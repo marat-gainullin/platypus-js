@@ -213,6 +213,13 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return B.boxAsJs(value);
+            }
+        });
+
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -220,13 +227,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.onComponentShown = aValue;
-            }
-        });
-
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return B.boxAsJs(value);
             }
         });
 
@@ -280,13 +280,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "onActionPerformed", {
+        Object.defineProperty(this, "count", {
             get: function() {
-                var value = delegate.onActionPerformed;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = aValue;
+                var value = delegate.count;
+                return B.boxAsJs(value);
             }
         });
 
@@ -300,10 +297,13 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "count", {
+        Object.defineProperty(this, "onActionPerformed", {
             get: function() {
-                var value = delegate.count;
-                return B.boxAsJs(value);
+                var value = delegate.onActionPerformed;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = aValue;
             }
         });
 
@@ -481,17 +481,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
     /**
-     * Gets the container's children components.
-     * @method children
-     * @memberOf FlowPane
-     */
-    FlowPane.prototype.children = function() {
-        var delegate = this.unwrap();
-        var value = delegate.children();
-        return B.boxAsJs(value);
-    };
-
-    /**
      * Tries to acquire focus for this component.
      * @method focus
      * @memberOf FlowPane
@@ -499,6 +488,17 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     FlowPane.prototype.focus = function() {
         var delegate = this.unwrap();
         var value = delegate.focus();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Gets the container's children components.
+     * @method children
+     * @memberOf FlowPane
+     */
+    FlowPane.prototype.children = function() {
+        var delegate = this.unwrap();
+        var value = delegate.children();
         return B.boxAsJs(value);
     };
 

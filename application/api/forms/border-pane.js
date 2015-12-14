@@ -213,6 +213,13 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return B.boxAsJs(value);
+            }
+        });
+
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -220,13 +227,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.onComponentShown = aValue;
-            }
-        });
-
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return B.boxAsJs(value);
             }
         });
 
@@ -250,13 +250,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "topComponent", {
-            get: function() {
-                var value = delegate.topComponent;
-                return B.boxAsJs(value);
-            }
-        });
-
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -264,6 +257,13 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.visible = B.boxAsJava(aValue);
+            }
+        });
+
+        Object.defineProperty(this, "topComponent", {
+            get: function() {
+                var value = delegate.topComponent;
+                return B.boxAsJs(value);
             }
         });
 
@@ -297,13 +297,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "onActionPerformed", {
+        Object.defineProperty(this, "count", {
             get: function() {
-                var value = delegate.onActionPerformed;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = aValue;
+                var value = delegate.count;
+                return B.boxAsJs(value);
             }
         });
 
@@ -317,10 +314,13 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "count", {
+        Object.defineProperty(this, "onActionPerformed", {
             get: function() {
-                var value = delegate.count;
-                return B.boxAsJs(value);
+                var value = delegate.onActionPerformed;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = aValue;
             }
         });
 
@@ -344,16 +344,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "onMouseWheelMoved", {
-            get: function() {
-                var value = delegate.onMouseWheelMoved;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onMouseWheelMoved = aValue;
-            }
-        });
-
         Object.defineProperty(this, "rightComponent", {
             get: function() {
                 var value = delegate.rightComponent;
@@ -361,6 +351,16 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.rightComponent = B.boxAsJava(aValue);
+            }
+        });
+
+        Object.defineProperty(this, "onMouseWheelMoved", {
+            get: function() {
+                var value = delegate.onMouseWheelMoved;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onMouseWheelMoved = aValue;
             }
         });
 
@@ -530,17 +530,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
     /**
-     * Gets the container's children components.
-     * @method children
-     * @memberOf BorderPane
-     */
-    BorderPane.prototype.children = function() {
-        var delegate = this.unwrap();
-        var value = delegate.children();
-        return B.boxAsJs(value);
-    };
-
-    /**
      * Tries to acquire focus for this component.
      * @method focus
      * @memberOf BorderPane
@@ -548,6 +537,17 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     BorderPane.prototype.focus = function() {
         var delegate = this.unwrap();
         var value = delegate.focus();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Gets the container's children components.
+     * @method children
+     * @memberOf BorderPane
+     */
+    BorderPane.prototype.children = function() {
+        var delegate = this.unwrap();
+        var value = delegate.children();
         return B.boxAsJs(value);
     };
 

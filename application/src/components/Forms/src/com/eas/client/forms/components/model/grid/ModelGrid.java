@@ -197,8 +197,8 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     }
 
     /**
-     * Returns row for particular Index. Index is in model's coordinates.
-     * Index is 0-based.
+     * Returns row for particular Index. Index is in model's coordinates. Index
+     * is 0-based.
      *
      * @param aIdx Index the row is to be calculated for.
      * @return Row's index;
@@ -572,21 +572,21 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     }
 
     protected boolean headerVisible = true;
-    
+
     @ScriptFunction
-    public boolean isHeaderVisible(){
+    public boolean isHeaderVisible() {
         return headerVisible;
     }
-    
+
     @ScriptFunction
-    public void setHeaderVisible(boolean aValue){
+    public void setHeaderVisible(boolean aValue) {
         headerVisible = aValue;
     }
-    
+
     protected boolean draggableRows;
-    
+
     @ScriptFunction
-    protected boolean isDraggableRows(){
+    protected boolean isDraggableRows() {
         return draggableRows;
     }
 
@@ -594,7 +594,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     public void setDraggableRows(boolean aValue) {
         draggableRows = aValue;
     }
-    
+
     private static final String ON_RENDER_JSDOC = ""
             + "/**\n"
             + " * General render event handler.\n"
@@ -1960,6 +1960,65 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
             }
         }
         return false;
+    }
+
+    private static final String EXPANDED_JSDOC = ""
+            + "/**\n"
+            + "* Tests if node of specified .data array element is expanded.\n"
+            + "* @param instance .data array element to test.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = EXPANDED_JSDOC, params = {"instance"})
+    public boolean expanded(JSObject anElement) {
+        if (deepModel instanceof TableFront2TreedModel<?>) {
+            TableFront2TreedModel<JSObject> front = (TableFront2TreedModel<JSObject>) deepModel;
+            return front.isExpanded(anElement);
+        } else {
+            return false;
+        }
+    }
+
+    private static final String EXPAND_JSDOC = ""
+            + "/**\n"
+            + "* Makes node of specified .data array element expanded.\n"
+            + "* @param instance .data array element to expand.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = EXPAND_JSDOC, params = {"instance"})
+    public void expand(JSObject anElement) {
+        if (deepModel instanceof TableFront2TreedModel<?>) {
+            TableFront2TreedModel<JSObject> front = (TableFront2TreedModel<JSObject>) deepModel;
+            front.expand(anElement, false);
+        }
+    }
+
+    private static final String COLLAPSE_JSDOC = ""
+            + "/**\n"
+            + "* Makes node of specified .data array element collapsed.\n"
+            + "* @param instance .data array element to collapsed.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = COLLAPSE_JSDOC, params = {"instance"})
+    public void collapse(JSObject anElement) {
+        if (deepModel instanceof TableFront2TreedModel<?>) {
+            TableFront2TreedModel<JSObject> front = (TableFront2TreedModel<JSObject>) deepModel;
+            front.collapse(anElement);
+        }
+    }
+
+    private static final String TOGGLE_JSDOC = ""
+            + "/**\n"
+            + "* Makes node of specified .data array element expanded if it was already collapsed and collapsed otherwise.\n"
+            + "* @param instance .data array element to expand or collpase.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = TOGGLE_JSDOC, params = {"instance"})
+    public void toggle(JSObject anElement) {
+        if (expanded(anElement)) {
+            collapse(anElement);
+        } else {
+            expand(anElement);
+        }
     }
 
     public boolean isCurrentRow(JSObject anElement) {

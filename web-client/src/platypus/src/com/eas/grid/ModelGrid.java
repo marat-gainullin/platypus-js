@@ -977,13 +977,30 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		aPublished.findSomething = function() {
 			aPublished.find();
 		};
-		aPublished.makeVisible = function(aRow, needToSelect) {
+		aPublished.makeVisible = function(aInstance, needToSelect) {
 			var need2Select = arguments.length > 1 ? !!needToSelect : false;
-			if (aRow != null)
-				return aWidget.@com.eas.grid.ModelGrid::makeVisible(Lcom/google/gwt/core/client/JavaScriptObject;Z)(aRow, need2Select);
+			if (aInstance != null)
+				return aWidget.@com.eas.grid.ModelGrid::makeVisible(Lcom/google/gwt/core/client/JavaScriptObject;Z)(aInstance, need2Select);
 			else
 				return false;
 		};
+		
+		aPublished.expanded = function(aInstance) {
+			return aWidget.@com.eas.grid.ModelGrid::expanded(Lcom/google/gwt/core/client/JavaScriptObject;)(aInstance);
+		};
+		
+		aPublished.expand = function(aInstance) {
+			aWidget.@com.eas.grid.ModelGrid::expand(Lcom/google/gwt/core/client/JavaScriptObject;)(aInstance);
+		};
+		
+		aPublished.collapse = function(aInstance) {
+			aWidget.@com.eas.grid.ModelGrid::collapse(Lcom/google/gwt/core/client/JavaScriptObject;)(aInstance);
+		};
+		
+		aPublished.toggle = function(aInstance) {
+			aWidget.@com.eas.grid.ModelGrid::toggle(Lcom/google/gwt/core/client/JavaScriptObject;)(aInstance);
+		};
+		
 		aPublished.unsort = function() {
 			aWidget.@com.eas.grid.ModelGrid::unsort()();
 		};
@@ -1286,6 +1303,40 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		insertable = aValue;
 	}
 
+	public boolean expanded(JavaScriptObject anElement){
+		if(getDataProvider() instanceof JsArrayTreeDataProvider){
+			JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider)getDataProvider();
+			return treeDataProvider.isExpanded(anElement);
+		}else{
+			return false;
+		}
+	}
+	
+	public void expand(JavaScriptObject anElement){
+		if(getDataProvider() instanceof JsArrayTreeDataProvider){
+			JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider)getDataProvider();
+			treeDataProvider.expand(anElement);
+		}
+	}
+	
+	public void collapse(JavaScriptObject anElement){
+		if(getDataProvider() instanceof JsArrayTreeDataProvider){
+			JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider)getDataProvider();
+			treeDataProvider.collapse(anElement);
+		}
+	}
+	
+	public void toggle(JavaScriptObject anElement){
+		if(getDataProvider() instanceof JsArrayTreeDataProvider){
+			JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider)getDataProvider();
+			if(treeDataProvider.isExpanded(anElement)){
+				treeDataProvider.collapse(anElement);
+			}else{
+				treeDataProvider.expand(anElement);
+			}
+		}
+	}
+	
 	public boolean makeVisible(JavaScriptObject anElement, boolean needToSelect) {
 		IndexOfProvider<JavaScriptObject> indexOfProvider = (IndexOfProvider<JavaScriptObject>) dataProvider;
 		int index = indexOfProvider.indexOf(anElement);

@@ -170,16 +170,6 @@ define(['boxing'], function(B) {
             }
         });
 
-        Object.defineProperty(this, "formKey", {
-            get: function() {
-                var value = delegate.formKey;
-                return B.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.formKey = B.boxAsJava(aValue);
-            }
-        });
-
         Object.defineProperty(this, "onWindowRestored", {
             get: function() {
                 var value = delegate.onWindowRestored;
@@ -187,6 +177,16 @@ define(['boxing'], function(B) {
             },
             set: function(aValue) {
                 delegate.onWindowRestored = aValue;
+            }
+        });
+
+        Object.defineProperty(this, "formKey", {
+            get: function() {
+                var value = delegate.formKey;
+                return B.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.formKey = B.boxAsJava(aValue);
             }
         });
 
@@ -281,29 +281,6 @@ define(['boxing'], function(B) {
     };
 
     /**
-     * Moves form to the front position.
-     * @method toFront
-     * @memberOf Form
-     */
-    Form.prototype.toFront = function() {
-        var delegate = this.unwrap();
-        var value = delegate.toFront();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Shows the form as a dialog (modal window).
-     * @param callback a callback handler function
-     * @method showModal
-     * @memberOf Form
-     */
-    Form.prototype.showModal = function(callback) {
-        var delegate = this.unwrap();
-        var value = delegate.showModal(B.boxAsJava(callback));
-        return B.boxAsJs(value);
-    };
-
-    /**
      * Shows the form as an ordinary window.
      * @method show
      * @memberOf Form
@@ -315,13 +292,13 @@ define(['boxing'], function(B) {
     };
 
     /**
-     * Minimizes this form.
-     * @method minimize
+     * Moves form to the front position.
+     * @method toFront
      * @memberOf Form
      */
-    Form.prototype.minimize = function() {
+    Form.prototype.toFront = function() {
         var delegate = this.unwrap();
-        var value = delegate.minimize();
+        var value = delegate.toFront();
         return B.boxAsJs(value);
     };
 
@@ -337,6 +314,17 @@ define(['boxing'], function(B) {
     };
 
     /**
+     * Minimizes this form.
+     * @method minimize
+     * @memberOf Form
+     */
+    Form.prototype.minimize = function() {
+        var delegate = this.unwrap();
+        var value = delegate.minimize();
+        return B.boxAsJs(value);
+    };
+
+    /**
      * Restores this form state.
      * @method restore
      * @memberOf Form
@@ -344,6 +332,18 @@ define(['boxing'], function(B) {
     Form.prototype.restore = function() {
         var delegate = this.unwrap();
         var value = delegate.restore();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Shows the form as a dialog (modal window).
+     * @param callback a callback handler function
+     * @method showModal
+     * @memberOf Form
+     */
+    Form.prototype.showModal = function(callback) {
+        var delegate = this.unwrap();
+        var value = delegate.showModal(B.boxAsJava(callback));
         return B.boxAsJs(value);
     };
 

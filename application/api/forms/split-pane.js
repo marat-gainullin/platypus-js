@@ -114,16 +114,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "onComponentAdded", {
-            get: function() {
-                var value = delegate.onComponentAdded;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onComponentAdded = aValue;
-            }
-        });
-
         Object.defineProperty(this, "dividerLocation", {
             get: function() {
                 var value = delegate.dividerLocation;
@@ -131,6 +121,16 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.dividerLocation = B.boxAsJava(aValue);
+            }
+        });
+
+        Object.defineProperty(this, "onComponentAdded", {
+            get: function() {
+                var value = delegate.onComponentAdded;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onComponentAdded = aValue;
             }
         });
 
@@ -221,6 +221,13 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return B.boxAsJs(value);
+            }
+        });
+
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -228,13 +235,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.onComponentShown = aValue;
-            }
-        });
-
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return B.boxAsJs(value);
             }
         });
 
@@ -298,13 +298,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "onActionPerformed", {
+        Object.defineProperty(this, "count", {
             get: function() {
-                var value = delegate.onActionPerformed;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = aValue;
+                var value = delegate.count;
+                return B.boxAsJs(value);
             }
         });
 
@@ -318,10 +315,13 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "count", {
+        Object.defineProperty(this, "onActionPerformed", {
             get: function() {
-                var value = delegate.count;
-                return B.boxAsJs(value);
+                var value = delegate.onActionPerformed;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = aValue;
             }
         });
 
@@ -474,17 +474,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
 
     }
     /**
-     * Gets the container's children components.
-     * @method children
-     * @memberOf SplitPane
-     */
-    SplitPane.prototype.children = function() {
-        var delegate = this.unwrap();
-        var value = delegate.children();
-        return B.boxAsJs(value);
-    };
-
-    /**
      * Tries to acquire focus for this component.
      * @method focus
      * @memberOf SplitPane
@@ -492,6 +481,17 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     SplitPane.prototype.focus = function() {
         var delegate = this.unwrap();
         var value = delegate.focus();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Gets the container's children components.
+     * @method children
+     * @memberOf SplitPane
+     */
+    SplitPane.prototype.children = function() {
+        var delegate = this.unwrap();
+        var value = delegate.children();
         return B.boxAsJs(value);
     };
 

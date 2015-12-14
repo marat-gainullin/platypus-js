@@ -31,31 +31,6 @@ define(['boxing'], function(B) {
 
     }
     /**
-     * Reverts model data changes.
-     * After this method call, no data changes are avaliable for <code>model.save()</code> method.
-     * @method revert
-     * @memberOf ApplicationDbModel
-     */
-    ApplicationDbModel.prototype.revert = function() {
-        var delegate = this.unwrap();
-        var value = delegate.revert();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Requeries the model data. Forces the model data refresh, no matter if its parameters has changed or not.
-     * @param onSuccess The handler function for refresh data on success event (optional).
-     * @param onFailure The handler function for refresh data on failure event (optional).
-     * @method requery
-     * @memberOf ApplicationDbModel
-     */
-    ApplicationDbModel.prototype.requery = function(onSuccess, onFailure) {
-        var delegate = this.unwrap();
-        var value = delegate.requery(B.boxAsJava(onSuccess), B.boxAsJava(onFailure));
-        return B.boxAsJs(value);
-    };
-
-    /**
      * Creates new entity of model, based on passed sql query. This method works only in two tier components of a system.
      * @param sqlText SQL text for the new entity.
      * @param datasourceName the concrete database ID (optional).
@@ -82,6 +57,31 @@ define(['boxing'], function(B) {
     ApplicationDbModel.prototype.executeSql = function(sqlText, datasourceName, arg2, arg3) {
         var delegate = this.unwrap();
         var value = delegate.executeSql(B.boxAsJava(sqlText), B.boxAsJava(datasourceName), B.boxAsJava(arg2), B.boxAsJava(arg3));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Reverts model data changes.
+     * After this method call, no data changes are avaliable for <code>model.save()</code> method.
+     * @method revert
+     * @memberOf ApplicationDbModel
+     */
+    ApplicationDbModel.prototype.revert = function() {
+        var delegate = this.unwrap();
+        var value = delegate.revert();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Requeries the model data. Forces the model data refresh, no matter if its parameters has changed or not.
+     * @param onSuccess The handler function for refresh data on success event (optional).
+     * @param onFailure The handler function for refresh data on failure event (optional).
+     * @method requery
+     * @memberOf ApplicationDbModel
+     */
+    ApplicationDbModel.prototype.requery = function(onSuccess, onFailure) {
+        var delegate = this.unwrap();
+        var value = delegate.requery(B.boxAsJava(onSuccess), B.boxAsJava(onFailure));
         return B.boxAsJs(value);
     };
 
