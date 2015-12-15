@@ -33,7 +33,7 @@ public class DbTablesListRenderer extends DefaultListCellRenderer {
                     String ownerName = sValue.substring(0, dotIdx);
                     String tableName = sValue.substring(dotIdx + 1);
                     String cachedName = tableName;
-                    value = tableName;
+                    value = tableName; 
                     DbTablesListModel model = (DbTablesListModel) list.getModel();
                     try {
                         if (model.getMdCache().getDatasourceSchema() == null || !model.getMdCache().getDatasourceSchema().equalsIgnoreCase(ownerName)) {
