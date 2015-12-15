@@ -624,11 +624,11 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                         try {
                             prepareConnection(connection);
                             try {
-                                Map<String, Integer> assignedJdbcTypes = new HashMap<>();
+                                Map<Integer, Integer> assignedJdbcTypes = new HashMap<>();
                                 for (int i = 1; i <= aParams.getParametersCount(); i++) {
                                     Parameter param = aParams.get(i);
                                     int assignedJdbcType = assignParameter(param, stmt, i, connection);
-                                    assignedJdbcTypes.put(param.getName(), assignedJdbcType);
+                                    assignedJdbcTypes.put(i, assignedJdbcType);
                                 }
                                 logQuery(sqlClause, aParams, assignedJdbcTypes);
                                 ResultSet rs = null;
@@ -709,7 +709,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
         }
     }
 
-    protected static void logQuery(String sqlClause, Parameters aParams, Map<String, Integer> aAssignedJdbcTypes) {
+    protected static void logQuery(String sqlClause, Parameters aParams, Map<Integer, Integer> aAssignedJdbcTypes) {
         if (queriesLogger.isLoggable(Level.FINE)) {
             boolean finerLogs = queriesLogger.isLoggable(Level.FINER);
             queriesLogger.log(Level.FINE, "Executing sql:\n{0}\nwith {1} parameters{2}", new Object[]{sqlClause, aParams.getParametersCount(), finerLogs && aParams.getParametersCount() > 0 ? ":" : ""});
@@ -722,9 +722,9 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                         SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
                         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                         String jsonLikeText = sdf.format(dateValue);
-                        queriesLogger.log(Level.FINER, "order: {0}; name: {1}; jdbc type: {2}; json like timestamp: {3}; raw timestamp: {4};", new Object[]{i, param.getName(), aAssignedJdbcTypes.get(param.getName()), jsonLikeText, dateValue.getTime()});
+                        queriesLogger.log(Level.FINER, "order: {0}; name: {1}; jdbc type: {2}; json like timestamp: {3}; raw timestamp: {4};", new Object[]{i, param.getName(), aAssignedJdbcTypes.get(i), jsonLikeText, dateValue.getTime()});
                     } else {// nulls, String, Number, Boolean
-                        queriesLogger.log(Level.FINER, "order: {0}; name: {1}; jdbc type: {2}; value: {3};", new Object[]{i, param.getName(), aAssignedJdbcTypes.get(param.getName()), param.getValue()});
+                        queriesLogger.log(Level.FINER, "order: {0}; name: {1}; jdbc type: {2}; value: {3};", new Object[]{i, param.getName(), aAssignedJdbcTypes.get(i), param.getValue()});
                     }
                 }
             }
