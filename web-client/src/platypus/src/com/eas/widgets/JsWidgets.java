@@ -190,6 +190,8 @@ public class JsWidgets {
 		    		@com.eas.widgets.FlowPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
 				}else if(aPublished.parent instanceof BoxPane && aPublished.parent.orientation == Orientation.VERTICAL){
 	    			aPublished.parent.unwrap().@com.eas.widgets.containers.BoxPanel::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
+		    	}else if(aPublished.parent instanceof ToolBar){
+		    		// no op
 		    	}else if(aPublished.parent instanceof BorderPane){
 	    			aPublished.parent.unwrap().@com.eas.widgets.containers.BorderPanel::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
 		    	}else{
