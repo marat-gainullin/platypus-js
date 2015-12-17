@@ -75,7 +75,7 @@ public class LocalModulesProxy implements ModulesProxy {
                                 if (depFiles.isModule()) {
                                     return true;
                                 } else {
-                                    Logger.getLogger(LocalModulesProxy.class.getName()).log(Level.WARNING, "Possible name duplication (JavaScript indentifier {0} found that is the same with non-module application element).", aModuleCandidate);
+                                    Logger.getLogger(LocalModulesProxy.class.getName()).log(Level.WARNING, "Possible name duplication (JavaScript identifier {0} found that is the same with non-module application element).", aModuleCandidate);
                                 }
                             }// ordinary script class
                             return false;

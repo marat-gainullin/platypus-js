@@ -292,7 +292,7 @@ public class Entity implements HasPublished {
 
 	public void applySnapshot(JavaScriptObject aValue) {
 		lastSnapshot = aValue;
-		// Apply aRowset as a snapshot. Be aware of change log!
+		// Apply aValue as a snapshot. Be aware of change log!
 		if (snapshotConsumer != null) {// snapshotConsumer is null in designer
 			snapshotConsumer.<Utils.JsObject> cast().call(null, aValue, true);
 		}

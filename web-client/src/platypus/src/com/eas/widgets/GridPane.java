@@ -185,7 +185,7 @@ public class GridPane extends GridPanel implements HasJsFacade, HasEnabled, HasC
 		}
 		return res;
 	}
-
+	
 	@Override
 	public JavaScriptObject getPublished() {
 		return published;

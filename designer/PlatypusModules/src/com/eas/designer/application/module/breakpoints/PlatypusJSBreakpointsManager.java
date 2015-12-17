@@ -142,23 +142,7 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
         aFileName = aFileName.replace('.', '_').replace('-', '_');
         return NameCodec.encode(aFileName);
     }
-/*
-    private static final String DANGEROUS_CHARS = "\\/.;:$[]<>";
-
-    private static String replaceDangerChars(final String name) {
-        final int len = name.length();
-        final StringBuilder buf = new StringBuilder();
-        for (int i = 0; i < len; i++) {
-            final char ch = name.charAt(i);
-            if (DANGEROUS_CHARS.indexOf(ch) != -1) {
-                buf.append('_');
-            } else {
-                buf.append(ch);
-            }
-        }
-        return buf.toString();
-    }
-*/
+    
     private final class ScriptsHandler implements JPDABreakpointListener {
 
         private final JPDADebugger debugger;
@@ -177,7 +161,7 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
                     false,
                     ClassLoadUnloadBreakpoint.TYPE_CLASS_LOADED);
             newClassesInternalBreakpoint.setHidden(true);
-            newClassesInternalBreakpoint.setSuspend(EventRequest.SUSPEND_ALL);
+            newClassesInternalBreakpoint.setSuspend(EventRequest.SUSPEND_EVENT_THREAD);
             newClassesInternalBreakpoint.addJPDABreakpointListener(this);
             DebuggerManager.getDebuggerManager().addBreakpoint(newClassesInternalBreakpoint);
         }
@@ -271,8 +255,8 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
                 } catch (Exception ex) {
                     // no op
                 }
-                event.resume();
             }
+            event.resume();
         }
 
         protected void checkSourceBreakpoints(String aScriptClassName, String aFileName) throws Exception, AbsentInformationException {

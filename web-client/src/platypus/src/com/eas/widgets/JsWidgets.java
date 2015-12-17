@@ -980,33 +980,28 @@ public class JsWidgets {
 		
 		predefine([], 'forms/grid-pane', function(){
 			function GridPane(aRows, aCols, aVGap, aHGap) {
-				var aComponent = arguments.length > 4 ? arguments[4] : null;
 				if (!(this instanceof GridPane)) {
 					throw  ' use  "new GridPane()" !';
 				}
-	
-				var published = this; 
-				aComponent = aComponent || @com.eas.widgets.GridPane::new()();
-				published.unwrap = function() {
-					return aComponent;
-				};
-				publishComponentProperties(published);
-				
-				if(arguments.length <= 4){
+				var published = this;
+				var aComponent;
+				if(arguments.length > 4) {
+					aComponent = arguments[4];
+				} else {
 					if (aRows == undefined) {
 						throw "aRows argument is required!"
 					}
 					if (aCols == undefined) {
 						throw "aCols argument is required!"
 					}
-					aComponent.@com.eas.widgets.GridPane::resize(II)(aRows, aCols);
-					if (aVGap) {
-						aComponent.@com.eas.widgets.GridPane::setVgap(I)(aVGap);
-					}
-					if (aHGap) {
-						aComponent.@com.eas.widgets.GridPane::setHgap(I)(aHGap);
-					}
-				}
+					aVGap = aVGap || 0;
+					aHGap = aHGap || 0;
+					aComponent = @com.eas.widgets.GridPane::new(IIII)(+aRows, +aCols, +aVGap, +aHGap);
+			    }
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
 			}
 			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('GridPane', GridPane);
 			return GridPane;
