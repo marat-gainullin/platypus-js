@@ -1146,7 +1146,7 @@ public class Model implements HasPublished {
 	}
 
 	public void requery(Callback<JavaScriptObject, String> aCallback) throws Exception {
-		inProcess(new Callable(){
+		inNewProcess(new Callable(){
 			@Override
 			public void call() throws Exception {
 				revert();
@@ -1178,7 +1178,7 @@ public class Model implements HasPublished {
 	}
 
 	public void execute(Callback<JavaScriptObject, String> aCallback) throws Exception {
-		inProcess(new Callable(){
+		inNewProcess(new Callable(){
 			@Override
 			public void call() throws Exception {
 				executeEntities(false, rootEntities());
@@ -1186,7 +1186,7 @@ public class Model implements HasPublished {
 		}, aCallback);
 	}
 
-	public void inProcess(Callable aAction, Callback<JavaScriptObject, String> aCallback) throws Exception {
+	public void inNewProcess(Callable aAction, Callback<JavaScriptObject, String> aCallback) throws Exception {
 		if (process != null) {
 			process.cancel();
 			process = null;

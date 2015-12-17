@@ -303,46 +303,44 @@ public class Entity implements HasPublished {
 	}
 
 	protected void refreshRowset(final Callback<JavaScriptObject, String> aCallback) throws Exception {
-		if (model.process != null || aCallback != null) {
-			final CancellableContainer f = new CancellableContainer();
-			f.future = query.execute(new CallbackAdapter<JavaScriptObject, String>() {
+		final CancellableContainer f = new CancellableContainer();
+		f.future = query.execute(new CallbackAdapter<JavaScriptObject, String>() {
 
-				@Override
-				public void doWork(JavaScriptObject aResult) throws Exception {
-					if (pending == f.future) {
-						// Apply aRowset as a snapshot. Be aware of change log!
-						applySnapshot(aResult);
-						valid = true;
-						pending = null;
-						model.terminateProcess(Entity.this, null);
-						if (onRequeried != null) {
-							try {
-								onRequeried.<Utils.JsObject> cast().call(jsPublished, new Object[] {});
-							} catch (Exception ex) {
-								Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
-							}
-						}
-						if (aCallback != null) {
-							aCallback.onSuccess(jsPublished);
+			@Override
+			public void doWork(JavaScriptObject aResult) throws Exception {
+				if (pending == f.future) {
+					// Apply aRowset as a snapshot. Be aware of change log!
+					applySnapshot(aResult);
+					valid = true;
+					pending = null;
+					model.terminateProcess(Entity.this, null);
+					if (onRequeried != null) {
+						try {
+							onRequeried.<Utils.JsObject> cast().call(jsPublished, new Object[] {});
+						} catch (Exception ex) {
+							Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
-				}
-
-				@Override
-				public void onFailure(String aMessage) {
-					if (pending == f.future) {
-						valid = true;
-						pending = null;
-						model.terminateProcess(Entity.this, aMessage);
-						if (aCallback != null) {
-							aCallback.onFailure(aMessage);
-						}
+					if (aCallback != null) {
+						aCallback.onSuccess(jsPublished);
 					}
 				}
+			}
 
-			});
-			pending = f.future;
-		}
+			@Override
+			public void onFailure(String aMessage) {
+				if (pending == f.future) {
+					valid = true;
+					pending = null;
+					model.terminateProcess(Entity.this, aMessage);
+					if (aCallback != null) {
+						aCallback.onFailure(aMessage);
+					}
+				}
+			}
+
+		});
+		pending = f.future;
 	}
 
 	public void validateQuery() throws Exception {
@@ -495,7 +493,7 @@ public class Entity implements HasPublished {
 			if (getOutRelations().isEmpty()) {
 				internalExecute(aCallback);
 			} else {
-				model.inProcess(new Callable() {
+				model.inNewProcess(new Callable() {
 					@Override
 					public void call() throws Exception {
 						internalExecute(null);
@@ -503,12 +501,16 @@ public class Entity implements HasPublished {
 				}, new Callback<JavaScriptObject, String>() {
 					@Override
 					public void onSuccess(JavaScriptObject result) {
-						aCallback.onSuccess(jsPublished);
+						if(aCallback != null){
+							aCallback.onSuccess(jsPublished);
+						}
 					}
 
 					@Override
 					public void onFailure(String reason) {
-						aCallback.onFailure(reason);
+						if(aCallback != null){
+							aCallback.onFailure(reason);
+						}
 					}
 				});
 			}
