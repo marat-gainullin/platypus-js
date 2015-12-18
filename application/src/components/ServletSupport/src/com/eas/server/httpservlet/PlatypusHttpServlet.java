@@ -389,7 +389,7 @@ public class PlatypusHttpServlet extends HttpServlet {
             RequestHandler<Request, Response> handler = (RequestHandler<Request, Response>) RequestHandlerFactory.getHandler(platypusCore, platypusRequest);
             if (handler != null) {
                 Consumer<Exception> onFailure = (Exception ex) -> {
-                    Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, ex.getMessage());
+                    Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, ex.toString());
                     try {
                         if (ex instanceof AccessControlException) {
                             /*

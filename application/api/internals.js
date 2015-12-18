@@ -125,6 +125,7 @@
             throw 'Module definition arguments mismatch';
         }
     }
+    define.amd = {};
     Object.defineProperty(global, 'define', {value: define});
     Object.defineProperty(global, 'require', {value: require});
     var Report = require('core/report');

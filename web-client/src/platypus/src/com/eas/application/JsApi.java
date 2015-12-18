@@ -39,6 +39,7 @@ public class JsApi {
 	            throw 'Module definition arguments mismatch';
 	        }
 		};
+		$wnd.define.amd = {};
 		
 		function predefine(aDeps, aName, aDefiner){
 			@com.eas.core.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);

@@ -70,7 +70,7 @@ public class ModuleStructureRequestHandler extends RequestHandler<ModuleStructur
                     onSuccess.accept(resp);
                 }, onFailure);
             } else {
-                onFailure.accept(new FileNotFoundException(moduleOrResourceName));
+                onFailure.accept(new FileNotFoundException("Module '" + moduleOrResourceName + "' is not found."));
             }
         } catch (Exception ex) {
             onFailure.accept(ex);

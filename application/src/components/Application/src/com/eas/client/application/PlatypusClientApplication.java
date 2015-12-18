@@ -230,7 +230,7 @@ public class PlatypusClientApplication {
                 } else if (config.url.getProtocol().equalsIgnoreCase("platypus")) {
                     app = new PlatypusClient(new PlatypusPlatypusConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, (Runnable aTask) -> {
                         EventQueue.invokeLater(aTask);
-                    }, config.threadsArgs.getMaxPlatypusConnections()));
+                    }, config.threadsArgs.getMaxPlatypusConnections(), true));
                 } else if (config.url.getProtocol().equalsIgnoreCase("file")) {
                     File f = new File(config.url.toURI());
                     if (f.exists() && f.isDirectory()) {

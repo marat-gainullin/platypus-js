@@ -77,7 +77,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     // WARNING!!! syncSocket is intended only for single threaded using
     private final Socket syncSocket;
 
-    public PlatypusPlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, Executor aNetworkProcessor, int aMaximumConnections) throws Exception {
+    public PlatypusPlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, Executor aNetworkProcessor, int aMaximumConnections, boolean aInteractive) throws Exception {
         super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
 
         host = aUrl.getHost();
@@ -88,14 +88,14 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
 
         maximumConnections = Math.max(1, aMaximumConnections);
 
-        connector = configureConnector(networkProcessor, sslContext);
+        connector = configureConnector(networkProcessor, sslContext, aInteractive);
 
         syncSocket = sslContext.getSocketFactory().createSocket();
         syncEncoder = new RequestEncoder();
         syncDecoder = new ResponseDecoder();
     }
 
-    private NioSocketConnector configureConnector(Executor aProcessor, SSLContext sslContext) throws Exception {
+    private NioSocketConnector configureConnector(Executor aProcessor, SSLContext sslContext, boolean aInteractive) throws Exception {
         ThreadPoolExecutor ioProcessorExecutor = new ThreadPoolExecutor(1, 1,
                 3L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
@@ -105,8 +105,24 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
         lconnector.setDefaultRemoteAddress(new InetSocketAddress(host, port));
         SslFilter sslFilter = new SslFilter(sslContext);
         sslFilter.setUseClientMode(true);
-        lconnector.getFilterChain().addLast("encryption", sslFilter);
-        lconnector.getFilterChain().addLast("executor", new ExecutorFilter(aProcessor));
+        /**
+         * The sslFilter("encryption") filter should be placed first, according
+         * to MINA architecture, but we have to communicate with a user about
+         * untrusted certificates. All of this should be done in AWT Event
+         * thread and so, we have to place ssqlFilter's work to AWT event
+         * thread. It it would be placed in NioProcessor thread, than we will
+         * get a deadlock. - AWT: write with ssl error -> handshake start and
+         * wait for result from first network communication. - NioProcessor:
+         * perform the handshake and ask a user about untrusted certificate and
+         * wait for AWT dialog processing.
+         */
+        if (aInteractive) {
+            lconnector.getFilterChain().addLast("executor", new ExecutorFilter(aProcessor));
+            lconnector.getFilterChain().addLast("encryption", sslFilter);
+        } else {
+            lconnector.getFilterChain().addLast("encryption", sslFilter);
+            lconnector.getFilterChain().addLast("executor", new ExecutorFilter(aProcessor));
+        }
         lconnector.getFilterChain().addLast("platypusCodec", new ProtocolCodecFilter(new RequestEncoder(), new ResponseDecoder()));
         lconnector.setHandler(new IoHandlerAdapter() {
 
