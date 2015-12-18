@@ -13,7 +13,7 @@
             <targets>clean build copy-dest</targets>
             <antName>ant1.9</antName>
             <buildFile>web-client/src/platypus/build.xml</buildFile>
-            <properties>destdir=./application/bin
+            <properties>destdir=../../../application/bin
 gwt.sdk=/home/hudson/gwt-2.7.0</properties>
           </hudson.tasks.Ant>
           <hudson.tasks.Ant>
@@ -22,16 +22,28 @@ gwt.sdk=/home/hudson/gwt-2.7.0</properties>
             <targets>clean jar buildupdates</targets>
             <antName>ant1.9</antName>
             <buildFile>application/src/group/build.xml</buildFile>
-            <properties>libs.javaee-web-api-7.0.classpath=/home/hudson/netbeans8.0.2/enterprise/modules/ext/javaee-web-api-7.0.jar 
-libs.CopyLibs.classpath=/home/hudson/netbeans8.0.2/java/ant/extra/org-netbeans-modules-java-j2seproject-copylibstask.jar 
+            <properties>libs.javaee-web-api-7.0.classpath=/home/hudson/netbeans-8.1/enterprise/modules/ext/javaee-web-api-7.0.jar 
+libs.CopyLibs.classpath=/home/hudson/netbeans-8.1/java/ant/extra/org-netbeans-modules-java-j2seproject-copylibstask.jar 
 j2ee.server.home=/home/hudson/tomcat/apache-tomcat-8.0.24</properties>
           </hudson.tasks.Ant>
           <hudson.tasks.Shell>
             <disabled>false</disabled>
             <description>Preparing files for installer</description>
-            <command>rm -rf /home/hudson/netbeans8.0.2/harness/nbi/stub/*
-cp -r /home/hudson/netbeans8.0.2-harness-nbi-stub-ext/ext /home/hudson/netbeans8.0.2/harness/nbi/stub/
-cp -r ./installer/* /home/hudson/netbeans8.0.2/harness/nbi/stub/</command>
+            <command>mkdir ./Platypus
+cp -r ./application/api ./Platypus/
+cp -r ./application/bin ./Platypus/
+cp -r ./application/etc ./Platypus/
+cp -r ./application/ext ./Platypus/
+cp -r ./application/lib ./Platypus/
+cp -r ./application/run ./Platypus/
+cp -r ./application/updates ./Platypus/
+zip -r ./platypus-runtime.zip ./Platypus
+rm -rf ./Platypus
+mv ./platypus-runtime.zip /home/hudson/platformBuild/platypus-runtime.zip
+
+rm -rf /home/hudson/netbeans-8.1/harness/nbi/stub/*
+cp -r /home/hudson/netbeans-8.1-harness-nbi-stub-ext/ext /home/hudson/netbeans-8.1/harness/nbi/stub/
+cp -r ./installer/* /home/hudson/netbeans-8.1/harness/nbi/stub/</command>
           </hudson.tasks.Shell>
           <hudson.tasks.Ant>
             <disabled>false</disabled>
@@ -39,29 +51,29 @@ cp -r ./installer/* /home/hudson/netbeans8.0.2/harness/nbi/stub/</command>
             <targets>clean nbms</targets>
             <antName>ant1.9</antName>
             <buildFile>./designer/build.xml</buildFile>
-            <properties>nbplatform.default.harness.dir=/home/hudson/netbeans8.0.2/harness/
-nbplatform.default.netbeans.dest.dir=/home/hudson/netbeans8.0.2/</properties>
+            <properties>nbplatform.default.harness.dir=/home/hudson/netbeans-8.1/harness/
+nbplatform.default.netbeans.dest.dir=/home/hudson/netbeans-8.1/</properties>
           </hudson.tasks.Ant>
           <hudson.tasks.Ant>
             <disabled>false</disabled>
             <description>Building installer</description>
             <targets>build</targets>
             <antName>ant1.9</antName>
-            <buildFile>/home/hudson/netbeans8.0.2/harness/nbi/stub/template.xml</buildFile>
-            <properties>nbi.stub.common.location=/home/hudson/netbeans8.0.2/harness/nbi/.common
+            <buildFile>/home/hudson/netbeans-8.1/harness/nbi/stub/template.xml</buildFile>
+            <properties>nbi.stub.common.location=/home/hudson/netbeans-8.1/harness/nbi/.common
 pack200.enabled=false
-nbplatform.default.harness.dir=/home/hudson/netbeans8.0.2/harness
+nbplatform.default.harness.dir=/home/hudson/netbeans-8.1/harness
 suite.nbi.product.uid=designer
-generator-jdk-location-forward-slashes=/usr/lib/jvm/jdk1.8.0_60/
-nbi.dock.icon.file=/home/hudson/netbeans8.0.2/harness/etc/applicationIcon.icns
-nbi.engine.jar=/home/hudson/netbeans8.0.2/harness/modules/ext/nbi-engine.jar
-nbi.registries.management.jar=/home/hudson/netbeans8.0.2/harness/modules/ext/nbi-registries-management.jar
+generator-jdk-location-forward-slashes=/usr/lib/jvm/jdk1.8.0_65/
+nbi.dock.icon.file=/home/hudson/netbeans-8.1/harness/etc/applicationIcon.icns
+nbi.engine.jar=/home/hudson/netbeans-8.1/harness/modules/ext/nbi-engine.jar
+nbi.registries.management.jar=/home/hudson/netbeans-8.1/harness/modules/ext/nbi-registries-management.jar
 generate.installer.for.platforms=windows linux macosx
 suite.location=/home/hudson/jobs/BuildPlatypusRelease5Fix/workspace/designer
-nbi.stub.location=/home/hudson/netbeans8.0.2/harness/nbi/stub
+nbi.stub.location=/home/hudson/netbeans-8.1/harness/nbi/stub
 nbi.icon.file=./designer/branding/core/core.jar/org/netbeans/core/startup/frame48.gif
-nbplatform.default.netbeans.dest.dir=/home/hudson/netbeans8.0.2/
-nbi.ant.tasks.jar=/home/hudson/netbeans8.0.2/harness/modules/ext/nbi-ant-tasks.jar
+nbplatform.default.netbeans.dest.dir=/home/hudson/netbeans-8.1/
+nbi.ant.tasks.jar=/home/hudson/netbeans-8.1/harness/modules/ext/nbi-ant-tasks.jar
 nbi.license.file=/home/hudson/jobs/BuildPlatypusRelease5Fix/workspace/designer/license.txt</properties>
           </hudson.tasks.Ant>
           <hudson.tasks.Shell>
@@ -133,8 +145,8 @@ git push origin master</command>
                   <scheme>https</scheme>
                   <path>/altsoft/PlatypusJS.git</path>
                   <rawPath>/altsoft/PlatypusJS.git</rawPath>
-                  <user></user>
-                  <pass></pass>
+                  <user>altsoft</user>
+                  <pass>uyVbd26H0n</pass>
                   <port>-1</port>
                   <host>github.com</host>
                 </org.eclipse.jgit.transport.URIish>
