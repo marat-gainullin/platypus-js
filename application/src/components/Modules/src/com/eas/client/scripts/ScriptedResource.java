@@ -727,10 +727,10 @@ public class ScriptedResource {
             for (String moduleName : modulesNames) {
                 if (aSpace.getDefined().containsKey(moduleName)) {
                     process.complete(moduleName, null);
-                } else if(aCyclic.contains(moduleName)){
+                } else if (aCyclic.contains(moduleName)) {
                     Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "Cyclic dependency detected: {0}", checkedScriptOrModuleName(moduleName));
                     process.complete(moduleName, null);
-                }else {
+                } else {
                     aCyclic.add(moduleName);
                     // add callbacks to pendings
                     if (!aSpace.getPending().containsKey(moduleName)) {
@@ -765,7 +765,7 @@ public class ScriptedResource {
                                             onDependenciesResolved.call(null, new Object[]{moduleName});
                                             // If module is still not defined because of buggy definer in script,
                                             // we have to put it definition as undefined by hand.
-                                            if(!aSpace.getDefined().containsKey(moduleName)){
+                                            if (!aSpace.getDefined().containsKey(moduleName)) {
                                                 aSpace.getDefined().put(moduleName, null);
                                             }
                                             Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedScriptOrModuleName(moduleName));
@@ -810,43 +810,45 @@ public class ScriptedResource {
         Path apiPath = Scripts.getAbsoluteApiPath();
         Path appPath = getAbsoluteAppPath();
         for (String scriptOrModuleName : aModulesNames) {
-            if(aCyclic.contains(scriptOrModuleName)){
-                Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "Cyclic dependency detected: {0}", checkedScriptOrModuleName(scriptOrModuleName));
-            }else if (!aSpace.getDefined().containsKey(scriptOrModuleName)) {
-                aCyclic.add(scriptOrModuleName);
-                Path apiLocalPath = apiPath.resolve(scriptOrModuleName + PlatypusFiles.JAVASCRIPT_FILE_END);
-                if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
-                    URL toLoad = apiLocalPath.toUri().toURL();
-                    aSpace.exec(scriptOrModuleName, toLoad);
+            if (!aSpace.getDefined().containsKey(scriptOrModuleName)) {
+                if (aCyclic.contains(scriptOrModuleName)) {
+                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "Cyclic dependency detected: {0}", checkedScriptOrModuleName(scriptOrModuleName));
                 } else {
-                    ModuleStructure structure = app.getModules().getModule(scriptOrModuleName, null, null, null);
-                    if (structure != null) {
-                        AppElementFiles files = structure.getParts();
-                        File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
-                        URL toLoad = sourceFile.toURI().toURL();
-                        if (files.isModule()) {
-                            qRequire(structure.getQueryDependencies().toArray(new String[]{}), null, null, null);
-                            sRequire(structure.getServerDependencies().toArray(new String[]{}), null, null, null);
-                        }
-                        String[] autoDiscoveredDependencies = structure.getClientDependencies().toArray(new String[]{});
-                        _require(autoDiscoveredDependencies, null, aSpace, aCyclic);
-                        Path fileToLoad = Paths.get(toLoad.toURI());
-                        Path appRelative = appPath.relativize(fileToLoad);
-                        aSpace.exec(appRelative.toString().replace(File.separator, "/"), toLoad);
+                    aCyclic.add(scriptOrModuleName);
+                    Path apiLocalPath = apiPath.resolve(scriptOrModuleName + PlatypusFiles.JAVASCRIPT_FILE_END);
+                    if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
+                        URL toLoad = apiLocalPath.toUri().toURL();
+                        aSpace.exec(scriptOrModuleName, toLoad);
                     } else {
-                        throw new FileNotFoundException(scriptOrModuleName);
+                        ModuleStructure structure = app.getModules().getModule(scriptOrModuleName, null, null, null);
+                        if (structure != null) {
+                            AppElementFiles files = structure.getParts();
+                            File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
+                            URL toLoad = sourceFile.toURI().toURL();
+                            if (files.isModule()) {
+                                qRequire(structure.getQueryDependencies().toArray(new String[]{}), null, null, null);
+                                sRequire(structure.getServerDependencies().toArray(new String[]{}), null, null, null);
+                            }
+                            String[] autoDiscoveredDependencies = structure.getClientDependencies().toArray(new String[]{});
+                            _require(autoDiscoveredDependencies, null, aSpace, aCyclic);
+                            Path fileToLoad = Paths.get(toLoad.toURI());
+                            Path appRelative = appPath.relativize(fileToLoad);
+                            aSpace.exec(appRelative.toString().replace(File.separator, "/"), toLoad);
+                        } else {
+                            throw new FileNotFoundException(scriptOrModuleName);
+                        }
                     }
-                }
-                String[] moduleDefinedDependencies = aSpace.consumeAmdDependencies();
-                JSObject onDependenciesResolved = aSpace.consumeAmdDefineCallback();
-                if (onDependenciesResolved != null) {
-                    _require(moduleDefinedDependencies, null, aSpace, aCyclic);
-                    onDependenciesResolved.call(null, new Object[]{scriptOrModuleName});
-                }
-                // If module is still not defined (lack of module definer or buggy definer in script, etc.)
-                // we have to put it definition as undefined by hand.
-                if(!aSpace.getDefined().containsKey(scriptOrModuleName)){
-                    aSpace.getDefined().put(scriptOrModuleName, null);
+                    String[] moduleDefinedDependencies = aSpace.consumeAmdDependencies();
+                    JSObject onDependenciesResolved = aSpace.consumeAmdDefineCallback();
+                    if (onDependenciesResolved != null) {
+                        _require(moduleDefinedDependencies, null, aSpace, aCyclic);
+                        onDependenciesResolved.call(null, new Object[]{scriptOrModuleName});
+                    }
+                    // If module is still not defined (lack of module definer or buggy definer in script, etc.)
+                    // we have to put it definition as undefined by hand.
+                    if (!aSpace.getDefined().containsKey(scriptOrModuleName)) {
+                        aSpace.getDefined().put(scriptOrModuleName, null);
+                    }
                 }
             }
         }
