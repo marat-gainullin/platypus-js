@@ -24,7 +24,7 @@ gwt.sdk=/home/hudson/gwt-2.7.0</properties>
             <buildFile>application/src/group/build.xml</buildFile>
             <properties>libs.javaee-web-api-7.0.classpath=/home/hudson/netbeans-8.1/enterprise/modules/ext/javaee-web-api-7.0.jar 
 libs.CopyLibs.classpath=/home/hudson/netbeans-8.1/java/ant/extra/org-netbeans-modules-java-j2seproject-copylibstask.jar 
-j2ee.server.home=/home/hudson/tomcat/apache-tomcat-8.0.24</properties>
+j2ee.server.home=/home/hudson/tomcat/apache-tomcat-8.0.30</properties>
           </hudson.tasks.Ant>
           <hudson.tasks.Shell>
             <disabled>false</disabled>
