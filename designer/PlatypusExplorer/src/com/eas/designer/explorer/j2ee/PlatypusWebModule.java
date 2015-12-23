@@ -4,6 +4,7 @@
  */
 package com.eas.designer.explorer.j2ee;
 
+import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import java.beans.PropertyChangeEvent;
@@ -27,7 +28,6 @@ import org.netbeans.modules.j2ee.metadata.model.api.MetadataModel;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.util.Exceptions;
 
 /**
  * Platypus web application.
@@ -38,10 +38,6 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
         ModuleChangeReporter,
         EjbChangeDescriptor {
 
-    public static final String WEB_DIRECTORY = "web"; //NOI18N
-    public static final String WEB_INF_DIRECTORY = "WEB-INF"; //NOI18N
-    public static final String LIB_DIRECTORY_NAME = "lib"; //NOI18N
-    public static final String CLASSES_DIRECTORY_NAME = "classes"; //NOI18N
     public static final String META_INF_DIRECTORY = "META-INF"; //NOI18N
     public static final String PUBLIC_DIRECTORY = "pub"; //NOI18N
     protected final PlatypusProjectImpl project;
@@ -142,7 +138,7 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
     @Override
     public File getDeploymentConfigurationFile(String name) {
         try {
-            String webInfRelativePath = formatRelativePath(WEB_INF_DIRECTORY);
+            String webInfRelativePath = formatRelativePath(PlatypusProject.WEB_INF_DIRECTORY);
             String metaInfRelativePath = formatRelativePath(META_INF_DIRECTORY);
             FileObject dir;
             String path;
@@ -188,7 +184,7 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
     }
 
     public FileObject getWebInfDir() throws IOException {
-        return getContentDirectory().getFileObject(WEB_INF_DIRECTORY);
+        return getContentDirectory().getFileObject(PlatypusProject.WEB_INF_DIRECTORY);
     }
 
     public FileObject getMetaInfDir() throws IOException {

@@ -31,7 +31,7 @@ public class PlatypusLayoutDataLoader extends UniFileLoader {
         // never recognize folders.
         if (!fo.isFolder()) {
             String ext = fo.getExt();
-            if (ext.equals(PlatypusFiles.FORM_EXTENSION) && FileUtil.findBrother(fo, PlatypusFiles.JAVASCRIPT_EXTENSION) == null) {
+            if (ext.equals(PlatypusFiles.FORM_EXTENSION) && (FileUtil.findBrother(fo, PlatypusFiles.JAVASCRIPT_EXTENSION) == null || FileUtil.findBrother(fo, PlatypusFiles.MODEL_EXTENSION) == null)) {
                 return fo;
             }
         }

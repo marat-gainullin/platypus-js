@@ -3,7 +3,50 @@
 define(function () {
     var LoggerClass = Java.type("java.util.logging.Logger");
     var applicationLogger = LoggerClass.getLogger("Application");
-    var Logger = {};
+    var Logger = {
+        /**
+         * 
+         * @param {type} aMessage
+         * @returns {undefined}
+         */
+        info: function(aMessage){},
+        /**
+         * 
+         * @param {type} aMessage
+         * @returns {undefined}
+         */
+        config: function(aMessage){},
+        /**
+         * 
+         * @param {type} aMessage
+         * @returns {undefined}
+         */
+        fine: function(aMessage){},
+        /**
+         * 
+         * @param {type} aMessage
+         * @returns {undefined}
+         */
+        finer: function(aMessage){},
+        /**
+         * 
+         * @param {type} aMessage
+         * @returns {undefined}
+         */
+        finest: function(aMessage){},
+        /**
+         * 
+         * @param {type} aMessage
+         * @returns {undefined}
+         */
+        severe: function(aMessage){},
+        /**
+         * 
+         * @param {type} aMessage
+         * @returns {undefined}
+         */
+        warning: function(aMessage){}
+    };
     Object.defineProperty(Logger, "config", {value: function (aMessage) {
             applicationLogger.config("" + aMessage);
         }});

@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import jdk.nashorn.internal.ir.AccessNode;
-import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.ir.IndexNode;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 

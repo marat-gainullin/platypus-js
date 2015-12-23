@@ -71,13 +71,9 @@ public class FileChooser extends JPanel implements ExplorerManager.Provider {
      * Creates a new FileChooser. Can be used directly as a panel, or getDialog
      * can be called to get it wrapped in a Dialog.
      *
-     * @param fileInProject a source file from project sources (determines the
-     * project's classpath)
-     * @param aDisplayFilter a filter for files to be displayed
-     * @param anSelectFilter a filter for files to be selected
-     * @param aChoosingFolder if true, the chooser only allows to select a
-     * folder, and only source classpath is shown (i.e. not JARs on execution
-     * CP)
+     * @param aRootFile
+     * @param aDisplayFilter
+     * @param anSelectFilter
      * @param okCancelButtons defines whether the controls buttons should be
      * shown (typically true if using as a dialog and false if using as a panel)
      */
@@ -100,12 +96,8 @@ public class FileChooser extends JPanel implements ExplorerManager.Provider {
      * Creates a new FileChooser for application elements. Can be used directly
      * as a panel, or getDialog can be called to get it wrapped in a Dialog.
      *
-     * @param fileInProject a source file from project sources (determines the
-     * project's classpath)
-     * @param anSelectFilter a filter for files to be selected
-     * @param aChoosingFolder if true, the chooser only allows to select a
-     * folder, and only source classpath is shown (i.e. not JARs on execution
-     * CP)
+     * @param aRootFile
+     * @param anSelectFilter
      * @param okCancelButtons defines whether the controls buttons should be
      * shown (typically true if using as a dialog and false if using as a panel)
      */

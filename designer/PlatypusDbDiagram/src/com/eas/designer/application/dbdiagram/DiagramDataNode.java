@@ -7,6 +7,7 @@ package com.eas.designer.application.dbdiagram;
 
 import com.eas.designer.explorer.PlatypusDataObject;
 import javax.swing.Action;
+import org.openide.actions.*;
 import org.openide.loaders.DataNode;
 import org.openide.nodes.FilterNode;
 import org.openide.util.actions.SystemAction;

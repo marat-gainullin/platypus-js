@@ -28,7 +28,7 @@ public class RelativeUrlProvider extends SourcePathProvider {
 
     private static final String[] NO_SOURCE_ROOTS = new String[]{};
 
-    private static final String pathPrefix = "jdk/nashorn/internal/scripts/";   // NOI18N
+    private static final String PATH_PREFIX = "jdk/nashorn/internal/scripts/";   // NOI18N
 
     private final ContextProvider contextProvider;
     private SourcePathProvider sourcePath;
@@ -42,8 +42,8 @@ public class RelativeUrlProvider extends SourcePathProvider {
 
     @Override
     public String getURL(String relativePath, boolean global) {
-        if (relativePath.startsWith(pathPrefix)) {
-            relativePath = relativePath.substring(pathPrefix.length());
+        if (relativePath.startsWith(PATH_PREFIX)) {
+            relativePath = relativePath.substring(PATH_PREFIX.length());
             return resolveURL(relativePath);
         } else {
             return null;

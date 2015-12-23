@@ -12,7 +12,6 @@ import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JToolBar;
 import javax.swing.text.Document;
-import org.netbeans.api.debugger.DebuggerManager;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;

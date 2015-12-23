@@ -4,7 +4,6 @@
  */
 package com.eas.designer.explorer.j2ee;
 
-import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.j2ee.dd.AppListener;
 import com.eas.designer.explorer.j2ee.dd.AuthConstraint;
@@ -19,8 +18,6 @@ import com.eas.designer.explorer.j2ee.dd.Servlet;
 import com.eas.designer.explorer.j2ee.dd.ServletMapping;
 import com.eas.designer.explorer.j2ee.dd.WebApplication;
 import com.eas.designer.explorer.j2ee.dd.WebResourceCollection;
-import com.eas.designer.application.platform.PlatformHomePathException;
-import com.eas.designer.application.platform.PlatypusPlatform;
 import com.eas.designer.application.project.ClientType;
 import com.eas.designer.application.project.PlatypusProjectSettings;
 import com.eas.designer.explorer.j2ee.dd.WelcomeFile;
@@ -30,14 +27,9 @@ import com.eas.server.httpservlet.PlatypusHttpServlet;
 import com.eas.server.httpservlet.PlatypusSessionsSynchronizer;
 import com.eas.util.FileUtils;
 import com.eas.xml.dom.XmlDom2String;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
@@ -116,7 +108,7 @@ public class PlatypusWebModuleManager {
         String webAppRunUrl = null;
         assert webModule != null : "J2eeModuleProvider instance should be in the project's lookup.";
         try {
-            prepareWebApplication(false);
+            prepareWebApplication();
             if (webModule.getServerID() == null || webModule.getServerID().isEmpty()) {
                 project.getOutputWindowIO().getErr().println(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_App_Server_Not_Set"));//NOI18N
                 return null;
@@ -148,88 +140,17 @@ public class PlatypusWebModuleManager {
     }
 
     /**
-     * Clears jars and Platypus Web Client in the project's web directory.
-     *
-     * @throws IOException I/O exception if unable to clear.
-     */
-    public void clearWebDir() throws IOException {
-        PlatypusWebModule webModule = project.getLookup().lookup(PlatypusWebModule.class);
-        if (webDirExists()) {
-            webContentDir = projectDir.getFileObject(PlatypusWebModule.WEB_DIRECTORY);
-            if (webContentDir != null && webContentDir.isFolder()) {
-                webInfDir = webModule.getWebInfDir();
-                if (webInfDir != null && webInfDir.isFolder()) {
-                    FileObject libsDir = webInfDir.getFileObject(PlatypusWebModule.LIB_DIRECTORY_NAME);
-                    if (libsDir != null && libsDir.isFolder()) {
-                        FileUtils.clearDirectory(FileUtil.toFile(libsDir));// servlet files
-                    }
-                    FileObject classesDir = webInfDir.getFileObject(PlatypusWebModule.CLASSES_DIRECTORY_NAME);
-                    if (classesDir != null && classesDir.isFolder()) {
-                        FileUtils.clearDirectory(FileUtil.toFile(classesDir));// api js files
-                    }
-                }
-            }
-            FileObject pwcDir = webContentDir.getFileObject(PLATYPUS_WEB_CLIENT_DIR_NAME);
-            if (pwcDir != null && pwcDir.isFolder()) {
-                FileUtils.clearDirectory(FileUtil.toFile(pwcDir));// browser client
-            }
-        }
-    }
-
-    public boolean webDirExists() {
-        return projectDir.getFileObject(PlatypusWebModule.WEB_DIRECTORY) != null && projectDir.getFileObject(PlatypusWebModule.WEB_DIRECTORY).isFolder();
-    }
-
-    /**
      * Creates an web application skeleton if not created yet.
      *
-     * @param forceOverwrite
      * @throws java.lang.Exception
      */
-    public void prepareWebApplication(boolean forceOverwrite) throws Exception {
+    public void prepareWebApplication() throws Exception {
+        undeploy();
+        project.forceUpdatePlatypusRuntime();
         project.getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_Preparing_Web_App"));//NOI18N
-        webContentDir = createFolderIfNotExists(projectDir, PlatypusWebModule.WEB_DIRECTORY);
-        webInfDir = createFolderIfNotExists(projectDir, PlatypusWebModule.WEB_INF_DIRECTORY);
         metaInfDir = createFolderIfNotExists(projectDir, PlatypusWebModule.META_INF_DIRECTORY);
         publicDir = createFolderIfNotExists(projectDir, PlatypusWebModule.PUBLIC_DIRECTORY);
-        prepareJarsJSes(forceOverwrite);
-        preparePlatypusWebClient(forceOverwrite);
         prepareResources();
-    }
-
-    private void prepareJarsJSes(boolean forceOverwrite) throws Exception {
-        FileObject libsDir = webInfDir.getFileObject(PlatypusWebModule.LIB_DIRECTORY_NAME);
-        if (libsDir == null) {
-            libsDir = webInfDir.createFolder(PlatypusWebModule.LIB_DIRECTORY_NAME);
-        }
-        if (libsDir.getChildren().length == 0 || forceOverwrite) {
-            copyBinJars(libsDir);
-            copyLibJars(libsDir);
-        }
-        FileObject classesDir = webInfDir.getFileObject(PlatypusWebModule.CLASSES_DIRECTORY_NAME);
-        if (classesDir == null) {
-            classesDir = webInfDir.createFolder(PlatypusWebModule.CLASSES_DIRECTORY_NAME);
-        }
-        if (classesDir.getChildren().length == 0 || forceOverwrite) {
-            copyApiJs(classesDir);
-        }
-    }
-
-    private void preparePlatypusWebClient(boolean forceOverwrite) throws IOException, PlatformHomePathException {
-        FileObject pwcDir = webContentDir.getFileObject(PLATYPUS_WEB_CLIENT_DIR_NAME);
-        if (pwcDir == null) {
-            pwcDir = webContentDir.createFolder(PLATYPUS_WEB_CLIENT_DIR_NAME);
-        }
-        FileObject pwcSourceDir = FileUtil.toFileObject(PlatypusPlatform.getPlatformBinDirectory()).getFileObject(PLATYPUS_WEB_CLIENT_DIR_NAME);
-        if (pwcSourceDir == null) {
-            throw new IllegalStateException(String.format(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_Platypus_Web_Client_Not_Found"), PlatypusPlatform.getPlatformBinDirectory().getAbsolutePath()));//NOI18N
-        }
-        if (!pwcSourceDir.isFolder()) {
-            throw new IllegalStateException(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_Platypus_Web_Client_Dir"));//NOI18N
-        }
-        if (pwcDir.getChildren().length == 0 || forceOverwrite) {
-            copyContent(pwcSourceDir, pwcDir);
-        }
     }
 
     private void prepareResources() throws IOException {
@@ -245,32 +166,6 @@ public class PlatypusWebModuleManager {
             try (InputStream is = PlatypusWebModuleManager.class.getResourceAsStream(J2EE_RESOURCES_PACKAGE + filePath);
                     OutputStream os = fo.getOutputStream()) {
                 FileUtil.copy(is, os);
-            }
-        }
-    }
-
-    /**
-     * Recursively copies directory's content.
-     *
-     * @param sourceDir
-     * @param libDir
-     * @throws IOException if some I/O problem occurred.
-     */
-    protected static void copyContent(FileObject sourceDir, FileObject libDir) throws IOException {
-        assert sourceDir.isFolder() && libDir.isFolder();
-        for (FileObject fo : sourceDir.getChildren()) {
-            if (fo.isFolder()) {
-                FileObject targetFolder = createFolderIfNotExists(libDir, fo.getNameExt());
-                copyContent(fo, targetFolder);
-            } else {
-                FileObject alreadyFO = libDir.getFileObject(fo.getName(), fo.getExt());
-                if (alreadyFO != null) {// overwrite file
-                    try (OutputStream out = alreadyFO.getOutputStream()) {
-                        Files.copy(FileUtil.toFile(fo).toPath(), out);
-                    }
-                } else {// copy file
-                    FileUtil.copyFile(fo, libDir, fo.getName());
-                }
             }
         }
     }
@@ -374,64 +269,5 @@ public class PlatypusWebModuleManager {
         //
         aWebApplication.addSecurityRole(new SecurityRole(ANY_SIGNED_USER_ROLE));
         aWebApplication.setLoginConfig(loginConfig);
-
-    }
-
-    private void copyBinJars(FileObject libsDir) throws PlatformHomePathException, IOException {
-        FileObject platformBinDir = FileUtil.toFileObject(PlatypusPlatform.getPlatformBinDirectory());
-        for (FileObject fo : platformBinDir.getChildren()) {
-            if (fo.isData() && PlatypusPlatform.JAR_FILE_EXTENSION.equalsIgnoreCase(fo.getExt())) {
-                FileObject alreadyFO = libsDir.getFileObject(fo.getName(), fo.getExt());
-                if (alreadyFO != null) {// overwrite file
-                    try (OutputStream out = alreadyFO.getOutputStream()) {
-                        Files.copy(FileUtil.toFile(fo).toPath(), out);
-                    }
-                } else {// copy file
-                    FileUtil.copyFile(fo, libsDir, fo.getName());
-                }
-            }
-        }
-    }
-
-    private void copyLibJars(FileObject libsDir) throws Exception {
-        Set<File> jdbcDriverFiles = new HashSet<>();
-        for (String clazz : GeneralResourceProvider.driversClasses) {
-            File jdbcDriver = PlatypusPlatform.findThirdpartyJar(clazz);
-            if (jdbcDriver != null) {
-                FileObject jdbcDriverFo = FileUtil.toFileObject(jdbcDriver);
-                Enumeration<? extends FileObject> jdbcDriversEnumeration = jdbcDriverFo.getParent().getChildren(false);
-                while (jdbcDriversEnumeration.hasMoreElements()) {
-                    FileObject fo = jdbcDriversEnumeration.nextElement();
-                    jdbcDriverFiles.add(FileUtil.toFile(fo));
-                }
-            }
-        }
-        FileObject platformLibDir = FileUtil.toFileObject(PlatypusPlatform.getPlatformLibDirectory());
-        Enumeration<? extends FileObject> filesEnumeration = platformLibDir.getChildren(true);
-        while (filesEnumeration.hasMoreElements()) {
-            FileObject fo = filesEnumeration.nextElement();
-            if (!fo.isFolder() && PlatypusPlatform.JAR_FILE_EXTENSION.equalsIgnoreCase(fo.getExt())
-                    && !jdbcDriverFiles.contains(FileUtil.toFile(fo))) {
-                Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, "Copying lib: {0}", fo.getPath());
-                FileObject alreadyFO = libsDir.getFileObject(fo.getName(), fo.getExt());
-                if (alreadyFO != null) {// overwrite file
-                    try (OutputStream out = alreadyFO.getOutputStream()) {
-                        Files.copy(FileUtil.toFile(fo).toPath(), out);
-                    }
-                } else {// copy file
-                    FileUtil.copyFile(fo, libsDir, fo.getName());
-                }
-            } else {
-                Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, "Skipped while copying libs: {0}", fo.getPath());
-            }
-        }
-    }
-
-    private void copyApiJs(FileObject clasessDir) throws IOException {
-        try {
-            copyContent(FileUtil.toFileObject(PlatypusPlatform.getPlatformApiDirectory()), clasessDir);
-        } catch (PlatformHomePathException ex) {
-            ErrorManager.getDefault().notify(ex);//Should not happen
-        }
     }
 }

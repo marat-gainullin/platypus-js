@@ -53,11 +53,13 @@ public class ModuleCompletionProvider implements CompletionProvider {
     }
 
     protected void fillCompletionPoint(PlatypusModuleDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet, int caretOffset) throws Exception {
-        dataObject.setAstRoot(point.getAstRoot());
-        CompletionContext initialCompltionContext = dataObject.getCompletionContext();
-        CompletionContext completionContext = getCompletionContext(initialCompltionContext, point.getCompletionTokens(), caretOffset);
-        if (completionContext != null) {
-            completionContext.applyCompletionItems(point, caretOffset, resultSet);
+        if (dataObject != null) {
+            dataObject.setAstRoot(point.getAstRoot());
+            CompletionContext initialCompltionContext = dataObject.getCompletionContext();
+            CompletionContext completionContext = getCompletionContext(initialCompltionContext, point.getCompletionTokens(), caretOffset);
+            if (completionContext != null) {
+                completionContext.applyCompletionItems(point, caretOffset, resultSet);
+            }
         }
     }
 
@@ -73,7 +75,7 @@ public class ModuleCompletionProvider implements CompletionProvider {
                     if (completionContext == null) {
                         caretOffset = initialOffset;
                         completionContext = initialContext.getChildContext(token, caretOffset);
-                        if(completionContext == null){
+                        if (completionContext == null) {
                             completionContext = initialContext;
                         }
                     } else {
