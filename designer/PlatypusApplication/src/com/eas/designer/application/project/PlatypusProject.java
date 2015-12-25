@@ -7,7 +7,6 @@ package com.eas.designer.application.project;
 import com.eas.client.DatabasesClient;
 import com.eas.client.cache.PlatypusIndexer;
 import com.eas.client.queries.LocalQueriesProxy;
-import com.eas.designer.application.platform.PlatypusPlatform;
 import com.eas.util.ListenerRegistration;
 import java.awt.Component;
 import java.util.concurrent.ExecutionException;
@@ -29,7 +28,6 @@ public interface PlatypusProject extends Project {
     public static final String LIB_DIRECTORY_NAME = "lib"; //NOI18N
     public static final String CLASSES_DIRECTORY_NAME = "classes"; //NOI18N
     public static final String PLATYPUS_WEB_CLIENT_DIR_NAME = "pwc"; //NOI18N
-    public static final String PROJECT_VERSION_FILE_NAME = "platypus-js-" + PlatypusPlatform.VERSION_FILE_NAME;
 
     public interface ClientChangeListener {
 

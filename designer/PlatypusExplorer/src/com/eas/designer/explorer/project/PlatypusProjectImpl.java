@@ -632,36 +632,37 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
     protected boolean needUpdatePlatypusRuntime() throws IOException {
         try {
-            FileObject platformVersion = FileUtil.toFileObject(PlatypusPlatform.getPlatformVersion());
-            FileObject projectVersion = projectDir.getFileObject(PROJECT_VERSION_FILE_NAME);
-            if (platformVersion != null && projectVersion != null) {
-                Document platformVersionDoc = Source2XmlDom.transform(platformVersion.asText());
-                Document projectVersionDoc = Source2XmlDom.transform(projectVersion.asText());
-                NodeList platformVersionElements = platformVersionDoc.getDocumentElement().getElementsByTagName(PlatypusPlatform.VERSION_TAG_NAME);
-                NodeList projectVersionElements = projectVersionDoc.getDocumentElement().getElementsByTagName(PlatypusPlatform.VERSION_TAG_NAME);
-                if (platformVersionElements.getLength() == 1 && projectVersionElements.getLength() == 1) {
-                    Element platformVersionElement = (Element) platformVersionElements.item(0);
-                    Element projectVersionElement = (Element) projectVersionElements.item(0);
-                    if (platformVersionElement != null && projectVersionElement != null) {
-                        String platformVersionValue = platformVersionElement.getAttribute(PlatypusPlatform.VERSION_ATTRIBUTE_NAME);
-                        String projectVersionValue = projectVersionElement.getAttribute(PlatypusPlatform.VERSION_ATTRIBUTE_NAME);
-                        return (platformVersionValue == null ? projectVersionValue != null : !platformVersionValue.equals(projectVersionValue));
-                    }
-                }
-            }
-            return true;
+            String projectVersionValue = settings.getPlatypusJsVersion();
+            String platformVersionValue = readPlatypusJsVersion();
+            return (projectVersionValue == null ? platformVersionValue != null : !projectVersionValue.equals(platformVersionValue));
         } catch (PlatformHomePathException ex) {
             getOutputWindowIO().getErr().println(ex.getMessage());
             return false;
         }
     }
 
+    protected String readPlatypusJsVersion() throws IOException, PlatformHomePathException {
+        FileObject platformVersion = FileUtil.toFileObject(PlatypusPlatform.getPlatformVersion());
+        if (platformVersion != null) {
+            Document platformVersionDoc = Source2XmlDom.transform(platformVersion.asText());
+            NodeList platformVersionElements = platformVersionDoc.getDocumentElement().getElementsByTagName(PlatypusPlatform.VERSION_TAG_NAME);
+            if (platformVersionElements.getLength() == 1) {
+                Element platformVersionElement = (Element) platformVersionElements.item(0);
+                if (platformVersionElement != null) {
+                    return platformVersionElement.getAttribute(PlatypusPlatform.VERSION_ATTRIBUTE_NAME);
+                }
+            }
+        }
+        return null;
+    }
+
     protected void copyPlatypusRuntime() throws IOException {
         try {
             prepareJarsJSes(true);
             preparePlatypusWebClient(true);
-            FileObject platformVersion = FileUtil.toFileObject(PlatypusPlatform.getPlatformVersion());
-            platformVersion.copy(projectDir, PROJECT_VERSION_FILE_NAME, null);
+            String platformVersion = readPlatypusJsVersion();
+            settings.setPlatypusJsVersion(platformVersion);
+            settings.save();
         } catch (PlatformHomePathException ex) {
             throw new IOException(ex);
         }
@@ -804,10 +805,6 @@ public class PlatypusProjectImpl implements PlatypusProject {
     }
 
     public void clearPlatypusRuntime() throws IOException {
-        FileObject projectVersion = projectDir.getFileObject(PROJECT_VERSION_FILE_NAME);
-        if (projectVersion != null) {
-            projectVersion.delete();
-        }
         FileObject webInfDir = projectDir.getFileObject(WEB_INF_DIRECTORY);
         if (webInfDir != null && webInfDir.isFolder()) {
             FileObject libsDir = webInfDir.getFileObject(LIB_DIRECTORY_NAME);

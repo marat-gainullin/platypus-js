@@ -48,6 +48,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     public static final String DEBUG_SERVER_PORT_KEY = "debugServerPort"; //NOI18N
     public static final String CLIENT_LOG_LEVEL = "clientLogLevel"; //NOI18N
     public static final String SERVER_LOG_LEVEL = "serverLogLevel"; //NOI18N
+    public static final String PLATYPUS_JS_VERSION = "platypus-js-version"; //NOI18N
     public static final String J2EE_SERVER_ID_KEY = "j2eeServerId"; //NOI18N
     public static final String SERVER_CONTEXT_KEY = "context";//NOI18N
     public static final String ENABLE_SECURITY_REALM_KEY = "enableSecurityRealm";//NOI18N
@@ -443,7 +444,6 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
         return value != null ? Boolean.valueOf(value) : false;
     }
 
-    
     /**
      * Sets JPDA debugging port for Platypus Client on local computer on
      * development.
@@ -475,8 +475,8 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     }
 
     /**
-     * Gets JPDA debugging port for Platypus Application Server on local computer
-     * on development if null or empty, use default value.
+     * Gets JPDA debugging port for Platypus Application Server on local
+     * computer on development if null or empty, use default value.
      *
      * @return JPDA debugging port
      */
@@ -633,7 +633,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     }
 
     @Override
-    public void save() throws Exception {
+    public void save() throws IOException {
         if (projectPropertiesIsDirty) {
             try (OutputStream os = getProjectSettingsFileObject().getOutputStream()) {
                 projectProperties.store(os);
@@ -745,5 +745,20 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
         }
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(SERVER_LOG_LEVEL, aValue, oldValue);
+    }
+
+    public String getPlatypusJsVersion() {
+        return projectPrivateProperties.getProperty(PLATYPUS_JS_VERSION);
+    }
+
+    public void setPlatypusJsVersion(String aValue) {
+        String oldValue = getPlatypusJsVersion();
+        if (aValue != null) {
+            projectPrivateProperties.setProperty(PLATYPUS_JS_VERSION, aValue);
+        } else {
+            projectPrivateProperties.remove(PLATYPUS_JS_VERSION);
+        }
+        projectPrivatePropertiesIsDirty = true;
+        changeSupport.firePropertyChange(PLATYPUS_JS_VERSION, aValue, oldValue);
     }
 }

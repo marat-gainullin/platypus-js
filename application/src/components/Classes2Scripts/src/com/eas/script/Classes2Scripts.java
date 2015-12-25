@@ -467,6 +467,8 @@ public class Classes2Scripts {
         if (property.apiName != null && !property.apiName.isEmpty()) {
             apiPropName = property.apiName;
         }
+        sb.append(property.jsDoc).append("\n");
+        sb.append("this.").append(apiPropName).append("=").append("{}").append("\n");
         sb.append("Object.defineProperty(").append("this, \"").append(apiPropName).append("\", {\n");
         sb.append(getIndentStr(++i));
         assert property.readable;
@@ -633,8 +635,8 @@ public class Classes2Scripts {
     private String getPropsPart(Class clazz, FunctionInfo ci, Collection<MethodedPropBox> props, int ident) {
         StringBuilder sb = new StringBuilder();
         for (MethodedPropBox property : props) {
-            sb.append(getPropertyPart(checkScriptObject(clazz, ci.name), property, ident));
-            sb.append("\n");//NOI18N
+            sb.append(getPropertyPart(checkScriptObject(clazz, ci.name), property, ident))
+            .append("\n");//NOI18N
         }
         return sb.toString();
     }

@@ -230,9 +230,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     private static final String APPEND_JSDOC = ""
             + "/**\n"
-            + "* Append data to the entity's data. Appended data will be managed by ORM."
-            + "* @param data The plain js objects array to be appended.\n"
-            + "*/";
+            + " * Append data to the entity's data.\n"
+            + " * Appended data will be managed by model, but appending itself will not be included in data changelog.\n"
+            + " * @param data The plain js objects array to be appended.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = APPEND_JSDOC, params = {"data"})
     public void append(JSObject aData) {
@@ -243,8 +244,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     private static final String INSTANCE_CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* Experimental. The constructor funciton for the entity's data array elements.\n"
-            + "*/";
+            + " * The constructor funciton for the entity's data array elements.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = INSTANCE_CONSTRUCTOR_JSDOC)
     public JSObject getElementClass() {
@@ -338,8 +339,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     private static final String ON_REQUIRED_JSDOC = ""
             + "/**\n"
-            + "* The handler function for the event occured after the entity's data have been requeried.\n"
-            + "*/";
+            + " * The handler function for the event occured after the entity's data have been requeried.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_REQUIRED_JSDOC)
     @EventMethod(eventClass = PublishedSourcedEvent.class)

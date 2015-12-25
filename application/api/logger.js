@@ -5,44 +5,45 @@ define(function () {
     var applicationLogger = LoggerClass.getLogger("Application");
     var Logger = {
         /**
-         * 
-         * @param {type} aMessage
+         * Adds aMessage to 'Application' logger on INFO log level.
+         * @param {String} aMessage
          * @returns {undefined}
          */
         info: function(aMessage){},
         /**
-         * 
-         * @param {type} aMessage
+         * Adds aMessage to 'Application' logger on CONFIG log level.
+         * @param {String} aMessage
          * @returns {undefined}
          */
         config: function(aMessage){},
         /**
-         * 
-         * @param {type} aMessage
+         * Adds aMessage to 'Application' logger on FINE log level.
+         * @param {String} aMessage
          * @returns {undefined}
          */
         fine: function(aMessage){},
         /**
-         * 
-         * @param {type} aMessage
+         * Adds aMessage to 'Application' logger on FINER log level.
+         * @param {String} aMessage
          * @returns {undefined}
          */
         finer: function(aMessage){},
         /**
-         * 
-         * @param {type} aMessage
+         * Adds aMessage to 'Application' logger on FINEST log level.
+         * @param {String} aMessage
          * @returns {undefined}
          */
         finest: function(aMessage){},
         /**
-         * 
-         * @param {type} aMessage
+         * Adds aMessage to 'Application' logger on SEVERE log level.
+         * This log level is typical for exceptions.
+         * @param {String} aMessage
          * @returns {undefined}
          */
         severe: function(aMessage){},
         /**
-         * 
-         * @param {type} aMessage
+         * Adds aMessage to 'Application' logger on WARNING log level.
+         * @param {String} aMessage
          * @returns {undefined}
          */
         warning: function(aMessage){}

@@ -6,7 +6,6 @@ package com.eas.gui;
 
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
-import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
 import java.awt.Color;
@@ -25,7 +24,7 @@ public class ScriptColor extends java.awt.Color implements HasPublished {
     protected JSObject published;
 
     @ScriptFunction(name = "Color", params = {"red", "green", "blue", "alpha"}, jsDoc = "/**\n"
-            + "* The <code>Color</code> class is used to encapsulate colors in the default RGB color space."
+            + "* The <code>Color</code> class is used to encapsulate colors in the default RGB color space.\n"
             + "* @param red Red compontent (optional)\n"
             + "* @param green Green compontent (optional)\n"
             + "* @param blue Blue compontent (optional)\n"

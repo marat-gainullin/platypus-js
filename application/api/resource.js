@@ -17,7 +17,36 @@ define(['boxing'], function (B) {
         return calledFromFile + '.js';
     }
 
-    var module = {};
+    var module = {
+        /**
+         * Absolute path to the project's 'app' directory
+         */
+        applicationPath:"",
+        /**
+         * Loads the specified resource from project or from the specified http url.
+         * Attempts to auto discover type of the resource and passes to the success callback
+         * data of the appropriate type. In general, it will be 'String' or 'ArrayBuffer'.
+         * If resource name starts with 'http://' prefix, than this name used as a plain http url.
+         * @param {String} aResName Resource name. Resource names are considered as path to the resource from project's 'app' directory.
+         * It may be relative name (./, ../)
+         * @param {Function} onSuccess Success callback consuming loaded result.
+         * @param {Function} onFailure Failure callback, called if problem occur while loading.
+         * @returns {undefined}
+         */
+        load: function(aResName, onSuccess, onFailure){},
+        /**
+         * Loads the specified resource from project or from the specified http url.
+         * Allways considers 'text' type of the resource and passes text from server response to the success callback.
+         * If resource name starts with 'http://' prefix, than this name used as a plain http url.
+         * If http url was used and server would not send us 'content-type' header, 'utf-8' is used as text encoding.
+         * @param {String} aResName Resource name. Resource names are considered as path to the resource from project's 'app' directory.
+         * It may be relative name (./, ../)
+         * @param {Function} onSuccess Success callback consuming loaded result.
+         * @param {Function} onFailure Failure callback, called if problem occur while loading.
+         * @returns {undefined}
+         */
+        loadText: function(aResName, onSuccess, onFailure){}
+    };
     Object.defineProperty(module, "load", {
         enumerable: true,
         value: function (aResName, onSuccess, onFailure) {

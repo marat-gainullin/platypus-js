@@ -49,7 +49,7 @@ public class ModuleCompletionContext extends CompletionContext {
     protected static final String MODULES_OBJECT_NAME = "Modules";// NOI18N
     protected static final String SYSTEM_OBJECT_NAME = "P";//NOI18N
     protected static final String LOAD_MODEL_METHOD_NAME = "loadModel";// NOI18N
-    private static final Set<String> ARRAY_ITERATION_FUNCTIONS_NAMES = new HashSet<String>() {
+    public static final Set<String> ARRAY_ITERATION_FUNCTIONS_NAMES = new HashSet<String>() {
         {
             add("forEach");//NOI18N
             add("filter");//NOI18N
@@ -249,8 +249,8 @@ public class ModuleCompletionContext extends CompletionContext {
             if (cn.getFunction() instanceof AccessNode) {
                 AccessNode an = (AccessNode) cn.getFunction();
                 return methodName.equals(an.getProperty())
-                        && an.getBase() instanceof IdentNode
-                        && SYSTEM_OBJECT_NAME.equals(((IdentNode) an.getBase()).getName());
+                        && an.getBase() instanceof IdentNode;
+                        //&& SYSTEM_OBJECT_NAME.equals(((IdentNode) an.getBase()).getName()); Orm.loadModel, P.loadModel ... ???
             }
         }
         return false;
