@@ -184,7 +184,10 @@ public class Parameter extends Field {
      *
      * @return Parameter's mode.
      */
-    @ScriptFunction(jsDoc = "Parameter's mode (in, out, in/out).")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Parameter's mode (in, out, in/out).\n"
+            + " */")
     public int getMode() {
         return mode;
     }
@@ -206,7 +209,10 @@ public class Parameter extends Field {
      *
      * @return Parameter's default value.
      */
-    @ScriptFunction(jsDoc = "The default value of the parameter.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * The default value of the parameter.\n"
+            + " */")
     public Object getDefaultValue() {
         return defaultValue;
     }
@@ -246,7 +252,10 @@ public class Parameter extends Field {
         }
     }
 
-    @ScriptFunction(name = "value", jsDoc = "The value of the parameter.")
+    @ScriptFunction(name = "value", jsDoc = ""
+            + "/**\n"
+            + " * The value of the parameter.\n"
+            + " */")
     public Object getJsValue() {
         return getValue();
     }
@@ -332,7 +341,7 @@ public class Parameter extends Field {
     /**
      * Sets the selection form of the parameter.
      *
-     * @param selectionForm Selection form of the parameter.
+     * @param aValue Selection form of the parameter.
      */
     public void setSelectionForm(String aValue) {
         String oldValue = selectionForm;
@@ -340,7 +349,10 @@ public class Parameter extends Field {
         changeSupport.firePropertyChange("selectionForm", oldValue, aValue);
     }
 
-    @ScriptFunction(jsDoc = "Determines if parameter was modified.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Determines if parameter was modified.\n"
+            + " */")
     public boolean isModified() {
         return modified;
     }

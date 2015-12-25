@@ -23,13 +23,14 @@ public class ScriptColor extends java.awt.Color implements HasPublished {
 
     protected JSObject published;
 
-    @ScriptFunction(name = "Color", params = {"red", "green", "blue", "alpha"}, jsDoc = "/**\n"
-            + "* The <code>Color</code> class is used to encapsulate colors in the default RGB color space.\n"
-            + "* @param red Red compontent (optional)\n"
-            + "* @param green Green compontent (optional)\n"
-            + "* @param blue Blue compontent (optional)\n"
-            + "* @param alpha Alpha compontent (optional)\n"
-            + "*/")
+    @ScriptFunction(name = "Color", params = {"red", "green", "blue", "alpha"}, jsDoc = ""
+            + "/**\n"
+            + " * The <code>Color</code> class is used to encapsulate colors in the default RGB color space.\n"
+            + " * @param red Red compontent (optional)\n"
+            + " * @param green Green compontent (optional)\n"
+            + " * @param blue Blue compontent (optional)\n"
+            + " * @param alpha Alpha compontent (optional)\n"
+            + " */")
     public ScriptColor(int r, int g, int b, int a) {
         super(r, g, b, a);
     }

@@ -240,7 +240,7 @@ public class Form implements HasPublished {
      * @return value of the modalResult property
      * @throws Exception an exception if something goes wrong
      */
-    @ScriptFunction(params = {"callback"}, jsDoc = SHOW_MODAL_JSDOC)
+    @ScriptFunction(jsDoc = SHOW_MODAL_JSDOC, params = {"callback"})
     public Object showModal(JSObject onOkModalResult) throws Exception {
         return displayAsDialog(onOkModalResult);
     }

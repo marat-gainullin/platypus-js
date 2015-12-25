@@ -37,8 +37,8 @@ public class EntityInstanceChangeEvent extends PublishedSourcedEvent {
 
     private static final String PROPERTY_NAME_JSDOC = ""
             + "/**\n"
-            + "* The changed property name.\n"
-            + "*/";
+            + " * The changed property name.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = PROPERTY_NAME_JSDOC)
     public String getPropertyName() {
@@ -47,8 +47,8 @@ public class EntityInstanceChangeEvent extends PublishedSourcedEvent {
 
     private static final String OLD_VALUE_JSDOC = ""
             + "/**\n"
-            + "* The old value.\n"
-            + "*/";
+            + " * The old value.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = OLD_VALUE_JSDOC)
     public Object getOldValue() {
@@ -57,8 +57,8 @@ public class EntityInstanceChangeEvent extends PublishedSourcedEvent {
 
     private static final String NEW_VALUE_JSDOC = ""
             + "/**\n"
-            + "* The new value.\n"
-            + "*/";
+            + " * The new value.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = NEW_VALUE_JSDOC)
     public Object getNewValue() {
@@ -67,8 +67,8 @@ public class EntityInstanceChangeEvent extends PublishedSourcedEvent {
 
     private static final String OBJECT_JSDOC = ""
             + "/**\n"
-            + "* The updated element.\n"
-            + "*/";
+            + " * The updated element.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = OBJECT_JSDOC)
     public HasPublished getObject() {

@@ -841,6 +841,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 GlobalPathRegistry.getDefault().register(PlatypusPathRecognizer.API_CP, new ClassPath[]{apiCp});
                 GlobalPathRegistry.getDefault().register(ClassPath.SOURCE, new ClassPath[]{sourceCp});
                 Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.INFO, "Project opened");
+                settings.load();
                 startConnecting2db(getSettings().getDefaultDataSourceName());
                 updatePlatypusRuntime();
             } catch (Exception ex) {

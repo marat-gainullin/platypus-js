@@ -22,6 +22,7 @@ define(['boxing'], function(B) {
         if(WebSocketServerSession.superclass)
             WebSocketServerSession.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        this.query = '';
         Object.defineProperty(this, "query", {
             get: function() {
                 var value = delegate.query;
@@ -29,6 +30,7 @@ define(['boxing'], function(B) {
             }
         });
 
+        this.protocolVersion = '';
         Object.defineProperty(this, "protocolVersion", {
             get: function() {
                 var value = delegate.protocolVersion;
@@ -36,6 +38,7 @@ define(['boxing'], function(B) {
             }
         });
 
+        this.id = '';
         Object.defineProperty(this, "id", {
             get: function() {
                 var value = delegate.id;
@@ -43,6 +46,7 @@ define(['boxing'], function(B) {
             }
         });
 
+        this.uri = '';
         Object.defineProperty(this, "uri", {
             get: function() {
                 var value = delegate.uri;

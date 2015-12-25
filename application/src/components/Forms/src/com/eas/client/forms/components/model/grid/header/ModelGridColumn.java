@@ -309,7 +309,7 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
 
     private static final String SORT = ""
             + "/**\n"
-            + " * Column sort, works only in HTML5"
+            + " * Column sort, works only in HTML5\n"
             + " */";
 
     @ScriptFunction(jsDoc = SORT)
@@ -318,7 +318,7 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
     }
     private static final String SORT_DESC = ""
             + "/**\n"
-            + " * Descending column sort, works only in HTML5"
+            + " * Descending column sort, works only in HTML5\n"
             + " */";
 
     @ScriptFunction(jsDoc = SORT_DESC)
@@ -327,7 +327,7 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
     }
     private static final String UNSORT = ""
             + "/**\n"
-            + " * Clears sort column, works only in HTML5"
+            + " * Clears sort column, works only in HTML5\n"
             + " */";
 
     @ScriptFunction(jsDoc = UNSORT)

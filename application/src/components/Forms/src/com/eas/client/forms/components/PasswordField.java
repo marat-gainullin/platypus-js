@@ -42,9 +42,9 @@ public class PasswordField extends VPasswordField implements HasOnValueChange, H
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* Password field component.\n"
-            + "* @param text the text for the component (optional).\n"
-            + "*/";
+            + " * Password field component.\n"
+            + " * @param text the text for the component (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
     public PasswordField(String aText) {

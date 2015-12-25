@@ -43,9 +43,9 @@ public class ToolBar extends JToolBar implements HasPublished, HasContainerEvent
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* <code>ToolBar</code> provides a component that is useful for displaying commonly used actions or controls.\n"
-            + "* @param floatable if <code>true</code>, the tool bar can be moved; <code>false</code> otherwise (optional).\n"
-            + "*/";
+            + " * <code>ToolBar</code> provides a component that is useful for displaying commonly used actions or controls.\n"
+            + " * @param floatable if <code>true</code>, the tool bar can be moved; <code>false</code> otherwise (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"floatable"})
     public ToolBar(boolean floatable) {
@@ -293,9 +293,9 @@ public class ToolBar extends JToolBar implements HasPublished, HasContainerEvent
 
     private static final String ADD_JSDOC = ""
             + "/**\n"
-            + "* Appends the specified component to the end of this container.\n"
-            + "* @param component the component to add.\n"
-            + "*/";
+            + " * Appends the specified component to the end of this container.\n"
+            + " * @param component the component to add.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
     public void add(JComponent aComp) {

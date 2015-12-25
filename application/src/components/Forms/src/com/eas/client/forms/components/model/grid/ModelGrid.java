@@ -631,8 +631,8 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     private static final String ODD_ROW_COLOR_JSDOC = ""
             + "/**\n"
-            + "* Odd rows color.\n"
-            + "*/";
+            + " * Odd rows color.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ODD_ROW_COLOR_JSDOC)
     @Designable(category = "appearance")
@@ -648,8 +648,8 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     private static final String SHOW_HORIZONTAL_LINES_JSDOC = ""
             + "/**\n"
-            + "* Determines if grid shows horizontal lines.\n"
-            + "*/";
+            + " * Determines if grid shows horizontal lines.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = SHOW_HORIZONTAL_LINES_JSDOC)
     @Designable(category = "appearance")
@@ -659,8 +659,8 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     private static final String SHOW_VERTICAL_LINES_JSDOC = ""
             + "/**\n"
-            + "* Determines if grid shows vertical lines.\n"
-            + "*/";
+            + " * Determines if grid shows vertical lines.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = SHOW_VERTICAL_LINES_JSDOC)
     @Designable(category = "appearance")
@@ -670,8 +670,8 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     private static final String SHOW_ODD_ROWS_IN_OTHER_COLOR_JSDOC = ""
             + "/**\n"
-            + "* Determines if grid shows odd rows if other color.\n"
-            + "*/";
+            + " * Determines if grid shows odd rows if other color.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = SHOW_ODD_ROWS_IN_OTHER_COLOR_JSDOC)
     @Designable(category = "appearance")
@@ -687,8 +687,8 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     private static final String GRID_COLOR_JSDOC = ""
             + "/**\n"
-            + "* The color of the grid.\n"
-            + "*/";
+            + " * The color of the grid.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = GRID_COLOR_JSDOC)
     @Designable(category = "appearance")
@@ -704,8 +704,8 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     private static final String ROWS_HEIGHT_JSDOC = ""
             + "/**\n"
-            + "* The height of grid's rows.\n"
-            + "*/";
+            + " * The height of grid's rows.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ROWS_HEIGHT_JSDOC)
     @Designable(category = "appearance")
@@ -733,8 +733,8 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     private static final String EDITABLE_JSDOC = ""
             + "/**\n"
-            + "* Determines if gris cells are editable.\n"
-            + "*/";
+            + " * Determines if gris cells are editable.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
     @Designable(category = "editing")
@@ -749,8 +749,8 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     private static final String INSERTABLE_JSDOC = ""
             + "/**\n"
-            + "* Determines if grid allows row insertion.\n"
-            + "*/";
+            + " * Determines if grid allows row insertion.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = INSERTABLE_JSDOC)
     @Designable(category = "editing")
@@ -765,8 +765,8 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     private static final String DELETABLE_JSDOC = ""
             + "/**\n"
-            + "* Determines if grid allows to delete rows.\n"
-            + "*/";
+            + " * Determines if grid allows to delete rows.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = DELETABLE_JSDOC)
     @Designable(category = "editing")
@@ -1245,8 +1245,8 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     private static final String REDRAW_JSDOC = ""
             + "/**\n"
-            + "* Redraw the component.\n"
-            + "*/";
+            + " * Redraw the component.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = REDRAW_JSDOC)
     @Override
@@ -1901,9 +1901,9 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     private static final String FIND_SOMETHING_JSDOC = ""
             + "/**\n"
-            + "* Shows find dialog.\n"
-            + "* @deprecated Use find() instead. \n"
-            + "*/";
+            + " * Shows find dialog.\n"
+            + " * @deprecated Use find() instead. \n"
+            + " */";
 
     @ScriptFunction(jsDoc = FIND_SOMETHING_JSDOC)
     public void find() {
@@ -1916,10 +1916,10 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     private static final String MAKE_VISIBLE_JSDOC = ""
             + "/**\n"
-            + "* Makes specified instance visible.\n"
-            + "* @param instance Entity's instance to make visible.\n"
-            + "* @param need2select true to select the instance (optional).\n"
-            + "*/";
+            + " * Makes specified instance visible.\n"
+            + " * @param instance Entity's instance to make visible.\n"
+            + " * @param need2select true to select the instance (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = MAKE_VISIBLE_JSDOC, params = {"instance", "need2select"})
     @Override
@@ -1964,9 +1964,9 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     private static final String EXPANDED_JSDOC = ""
             + "/**\n"
-            + "* Tests if node of specified .data array element is expanded.\n"
-            + "* @param instance .data array element to test.\n"
-            + "*/";
+            + " * Tests if node of specified .data array element is expanded.\n"
+            + " * @param instance .data array element to test.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = EXPANDED_JSDOC, params = {"instance"})
     public boolean expanded(JSObject anElement) {
@@ -1980,9 +1980,9 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     private static final String EXPAND_JSDOC = ""
             + "/**\n"
-            + "* Makes node of specified .data array element expanded.\n"
-            + "* @param instance .data array element to expand.\n"
-            + "*/";
+            + " * Makes node of specified .data array element expanded.\n"
+            + " * @param instance .data array element to expand.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = EXPAND_JSDOC, params = {"instance"})
     public void expand(JSObject anElement) {
@@ -1994,9 +1994,9 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     private static final String COLLAPSE_JSDOC = ""
             + "/**\n"
-            + "* Makes node of specified .data array element collapsed.\n"
-            + "* @param instance .data array element to collapsed.\n"
-            + "*/";
+            + " * Makes node of specified .data array element collapsed.\n"
+            + " * @param instance .data array element to collapsed.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = COLLAPSE_JSDOC, params = {"instance"})
     public void collapse(JSObject anElement) {
@@ -2008,9 +2008,9 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     private static final String TOGGLE_JSDOC = ""
             + "/**\n"
-            + "* Makes node of specified .data array element expanded if it was already collapsed and collapsed otherwise.\n"
-            + "* @param instance .data array element to expand or collpase.\n"
-            + "*/";
+            + " * Makes node of specified .data array element expanded if it was already collapsed and collapsed otherwise.\n"
+            + " * @param instance .data array element to expand or collpase.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = TOGGLE_JSDOC, params = {"instance"})
     public void toggle(JSObject anElement) {

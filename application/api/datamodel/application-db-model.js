@@ -22,6 +22,10 @@ define(['boxing'], function(B) {
         if(ApplicationDbModel.superclass)
             ApplicationDbModel.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * Flagis set to true if model has been modified.
+         */
+        this.modified = true;
         Object.defineProperty(this, "modified", {
             get: function() {
                 var value = delegate.modified;
@@ -116,7 +120,7 @@ define(['boxing'], function(B) {
 
     /**
      * Creates new entity of model, based on application query.
-     * @param queryId the query application element ID.
+     * @param queryName the query application element name.
      * @return a new entity.
      * @method loadEntity
      * @memberOf ApplicationDbModel

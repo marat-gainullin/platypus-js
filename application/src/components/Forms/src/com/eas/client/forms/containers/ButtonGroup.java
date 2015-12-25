@@ -49,7 +49,7 @@ public class ButtonGroup extends ButtonGroupWrapper implements HasPublished, Has
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + " * Creates a multiple-exclusion scope for a set of radio or toggle buttons or for a menu item with radio button.\n"
-            + "  * Creating a set of buttons with the same <code>ButtonGroup</code> object means that turning \"on\" one of those buttons turns off all other buttons in the group.\n"
+            + " * Creating a set of buttons with the same <code>ButtonGroup</code> object means that turning \"on\" one of those buttons turns off all other buttons in the group.\n"
             + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
@@ -316,7 +316,7 @@ public class ButtonGroup extends ButtonGroupWrapper implements HasPublished, Has
             + "/**\n"
             + " * Appends the specified component to the end of this group.\n"
             + " * @param component Component to add to the group.\n"
-            + "*/";
+            + " */";
 
     @ScriptFunction(name = "add", jsDoc = ADD_JSDOC, params = {"component"})
     public void jsAdd(JComponent aComp) {

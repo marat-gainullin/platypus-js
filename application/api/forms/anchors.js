@@ -5,7 +5,7 @@ define(['boxing'], function(B) {
     var javaClass = Java.type(className);
     /**
      * Component's layout anchors for AnchorsPane.
-     * Two constraint values of three possible must be provided for X and Y axis, other constraints must be set to <code>null</code>.* Parameters values can be provided in pixels, per cents or numbers, e.g. '30px', '30' or 10%.
+     * Two constraint values of three possible must be provided for X and Y axis, other constraints must be set to <code>null</code>. * Parameters values can be provided in pixels, per cents or numbers, e.g. '30px', '30' or 10%.
      * @param left a left anchor
      * @param width a width value
      * @param right a right anchor

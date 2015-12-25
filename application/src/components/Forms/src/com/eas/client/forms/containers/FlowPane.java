@@ -51,10 +51,10 @@ public class FlowPane extends JPanel implements HasPublished, HasContainerEvents
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* A container with Flow Layout.\n"
-            + "* @param hgap the horizontal gap (optional).\n"
-            + "* @param vgap the vertical gap (optional).\n"
-            + "*/";
+            + " * A container with Flow Layout.\n"
+            + " * @param hgap the horizontal gap (optional).\n"
+            + " * @param vgap the vertical gap (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"hgap", "vgap"})
     public FlowPane(int hgap, int vgap) {
@@ -330,9 +330,9 @@ public class FlowPane extends JPanel implements HasPublished, HasContainerEvents
     
     private static final String ADD_JSDOC = ""
             + "/**\n"
-            + "* Appends the specified component to the end of this container.\n"
-            + "* @param component the component to add\n"
-            + "*/";
+            + " * Appends the specified component to the end of this container.\n"
+            + " * @param component the component to add\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
     public void add(JComponent aComp) {

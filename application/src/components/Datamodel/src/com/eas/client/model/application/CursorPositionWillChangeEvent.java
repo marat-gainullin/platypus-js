@@ -29,16 +29,16 @@ public class CursorPositionWillChangeEvent extends PublishedSourcedEvent {
 
     @ScriptFunction(jsDoc = ""
             + "/**\n"
-            + "* Cursor position the cursor is still on.\n"
-            + "*/")
+            + " * Cursor position the cursor is still on.\n"
+            + " */")
     public int getOldIndex() {
         return oldIndex;
     }
 
     @ScriptFunction(jsDoc = ""
             + "/**\n"
-            + "* Cursor position the cursor will be set on.\n"
-            + "*/")
+            + " * Cursor position the cursor will be set on.\n"
+            + " */")
     public int getNewIndex() {
         return newIndex;
     }

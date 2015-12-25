@@ -18,8 +18,8 @@ public interface HasContainerEvents extends HasComponentEvents {
 
     public static final String ON_COMPONENT_ADDED_JSDOC = ""
             + "/**\n"
-            + "* Component added event hanler function.\n"
-            + "*/";
+            + " * Component added event hanler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_COMPONENT_ADDED_JSDOC)
     @EventMethod(eventClass = ContainerEvent.class)
@@ -30,8 +30,8 @@ public interface HasContainerEvents extends HasComponentEvents {
 
     public static final String ON_COMPONENT_REMOVED_JSDOC = ""
             + "/**\n"
-            + "* Component removed event handler function.\n"
-            + "*/";
+            + " * Component removed event handler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_COMPONENT_REMOVED_JSDOC)
     @EventMethod(eventClass = ContainerEvent.class)

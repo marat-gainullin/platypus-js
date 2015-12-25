@@ -367,9 +367,9 @@ public class BoxPane extends JPanel implements HasPublished, HasContainerEvents,
 
     private static final String ADD_JSDOC = ""
             + "/**\n"
-            + "* Appends the specified component to the end of this container.\n"
-            + "* @param component the component to add\n"
-            + "*/";
+            + " * Appends the specified component to the end of this container.\n"
+            + " * @param component the component to add\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
     public void add(JComponent aComp) {

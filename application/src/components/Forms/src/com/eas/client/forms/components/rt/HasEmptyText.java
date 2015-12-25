@@ -15,8 +15,8 @@ public interface HasEmptyText {
 
     public static final String EMPTY_TEXT_JSDOC = ""
             + "/**\n"
-            + "* The text to be shown when component's value is absent.\n"
-            + "*/";
+            + " * The text to be shown when component's value is absent.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = EMPTY_TEXT_JSDOC)
     public String getEmptyText();

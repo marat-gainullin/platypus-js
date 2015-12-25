@@ -17,12 +17,13 @@ public class Font extends java.awt.Font implements HasPublished {
 
     protected JSObject published;
 
-    @ScriptFunction(params = {"family", "style", "size"}, jsDoc = "/**\n"
-            + "* Font object, which is used to render text in a visible way.\n"
-            + "* @param family a font family name, e.g. 'SansSerif'\n"
-            + "* @param style a FontStyle object\n"
-            + "* @param size the size of the font\n"
-            + "*/")
+    @ScriptFunction(params = {"family", "style", "size"}, jsDoc = ""
+            + "/**\n"
+            + " * Font object, which is used to render text in a visible way.\n"
+            + " * @param family a font family name, e.g. 'SansSerif'\n"
+            + " * @param style a FontStyle object\n"
+            + " * @param size the size of the font\n"
+            + " */")
     public Font(String aFamily, int aStyle, int aSize) {
         super(aFamily, aStyle, aSize);
     }

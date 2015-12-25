@@ -92,10 +92,16 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
         }
         projectDir = aProjectDir;
         projectProperties = new EditableProperties(false);
+        projectPrivateProperties = new EditableProperties(false);
+        load();
+    }
+    
+    public final void load() throws IOException{
+        projectProperties.clear();
         try (InputStream is = getProjectSettingsFileObject().getInputStream()) {
             projectProperties.load(is);
         }
-        projectPrivateProperties = new EditableProperties(false);
+        projectPrivateProperties.clear();
         try (InputStream is = getProjectPrivateSettingsFileObject().getInputStream()) {
             projectPrivateProperties.load(is);
         }

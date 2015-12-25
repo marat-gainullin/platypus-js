@@ -41,8 +41,8 @@ public class PopupMenu extends JPopupMenu implements HasPublished, HasContainerE
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* An implementation of a popup menu -- a small window that pops up and displays a series of choices.\n"
-            + "*/";
+            + " * An implementation of a popup menu -- a small window that pops up and displays a series of choices.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
     public PopupMenu() {
@@ -288,9 +288,9 @@ public class PopupMenu extends JPopupMenu implements HasPublished, HasContainerE
 
     private static final String ADD_JSDOC = ""
             + "/**\n"
-            + "* Adds the item to the menu.\n"
-            + "* @param menu the menu component to add.\n"
-            + "*/";
+            + " * Adds the item to the menu.\n"
+            + " * @param menu the menu component to add.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"menu"})
     public void add(JComponent aMenu) {

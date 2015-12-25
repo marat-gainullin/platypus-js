@@ -48,9 +48,9 @@ public class SplitPane extends JSplitPane implements HasPublished, HasContainerE
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* <code>SplitPane</code> is used to divide two (and only two) components. By default uses horisontal orientation.\n"
-            + "* @param orientation <code>Orientation.HORIZONTAL</code> or <code>Orientation.VERTICAL</code> (optional).\n"
-            + "*/";
+            + " * <code>SplitPane</code> is used to divide two (and only two) components. By default uses horisontal orientation.\n"
+            + " * @param orientation <code>Orientation.HORIZONTAL</code> or <code>Orientation.VERTICAL</code> (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"orientation"})
     public SplitPane(int aOrientation) {
@@ -311,19 +311,23 @@ public class SplitPane extends JSplitPane implements HasPublished, HasContainerE
     @ScriptFunction
     @Override
     public void setOrientation(int aOrientation) {
-        if (aOrientation == Orientation.HORIZONTAL) {
-            super.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
-        } else if (aOrientation == Orientation.VERTICAL) {
-            super.setOrientation(JSplitPane.VERTICAL_SPLIT);
-        } else {
-            super.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
+        switch (aOrientation) {
+            case Orientation.HORIZONTAL:
+                super.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
+                break;
+            case Orientation.VERTICAL:
+                super.setOrientation(JSplitPane.VERTICAL_SPLIT);
+                break;
+            default:
+                super.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
+                break;
         }
     }
 
     private static final String DIVIDER_LOCATION_JSDOC = ""
             + "/**\n"
-            + "* The split pane divider's location in pixels.\n"
-            + "*/";
+            + " * The split pane divider's location in pixels.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = DIVIDER_LOCATION_JSDOC)
     @Designable(category = "split")
@@ -340,8 +344,8 @@ public class SplitPane extends JSplitPane implements HasPublished, HasContainerE
 
     private static final String ONE_TOUCH_EXPANDABLE_JSDOC = ""
             + "/**\n"
-            + "* <code>true</code> if the pane is one touch expandable.\n"
-            + "*/";
+            + " * <code>true</code> if the pane is one touch expandable.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ONE_TOUCH_EXPANDABLE_JSDOC)
     @Designable(category = "split")
@@ -358,8 +362,8 @@ public class SplitPane extends JSplitPane implements HasPublished, HasContainerE
 
     private static final String FIRST_COMPONENT_JSDOC = ""
             + "/**\n"
-            + "* The first component of the container.\n"
-            + "*/";
+            + " * The first component of the container.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = FIRST_COMPONENT_JSDOC)
     @Undesignable
@@ -376,8 +380,8 @@ public class SplitPane extends JSplitPane implements HasPublished, HasContainerE
 
     private static final String SECOND_COMPONENT_JSDOC = ""
             + "/**\n"
-            + "* The second component of the container.\n"
-            + "*/";
+            + " * The second component of the container.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = SECOND_COMPONENT_JSDOC)
     @Undesignable
@@ -408,9 +412,9 @@ public class SplitPane extends JSplitPane implements HasPublished, HasContainerE
 
     private static final String ADD_JSDOC = ""
             + "/**\n"
-            + "* Appends the specified component to the end of this container.\n"
-            + "* @param component the component to add.\n"
-            + "*/";
+            + " * Appends the specified component to the end of this container.\n"
+            + " * @param component the component to add.\n"
+            + " */";
 
     @ScriptFunction(name = "add", jsDoc = ADD_JSDOC, params = {"component"})
     public void jsAdd(JComponent aComponent) {

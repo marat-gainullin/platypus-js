@@ -48,11 +48,11 @@ public class RadioButton extends VRadioButton implements HasOnValueChange, HasJs
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* Radio button component.\n"
-            + "* @param text Component's text (optional)\n"
-            + "* @param selected <code>true</code> if component is selected (optional)\n"
-            + "* @param actionPerformed On action performed function (optional)\n"
-            + "*/";
+            + " * Radio button component.\n"
+            + " * @param text Component's text (optional)\n"
+            + " * @param selected <code>true</code> if component is selected (optional)\n"
+            + " * @param actionPerformed On action performed function (optional)\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected", "actionPerformed"})
     public RadioButton(String aText, boolean aSelected, JSObject aActionPerformedHandler) {

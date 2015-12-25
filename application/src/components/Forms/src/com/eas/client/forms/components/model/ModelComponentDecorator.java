@@ -862,8 +862,8 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
 
     private static final String REDRAW_JSDOC = ""
             + "/**\n"
-            + "* Redraw the component.\n"
-            + "*/";
+            + " * Redraw the component.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = REDRAW_JSDOC)
     public void redraw() {

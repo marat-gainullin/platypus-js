@@ -42,9 +42,10 @@ define(['boxing'], function(B) {
 
     /**
      * Saves the report at a specified location.
+     * @param aFileName Name of a file, the generated report should be save in.
      * @method save
      * @memberOf Report
-     * @param aFileName Name of a file, the generated report should be save in. */
+     */
     Report.prototype.save = function(aFileName) {
         var delegate = this.unwrap();
         var value = delegate.save(B.boxAsJava(aFileName));

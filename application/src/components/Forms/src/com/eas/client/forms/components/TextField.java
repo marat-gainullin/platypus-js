@@ -44,9 +44,9 @@ public class TextField extends VTextField implements HasOnValueChange, HasJsValu
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* Text field component. \n"
-            + "* @param text the initial text for the component (optional)\n"
-            + "*/";
+            + " * Text field component. \n"
+            + " * @param text the initial text for the component (optional)\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
     public TextField(String aText) {

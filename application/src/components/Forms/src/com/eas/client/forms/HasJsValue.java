@@ -7,14 +7,14 @@ package com.eas.client.forms;
 
 /**
  *
- * @author Марат
+ * @author mg
  */
 public interface HasJsValue {
 
     public static final String JS_VALUE_JSDOC = ""
             + "/**\n"
-            + "* Widget's value.\n"
-            + "*/";
+            + " * Widget's value.\n"
+            + " */";
 
     public Object getJsValue();
 

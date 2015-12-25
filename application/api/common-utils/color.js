@@ -4,7 +4,8 @@ define(['boxing'], function(B) {
     var className = "com.eas.gui.ScriptColor";
     var javaClass = Java.type(className);
     /**
-     * The <code>Color</code> class is used to encapsulate colors in the default RGB color space.* @param red Red compontent (optional)
+     * The <code>Color</code> class is used to encapsulate colors in the default RGB color space.
+     * @param red Red compontent (optional)
      * @param green Green compontent (optional)
      * @param blue Blue compontent (optional)
      * @param alpha Alpha compontent (optional)
@@ -29,6 +30,7 @@ define(['boxing'], function(B) {
         if(Color.superclass)
             Color.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        this.WHITE = {};
         Object.defineProperty(this, "WHITE", {
             get: function() {
                 var value = delegate.WHITE;
@@ -36,6 +38,7 @@ define(['boxing'], function(B) {
             }
         });
 
+        this.GRAY = {};
         Object.defineProperty(this, "GRAY", {
             get: function() {
                 var value = delegate.GRAY;
@@ -43,6 +46,7 @@ define(['boxing'], function(B) {
             }
         });
 
+        this.BLUE = {};
         Object.defineProperty(this, "BLUE", {
             get: function() {
                 var value = delegate.BLUE;
@@ -50,6 +54,7 @@ define(['boxing'], function(B) {
             }
         });
 
+        this.GREEN = {};
         Object.defineProperty(this, "GREEN", {
             get: function() {
                 var value = delegate.GREEN;
@@ -57,6 +62,7 @@ define(['boxing'], function(B) {
             }
         });
 
+        this.RED = {};
         Object.defineProperty(this, "RED", {
             get: function() {
                 var value = delegate.RED;
@@ -64,6 +70,7 @@ define(['boxing'], function(B) {
             }
         });
 
+        this.PINK = {};
         Object.defineProperty(this, "PINK", {
             get: function() {
                 var value = delegate.PINK;
@@ -71,6 +78,7 @@ define(['boxing'], function(B) {
             }
         });
 
+        this.LIGHT_GRAY = {};
         Object.defineProperty(this, "LIGHT_GRAY", {
             get: function() {
                 var value = delegate.LIGHT_GRAY;
@@ -78,13 +86,7 @@ define(['boxing'], function(B) {
             }
         });
 
-        Object.defineProperty(this, "BLACK", {
-            get: function() {
-                var value = delegate.BLACK;
-                return B.boxAsJs(value);
-            }
-        });
-
+        this.MAGENTA = {};
         Object.defineProperty(this, "MAGENTA", {
             get: function() {
                 var value = delegate.MAGENTA;
@@ -92,6 +94,15 @@ define(['boxing'], function(B) {
             }
         });
 
+        this.BLACK = {};
+        Object.defineProperty(this, "BLACK", {
+            get: function() {
+                var value = delegate.BLACK;
+                return B.boxAsJs(value);
+            }
+        });
+
+        this.YELLOW = {};
         Object.defineProperty(this, "YELLOW", {
             get: function() {
                 var value = delegate.YELLOW;
@@ -99,13 +110,7 @@ define(['boxing'], function(B) {
             }
         });
 
-        Object.defineProperty(this, "CYAN", {
-            get: function() {
-                var value = delegate.CYAN;
-                return B.boxAsJs(value);
-            }
-        });
-
+        this.DARK_GRAY = {};
         Object.defineProperty(this, "DARK_GRAY", {
             get: function() {
                 var value = delegate.DARK_GRAY;
@@ -113,6 +118,15 @@ define(['boxing'], function(B) {
             }
         });
 
+        this.CYAN = {};
+        Object.defineProperty(this, "CYAN", {
+            get: function() {
+                var value = delegate.CYAN;
+                return B.boxAsJs(value);
+            }
+        });
+
+        this.ORANGE = {};
         Object.defineProperty(this, "ORANGE", {
             get: function() {
                 var value = delegate.ORANGE;

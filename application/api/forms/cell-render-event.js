@@ -22,6 +22,10 @@ define(['boxing'], function(B) {
         if(CellRenderEvent.superclass)
             CellRenderEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * The cell's column.
+         */
+        this.column = {};
         Object.defineProperty(this, "column", {
             get: function() {
                 var value = delegate.column;
@@ -29,6 +33,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The source object of the event.
+         */
+        this.source = {};
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
@@ -36,6 +44,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The "abstract" cell.
+         */
+        this.cell = {};
         Object.defineProperty(this, "cell", {
             get: function() {
                 var value = delegate.cell;
@@ -43,6 +55,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The cell's object.
+         */
+        this.object = {};
         Object.defineProperty(this, "object", {
             get: function() {
                 var value = delegate.object;

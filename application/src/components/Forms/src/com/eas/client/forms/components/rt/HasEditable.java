@@ -15,8 +15,8 @@ public interface HasEditable {
     
     public static final String EDITABLE_JSDOC = ""
             + "/**\n"
-            + "* Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.\n"
-            + "*/";
+            + " * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
     public boolean getEditable();

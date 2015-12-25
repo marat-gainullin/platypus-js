@@ -105,11 +105,12 @@ public class Field implements HasPublished {
         assignFrom(aSourceField);
     }
 
-    private static final String ORIGINAL_NAME_JS_DOC = "/**\n"
-            + "* The original name of the field.\n"
-            + "* In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique,\n"
-            + "* but be able to generate right update sql clauses for multiple tables.\n"
-            + "*/";
+    private static final String ORIGINAL_NAME_JS_DOC = ""
+            + "/**\n"
+            + " * The original name of the field.\n"
+            + " * In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique,\n"
+            + " * but be able to generate right update sql clauses for multiple tables.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ORIGINAL_NAME_JS_DOC)
     public String getOriginalName() {
@@ -123,9 +124,10 @@ public class Field implements HasPublished {
         changeSupport.firePropertyChange(ORIGINAL_NAME_PROPERTY, oldValue, originalName);
     }
 
-    private static final String TABLE_NAME_JS_DOC = "/**\n"
-            + "* This field table's name.\n"
-            + "*/";
+    private static final String TABLE_NAME_JS_DOC = ""
+            + "/**\n"
+            + " * This field table's name.\n"
+            + " */";
 
     /**
      * Returns the field's table name.
@@ -153,9 +155,10 @@ public class Field implements HasPublished {
         return changeSupport;
     }
 
-    private static final String FK_JS_DOC = "/**\n"
-            + "* Indicates that this field is a foreign key to another table or it is a self-reference key.\n"
-            + "*/";
+    private static final String FK_JS_DOC = ""
+            + "/**\n"
+            + " * Indicates that this field is a foreign key to another table or it is a self-reference key.\n"
+            + " */";
 
     /**
      * Returns if this field is foreign key to another table or it is a
@@ -169,9 +172,10 @@ public class Field implements HasPublished {
         return fk != null;
     }
 
-    private static final String PK_JS_DOC = "/**\n"
-            + "* Determines that this field is a primary key.\n"
-            + "*/";
+    private static final String PK_JS_DOC = ""
+            + "/**\n"
+            + " * Determines that this field is a primary key.\n"
+            + " */";
 
     /**
      * Returns if this field is primary key.
@@ -218,9 +222,10 @@ public class Field implements HasPublished {
         changeSupport.firePropertyChange(FK_PROPERTY, oldValue, aValue);
     }
 
-    private static final String READOLNY_JS_DOC = "/**\n"
-            + "* Determines if this field is readonly.\n"
-            + "*/";
+    private static final String READOLNY_JS_DOC = ""
+            + "/**\n"
+            + " * Determines if this field is readonly.\n"
+            + " */";
 
     /**
      * Returns if this field is readonly.
@@ -270,9 +275,10 @@ public class Field implements HasPublished {
         }
         return false;
     }
-    private static final String NAME_JS_DOC = "/**\n"
-            + "* The name of the field.\n"
-            + "*/";
+    private static final String NAME_JS_DOC = ""
+            + "/**\n"
+            + " * The name of the field.\n"
+            + " */";
 
     /**
      * Returns the name of the field.
@@ -296,9 +302,10 @@ public class Field implements HasPublished {
         changeSupport.firePropertyChange(NAME_PROPERTY, oldValue, aValue);
     }
 
-    private static final String DESCRIPTION_JS_DOC = "/**\n"
-            + "* The description of the field.\n"
-            + "*/";
+    private static final String DESCRIPTION_JS_DOC = ""
+            + "/**\n"
+            + " * The description of the field.\n"
+            + " */";
 
     /**
      * Returns description of the field.
@@ -322,9 +329,10 @@ public class Field implements HasPublished {
         changeSupport.firePropertyChange(DESCRIPTION_PROPERTY, oldValue, aValue);
     }
 
-    private static final String TYPE_INFO_JS_DOC = "/**\n"
-            + "* The field's type information.\n"
-            + "*/";
+    private static final String TYPE_INFO_JS_DOC = ""
+            + "/**\n"
+            + " * The field's type information.\n"
+            + " */";
 
     /**
      * Returns the field's type information
@@ -375,9 +383,10 @@ public class Field implements HasPublished {
         return value;
     }
 
-    private static final String NULLABLE_JS_DOC = "/**\n"
-            + "* Determines if field is nullable.\n"
-            + "*/";
+    private static final String NULLABLE_JS_DOC = ""
+            + "/**\n"
+            + " * Determines if field is nullable.\n"
+            + " */";
 
     /**
      * Returns whether this field is nullable.

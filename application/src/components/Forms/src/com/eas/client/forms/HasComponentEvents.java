@@ -22,8 +22,8 @@ public interface HasComponentEvents {
 
     public static final String ON_MOUSE_CLICKED_JSDOC = ""
             + "/**\n"
-            + "* Mouse clicked event handler function.\n"
-            + "*/";
+            + " * Mouse clicked event handler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_MOUSE_CLICKED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
@@ -33,8 +33,8 @@ public interface HasComponentEvents {
     public void setOnMouseClicked(JSObject aValue);
     public static final String ON_MOUSE_DRAGGED_JSDOC = ""
             + "/**\n"
-            + "* Mouse dragged event handler function.\n"
-            + "*/";
+            + " * Mouse dragged event handler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_MOUSE_DRAGGED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
@@ -45,8 +45,8 @@ public interface HasComponentEvents {
 
     public static final String ON_MOUSE_ENTERED_JSDOC = ""
             + "/**\n"
-            + "* Mouse entered over the component event handler function.\n"
-            + "*/";
+            + " * Mouse entered over the component event handler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_MOUSE_ENTERED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
@@ -56,8 +56,8 @@ public interface HasComponentEvents {
     public void setOnMouseEntered(JSObject aValue);
     public static final String ON_MOUSE_EXITED_JSDOC = ""
             + "/**\n"
-            + "* Mouse exited over the component event handler function.\n"
-            + "*/";
+            + " * Mouse exited over the component event handler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_MOUSE_EXITED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
@@ -68,8 +68,8 @@ public interface HasComponentEvents {
 
     public static final String ON_MOUSE_MOVED_JSDOC = ""
             + "/**\n"
-            + "* Mouse moved event handler function.\n"
-            + "*/";
+            + " * Mouse moved event handler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_MOUSE_MOVED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
@@ -80,8 +80,8 @@ public interface HasComponentEvents {
 
     public static final String ON_MOUSE_PRESSED_JSDOC = ""
             + "/**\n"
-            + "* Mouse pressed event handler function.\n"
-            + "*/";
+            + " * Mouse pressed event handler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_MOUSE_PRESSED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
@@ -92,8 +92,8 @@ public interface HasComponentEvents {
 
     public static final String ON_MOUSE_RELEASED_JSDOC = ""
             + "/**\n"
-            + "* Mouse released event handler function.\n"
-            + "*/";
+            + " * Mouse released event handler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_MOUSE_RELEASED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
@@ -104,8 +104,8 @@ public interface HasComponentEvents {
 
     public static final String ON_MOUSE_WHEEL_MOVED_JSDOC = ""
             + "/**\n"
-            + "* Mouse wheel moved event handler function.\n"
-            + "*/";
+            + " * Mouse wheel moved event handler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_MOUSE_WHEEL_MOVED_JSDOC)
     @EventMethod(eventClass = MouseEvent.class)
@@ -116,8 +116,8 @@ public interface HasComponentEvents {
 
     public static final String ON_ACTION_PERFORMED_JSDOC = ""
             + "/**\n"
-            + "* Main action performed event handler function.\n"
-            + "*/";
+            + " * Main action performed event handler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_ACTION_PERFORMED_JSDOC)
     @EventMethod(eventClass = ActionEvent.class)
@@ -128,8 +128,8 @@ public interface HasComponentEvents {
 
     public static final String ON_COMPONENT_HIDDEN_JSDOC = ""
             + "/**\n"
-            + "* Component hidden event handler function.\n"
-            + "*/";
+            + " * Component hidden event handler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_COMPONENT_HIDDEN_JSDOC)
     @EventMethod(eventClass = ComponentEvent.class)
@@ -140,8 +140,8 @@ public interface HasComponentEvents {
 
     public static final String ON_COMPONENT_MOVED_JSDOC = ""
             + "/**\n"
-            + "* Component moved event handler function.\n"
-            + "*/";
+            + " * Component moved event handler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_COMPONENT_MOVED_JSDOC)
     @EventMethod(eventClass = ComponentEvent.class)
@@ -152,8 +152,8 @@ public interface HasComponentEvents {
 
     public static final String ON_COMPONENT_RESIZED_JSDOC = ""
             + "/**\n"
-            + "* Component resized event handler function.\n"
-            + "*/";
+            + " * Component resized event handler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_COMPONENT_RESIZED_JSDOC)
     @EventMethod(eventClass = ComponentEvent.class)
@@ -164,8 +164,8 @@ public interface HasComponentEvents {
 
     public static final String ON_COMPONENT_SHOWN_JSDOC = ""
             + "/**\n"
-            + "* Component shown event handler function.\n"
-            + "*/";
+            + " * Component shown event handler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_COMPONENT_SHOWN_JSDOC)
     @EventMethod(eventClass = ComponentEvent.class)
@@ -176,8 +176,8 @@ public interface HasComponentEvents {
 
     public static final String ON_FOCUS_GAINED_JSDOC = ""
             + "/**\n"
-            + "* Keyboard focus gained by the component event.\n"
-            + "*/";
+            + " * Keyboard focus gained by the component event.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_FOCUS_GAINED_JSDOC)
     @EventMethod(eventClass = FocusEvent.class)
@@ -188,8 +188,8 @@ public interface HasComponentEvents {
 
     public static final String ON_FOCUS_LOST_JSDOC = ""
             + "/**\n"
-            + "* Keyboard focus lost by the component event handler function.\n"
-            + "*/";
+            + " * Keyboard focus lost by the component event handler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_FOCUS_LOST_JSDOC)
     @EventMethod(eventClass = FocusEvent.class)
@@ -200,8 +200,8 @@ public interface HasComponentEvents {
 
     public static final String ON_KEY_PRESSED_JSDOC = ""
             + "/**\n"
-            + "* Key pressed event handler function.\n"
-            + "*/";
+            + " * Key pressed event handler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_KEY_PRESSED_JSDOC)
     @EventMethod(eventClass = KeyEvent.class)
@@ -212,8 +212,8 @@ public interface HasComponentEvents {
 
     public static final String ON_KEY_RELEASED_JSDOC = ""
             + "/**\n"
-            + "* Key released event handler function.\n"
-            + "*/";
+            + " * Key released event handler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_KEY_RELEASED_JSDOC)
     @EventMethod(eventClass = KeyEvent.class)
@@ -224,8 +224,8 @@ public interface HasComponentEvents {
 
     public static final String ON_KEY_TYPED_JSDOC = ""
             + "/**\n"
-            + "* Key typed event handler function.\n"
-            + "*/";
+            + " * Key typed event handler function.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ON_KEY_TYPED_JSDOC)
     @EventMethod(eventClass = KeyEvent.class)

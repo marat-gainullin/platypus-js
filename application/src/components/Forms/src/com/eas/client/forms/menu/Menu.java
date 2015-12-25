@@ -46,11 +46,11 @@ public class Menu extends JMenu implements HasPublished, HasContainerEvents, Has
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* An implementation of a menu -- a popup window containing MenuItems\n"
-            + "* that is displayed when the user selects an item on the MenuBar.\n"
-            + "* In addition to <code>MenuItems</code>, a <code>Menu</code> can also contain <code>MenuSeparators</code>.\n"
-            + "* @param text the text for the menu label (optional).\n"
-            + "*/";
+            + " * An implementation of a menu -- a popup window containing MenuItems\n"
+            + " * that is displayed when the user selects an item on the MenuBar.\n"
+            + " * In addition to <code>MenuItems</code>, a <code>Menu</code> can also contain <code>MenuSeparators</code>.\n"
+            + " * @param text the text for the menu label (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
     public Menu(String aText) {
@@ -317,9 +317,9 @@ public class Menu extends JMenu implements HasPublished, HasContainerEvents, Has
 
     private static final String ADD_JSDOC = ""
             + "/**\n"
-            + "* Adds an item to the menu.\n"
-            + "* @param component the component to add\n"
-            + "*/";
+            + " * Adds an item to the menu.\n"
+            + " * @param component the component to add\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
     public void add(JComponent aComp) {

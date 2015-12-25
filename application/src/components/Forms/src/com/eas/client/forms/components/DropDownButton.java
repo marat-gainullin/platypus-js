@@ -48,12 +48,12 @@ public class DropDownButton extends JDropDownButton implements HasPublished, Has
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* Drop-down button component.\n"
-            + "* @param text the text of the component (optional).\n"
-            + "* @param icon the icon of the component (optional).\n"
-            + "* @param iconTextGap the text gap (optional).\n"
-            + "* @param actionPerformed the function for the action performed handler (optional).\n"
-            + "*/";
+            + " * Drop-down button component.\n"
+            + " * @param text the text of the component (optional).\n"
+            + " * @param icon the icon of the component (optional).\n"
+            + " * @param iconTextGap the text gap (optional).\n"
+            + " * @param actionPerformed the function for the action performed handler (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "iconTextGap", "actionPerformed"})
     public DropDownButton(String aText, Icon aIcon, int aIconTextGap, JSObject aActionPerformedHandler) {

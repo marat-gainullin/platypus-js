@@ -48,12 +48,12 @@ public class Button extends JButton implements HasPublished, HasComponentEvents,
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* Simple button component.\n"
-            + "* @param text the text of the component (optional)\n"
-            + "* @param icon the icon of the component (optional)\n"
-            + "* @param iconTextGap the text gap (optional)\n"
-            + "* @param actionPerformed the function for the action performed handler(optional)\n"
-            + "*/";
+            + " * Simple button component.\n"
+            + " * @param text the text of the component (optional)\n"
+            + " * @param icon the icon of the component (optional)\n"
+            + " * @param iconTextGap the text gap (optional)\n"
+            + " * @param actionPerformed the function for the action performed handler(optional)\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "iconTextGap", "actionPerformed"})
     public Button(String aText, Icon aIcon, int aIconTextGap, JSObject aActionPerformedHandler) {

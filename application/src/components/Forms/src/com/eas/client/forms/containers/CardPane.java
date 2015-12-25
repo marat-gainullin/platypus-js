@@ -66,10 +66,10 @@ public class CardPane extends JPanel implements HasPublished, HasContainerEvents
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* A container with Card Layout. It treats each component in the container as a card. Only one card is visible at a time, and the container acts as a stack of cards.\n"
-            + "* @param hgap the horizontal gap (optional).\n"
-            + "* @param vgap the vertical gap (optional).\n"
-            + "*/";
+            + " * A container with Card Layout. It treats each component in the container as a card. Only one card is visible at a time, and the container acts as a stack of cards.\n"
+            + " * @param hgap the horizontal gap (optional).\n"
+            + " * @param vgap the vertical gap (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"hgap", "vgap"})
     public CardPane(int hgap, int vgap) {
@@ -363,10 +363,10 @@ public class CardPane extends JPanel implements HasPublished, HasContainerEvents
     
     private static final String ADD_JSDOC = ""
             + "/**\n"
-            + "* Appends the component to this container with the specified name.\n"
-            + "* @param component the component to add.\n"
-            + "* @param cardName the name of the card.\n"
-            + "*/";
+            + " * Appends the component to this container with the specified name.\n"
+            + " * @param component the component to add.\n"
+            + " * @param cardName the name of the card.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component", "cardName"})
     public void add(JComponent aComp, String aCardName) {
@@ -421,7 +421,7 @@ public class CardPane extends JPanel implements HasPublished, HasContainerEvents
             + " * Gets child component, associated with the specified card.\n"
             + " * @param cardName Name of the card.\n"
             + " * @return the child component.\n"
-            + "*/", params = {"cardName"})
+            + " */", params = {"cardName"})
     public JComponent child(String aCardName) {
         CardLayout layout = (CardLayout) super.getLayout();
         return (JComponent) layout.getComponent(aCardName);

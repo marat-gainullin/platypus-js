@@ -152,10 +152,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     }
     private static final String EXECUTE_JSDOC = ""
             + "/**\n"
-            + "* Requeries the entity, only if any of its parameters has changed.\n"
-            + "* @param onSuccess The handler function for refresh data on success event (optional).\n"
-            + "* @param onFailure The handler function for refresh data on failure event (optional).\n"
-            + "*/";
+            + " * Requeries the entity, only if any of its parameters has changed.\n"
+            + " * @param onSuccess The handler function for refresh data on success event (optional).\n"
+            + " * @param onFailure The handler function for refresh data on failure event (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"onSuccess", "onFailure"})
     public void execute(final JSObject aOnSuccess, final JSObject aOnFailure) throws Exception {
@@ -191,10 +191,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     }
     private static final String REQUERY_JSDOC = ""
             + "/**\n"
-            + "* Requeries the entity's data. Forses the entity to refresh its data, no matter if its parameters has changed or not.\n"
-            + "* @param onSuccess The callback function for refreshed data on success event (optional).\n"
-            + "* @param onFailure The callback function for refreshed data on failure event (optional).\n"
-            + "*/";
+            + " * Requeries the entity's data. Forses the entity to refresh its data, no matter if its parameters has changed or not.\n"
+            + " * @param onSuccess The callback function for refreshed data on success event (optional).\n"
+            + " * @param onFailure The callback function for refreshed data on failure event (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccess", "onFailure"})
     public void requery(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
@@ -204,12 +204,12 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     private static final String QUERY_JSDOC = ""
             + "/**\n"
-            + "* Queries the entity's data. Data will be fresh copy. A call to query() will be independent from other calls.\n"
-            + "* Subsequent calls will not cancel requests made within previous calls.\n"
-            + "* @param params The params object with parameters' values of query. These values will not be written to entity's parameters.\n"
-            + "* @param onSuccess The callback function for fresh data on success event (optional).\n"
-            + "* @param onFailure The callback function for fresh data on failure event (optional).\n"
-            + "*/";
+            + " * Queries the entity's data. Data will be fresh copy. A call to query() will be independent from other calls.\n"
+            + " * Subsequent calls will not cancel requests made within previous calls.\n"
+            + " * @param params The params object with parameters' values of query. These values will not be written to entity's parameters.\n"
+            + " * @param onSuccess The callback function for fresh data on success event (optional).\n"
+            + " * @param onFailure The callback function for fresh data on failure event (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = QUERY_JSDOC, params = {"params", "onSuccess", "onFailure"})
     public JSObject query(JSObject aJsParams, JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
@@ -373,17 +373,17 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     protected static final String ENQUEUE_UPDATE_JSDOC = ""
             + "/**\n"
-            + "* Adds the updates into the change log as a command.\n"
-            + "*/";
+            + " * Adds the updates into the change log as a command.\n"
+            + " */";
 
     public abstract void enqueueUpdate() throws Exception;
 
     protected static final String EXECUTE_UPDATE_JSDOC = ""
             + "/**\n"
-            + "* Applies the updates into the database and commits the transaction.\n"
-            + "* @param onSuccess Success callback. It has an argument, - updates rows count.\n"
-            + "* @param onFailure Failure callback. It has an argument, - exception occured while applying updates into the database.\n"
-            + "*/";
+            + " * Applies the updates into the database and commits the transaction.\n"
+            + " * @param onSuccess Success callback. It has an argument, - updates rows count.\n"
+            + " * @param onFailure Failure callback. It has an argument, - exception occured while applying updates into the database.\n"
+            + " */";
 
     public abstract int executeUpdate(JSObject onSuccess, JSObject onFailure) throws Exception;
 
