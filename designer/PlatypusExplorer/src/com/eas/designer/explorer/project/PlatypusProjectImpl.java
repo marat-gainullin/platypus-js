@@ -603,8 +603,15 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
     public void forceUpdatePlatypusRuntime() throws IOException {
         if (needUpdatePlatypusRuntime()) {
-            clearPlatypusRuntime();
-            copyPlatypusRuntime();
+            getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Platform_Integrating_Progress_Started", getDisplayName()));
+            try {
+                clearPlatypusRuntime();
+                copyPlatypusRuntime();
+                getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Platform_Integrating_Progress_Finished", getDisplayName()));
+            } catch (IOException ex) {
+                getOutputWindowIO().getErr().println(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Platform_Integrating_Progress_Failed", getDisplayName(), ex.toString()));
+                throw ex;
+            }
         }
     }
 
@@ -617,6 +624,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
                     copyPlatypusRuntime();
                     getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Platform_Integrating_Progress_Finished", getDisplayName()));
                 } catch (IOException ex) {
+                    getOutputWindowIO().getErr().println(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Platform_Integrating_Progress_Failed", getDisplayName(), ex.toString()));
                     Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.SEVERE, null, ex);
                 }
             });

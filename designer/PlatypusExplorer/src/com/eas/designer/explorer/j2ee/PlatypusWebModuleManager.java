@@ -19,8 +19,10 @@ import com.eas.designer.explorer.j2ee.dd.ServletMapping;
 import com.eas.designer.explorer.j2ee.dd.WebApplication;
 import com.eas.designer.explorer.j2ee.dd.WebResourceCollection;
 import com.eas.designer.application.project.ClientType;
+import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.project.PlatypusProjectSettings;
 import com.eas.designer.explorer.j2ee.dd.WelcomeFile;
+import com.eas.designer.explorer.j2ee.tomcat.TomcatWebAppManager;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.server.httpservlet.PlatypusServerConfig;
 import com.eas.server.httpservlet.PlatypusHttpServlet;
@@ -72,29 +74,42 @@ public class PlatypusWebModuleManager {
     public static final int PLATYPUS_SERVLET_LOAD_ON_STARTUP_ORDER = 1;
     protected final PlatypusProjectImpl project;
     protected final FileObject projectDir;
-    protected FileObject webContentDir;
     protected FileObject webInfDir;
     protected FileObject metaInfDir;
     protected FileObject publicDir;
 
     public PlatypusWebModuleManager(PlatypusProjectImpl aProject) {
+        super();
         project = aProject;
         projectDir = aProject.getProjectDirectory();
+        webInfDir = projectDir.getFileObject(PlatypusProject.WEB_INF_DIRECTORY);
     }
 
-    public void undeploy() throws Deployment.DeploymentException {
+    public void undeploy() throws Exception {
         PlatypusWebModule webModule = project.getLookup().lookup(PlatypusWebModule.class);
         assert webModule != null : "J2eeModuleProvider instance should be in the project's lookup.";
-        webModule.forceServerChanged();// Crazy NetBeans architecture of "Deployment" pushs us to do this dirty hack :(
-        Deployment.getDefault().undeploy(webModule, false, (String message) -> {
-            if (message != null) {
-                if (message.contains("FAIL")) {// Crazy NetBeans' Tomcat manager module architecture push us to do this dirty hack :(
-                    project.getOutputWindowIO().getErr().println(message);
-                } else {
-                    project.getOutputWindowIO().getOut().println(message);
+
+        // Crazy NetBeans architecture of "Deployment" pushs us to do this dirty hack :(
+        FileObject contextXml = metaInfDir.getFileObject(TomcatWebAppManager.CONTEXT_FILE_NAME);
+        try {
+            webModule.forceServerChanged();
+            Deployment.getDefault().undeploy(webModule, false, (String message) -> {
+                if (message != null) {
+                    if (message.contains("FAIL")) {// Crazy NetBeans' Tomcat manager module architecture push us to do this dirty hack :(
+                        project.getOutputWindowIO().getErr().println(message);
+                    } else {
+                        project.getOutputWindowIO().getOut().println(message);
+                    }
+                }
+            });
+        } finally {
+            if (contextXml == null) {
+                FileObject recreatedContextXml = metaInfDir.getFileObject(TomcatWebAppManager.CONTEXT_FILE_NAME);
+                if (recreatedContextXml != null) {
+                    recreatedContextXml.delete();
                 }
             }
-        });
+        }
     }
 
     /**
@@ -108,32 +123,35 @@ public class PlatypusWebModuleManager {
         String webAppRunUrl = null;
         assert webModule != null : "J2eeModuleProvider instance should be in the project's lookup.";
         try {
+            metaInfDir = createFolderIfNotExists(projectDir, PlatypusWebModule.META_INF_DIRECTORY);
+            publicDir = createFolderIfNotExists(projectDir, PlatypusWebModule.PUBLIC_DIRECTORY);
             prepareWebApplication();
-            if (webModule.getServerID() == null || webModule.getServerID().isEmpty()) {
+            if (webModule.getServerID() != null && !webModule.getServerID().isEmpty()) {
+                setupWebApplication(webModule);
+                webModule.forceServerChanged();// Crazy NetBeans architecture of "Deployment" pushs us to do this dirty hack :(
+                webAppRunUrl = Deployment.getDefault().deploy(webModule,
+                        debug ? Deployment.Mode.DEBUG : Deployment.Mode.RUN,
+                        webModule.getUrl(),
+                        ClientType.PLATYPUS_CLIENT.equals(project.getSettings().getRunClientType()) ? "" : START_PAGE_FILE_NAME,
+                        true,
+                        (String message) -> {
+                            if (message != null) {
+                                if (message.contains("FAIL")) {
+                                    project.getOutputWindowIO().getErr().println(message);
+                                } else {
+                                    project.getOutputWindowIO().getOut().println(message);
+                                }
+                            }
+                        }, null);
+                String deployResultMessage = NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_Web_App_Deployed");//NOI18N
+                Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, deployResultMessage);
+                project.getOutputWindowIO().getOut().println(deployResultMessage);
+            } else {
                 project.getOutputWindowIO().getErr().println(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_App_Server_Not_Set"));//NOI18N
                 return null;
             }
-            setupWebApplication(webModule);
-            webModule.forceServerChanged();// Crazy NetBeans architecture of "Deployment" pushs us to do this dirty hack :(
-            webAppRunUrl = Deployment.getDefault().deploy(webModule,
-                    debug ? Deployment.Mode.DEBUG : Deployment.Mode.RUN,
-                    webModule.getUrl(),
-                    ClientType.PLATYPUS_CLIENT.equals(project.getSettings().getRunClientType()) ? "" : START_PAGE_FILE_NAME,
-                    true,
-                    (String message) -> {
-                        if (message != null) {
-                            if (message.contains("FAIL")) {
-                                project.getOutputWindowIO().getErr().println(message);
-                            } else {
-                                project.getOutputWindowIO().getOut().println(message);
-                            }
-                        }
-                    }, null);
-            String deployResultMessage = NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_Web_App_Deployed");//NOI18N
-            Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, deployResultMessage);
-            project.getOutputWindowIO().getOut().println(deployResultMessage);
         } catch (Exception ex) {
-            project.getOutputWindowIO().getErr().println(ex.getMessage());
+            project.getOutputWindowIO().getErr().println(ex.toString());
             ErrorManager.getDefault().notify(ex);
         }
         return webAppRunUrl;
@@ -148,8 +166,6 @@ public class PlatypusWebModuleManager {
         undeploy();
         project.forceUpdatePlatypusRuntime();
         project.getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_Preparing_Web_App"));//NOI18N
-        metaInfDir = createFolderIfNotExists(projectDir, PlatypusWebModule.META_INF_DIRECTORY);
-        publicDir = createFolderIfNotExists(projectDir, PlatypusWebModule.PUBLIC_DIRECTORY);
         prepareResources();
     }
 
@@ -181,16 +197,17 @@ public class PlatypusWebModuleManager {
     /**
      * Sets up an web application.
      *
-     * @param aJmp Web Module
+     * @param aModuleProvider Web Module
+     * @param aContextXml
      * @throws java.lang.Exception
      */
-    protected void setupWebApplication(J2eeModuleProvider aJmp) throws Exception {
-        WebAppManager webAppConfigurator = WebAppManagerFactory.getInstance().createWebAppManager(project, aJmp);
-        if (webAppConfigurator != null) {
+    protected void setupWebApplication(J2eeModuleProvider aModuleProvider) throws Exception {
+        if (TomcatWebAppManager.TOMCAT_SERVER_ID.equals(aModuleProvider.getServerID())) {
+            TomcatWebAppManager webAppConfigurator = new TomcatWebAppManager(project, aModuleProvider.getServerInstanceID());
             //webAppConfigurator.deployJdbcDrivers(); // since jdbc drivers are in bundled version of tomcat there is no need to deploy them right now
             webAppConfigurator.configure();
         } else {
-            String errorMessage = String.format(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_Web_App_Config_Not_Supported"), aJmp.getServerID());//NOI18N
+            String errorMessage = String.format(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_Web_App_Config_Not_Supported"), aModuleProvider.getServerID());//NOI18N
             Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.WARNING, errorMessage);
             project.getOutputWindowIO().getErr().println(errorMessage);
         }
@@ -198,19 +215,21 @@ public class PlatypusWebModuleManager {
     }
 
     private void configureDeploymentDescriptor() throws Exception {
-        WebApplication wa = new WebApplication();
-        configureParams(wa);
-        wa.addAppListener(new AppListener(PlatypusSessionsSynchronizer.class.getName()));
-        configureServlet(wa);
-        configureDatasources(wa);
-        if (project.getSettings().isSecurityRealmEnabled()) {
-            configureSecurity(wa);
-        }
         FileObject webXml = webInfDir.getFileObject(WEB_XML_FILE_NAME);
-        if (webXml == null) {
-            webXml = webInfDir.createData(WEB_XML_FILE_NAME);
+        if (webXml == null || project.getSettings().isAutoApplyWebSettings()) {
+            WebApplication wa = new WebApplication();
+            configureParams(wa);
+            wa.addAppListener(new AppListener(PlatypusSessionsSynchronizer.class.getName()));
+            configureServlet(wa);
+            configureDatasources(wa);
+            if (project.getSettings().isSecurityRealmEnabled()) {
+                configureSecurity(wa);
+            }
+            if (webXml == null) {
+                webXml = webInfDir.createData(WEB_XML_FILE_NAME);
+            }
+            FileUtils.writeString(FileUtil.toFile(webXml), XmlDom2String.transform(wa.toDocument()), PlatypusUtils.COMMON_ENCODING_NAME);
         }
-        FileUtils.writeString(FileUtil.toFile(webXml), XmlDom2String.transform(wa.toDocument()), PlatypusUtils.COMMON_ENCODING_NAME);
     }
 
     private void configureParams(WebApplication wa) throws Exception {

@@ -46,9 +46,10 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     public static final String NOT_START_SERVER_KEY = "notStartServer"; //NOI18N
     public static final String DEBUG_CLIENT_PORT_KEY = "debugClientPort"; //NOI18N
     public static final String DEBUG_SERVER_PORT_KEY = "debugServerPort"; //NOI18N
-    public static final String CLIENT_LOG_LEVEL = "clientLogLevel"; //NOI18N
-    public static final String SERVER_LOG_LEVEL = "serverLogLevel"; //NOI18N
-    public static final String PLATYPUS_JS_VERSION = "platypus-js-version"; //NOI18N
+    public static final String CLIENT_LOG_LEVEL_KEY = "clientLogLevel"; //NOI18N
+    public static final String SERVER_LOG_LEVEL_KEY = "serverLogLevel"; //NOI18N
+    public static final String PLATYPUS_JS_VERSION_KEY = "platypus-js-version"; //NOI18N
+    public static final String AUTO_APPLY_WEB_SETTINGS_KEY = "auto-apply-web-settings"; //NOI18N
     public static final String J2EE_SERVER_ID_KEY = "j2eeServerId"; //NOI18N
     public static final String SERVER_CONTEXT_KEY = "context";//NOI18N
     public static final String ENABLE_SECURITY_REALM_KEY = "enableSecurityRealm";//NOI18N
@@ -690,7 +691,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
      */
     @Override
     public Level getClientLogLevel() {
-        String logLevel = projectPrivateProperties.get(CLIENT_LOG_LEVEL);
+        String logLevel = projectPrivateProperties.get(CLIENT_LOG_LEVEL_KEY);
         if (logLevel == null || logLevel.isEmpty()) {
             return DEFAULT_LOG_LEVEL;
         }
@@ -710,12 +711,12 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     public void setClientLogLevel(Level aValue) {
         Level oldValue = getClientLogLevel();
         if (aValue != null) {
-            projectPrivateProperties.setProperty(CLIENT_LOG_LEVEL, aValue.getName());
+            projectPrivateProperties.setProperty(CLIENT_LOG_LEVEL_KEY, aValue.getName());
         } else {
-            projectPrivateProperties.remove(CLIENT_LOG_LEVEL);
+            projectPrivateProperties.remove(CLIENT_LOG_LEVEL_KEY);
         }
         projectPrivatePropertiesIsDirty = true;
-        changeSupport.firePropertyChange(CLIENT_LOG_LEVEL, aValue, oldValue);
+        changeSupport.firePropertyChange(CLIENT_LOG_LEVEL_KEY, aValue, oldValue);
     }
 
     /**
@@ -725,7 +726,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
      */
     @Override
     public Level getServerLogLevel() {
-        String logLevel = projectPrivateProperties.get(SERVER_LOG_LEVEL);
+        String logLevel = projectPrivateProperties.get(SERVER_LOG_LEVEL_KEY);
         if (logLevel == null || logLevel.isEmpty()) {
             return DEFAULT_LOG_LEVEL;
         }
@@ -745,26 +746,38 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     public void setServerLogLevel(Level aValue) {
         Level oldValue = getServerLogLevel();
         if (aValue != null) {
-            projectPrivateProperties.setProperty(SERVER_LOG_LEVEL, aValue.getName());
+            projectPrivateProperties.setProperty(SERVER_LOG_LEVEL_KEY, aValue.getName());
         } else {
-            projectPrivateProperties.remove(SERVER_LOG_LEVEL);
+            projectPrivateProperties.remove(SERVER_LOG_LEVEL_KEY);
         }
         projectPrivatePropertiesIsDirty = true;
-        changeSupport.firePropertyChange(SERVER_LOG_LEVEL, aValue, oldValue);
+        changeSupport.firePropertyChange(SERVER_LOG_LEVEL_KEY, aValue, oldValue);
     }
 
     public String getPlatypusJsVersion() {
-        return projectPrivateProperties.getProperty(PLATYPUS_JS_VERSION);
+        return projectPrivateProperties.getProperty(PLATYPUS_JS_VERSION_KEY);
     }
 
     public void setPlatypusJsVersion(String aValue) {
         String oldValue = getPlatypusJsVersion();
         if (aValue != null) {
-            projectPrivateProperties.setProperty(PLATYPUS_JS_VERSION, aValue);
+            projectPrivateProperties.setProperty(PLATYPUS_JS_VERSION_KEY, aValue);
         } else {
-            projectPrivateProperties.remove(PLATYPUS_JS_VERSION);
+            projectPrivateProperties.remove(PLATYPUS_JS_VERSION_KEY);
         }
         projectPrivatePropertiesIsDirty = true;
-        changeSupport.firePropertyChange(PLATYPUS_JS_VERSION, aValue, oldValue);
+        changeSupport.firePropertyChange(PLATYPUS_JS_VERSION_KEY, aValue, oldValue);
+    }
+
+    public void setAutoApplyWebSettings(boolean aValue) {
+        boolean oldValue = isAutoApplyWebSettings();
+        projectProperties.setProperty(AUTO_APPLY_WEB_SETTINGS_KEY, aValue + "");
+        projectPropertiesIsDirty = true;
+        changeSupport.firePropertyChange(AUTO_APPLY_WEB_SETTINGS_KEY, aValue, oldValue);
+    }
+
+    public boolean isAutoApplyWebSettings() {
+        String sValue = projectProperties.getProperty(AUTO_APPLY_WEB_SETTINGS_KEY);
+        return sValue != null && !sValue.isEmpty() ? Boolean.valueOf(sValue) : true;
     }
 }

@@ -12,6 +12,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -53,7 +54,7 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
     }
 
     public void forceServerChanged() {
-        fireServerChange(null, getServerByServerInstanceId(project.getSettings().getJ2eeServerId()));
+        fireServerChange("", getServerByServerInstanceId(project.getSettings().getJ2eeServerId()));
     }
 
     @Override
@@ -146,13 +147,13 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
                 path = name.substring(webInfRelativePath.length());
                 dir = getWebInfDir();
             } else if (name.startsWith(metaInfRelativePath)) {
-                path = name.substring(webInfRelativePath.length());
+                path = name.substring(metaInfRelativePath.length());
                 dir = getMetaInfDir();
             } else {
                 return null;
             }
-            FileObject fo = dir.getFileObject(path);
-            return fo != null ? FileUtil.toFile(fo) : null;
+            File file = dir != null ? Paths.get(dir.toURI()).resolve(path).toFile() : null;
+            return file != null ? file : null;
         } catch (IOException ex) {
             ErrorManager.getDefault().notify(ex);
         }
