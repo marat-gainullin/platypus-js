@@ -4,7 +4,7 @@
  * @module ${appElementName}
  */
 define(['orm', 'forms', 'ui'], function (Orm, Forms, Ui,  ModuleName) {
-    function ${appElementName}() {
+    function module_constructor() {
         var self = this
                 , model = Orm.loadModel(ModuleName)
                 , form = Forms.loadForm(ModuleName, model);
@@ -20,5 +20,5 @@ define(['orm', 'forms', 'ui'], function (Orm, Forms, Ui,  ModuleName) {
         });
 
     }
-    return ${appElementName};
+    return module_constructor;
 });

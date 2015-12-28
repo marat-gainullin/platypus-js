@@ -5,7 +5,7 @@
  * @stateless
  */
 define(['orm', 'logger'], function (Orm, Logger, ModuleName) {
-    function ${appElementName}() {
+    function module_constructor() {
         var self = this, model = Orm.loadModel(ModuleName);
 
         this.schema = [
@@ -78,5 +78,5 @@ define(['orm', 'logger'], function (Orm, Logger, ModuleName) {
             }
         };
     }
-    return ${appElementName};
+    return module_constructor;
 });

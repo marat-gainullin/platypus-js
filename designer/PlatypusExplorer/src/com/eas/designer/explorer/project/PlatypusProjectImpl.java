@@ -843,12 +843,12 @@ public class PlatypusProjectImpl implements PlatypusProject {
         protected void projectOpened() {
             try {
                 datasourceListener = DatabaseConnections.getDefault().addListener(this);
-                sourceCp = ClassPath.getClassPath(getSrcRoot(), PlatypusPathRecognizer.SOURCE_CP);
                 apiCp = ClassPath.getClassPath(getApiRoot(), PlatypusPathRecognizer.API_CP);
-                GlobalPathRegistry.getDefault().register(PlatypusPathRecognizer.SOURCE_CP, new ClassPath[]{sourceCp});
+                sourceCp = ClassPath.getClassPath(getSrcRoot(), PlatypusPathRecognizer.SOURCE_CP);
                 GlobalPathRegistry.getDefault().register(PlatypusPathRecognizer.API_CP, new ClassPath[]{apiCp});
-                GlobalPathRegistry.getDefault().register(ClassPath.SOURCE, new ClassPath[]{sourceCp});
-                Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.INFO, "Project opened");
+                GlobalPathRegistry.getDefault().register(PlatypusPathRecognizer.SOURCE_CP, new ClassPath[]{sourceCp});
+                GlobalPathRegistry.getDefault().register(ClassPath.SOURCE, new ClassPath[]{apiCp, sourceCp});
+                Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.INFO, "Project {0} opened", getDisplayName());
                 settings.load();
                 startConnecting2db(getSettings().getDefaultDataSourceName());
                 updatePlatypusRuntime();
@@ -863,10 +863,10 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 if (datasourceListener != null) {
                     datasourceListener.remove();
                 }
-                GlobalPathRegistry.getDefault().unregister(PlatypusPathRecognizer.SOURCE_CP, new ClassPath[]{sourceCp});
                 GlobalPathRegistry.getDefault().unregister(PlatypusPathRecognizer.API_CP, new ClassPath[]{apiCp});
-                GlobalPathRegistry.getDefault().unregister(ClassPath.SOURCE, new ClassPath[]{sourceCp});
-                Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.INFO, "Project closed");
+                GlobalPathRegistry.getDefault().unregister(PlatypusPathRecognizer.SOURCE_CP, new ClassPath[]{sourceCp});
+                GlobalPathRegistry.getDefault().unregister(ClassPath.SOURCE, new ClassPath[]{apiCp, sourceCp});
+                Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.INFO, "Project {0} closed", getDisplayName());
             } catch (Exception ex) {
                 Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.SEVERE, null, ex);
             }

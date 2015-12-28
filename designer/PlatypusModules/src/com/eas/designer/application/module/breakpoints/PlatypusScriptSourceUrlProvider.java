@@ -7,12 +7,9 @@ package com.eas.designer.application.module.breakpoints;
 
 import com.eas.client.cache.PlatypusFiles;
 import com.sun.jdi.AbsentInformationException;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import org.netbeans.api.debugger.jpda.JPDAClassType;
 import org.netbeans.spi.debugger.ContextProvider;
 import org.netbeans.spi.debugger.jpda.SourcePathProvider;
@@ -24,18 +21,15 @@ import org.openide.filesystems.FileUtil;
  * @author Martin
  */
 @SourcePathProvider.Registration(path = "netbeans-JPDASession")
-public class RelativeUrlProvider extends SourcePathProvider {
+public class PlatypusScriptSourceUrlProvider extends SourcePathProvider {
 
     private static final String[] NO_SOURCE_ROOTS = new String[]{};
 
     private static final String PATH_PREFIX = "jdk/nashorn/internal/scripts/";   // NOI18N
 
     private final ContextProvider contextProvider;
-    private SourcePathProvider sourcePath;
-    private Set<FileObject> rootDirs;
-    private final Object rootDirsLock = new Object();
 
-    public RelativeUrlProvider(ContextProvider aContextProvider) {
+    public PlatypusScriptSourceUrlProvider(ContextProvider aContextProvider) {
         super();
         contextProvider = aContextProvider;
     }
@@ -51,16 +45,18 @@ public class RelativeUrlProvider extends SourcePathProvider {
     }
 
     protected String resolveURL(String relativePath) {
-        synchronized (rootDirsLock) {
-            if (rootDirs == null) {
-                sourcePath = getSourcePathProvider();
-                sourcePath.addPropertyChangeListener(new SourcePathListener());
-                rootDirs = computeModuleRoots();
-            }
-            for (FileObject root : rootDirs) {
-                FileObject fo = root.getFileObject(relativePath.endsWith(PlatypusFiles.JAVASCRIPT_FILE_END) ? relativePath : relativePath + PlatypusFiles.JAVASCRIPT_FILE_END);
-                if (fo != null) {
-                    return fo.toURL().toExternalForm();
+        List<? extends SourcePathProvider> spps = contextProvider.lookup(null, SourcePathProvider.class);
+        for (SourcePathProvider spp : spps) {
+            if (spp != this) {
+                String[] sourceRoots = spp.getSourceRoots();
+                for (String srcRoot : sourceRoots) {
+                    FileObject foRoot = FileUtil.toFileObject(new File(srcRoot));
+                    if (foRoot != null) {
+                        FileObject fo = foRoot.getFileObject(relativePath.endsWith(PlatypusFiles.JAVASCRIPT_FILE_END) ? relativePath : relativePath + PlatypusFiles.JAVASCRIPT_FILE_END);
+                        if (fo != null) {
+                            return fo.toURL().toExternalForm();
+                        }
+                    }
                 }
             }
         }
@@ -109,56 +105,6 @@ public class RelativeUrlProvider extends SourcePathProvider {
 
     @Override
     public void removePropertyChangeListener(PropertyChangeListener l) {
-    }
-
-    private SourcePathProvider getSourcePathProvider() {
-        List<? extends SourcePathProvider> spps = contextProvider.lookup(null, SourcePathProvider.class);
-        for (SourcePathProvider spp : spps) {
-            if (spp != this) {
-                return spp;
-            }
-        }
-        throw new RuntimeException("No SourcePathProvider");
-    }
-
-    private Set<FileObject> computeModuleRoots() {
-        Set<FileObject> dirs = new LinkedHashSet<>();
-        String[] sourceRoots = sourcePath.getSourceRoots();
-        for (String src : sourceRoots) {
-            FileObject fo = getFileObject(src);
-            if (fo != null) {
-                dirs.add(fo);
-            }
-        }
-        return dirs;
-    }
-
-    /**
-     * Returns FileObject for given String.
-     */
-    private static FileObject getFileObject(String file) {
-        File f = new File(file);
-        FileObject fo = FileUtil.toFileObject(FileUtil.normalizeFile(f));
-        if (fo == null && file.contains("!/")) {
-            int index = file.indexOf("!/");
-            f = new File(file.substring(0, index));
-            fo = FileUtil.toFileObject(f);
-        }
-        return fo;
-    }
-
-    private class SourcePathListener implements PropertyChangeListener {
-
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            synchronized (rootDirsLock) {
-                if (rootDirs != null) {
-                    // If initialized already, recompute:
-                    rootDirs = computeModuleRoots();
-                }
-            }
-        }
-
     }
 
 }

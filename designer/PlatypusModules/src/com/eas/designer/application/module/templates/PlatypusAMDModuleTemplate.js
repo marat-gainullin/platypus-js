@@ -4,7 +4,7 @@
  * @module ${appElementName}
  */
 define(['orm'], function (Orm, ModuleName) {
-    function ${appElementName}() {
+    function module_constructor() {
         var self = this, model = Orm.loadModel(ModuleName);
 
         // TODO : place constructor code here
@@ -13,5 +13,5 @@ define(['orm'], function (Orm, ModuleName) {
             // TODO : place application code here
         };
     }
-    return ${appElementName};
+    return module_constructor;
 });
