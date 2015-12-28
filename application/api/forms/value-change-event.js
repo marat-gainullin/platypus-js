@@ -22,7 +22,7 @@ define(['boxing'], function(B) {
         if(ValueChangeEvent.superclass)
             ValueChangeEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        this.newValue = {};
+        this.newValue = new Object();
         Object.defineProperty(this, "newValue", {
             get: function() {
                 var value = delegate.newValue;
@@ -30,7 +30,7 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.oldValue = {};
+        this.oldValue = new Object();
         Object.defineProperty(this, "oldValue", {
             get: function() {
                 var value = delegate.oldValue;
@@ -41,7 +41,7 @@ define(['boxing'], function(B) {
         /**
          * The source object of the event.
          */
-        this.source = {};
+        this.source = new Object();
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;

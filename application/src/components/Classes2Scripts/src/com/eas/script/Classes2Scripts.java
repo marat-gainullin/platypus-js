@@ -486,11 +486,11 @@ public class Classes2Scripts {
                     propValueSample = "0";
                     break;
                 default:
-                    propValueSample = "{}";
+                    propValueSample = "new Object()";
                     break;
             }
         } else {
-            propValueSample = "{}";
+            propValueSample = "new Object()";
         }
         sb.append(commonIndent).append("this.").append(apiPropName).append(" = ").append(propValueSample).append(";").append("\n");
         sb.append(commonIndent).append("Object.defineProperty(").append("this, \"").append(apiPropName).append("\", {\n");

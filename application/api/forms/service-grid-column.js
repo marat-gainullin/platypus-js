@@ -66,7 +66,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        this.foreground = {};
+        this.foreground = new Object();
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;
@@ -121,7 +121,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        this.background = {};
+        this.background = new Object();
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
@@ -140,7 +140,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        this.font = {};
+        this.font = new Object();
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;

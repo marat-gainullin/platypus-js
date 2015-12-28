@@ -22,7 +22,7 @@ define(['boxing'], function(B) {
         if(ItemEvent.superclass)
             ItemEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        this.item = {};
+        this.item = new Object();
         Object.defineProperty(this, "item", {
             get: function() {
                 var value = delegate.item;
@@ -33,7 +33,7 @@ define(['boxing'], function(B) {
         /**
          * The source object of the event.
          */
-        this.source = {};
+        this.source = new Object();
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;

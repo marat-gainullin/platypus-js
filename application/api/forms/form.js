@@ -29,7 +29,7 @@ define(['boxing'], function(B) {
         /**
          * The handler function for the form's <i>before open</i> event.
          */
-        this.onWindowOpened = {};
+        this.onWindowOpened = new Object();
         Object.defineProperty(this, "onWindowOpened", {
             get: function() {
                 var value = delegate.onWindowOpened;
@@ -57,7 +57,7 @@ define(['boxing'], function(B) {
         /**
          * The form's icon.
          */
-        this.icon = {};
+        this.icon = new Object();
         Object.defineProperty(this, "icon", {
             get: function() {
                 var value = delegate.icon;
@@ -96,7 +96,7 @@ define(['boxing'], function(B) {
         /**
          * The handler function for the form's <i>after minimize</i> event.
          */
-        this.onWindowMinimized = {};
+        this.onWindowMinimized = new Object();
         Object.defineProperty(this, "onWindowMinimized", {
             get: function() {
                 var value = delegate.onWindowMinimized;
@@ -124,7 +124,7 @@ define(['boxing'], function(B) {
         /**
          * The handler function for the form's <i>after deactivate</i> event.
          */
-        this.onWindowDeactivated = {};
+        this.onWindowDeactivated = new Object();
         Object.defineProperty(this, "onWindowDeactivated", {
             get: function() {
                 var value = delegate.onWindowDeactivated;
@@ -167,7 +167,7 @@ define(['boxing'], function(B) {
         /**
          * The handler function for the form's <i>after activate</i> event.
          */
-        this.onWindowActivated = {};
+        this.onWindowActivated = new Object();
         Object.defineProperty(this, "onWindowActivated", {
             get: function() {
                 var value = delegate.onWindowActivated;
@@ -206,7 +206,7 @@ define(['boxing'], function(B) {
         /**
          * The handler function for the form's <i>after maximize</i> event.
          */
-        this.onWindowMaximized = {};
+        this.onWindowMaximized = new Object();
         Object.defineProperty(this, "onWindowMaximized", {
             get: function() {
                 var value = delegate.onWindowMaximized;
@@ -234,7 +234,7 @@ define(['boxing'], function(B) {
         /**
          * The handler function for the form's <i>after restore</i> event.
          */
-        this.onWindowRestored = {};
+        this.onWindowRestored = new Object();
         Object.defineProperty(this, "onWindowRestored", {
             get: function() {
                 var value = delegate.onWindowRestored;
@@ -273,7 +273,7 @@ define(['boxing'], function(B) {
         /**
          * The handler function for the form's <i>after close</i> event.
          */
-        this.onWindowClosed = {};
+        this.onWindowClosed = new Object();
         Object.defineProperty(this, "onWindowClosed", {
             get: function() {
                 var value = delegate.onWindowClosed;
@@ -343,7 +343,7 @@ define(['boxing'], function(B) {
         /**
          * The handler function for the form's <i>before close</i> event.
          */
-        this.onWindowClosing = {};
+        this.onWindowClosing = new Object();
         Object.defineProperty(this, "onWindowClosing", {
             get: function() {
                 var value = delegate.onWindowClosing;

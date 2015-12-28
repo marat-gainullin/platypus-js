@@ -36,7 +36,7 @@ define(['boxing'], function(B) {
         /**
          * Value of changed property.
          */
-        this.value = {};
+        this.value = new Object();
         Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.value;

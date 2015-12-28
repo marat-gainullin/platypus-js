@@ -25,7 +25,7 @@ define(['boxing'], function(B) {
         /**
          * The cell's data.
          */
-        this.data = {};
+        this.data = new Object();
         Object.defineProperty(this, "data", {
             get: function() {
                 var value = delegate.data;
@@ -36,7 +36,7 @@ define(['boxing'], function(B) {
         /**
          * The displayed text.
          */
-        this.display = {};
+        this.display = new Object();
         Object.defineProperty(this, "display", {
             get: function() {
                 var value = delegate.display;

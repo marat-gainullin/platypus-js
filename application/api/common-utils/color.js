@@ -30,7 +30,7 @@ define(['boxing'], function(B) {
         if(Color.superclass)
             Color.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        this.WHITE = {};
+        this.WHITE = new Object();
         Object.defineProperty(this, "WHITE", {
             get: function() {
                 var value = delegate.WHITE;
@@ -38,7 +38,7 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.GRAY = {};
+        this.GRAY = new Object();
         Object.defineProperty(this, "GRAY", {
             get: function() {
                 var value = delegate.GRAY;
@@ -46,7 +46,7 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.BLUE = {};
+        this.BLUE = new Object();
         Object.defineProperty(this, "BLUE", {
             get: function() {
                 var value = delegate.BLUE;
@@ -54,7 +54,7 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.GREEN = {};
+        this.GREEN = new Object();
         Object.defineProperty(this, "GREEN", {
             get: function() {
                 var value = delegate.GREEN;
@@ -62,7 +62,7 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.RED = {};
+        this.RED = new Object();
         Object.defineProperty(this, "RED", {
             get: function() {
                 var value = delegate.RED;
@@ -70,7 +70,7 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.PINK = {};
+        this.PINK = new Object();
         Object.defineProperty(this, "PINK", {
             get: function() {
                 var value = delegate.PINK;
@@ -78,7 +78,7 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.LIGHT_GRAY = {};
+        this.LIGHT_GRAY = new Object();
         Object.defineProperty(this, "LIGHT_GRAY", {
             get: function() {
                 var value = delegate.LIGHT_GRAY;
@@ -86,7 +86,7 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.MAGENTA = {};
+        this.MAGENTA = new Object();
         Object.defineProperty(this, "MAGENTA", {
             get: function() {
                 var value = delegate.MAGENTA;
@@ -94,7 +94,7 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.BLACK = {};
+        this.BLACK = new Object();
         Object.defineProperty(this, "BLACK", {
             get: function() {
                 var value = delegate.BLACK;
@@ -102,7 +102,7 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.YELLOW = {};
+        this.YELLOW = new Object();
         Object.defineProperty(this, "YELLOW", {
             get: function() {
                 var value = delegate.YELLOW;
@@ -110,7 +110,7 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.DARK_GRAY = {};
+        this.DARK_GRAY = new Object();
         Object.defineProperty(this, "DARK_GRAY", {
             get: function() {
                 var value = delegate.DARK_GRAY;
@@ -118,7 +118,7 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.CYAN = {};
+        this.CYAN = new Object();
         Object.defineProperty(this, "CYAN", {
             get: function() {
                 var value = delegate.CYAN;
@@ -126,7 +126,7 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.ORANGE = {};
+        this.ORANGE = new Object();
         Object.defineProperty(this, "ORANGE", {
             get: function() {
                 var value = delegate.ORANGE;

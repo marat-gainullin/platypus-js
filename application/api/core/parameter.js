@@ -50,7 +50,7 @@ define(['boxing'], function(B) {
         /**
          * The default value of the parameter.
          */
-        this.defaultValue = {};
+        this.defaultValue = new Object();
         Object.defineProperty(this, "defaultValue", {
             get: function() {
                 var value = delegate.defaultValue;
@@ -136,7 +136,7 @@ define(['boxing'], function(B) {
         /**
          * The value of the parameter.
          */
-        this.value = {};
+        this.value = new Object();
         Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.jsValue;

@@ -25,7 +25,7 @@ define(['boxing'], function(B) {
         /**
          * The source object of the event.
          */
-        this.source = {};
+        this.source = new Object();
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
@@ -36,7 +36,7 @@ define(['boxing'], function(B) {
         /**
          * The child component the operation is performed on.
          */
-        this.child = {};
+        this.child = new Object();
         Object.defineProperty(this, "child", {
             get: function() {
                 var value = delegate.child;

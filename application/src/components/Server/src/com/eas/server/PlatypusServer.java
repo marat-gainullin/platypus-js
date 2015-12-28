@@ -73,7 +73,6 @@ public class PlatypusServer extends PlatypusServerCore {
 
     public void start(Set<String> aResidents, Map<String, String> aAcceptors) throws Exception {
         //instance = this;// Hack, but server is natural singleton and so it is ok.
-        startResidents(aResidents);
         for (InetSocketAddress s : listenAddresses) {
             initializeAndBindAcceptor(s, aAcceptors, executor);
         }

@@ -129,7 +129,6 @@ public class PlatypusHttpServlet extends HttpServlet {
                             selfExecutor.submit(aTask);
                         }
                     });
-                    platypusCore.startResidents(tasksScanner.getResidents());
                     if (platypusConfig.isWatch()) {
                         // TODO: uncomment after watcher refactoring
                         //indexer.watch();

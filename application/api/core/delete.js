@@ -25,7 +25,7 @@ define(['boxing'], function(B) {
         /**
          * Keys values used for identification of deleted data.
          */
-        this.keys = {};
+        this.keys = new Object();
         Object.defineProperty(this, "keys", {
             get: function() {
                 var value = delegate.keys;

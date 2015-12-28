@@ -125,7 +125,7 @@ public class StoredQueryFactory {
         List<StoredFieldMetadata> additionalFieldsMetadata = queryDoc.getAdditionalFieldsMetadata();
         String sqlText = query.getSqlText();
         if (sqlText != null && !sqlText.isEmpty()) {
-            if (query.getFullSqlText() != null && !query.getFullSqlText().isEmpty()) {
+            if (query.getFullSqlText() != null && !query.getFullSqlText().isEmpty() && !query.getFullSqlText().replaceAll("\\s", "").isEmpty()) {
                 sqlText = query.getFullSqlText();
             }
             try {

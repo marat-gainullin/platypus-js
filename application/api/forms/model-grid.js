@@ -22,18 +22,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         if(ModelGrid.superclass)
             ModelGrid.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        this.selected = {};
-        Object.defineProperty(this, "selected", {
-            get: function() {
-                var value = delegate.jsSelected;
-                return value;
-            }
-        });
-
         /**
          * Mouse released event handler function.
          */
-        this.onMouseReleased = {};
+        this.onMouseReleased = new Object();
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -44,7 +36,15 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        this.data = {};
+        this.selected = new Object();
+        Object.defineProperty(this, "selected", {
+            get: function() {
+                var value = delegate.jsSelected;
+                return value;
+            }
+        });
+
+        this.data = new Object();
         Object.defineProperty(this, "data", {
             get: function() {
                 var value = delegate.data;
@@ -55,7 +55,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        this.foreground = {};
+        this.foreground = new Object();
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;
@@ -80,7 +80,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Component moved event handler function.
          */
-        this.onComponentMoved = {};
+        this.onComponentMoved = new Object();
         Object.defineProperty(this, "onComponentMoved", {
             get: function() {
                 var value = delegate.onComponentMoved;
@@ -120,7 +120,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
          * General render event handler.
          * This hanler be called on each cell's rendering in the case when no render handler is provided for the conrete column.
          */
-        this.onRender = {};
+        this.onRender = new Object();
         Object.defineProperty(this, "onRender", {
             get: function() {
                 var value = delegate.onRender;
@@ -134,7 +134,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Parent container of this widget.
          */
-        this.parent = {};
+        this.parent = new Object();
         Object.defineProperty(this, "parent", {
             get: function() {
                 var value = delegate.parentWidget;
@@ -145,7 +145,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Mouse entered over the component event handler function.
          */
-        this.onMouseEntered = {};
+        this.onMouseEntered = new Object();
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -184,7 +184,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Component shown event handler function.
          */
-        this.onComponentShown = {};
+        this.onComponentShown = new Object();
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -198,7 +198,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Native API. Returns low level html element. Applicable only in HTML5 client.
          */
-        this.element = {};
+        this.element = new Object();
         Object.defineProperty(this, "element", {
             get: function() {
                 var value = delegate.element;
@@ -223,7 +223,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Component hidden event handler function.
          */
-        this.onComponentHidden = {};
+        this.onComponentHidden = new Object();
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
                 var value = delegate.onComponentHidden;
@@ -237,7 +237,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Main action performed event handler function.
          */
-        this.onActionPerformed = {};
+        this.onActionPerformed = new Object();
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -251,7 +251,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Key released event handler function.
          */
-        this.onKeyReleased = {};
+        this.onKeyReleased = new Object();
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -279,7 +279,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Key typed event handler function.
          */
-        this.onKeyTyped = {};
+        this.onKeyTyped = new Object();
         Object.defineProperty(this, "onKeyTyped", {
             get: function() {
                 var value = delegate.onKeyTyped;
@@ -293,7 +293,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Mouse wheel moved event handler function.
          */
-        this.onMouseWheelMoved = {};
+        this.onMouseWheelMoved = new Object();
         Object.defineProperty(this, "onMouseWheelMoved", {
             get: function() {
                 var value = delegate.onMouseWheelMoved;
@@ -343,7 +343,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        this.background = {};
+        this.background = new Object();
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
@@ -396,7 +396,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Mouse dragged event handler function.
          */
-        this.onMouseDragged = {};
+        this.onMouseDragged = new Object();
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
@@ -410,7 +410,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Event that is fired when user collapses ModelGrid's row.
          */
-        this.onCollapse = {};
+        this.onCollapse = new Object();
         Object.defineProperty(this, "onCollapse", {
             get: function() {
                 var value = delegate.onCollapse;
@@ -424,7 +424,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Event that is fired when user expands ModelGrid's row.
          */
-        this.onExpand = {};
+        this.onExpand = new Object();
         Object.defineProperty(this, "onExpand", {
             get: function() {
                 var value = delegate.onExpand;
@@ -438,7 +438,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Keyboard focus lost by the component event handler function.
          */
-        this.onFocusLost = {};
+        this.onFocusLost = new Object();
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -446,6 +446,20 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.onFocusLost = aValue;
+            }
+        });
+
+        /**
+         * Mouse pressed event handler function.
+         */
+        this.onMousePressed = new Object();
+        Object.defineProperty(this, "onMousePressed", {
+            get: function() {
+                var value = delegate.onMousePressed;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onMousePressed = aValue;
             }
         });
 
@@ -460,20 +474,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.deletable = B.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * Mouse pressed event handler function.
-         */
-        this.onMousePressed = {};
-        Object.defineProperty(this, "onMousePressed", {
-            get: function() {
-                var value = delegate.onMousePressed;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onMousePressed = aValue;
             }
         });
 
@@ -506,7 +506,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        this.componentPopupMenu = {};
+        this.componentPopupMenu = new Object();
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
                 var value = delegate.componentPopupMenu;
@@ -534,7 +534,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Component resized event handler function.
          */
-        this.onComponentResized = {};
+        this.onComponentResized = new Object();
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -548,7 +548,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Odd rows color.
          */
-        this.oddRowsColor = {};
+        this.oddRowsColor = new Object();
         Object.defineProperty(this, "oddRowsColor", {
             get: function() {
                 var value = delegate.oddRowsColor;
@@ -573,7 +573,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Mouse moved event handler function.
          */
-        this.onMouseMoved = {};
+        this.onMouseMoved = new Object();
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
                 var value = delegate.onMouseMoved;
@@ -615,7 +615,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
          */
-        this.nextFocusableComponent = {};
+        this.nextFocusableComponent = new Object();
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
                 var value = delegate.nextFocusableComponent;
@@ -640,7 +640,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Event that is fired when selection lead changes in this ModelGrid.
          */
-        this.onItemSelected = {};
+        this.onItemSelected = new Object();
         Object.defineProperty(this, "onItemSelected", {
             get: function() {
                 var value = delegate.onItemSelected;
@@ -654,7 +654,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Native API. Returns low level swing component. Applicable only in J2SE swing client.
          */
-        this.component = {};
+        this.component = new Object();
         Object.defineProperty(this, "component", {
             get: function() {
                 var value = delegate.component;
@@ -665,7 +665,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Keyboard focus gained by the component event.
          */
-        this.onFocusGained = {};
+        this.onFocusGained = new Object();
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
                 var value = delegate.onFocusGained;
@@ -673,6 +673,20 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.onFocusGained = aValue;
+            }
+        });
+
+        /**
+         * Mouse clicked event handler function.
+         */
+        this.onMouseClicked = new Object();
+        Object.defineProperty(this, "onMouseClicked", {
+            get: function() {
+                var value = delegate.onMouseClicked;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onMouseClicked = aValue;
             }
         });
 
@@ -691,23 +705,9 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         });
 
         /**
-         * Mouse clicked event handler function.
-         */
-        this.onMouseClicked = {};
-        Object.defineProperty(this, "onMouseClicked", {
-            get: function() {
-                var value = delegate.onMouseClicked;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onMouseClicked = aValue;
-            }
-        });
-
-        /**
          * Mouse exited over the component event handler function.
          */
-        this.onMouseExited = {};
+        this.onMouseExited = new Object();
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
                 var value = delegate.onMouseExited;
@@ -749,7 +749,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * The color of the grid.
          */
-        this.gridColor = {};
+        this.gridColor = new Object();
         Object.defineProperty(this, "gridColor", {
             get: function() {
                 var value = delegate.gridColor;
@@ -774,7 +774,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        this.draggableRows = {};
+        this.draggableRows = new Object();
         Object.defineProperty(this, "draggableRows", {
             get: function() {
                 var value = delegate.draggableRows;
@@ -785,7 +785,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        this.font = {};
+        this.font = new Object();
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
@@ -799,7 +799,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Key pressed event handler function.
          */
-        this.onKeyPressed = {};
+        this.onKeyPressed = new Object();
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -866,63 +866,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     ModelGrid.prototype.elementByModelIndex = function(arg0) {
         var delegate = this.unwrap();
         var value = delegate.elementByModelIndex(B.boxAsJava(arg0));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     *
-     * @method addColumnNode
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.addColumnNode = function(arg0) {
-        var delegate = this.unwrap();
-        var value = delegate.addColumnNode(B.boxAsJava(arg0));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     *
-     * @method columnNodes
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.columnNodes = function() {
-        var delegate = this.unwrap();
-        var value = delegate.columnNodes();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     *
-     * @method removeColumnNode
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.removeColumnNode = function(arg0) {
-        var delegate = this.unwrap();
-        var value = delegate.removeColumnNode(B.boxAsJava(arg0));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     *
-     * @method insertColumnNode
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
-        var delegate = this.unwrap();
-        var value = delegate.insertColumnNode(B.boxAsJava(arg0), B.boxAsJava(arg1));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Makes specified instance visible.
-     * @param instance Entity's instance to make visible.
-     * @param need2select true to select the instance (optional).
-     * @method makeVisible
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.makeVisible = function(instance, need2select) {
-        var delegate = this.unwrap();
-        var value = delegate.makeVisible(B.boxAsJava(instance), B.boxAsJava(need2select));
         return B.boxAsJs(value);
     };
 
@@ -1025,6 +968,63 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     ModelGrid.prototype.try2CancelAnyEditing = function() {
         var delegate = this.unwrap();
         var value = delegate.try2CancelAnyEditing();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     *
+     * @method addColumnNode
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.addColumnNode = function(arg0) {
+        var delegate = this.unwrap();
+        var value = delegate.addColumnNode(B.boxAsJava(arg0));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     *
+     * @method columnNodes
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.columnNodes = function() {
+        var delegate = this.unwrap();
+        var value = delegate.columnNodes();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     *
+     * @method removeColumnNode
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.removeColumnNode = function(arg0) {
+        var delegate = this.unwrap();
+        var value = delegate.removeColumnNode(B.boxAsJava(arg0));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     *
+     * @method insertColumnNode
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
+        var delegate = this.unwrap();
+        var value = delegate.insertColumnNode(B.boxAsJava(arg0), B.boxAsJava(arg1));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Makes specified instance visible.
+     * @param instance Entity's instance to make visible.
+     * @param need2select true to select the instance (optional).
+     * @method makeVisible
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.makeVisible = function(instance, need2select) {
+        var delegate = this.unwrap();
+        var value = delegate.makeVisible(B.boxAsJava(instance), B.boxAsJava(need2select));
         return B.boxAsJs(value);
     };
 

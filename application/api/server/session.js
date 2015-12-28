@@ -25,7 +25,7 @@ define(['boxing'], function(B) {
         /**
          * Contains modules collection of this session.
          */
-        this.modules = {};
+        this.modules = new Object();
         Object.defineProperty(this, "modules", {
             get: function() {
                 var value = delegate.modules;

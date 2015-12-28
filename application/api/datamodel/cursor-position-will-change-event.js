@@ -36,7 +36,7 @@ define(['boxing'], function(B) {
         /**
          * The source object of the event.
          */
-        this.source = {};
+        this.source = new Object();
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;

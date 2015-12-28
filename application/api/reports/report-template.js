@@ -61,7 +61,7 @@ define(['boxing'], function(B) {
         /**
          * Array of name collections, that will fixed.
          */
-        this.fixed = {};
+        this.fixed = new Object();
         Object.defineProperty(this, "fixed", {
             get: function() {
                 var value = delegate.fixed;

@@ -370,64 +370,6 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
         return arguments;
     }
 
-    public void startResidents(Set<String> aRezidents) throws Exception {
-        Session session = sessionManager.getSystemSession();
-        Scripts.Space space = session.getSpace();
-        Scripts.LocalContext context = Scripts.createContext(space);
-        context.setPrincipal(session.getPrincipal());
-        context.setSession(session);
-        context.setRequest(null);
-        context.setResponse(null);
-        Scripts.setContext(context);
-        try {
-            space.process(() -> {
-                aRezidents.stream().forEach((moduleName) -> {
-                    try {
-                        AppElementFiles files = modules.nameToFiles(moduleName);
-                        if (files != null && files.isModule()) {
-                            startResidentModule(moduleName, space);
-                        } else {
-                            Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.WARNING, "Rezident task \"{0}\" is illegal (no module). Skipping it.", moduleName);
-                        }
-                    } catch (Exception ex) {
-                        Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                });
-            });
-        } finally {
-            Scripts.setContext(null);
-        }
-    }
-
-    /**
-     * Starts a server task, initializing it with supplied module annotations.
-     *
-     * @param aModuleName Module identifier, specifying a module for the task
-     * @param aSpace
-     * @return Success status
-     * @throws java.lang.Exception
-     */
-    protected boolean startResidentModule(String aModuleName, Scripts.Space aSpace) throws Exception {
-        ScriptedResource.require(new String[]{aModuleName}, null);
-        Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.INFO, "Starting resident module \"{0}\"", aModuleName);
-        try {
-            JSObject jsConstr = aSpace.lookupInGlobal(aModuleName);
-            Object oModule = jsConstr != null ? jsConstr.newObject(new Object[]{}) : null;
-            JSObject module = oModule instanceof JSObject ? (JSObject) oModule : null;
-            if (module != null) {
-                sessionManager.getSystemSession().registerModule(aModuleName, module);
-                Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.INFO, "Resident module \"{0}\" has been started successfully", aModuleName);
-                return true;
-            } else {
-                Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.WARNING, "Resident module \"{0}\" is illegal (may be bad name). Skipping it.", aModuleName);
-                return false;
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.SEVERE, "Resident module \"{0}\" caused an error: {1}. Skipping it.", new Object[]{aModuleName, ex.getMessage()});
-            return false;
-        }
-    }
-
     @Override
     public String preparationContext() throws Exception {
         Scripts.LocalContext context = Scripts.getContext();

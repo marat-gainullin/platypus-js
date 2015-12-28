@@ -337,10 +337,6 @@
                 <binary-origin>release/modules/ext/jfreechart-1.0.15.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/postgresql-9.4-1206.jdbc42.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/postgresql-9.4-1206.jdbc42.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/gt-referencing-10.3.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/gt-referencing-10.3.jar</binary-origin>
             </class-path-extension>

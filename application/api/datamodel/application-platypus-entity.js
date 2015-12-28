@@ -25,7 +25,7 @@ define(['boxing'], function(B) {
         /**
          * The handler function for the event occured after the entity's data have been requeried.
          */
-        this.onRequeried = {};
+        this.onRequeried = new Object();
         Object.defineProperty(this, "onRequeried", {
             get: function() {
                 var value = delegate.onRequeried;
@@ -39,7 +39,7 @@ define(['boxing'], function(B) {
         /**
          * The constructor funciton for the entity's data array elements.
          */
-        this.elementClass = {};
+        this.elementClass = new Object();
         Object.defineProperty(this, "elementClass", {
             get: function() {
                 var value = delegate.elementClass;

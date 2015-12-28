@@ -25,7 +25,7 @@ define(['boxing'], function(B) {
         /**
          * The inserted element.
          */
-        this.inserted = {};
+        this.inserted = new Object();
         Object.defineProperty(this, "inserted", {
             get: function() {
                 var value = delegate.inserted;
@@ -36,7 +36,7 @@ define(['boxing'], function(B) {
         /**
          * The source object of the event.
          */
-        this.source = {};
+        this.source = new Object();
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
@@ -47,7 +47,7 @@ define(['boxing'], function(B) {
         /**
          * The inserted element.
          */
-        this.object = {};
+        this.object = new Object();
         Object.defineProperty(this, "object", {
             get: function() {
                 var value = delegate.object;

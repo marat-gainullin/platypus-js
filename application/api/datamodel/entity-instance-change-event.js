@@ -25,7 +25,7 @@ define(['boxing'], function(B) {
         /**
          * The new value.
          */
-        this.newValue = {};
+        this.newValue = new Object();
         Object.defineProperty(this, "newValue", {
             get: function() {
                 var value = delegate.newValue;
@@ -47,7 +47,7 @@ define(['boxing'], function(B) {
         /**
          * The old value.
          */
-        this.oldValue = {};
+        this.oldValue = new Object();
         Object.defineProperty(this, "oldValue", {
             get: function() {
                 var value = delegate.oldValue;
@@ -58,7 +58,7 @@ define(['boxing'], function(B) {
         /**
          * The source object of the event.
          */
-        this.source = {};
+        this.source = new Object();
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
@@ -69,7 +69,7 @@ define(['boxing'], function(B) {
         /**
          * The updated element.
          */
-        this.object = {};
+        this.object = new Object();
         Object.defineProperty(this, "object", {
             get: function() {
                 var value = delegate.object;

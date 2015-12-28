@@ -25,7 +25,7 @@ define(['boxing'], function(B) {
         /**
          * Data to be applied within a target datasource.
          */
-        this.data = {};
+        this.data = new Object();
         Object.defineProperty(this, "data", {
             get: function() {
                 var value = delegate.data;
@@ -36,7 +36,7 @@ define(['boxing'], function(B) {
         /**
          * Keys used for indentifying data changes within a target datasource
          */
-        this.keys = {};
+        this.keys = new Object();
         Object.defineProperty(this, "keys", {
             get: function() {
                 var value = delegate.keys;

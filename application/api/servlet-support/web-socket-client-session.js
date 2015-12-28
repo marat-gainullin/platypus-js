@@ -23,7 +23,7 @@ define(['boxing'], function(B) {
         if(WebSocket.superclass)
             WebSocket.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        this.onmessage = {};
+        this.onmessage = new Object();
         Object.defineProperty(this, "onmessage", {
             get: function() {
                 var value = delegate.onmessage;
@@ -34,7 +34,7 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.onerror = {};
+        this.onerror = new Object();
         Object.defineProperty(this, "onerror", {
             get: function() {
                 var value = delegate.onerror;
@@ -45,7 +45,7 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.onopen = {};
+        this.onopen = new Object();
         Object.defineProperty(this, "onopen", {
             get: function() {
                 var value = delegate.onopen;
@@ -64,7 +64,7 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.onclose = {};
+        this.onclose = new Object();
         Object.defineProperty(this, "onclose", {
             get: function() {
                 var value = delegate.onclose;

@@ -4,7 +4,7 @@
  * @module ${appElementName}
  */
 define(['orm', 'forms', 'ui'], function (Orm, Forms, Ui,  ModuleName) {
-    return function () {
+    function ${appElementName}() {
         var self = this
                 , model = Orm.loadModel(ModuleName)
                 , form = Forms.loadForm(ModuleName, model);
@@ -19,5 +19,6 @@ define(['orm', 'forms', 'ui'], function (Orm, Forms, Ui,  ModuleName) {
             // TODO : place your code here
         });
 
-    };
+    }
+    return ${appElementName};
 });

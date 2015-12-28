@@ -5,9 +5,10 @@
  * @module ${appElementName}
  */
 define(['orm'], function (Orm, ModuleName) {
-    return function () {
+    function ${appElementName}() {
         var self = this, model = Orm.loadModel(ModuleName);
 
         // TODO : place your code here
-    };
+    }
+    return ${appElementName};
 });

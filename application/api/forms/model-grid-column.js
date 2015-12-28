@@ -66,7 +66,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        this.foreground = {};
+        this.foreground = new Object();
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;
@@ -102,7 +102,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Returns script handler, used for select a value of the cell.
          */
-        this.onSelect = {};
+        this.onSelect = new Object();
         Object.defineProperty(this, "onSelect", {
             get: function() {
                 var value = delegate.onSelect;
@@ -149,7 +149,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Returns script handler, used for calculate cell's data, display value and style attributes.
          */
-        this.onRender = {};
+        this.onRender = new Object();
         Object.defineProperty(this, "onRender", {
             get: function() {
                 var value = delegate.onRender;
@@ -160,7 +160,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        this.background = {};
+        this.background = new Object();
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
@@ -190,7 +190,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        this.font = {};
+        this.font = new Object();
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
@@ -221,6 +221,17 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     ModelGridColumn.prototype.sort = function() {
         var delegate = this.unwrap();
         var value = delegate.sort();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Clears sort column, works only in HTML5
+     * @method unsort
+     * @memberOf ModelGridColumn
+     */
+    ModelGridColumn.prototype.unsort = function() {
+        var delegate = this.unwrap();
+        var value = delegate.unsort();
         return B.boxAsJs(value);
     };
 
@@ -265,17 +276,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     ModelGridColumn.prototype.insertColumnNode = function(position, node) {
         var delegate = this.unwrap();
         var value = delegate.insertColumnNode(B.boxAsJava(position), B.boxAsJava(node));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Clears sort column, works only in HTML5
-     * @method unsort
-     * @memberOf ModelGridColumn
-     */
-    ModelGridColumn.prototype.unsort = function() {
-        var delegate = this.unwrap();
-        var value = delegate.unsort();
         return B.boxAsJs(value);
     };
 

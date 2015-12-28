@@ -25,7 +25,7 @@ define(['boxing'], function(B) {
         /**
          * Data that will be inserted.
          */
-        this.data = {};
+        this.data = new Object();
         Object.defineProperty(this, "data", {
             get: function() {
                 var value = delegate.data;

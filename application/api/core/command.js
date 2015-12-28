@@ -36,7 +36,7 @@ define(['boxing'], function(B) {
         /**
          * Parameters of command.
          */
-        this.parameters = {};
+        this.parameters = new Object();
         Object.defineProperty(this, "parameters", {
             get: function() {
                 var value = delegate.parameters;
