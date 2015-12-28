@@ -50,6 +50,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     public static final String SERVER_LOG_LEVEL_KEY = "serverLogLevel"; //NOI18N
     public static final String PLATYPUS_JS_VERSION_KEY = "platypus-js-version"; //NOI18N
     public static final String AUTO_APPLY_WEB_SETTINGS_KEY = "auto-apply-web-settings"; //NOI18N
+    public static final String AUTO_UPDATE_PLATYPUS_API_KEY = "auto-update-platypus-api"; //NOI18N
     public static final String J2EE_SERVER_ID_KEY = "j2eeServerId"; //NOI18N
     public static final String SERVER_CONTEXT_KEY = "context";//NOI18N
     public static final String ENABLE_SECURITY_REALM_KEY = "enableSecurityRealm";//NOI18N
@@ -608,7 +609,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
             projectPrivateProperties.remove(CLIENT_TYPE_KEY);
         }
         projectPrivatePropertiesIsDirty = true;
-        changeSupport.firePropertyChange(CLIENT_TYPE_KEY, aValue, oldValue);
+        changeSupport.firePropertyChange(CLIENT_TYPE_KEY, oldValue, aValue);
     }
 
     /**
@@ -636,7 +637,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
             projectPrivateProperties.remove(SERVER_TYPE_KEY);
         }
         projectPrivatePropertiesIsDirty = true;
-        changeSupport.firePropertyChange(SERVER_TYPE_KEY, aValue, oldValue);
+        changeSupport.firePropertyChange(SERVER_TYPE_KEY, oldValue, aValue);
     }
 
     @Override
@@ -716,7 +717,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
             projectPrivateProperties.remove(CLIENT_LOG_LEVEL_KEY);
         }
         projectPrivatePropertiesIsDirty = true;
-        changeSupport.firePropertyChange(CLIENT_LOG_LEVEL_KEY, aValue, oldValue);
+        changeSupport.firePropertyChange(CLIENT_LOG_LEVEL_KEY, oldValue, aValue);
     }
 
     /**
@@ -751,7 +752,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
             projectPrivateProperties.remove(SERVER_LOG_LEVEL_KEY);
         }
         projectPrivatePropertiesIsDirty = true;
-        changeSupport.firePropertyChange(SERVER_LOG_LEVEL_KEY, aValue, oldValue);
+        changeSupport.firePropertyChange(SERVER_LOG_LEVEL_KEY, oldValue, aValue);
     }
 
     public String getPlatypusJsVersion() {
@@ -766,18 +767,30 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
             projectPrivateProperties.remove(PLATYPUS_JS_VERSION_KEY);
         }
         projectPrivatePropertiesIsDirty = true;
-        changeSupport.firePropertyChange(PLATYPUS_JS_VERSION_KEY, aValue, oldValue);
+        changeSupport.firePropertyChange(PLATYPUS_JS_VERSION_KEY, oldValue, aValue);
     }
 
     public void setAutoApplyWebSettings(boolean aValue) {
         boolean oldValue = isAutoApplyWebSettings();
         projectProperties.setProperty(AUTO_APPLY_WEB_SETTINGS_KEY, aValue + "");
         projectPropertiesIsDirty = true;
-        changeSupport.firePropertyChange(AUTO_APPLY_WEB_SETTINGS_KEY, aValue, oldValue);
+        changeSupport.firePropertyChange(AUTO_APPLY_WEB_SETTINGS_KEY, oldValue, aValue);
     }
 
     public boolean isAutoApplyWebSettings() {
         String sValue = projectProperties.getProperty(AUTO_APPLY_WEB_SETTINGS_KEY);
+        return sValue != null && !sValue.isEmpty() ? Boolean.valueOf(sValue) : true;
+    }
+
+    public void setAutoUpdatePlatypusJs(boolean aValue) {        
+        boolean oldValue = isAutoUpdatePlatypusJs();
+        projectPrivateProperties.setProperty(AUTO_UPDATE_PLATYPUS_API_KEY, aValue + "");
+        projectPrivatePropertiesIsDirty = true;
+        changeSupport.firePropertyChange(AUTO_UPDATE_PLATYPUS_API_KEY, oldValue, aValue);
+    }
+
+    public boolean isAutoUpdatePlatypusJs() {
+        String sValue = projectPrivateProperties.getProperty(AUTO_UPDATE_PLATYPUS_API_KEY);
         return sValue != null && !sValue.isEmpty() ? Boolean.valueOf(sValue) : true;
     }
 }

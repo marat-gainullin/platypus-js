@@ -639,12 +639,16 @@ public class PlatypusProjectImpl implements PlatypusProject {
     }
 
     protected boolean needUpdatePlatypusRuntime() throws IOException {
-        try {
-            String projectVersionValue = settings.getPlatypusJsVersion();
-            String platformVersionValue = readPlatypusJsVersion();
-            return (projectVersionValue == null ? platformVersionValue != null : !projectVersionValue.equals(platformVersionValue));
-        } catch (PlatformHomePathException ex) {
-            getOutputWindowIO().getErr().println(ex.getMessage());
+        if (settings.isAutoUpdatePlatypusJs()) {
+            try {
+                String projectVersionValue = settings.getPlatypusJsVersion();
+                String platformVersionValue = readPlatypusJsVersion();
+                return (projectVersionValue == null ? platformVersionValue != null : !projectVersionValue.equals(platformVersionValue));
+            } catch (PlatformHomePathException ex) {
+                getOutputWindowIO().getErr().println(ex.getMessage());
+                return false;
+            }
+        } else {
             return false;
         }
     }
