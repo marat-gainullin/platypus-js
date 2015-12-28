@@ -42,9 +42,9 @@ public class ScrollPane extends JScrollPane implements HasPublished, HasContaine
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* Provides a scrollable view of a lightweight component.\n"
-            + "* @param view the component to display in the scrollpane's viewport (optional)\n"
-            + "*/";
+            + " * Provides a scrollable view of a lightweight component.\n"
+            + " * @param view the component to display in the scrollpane's viewport (optional)\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"view"})
     public ScrollPane(JComponent aComp) {
@@ -333,9 +333,9 @@ public class ScrollPane extends JScrollPane implements HasPublished, HasContaine
 
     private static final String ADD_JSDOC = ""
             + "/**\n"
-            + "* Sets the specified component as the scroll's view, replacing old view component.\n"
-            + "* @param component the component to add\n"
-            + "*/";
+            + " * Sets the specified component as the scroll's view, replacing old view component.\n"
+            + " * @param component the component to add.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
     public void add(JComponent aComp) {

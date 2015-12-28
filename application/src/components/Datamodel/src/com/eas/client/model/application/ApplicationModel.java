@@ -280,29 +280,15 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
 
     public abstract boolean isModified() throws Exception;
 
-    /*
-     public boolean isModified() throws Exception {
-     if (entities != null) {
-     for (E ent : entities.values()) {
-     if (ent != null && ent.getRowset() != null) {
-     if (ent.getRowset().isModified()) {
-     return true;
-     }
-     }
-     }
-     }
-     return false;
-     }
-     */
     protected static final String SAVE_JSDOC = ""
             + "/**\n"
-            + "* Saves model data changes.\n"
-            + "* If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.\n"
-            + "* If an application needs to abort further attempts and discard model data changes, use <code>model.revert()</code>.\n"
-            + "* Note, that a <code>model.save()</code> call on unchanged model nevertheless leads to a commit.\n"
-            + "* @param onSuccess The function to be invoked after the data changes saved (optional).\n"
-            + "* @param onFailure The function to be invoked when exception raised while commit process (optional).\n"
-            + "*/";
+            + " * Saves model data changes.\n"
+            + " * If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.\n"
+            + " * If an application needs to abort further attempts and discard model data changes, use <code>model.revert()</code>.\n"
+            + " * Note, that a <code>model.save()</code> call on unchanged model nevertheless leads to a commit.\n"
+            + " * @param onSuccess The function to be invoked after the data changes saved (optional).\n"
+            + " * @param onFailure The function to be invoked when exception raised while commit process (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"onSuccess", "onFailure"})
     public int save(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
@@ -343,9 +329,9 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
 
     protected static final String REVERT_JSDOC = ""
             + "/**\n"
-            + "* Reverts model data changes.\n"
-            + "* After this method call, no data changes are avaliable for <code>model.save()</code> method.\n"
-            + "*/";
+            + " * Reverts model data changes.\n"
+            + " * After this method call, no data changes are avaliable for <code>model.save()</code> method.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = REVERT_JSDOC)
     public void revert() {
@@ -372,10 +358,10 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
 
     protected static final String REQUERY_JSDOC = ""
             + "/**\n"
-            + "* Requeries the model data. Forces the model data refresh, no matter if its parameters has changed or not.\n"
-            + "* @param onSuccess The handler function for refresh data on success event (optional).\n"
-            + "* @param onFailure The handler function for refresh data on failure event (optional).\n"
-            + "*/";
+            + " * Requeries the model data. Forces the model data refresh, no matter if its parameters has changed or not.\n"
+            + " * @param onSuccess The handler function for refresh data on success event (optional).\n"
+            + " * @param onFailure The handler function for refresh data on failure event (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccess", "onFailure"})
     public void requery(JSObject onSuccess, JSObject onFailure) throws Exception {
@@ -399,10 +385,10 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     }
     private static final String EXECUTE_JSDOC = ""
             + "/**\n"
-            + "* Refreshes the model, only if any of its parameters has changed.\n"
-            + "* @param onSuccess The handler function for refresh data on success event (optional).\n"
-            + "* @param onFailure The handler function for refresh data on failure event (optional).\n"
-            + "*/";
+            + " * Refreshes the model, only if any of its parameters has changed.\n"
+            + " * @param onSuccess The handler function for refresh data on success event (optional).\n"
+            + " * @param onFailure The handler function for refresh data on failure event (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"onSuccess", "onFailure"})
     public void execute(Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
@@ -435,10 +421,10 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     }
     private static final String LOAD_ENTITY_JSDOC = ""
             + "/**\n"
-            + "* Creates new entity of model, based on application query.\n"
-            + "* @param queryId the query application element ID.\n"
-            + "* @return a new entity.\n"
-            + "*/";
+            + " * Creates new entity of model, based on application query.\n"
+            + " * @param queryName the query application element name.\n"
+            + " * @return a new entity.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = LOAD_ENTITY_JSDOC, params = {"queryName"})
     public E loadEntity(String aQueryName) throws Exception {

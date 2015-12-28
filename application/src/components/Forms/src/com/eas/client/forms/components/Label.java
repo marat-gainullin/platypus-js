@@ -38,12 +38,13 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class Label extends JLabel implements HasPublished, HasComponentEvents, HasJsName, Widget {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
-            + "* Label component.\n"
-            + "* @param text the initial text for the component (optional)\n"
-            + "* @param icon the icon for the component (optional)\n"
-            + "* @param iconTextGap the text gap (optional)\n"
-            + "*/";
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + " * Label component.\n"
+            + " * @param text the initial text for the component (optional)\n"
+            + " * @param icon the icon for the component (optional)\n"
+            + " * @param iconTextGap the text gap (optional)\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "iconTextGap"})
     public Label(String aText, Icon aIcon, int aIconTextGap) {

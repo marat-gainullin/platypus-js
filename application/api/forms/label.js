@@ -28,6 +28,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         if(Label.superclass)
             Label.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * The mouse <code>Cursor</code> over this component.
+         */
+        this.cursor = new Object();
         Object.defineProperty(this, "cursor", {
             get: function() {
                 var value = delegate.cursor;
@@ -38,6 +42,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Mouse dragged event handler function.
+         */
+        this.onMouseDragged = new Object();
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
@@ -48,6 +56,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Mouse released event handler function.
+         */
+        this.onMouseReleased = new Object();
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -58,6 +70,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Keyboard focus lost by the component event handler function.
+         */
+        this.onFocusLost = new Object();
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -68,6 +84,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * The graphic image (glyph, icon) that the label displays.
+         */
+        this.icon = new Object();
         Object.defineProperty(this, "icon", {
             get: function() {
                 var value = delegate.icon;
@@ -78,6 +98,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Mouse pressed event handler function.
+         */
+        this.onMousePressed = new Object();
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
@@ -88,6 +112,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * The foreground color of this component.
+         */
+        this.foreground = new Object();
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;
@@ -98,6 +126,11 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * An error message of this component.
+         * Validation procedure may set this property and subsequent focus lost event will clear it.
+         */
+        this.error = '';
         Object.defineProperty(this, "error", {
             get: function() {
                 var value = delegate.error;
@@ -108,6 +141,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
+         */
+        this.enabled = true;
         Object.defineProperty(this, "enabled", {
             get: function() {
                 var value = delegate.enabled;
@@ -118,6 +155,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Component moved event handler function.
+         */
+        this.onComponentMoved = new Object();
         Object.defineProperty(this, "onComponentMoved", {
             get: function() {
                 var value = delegate.onComponentMoved;
@@ -128,6 +169,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * <code>PopupMenu</code> that assigned for this component.
+         */
+        this.componentPopupMenu = new Object();
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
                 var value = delegate.componentPopupMenu;
@@ -138,6 +183,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Vertical coordinate of the component.
+         */
+        this.top = 0;
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -148,6 +197,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Component resized event handler function.
+         */
+        this.onComponentResized = new Object();
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -158,6 +211,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Parent container of this widget.
+         */
+        this.parent = new Object();
         Object.defineProperty(this, "parent", {
             get: function() {
                 var value = delegate.parentWidget;
@@ -165,6 +222,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * The text string that the label displays.
+         */
+        this.text = '';
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -175,6 +236,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Mouse entered over the component event handler function.
+         */
+        this.onMouseEntered = new Object();
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -185,6 +250,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * The tooltip string that has been set with.
+         */
+        this.toolTipText = '';
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -195,6 +264,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Height of the component.
+         */
+        this.height = 0;
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -205,13 +278,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return B.boxAsJs(value);
-            }
-        });
-
+        /**
+         * Component shown event handler function.
+         */
+        this.onComponentShown = new Object();
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -222,6 +292,21 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Native API. Returns low level html element. Applicable only in HTML5 client.
+         */
+        this.element = new Object();
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return B.boxAsJs(value);
+            }
+        });
+
+        /**
+         * Mouse moved event handler function.
+         */
+        this.onMouseMoved = new Object();
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
                 var value = delegate.onMouseMoved;
@@ -232,6 +317,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * True if this component is completely opaque.
+         */
+        this.opaque = true;
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -242,6 +331,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Determines whether this component should be visible when its parent is visible.
+         */
+        this.visible = true;
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -252,6 +345,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Component hidden event handler function.
+         */
+        this.onComponentHidden = new Object();
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
                 var value = delegate.onComponentHidden;
@@ -262,16 +359,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "iconTextGap", {
-            get: function() {
-                var value = delegate.iconTextGap;
-                return B.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.iconTextGap = B.boxAsJava(aValue);
-            }
-        });
-
+        /**
+         * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
+         */
+        this.nextFocusableComponent = new Object();
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
                 var value = delegate.nextFocusableComponent;
@@ -282,16 +373,24 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "onKeyReleased", {
+        /**
+         * The amount of space between the text and the icon displayed in this label.
+         */
+        this.iconTextGap = 0;
+        Object.defineProperty(this, "iconTextGap", {
             get: function() {
-                var value = delegate.onKeyReleased;
-                return value;
+                var value = delegate.iconTextGap;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onKeyReleased = aValue;
+                delegate.iconTextGap = B.boxAsJava(aValue);
             }
         });
 
+        /**
+         * Main action performed event handler function.
+         */
+        this.onActionPerformed = new Object();
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -302,6 +401,24 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Key released event handler function.
+         */
+        this.onKeyReleased = new Object();
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = aValue;
+            }
+        });
+
+        /**
+         * Determines whether this component may be focused.
+         */
+        this.focusable = true;
         Object.defineProperty(this, "focusable", {
             get: function() {
                 var value = delegate.focusable;
@@ -312,6 +429,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Key typed event handler function.
+         */
+        this.onKeyTyped = new Object();
         Object.defineProperty(this, "onKeyTyped", {
             get: function() {
                 var value = delegate.onKeyTyped;
@@ -322,6 +443,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Horizontal position of the text relative to the icon.
+         */
+        this.horizontalTextPosition = 0;
         Object.defineProperty(this, "horizontalTextPosition", {
             get: function() {
                 var value = delegate.horizontalTextPosition;
@@ -332,6 +457,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Vertical position of the text relative to the icon.
+         */
+        this.verticalTextPosition = 0;
         Object.defineProperty(this, "verticalTextPosition", {
             get: function() {
                 var value = delegate.verticalTextPosition;
@@ -342,6 +471,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Mouse wheel moved event handler function.
+         */
+        this.onMouseWheelMoved = new Object();
         Object.defineProperty(this, "onMouseWheelMoved", {
             get: function() {
                 var value = delegate.onMouseWheelMoved;
@@ -352,6 +485,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Horizontal position of the text with the icon relative to the component's size.
+         */
+        this.horizontalAlignment = 0;
         Object.defineProperty(this, "horizontalAlignment", {
             get: function() {
                 var value = delegate.horizontalAlignment;
@@ -362,6 +499,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+         */
+        this.component = new Object();
         Object.defineProperty(this, "component", {
             get: function() {
                 var value = delegate.component;
@@ -369,6 +510,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Keyboard focus gained by the component event.
+         */
+        this.onFocusGained = new Object();
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
                 var value = delegate.onFocusGained;
@@ -379,6 +524,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Horizontal coordinate of the component.
+         */
+        this.left = 0;
         Object.defineProperty(this, "left", {
             get: function() {
                 var value = delegate.left;
@@ -389,6 +538,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * The background color of this component.
+         */
+        this.background = new Object();
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
@@ -399,6 +552,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Mouse clicked event handler function.
+         */
+        this.onMouseClicked = new Object();
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -409,6 +566,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Mouse exited over the component event handler function.
+         */
+        this.onMouseExited = new Object();
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
                 var value = delegate.onMouseExited;
@@ -419,6 +580,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Gets name of this component.
+         */
+        this.name = '';
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
@@ -429,6 +594,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Width of the component.
+         */
+        this.width = 0;
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -439,6 +608,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Vertical position of the text with the icon relative to the component's size.
+         */
+        this.verticalAlignment = 0;
         Object.defineProperty(this, "verticalAlignment", {
             get: function() {
                 var value = delegate.verticalAlignment;
@@ -449,6 +622,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * The font of this component.
+         */
+        this.font = new Object();
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
@@ -459,6 +636,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        /**
+         * Key pressed event handler function.
+         */
+        this.onKeyPressed = new Object();
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;

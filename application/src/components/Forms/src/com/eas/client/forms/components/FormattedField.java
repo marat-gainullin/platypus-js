@@ -42,9 +42,9 @@ public class FormattedField extends VFormattedField implements HasOnValueChange,
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* Formatted field component. \n"
-            + "* @param value the value for the formatted field (optional)\n"
-            + "*/";
+            + " * Formatted field component. \n"
+            + " * @param value the value for the formatted field (optional)\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"value"})
     public FormattedField(Object aValue) {

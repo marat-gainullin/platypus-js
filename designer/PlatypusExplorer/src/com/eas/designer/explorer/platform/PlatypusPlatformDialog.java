@@ -5,7 +5,7 @@
  */
 package com.eas.designer.explorer.platform;
 
-import com.eas.designer.application.indexer.BootClassPathProviderImpl;
+//import com.eas.designer.application.indexer.BootClassPathProviderImpl;
 import com.eas.designer.application.platform.PlatformHomePathException;
 import com.eas.designer.application.platform.PlatypusPlatform;
 import java.io.IOException;
@@ -15,7 +15,6 @@ import org.netbeans.api.db.explorer.DatabaseException;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.ErrorManager;
-import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 
 /**
@@ -32,7 +31,6 @@ public class PlatypusPlatformDialog {
             try {
                 PlatypusPlatform.setPlatformHomePath(platformDirectorySelectPanel.getDirectoryPath());
                 PlatypusPlatform.registerJdbcDrivers();
-                registerBootClassPath();
                 return true;
             } catch (PlatformHomePathException ex) {
                 Logger.getLogger(PlatypusPlatform.class.getName()).log(Level.WARNING, ex.getMessage());
@@ -41,10 +39,5 @@ public class PlatypusPlatformDialog {
             }
         }
         return false;
-    }
-
-    private static void registerBootClassPath() {
-        BootClassPathProviderImpl bootClassPath = Lookup.getDefault().lookup(BootClassPathProviderImpl.class);
-        bootClassPath.registerJsClassPath();
     }
 }

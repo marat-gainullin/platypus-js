@@ -22,6 +22,10 @@ define(['boxing'], function(B) {
         if(JdbcChangeValue.superclass)
             JdbcChangeValue.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * Name of changed property.
+         */
+        this.name = '';
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
@@ -29,6 +33,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Value of changed property.
+         */
+        this.value = new Object();
         Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.value;

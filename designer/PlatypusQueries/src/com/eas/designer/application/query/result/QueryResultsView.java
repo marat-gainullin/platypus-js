@@ -141,10 +141,13 @@ public class QueryResultsView extends javax.swing.JPanel {
     }
 
     protected static String extractText(PlatypusQueryDataObject aQueryDataObject) throws Exception {
-        String storedQueryText = aQueryDataObject.getSqlTextDocument().getText(0, aQueryDataObject.getSqlTextDocument().getLength());
-        String storedDialectQueryText = aQueryDataObject.getSqlFullTextDocument().getText(0, aQueryDataObject.getSqlFullTextDocument().getLength());
         StoredQueryFactory factory = new ScriptedQueryFactory(aQueryDataObject.getBasesProxy(), aQueryDataObject.getProject().getQueries(), aQueryDataObject.getProject().getIndexer());
-        return factory.compileSubqueries(storedDialectQueryText != null && !storedDialectQueryText.isEmpty() ? storedDialectQueryText : storedQueryText, aQueryDataObject.getModel());
+        String queryText = aQueryDataObject.getSqlTextDocument().getText(0, aQueryDataObject.getSqlTextDocument().getLength());
+        String dialectQueryText = aQueryDataObject.getSqlFullTextDocument().getText(0, aQueryDataObject.getSqlFullTextDocument().getLength());
+        if (dialectQueryText != null && !dialectQueryText.isEmpty() && !dialectQueryText.replaceAll("\\s", "").isEmpty()) {
+            queryText = dialectQueryText;
+        }
+        return factory.compileSubqueries(queryText, aQueryDataObject.getModel());
     }
 
     public void setPageSize(int aValue) {

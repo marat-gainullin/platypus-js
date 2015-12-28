@@ -4,6 +4,7 @@
  */
 package com.eas.designer.explorer.j2ee;
 
+import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import java.beans.PropertyChangeEvent;
@@ -11,6 +12,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -27,7 +29,6 @@ import org.netbeans.modules.j2ee.metadata.model.api.MetadataModel;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.util.Exceptions;
 
 /**
  * Platypus web application.
@@ -38,10 +39,6 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
         ModuleChangeReporter,
         EjbChangeDescriptor {
 
-    public static final String WEB_DIRECTORY = "web"; //NOI18N
-    public static final String WEB_INF_DIRECTORY = "WEB-INF"; //NOI18N
-    public static final String LIB_DIRECTORY_NAME = "lib"; //NOI18N
-    public static final String CLASSES_DIRECTORY_NAME = "classes"; //NOI18N
     public static final String META_INF_DIRECTORY = "META-INF"; //NOI18N
     public static final String PUBLIC_DIRECTORY = "pub"; //NOI18N
     protected final PlatypusProjectImpl project;
@@ -57,7 +54,7 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
     }
 
     public void forceServerChanged() {
-        fireServerChange(null, getServerByServerInstanceId(project.getSettings().getJ2eeServerId()));
+        fireServerChange("", getServerByServerInstanceId(project.getSettings().getJ2eeServerId()));
     }
 
     @Override
@@ -142,7 +139,7 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
     @Override
     public File getDeploymentConfigurationFile(String name) {
         try {
-            String webInfRelativePath = formatRelativePath(WEB_INF_DIRECTORY);
+            String webInfRelativePath = formatRelativePath(PlatypusProject.WEB_INF_DIRECTORY);
             String metaInfRelativePath = formatRelativePath(META_INF_DIRECTORY);
             FileObject dir;
             String path;
@@ -150,13 +147,13 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
                 path = name.substring(webInfRelativePath.length());
                 dir = getWebInfDir();
             } else if (name.startsWith(metaInfRelativePath)) {
-                path = name.substring(webInfRelativePath.length());
+                path = name.substring(metaInfRelativePath.length());
                 dir = getMetaInfDir();
             } else {
                 return null;
             }
-            FileObject fo = dir.getFileObject(path);
-            return fo != null ? FileUtil.toFile(fo) : null;
+            File file = dir != null ? Paths.get(dir.toURI()).resolve(path).toFile() : null;
+            return file != null ? file : null;
         } catch (IOException ex) {
             ErrorManager.getDefault().notify(ex);
         }
@@ -188,7 +185,7 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
     }
 
     public FileObject getWebInfDir() throws IOException {
-        return getContentDirectory().getFileObject(WEB_INF_DIRECTORY);
+        return getContentDirectory().getFileObject(PlatypusProject.WEB_INF_DIRECTORY);
     }
 
     public FileObject getMetaInfDir() throws IOException {

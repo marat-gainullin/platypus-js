@@ -30,7 +30,17 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         return calledFromFile;
     }
 
-    var Icon = {};
+    var Icon = {
+        /**
+         * Loads a icon with aResName from project's resource or from plain http url.
+         * @param {String} aResName Resource name. Resource names are considered as path to the resource from project's 'app' directory.
+         * It may be relative name (./, ../)
+         * @param {Function} onSuccess Success callback. Accpets a loaded icon for use as widgets' icon/image property value.
+         * @param {Function} onFailure Failure callback, called if problem occur while icon loading.
+         * @returns {undefined}
+         */
+        load: function (aResName, onSuccess, onFailure) {}
+    };
     Object.defineProperty(Icon, "load", {
         value: function (aResName, onSuccess, onFailure) {
             var calledFromFile = lookupCallerFile();
@@ -118,6 +128,12 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         return result;
     }
     directoryDialog.docString = "shows a directory dialog box";
+    /**
+     * Opens a directory dialog box 
+     * @param {Function} aCallback Callback function, called when user selects a directory.
+     * @param {String} aCurDir current directory [optional]
+     * @returns {undefined}.
+     */
     function selectDirectory(aCallback, aCurDir) {
         if (aCallback) {
             invokeLater(function () {
@@ -129,13 +145,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         }
     }
 
-    /**
-     * Opens a color chooser dialog box 
-     *
-     * @param title of the dialog box [optional]
-     * @param color default color [optional]
-     * @return choosen color or default color
-     */
     function colorDialog(title, color) {
         var result;
         function _colorDialog() {
@@ -152,6 +161,14 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         return result;
     }
     colorDialog.docString = "shows a color chooser dialog box";
+    /**
+     * Opens a color chooser dialog box 
+     *
+     * @param {Function} aCallback Callback function, called when user selects a directory.
+     * @param {Color} aOldColor default color [optional].
+     * @param {String} aTitle Title of the dialog [optional].
+     * @return choosen color or default color
+     */
     function selectColor(aCallback, aOldColor, aTitle) {
         if (aCallback) {
             invokeLater(function () {
@@ -272,7 +289,11 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         value: confirm
     });
 
-    var HorizontalPosition = {};
+    var HorizontalPosition = {
+        LEFT: 0,
+        CENTER: 0,
+        RIGHT: 0,
+    };
     Object.defineProperty(HorizontalPosition, "LEFT", {
         value: HorizontalPositionClass.LEFT
     });
@@ -283,7 +304,11 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         value: HorizontalPositionClass.RIGHT
     });
 //
-    var VerticalPosition = {};
+    var VerticalPosition = {
+        TOP: 0,
+        CENTER: 0,
+        BOTTOM: 0
+    };
     Object.defineProperty(VerticalPosition, "TOP", {
         value: VerticalPositionClass.TOP
     });
@@ -294,7 +319,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         value: VerticalPositionClass.BOTTOM
     });
 //
-    var Orientation = {};
+    var Orientation = {
+        HORIZONTAL: 0,
+        VERTICAL: 0
+    };
     Object.defineProperty(Orientation, "HORIZONTAL", {
         value: OrientationClass.HORIZONTAL
     });
@@ -302,7 +330,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         value: OrientationClass.VERTICAL
     });
 
-    var ScrollBarPolicy = {};
+    var ScrollBarPolicy = {AUTO: 0, NEVER: 0, ALLWAYS: 0};
     Object.defineProperty(ScrollBarPolicy, "AUTO", {
         value: 30
     });
@@ -315,7 +343,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
 
     //
     var FontStyleClass = Java.type("com.eas.gui.FontStyle");
-    var FontStyle = {};
+    var FontStyle = {ITALIC: 0, BOLD: 0, BOLD_ITALIC: 0};
     Object.defineProperty(FontStyle, "ITALIC", {
         value: FontStyleClass.ITALIC
     });
@@ -328,8 +356,63 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     Object.defineProperty(FontStyle, "NORMAL", {
         value: FontStyleClass.NORMAL
     });
-    
-    var module = {};
+
+    var module = {
+        /**
+         * The <code>Color</code> class is used to encapsulate colors in the default RGB color space.
+         * @param red Red compontent (optional)
+         * @param green Green compontent (optional)
+         * @param blue Blue compontent (optional)
+         * @param alpha Alpha compontent (optional)
+         * @constructor Color Color
+         */
+        Color: Color,
+        /**
+         * Predefined color enumeration
+         */
+        Colors: Color,
+        /**
+         * Predefined cursors enumeration.
+         * Its elements should be used as cursor widgets' properties value.
+         */
+        Cursor: Cursor,
+        /**
+         * Special icon namespace.
+         */
+        Icon: Icon,
+        Icons: Icon,
+        /**
+         * Font object, which is used to render text in a visible way.
+         * @param family a font family name, e.g. 'Arial'
+         * @param style a FontStyle object
+         * @param size the size of the font
+         * @constructor Font Font
+         */
+        Font: Font,
+        selectFile: selectFile,
+        selectDirectory: selectDirectory,
+        selectColor: selectColor,
+        /**
+         * 
+         */
+        HorizontalPosition: HorizontalPosition,
+        /**
+         * 
+         */
+        VerticalPosition: VerticalPosition,
+        /**
+         * 
+         */
+        Orientation: Orientation,
+        /**
+         * 
+         */
+        ScrollBarPolicy: ScrollBarPolicy,
+        /**
+         * 
+         */
+        FontStyle: FontStyle
+    };
     Object.defineProperty(module, 'Colors', {
         enumerable: true,
         value: Color

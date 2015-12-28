@@ -19,16 +19,16 @@ public class Anchors implements HasPublished {
 
     @ScriptFunction(params = {"left", "width", "right", "top", "height", "bottom"}, jsDoc = ""
             + "/**\n"
-            + "* Component's layout anchors for AnchorsPane.\n"
-            + "* Two constraint values of three possible must be provided for X and Y axis, other constraints must be set to <code>null</code>."
-            + "* Parameters values can be provided in pixels, per cents or numbers, e.g. '30px', '30' or 10%.\n"
-            + "* @param left a left anchor\n"
-            + "* @param width a width value\n"
-            + "* @param right a right anchor\n"
-            + "* @param top a top anchor\n"
-            + "* @param height a height value\n"
-            + "* @param bottom a bottom anchor\n"
-            + "*/")
+            + " * Component's layout anchors for AnchorsPane.\n"
+            + " * Two constraint values of three possible must be provided for X and Y axis, other constraints must be set to <code>null</code>."
+            + " * Parameters values can be provided in pixels, per cents or numbers, e.g. '30px', '30' or 10%.\n"
+            + " * @param left a left anchor\n"
+            + " * @param width a width value\n"
+            + " * @param right a right anchor\n"
+            + " * @param top a top anchor\n"
+            + " * @param height a height value\n"
+            + " * @param bottom a bottom anchor\n"
+            + " */")
     public Anchors(Object aLeft, Object aWidth, Object aRight,
             Object aTop, Object aHeight, Object aBottom) {
         super();

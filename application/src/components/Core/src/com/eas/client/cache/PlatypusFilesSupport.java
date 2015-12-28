@@ -111,7 +111,7 @@ public class PlatypusFilesSupport {
                 Logger.getLogger(PlatypusFilesSupport.class.getName()).log(Level.FINER, "Single function is found in top level scope of the module {0} - considered as a module's constructor.", aFileName);
                 return cx.result;
             } else if (cx.functions == 0) {
-                Logger.getLogger(PlatypusFilesSupport.class.getName()).log(Level.WARNING, "No functions found in top level scope of the module {0}.", aFileName);
+                Logger.getLogger(PlatypusFilesSupport.class.getName()).log(Level.FINER, "No functions found in top level scope of the module {0}.", aFileName);
             } else if (cx.annotatedConstructors > 1) {
                 Logger.getLogger(PlatypusFilesSupport.class.getName()).log(Level.WARNING, "More than one annotated constructor found in module {0}.", aFileName);
             } else if (cx.annotatedConstructors == 0 && cx.functions > 1) {

@@ -22,6 +22,10 @@ define(['boxing'], function(B) {
         if(ActionEvent.superclass)
             ActionEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * The source object of the event.
+         */
+        this.source = new Object();
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;

@@ -22,6 +22,10 @@ define(['boxing'], function(B) {
         if(ApplicationPlatypusEntity.superclass)
             ApplicationPlatypusEntity.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * The handler function for the event occured after the entity's data have been requeried.
+         */
+        this.onRequeried = new Object();
         Object.defineProperty(this, "onRequeried", {
             get: function() {
                 var value = delegate.onRequeried;
@@ -32,6 +36,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The constructor funciton for the entity's data array elements.
+         */
+        this.elementClass = new Object();
         Object.defineProperty(this, "elementClass", {
             get: function() {
                 var value = delegate.elementClass;
@@ -68,7 +76,9 @@ define(['boxing'], function(B) {
     };
 
     /**
-     * Append data to the entity's data. Appended data will be managed by ORM.* @param data The plain js objects array to be appended.
+     * Append data to the entity's data.
+     * Appended data will be managed by model, but appending itself will not be included in data changelog.
+     * @param data The plain js objects array to be appended.
      * @method append
      * @memberOf ApplicationPlatypusEntity
      */

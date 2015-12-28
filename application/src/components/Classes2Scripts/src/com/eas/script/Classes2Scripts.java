@@ -338,10 +338,10 @@ public class Classes2Scripts {
             } else {
                 ci.jsDeps += ", 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './action-event', './cell-render-event', './component-event', './focus-event', './item-event', './key-event', './value-change-event'";
                 ci.jsDepsResults += ", Color, Cursor, Font, ActionEvent, RenderEvent, ComponentEvent, FocusEvent, ItemEvent, KeyEvent, ValueChangeEvent";
-                if(ci.javaClassName.startsWith("com.eas.client.forms.containers") ||
-                        ci.javaClassName.startsWith("com.eas.client.forms.menu.MenuBar")||
-                        ci.javaClassName.startsWith("com.eas.client.forms.menu.Menu")||
-                        ci.javaClassName.startsWith("com.eas.client.forms.menu.PopupMenu")){
+                if (ci.javaClassName.startsWith("com.eas.client.forms.containers")
+                        || ci.javaClassName.startsWith("com.eas.client.forms.menu.MenuBar")
+                        || ci.javaClassName.startsWith("com.eas.client.forms.menu.Menu")
+                        || ci.javaClassName.startsWith("com.eas.client.forms.menu.PopupMenu")) {
                     ci.jsDeps += ", './container-event'";
                     ci.jsDepsResults += ", ContainerEvent";
                 }
@@ -462,12 +462,38 @@ public class Classes2Scripts {
     private String getPropertyPart(String namespace, MethodedPropBox property, int ident) {
         StringBuilder sb = new StringBuilder();
         int i = ident;
-        sb.append(getIndentStr(i));
+        String commonIndent = getIndentStr(i);
         String apiPropName = property.name;
         if (property.apiName != null && !property.apiName.isEmpty()) {
             apiPropName = property.apiName;
         }
-        sb.append("Object.defineProperty(").append("this, \"").append(apiPropName).append("\", {\n");
+        if (property.jsDoc != null && !property.jsDoc.isEmpty()) {
+            String[] jsDocLines = property.jsDoc.split("\n");
+            for (String jsDocLine : jsDocLines) {
+                sb.append(commonIndent).append(jsDocLine).append("\n");
+            }
+        }
+        String propValueSample;
+        if (property.typeName != null) {
+            switch (property.typeName) {
+                case "String":
+                    propValueSample = "''";
+                    break;
+                case "Boolean":
+                    propValueSample = "true";
+                    break;
+                case "Number":
+                    propValueSample = "0";
+                    break;
+                default:
+                    propValueSample = "new Object()";
+                    break;
+            }
+        } else {
+            propValueSample = "new Object()";
+        }
+        sb.append(commonIndent).append("this.").append(apiPropName).append(" = ").append(propValueSample).append(";").append("\n");
+        sb.append(commonIndent).append("Object.defineProperty(").append("this, \"").append(apiPropName).append("\", {\n");
         sb.append(getIndentStr(++i));
         assert property.readable;
         sb.append("get: function() {\n");
@@ -508,6 +534,7 @@ public class Classes2Scripts {
          */
         return sb.toString();
     }
+
     /*
      private String getDefaultLiteralOfType(String aTypeName) {
      if ("Number".equals(aTypeName)) {
@@ -525,7 +552,6 @@ public class Classes2Scripts {
      }
      }
      */
-
     private String getMethodPart(String namespace, Method method, int indent) {
         FunctionInfo fi = getFunctionInfo(method.getName(), method);
         StringBuilder sb = new StringBuilder();
@@ -633,8 +659,8 @@ public class Classes2Scripts {
     private String getPropsPart(Class clazz, FunctionInfo ci, Collection<MethodedPropBox> props, int ident) {
         StringBuilder sb = new StringBuilder();
         for (MethodedPropBox property : props) {
-            sb.append(getPropertyPart(checkScriptObject(clazz, ci.name), property, ident));
-            sb.append("\n");//NOI18N
+            sb.append(getPropertyPart(checkScriptObject(clazz, ci.name), property, ident))
+                    .append("\n");//NOI18N
         }
         return sb.toString();
     }

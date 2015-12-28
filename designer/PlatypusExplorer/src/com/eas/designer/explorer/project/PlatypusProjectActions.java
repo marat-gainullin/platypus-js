@@ -5,15 +5,9 @@
 package com.eas.designer.explorer.project;
 
 import com.eas.designer.application.project.PlatypusProject;
-import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.MissingResourceException;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment;
 import org.netbeans.spi.project.ActionProvider;
 import org.netbeans.spi.project.ui.support.DefaultProjectOperations;
 import org.openide.DialogDescriptor;
@@ -29,7 +23,6 @@ public class PlatypusProjectActions implements ActionProvider {
 
     public static final String COMMAND_CONNECT = "connect-to-db"; // NOI18N
     public static final String COMMAND_DISCONNECT = "disconnect-from-db"; // NOI18N
-    public static final String COMMAND_CLEAN_AND_RUN = "clean-web-and-run"; // NOI18N
     /**
      * Some routine global actions for which we can supply a display name. These
      * are IDE-specific.
@@ -42,9 +35,8 @@ public class PlatypusProjectActions implements ActionProvider {
             COMMAND_MOVE,
             COMMAND_RENAME,
             COMMAND_CONNECT,
-            COMMAND_DISCONNECT,
-            COMMAND_CLEAN_AND_RUN,
-            COMMAND_CLEAN));
+            COMMAND_DISCONNECT));
+
     protected PlatypusProject project;
 
     public PlatypusProjectActions(PlatypusProjectImpl aProject) {
@@ -76,10 +68,6 @@ public class PlatypusProjectActions implements ActionProvider {
                 case COMMAND_RUN:
                     run(false);
                     break;
-                case COMMAND_CLEAN_AND_RUN:
-                    clean();
-                    run(false);
-                    break;
                 case COMMAND_DEBUG:
                     run(true);
                     break;
@@ -88,9 +76,6 @@ public class PlatypusProjectActions implements ActionProvider {
                     break;
                 case COMMAND_DISCONNECT:
                     project.disconnectFormDb(project.getSettings().getDefaultDataSourceName());
-                    break;
-                case COMMAND_CLEAN:
-                    clean();
                     break;
             }
         } catch (Exception ex) {
@@ -104,12 +89,12 @@ public class PlatypusProjectActions implements ActionProvider {
             return project.isDbConnected(project.getSettings().getDefaultDataSourceName());
         } else if (COMMAND_CONNECT.equals(command)) {
             return !project.isDbConnected(project.getSettings().getDefaultDataSourceName());
-        } else if (COMMAND_CLEAN.equals(command)) {
-            PlatypusWebModuleManager pwmm = project.getLookup().lookup(PlatypusWebModuleManager.class);
-            assert pwmm != null;
-            return pwmm.webDirExists();
         } else if (COMMON_IDE_GLOBAL_ACTIONS.contains(command)) {
-            return true;
+            if (COMMAND_DEBUG.equals(command) || COMMAND_RUN.equals(command)) {
+                return !project.isPlatypusJsIntegrating();
+            } else {
+                return true;
+            }
         }
         return false;
     }
@@ -133,20 +118,6 @@ public class PlatypusProjectActions implements ActionProvider {
             ProjectRunner.run(project, runAppElement);
         } else {
             ProjectRunner.debug(project, runAppElement);
-        }
-    }
-
-    private void clean() {
-        PlatypusWebModuleManager pwmm = project.getLookup().lookup(PlatypusWebModuleManager.class);
-        assert pwmm != null;
-        try {
-            pwmm.undeploy();
-            project.getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Cleaning_Web_Dir")); // NOI18N
-            pwmm.clearWebDir();
-            project.getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Cleaning_Web_Dir_Complete")); // NOI18N
-        } catch (MissingResourceException | IOException | Deployment.DeploymentException ex) {
-            Logger.getLogger(PlatypusProjectActions.class.getName()).log(Level.WARNING, "Error clearning web directory", ex);
-            project.getOutputWindowIO().getErr().println(ex.getMessage());
         }
     }
 }

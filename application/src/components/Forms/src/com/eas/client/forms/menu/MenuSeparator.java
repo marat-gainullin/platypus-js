@@ -39,10 +39,10 @@ public class MenuSeparator extends JSeparator implements HasPublished, HasCompon
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* MenuSeparator provides a general purpose component for\n"
-            + "* implementing divider lines - most commonly used as a divider\n"
-            + "* between menu items that breaks them up into logical groupings.\n"
-            + "*/";
+            + " * MenuSeparator provides a general purpose component for\n"
+            + " * implementing divider lines - most commonly used as a divider\n"
+            + " * between menu items that breaks them up into logical groupings.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
     public MenuSeparator() {

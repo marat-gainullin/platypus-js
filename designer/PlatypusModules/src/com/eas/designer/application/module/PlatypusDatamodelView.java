@@ -227,7 +227,7 @@ public final class PlatypusDatamodelView extends CloneableTopComponent implement
                 @Override
                 public void fillAllowedMimeTypes(Set<String> allowedMimeTypes) {
                     super.fillAllowedMimeTypes(allowedMimeTypes);
-                    allowedMimeTypes.add(PlatypusPathRecognizer.JAVASRIPT_MIME_TYPE);
+                    allowedMimeTypes.add(PlatypusPathRecognizer.JAVASCRIPT_MIME_TYPE);
                 }
             };
             if (appModelEditor != null) {

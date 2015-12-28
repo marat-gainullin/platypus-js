@@ -22,6 +22,10 @@ define(['boxing'], function(B) {
         if(CursorPositionChangedEvent.superclass)
             CursorPositionChangedEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * Cursor position the cursor was on.
+         */
+        this.oldIndex = 0;
         Object.defineProperty(this, "oldIndex", {
             get: function() {
                 var value = delegate.oldIndex;
@@ -29,6 +33,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The source object of the event.
+         */
+        this.source = new Object();
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
@@ -36,6 +44,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+        * Cursor position the cursor has been set on.
+        */
+        this.newIndex = 0;
         Object.defineProperty(this, "newIndex", {
             get: function() {
                 var value = delegate.newIndex;

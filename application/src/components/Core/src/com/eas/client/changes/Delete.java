@@ -28,7 +28,10 @@ public class Delete extends Change {
         aChangeVisitor.visit(this);
     }
 
-    @ScriptFunction(jsDoc = "Keys values used for identification of deleted data.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Keys values used for identification of deleted data.\n"
+            + " */")
     public List<ChangeValue> getKeys() {
         return keys;
     }

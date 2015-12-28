@@ -22,13 +22,11 @@ define(['boxing'], function(B) {
         if(MouseEvent.superclass)
             MouseEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "altDown", {
-            get: function() {
-                var value = delegate.altDown;
-                return B.boxAsJs(value);
-            }
-        });
-
+        /**
+         * Which, if any, of the mouse buttons has changed state.
+         * Values: 0 - no button, 1 - button 1, 2 - button 2, 3 - button 3.
+         */
+        this.button = 0;
         Object.defineProperty(this, "button", {
             get: function() {
                 var value = delegate.button;
@@ -36,6 +34,21 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Alt key is down on this event.
+         */
+        this.altDown = true;
+        Object.defineProperty(this, "altDown", {
+            get: function() {
+                var value = delegate.altDown;
+                return B.boxAsJs(value);
+            }
+        });
+
+        /**
+         * The number of mouse clicks associated with this event.
+         */
+        this.clickCount = 0;
         Object.defineProperty(this, "clickCount", {
             get: function() {
                 var value = delegate.clickCount;
@@ -43,6 +56,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Ctrl key is down on this event.
+         */
+        this.controlDown = true;
         Object.defineProperty(this, "controlDown", {
             get: function() {
                 var value = delegate.controlDown;
@@ -50,6 +67,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Shift key is down on this event.
+         */
+        this.shiftDown = true;
         Object.defineProperty(this, "shiftDown", {
             get: function() {
                 var value = delegate.shiftDown;
@@ -57,6 +78,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * X cursor coordinate in component's space.
+         */
+        this.x = 0;
         Object.defineProperty(this, "x", {
             get: function() {
                 var value = delegate.x;
@@ -64,6 +89,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Meta key is down on this event.
+         */
+        this.metaDown = true;
         Object.defineProperty(this, "metaDown", {
             get: function() {
                 var value = delegate.metaDown;
@@ -71,6 +100,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Y cursor coordinate in component's space.
+         */
+        this.y = 0;
         Object.defineProperty(this, "y", {
             get: function() {
                 var value = delegate.y;
@@ -78,6 +111,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The source object of the event.
+         */
+        this.source = new Object();
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;

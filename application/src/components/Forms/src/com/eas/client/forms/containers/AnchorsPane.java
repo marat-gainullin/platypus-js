@@ -294,10 +294,10 @@ public class AnchorsPane extends JPanel implements HasPublished, HasContainerEve
 
     private static final String ADD_JSDOC = ""
             + "/**\n"
-            + "* Appends the specified component to the container with specified placement.\n"
-            + "* @param component the component to add.\n"
-            + "* @param anchors the anchors object for the component, can contain the following properties: left, width, right, top, height, bottom.\n"
-            + "*/";
+            + " * Appends the specified component to the container with specified placement.\n"
+            + " * @param component the component to add.\n"
+            + " * @param anchors the anchors object for the component, can contain the following properties: left, width, right, top, height, bottom.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component", "anchors"})
     public void add(JComponent aComp, Object oAnchors) {

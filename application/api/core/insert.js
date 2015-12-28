@@ -22,6 +22,10 @@ define(['boxing'], function(B) {
         if(Insert.superclass)
             Insert.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * Data that will be inserted.
+         */
+        this.data = new Object();
         Object.defineProperty(this, "data", {
             get: function() {
                 var value = delegate.data;
@@ -29,6 +33,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Indicates the change's type (Insert, Update, Delete or Command).
+         */
+        this.type = '';
         Object.defineProperty(this, "type", {
             get: function() {
                 var value = delegate.type;
@@ -36,6 +44,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         *Indicates the change's destination entity.
+         */
+        this.entity = '';
         Object.defineProperty(this, "entity", {
             get: function() {
                 var value = delegate.entity;

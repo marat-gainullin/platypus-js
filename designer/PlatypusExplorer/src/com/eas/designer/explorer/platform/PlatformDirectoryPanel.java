@@ -4,12 +4,9 @@
  */
 package com.eas.designer.explorer.platform;
 
-import com.eas.designer.explorer.actions.GotoAction;
 import javax.swing.JFileChooser;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import org.openide.DialogDescriptor;
-import org.openide.DialogDisplayer;
 import org.openide.util.NbBundle;
 
 /**

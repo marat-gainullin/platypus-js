@@ -46,7 +46,22 @@ define(['boxing', 'forms/form', 'forms/index', 'grid/index'], function (B, Form)
         return loadFormDocument(document, aModel, aTarget);
     }
 
-    var module = {};
+    var module = {
+        /**
+         * Locates a prefetched resource by module name and reads widgets and form (window) definition from it.
+         * @param {String} aName Name of module that is the owner of prefetched resource (*.model file).
+         * @param {Object} aModel JavaScript object to use while widgets binding. (Optional)
+         * @returns {Form}
+         */
+        loadForm: function(aName, aModel){},
+        /**
+         * Reads widgets and form (window) definition from aContent.
+         * @param {String} aContent String, all widgets and form itself should be read from.
+         * @param {Object} aModel JavaScript object to use while widgets binding. (Optional)
+         * @returns {Form}
+         */
+        readForm: function(aContent, aModel){}
+    };
     Object.defineProperty(module, 'loadForm', {
         enumerable: true,
         value: loadForm

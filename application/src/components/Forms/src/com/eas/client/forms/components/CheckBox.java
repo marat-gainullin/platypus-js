@@ -47,11 +47,11 @@ public class CheckBox extends VCheckBox implements HasOnValueChange, HasJsValue,
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* Check box component. \n"
-            + "* @param text the text of the check box (optional).\n"
-            + "* @param selected <code>true</code> if selected (optional).\n"
-            + "* @param actionPerformed the function for the action performed (optional).\n"
-            + "*/";
+            + " * Check box component. \n"
+            + " * @param text the text of the check box (optional).\n"
+            + " * @param selected <code>true</code> if selected (optional).\n"
+            + " * @param actionPerformed the function for the action performed (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected", "actionPerformed"})
     public CheckBox(String aText, boolean aSelected, JSObject aActionPerformedHandler) {

@@ -41,11 +41,11 @@ public class Slider extends VSlider implements HasOnValueChange, HasPublished, H
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* Slider component.\n"
-            + "* @param min the minimum value (optional)\n"
-            + "* @param max the maximum value (optional)\n"
-            + "* @param value the initial value (optional)\n"
-            + "*/";
+            + " * Slider component.\n"
+            + " * @param min the minimum value (optional)\n"
+            + " * @param max the maximum value (optional)\n"
+            + " * @param value the initial value (optional)\n"
+            + " */";
     
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"min", "max", "value"})
     public Slider(int min, int max, int value) {

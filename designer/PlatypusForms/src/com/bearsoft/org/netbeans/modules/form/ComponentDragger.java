@@ -50,6 +50,7 @@ import java.util.*;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.undo.*;
+import org.openide.ErrorManager;
 
 /**
  *
@@ -247,7 +248,7 @@ class ComponentDragger {
                     layoutSupport.acceptNewComponents(newComps, newConstr, jj);
                 } catch (RuntimeException ex) {
                     // layout support does not accept components
-                    org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, ex);
+                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
                     return;
                 }
 

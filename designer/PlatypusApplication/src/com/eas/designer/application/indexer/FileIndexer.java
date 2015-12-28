@@ -42,13 +42,13 @@ public class FileIndexer extends CustomIndexer {
     protected void index(Iterable<? extends Indexable> files, Context context) {
         try {
             IndexingSupport is = IndexingSupport.getInstance(context);
-            for (Indexable i : files) {
+            for (Indexable indexable : files) {
                 if (context.isCancelled()) {
                     break;
                 }
-                String nameExt = getNameExt(i);
+                String nameExt = getNameExt(indexable);
                 if (nameExt.length() > 0 && isIndexableFile(nameExt)) {
-                    URL indexableURL = i.getURL();
+                    URL indexableURL = indexable.getURL();
                     if (indexableURL == null) {
                         continue;
                     }
@@ -56,7 +56,7 @@ public class FileIndexer extends CustomIndexer {
                     if (fo == null) {
                         continue;
                     }
-                    IndexDocument d = is.createDocument(i);
+                    IndexDocument d = is.createDocument(indexable);
                     // By default look for application element name in annotation
                     File f = FileUtil.toFile(fo);
                     if (f != null) {
@@ -70,8 +70,13 @@ public class FileIndexer extends CustomIndexer {
                                 if (fileProject instanceof PlatypusProject) {
                                     PlatypusProject pProject = (PlatypusProject) fileProject;
                                     appElementName = FileUtil.getRelativePath(pProject.getSrcRoot(), fo);
-                                    appElementName = appElementName.substring(0, appElementName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
-                                    appElementName = appElementName.replace(File.separator, "/");
+                                    if (appElementName == null) {
+                                        appElementName = FileUtil.getRelativePath(pProject.getApiRoot(), fo);
+                                    }
+                                    if (appElementName != null) {
+                                        appElementName = appElementName.substring(0, appElementName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
+                                        appElementName = appElementName.replace(File.separator, "/");
+                                    }
                                 }
                             }
                         } else {

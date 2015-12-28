@@ -725,6 +725,12 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                 };
                 return aTarget;
             }
+            /**
+             * Locates a prefetched resource by module name and reads a model from it.
+             * @param {String} aName Name of module that is the owner of prefetched resource (*.layout file).
+             * @param {Object} aTarget Object, the model properties and methods will be defined on. Default value is new Object. (Optional).
+             * @returns {Model}
+             */
             function loadModel(aName, aTarget) {
                 var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
                 if (files) {
@@ -735,34 +741,53 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                 }
             }
 
+            /**
+             * Reads model definition from aContent.
+             * @param {String} aContent String, containing model definition.
+             * @param {Object} aTarget Object, the model properties and methods will be defined on. Default value is new Object. (Optional).
+             * @returns {Model}
+             */
             function readModel(aContent, aTarget) {
                 var modelDocument = Source2XmlDom.transform(aContent);
                 return loadModelDocument(modelDocument, aTarget);
             }
 
-            function requireEntities(aEntities, aOnSuccess, aOnFailure) {
+            /**
+             * Loads entities definitions, needed to construct a model from a server.
+             * If corresponding entities definitions are already loaded, then no extra network activity occur.
+             * It reads entities related information from model definition.
+             * @param {String} aModelDefinition String with a model definition.
+             * @param {Function} aOnSuccess Callback function, called when entities are loaded successfully.
+             * @param {Function} aOnFailure Failure callback function.
+             * @returns {undefined}
+             */
+            function requireEntities(aModelDefinition, aOnSuccess, aOnFailure) {
                 var entities;
-                if (!Array.isArray(aEntities)) {
-                    aEntities = aEntities + "";
-                    if (aEntities.length > 5 && aEntities.trim().substring(0, 5).toLowerCase() === "<?xml") {
+                if (!Array.isArray(aModelDefinition)) {
+                    aModelDefinition = aModelDefinition + "";
+                    if (aModelDefinition.length > 5 && aModelDefinition.trim().substring(0, 5).toLowerCase() === "<?xml") {
                         entities = [];
                         var pattern = /queryId="(.+?)"/ig;
                         var groups;
-                        while ((groups = pattern.exec(aEntities)) != null) {
+                        while ((groups = pattern.exec(aModelDefinition)) != null) {
                             if (groups.length > 1) {
                                 entities.push(groups[1]);
                             }
                         }
                     } else {
-                        entities = [aEntities];
+                        entities = [aModelDefinition];
                     }
                 } else {
-                    entities = aEntities;
+                    entities = aModelDefinition;
                 }
                 ScriptedResourceClass.loadEntities(Java.to(entities, JavaStringArrayClass), aOnSuccess ? aOnSuccess : null, aOnFailure ? aOnFailure : null);
             }
 
-            var module = {};
+            var module = {
+                loadModel: loadModel,
+                readModel: readModel,
+                requireEntities: requireEntities
+            }
             Object.defineProperty(module, 'loadModel', {
                 enumerable: true,
                 value: loadModel

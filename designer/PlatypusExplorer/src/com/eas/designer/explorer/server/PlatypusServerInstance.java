@@ -8,8 +8,6 @@ import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.project.PlatypusProjectSettings;
 import com.eas.designer.explorer.project.ProjectRunner;
-import static com.eas.designer.explorer.project.ProjectRunner.getCommandLineStr;
-import static com.eas.designer.explorer.project.ProjectRunner.setLogging;
 import com.eas.server.PlatypusServer;
 import com.eas.server.ServerMain;
 import java.io.File;
@@ -139,12 +137,12 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
         }
 
         io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Logging_Level"), project.getSettings().getClientLogLevel()));//NOI18N
-        setLogging(arguments, project.getSettings().getServerLogLevel());
+        ProjectRunner.setLogging(arguments, project.getSettings().getServerLogLevel());
 
         PlatypusProjectSettings pps = project.getSettings();
 
         arguments.add(ProjectRunner.OPTION_PREFIX + ProjectRunner.CLASSPATH_OPTION_NAME);
-        String classPath = ProjectRunner.getExtendedClasspath(ProjectRunner.getApiClasspath(getExecutablePath(binDir)));
+        String classPath = ProjectRunner.getExtendedClasspath(ProjectRunner.getApiClasspath(aProject, getExecutablePath(binDir)));
         arguments.add("\"" + classPath + "\"");
         arguments.add(ServerMain.class.getName());
 
@@ -215,7 +213,7 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
             processBuilder = processBuilder.addArgument(argument);
         }
         ExecutionService service = ExecutionService.newService(processBuilder, descriptor, "Platypus Server");
-        io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Command_Line") + getCommandLineStr(arguments));//NOI18N
+        io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Command_Line") + ProjectRunner.getCommandLineStr(arguments));//NOI18N
         Future<Integer> runTask = service.run();
         serverRunTask = runTask;
         return true;

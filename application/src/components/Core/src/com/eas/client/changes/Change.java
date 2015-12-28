@@ -27,12 +27,18 @@ public abstract class Change implements HasPublished {
 
     public abstract void accept(ChangeVisitor aChangeVisitor) throws Exception;
 
-    @ScriptFunction(jsDoc = "Indicates the change's type (Insert, Update, Delete or Command).")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Indicates the change's type (Insert, Update, Delete or Command).\n"
+            + " */")
     public String getType() {
         return getClass().getSimpleName();
     }
 
-    @ScriptFunction(jsDoc = "Indicates the change's destination entity.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " *Indicates the change's destination entity.\n"
+            + " */")
     public String getEntity() {
         return entityName;
     }

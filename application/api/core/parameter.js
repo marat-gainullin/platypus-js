@@ -22,6 +22,10 @@ define(['boxing'], function(B) {
         if(Parameter.superclass)
             Parameter.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * Determines if field is nullable.
+         */
+        this.nullable = true;
         Object.defineProperty(this, "nullable", {
             get: function() {
                 var value = delegate.nullable;
@@ -32,6 +36,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Indicates that this field is a foreign key to another table or it is a self-reference key.
+         */
+        this.fk = true;
         Object.defineProperty(this, "fk", {
             get: function() {
                 var value = delegate.fk;
@@ -39,6 +47,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The default value of the parameter.
+         */
+        this.defaultValue = new Object();
         Object.defineProperty(this, "defaultValue", {
             get: function() {
                 var value = delegate.defaultValue;
@@ -49,6 +61,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The description of the field.
+         */
+        this.description = '';
         Object.defineProperty(this, "description", {
             get: function() {
                 var value = delegate.description;
@@ -59,6 +75,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The field's type information.
+         */
+        this.type = '';
         Object.defineProperty(this, "type", {
             get: function() {
                 var value = delegate.type;
@@ -69,6 +89,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * This field table's name.
+         */
+        this.tableName = '';
         Object.defineProperty(this, "tableName", {
             get: function() {
                 var value = delegate.tableName;
@@ -79,6 +103,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Parameter's mode (in, out, in/out).
+         */
+        this.mode = 0;
         Object.defineProperty(this, "mode", {
             get: function() {
                 var value = delegate.mode;
@@ -89,6 +117,12 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The original name of the field.
+         * In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique,
+         * but be able to generate right update sql clauses for multiple tables.
+         */
+        this.originalName = '';
         Object.defineProperty(this, "originalName", {
             get: function() {
                 var value = delegate.originalName;
@@ -99,6 +133,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The value of the parameter.
+         */
+        this.value = new Object();
         Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.jsValue;
@@ -109,6 +147,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Determines if this field is readonly.
+         */
+        this.readonly = true;
         Object.defineProperty(this, "readonly", {
             get: function() {
                 var value = delegate.readonly;
@@ -119,6 +161,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The name of the field.
+         */
+        this.name = '';
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
@@ -129,6 +175,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Determines if parameter was modified.
+         */
+        this.modified = true;
         Object.defineProperty(this, "modified", {
             get: function() {
                 var value = delegate.modified;
@@ -139,6 +189,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Determines that this field is a primary key.
+         */
+        this.pk = true;
         Object.defineProperty(this, "pk", {
             get: function() {
                 var value = delegate.pk;

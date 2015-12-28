@@ -22,6 +22,10 @@ define(['boxing'], function(B) {
         if(Update.superclass)
             Update.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * Data to be applied within a target datasource.
+         */
+        this.data = new Object();
         Object.defineProperty(this, "data", {
             get: function() {
                 var value = delegate.data;
@@ -29,6 +33,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Keys used for indentifying data changes within a target datasource
+         */
+        this.keys = new Object();
         Object.defineProperty(this, "keys", {
             get: function() {
                 var value = delegate.keys;
@@ -36,6 +44,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Indicates the change's type (Insert, Update, Delete or Command).
+         */
+        this.type = '';
         Object.defineProperty(this, "type", {
             get: function() {
                 var value = delegate.type;
@@ -43,6 +55,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         *Indicates the change's destination entity.
+         */
+        this.entity = '';
         Object.defineProperty(this, "entity", {
             get: function() {
                 var value = delegate.entity;

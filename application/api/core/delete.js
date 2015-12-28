@@ -22,6 +22,10 @@ define(['boxing'], function(B) {
         if(Delete.superclass)
             Delete.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * Keys values used for identification of deleted data.
+         */
+        this.keys = new Object();
         Object.defineProperty(this, "keys", {
             get: function() {
                 var value = delegate.keys;
@@ -29,6 +33,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Indicates the change's type (Insert, Update, Delete or Command).
+         */
+        this.type = '';
         Object.defineProperty(this, "type", {
             get: function() {
                 var value = delegate.type;
@@ -36,6 +44,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         *Indicates the change's destination entity.
+         */
+        this.entity = '';
         Object.defineProperty(this, "entity", {
             get: function() {
                 var value = delegate.entity;

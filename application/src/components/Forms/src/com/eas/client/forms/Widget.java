@@ -64,15 +64,15 @@ public interface Widget {
 
     public static final String PARENT_JSDOC = ""
             + "/**\n"
-            + "* Parent container of this widget.\n"
-            + "*/";
+            + " * Parent container of this widget.\n"
+            + " */";
 
     public Widget getParentWidget();
 
     public static final String LEFT_JSDOC = ""
             + "/**\n"
-            + "* Horizontal coordinate of the component.\n"
-            + "*/";
+            + " * Horizontal coordinate of the component.\n"
+            + " */";
 
     public int getLeft();
 
@@ -80,8 +80,8 @@ public interface Widget {
 
     public static final String TOP_JSDOC = ""
             + "/**\n"
-            + "* Vertical coordinate of the component.\n"
-            + "*/";
+            + " * Vertical coordinate of the component.\n"
+            + " */";
 
     public int getTop();
 
@@ -89,8 +89,8 @@ public interface Widget {
 
     public static final String WIDTH_JSDOC = ""
             + "/**\n"
-            + "* Width of the component.\n"
-            + "*/";
+            + " * Width of the component.\n"
+            + " */";
 
     public int getWidth();
 
@@ -98,8 +98,8 @@ public interface Widget {
 
     public static final String HEIGHT_JSDOC = ""
             + "/**\n"
-            + "* Height of the component.\n"
-            + "*/";
+            + " * Height of the component.\n"
+            + " */";
 
     public int getHeight();
 
@@ -132,8 +132,8 @@ public interface Widget {
 
     public static final String FOCUS_JSDOC = ""
             + "/**\n"
-            + "* Tries to acquire focus for this component.\n"
-            + "*/";
+            + " * Tries to acquire focus for this component.\n"
+            + " */";
 
     public void focus();
 
@@ -170,8 +170,8 @@ public interface Widget {
 
     public static final String ENABLED_JSDOC = ""
             + "/**\n"
-            + "* Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.\n"
-            + "*/";
+            + " * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.\n"
+            + " */";
 
     public boolean getEnabled();
 
@@ -225,15 +225,15 @@ public interface Widget {
     // Native API
     public static final String NATIVE_COMPONENT_JSDOC = ""
             + "/**\n"
-            + "* Native API. Returns low level swing component. Applicable only in J2SE swing client.\n"
-            + "*/";
+            + " * Native API. Returns low level swing component. Applicable only in J2SE swing client.\n"
+            + " */";
 
     public JComponent getComponent();
 
     public static final String NATIVE_ELEMENT_JSDOC = ""
             + "/**\n"
-            + "* Native API. Returns low level html element. Applicable only in HTML5 client.\n"
-            + "*/";
+            + " * Native API. Returns low level html element. Applicable only in HTML5 client.\n"
+            + " */";
 
     public Object getElement();
 }

@@ -30,6 +30,10 @@ define(['boxing'], function(B) {
         if(ReportTemplate.superclass)
             ReportTemplate.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * Array of name collections, that will fixed.
+         */
+        this.timezoneOffset = 0;
         Object.defineProperty(this, "timezoneOffset", {
             get: function() {
                 var value = delegate.timezoneOffset;
@@ -40,6 +44,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Name of the generated report's file.
+         */
+        this.name = '';
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
@@ -50,6 +58,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Array of name collections, that will fixed.
+         */
+        this.fixed = new Object();
         Object.defineProperty(this, "fixed", {
             get: function() {
                 var value = delegate.fixed;

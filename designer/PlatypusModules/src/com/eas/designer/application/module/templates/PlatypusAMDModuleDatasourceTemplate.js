@@ -5,7 +5,7 @@
  * @stateless
  */
 define(['orm', 'logger'], function (Orm, Logger, ModuleName) {
-    return function () {
+    function module_constructor() {
         var self = this, model = Orm.loadModel(ModuleName);
 
         this.schema = [
@@ -69,7 +69,6 @@ define(['orm', 'logger'], function (Orm, Logger, ModuleName) {
                  *   ...
                  */
             }
-            ;
             if (aOnSuccess) {
                 // TODO : place here your asynchronous data storing code.
                 // aOnSuccess(/*number of changed objects in backend*/);
@@ -78,6 +77,6 @@ define(['orm', 'logger'], function (Orm, Logger, ModuleName) {
                 return /*number of changed objects in backend*/;
             }
         };
-
-    };
+    }
+    return module_constructor;
 });

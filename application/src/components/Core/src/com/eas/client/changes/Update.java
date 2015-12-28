@@ -29,12 +29,18 @@ public class Update extends Change {
         aChangeVisitor.visit(this);
     }
 
-    @ScriptFunction(jsDoc = "Keys used for indentifying data changes within a target datasource")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Keys used for indentifying data changes within a target datasource\n"
+            + " */")
     public List<ChangeValue> getKeys() {
         return keys;
     }
 
-    @ScriptFunction(jsDoc = "Data to be applied within a target datasource")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Data to be applied within a target datasource.\n"
+            + " */")
     public List<ChangeValue> getData() {
         return data;
     }

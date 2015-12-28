@@ -11,7 +11,21 @@ define(function(){
     function invokeLater(aTarget) {
         space.enqueue(aTarget);
     }
-    var module = {};
+    var module = {
+        /**
+         * Adds an action call to agent's event queue.
+         * @param {Function} anAction A callback function to be called, when agent's queue will handle it.
+         * @returns {undefined}
+         */
+        later: function(anAction){},
+        /**
+         * Holds an action for aTimeout and than, when aTimeout will elapse, adds it to agent's event queue.
+         * @param {Number} aTimeout Amount of time to hold the action.
+         * @param {Function} anAction Callback function, that will be invoked when the timeout elapses.
+         * @returns {undefined}
+         */
+        delayed: function(aTimeout, anAction){}
+    };
     Object.defineProperty(module, 'later', {
         enumerable: true,
         value: invokeLater

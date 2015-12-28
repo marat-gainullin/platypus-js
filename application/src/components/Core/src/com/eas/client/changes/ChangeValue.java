@@ -28,12 +28,18 @@ public class ChangeValue implements HasPublished {
         value = Scripts.getSpace() != null ? Scripts.getSpace().toJava(aValue) : aValue;
     }
 
-    @ScriptFunction(jsDoc = "Name of changed property.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Name of changed property.\n"
+            + " */")
     public String getName() {
         return name;
     }
 
-    @ScriptFunction(jsDoc = "Value of changed property.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Value of changed property.\n"
+            + " */")
     public Object getValue() {
         return Scripts.getSpace().toJs(value);
     }

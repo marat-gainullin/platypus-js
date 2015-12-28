@@ -44,11 +44,11 @@ public class MenuItem extends JMenuItem implements HasPublished, HasComponentEve
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* A menu item that can be selected or deselected.\n"
-            + "* @param text the text of the component (optional).\n"
-            + "* @param icon the icon of the component (optional).\n"
-            + "* @param actionPerformed the function for the action performed handler (optional).\n"
-            + "*/";
+            + " * A menu item that can be selected or deselected.\n"
+            + " * @param text the text of the component (optional).\n"
+            + " * @param icon the icon of the component (optional).\n"
+            + " * @param actionPerformed the function for the action performed handler (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "actionPerformed"})
     public MenuItem(String aText, Icon aIcon, JSObject aActionPerformedHandler) {

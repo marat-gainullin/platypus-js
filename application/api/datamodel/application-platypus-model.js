@@ -79,7 +79,7 @@ define(['boxing'], function(B) {
 
     /**
      * Creates new entity of model, based on application query.
-     * @param queryId the query application element ID.
+     * @param queryName the query application element name.
      * @return a new entity.
      * @method loadEntity
      * @memberOf ApplicationPlatypusModel

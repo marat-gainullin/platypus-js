@@ -60,8 +60,8 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
     }
     private static final String MODIFIED_JSDOC = ""
             + "/**\n"
-            + "* Flagis set to true if model has been modified"
-            + "*/";
+            + " * Flagis set to true if model has been modified.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = MODIFIED_JSDOC)
     @Override
@@ -129,11 +129,11 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
 
     private static final String CREATE_ENTITY_JSDOC = ""
             + "/**\n"
-            + "* Creates new entity of model, based on passed sql query. This method works only in two tier components of a system.\n"
-            + "* @param sqlText SQL text for the new entity.\n"
-            + "* @param datasourceName the concrete database ID (optional).\n"
-            + "* @return an entity instance.\n"
-            + "*/";
+            + " * Creates new entity of model, based on passed sql query. This method works only in two tier components of a system.\n"
+            + " * @param sqlText SQL text for the new entity.\n"
+            + " * @param datasourceName the concrete database ID (optional).\n"
+            + " * @return an entity instance.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CREATE_ENTITY_JSDOC, params = {"sqlText", "datasourceName"})
     public ApplicationDbEntity createEntity(String aSqlText, String aDatasourceName) throws Exception {
@@ -157,13 +157,13 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
 
     private static final String EXECUTE_SQL_JSDOC = ""
             + "/**\n"
-            + "* Executes a SQL query against specific datasource. This method works only in two tier components of a system.\n"
-            + "* @param sqlText SQL text for the new entity.\n"
-            + "* @param datasourceName. The specific databsource name (optional).\n"
-            + "* @param onSuccess Success callback. Have a number argument, indicating updated rows count (optional).\n"
-            + "* @param onFailure Failure callback. Have a string argument, indicating an error occured (optional).\n"
-            + "* @return an entity instance.\n"
-            + "*/";
+            + " * Executes a SQL query against specific datasource. This method works only in two tier components of a system.\n"
+            + " * @param sqlText SQL text for the new entity.\n"
+            + " * @param datasourceName. The specific databsource name (optional).\n"
+            + " * @param onSuccess Success callback. Have a number argument, indicating updated rows count (optional).\n"
+            + " * @param onFailure Failure callback. Have a string argument, indicating an error occured (optional).\n"
+            + " * @return an entity instance.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = EXECUTE_SQL_JSDOC, params = {"sqlText", "datasourceName"})
     public void executeSql(String aSqlClause, String aDatasourceName, JSObject onSuccess, JSObject onFailure) throws Exception {

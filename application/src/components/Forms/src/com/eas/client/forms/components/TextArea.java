@@ -44,9 +44,9 @@ public class TextArea extends VTextArea implements HasOnValueChange, HasJsValue,
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* Text area component. \n"
-            + "* @param text the text for the component (optional)\n"
-            + "*/";
+            + " * Text area component. \n"
+            + " * @param text the text for the component (optional)\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
     public TextArea(String aText) {

@@ -26,6 +26,10 @@ define(['boxing'], function(B) {
         if(Form.superclass)
             Form.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * The handler function for the form's <i>before open</i> event.
+         */
+        this.onWindowOpened = new Object();
         Object.defineProperty(this, "onWindowOpened", {
             get: function() {
                 var value = delegate.onWindowOpened;
@@ -36,6 +40,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Determines whether this window should always be above other windows.
+         */
+        this.alwaysOnTop = true;
         Object.defineProperty(this, "alwaysOnTop", {
             get: function() {
                 var value = delegate.alwaysOnTop;
@@ -46,6 +54,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The form's icon.
+         */
+        this.icon = new Object();
         Object.defineProperty(this, "icon", {
             get: function() {
                 var value = delegate.icon;
@@ -56,6 +68,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The form's title text.
+         */
+        this.title = '';
         Object.defineProperty(this, "title", {
             get: function() {
                 var value = delegate.title;
@@ -66,6 +82,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * <code>true</code> if this form is minimized.
+         */
+        this.minimized = true;
         Object.defineProperty(this, "minimized", {
             get: function() {
                 var value = delegate.minimized;
@@ -73,6 +93,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The handler function for the form's <i>after minimize</i> event.
+         */
+        this.onWindowMinimized = new Object();
         Object.defineProperty(this, "onWindowMinimized", {
             get: function() {
                 var value = delegate.onWindowMinimized;
@@ -83,6 +107,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The distance for this form to the parent container's top side.
+         */
+        this.top = 0;
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -93,6 +121,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The handler function for the form's <i>after deactivate</i> event.
+         */
+        this.onWindowDeactivated = new Object();
         Object.defineProperty(this, "onWindowDeactivated", {
             get: function() {
                 var value = delegate.onWindowDeactivated;
@@ -103,6 +135,11 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Determines whether this form should appear at the default location
+         * for the native windowing system or at the current location.
+         */
+        this.locationByPlatform = true;
         Object.defineProperty(this, "locationByPlatform", {
             get: function() {
                 var value = delegate.locationByPlatform;
@@ -113,6 +150,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * <code>true</code> if this form minimizable.
+         */
+        this.minimizable = true;
         Object.defineProperty(this, "minimizable", {
             get: function() {
                 var value = delegate.minimizable;
@@ -123,6 +164,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The handler function for the form's <i>after activate</i> event.
+         */
+        this.onWindowActivated = new Object();
         Object.defineProperty(this, "onWindowActivated", {
             get: function() {
                 var value = delegate.onWindowActivated;
@@ -133,6 +178,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The form's height.
+         */
+        this.height = 0;
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -143,6 +192,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Checks if this form is visible.
+         */
+        this.visible = true;
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -150,6 +203,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The handler function for the form's <i>after maximize</i> event.
+         */
+        this.onWindowMaximized = new Object();
         Object.defineProperty(this, "onWindowMaximized", {
             get: function() {
                 var value = delegate.onWindowMaximized;
@@ -160,6 +217,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * <code>true</code> if this form resizable.
+         */
+        this.resizable = true;
         Object.defineProperty(this, "resizable", {
             get: function() {
                 var value = delegate.resizable;
@@ -170,6 +231,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The handler function for the form's <i>after restore</i> event.
+         */
+        this.onWindowRestored = new Object();
         Object.defineProperty(this, "onWindowRestored", {
             get: function() {
                 var value = delegate.onWindowRestored;
@@ -180,6 +245,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The form key. Used to identify a form instance. Initialy set to the form's application element name.
+         */
+        this.formKey = '';
         Object.defineProperty(this, "formKey", {
             get: function() {
                 var value = delegate.formKey;
@@ -190,6 +259,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * <code>true</code> if this form is maximized.
+         */
+        this.maximized = true;
         Object.defineProperty(this, "maximized", {
             get: function() {
                 var value = delegate.maximized;
@@ -197,6 +270,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The handler function for the form's <i>after close</i> event.
+         */
+        this.onWindowClosed = new Object();
         Object.defineProperty(this, "onWindowClosed", {
             get: function() {
                 var value = delegate.onWindowClosed;
@@ -207,6 +284,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * <code>true</code> if this form maximizable.
+         */
+        this.maximizable = true;
         Object.defineProperty(this, "maximizable", {
             get: function() {
                 var value = delegate.maximizable;
@@ -217,6 +298,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * <code>true</code> if no decoration to be enabled for this form.
+         */
+        this.undecorated = true;
         Object.defineProperty(this, "undecorated", {
             get: function() {
                 var value = delegate.undecorated;
@@ -227,6 +312,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The distance for this form to the parent container's left side.
+         */
+        this.left = 0;
         Object.defineProperty(this, "left", {
             get: function() {
                 var value = delegate.left;
@@ -237,6 +326,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The form's width.
+         */
+        this.width = 0;
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -247,6 +340,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The handler function for the form's <i>before close</i> event.
+         */
+        this.onWindowClosing = new Object();
         Object.defineProperty(this, "onWindowClosing", {
             get: function() {
                 var value = delegate.onWindowClosing;
@@ -257,6 +354,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The opacity of the form.
+         */
+        this.opacity = 0;
         Object.defineProperty(this, "opacity", {
             get: function() {
                 var value = delegate.opacity;
@@ -281,17 +382,6 @@ define(['boxing'], function(B) {
     };
 
     /**
-     * Shows the form as an ordinary window.
-     * @method show
-     * @memberOf Form
-     */
-    Form.prototype.show = function() {
-        var delegate = this.unwrap();
-        var value = delegate.show();
-        return B.boxAsJs(value);
-    };
-
-    /**
      * Moves form to the front position.
      * @method toFront
      * @memberOf Form
@@ -299,39 +389,6 @@ define(['boxing'], function(B) {
     Form.prototype.toFront = function() {
         var delegate = this.unwrap();
         var value = delegate.toFront();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Maximizes this form.
-     * @method maximize
-     * @memberOf Form
-     */
-    Form.prototype.maximize = function() {
-        var delegate = this.unwrap();
-        var value = delegate.maximize();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Minimizes this form.
-     * @method minimize
-     * @memberOf Form
-     */
-    Form.prototype.minimize = function() {
-        var delegate = this.unwrap();
-        var value = delegate.minimize();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Restores this form state.
-     * @method restore
-     * @memberOf Form
-     */
-    Form.prototype.restore = function() {
-        var delegate = this.unwrap();
-        var value = delegate.restore();
         return B.boxAsJs(value);
     };
 
@@ -348,6 +405,17 @@ define(['boxing'], function(B) {
     };
 
     /**
+     * Shows the form as an ordinary window.
+     * @method show
+     * @memberOf Form
+     */
+    Form.prototype.show = function() {
+        var delegate = this.unwrap();
+        var value = delegate.show();
+        return B.boxAsJs(value);
+    };
+
+    /**
      * Shows the form as an internal window in a desktop.
      * @param desktop the parent desktop object
      * @method showInternalFrame
@@ -356,6 +424,39 @@ define(['boxing'], function(B) {
     Form.prototype.showInternalFrame = function(desktop) {
         var delegate = this.unwrap();
         var value = delegate.showInternalFrame(B.boxAsJava(desktop));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Minimizes this form.
+     * @method minimize
+     * @memberOf Form
+     */
+    Form.prototype.minimize = function() {
+        var delegate = this.unwrap();
+        var value = delegate.minimize();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Maximizes this form.
+     * @method maximize
+     * @memberOf Form
+     */
+    Form.prototype.maximize = function() {
+        var delegate = this.unwrap();
+        var value = delegate.maximize();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Restores this form state.
+     * @method restore
+     * @memberOf Form
+     */
+    Form.prototype.restore = function() {
+        var delegate = this.unwrap();
+        var value = delegate.restore();
         return B.boxAsJs(value);
     };
 

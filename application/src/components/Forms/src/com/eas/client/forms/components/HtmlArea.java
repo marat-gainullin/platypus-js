@@ -43,9 +43,9 @@ public class HtmlArea extends VHtmlArea implements HasOnValueChange, HasJsValue,
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* HTML area component. \n"
-            + "* @param text the initial text for the HTML area (optional)\n"
-            + "*/";
+            + " * HTML area component. \n"
+            + " * @param text the initial text for the HTML area (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
     public HtmlArea(String aText) {

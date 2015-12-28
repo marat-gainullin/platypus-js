@@ -40,10 +40,10 @@ public class ProgressBar extends VProgressBar implements HasOnValueChange, HasPu
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* Progress bar component.\n"
-            + "* @param min the minimum value (optional)\n"
-            + "* @param max the maximum value (optional)\n"
-            + "*/";
+            + " * Progress bar component.\n"
+            + " * @param min the minimum value (optional)\n"
+            + " * @param max the maximum value (optional)\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"min", "max"})
     public ProgressBar(int min, int max) {

@@ -28,7 +28,10 @@ public class Insert extends Change {
         aChangeVisitor.visit(this);
     }
 
-    @ScriptFunction(jsDoc = "Data that will be inserted.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Data that will be inserted.\n"
+            + " */")
     public List<ChangeValue> getData() {
         return data;
     }

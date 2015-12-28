@@ -52,13 +52,13 @@ public class ToggleButton extends VToggleButton implements HasOnValueChange, Has
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* Toggle button component.\n"
-            + "* @param text the text for the component (optional)\n"
-            + "* @param icon the icon for the component (optional)\n"
-            + "* @param selected the selected state of the button (optional)\n"
-            + "* @param iconTextGap the text gap (optional)\n"
-            + "* @param actionPerformed the function for the action performed handler (optional)\n"
-            + "*/";
+            + " * Toggle button component.\n"
+            + " * @param text the text for the component (optional)\n"
+            + " * @param icon the icon for the component (optional)\n"
+            + " * @param selected the selected state of the button (optional)\n"
+            + " * @param iconTextGap the text gap (optional)\n"
+            + " * @param actionPerformed the function for the action performed handler (optional)\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "selected", "iconTextGap", "actionPerformed"})
     public ToggleButton(String aText, Icon aIcon, boolean aSelected, int aIconTextGap, JSObject aActionPerformedHandler) {

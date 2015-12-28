@@ -14,7 +14,7 @@ import javax.swing.ImageIcon;
  */
 public class BeanCompletionItem extends JsCompletionItem {
 
-    protected static final ImageIcon compIcon = new ImageIcon(BeanCompletionItem.class.getResource("bean.png"));
+    protected static final ImageIcon COMP_ICON = new ImageIcon(BeanCompletionItem.class.getResource("bean.png"));
     protected Class<?> beanClass;
     private static final int SORT_PRIORITY = 50;
 
@@ -22,7 +22,7 @@ public class BeanCompletionItem extends JsCompletionItem {
         super(aText, (aInformationText != null && !aInformationText.isEmpty()) ? aInformationText : null, aStartOffset, aEndOffset);
         beanClass = aBean;
         rightText = beanClass.getSimpleName();
-        icon = compIcon;
+        icon = COMP_ICON;
     }
     
     @Override

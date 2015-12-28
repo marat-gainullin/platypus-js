@@ -29,12 +29,18 @@ public class Command extends Change {
         aChangeVisitor.visit(this);
     }
 
-    @ScriptFunction(jsDoc = "Command sql text to be applied in a database.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Command sql text to be applied in a database.\n"
+            + " */")
     public String getCommand() {
         return command;
     }
 
-    @ScriptFunction(jsDoc = "Parameters of command.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Parameters of command.\n"
+            + " */")
     public List<ChangeValue> getParameters() {
         return parameters;
     }

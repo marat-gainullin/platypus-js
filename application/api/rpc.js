@@ -6,9 +6,14 @@ define('logger', function () {
     var JavaArrayClass = Java.type("java.lang.Object[]");
     var space = ScriptsClass.getSpace();
     /**
-     * Constructs server module network proxy.
+     * Server modules remote network or local script spaces proxy.
+     * If it is used on client (J2SE, or in Browser) it is remote proxy thransforming methods' stubs calls into
+     * network requests.
+     * If it is used in server environment it is local proxy thransforming methods' stubs calls into neighbor script space's queue.
+     * In this case, results, calculated on the other side of LPC are placed into initial script space's queue in form of success callback call.
      * @constructor
-     * @param {String} aModuleName Name of server module (session stateless or statefull or rezident).
+     * @param {String} aModuleName Name of a server module(session stateless or statefull or rezident), this proxy is used for as communication interface.
+     * @returns {Proxy}
      */
     function RpcProxy(aModuleName) {
         if (aModuleName) {
@@ -59,17 +64,28 @@ define('logger', function () {
             throw "Module name could not be empty.";
         }
     }
+    /**
+     * Loads server modules structure (list of functions), constructs Proxies for them and
+     * passes them to aOnSuccess callback.
+     * @param {String|Array} aRemotesNames Names(s) of server modules.
+     * @param {Function} aOnSuccess Success callback. Accepts proxies, constrcuted upon loaded structure of server modules.
+     * @param {Function} aOnFailure Failure callback. Called if some problem occurs while loading modules structure from a server.
+     * @returns {undefined}
+     */
     function requireRemotes(aRemotesNames, aOnSuccess, aOnFailure) {
         var remotesNames = Array.isArray(aRemotesNames) ? aRemotesNames : [aRemotesNames];
         ScriptedResourceClass.loadRemotes(Java.to(remotesNames, JavaStringArrayClass), aOnSuccess ? function () {
             var proxies = [];
-            for(var r = 0; r < remotesNames.length; r++){
+            for (var r = 0; r < remotesNames.length; r++) {
                 proxies.push(new RpcProxy(remotesNames[r]));
             }
             aOnSuccess.apply(null, proxies);
         } : null, aOnFailure ? aOnFailure : null);
     }
-    var module = {};
+    var module = {
+        Proxy: RpcProxy,
+        requireRemotes: requireRemotes
+    };
     Object.defineProperty(module, 'Proxy', {
         enumerable: true,
         value: RpcProxy

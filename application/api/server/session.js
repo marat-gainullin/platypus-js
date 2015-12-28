@@ -22,6 +22,10 @@ define(['boxing'], function(B) {
         if(Session.superclass)
             Session.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * Contains modules collection of this session.
+         */
+        this.modules = new Object();
         Object.defineProperty(this, "modules", {
             get: function() {
                 var value = delegate.modules;

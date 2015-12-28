@@ -22,6 +22,10 @@ define(['boxing'], function(B) {
         if(KeyEvent.superclass)
             KeyEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * Alt key is down on this event.
+         */
+        this.altDown = true;
         Object.defineProperty(this, "altDown", {
             get: function() {
                 var value = delegate.altDown;
@@ -29,6 +33,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Ctrl key is down on this event.
+         */
+        this.controlDown = true;
         Object.defineProperty(this, "controlDown", {
             get: function() {
                 var value = delegate.controlDown;
@@ -36,6 +44,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Shift key is down on this event.
+         */
+        this.shiftDown = true;
         Object.defineProperty(this, "shiftDown", {
             get: function() {
                 var value = delegate.shiftDown;
@@ -43,6 +55,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Char associated with this event.
+         */
+        this.char = '';
         Object.defineProperty(this, "char", {
             get: function() {
                 var value = delegate.char;
@@ -50,6 +66,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Meta key is down on this event.
+         */
+        this.metaDown = true;
         Object.defineProperty(this, "metaDown", {
             get: function() {
                 var value = delegate.metaDown;
@@ -57,6 +77,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The source object of the event.
+         */
+        this.source = new Object();
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
@@ -64,6 +88,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * Key code associated with this event.
+         */
+        this.key = 0;
         Object.defineProperty(this, "key", {
             get: function() {
                 var value = delegate.key;

@@ -4,7 +4,7 @@
  * @module ${appElementName}
  */
 define(['orm', 'template'], function (Orm, loadTemplate, ModuleName) {
-    return function () {
+    function module_constructor() {
         var self = this
                 , model = Orm.loadModel(ModuleName)
                 , template = loadTemplate(ModuleName, model);
@@ -21,5 +21,6 @@ define(['orm', 'template'], function (Orm, loadTemplate, ModuleName) {
             }, onFailure);
 
         };
-    };
+    }
+    return module_constructor;
 });

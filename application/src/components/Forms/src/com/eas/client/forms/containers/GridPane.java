@@ -62,12 +62,12 @@ public class GridPane extends JPanel implements HasPublished, HasContainerEvents
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* A container with Grid Layout.\n"
-            + "* @param rows the number of grid rows.\n"
-            + "* @param cols the number of grid columns.\n"
-            + "* @param hgap the horizontal gap (optional).\n"
-            + "* @param vgap the vertical gap (optional).\n"
-            + "*/";
+            + " * A container with Grid Layout.\n"
+            + " * @param rows the number of grid rows.\n"
+            + " * @param cols the number of grid columns.\n"
+            + " * @param hgap the horizontal gap (optional).\n"
+            + " * @param vgap the vertical gap (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"rows", "cols", "hgap", "vgap"})
     public GridPane(int rows, int cols, int hgap, int vgap) {
@@ -349,11 +349,11 @@ public class GridPane extends JPanel implements HasPublished, HasContainerEvents
 
     private static final String ADD_JSDOC = ""
             + "/**\n"
-            + "* Appends the specified component to the end of this container.\n"
-            + "* @param component the component to add\n"
-            + "* @param row the row of the component\n"
-            + "* @param column the column of the component\n"
-            + "*/";
+            + " * Appends the specified component to the end of this container.\n"
+            + " * @param component the component to add\n"
+            + " * @param row the row of the component\n"
+            + " * @param column the column of the component\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component", "row", "column"})
     public void add(JComponent aComp, int aRow, int aCol) {

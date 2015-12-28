@@ -23,6 +23,12 @@ import org.openide.windows.InputOutput;
  */
 public interface PlatypusProject extends Project {
 
+    public static final String WEB_DIRECTORY = "web"; //NOI18N
+    public static final String WEB_INF_DIRECTORY = "WEB-INF"; //NOI18N
+    public static final String LIB_DIRECTORY_NAME = "lib"; //NOI18N
+    public static final String CLASSES_DIRECTORY_NAME = "classes"; //NOI18N
+    public static final String PLATYPUS_WEB_CLIENT_DIR_NAME = "pwc"; //NOI18N
+
     public interface ClientChangeListener {
 
         public void connected(String aDatasourceName);
@@ -42,13 +48,15 @@ public interface PlatypusProject extends Project {
     LocalQueriesProxy getQueries();
 
     PlatypusIndexer getIndexer();
-    
+
     boolean isDbConnected(String aDatasourceId);
 
     void startConnecting2db(String aDatasourceId);
 
     void disconnectFormDb(String aDatasourceId) throws InterruptedException, ExecutionException;
 
+    boolean isPlatypusJsIntegrating();
+    
     InputOutput getOutputWindowIO();
 
     Component generateDbPlaceholder(String aDatasourceId) throws Exception;
@@ -56,13 +64,13 @@ public interface PlatypusProject extends Project {
     Component generateDbValidatePlaceholder() throws Exception;
 
     ListenerRegistration addClientChangeListener(final ClientChangeListener onChange);
-    
+
     ListenerRegistration addQueriesChangeListener(final QueriesChangeListener onChange);
 
     public void fireQueriesChanged();
-        
+
     public void fireQueryChanged(String aQueryName);
-    
+
     PlatypusProjectSettings getSettings();
 
     void save() throws Exception;
@@ -76,6 +84,8 @@ public interface PlatypusProject extends Project {
     ProjectState getState();
 
     FileObject getSrcRoot();
+
+    FileObject getApiRoot();
 
     PlatypusProjectInformation getProjectInfo();
 

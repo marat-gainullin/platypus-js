@@ -107,6 +107,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                 chGlobalApi.setSelected(projectSettings.getGlobalAPI());
                 cbNotStartServer.setSelected(projectSettings.isNotStartServer());
                 cbEnableWebSecurity.setSelected(projectSettings.isSecurityRealmEnabled());
+                cbAutoApply.setSelected(projectSettings.isAutoApplyWebSettings());
                 enablePlatypusClientCustomSettings();
                 cbClientType.setSelectedItem(projectSettings.getRunClientType());
                 cbAppServerType.setSelectedItem(projectSettings.getRunAppServerType());
@@ -271,6 +272,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         txtContext = new javax.swing.JTextField();
         btnManageServers = new javax.swing.JButton();
         cbEnableWebSecurity = new javax.swing.JCheckBox();
+        cbAutoApply = new javax.swing.JCheckBox();
         cbClientType = new javax.swing.JComboBox();
         lblClientType = new javax.swing.JLabel();
         lblServeType = new javax.swing.JLabel();
@@ -649,13 +651,22 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             }
         });
 
+        cbAutoApply.setText(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.cbAutoApply.text")); // NOI18N
+        cbAutoApply.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbAutoApplyActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout j2eeServerPanelLayout = new javax.swing.GroupLayout(j2eeServerPanel);
         j2eeServerPanel.setLayout(j2eeServerPanelLayout);
         j2eeServerPanelLayout.setHorizontalGroup(
             j2eeServerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(j2eeServerPanelLayout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, j2eeServerPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(j2eeServerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(j2eeServerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(cbEnableWebSecurity, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(cbAutoApply, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(j2eeServerPanelLayout.createSequentialGroup()
                         .addGroup(j2eeServerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblJ2eeServer)
@@ -663,13 +674,10 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(j2eeServerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(cbj2eeServer, 0, 242, Short.MAX_VALUE)
-                            .addComponent(txtContext))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnManageServers)
-                        .addGap(102, 102, 102))
-                    .addGroup(j2eeServerPanelLayout.createSequentialGroup()
-                        .addComponent(cbEnableWebSecurity)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(txtContext))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnManageServers)
+                .addGap(102, 102, 102))
         );
         j2eeServerPanelLayout.setVerticalGroup(
             j2eeServerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -685,7 +693,9 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                     .addComponent(txtContext, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(cbEnableWebSecurity)
-                .addContainerGap(186, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cbAutoApply)
+                .addContainerGap(160, Short.MAX_VALUE))
         );
 
         tabbedPane.addTab(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.j2eeServerPanel.TabConstraints.tabTitle"), j2eeServerPanel); // NOI18N
@@ -797,7 +807,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                     .addComponent(chCacheBust)
                     .addComponent(chGlobalApi))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(tabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 301, Short.MAX_VALUE))
+                .addComponent(tabbedPane))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -1005,11 +1015,16 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         projectSettings.setGlobalAPI(chGlobalApi.isSelected());
     }//GEN-LAST:event_chGlobalApiActionPerformed
 
+    private void cbAutoApplyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbAutoApplyActionPerformed
+        projectSettings.setAutoApplyWebSettings(cbAutoApply.isSelected());
+    }//GEN-LAST:event_cbAutoApplyActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddDatasource;
     private javax.swing.JButton btnBrowse;
     private javax.swing.JButton btnManageServers;
     private javax.swing.JComboBox cbAppServerType;
+    private javax.swing.JCheckBox cbAutoApply;
     private javax.swing.JComboBox cbClientLogLevel;
     private javax.swing.JComboBox cbClientType;
     private javax.swing.JComboBox cbConnections;

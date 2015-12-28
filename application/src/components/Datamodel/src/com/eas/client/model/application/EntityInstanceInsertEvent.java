@@ -28,8 +28,8 @@ public class EntityInstanceInsertEvent extends PublishedSourcedEvent {
 
     private static final String INSERTED_JSDOC = ""
             + "/**\n"
-            + "* The inserted element.\n"
-            + "*/";
+            + " * The inserted element.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = INSERTED_JSDOC)
     public JSObject getInserted() {
@@ -38,8 +38,8 @@ public class EntityInstanceInsertEvent extends PublishedSourcedEvent {
 
     private static final String OBJECT_JSDOC = ""
             + "/**\n"
-            + "* The inserted element.\n"
-            + "*/";
+            + " * The inserted element.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = OBJECT_JSDOC)
     public JSObject getObject() {

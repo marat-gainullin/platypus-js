@@ -102,7 +102,7 @@ public class Report implements HasPublished {
     private static final String SAVE_JSDOC = ""
             + "/**\n"
             + " * Saves the report at a specified location.\n"
-            + " * @param aFileName Name of a file, the generated report should be save in."
+            + " * @param aFileName Name of a file, the generated report should be save in.\n"
             + " */";
 
     @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"aFileName"})

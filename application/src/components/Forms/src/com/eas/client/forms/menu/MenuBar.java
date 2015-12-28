@@ -284,9 +284,9 @@ public class MenuBar extends JMenuBar implements HasPublished, HasContainerEvent
 
     private static final String ADD_JSDOC = ""
             + "/**\n"
-            + "* Adds the item to the menu.\n"
-            + "* @param menu the menu component to add\n"
-            + "*/";
+            + " * Adds the item to the menu.\n"
+            + " * @param menu the menu component to add\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"menu"})
     public void add(JComponent aMenu) {

@@ -22,6 +22,10 @@ define(['boxing'], function(B) {
         if(EntityInstanceChangeEvent.superclass)
             EntityInstanceChangeEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * The new value.
+         */
+        this.newValue = new Object();
         Object.defineProperty(this, "newValue", {
             get: function() {
                 var value = delegate.newValue;
@@ -29,6 +33,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The changed property name.
+         */
+        this.propertyName = '';
         Object.defineProperty(this, "propertyName", {
             get: function() {
                 var value = delegate.propertyName;
@@ -36,6 +44,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The old value.
+         */
+        this.oldValue = new Object();
         Object.defineProperty(this, "oldValue", {
             get: function() {
                 var value = delegate.oldValue;
@@ -43,6 +55,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The source object of the event.
+         */
+        this.source = new Object();
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
@@ -50,6 +66,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The updated element.
+         */
+        this.object = new Object();
         Object.defineProperty(this, "object", {
             get: function() {
                 var value = delegate.object;

@@ -7,7 +7,6 @@ package com.eas.designer.explorer.j2ee.tomcat;
 import com.eas.client.ClientConstants;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.j2ee.PlatypusWebModule;
-import com.eas.designer.explorer.j2ee.WebAppManager;
 import com.eas.designer.application.platform.PlatformHomePathException;
 import com.eas.designer.application.platform.PlatypusPlatform;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
@@ -41,25 +40,24 @@ import org.openide.util.Parameters;
  *
  * @author vv
  */
-public class TomcatWebAppManager implements WebAppManager {
+public class TomcatWebAppManager {
 
     public static final String TOMCAT_SERVER_ID = "Tomcat"; //NOI18N
     public static final String TOMCAT_LIB_DIR = "lib"; //NOI18N
-    public final String CONTEXT_FILE_NAME = "context.xml"; //NOI18N
-    public final String DATASOURCE_REALM_CLASS_NAME = "org.apache.catalina.realm.DataSourceRealm"; //NOI18N
+    public static final String CONTEXT_FILE_NAME = "context.xml"; //NOI18N
+    public static final String DATASOURCE_REALM_CLASS_NAME = "org.apache.catalina.realm.DataSourceRealm"; //NOI18N
     protected final PlatypusProjectImpl project;
-    private final ServerInstance si;
+    private final ServerInstance tomcatInstance;
 
-    public TomcatWebAppManager(PlatypusProjectImpl aProject, String serverInstanceID) throws InstanceRemovedException {
+    public TomcatWebAppManager(PlatypusProjectImpl aProject, String serverInstanceId) throws InstanceRemovedException {
         project = aProject;
-        si = Deployment.getDefault().getServerInstance(serverInstanceID);
+        tomcatInstance = Deployment.getDefault().getServerInstance(serverInstanceId);
     }
 
-    @Override
     public void deployJdbcDrivers() {
         try {
-            List<File> driverCP = Arrays.asList(si.getJ2eePlatform().getClasspathEntries());
-            FileObject tomcatLibDirectory = FileUtil.toFileObject(si.getJ2eePlatform().getServerHome()).getFileObject(TOMCAT_LIB_DIR);
+            List<File> driverCP = Arrays.asList(tomcatInstance.getJ2eePlatform().getClasspathEntries());
+            FileObject tomcatLibDirectory = FileUtil.toFileObject(tomcatInstance.getJ2eePlatform().getServerHome()).getFileObject(TOMCAT_LIB_DIR);
             for (DataSourceResource res : getDataSources()) {
                 if (!containsClass(driverCP, res.getDriverClassName())) {
                     deployJdbcDriver(tomcatLibDirectory, res.getDriverClassName());
@@ -70,16 +68,17 @@ public class TomcatWebAppManager implements WebAppManager {
         }
     }
 
-    @Override
     public void configure() {
         try {
-            FileObject contextFileObject = getWebMobdule().getMetaInfDir().getFileObject(CONTEXT_FILE_NAME);
-            if (contextFileObject == null) {
-                contextFileObject = getWebMobdule().getMetaInfDir().createData(CONTEXT_FILE_NAME);
+            FileObject contextXml = getWebMobdule().getMetaInfDir().getFileObject(CONTEXT_FILE_NAME);
+            if (contextXml == null || project.getSettings().isAutoApplyWebSettings()) {
+                if (contextXml == null) {
+                    contextXml = getWebMobdule().getMetaInfDir().createData(CONTEXT_FILE_NAME);
+                }
+                Context ctx = getContext();
+                FileUtils.writeString(FileUtil.toFile(contextXml), XmlDom2String.transform(ctx.toDocument()), PlatypusUtils.COMMON_ENCODING_NAME);
+                Logger.getLogger(getClass().getName()).log(Level.INFO, "Starting configuring an application for Tomcat.");
             }
-            Context ctx = getContext();
-            FileUtils.writeString(FileUtil.toFile(contextFileObject), XmlDom2String.transform(ctx.toDocument()), PlatypusUtils.COMMON_ENCODING_NAME);
-            Logger.getLogger(getClass().getName()).log(Level.INFO, "Starting configuring an application for Tomcat.");
         } catch (IOException ex) {
             ErrorManager.getDefault().notify(ex);
         }
@@ -130,10 +129,8 @@ public class TomcatWebAppManager implements WebAppManager {
                         }
                     }
                 }
-            } else {
-                if (new File(file, classFilePath).exists()) {
-                    return true;
-                }
+            } else if (new File(file, classFilePath).exists()) {
+                return true;
             }
         }
         return false;

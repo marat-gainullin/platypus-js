@@ -229,8 +229,6 @@ public class PlatypusProjectView implements LogicalViewProvider {
         private void fillActions() {
             actions.add(ProjectSensitiveActions.projectCommandAction(ActionProvider.COMMAND_RUN,
                     NbBundle.getMessage(PlatypusProjectView.class, "LBL_RunAction_Name"), null)); // NOI18N
-            actions.add(ProjectSensitiveActions.projectCommandAction(PlatypusProjectActions.COMMAND_CLEAN_AND_RUN,
-                    NbBundle.getMessage(PlatypusProjectView.class, "LBL_CleanRunAction_Name"), null)); // NOI18N
             actions.add(ProjectSensitiveActions.projectCommandAction(ActionProvider.COMMAND_DEBUG,
                     NbBundle.getMessage(PlatypusProjectView.class, "LBL_DebugAction_Name"), null)); // NOI18N
             actions.add(null);
@@ -238,8 +236,6 @@ public class PlatypusProjectView implements LogicalViewProvider {
                     NbBundle.getMessage(PlatypusProjectView.class, "LBL_ConnectToDbAction_Name"), null)); // NOI18N
             actions.add(ProjectSensitiveActions.projectCommandAction(PlatypusProjectActions.COMMAND_DISCONNECT,
                     NbBundle.getMessage(PlatypusProjectView.class, "LBL_DisconnectFromDbAction_Name"), null)); // NOI18N
-            actions.add(ProjectSensitiveActions.projectCommandAction(PlatypusProjectActions.COMMAND_CLEAN,
-                    NbBundle.getMessage(PlatypusProjectView.class, "LBL_CleanAction_Name"), null)); // NOI18N
             actions.add(null);
             Action[] commonActions = CommonProjectActions.forType("org-netbeans-modules-platypus"); // NOI18N
             actions.addAll(Arrays.asList(commonActions));

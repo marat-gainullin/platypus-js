@@ -22,6 +22,10 @@ define(['boxing'], function(B) {
         if(EntityInstanceInsertEvent.superclass)
             EntityInstanceInsertEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * The inserted element.
+         */
+        this.inserted = new Object();
         Object.defineProperty(this, "inserted", {
             get: function() {
                 var value = delegate.inserted;
@@ -29,6 +33,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The source object of the event.
+         */
+        this.source = new Object();
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
@@ -36,6 +44,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The inserted element.
+         */
+        this.object = new Object();
         Object.defineProperty(this, "object", {
             get: function() {
                 var value = delegate.object;

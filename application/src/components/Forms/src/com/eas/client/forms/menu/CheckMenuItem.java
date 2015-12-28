@@ -46,11 +46,11 @@ public class CheckMenuItem extends VCheckBoxMenuItem implements HasJsValue, HasP
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* A menu item that can be selected or deselected.\n"
-            + "* @param text the text of the component (optional).\n"
-            + "* @param selected <code>true</code> if selected (optional).\n"
-            + "* @param actionPerformed On action performed function (optional).\n"
-            + "*/";
+            + " * A menu item that can be selected or deselected.\n"
+            + " * @param text the text of the component (optional).\n"
+            + " * @param selected <code>true</code> if selected (optional).\n"
+            + " * @param actionPerformed On action performed function (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected", "actionPerformed"})
     public CheckMenuItem(String aText, boolean aSelected, JSObject aActionPerformedHandler) {

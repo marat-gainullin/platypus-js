@@ -21,8 +21,8 @@ public class KeyEvent extends Event<java.awt.event.KeyEvent> {
 
     private static final String KEY_JS_DOC = ""
             + "/**\n"
-            + "* Key code associated with this event.\n"
-            + "*/";
+            + " * Key code associated with this event.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = KEY_JS_DOC)
     public int getKey() {
@@ -31,8 +31,8 @@ public class KeyEvent extends Event<java.awt.event.KeyEvent> {
 
     private static final String ALT_DOWN_JS_DOC = ""
             + "/**\n"
-            + "* Alt key is down on this event.\n"
-            + "*/";
+            + " * Alt key is down on this event.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ALT_DOWN_JS_DOC)
     public boolean isAltDown() {
@@ -41,8 +41,8 @@ public class KeyEvent extends Event<java.awt.event.KeyEvent> {
 
     private static final String CONTROL_DOWN_JS_DOC = ""
             + "/**\n"
-            + "* Ctrl key is down on this event.\n"
-            + "*/";
+            + " * Ctrl key is down on this event.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONTROL_DOWN_JS_DOC)
     public boolean isControlDown() {
@@ -51,8 +51,8 @@ public class KeyEvent extends Event<java.awt.event.KeyEvent> {
 
     private static final String SHIFT_DOWN_JS_DOC = ""
             + "/**\n"
-            + "* Shift key is down on this event.\n"
-            + "*/";
+            + " * Shift key is down on this event.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = SHIFT_DOWN_JS_DOC)
     public boolean isShiftDown() {
@@ -61,8 +61,8 @@ public class KeyEvent extends Event<java.awt.event.KeyEvent> {
 
     private static final String META_DOWN_JS_DOC = ""
             + "/**\n"
-            + "* Meta key is down on this event.\n"
-            + "*/";
+            + " * Meta key is down on this event.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = META_DOWN_JS_DOC)
     public boolean isMetaDown() {
@@ -71,8 +71,8 @@ public class KeyEvent extends Event<java.awt.event.KeyEvent> {
 
     private static final String KEY_CHAR_JS_DOC = ""
             + "/**\n"
-            + "* Char associated with this event.\n"
-            + "*/";
+            + " * Char associated with this event.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = KEY_CHAR_JS_DOC)
     public String getChar() {

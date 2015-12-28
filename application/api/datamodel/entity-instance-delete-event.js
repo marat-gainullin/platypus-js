@@ -22,6 +22,10 @@ define(['boxing'], function(B) {
         if(EntityInstanceDeleteEvent.superclass)
             EntityInstanceDeleteEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * The deleted element.
+         */
+        this.deleted = new Object();
         Object.defineProperty(this, "deleted", {
             get: function() {
                 var value = delegate.deleted;
@@ -29,6 +33,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The source object of the event.
+         */
+        this.source = new Object();
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;

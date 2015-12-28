@@ -57,13 +57,16 @@ public class PlatypusPlatform {
     public static final String LIB_DIRECTORY_NAME = "lib"; //NOI18N
     public static final String UPDATES_DIRECTORY_NAME = "updates"; //NOI18N
     public static final String JS_API_DIRECTORY_NAME = "api"; //NOI18N
+    public static final String VERSION_FILE_NAME = "version.xml"; //NOI18N
+    public static final String VERSION_TAG_NAME = "Version"; //NOI18N
+    public static final String VERSION_ATTRIBUTE_NAME = "version"; //NOI18N
     public static final String JAR_FILE_EXTENSION = "jar"; //NOI18N
     public static final String THIRDPARTY_LIB_DIRECTORY_NAME = "thirdparty"; //NOI18N
-    private static final String PLATFORM_ERROR_MSG = "Platform executables home does not exist or not a directory.";
+    private static final String PLATFORM_ERROR_MSG = "Platypus.js home does not exist or not a directory.";
     private static final String LINUX_UPDATE_EXECUTABLE = "update.sh";
 //    private static final String MAC_UPDATE_EXECUTABLE = "update-mac.sh";
     private static final String WINDOWS_UPDATE_EXECUTABLE = "lookup-x86.exe";
-    private static final String WINDOWS_UPDATE_EXECUTABLE_x64 = "lookup-x64.exe";
+    private static final String WINDOWS_UPDATE_EXECUTABLE_X64 = "lookup-x64.exe";
     private static final Map<String, File> jarsCache = new HashMap<>();
     private static final int NEW_VERSION_CODE = 10;
     private static final int UPGRADE_VERSION_CODE = 12;
@@ -83,7 +86,7 @@ public class PlatypusPlatform {
                 if (System.getProperty("os.arch").equals("x86")) {
                     executableName = WINDOWS_UPDATE_EXECUTABLE;
                 } else {
-                    executableName = WINDOWS_UPDATE_EXECUTABLE_x64;
+                    executableName = WINDOWS_UPDATE_EXECUTABLE_X64;
                 }
             } //            else if (Utilities.isMac()) {
             //                executableName = MAC_UPDATE_EXECUTABLE;
@@ -270,6 +273,34 @@ public class PlatypusPlatform {
         return PlatypusPlatform.getPlatformApiDirectory(getPlatformHomeDir());
     }
 
+    /**
+     * Gets the platform's version.xml file.
+     *
+     * @return bin directory path
+     * @throws PlatformHomePathException if the platform isn't properly
+     * configured
+     */
+    public static File getPlatformVersion() throws PlatformHomePathException {
+        return PlatypusPlatform.getPlatformVersion(getPlatformHomeDir());
+    }
+
+    /**
+     * Gets the platform's version.xml file.
+     *
+     * @param platfromHomeDir
+     * @return bin directory path
+     * @throws PlatformHomePathException if the platform isn't properly
+     * configured
+     */
+    public static File getPlatformVersion(File platfromHomeDir) throws PlatformHomePathException {
+        File platformVersion = new File(platfromHomeDir + File.separator + UPDATES_DIRECTORY_NAME, VERSION_FILE_NAME);
+        if (!platformVersion.exists() || platformVersion.isDirectory()) {
+            throw new PlatformHomePathException(PLATFORM_ERROR_MSG);
+        }
+        return platformVersion;
+    }
+
+    /**
     /**
      * Gets the platform's JavaScript API directory.
      *

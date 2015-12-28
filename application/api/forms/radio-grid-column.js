@@ -22,6 +22,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         if(RadioGridColumn.superclass)
             RadioGridColumn.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        this.preferredWidth = 0;
         Object.defineProperty(this, "preferredWidth", {
             get: function() {
                 var value = delegate.preferredWidth;
@@ -32,6 +33,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        this.visible = true;
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -42,6 +44,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        this.resizable = true;
         Object.defineProperty(this, "resizable", {
             get: function() {
                 var value = delegate.resizable;
@@ -52,6 +55,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        this.minWidth = 0;
         Object.defineProperty(this, "minWidth", {
             get: function() {
                 var value = delegate.minWidth;
@@ -62,6 +66,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        this.foreground = new Object();
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;
@@ -72,6 +77,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        this.sortable = true;
         Object.defineProperty(this, "sortable", {
             get: function() {
                 var value = delegate.sortable;
@@ -82,6 +88,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        this.title = '';
         Object.defineProperty(this, "title", {
             get: function() {
                 var value = delegate.title;
@@ -92,6 +99,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        this.movable = true;
         Object.defineProperty(this, "movable", {
             get: function() {
                 var value = delegate.movable;
@@ -102,6 +110,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        this.readonly = true;
         Object.defineProperty(this, "readonly", {
             get: function() {
                 var value = delegate.readonly;
@@ -112,6 +121,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        this.background = new Object();
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
@@ -122,6 +132,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        this.width = 0;
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -129,6 +140,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        this.font = new Object();
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
@@ -139,6 +151,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        this.maxWidth = 0;
         Object.defineProperty(this, "maxWidth", {
             get: function() {
                 var value = delegate.maxWidth;

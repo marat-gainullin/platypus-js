@@ -22,6 +22,10 @@ define(['boxing'], function(B) {
         if(ContainerEvent.superclass)
             ContainerEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        /**
+         * The source object of the event.
+         */
+        this.source = new Object();
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
@@ -29,6 +33,10 @@ define(['boxing'], function(B) {
             }
         });
 
+        /**
+         * The child component the operation is performed on.
+         */
+        this.child = new Object();
         Object.defineProperty(this, "child", {
             get: function() {
                 var value = delegate.child;

@@ -28,8 +28,8 @@ public class EntityInstanceDeleteEvent extends PublishedSourcedEvent {
 
     private static final String DELETED_JSDOC = ""
             + "/**\n"
-            + "* The deleted element.\n"
-            + "*/";
+            + " * The deleted element.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = DELETED_JSDOC)
     public JSObject getDeleted() {
