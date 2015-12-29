@@ -49,7 +49,6 @@ import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 import org.apache.mina.filter.executor.ExecutorFilter;
-import org.apache.mina.filter.ssl.SslFilter;
 import org.apache.mina.transport.socket.SocketConnector;
 import org.apache.mina.transport.socket.nio.NioProcessor;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
@@ -90,7 +89,8 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
 
         connector = configureConnector(networkProcessor, sslContext, aInteractive);
 
-        syncSocket = sslContext.getSocketFactory().createSocket();
+        //syncSocket = sslContext.getSocketFactory().createSocket(); commented out until MINA Sslfilter bugs will be fixed
+        syncSocket = new Socket();
         syncEncoder = new RequestEncoder();
         syncDecoder = new ResponseDecoder();
     }
