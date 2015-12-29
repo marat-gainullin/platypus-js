@@ -6,6 +6,6 @@
 
 <tc-ref version="2.0" >
     <module name="com.bearsoft.org.netbeans.modules.form"/>
-    <tc-id id="ComponentPalette" />
+    <tc-id id="PlatypusComponentPalette" />
     <state opened="false" />
 </tc-ref>

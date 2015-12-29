@@ -113,16 +113,17 @@ public final class PaletteUtils {
         }
 
         try {
-            paletteFolder = FileUtil.getConfigFile("FormDesignerPalette"); // NOI18N
+            paletteFolder = FileUtil.getConfigFile(PLATYPUS_FORM_DESIGNER_PALETTE_NAME); // NOI18N
             if (paletteFolder == null) // not found, create new folder
             {
-                paletteFolder = FileUtil.getConfigRoot().createFolder("FormDesignerPalette"); // NOI18N
+                paletteFolder = FileUtil.getConfigRoot().createFolder(PLATYPUS_FORM_DESIGNER_PALETTE_NAME); // NOI18N
             }
         } catch (java.io.IOException ex) {
             throw new IllegalStateException("Palette folder not found and cannot be created."); // NOI18N
         }
         return paletteFolder;
     }
+    private static final String PLATYPUS_FORM_DESIGNER_PALETTE_NAME = "PlatypusFormDesignerPalette";
 
     public static Node getPaletteNode() {
         return getPaletteDataFolder().getNodeDelegate();
@@ -130,7 +131,7 @@ public final class PaletteUtils {
 
     public static void showPaletteManager() {
         try {
-            PaletteFactory.createPalette("FormDesignerPalette", // NOI18N
+            PaletteFactory.createPalette(PLATYPUS_FORM_DESIGNER_PALETTE_NAME, // NOI18N
                     new PaletteActions() {
                         @Override
                         public Action[] getImportActions() {
@@ -324,7 +325,7 @@ public final class PaletteUtils {
      */
     private static PaletteController createPalette(SwingPaletteFilter filter) {
         try {
-            return PaletteFactory.createPalette("FormDesignerPalette", // NOI18N
+            return PaletteFactory.createPalette(PLATYPUS_FORM_DESIGNER_PALETTE_NAME, // NOI18N
                     new PaletteActions() {
                         @Override
                         public Action[] getImportActions() {
