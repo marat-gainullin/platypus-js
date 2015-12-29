@@ -62,15 +62,16 @@ public class ToolsCaption extends FlowPanel implements HasHTML {
 		label.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		label.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		label.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
-		label.setStyleName("window-caption-text");// to implicitly remove gwt-HTML class
-		
+		label.setStyleName("window-caption-text");// to implicitly remove
+		                                          // gwt-HTML class
+
 		tools.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		tools.getElement().getStyle().setFloat(Style.Float.RIGHT);
 		tools.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
 		tools.setStyleName("window-caption-tools");
-		
+
 		getElement().getStyle().setPosition(Style.Position.RELATIVE);
-		
+
 		add(label);
 		add(tools);
 		tools.add(btnMinimize);
@@ -105,18 +106,18 @@ public class ToolsCaption extends FlowPanel implements HasHTML {
 				window.close();
 			}
 		}, ClickEvent.getType());
-		
-		addDomHandler(new DoubleClickHandler(){
+
+		addDomHandler(new DoubleClickHandler() {
 
 			@Override
-            public void onDoubleClick(DoubleClickEvent event) {
-				if(window.isMaximized()){
+			public void onDoubleClick(DoubleClickEvent event) {
+				if (window.isMaximized()) {
 					window.restore();
-				}else{
+				} else {
 					window.maximize();
 				}
-            }
-			
+			}
+
 		}, DoubleClickEvent.getType());
 		setWindow(aWindow);
 	}
@@ -174,7 +175,11 @@ public class ToolsCaption extends FlowPanel implements HasHTML {
 
 	@Override
 	public void setHTML(String html) {
-		label.setHTML(html);
+		if (html != null && !html.isEmpty()) {
+			label.setHTML(html);
+		} else {
+			label.setHTML("&nbsp;");
+		}
 	}
 
 	@Override
@@ -184,7 +189,11 @@ public class ToolsCaption extends FlowPanel implements HasHTML {
 
 	@Override
 	public void setText(String text) {
-		label.setText(text);
+		if (text != null && !text.isEmpty()) {
+			label.setText(text);
+		} else {
+			label.setHTML("&nbsp;");
+		}
 	}
 
 	public ImageResource getIcon() {

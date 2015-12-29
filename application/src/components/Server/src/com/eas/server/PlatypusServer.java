@@ -124,13 +124,13 @@ public class PlatypusServer extends PlatypusServerCore {
     }
 
     private void initializeAndBindPlatypusAcceptor(InetSocketAddress s) throws IOException, Exception {
-        final SslFilter sslFilter = new SslFilter(sslContext);
+        //final SslFilter sslFilter = new SslFilter(sslContext); commented out until MINA Sslfilter bugs will be fixed
         ThreadPoolExecutor connectionsPollerExecutor = new ThreadPoolExecutor(1, 1,
                 3L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("nio-polling-", false));
         final IoAcceptor acceptor = new NioSocketAcceptor(connectionsPollerExecutor, new NioProcessor(executor));
-        acceptor.getFilterChain().addLast("encryption", sslFilter);
+        //acceptor.getFilterChain().addLast("encryption", sslFilter); commented out until MINA Sslfilter bugs will be fixed
         acceptor.getFilterChain().addLast("platypusCodec", new ProtocolCodecFilter(new ResponseEncoder(), new RequestDecoder()));
         /*
         acceptor.getFilterChain().addLast("executor", new ExecutorFilter(executor, IoEventType.EXCEPTION_CAUGHT,

@@ -120,10 +120,10 @@ public class FormInspector extends TopComponent implements ExplorerManager.Provi
      */
     public static synchronized FormInspector getInstance() {
         if (instance == null) {
-            TopComponent tc = WindowManager.getDefault().findTopComponent("FormInspector"); // NOI18N
+            TopComponent tc = WindowManager.getDefault().findTopComponent("PlatypusFormInspector"); // NOI18N
             if (instance == null) {
                 ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, new IllegalStateException(
-                        "Can not find FormInspector component for its ID. Returned " + tc)); // NOI18N
+                        "Can not find PlatypusFormInspector component for its ID. Returned " + tc)); // NOI18N
                 instance = new FormInspector();
             }
         }

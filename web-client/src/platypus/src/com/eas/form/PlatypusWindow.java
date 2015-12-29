@@ -140,7 +140,6 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		setResizable(resizable);
 		getElement().getStyle().setOpacity(opacity);
 
-		caption.setHTML(title);
 		caption.setText(title);
 		registerWindowListeners();
 	}

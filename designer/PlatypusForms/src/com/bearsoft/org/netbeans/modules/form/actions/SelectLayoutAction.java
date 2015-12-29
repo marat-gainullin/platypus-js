@@ -154,10 +154,7 @@ public class SelectLayoutAction extends CallableSystemAction {
                 layoutsList.add(allItems[i]);
             }
         }
-
-        PaletteItem[] layouts = new PaletteItem[layoutsList.size()];
-        layoutsList.toArray(layouts);
-        return layouts;
+        return layoutsList.toArray(new PaletteItem[]{});
     }
 
     private static class LayoutMenu extends JMenu {

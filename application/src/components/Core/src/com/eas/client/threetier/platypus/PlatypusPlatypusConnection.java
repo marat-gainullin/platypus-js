@@ -49,7 +49,6 @@ import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 import org.apache.mina.filter.executor.ExecutorFilter;
-import org.apache.mina.filter.ssl.SslFilter;
 import org.apache.mina.transport.socket.SocketConnector;
 import org.apache.mina.transport.socket.nio.NioProcessor;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
@@ -90,7 +89,8 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
 
         connector = configureConnector(networkProcessor, sslContext, aInteractive);
 
-        syncSocket = sslContext.getSocketFactory().createSocket();
+        //syncSocket = sslContext.getSocketFactory().createSocket(); commented out until MINA Sslfilter bugs will be fixed
+        syncSocket = new Socket();
         syncEncoder = new RequestEncoder();
         syncDecoder = new ResponseDecoder();
     }
@@ -103,8 +103,8 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
         ioProcessorExecutor.allowCoreThreadTimeOut(true);
         NioSocketConnector lconnector = new NioSocketConnector(aProcessor, new NioProcessor(ioProcessorExecutor));
         lconnector.setDefaultRemoteAddress(new InetSocketAddress(host, port));
-        SslFilter sslFilter = new SslFilter(sslContext);
-        sslFilter.setUseClientMode(true);
+        //SslFilter sslFilter = new SslFilter(sslContext); commented out until MINA Sslfilter bugs will be fixed
+        //sslFilter.setUseClientMode(true); commented out until MINA Sslfilter bugs will be fixed
         /**
          * The sslFilter("encryption") filter should be placed first, according
          * to MINA architecture, but we have to communicate with a user about
@@ -118,9 +118,9 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
          */
         if (aInteractive) {
             lconnector.getFilterChain().addLast("executor", new ExecutorFilter(aProcessor));
-            lconnector.getFilterChain().addLast("encryption", sslFilter);
+            //lconnector.getFilterChain().addLast("encryption", sslFilter); commented out until MINA Sslfilter bugs will be fixed
         } else {
-            lconnector.getFilterChain().addLast("encryption", sslFilter);
+            //lconnector.getFilterChain().addLast("encryption", sslFilter); commented out until MINA Sslfilter bugs will be fixed
             lconnector.getFilterChain().addLast("executor", new ExecutorFilter(aProcessor));
         }
         lconnector.getFilterChain().addLast("platypusCodec", new ProtocolCodecFilter(new RequestEncoder(), new ResponseDecoder()));

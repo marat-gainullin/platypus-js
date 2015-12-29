@@ -6,6 +6,6 @@
 
 <tc-group version="2.0">
     <module name="com.bearsoft.org.netbeans.modules.form"/>
-    <tc-id id="FormInspector" />
+    <tc-id id="PlatypusFormInspector" />
     <open-close-behavior open="true" close="true" />
 </tc-group>
