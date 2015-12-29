@@ -59,6 +59,7 @@ import org.netbeans.installer.utils.helper.Status;
 import org.netbeans.installer.utils.progress.Progress;
 import org.netbeans.installer.wizard.Wizard;
 import org.netbeans.installer.wizard.components.WizardComponent;
+import org.netbeans.installer.utils.ResourceUtils;
 
 /**
  *
