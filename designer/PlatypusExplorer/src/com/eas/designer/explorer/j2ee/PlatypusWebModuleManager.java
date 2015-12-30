@@ -74,7 +74,7 @@ public class PlatypusWebModuleManager {
     public static final int PLATYPUS_SERVLET_LOAD_ON_STARTUP_ORDER = 1;
     protected final PlatypusProjectImpl project;
     protected final FileObject projectDir;
-    protected FileObject webInfDir;
+//    protected FileObject webInfDir;
     protected FileObject metaInfDir;
     protected FileObject publicDir;
 
@@ -82,7 +82,6 @@ public class PlatypusWebModuleManager {
         super();
         project = aProject;
         projectDir = aProject.getProjectDirectory();
-        webInfDir = projectDir.getFileObject(PlatypusProject.WEB_INF_DIRECTORY);
     }
 
     public void undeploy() throws Exception {
@@ -215,6 +214,7 @@ public class PlatypusWebModuleManager {
     }
 
     private void configureDeploymentDescriptor() throws Exception {
+        FileObject webInfDir = projectDir.getFileObject(PlatypusProject.WEB_INF_DIRECTORY);
         FileObject webXml = webInfDir.getFileObject(WEB_XML_FILE_NAME);
         if (webXml == null || project.getSettings().isAutoApplyWebSettings()) {
             WebApplication wa = new WebApplication();
