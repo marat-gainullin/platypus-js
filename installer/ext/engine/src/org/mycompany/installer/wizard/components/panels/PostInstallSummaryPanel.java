@@ -155,7 +155,7 @@ public class PostInstallSummaryPanel extends WizardPanel {
 
 
         private NbiTextPane messagePaneFinish;
-        private NbiCheckBox runAppNow;
+//        private NbiCheckBox runAppNow;
         private Product app;
 
         public PostInstallSummaryPanelSwingUi(
@@ -199,16 +199,16 @@ public class PostInstallSummaryPanel extends WizardPanel {
                 }
                 final File executable = l != null ? new File(app.getInstallationLocation(), l.getExecutable()) : null;
 
-                if (executable != null && runAppNow.isSelected()) {
-                    LogManager.log("... running: " + executable.getAbsolutePath());
-                    ProcessBuilder pb = new ProcessBuilder(new String[]{executable.getAbsolutePath()});
-                    try {
-                        pb.start();
-                    } catch (IOException e) {
-                        LogManager.log(e);
-                    }
-
-                }
+//                if (executable != null && runAppNow.isSelected()) {
+//                    LogManager.log("... running: " + executable.getAbsolutePath());
+//                    ProcessBuilder pb = new ProcessBuilder(new String[]{executable.getAbsolutePath()});
+//                    try {
+//                        pb.start();
+//                    } catch (IOException e) {
+//                        LogManager.log(e);
+//                    }
+//
+//                }
             }
             super.evaluateNextButtonClick();
         }
@@ -276,15 +276,17 @@ public class PostInstallSummaryPanel extends WizardPanel {
             final List<Product> products = new LinkedList<Product>();
             products.addAll(successfulInstall);
             products.addAll(warningInstall);
-            runAppNow.setSelected(false);
-            if (!products.isEmpty() && products.get(0).getUid().contains("designer")) { //NOI18N
-                runAppNow.setText(StringUtils.format(DEFAULT_MESSAGE_LAUNCH_APPLICATION_NOW,
-                        products.get(0).getDisplayName()));
-                runAppNow.doClick();
-                app = products.get(0);
-            } else {                
-                runAppNow.setVisible(false);
-            }
+            
+//            runAppNow.setSelected(false);
+//            runrunAppNowAppNow.setVisible(false);
+//            if (!products.isEmpty() && products.get(0).getUid().contains("designer")) { //NOI18N
+//                runAppNow.setText(StringUtils.format(DEFAULT_MESSAGE_LAUNCH_APPLICATION_NOW,
+//                        products.get(0).getDisplayName()));
+//                runAppNow.doClick();
+//                app = products.get(0);
+//            } else {                
+//                runAppNow.setVisible(false);
+//            }
 
 
         }
@@ -301,7 +303,7 @@ public class PostInstallSummaryPanel extends WizardPanel {
 
             messagePaneFinish = new NbiTextPane();
 
-            runAppNow = new NbiCheckBox();
+//            runAppNow = new NbiCheckBox();
 
 
             // this /////////////////////////////////////////////////////////////////
@@ -340,14 +342,14 @@ public class PostInstallSummaryPanel extends WizardPanel {
                     new Insets(0, 11, 0, 11), // padding
                     0, 0));                           // padx, pady - ???
             */
-            add(runAppNow, new GridBagConstraints(
-                    0, 4, // x, y
-                    1, 1, // width, height
-                    1.0, 1.0, // weight-x, weight-y
-                    GridBagConstraints.PAGE_START, // anchor
-                    GridBagConstraints.HORIZONTAL, // fill
-                    new Insets(11, 11, 0, 11), // padding
-                    0, 0));                           // padx, pady - ???
+//            add(runAppNow, new GridBagConstraints(
+//                    0, 4, // x, y
+//                    1, 1, // width, height
+//                    1.0, 1.0, // weight-x, weight-y
+//                    GridBagConstraints.PAGE_START, // anchor
+//                    GridBagConstraints.HORIZONTAL, // fill
+//                    new Insets(11, 11, 0, 11), // padding
+//                    0, 0));                           // padx, pady - ???
 
 
 
