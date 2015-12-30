@@ -234,18 +234,18 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
             
             String confPath = nbLocation + File.separator + "platypusdesigner" + File.separator + "config" + File.separator + "J2EE" + File.separator + "InstalledServers";
             LogManager.log("ConfPath: " + confPath);
-            File configFolder = new File(nbLocation, confPath);
+            File configFolder = new File(confPath);
             LogManager.log("ConfigFolder: " + configFolder.getAbsolutePath());
             configFolder.mkdirs();
             LogManager.log("ConfigFolderAfterCreation: " +configFolder.getAbsolutePath());
             
 
-            File tomcatAutoregistered = new File(nbLocation, confPath + File.separator + "tomcat_autoregistered_instance");
+            File tomcatAutoregistered = new File(confPath + File.separator + "tomcat_autoregistered_instance");
             LogManager.log("tomcatAutoregistered: " +tomcatAutoregistered.getAbsolutePath());
             tomcatAutoregistered.createNewFile();
             LogManager.log("tomcatAutoregistered: " +tomcatAutoregistered.getAbsolutePath());
             
-            try (PrintWriter writer = new PrintWriter(new File(nbLocation, confPath + File.separator + ".nbattrs"))) {
+            try (PrintWriter writer = new PrintWriter(new File(confPath + File.separator + ".nbattrs"))) {
                 String passwd = generatePassword(8);
                 LogManager.log("passwd: " +passwd);
                 //String tomcatHome = tomcatLocation.getAbsolutePath();
