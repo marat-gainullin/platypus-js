@@ -79,20 +79,44 @@ public class DependenciesWalkerTest {
                 + "define(['AnyModule'], function(AnyModule2){"
                 + "    return function(){"
                 + "        var self = this;"
+                + "        var pm = new AnyModule1();"
                 + "        var am = new AnyModule2();"
                 + "        var sm = RPC.Proxy('ServerCalc');"
                 + "    };"
                 + "});";
-        DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{
-            return "AnyModule2".equals(aIfDependency);
+        DependenciesWalker walker = new DependenciesWalker(va1, (ifDependency)->{
+            return "AnyModule1".equals(ifDependency) || "AnyModule2".equals(ifDependency);
         });
         walker.walk();
         assertTrue(walker.getDependencies().isEmpty());
-        assertFalse(walker.getServerDependencies().isEmpty());
+        assertEquals(1, walker.getServerDependencies().size());
+        assertTrue(walker.getServerDependencies().contains("ServerCalc"));
     }
     
     @Test
     public void testParseAmdDependencies3() {
+        String va1 = ""
+                + "var pm = new AnyModule1();"
+                + "define(['AnyModule'], function(AnyModule2){"
+                + "    return function(){"
+                + "        var self = this;"
+                + "        var am = new AnyModule2();"
+                + "        var am = new AnyModule3();"
+                + "        var sm = RPC.Proxy('ServerCalc');"
+                + "    };"
+                + "});";
+        DependenciesWalker walker = new DependenciesWalker(va1, (ifDependency)->{
+            return "AnyModule1".equals(ifDependency) || "AnyModule2".equals(ifDependency) || "AnyModule3".equals(ifDependency);
+        });
+        walker.walk();
+        assertEquals(1, walker.getDependencies().size());
+        assertTrue(walker.getDependencies().contains("AnyModule1"));
+        assertEquals(1, walker.getServerDependencies().size());
+        assertTrue(walker.getServerDependencies().contains("ServerCalc"));
+    }
+    
+    @Test
+    public void testParseAmdDependencies4() {
         String va1 = ""
                 + "P.require(['AnyModule'], function(AnyModule1){"
                 + "    return function(){"
@@ -110,7 +134,7 @@ public class DependenciesWalkerTest {
     }
     
     @Test
-    public void testParseAmdDependencies4() {
+    public void testParseAmdDependencies5() {
         String va1 = ""
                 + "require(['AnyModule'], function(AnyModule2){"
                 + "    return function(){"
