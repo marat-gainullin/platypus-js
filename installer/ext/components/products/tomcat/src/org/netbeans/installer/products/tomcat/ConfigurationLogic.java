@@ -228,7 +228,7 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
         instanceFO.setAttribute("monitor_enabled", "false"); // NOI18N
          */
         try {
-            String confPath = "nb" + File.separator + "config" + File.separator + "J2EE" + File.separator + "InstalledServers";
+            String confPath = nbLocation + File.separator + "platypusdesigner" + File.separator + "config" + File.separator + "J2EE" + File.separator + "InstalledServers";
             File configFolder = new File(nbLocation, confPath);
             configFolder.mkdirs();
 
