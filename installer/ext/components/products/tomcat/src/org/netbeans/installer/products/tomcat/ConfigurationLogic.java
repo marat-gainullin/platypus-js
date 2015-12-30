@@ -47,6 +47,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.installer.utils.applications.NetBeansUtils;
 import org.netbeans.installer.product.Registry;
 import org.netbeans.installer.product.components.Product;
@@ -64,6 +66,7 @@ import org.netbeans.installer.utils.progress.Progress;
 import org.netbeans.installer.wizard.Wizard;
 import org.netbeans.installer.wizard.components.WizardComponent;
 import org.netbeans.installer.utils.ResourceUtils;
+import sun.util.logging.PlatformLogger;
 
 /**
  *
@@ -227,27 +230,45 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
         FileObject instanceFO = serverInstanceDir.getFileObject("tomcat_autoregistered_instance");
         instanceFO.setAttribute("monitor_enabled", "false"); // NOI18N
          */
+        LogManager.log("INTEGRATING!!!!!");
         try {
+            
             String confPath = nbLocation + File.separator + "platypusdesigner" + File.separator + "config" + File.separator + "J2EE" + File.separator + "InstalledServers";
+            LogManager.log("ConfPath: " + confPath);
             File configFolder = new File(nbLocation, confPath);
+            LogManager.log("ConfigFolder: " + configFolder.getAbsolutePath());
             configFolder.mkdirs();
+            LogManager.log("ConfigFolderAfterCreation: " +configFolder.getAbsolutePath());
+            
 
             File tomcatAutoregistered = new File(nbLocation, confPath + File.separator + "tomcat_autoregistered_instance");
+            LogManager.log("tomcatAutoregistered: " +tomcatAutoregistered.getAbsolutePath());
             tomcatAutoregistered.createNewFile();
+            LogManager.log("tomcatAutoregistered: " +tomcatAutoregistered.getAbsolutePath());
+            
             try (PrintWriter writer = new PrintWriter(new File(nbLocation, confPath + File.separator + ".nbattrs"))) {
-                String passwd = generatePassword(5);
+                String passwd = generatePassword(8);
+                LogManager.log("passwd: " +passwd);
                 //String tomcatHome = tomcatLocation.getAbsolutePath();
                 Path tomcatHomePath = Paths.get(tomcatLocation.toURI());
+                LogManager.log("tomcatHomePath: " +tomcatHomePath.toString());
+                
                 Path tomcatName = tomcatHomePath.getName(tomcatHomePath.getNameCount() - 1);
+                LogManager.log("tomcatName: " +tomcatName.toString());
 
-                writer.append(TOMCAT_CONFIG.replace("${password}", passwd)
+                String parsedConfig = TOMCAT_CONFIG.replace("${password}", passwd)
                         .replace("${tomcatHome}", tomcatHomePath.toString())
                         .replace("${tomcatName}", tomcatName.toString())
-                        .replace("${tomcatBase}", tomcatName.toString() + "_base"));
+                        .replace("${tomcatBase}", tomcatName.toString() + "_base");
+                
+                LogManager.log("parsedConfig: " +parsedConfig);
+                
+                writer.append(parsedConfig);
                 writer.flush();
             }
             return true;
         } catch (IOException ex) {
+            LogManager.log(ex.toString());
             return false;
         }
     }
