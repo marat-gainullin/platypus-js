@@ -183,12 +183,12 @@ public class ProjectRunner {
             if (startFiles != null) {
                 String requireCallabckArg = moduleIdToVarName(appElementName);
                 String startMethod = startFiles.hasExtension(PlatypusFiles.FORM_EXTENSION) ? "show" : "execute";
-                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, aProject.getSettings().getBrowserCacheBusting() ? "" : "//", aProject.getSettings().getGlobalAPI() ? "" : "//", appElementName, requireCallabckArg, "        var m = new " + requireCallabckArg + "();\n", "        m." + startMethod + "();\n", appElementName);
+                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, aProject.getSettings().getGlobalAPI() ? "facade" : "environment", aProject.getSettings().getBrowserCacheBusting() ? "" : "//", aProject.getSettings().getGlobalAPI() ? "" : "//", appElementName, requireCallabckArg, "        var m = new " + requireCallabckArg + "();\n", "        m." + startMethod + "();\n", appElementName);
                 FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
             } else if (appElementName.toLowerCase().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
                 String moduleId = appElementName.substring(0, appElementName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
                 String requireCallabckArg = moduleIdToVarName(moduleId);
-                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, aProject.getSettings().getBrowserCacheBusting() ? "" : "//", aProject.getSettings().getGlobalAPI() ? "" : "//", appElementName, requireCallabckArg, "", "    //...\n", appElementName);
+                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, aProject.getSettings().getGlobalAPI() ? "facade" : "environment", aProject.getSettings().getBrowserCacheBusting() ? "" : "//", aProject.getSettings().getGlobalAPI() ? "" : "//", appElementName, requireCallabckArg, "", "    //...\n", appElementName);
                 FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
             }
         } else {
