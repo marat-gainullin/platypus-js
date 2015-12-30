@@ -96,7 +96,8 @@ public class PlatypusPlatform {
             }
 
             String UPDATER_EXECUTABLE = platformPath + File.separator + UPDATES_DIRECTORY_NAME + File.separator + executableName;
-            String[] command = createUpdaterCommand(UPDATER_EXECUTABLE, new String[]{"newversion", "-silent", "true"});
+            String javaHome = System.getProperty("java.home");
+            String[] command = createUpdaterCommand(UPDATER_EXECUTABLE, new String[]{"newversion", "-silent", "true", "-java-home", javaHome});
             try {
                 Process updaterProcess = Runtime.getRuntime().exec(command);
                 int updateStatus = updaterProcess.waitFor();
@@ -106,7 +107,7 @@ public class PlatypusPlatform {
                     case NEW_VERSION_CODE: {
                         detailsText = res.getString("confirmUpdate");
                         updateAction = (ActionEvent e) -> {
-                            String[] command1 = createUpdaterCommand(UPDATER_EXECUTABLE, new String[]{"update", "-silent", "false"});
+                            String[] command1 = createUpdaterCommand(UPDATER_EXECUTABLE, new String[]{"update", "-silent", "false", "-java-home", javaHome});
                             try {
                                 Process updaterProcess1 = Runtime.getRuntime().exec(command1);
                                 notification.clear();
