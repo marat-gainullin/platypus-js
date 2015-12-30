@@ -41,6 +41,8 @@ package org.netbeans.installer.products.tomcat;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -230,7 +232,14 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
 
             try (PrintWriter writer = new PrintWriter(new File(nbLocation, "nb/config/J2EE/InstalledServers/.nbattrs"))) {
                 String passwd = generatePassword(5);
-                writer.append(TOMCAT_CONFIG.replace("${password}", passwd));
+                //String tomcatHome = tomcatLocation.getAbsolutePath();
+                Path tomcatHomePath = Paths.get(tomcatLocation.toURI());
+                Path tomcatName = tomcatHomePath.getName(tomcatHomePath.getNameCount() - 1);
+
+                writer.append(TOMCAT_CONFIG.replace("${password}", passwd)
+                        .replace("${tomcatHome}", tomcatHomePath.toString())
+                        .replace("${tomcatName}", tomcatName.toString())
+                        .replace("${tomcatBase}",tomcatName.toString()+"_base"));
                 writer.flush();
             }
             return true;
@@ -389,12 +398,12 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
             + "    <fileobject name=\"tomcat_autoregistered_instance\">\n"
             + "        <attr name=\"admin_port\" stringvalue=\"8025\"/>\n"
             + "        <attr name=\"autoregistered\" stringvalue=\"true\"/>\n"
-            + "        <attr name=\"displayName\" stringvalue=\"Apache Tomcat 8.0.30.0\"/>\n"
+            + "        <attr name=\"displayName\" stringvalue=\"${tomcatName}\"/>\n"
             + "        <attr name=\"httpportnumber\" stringvalue=\"8080\"/>\n"
             + "        <attr name=\"is_it_bundled_tomcat\" stringvalue=\"true\"/>\n"
             + "        <attr name=\"monitor_enabled\" stringvalue=\"false\"/>\n"
             + "        <attr name=\"password\" stringvalue=\"${password}\"/>\n"
-            + "        <attr name=\"url\" stringvalue=\"tomcat80:home=/home/jskonst/apache-tomcat-8.0.30:base=apache-tomcat-8.0.30.0_base\"/>\n"
+            + "        <attr name=\"url\" stringvalue=\"tomcat80:home=${tomcatHome}:base=${tomcatBase}\"/>\n"
             + "        <attr name=\"username\" stringvalue=\"ide\"/>\n"
             + "    </fileobject>\n"
             + "</attributes>";
