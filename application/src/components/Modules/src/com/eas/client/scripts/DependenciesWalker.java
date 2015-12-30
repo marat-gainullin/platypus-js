@@ -120,7 +120,7 @@ public class DependenciesWalker {
                                     if (lastAccess.getBase() instanceof IdentNode) {
                                         String baseName = ((IdentNode) lastAccess.getBase()).getName();
                                         if (MODEL.equals(baseName) && LOAD_ENTITY.equals(funcName)) {
-                                            putQueryDependence(value);
+                                            queryDependencies.add(value);
                                         }
                                     }
                                     break;
@@ -135,8 +135,8 @@ public class DependenciesWalker {
                 String name = identNode.getName();
                 dependenceLikeIdentifiers.add(name);
                 try {
-                    if (validator != null && validator.call(name)) {
-                        putDependence(name);
+                    if (validator != null && validator.call(name) && defineCallbackScopeLevel <= 0) {
+                        dependencies.add(name);
                     }
                 } catch (Exception ex) {
                     Logger.getLogger(DependenciesWalker.class.getName()).log(Level.SEVERE, ex.getMessage());
@@ -144,6 +144,7 @@ public class DependenciesWalker {
             }
 
             private int scopeLevel;
+            private int defineCallbackScopeLevel;
 
             @Override
             public boolean enterFunctionNode(FunctionNode functionNode) {
@@ -156,6 +157,9 @@ public class DependenciesWalker {
                     Expression ifDefineCall = lastCall.getFunction();
                     if (ifDefineCall instanceof AccessNode) {
                         AccessNode acc = (AccessNode) ifDefineCall;
+                        if(DEFINE_FUNCTION_NAME.equals(acc.getProperty())){
+                            defineCallbackScopeLevel++;
+                        }
                         if (DEFINE_FUNCTION_NAME.equals(acc.getProperty()) || REQUIRE_FUNCTION_NAME.equals(acc.getProperty())) {
                             functionNode.getParameters().stream().forEach((definerArg) -> {
                                 dynamicDependencies.add(definerArg.getName());
@@ -163,6 +167,9 @@ public class DependenciesWalker {
                         }
                     } else if (ifDefineCall instanceof IdentNode) {
                         IdentNode toBeCalled = (IdentNode) lastCall.getFunction();
+                        if (DEFINE_FUNCTION_NAME.equals(toBeCalled.getName())){
+                            defineCallbackScopeLevel++;
+                        }
                         if (DEFINE_FUNCTION_NAME.equals(toBeCalled.getName()) || REQUIRE_FUNCTION_NAME.equals(toBeCalled.getName())) {
                             functionNode.getParameters().stream().forEach((definerArg) -> {
                                 dynamicDependencies.add(definerArg.getName());
@@ -176,24 +183,27 @@ public class DependenciesWalker {
             @Override
             public Node leaveFunctionNode(FunctionNode functionNode) {
                 scopeLevel--;
+                if (!calls.isEmpty()) {
+                    CallNode lastCall = calls.peek();
+                    Expression ifDefineCall = lastCall.getFunction();
+                    if (ifDefineCall instanceof AccessNode) {
+                        AccessNode acc = (AccessNode) ifDefineCall;
+                        if(DEFINE_FUNCTION_NAME.equals(acc.getProperty())){
+                            defineCallbackScopeLevel--;
+                        }
+                    } else if (ifDefineCall instanceof IdentNode) {
+                        IdentNode toBeCalled = (IdentNode) lastCall.getFunction();
+                        if (DEFINE_FUNCTION_NAME.equals(toBeCalled.getName())){
+                            defineCallbackScopeLevel--;
+                        }
+                    }
+                }
                 return super.leaveFunctionNode(functionNode);
             }
 
         });
         dependencies.removeAll(localFunctions);
         dependencies.removeAll(dynamicDependencies);
-    }
-
-    private void putDependence(String entityId) {
-        if (!dependencies.contains(entityId)) {
-            dependencies.add(entityId);
-        }
-    }
-
-    private void putQueryDependence(String entityId) {
-        if (!queryDependencies.contains(entityId)) {
-            queryDependencies.add(entityId);
-        }
     }
 
     public Set<String> getQueryDependencies() {
@@ -212,11 +222,11 @@ public class DependenciesWalker {
     }
 
     /**
-     * @param aEntityId
+     * @param aModuleName
      */
-    public void putServerDependence(String aEntityId) {
-        if (!serverDependencies.contains(aEntityId)) {
-            serverDependencies.add(aEntityId);
+    public void putServerDependence(String aModuleName) {
+        if (!serverDependencies.contains(aModuleName)) {
+            serverDependencies.add(aModuleName);
         }
     }
 
