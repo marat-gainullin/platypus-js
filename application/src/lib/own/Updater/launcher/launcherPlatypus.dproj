@@ -87,14 +87,14 @@
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <DCC_DebugInformation>2</DCC_DebugInformation>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <DCC_ExeOutput>C:\workspace\platypus js\application\updates</DCC_ExeOutput>
+        <DCC_ExeOutput>C:\workspace\platypusjs\application\updates</DCC_ExeOutput>
         <Debugger_CWD>C:\workspace\platypus js\application\updates</Debugger_CWD>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <Debugger_RunParams>newversion -silent true</Debugger_RunParams>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <Debugger_RunParams>update -silent true</Debugger_RunParams>
-        <DCC_ExeOutput>C:\workspace\platypus js\application\updates\</DCC_ExeOutput>
+        <DCC_ExeOutput>C:\workspace\platypusjs\application\updates\</DCC_ExeOutput>
         <DCC_RunTimeTypeInfo>true</DCC_RunTimeTypeInfo>
         <DCC_DebugInformation>2</DCC_DebugInformation>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>

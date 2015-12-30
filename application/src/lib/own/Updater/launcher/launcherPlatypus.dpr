@@ -170,9 +170,10 @@ begin
     end;
   end;
   if(javaHome <> '') then
-    javaExe := javaHome + '\' + 'javaw.exe'
+    javaExe := javaHome + '\bin\javaw.exe'
   else
     javaExe := 'javaw.exe';
+//  MessageBox(0, PWideChar('-7- ' + javaExe), '', 0);
   if command <> EmptyStr then
   begin
     if command = UPDATE_PARAM then
