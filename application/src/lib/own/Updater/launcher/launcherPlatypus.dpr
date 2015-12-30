@@ -12,6 +12,7 @@ const
   UPDATE_PARAM = 'update';
   CHECK_VERSION = 'newversion';
   SILENT = '-silent';
+  JAVA_HOME = '-java-home';
 
 var
   currentDirectory: string;
@@ -44,7 +45,7 @@ begin
     ZeroMemory(@startInfo, SizeOf(TStartupInfo));
     startInfo.cb := SizeOf(TStartupInfo);
     ZeroMemory(@processInfo, SizeOf(TProcessInformation));
-    javaParams := 'javaw.exe ' + aParameters;
+    javaParams := aFile + ' ' + aParameters;
 //    MessageBox(0, PWideChar('2 ' + javaParams), '', 0);
     if CreateProcess(nil, PWideChar(javaParams), nil, nil, false, 0, nil, nil,
       startInfo, processInfo) then
@@ -130,8 +131,11 @@ var
   statusCode: integer;
   command: String;
   isSilent: String;
+  javaHome: String;
+  javaExe: String;
 begin
   command := '';
+  javaHome := '';
   isSilent := 'false';
   currentDirectory := ExtractFilePath(ParamStr(0));
   if ParamCount > 0 then
@@ -156,18 +160,29 @@ begin
           end;
         end;
       end;
+      if ParamStr(i) = JAVA_HOME then
+      begin
+        if ParamCount >= i + 1 then
+        begin
+          javaHome := ParamStr(i + 1);
+        end;
+      end;
     end;
   end;
+  if(javaHome <> '') then
+    javaExe := javaHome + '\' + 'javaw.exe'
+  else
+    javaExe := 'javaw.exe';
   if command <> EmptyStr then
   begin
     if command = UPDATE_PARAM then
     begin
-      runApp('javaw.exe', generateRunParams('update' + ' ' + SILENT + ' ' +
+      runApp(javaExe, generateRunParams('update' + ' ' + SILENT + ' ' +
         isSilent), SHOW_APPLICATION, getNeedUAC, false);
     end
     else if command = CHECK_VERSION then
     begin
-      statusCode := runApp('javaw.exe',
+      statusCode := runApp(javaExe,
         generateRunParams('newversion' + ' ' + SILENT + ' ' + isSilent),
         SHOW_APPLICATION, false, true);
       ExitProcess(statusCode);
@@ -175,10 +190,10 @@ begin
   end
   else
   begin
-    if runApp('javaw.exe', generateRunParams('newversion'), SHOW_APPLICATION,
+    if runApp(javaExe, generateRunParams('newversion'), SHOW_APPLICATION,
       false, true) = NEED_UPDATE_RESULT then
     begin
-      runApp('javaw.exe', generateRunParams('update'), SHOW_APPLICATION, getNeedUAC(), false);
+      runApp(javaExe, generateRunParams('update'), SHOW_APPLICATION, getNeedUAC(), false);
     end;
   end;
 end;
