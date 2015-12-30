@@ -36,13 +36,19 @@
  * the option applies only if the new code is made subject to such option by the
  * copyright holder.
  */
-
 package org.netbeans.installer.products.tomcat;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.installer.utils.applications.NetBeansUtils;
 import org.netbeans.installer.product.Registry;
 import org.netbeans.installer.product.components.Product;
@@ -67,6 +73,7 @@ import org.netbeans.installer.utils.ResourceUtils;
  * @author Dmitry Lipin
  */
 public class ConfigurationLogic extends ProductConfigurationLogic {
+
     /////////////////////////////////////////////////////////////////////////////////
     // Instance
     private List<WizardComponent> wizardComponents;
@@ -80,7 +87,7 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
     public void install(
             final Progress progress) throws InstallationException {
         final File location = getProduct().getInstallationLocation();
-        
+
         /////////////////////////////////////////////////////////////////////////////
         //try {
         //    progress.setDetail(getString("CL.install.irrelevant.files")); // NOI18N
@@ -91,7 +98,6 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
         //            getString("CL.install.error.irrelevant.files"), // NOI18N
         //            e);
         //}
-
         /////////////////////////////////////////////////////////////////////////////
 //        try {
 //            progress.setDetail(getString("CL.install.files.permissions")); // NOI18N
@@ -102,7 +108,6 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
 //                    getString("CL.install.error.files.permissions"), // NOI18N
 //                    e);
 //        }
-        
         //get bundled registry to perform further runtime integration
         //http://wiki.netbeans.org/NetBeansInstallerIDEAndRuntimesIntegration
         Registry bundledRegistry = new Registry();
@@ -121,8 +126,8 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
         try {
             progress.setDetail(getString("CL.install.ide.integration")); // NOI18N
 
-            final List<Product> ides =
-                    Registry.getInstance().getProducts("designer");
+            final List<Product> ides
+                    = Registry.getInstance().getProducts("designer");
             List<Product> productsToIntegrate = new ArrayList<Product>();
             for (Product ide : ides) {
                 if (ide.getStatus() == Status.INSTALLED) {
@@ -137,7 +142,7 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
                         } else {
                             //check if this IDE is not integrated with any other GF instance - we need integrate with such IDE instance
                             try {
-                                if(!isTomcatRegistred(location)) {
+                                if (!isTomcatRegistred(location)) {
                                     LogManager.log("... will be integrated since there it is not yet integrated with any instance or such an instance does not exist");
                                     productsToIntegrate.add(ide);
                                 } else {
@@ -156,10 +161,10 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
                 LogManager.log("... integrate " + getProduct().getDisplayName() + " with " + productToIntegrate.getDisplayName() + " installed at " + ideLocation);
                 /////////////////////////////////////////////////////////////////////////////
                 // Reference: http://wiki.netbeans.org/wiki/view/TomcatAutoRegistration
-                if(!registerTomcat(ideLocation, location)) {
+                if (!registerTomcat(ideLocation, location)) {
                     continue;
                 }
-                
+
                 // if the IDE was installed in the same session as the
                 // appserver, we should add its "product id" to the IDE
                 if (productToIntegrate.hasStatusChanged()) {
@@ -179,12 +184,13 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
     }
 
     private boolean isTomcatRegistred(File nbLocation) throws IOException {
-        return new File (nbLocation, "nb/config/J2EE/InstalledServers/tomcat_autoregistered_instance").exists();
+        return new File(nbLocation, "nb/config/J2EE/InstalledServers/tomcat_autoregistered_instance").exists();
     }
-    
+
     private boolean registerTomcat(File nbLocation, File tomcatLocation) throws IOException {
+        /*
         File javaExe = JavaUtils.getExecutable(new File(System.getProperty("java.home")));
-        String [] cp = {
+        String[] cp = {
             "platform/core/core.jar",
             "platform/core/core-base.jar",
             "platform/lib/boot.jar",
@@ -197,15 +203,16 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
             "enterprise/modules/org-netbeans-modules-j2eeserver.jar",
             "enterprise/modules/org-netbeans-modules-tomcat5.jar"
         };
-        for(String c : cp) {
+        for (String c : cp) {
             File f = new File(nbLocation, c);
-            if(!FileUtils.exists(f)) {
+            if (!FileUtils.exists(f)) {
                 LogManager.log("... cannot find jar required for Tomcat integration: " + f);
                 return false;
             }
         }
+        
         String mainClass = "org.netbeans.modules.tomcat5.registration.AutomaticRegistration";
-        List <String> commands = new ArrayList <String> ();
+        List<String> commands = new ArrayList<String>();
         File nbCluster = new File(nbLocation, "platypusdesigner");
         commands.add(javaExe.getAbsolutePath());
         commands.add("-cp");
@@ -214,11 +221,58 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
         commands.add("--add");
         commands.add(nbCluster.getAbsolutePath());
         commands.add(tomcatLocation.getAbsolutePath());
-        
-        return SystemUtils.executeCommand(nbLocation, commands.toArray(new String[]{})).getErrorCode() == 0;
+
+        //This is hellHack and should be replaced after netbeans http monitor will be fixed
+        //in context of asynchronus http request
+        boolean retVal = SystemUtils.executeCommand(nbLocation, commands.toArray(new String[]{})).getErrorCode() == 0;
+        FileObject serverInstanceDir = FileUtil.getConfigFile("J2EE/InstalledServers"); // NOI18N
+        FileObject instanceFO = serverInstanceDir.getFileObject("tomcat_autoregistered_instance");
+        instanceFO.setAttribute("monitor_enabled", "false"); // NOI18N
+         */
+        LogManager.log("INTEGRATING!!!!!");
+        try {
+            
+            String confPath = nbLocation + File.separator + "platypusdesigner" + File.separator + "config" + File.separator + "J2EE" + File.separator + "InstalledServers";
+            LogManager.log("ConfPath: " + confPath);
+            File configFolder = new File(confPath);
+            LogManager.log("ConfigFolder: " + configFolder.getAbsolutePath());
+            configFolder.mkdirs();
+            LogManager.log("ConfigFolderAfterCreation: " +configFolder.getAbsolutePath());
+            
+
+            File tomcatAutoregistered = new File(confPath + File.separator + "tomcat_autoregistered_instance");
+            LogManager.log("tomcatAutoregistered: " +tomcatAutoregistered.getAbsolutePath());
+            tomcatAutoregistered.createNewFile();
+            LogManager.log("tomcatAutoregistered: " +tomcatAutoregistered.getAbsolutePath());
+            
+            try (PrintWriter writer = new PrintWriter(new File(confPath + File.separator + ".nbattrs"))) {
+                String passwd = generatePassword(8);
+                LogManager.log("passwd: " +passwd);
+                //String tomcatHome = tomcatLocation.getAbsolutePath();
+                Path tomcatHomePath = Paths.get(tomcatLocation.toURI());
+                LogManager.log("tomcatHomePath: " +tomcatHomePath.toString());
+                
+                Path tomcatName = tomcatHomePath.getName(tomcatHomePath.getNameCount() - 1);
+                LogManager.log("tomcatName: " +tomcatName.toString());
+
+                String parsedConfig = TOMCAT_CONFIG.replace("${password}", passwd)
+                        .replace("${tomcatHome}", tomcatHomePath.toString())
+                        .replace("${tomcatName}", tomcatName.toString())
+                        .replace("${tomcatBase}", tomcatName.toString() + "_base");
+                
+                LogManager.log("parsedConfig: " +parsedConfig);
+                
+                writer.append(parsedConfig);
+                writer.flush();
+            }
+            return true;
+        } catch (IOException ex) {
+            LogManager.log(ex.toString());
+            return false;
+        }
     }
-    
-    private void removeTomcatIntegration(File nbLocation, File tomcatLocation) throws IOException {        
+
+    private void removeTomcatIntegration(File nbLocation, File tomcatLocation) throws IOException {
         /*
         final String value = NetBeansUtils.getJvmOption(
                 nbLocation,
@@ -234,8 +288,8 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
                     nbLocation,
                     JVM_OPTION_AUTOREGISTER_TOKEN_NAME);
         }*/
-        FileUtils.deleteFile(new File (nbLocation, "nb/config/J2EE/InstalledServers/tomcat_autoregistered_instance"));
-        FileUtils.deleteFile(new File (nbLocation, "nb/config/J2EE/InstalledServers/.nbattrs"));
+        FileUtils.deleteFile(new File(nbLocation, "nb/config/J2EE/InstalledServers/tomcat_autoregistered_instance"));
+        FileUtils.deleteFile(new File(nbLocation, "nb/config/J2EE/InstalledServers/.nbattrs"));
     }
 
     public void uninstall(
@@ -246,13 +300,13 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
         try {
             progress.setDetail(getString("CL.uninstall.ide.integration")); // NOI18N
 
-            final List<Product> ides =
-                    Registry.getInstance().getProducts("nb-base");
-            for (Product ide: ides) {
+            final List<Product> ides
+                    = Registry.getInstance().getProducts("nb-base");
+            for (Product ide : ides) {
                 if (ide.getStatus() == Status.INSTALLED) {
                     LogManager.log("... checking if " + ide.getDisplayName() + " is integrated with " + getProduct().getDisplayName() + " installed at " + location);
                     final File nbLocation = ide.getInstallationLocation();
-                    
+
                     if (nbLocation != null) {
                         LogManager.log("... ide location is " + nbLocation);
                         removeTomcatIntegration(nbLocation, location);
@@ -271,8 +325,7 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
         progress.setPercentage(Progress.COMPLETE);
     }
 
-    public List<WizardComponent> getWizardComponents(
-            ) {
+    public List<WizardComponent> getWizardComponents() {
         return wizardComponents;
     }
 
@@ -302,42 +355,81 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
     @Override
     public boolean wrapForMacOs() {
         return true;
-    }    
-    
-    public boolean requireLegalArtifactSaving() {     
-       return false;                                   
-    }    
+    }
+
+    public boolean requireLegalArtifactSaving() {
+        return false;
+    }
 
     @Override
     public boolean allowModifyMode() {
         return false;
     }
+
+    private static String generatePassword(int length) {
+        int ran2 = 0;
+        Random random = new Random();
+        StringBuilder pwd = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+//ran2 = (int)(Math.random()*61);
+            ran2 = random.nextInt(61);
+            if (ran2 < 10) {
+                ran2 += 48;
+            } else if (ran2 < 35) {
+                ran2 += 55;
+            } else {
+                ran2 += 62;
+            }
+            char c = (char) ran2;
+            pwd.append(c);
+        }
+        return pwd.toString();
+    }
+
     /////////////////////////////////////////////////////////////////////////////////
     // Constants
-	
-    public static final String WIZARD_COMPONENTS_URI =
-            "resource:" + // NOI18N
+    public static final String WIZARD_COMPONENTS_URI
+            = "resource:"
+            + // NOI18N
             "org/netbeans/installer/products/tomcat/wizard.xml"; // NOI18N
-    public static final String PRODUCT_ID =
-            "TOMCAT"; // NOI18N
-     public static final String BIN_SUBDIR =
-            "bin/";
-     public static final String EXECUTABLE_WINDOWS =
-            BIN_SUBDIR
+    public static final String PRODUCT_ID
+            = "TOMCAT"; // NOI18N
+    public static final String BIN_SUBDIR
+            = "bin/";
+    public static final String EXECUTABLE_WINDOWS
+            = BIN_SUBDIR
             + ResourceUtils.getString(ConfigurationLogic.class, "CL.app.name") + ".bat"; // NOI18N
-    public static final String EXECUTABLE_UNIX =
-            BIN_SUBDIR
+    public static final String EXECUTABLE_UNIX
+            = BIN_SUBDIR
             + ResourceUtils.getString(ConfigurationLogic.class, "CL.app.name") + ".sh"; // NOI18N
-    public static final String ICON_UNIX =
-            ResourceUtils.getString(ConfigurationLogic.class,
-            "CL.unix.icon.name"); // NOI18N
-    public static final String ICON_UNIX_RESOURCE =
-            ResourceUtils.getString(ConfigurationLogic.class,
-            "CL.unix.icon.resource"); // NOI18N
-    public static final String ICON_MACOSX =
-            ResourceUtils.getString(ConfigurationLogic.class,
-            "CL.mac.icon.name"); // NOI18N
-    public static final String ICON_MACOSX_RESOURCE =
-            ResourceUtils.getString(ConfigurationLogic.class,
-            "CL.mac.icon.resource"); // NOI18N
+    public static final String ICON_UNIX
+            = ResourceUtils.getString(ConfigurationLogic.class,
+                    "CL.unix.icon.name"); // NOI18N
+    public static final String ICON_UNIX_RESOURCE
+            = ResourceUtils.getString(ConfigurationLogic.class,
+                    "CL.unix.icon.resource"); // NOI18N
+    public static final String ICON_MACOSX
+            = ResourceUtils.getString(ConfigurationLogic.class,
+                    "CL.mac.icon.name"); // NOI18N
+    public static final String ICON_MACOSX_RESOURCE
+            = ResourceUtils.getString(ConfigurationLogic.class,
+                    "CL.mac.icon.resource"); // NOI18N
+
+    private static final String TOMCAT_CONFIG = ""
+            + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            + "<!DOCTYPE attributes PUBLIC \"-//NetBeans//DTD DefaultAttributes 1.0//EN\" \"http://www.netbeans.org/dtds/attributes-1_0.dtd\">\n"
+            + "<attributes version=\"1.0\">\n"
+            + "    <fileobject name=\"tomcat_autoregistered_instance\">\n"
+            + "        <attr name=\"admin_port\" stringvalue=\"8025\"/>\n"
+            + "        <attr name=\"autoregistered\" stringvalue=\"true\"/>\n"
+            + "        <attr name=\"displayName\" stringvalue=\"${tomcatName}\"/>\n"
+            + "        <attr name=\"httpportnumber\" stringvalue=\"8080\"/>\n"
+            + "        <attr name=\"is_it_bundled_tomcat\" stringvalue=\"true\"/>\n"
+            + "        <attr name=\"monitor_enabled\" stringvalue=\"false\"/>\n"
+            + "        <attr name=\"password\" stringvalue=\"${password}\"/>\n"
+            + "        <attr name=\"url\" stringvalue=\"tomcat80:home=${tomcatHome}:base=${tomcatBase}\"/>\n"
+            + "        <attr name=\"username\" stringvalue=\"ide\"/>\n"
+            + "    </fileobject>\n"
+            + "</attributes>";
+
 }
