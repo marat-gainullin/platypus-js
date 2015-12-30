@@ -96,7 +96,8 @@ public class PlatypusPlatform {
             }
 
             String UPDATER_EXECUTABLE = platformPath + File.separator + UPDATES_DIRECTORY_NAME + File.separator + executableName;
-            String[] command = createUpdaterCommand(UPDATER_EXECUTABLE, new String[]{"newversion", "-silent", "true"});
+            String javaHome = "\"" + System.getProperty("java.home") + "\"";
+            String[] command = createUpdaterCommand(UPDATER_EXECUTABLE, new String[]{"newversion", "-silent", "true", "-java-home", javaHome});
             try {
                 Process updaterProcess = Runtime.getRuntime().exec(command);
                 int updateStatus = updaterProcess.waitFor();
@@ -106,11 +107,11 @@ public class PlatypusPlatform {
                     case NEW_VERSION_CODE: {
                         detailsText = res.getString("confirmUpdate");
                         updateAction = (ActionEvent e) -> {
-                            String[] command1 = createUpdaterCommand(UPDATER_EXECUTABLE, new String[]{"update", "-silent", "false"});
+                            String[] command1 = createUpdaterCommand(UPDATER_EXECUTABLE, new String[]{"update", "-silent", "false", "-java-home", javaHome});
                             try {
                                 Process updaterProcess1 = Runtime.getRuntime().exec(command1);
                                 notification.clear();
-                            }catch (IOException ex) {
+                            } catch (IOException ex) {
                                 Logger.getLogger(PlatypusPlatform.class.getName())
                                         .log(Level.SEVERE, null, ex); // NOI18N
                             }
@@ -164,7 +165,7 @@ public class PlatypusPlatform {
         String[] command = new String[aParams.length + 1];
         System.arraycopy(aParams, 0, command, 1, aParams.length);
         if (Utilities.isWindows()) {
-            command[0] = ("\"" + aExecutable + "\"");
+            command[0] = "\"" + aExecutable + "\"";
         } else {
             command[0] = aExecutable;
         }
@@ -301,7 +302,7 @@ public class PlatypusPlatform {
     }
 
     /**
-    /**
+     * /**
      * Gets the platform's JavaScript API directory.
      *
      * @param platfromHomeDir
