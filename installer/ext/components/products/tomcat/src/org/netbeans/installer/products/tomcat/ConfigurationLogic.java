@@ -39,6 +39,7 @@
 package org.netbeans.installer.products.tomcat;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
@@ -227,10 +228,13 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
         instanceFO.setAttribute("monitor_enabled", "false"); // NOI18N
          */
         try {
-            File tomcatAutoregistered = new File(nbLocation, "nb/config/J2EE/InstalledServers/tomcat_autoregistered_instance");
-            tomcatAutoregistered.createNewFile();
+            String confPath = "nb" + File.separator + "config" + File.separator + "J2EE" + File.separator + "InstalledServers";
+            File configFolder = new File(nbLocation, confPath);
+            configFolder.mkdirs();
 
-            try (PrintWriter writer = new PrintWriter(new File(nbLocation, "nb/config/J2EE/InstalledServers/.nbattrs"))) {
+            File tomcatAutoregistered = new File(nbLocation, confPath + File.separator + "tomcat_autoregistered_instance");
+            tomcatAutoregistered.createNewFile();
+            try (PrintWriter writer = new PrintWriter(new File(nbLocation, confPath + File.separator + ".nbattrs"))) {
                 String passwd = generatePassword(5);
                 //String tomcatHome = tomcatLocation.getAbsolutePath();
                 Path tomcatHomePath = Paths.get(tomcatLocation.toURI());
@@ -239,7 +243,7 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
                 writer.append(TOMCAT_CONFIG.replace("${password}", passwd)
                         .replace("${tomcatHome}", tomcatHomePath.toString())
                         .replace("${tomcatName}", tomcatName.toString())
-                        .replace("${tomcatBase}",tomcatName.toString()+"_base"));
+                        .replace("${tomcatBase}", tomcatName.toString() + "_base"));
                 writer.flush();
             }
             return true;
