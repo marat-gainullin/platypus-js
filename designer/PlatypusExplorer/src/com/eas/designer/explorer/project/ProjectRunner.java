@@ -45,12 +45,15 @@ import org.netbeans.api.debugger.jpda.AttachingDICookie;
 import org.netbeans.api.extexecution.ExecutionDescriptor;
 import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.ExternalProcessBuilder;
+import org.netbeans.api.progress.ProgressHandle;
+import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.actions.SaveAllAction;
 import org.openide.awt.HtmlBrowser;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
+import org.openide.util.RequestProcessor;
 import org.openide.util.actions.SystemAction;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
@@ -77,6 +80,7 @@ public class ProjectRunner {
     private static final String EQUALS_SIGN = "="; //NOI18N
     private static final String FALSE = "false"; //NOI18N
     private static final String LOCAL_HOSTNAME = "localhost"; //NOI18N
+    private static volatile RequestProcessor.Task runTask;
 
     private static class DebuggerManagerAdapter implements DebuggerManagerListener {
 
@@ -143,13 +147,22 @@ public class ProjectRunner {
      */
     public static void run(final PlatypusProject project, final String appElementName) throws Exception {
         saveAll();
-        project.getRequestProcessor().post(() -> {
-            try {
-                start(project, appElementName, false);
-            } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
-            }
-        });
+        if (runTask == null) {
+            runTask = project.getRequestProcessor().create(() -> {
+                try {
+                    start(project, appElementName, false);
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            });
+            final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(ProjectRunner.class, "LBL_Application_Running", project.getDisplayName()), runTask); // NOI18N  
+            runTask.addTaskListener((org.openide.util.Task task) -> {
+                ph.finish();
+                runTask = null;
+            });
+            ph.start();
+            runTask.schedule(0);
+        }
     }
 
     /**
@@ -407,9 +420,14 @@ public class ProjectRunner {
             }
         } catch (MalformedURLException | ServerSupport.ServerTimeOutException | ServerSupport.ServerStoppedException | InterruptedException | IllegalStateException ex) {
             io.getErr().println(ex.getMessage());
+            io.setErrVisible(true);
+            io.select();
         } catch (PlatformHomePathException ex) {
             io.getErr().println(ex.getMessage());
+            io.setErrVisible(true);
             io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Specify_Platypus_Platform_Path"));//NOI18N
+            io.setOutputVisible(true);
+            io.select();
         }
     }
 

@@ -151,7 +151,8 @@ public class PlatypusWebModuleManager {
             }
         } catch (Exception ex) {
             project.getOutputWindowIO().getErr().println(ex.toString());
-            ErrorManager.getDefault().notify(ex);
+            project.getOutputWindowIO().select();
+            project.getOutputWindowIO().setErrVisible(true);
         }
         return webAppRunUrl;
     }
