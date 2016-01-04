@@ -2,8 +2,6 @@ package com.eas.script;
 
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.LexicalContext;
 import jdk.nashorn.internal.ir.Node;
@@ -12,7 +10,6 @@ import jdk.nashorn.internal.parser.Lexer;
 import jdk.nashorn.internal.parser.Token;
 import jdk.nashorn.internal.parser.TokenStream;
 import jdk.nashorn.internal.parser.TokenType;
-import jdk.nashorn.internal.runtime.ParserException;
 import jdk.nashorn.internal.runtime.Source;
 
 /**
@@ -22,6 +19,25 @@ import jdk.nashorn.internal.runtime.Source;
  * @author mg
  */
 public abstract class BaseAnnotationsMiner extends NodeVisitor<LexicalContext> {
+
+    protected static class RegExpAwareLexer extends Lexer {
+
+        protected LineInfoReceiver lineInfos = (int line1, int linePosition1) -> {
+        };
+
+        public RegExpAwareLexer(final Source source, final TokenStream stream) {
+            super(source, stream);
+        }
+
+        public void resetPosition(int aPosition) {
+            super.reset(aPosition);
+        }
+
+        @Override
+        public boolean scanLiteral(long token, TokenType startTokenType, LineInfoReceiver lir) {
+            return super.scanLiteral(token, startTokenType, lineInfos);
+        }
+    }
 
     protected final int TOP_SCOPE_LEVEL = 1;
     protected final int TOP_CONSTRUCTORS_SCOPE_LEVEL = 2;
@@ -36,36 +52,48 @@ public abstract class BaseAnnotationsMiner extends NodeVisitor<LexicalContext> {
     }
 
     private void mineComments() {
-        try {
-            TokenStream tokens = new TokenStream();
-            Lexer lexer = new Lexer(source, tokens);
-            long prevT = 0;
-            long t;
-            TokenType tt = TokenType.EOL;
-            int i = 0;
-            while (tt != TokenType.EOF) {
-                // Get next token in nashorn's parser way
-                while (i > tokens.last()) {
-                    if (tokens.isFull()) {
-                        tokens.grow();
-                    }
-                    lexer.lexify();
-                }
-                t = tokens.get(i++);
-                // next token has been obtained.
-                tt = Token.descType(t);
-                if (tt == TokenType.EOL) {
-                    continue;
-                }
-                TokenType prevTt = Token.descType(prevT);
-                if (prevTt == TokenType.COMMENT) {
-                    prevComments.put(t, prevT);
-                }
-                prevT = t;
+        TokenStream tokens = new TokenStream();
+        RegExpAwareLexer lexer = new RegExpAwareLexer(source, tokens);
+        long previousToken = 0;
+        TokenType tokenType = TokenType.EOL;
+        int i = 0;
+        while (tokenType != TokenType.EOF) {
+            long token = nextToken(i, tokens, lexer);
+            tokenType = Token.descType(token);
+            // Literals care
+            boolean canStartLiteral = lexer.canStartLiteral(tokenType);
+            boolean literalScanned = canStartLiteral && lexer.scanLiteral(token, tokenType, null);
+            if (canStartLiteral && !literalScanned) {// scanLiteral() calls reset() and so, we have to revert it to repair plain token stream
+                int tokenPosition = Token.descPosition(token);
+                int tokenLength = Token.descLength(token);
+                lexer.resetPosition(tokenPosition + tokenLength);
             }
-        } catch (ParserException ex) {
-            Logger.getLogger(BaseAnnotationsMiner.class.getName()).log(Level.WARNING, ex.getMessage());
+            // Main logic
+            if (tokenType != TokenType.EOL) {
+                if (Token.descType(previousToken) == TokenType.COMMENT) {
+                    prevComments.put(token, previousToken);
+                }
+                previousToken = token;
+            }
+            // Memory sanitizing
+            if (i % 1024 == 0) {
+                tokens.commit(i);
+            }
+            // !Unconditionally! increase token number
+            i++;
         }
+    }
+
+    private long nextToken(int k, TokenStream tokens, Lexer lexer) {
+        // Get next token in nashorn's parser way
+        while (k > tokens.last()) {
+            if (tokens.isFull()) {
+                tokens.grow();
+            }
+            lexer.lexify();
+        }
+        long t = tokens.get(k);
+        return t;
     }
 
     protected int scopeLevel;
