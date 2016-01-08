@@ -133,6 +133,8 @@ public class FormFactory {
                         assert wName != null && !wName.isEmpty() : "A widget is expected to be a named item.";
                         widgets.put(wName, widget);
                         widgetsList.add(widget);
+                    } else {
+                        Logger.getLogger(FormFactory.class.getName()).log(Level.WARNING, "Unknown widget tag name: {0}. skipping.", aElement.getTagName());
                     }
                 } catch (Exception ex) {
                     Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
@@ -423,7 +425,7 @@ public class FormFactory {
                 if (anElement.hasAttribute("text")) {
                     modelCheckBox.setText(anElement.getAttribute("text"));
                 }
-                if(anElement.hasAttribute("nullable")) {
+                if (anElement.hasAttribute("nullable")) {
                     modelCheckBox.setNullable(XmlDomUtils.readBooleanAttribute(anElement, "nullable", true));
                 }
                 return modelCheckBox;
@@ -453,7 +455,7 @@ public class FormFactory {
                         modelCombo.setDisplayField(displayField);
                     }
                 }
-                if(anElement.hasAttribute("nullable")) {
+                if (anElement.hasAttribute("nullable")) {
                     modelCombo.setNullable(XmlDomUtils.readBooleanAttribute(anElement, "nullable", true));
                 }
                 return modelCombo;
@@ -477,7 +479,7 @@ public class FormFactory {
                     boolean selected = XmlDomUtils.readBooleanAttribute(anElement, "timeField", Boolean.FALSE);
                     modelDate.setTimePicker(selected);
                 }
-                if(anElement.hasAttribute("nullable")) {
+                if (anElement.hasAttribute("nullable")) {
                     modelDate.setNullable(XmlDomUtils.readBooleanAttribute(anElement, "nullable", true));
                 }
                 return modelDate;
@@ -496,7 +498,7 @@ public class FormFactory {
                 } catch (Exception ex) {
                     Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                if(anElement.hasAttribute("nullable")) {
+                if (anElement.hasAttribute("nullable")) {
                     modelFormattedField.setNullable(XmlDomUtils.readBooleanAttribute(anElement, "nullable", true));
                 }
                 return modelFormattedField;
@@ -520,7 +522,7 @@ public class FormFactory {
                 } catch (Exception ex) {
                     Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                if(anElement.hasAttribute("nullable")) {
+                if (anElement.hasAttribute("nullable")) {
                     modelSpin.setNullable(XmlDomUtils.readBooleanAttribute(anElement, "nullable", true));
                 }
                 return modelSpin;
@@ -535,7 +537,7 @@ public class FormFactory {
                         Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-                if(anElement.hasAttribute("nullable")) {
+                if (anElement.hasAttribute("nullable")) {
                     modelTextArea.setNullable(XmlDomUtils.readBooleanAttribute(anElement, "nullable", true));
                 }
                 return modelTextArea;
