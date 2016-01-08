@@ -26,7 +26,7 @@ public class CommentsMinerTest {
                 + " */"
                 + "/\\d/";
         Source source = Source.sourceFor("regExpLiteral", text);
-        BaseAnnotationsMiner miner = new BaseAnnotationsMiner(source) {
+        AnnotationsMiner miner = new AnnotationsMiner(source) {
             @Override
             protected void commentedFunction(FunctionNode aFunction, String aComment) {
             }
@@ -42,7 +42,7 @@ public class CommentsMinerTest {
                 + " */"
                 + "var r = /\\d\"/;";
         Source source = Source.sourceFor("regExpLiteral1", text);
-        BaseAnnotationsMiner miner = new BaseAnnotationsMiner(source) {
+        AnnotationsMiner miner = new AnnotationsMiner(source) {
             @Override
             protected void commentedFunction(FunctionNode aFunction, String aComment) {
             }
@@ -58,7 +58,7 @@ public class CommentsMinerTest {
                 + " */"
                 + "var r = /* second comment *//\\d\"/;";
         Source source = Source.sourceFor("regExpLiteral2", text);
-        BaseAnnotationsMiner miner = new BaseAnnotationsMiner(source) {
+        AnnotationsMiner miner = new AnnotationsMiner(source) {
             @Override
             protected void commentedFunction(FunctionNode aFunction, String aComment) {
             }
@@ -74,7 +74,7 @@ public class CommentsMinerTest {
                 + " */"
                 + "var r = /* second comment *//\\d\"//*third comment*/;";
         Source source = Source.sourceFor("regExpLiteral3", text);
-        BaseAnnotationsMiner miner = new BaseAnnotationsMiner(source) {
+        AnnotationsMiner miner = new AnnotationsMiner(source) {
             @Override
             protected void commentedFunction(FunctionNode aFunction, String aComment) {
             }
@@ -90,7 +90,7 @@ public class CommentsMinerTest {
                 + " */"
                 + "var r = // second comment \n/\\d\"//*third comment*/;";
         Source source = Source.sourceFor("regExpLiteral3", text);
-        BaseAnnotationsMiner miner = new BaseAnnotationsMiner(source) {
+        AnnotationsMiner miner = new AnnotationsMiner(source) {
             @Override
             protected void commentedFunction(FunctionNode aFunction, String aComment) {
             }
@@ -106,7 +106,7 @@ public class CommentsMinerTest {
                 + " */"
                 + "var r = // second comment \n/\\d\"/ig/*third comment*/;";
         Source source = Source.sourceFor("regExpLiteral3", text);
-        BaseAnnotationsMiner miner = new BaseAnnotationsMiner(source) {
+        AnnotationsMiner miner = new AnnotationsMiner(source) {
             @Override
             protected void commentedFunction(FunctionNode aFunction, String aComment) {
             }
@@ -118,7 +118,7 @@ public class CommentsMinerTest {
     public void regExpLiteralJQueryMin() throws IOException {
         URL resource = CommentsMinerTest.class.getClassLoader().getResource("com/eas/script/reg-exp-literal.min.js");
         Source source = Source.sourceFor("regExpLiteral-large-min", resource);
-        BaseAnnotationsMiner miner = new BaseAnnotationsMiner(source) {
+        AnnotationsMiner miner = new AnnotationsMiner(source) {
             @Override
             protected void commentedFunction(FunctionNode aFunction, String aComment) {
             }
@@ -130,7 +130,7 @@ public class CommentsMinerTest {
     public void regExpLiteralJQuery() throws IOException {
         URL resource = CommentsMinerTest.class.getClassLoader().getResource("com/eas/script/reg-exp-literal.js");
         Source source = Source.sourceFor("regExpLiteral-large", resource);
-        BaseAnnotationsMiner miner = new BaseAnnotationsMiner(source) {
+        AnnotationsMiner miner = new AnnotationsMiner(source) {
             @Override
             protected void commentedFunction(FunctionNode aFunction, String aComment) {
             }

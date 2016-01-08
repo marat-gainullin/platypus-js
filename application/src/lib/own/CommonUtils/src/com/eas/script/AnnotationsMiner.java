@@ -18,14 +18,14 @@ import jdk.nashorn.internal.runtime.Source;
  *
  * @author mg
  */
-public abstract class BaseAnnotationsMiner extends NodeVisitor<LexicalContext> {
+public abstract class AnnotationsMiner extends NodeVisitor<LexicalContext> {
 
-    protected static class RegExpAwareLexer extends Lexer {
+    protected static class OpenLexer extends Lexer {
 
         protected LineInfoReceiver lineInfos = (int line1, int linePosition1) -> {
         };
 
-        public RegExpAwareLexer(final Source source, final TokenStream stream) {
+        public OpenLexer(final Source source, final TokenStream stream) {
             super(source, stream);
         }
 
@@ -45,7 +45,7 @@ public abstract class BaseAnnotationsMiner extends NodeVisitor<LexicalContext> {
     protected Map<Long, Long> prevComments = new TreeMap<>();
     protected Source source;
 
-    public BaseAnnotationsMiner(Source aSource) {
+    public AnnotationsMiner(Source aSource) {
         super(new LexicalContext());
         source = aSource;
         mineComments();
@@ -53,7 +53,7 @@ public abstract class BaseAnnotationsMiner extends NodeVisitor<LexicalContext> {
 
     private void mineComments() {
         TokenStream tokens = new TokenStream();
-        RegExpAwareLexer lexer = new RegExpAwareLexer(source, tokens);
+        OpenLexer lexer = new OpenLexer(source, tokens);
         long previousToken = 0;
         TokenType tokenType = TokenType.EOL;
         int i = 0;
@@ -69,7 +69,7 @@ public abstract class BaseAnnotationsMiner extends NodeVisitor<LexicalContext> {
                 lexer.resetPosition(tokenPosition + tokenLength);
             }
             // Main logic
-            if (tokenType != TokenType.EOL) {
+            if (tokenType != TokenType.EOL && !literalScanned) {// If a literal was scanned, it will be added as next separate token to the stream and we will see it twice...
                 if (Token.descType(previousToken) == TokenType.COMMENT) {
                     prevComments.put(token, previousToken);
                 }
