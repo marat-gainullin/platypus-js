@@ -19,7 +19,7 @@ import jdk.nashorn.internal.runtime.Source;
  * Important! The visitor's <code>accept</code> method must be invoked on an AST root.
  * @author vv
  */
-public abstract class GMDPropertiesAnnotationsMiner extends BaseAnnotationsMiner {
+public abstract class GMDPropertiesAnnotationsMiner extends AnnotationsMiner {
 
     protected final Set<String> thisAliases;
 

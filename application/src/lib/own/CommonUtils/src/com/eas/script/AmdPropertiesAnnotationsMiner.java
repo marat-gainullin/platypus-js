@@ -17,7 +17,7 @@ import jdk.nashorn.internal.runtime.Source;
  *
  * @author mg
  */
-public abstract class AmdPropertiesAnnotationsMiner extends BaseAnnotationsMiner {
+public abstract class AmdPropertiesAnnotationsMiner extends AnnotationsMiner {
 
     public AmdPropertiesAnnotationsMiner(Source aSource) {
         super(aSource);
