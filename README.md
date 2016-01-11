@@ -21,3 +21,5 @@ The platform offers a set of features, making development process extremely prod
 * The GUI widgets which directly interact with the data model, allowing implementation of a CRUD (Create-Read-Update-Delete) user interface with visual configuration and without or just a little coding.
 * Built-in security support, including users authentication and authorization, constraints of access to application resources.
 * Application database schema structure and initial applicaton data migrations tools.
+
+
