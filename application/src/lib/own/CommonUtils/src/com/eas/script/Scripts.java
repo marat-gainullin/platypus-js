@@ -820,7 +820,6 @@ public class Scripts {
      *
      * @param moduleConstructor a constructor to search in
      * @return a set of aliases including <code>this</code> itself
-     */
     public static Set<String> getThisAliases(final FunctionNode moduleConstructor) {
         final Set<String> aliases = new HashSet<>();
         if (moduleConstructor != null && moduleConstructor.getBody() != null) {
@@ -844,6 +843,7 @@ public class Scripts {
         }
         return aliases;
     }
+     */
 
     protected static final String SCRIPT_NOT_INITIALIZED = "Platypus script functions are not initialized.";
 

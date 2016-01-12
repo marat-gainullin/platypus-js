@@ -39,14 +39,11 @@ public abstract class AnnotationsMiner extends NodeVisitor<LexicalContext> {
         }
     }
 
-    protected final int TOP_SCOPE_LEVEL = 1;
-    protected final int TOP_CONSTRUCTORS_SCOPE_LEVEL = 2;
-    protected final int AMD_CONSTRUCTORS_SCOPE_LEVEL = 3;
     protected Map<Long, Long> prevComments = new TreeMap<>();
     protected Source source;
 
-    public AnnotationsMiner(Source aSource) {
-        super(new LexicalContext());
+    public AnnotationsMiner(Source aSource, LexicalContext context) {
+        super(context);
         source = aSource;
         mineComments();
     }
@@ -105,6 +102,8 @@ public abstract class AnnotationsMiner extends NodeVisitor<LexicalContext> {
         if (prevComments.containsKey(ft)) {
             long prevComment = prevComments.get(ft);
             commentedFunction(functionNode, source.getString(prevComment));
+        } else {
+            commentedFunction(functionNode, null);
         }
         return super.enterFunctionNode(functionNode);
     }
