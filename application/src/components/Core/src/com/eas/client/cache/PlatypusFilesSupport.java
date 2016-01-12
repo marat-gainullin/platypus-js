@@ -6,7 +6,7 @@ package com.eas.client.cache;
 
 import com.eas.client.ClientConstants;
 import com.eas.script.AmdPropertiesAnnotationsMiner;
-import com.eas.script.BaseAnnotationsMiner;
+import com.eas.script.AnnotationsMiner;
 import com.eas.script.JsDoc;
 import com.eas.script.Scripts;
 import com.eas.util.StringUtils;
@@ -79,7 +79,7 @@ public class PlatypusFilesSupport {
     public static FunctionNode extractModuleConstructor(FunctionNode jsRoot, String aFileName) {
         if (jsRoot != null) {
             final NodesContext cx = new NodesContext();
-            jsRoot.accept(new BaseAnnotationsMiner(jsRoot.getSource()) {
+            jsRoot.accept(new AnnotationsMiner(jsRoot.getSource()) {
 
                 @Override
                 public boolean enterFunctionNode(FunctionNode fn) {
