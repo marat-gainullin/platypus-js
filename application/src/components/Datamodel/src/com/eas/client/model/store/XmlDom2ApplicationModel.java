@@ -4,7 +4,6 @@
  */
 package com.eas.client.model.store;
 
-import com.eas.client.model.Model;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
@@ -62,15 +61,15 @@ public class XmlDom2ApplicationModel<E extends ApplicationEntity<M, ?, E>, M ext
     }
 
     protected void readApplicationEntity(E aEntity) {
-        aEntity.setName(currentNode.getAttribute(Model.DATASOURCE_NAME_TAG_NAME));
-        aEntity.setTitle(currentNode.getAttribute(Model.DATASOURCE_TITLE_TAG_NAME));
+        aEntity.setName(XmlDomUtils.getAttribute(currentNode, "n", Model2XmlDom.DATASOURCE_NAMEE_ATTR_NAME));
+        aEntity.setTitle(XmlDomUtils.getAttribute(currentNode, "tt", Model2XmlDom.DATASOURCE_TITLE_ATTR_NAME));
         readEntity(aEntity);
     }
 
     @Override
     protected void readRelations() {
         super.readRelations();
-        List<Element> nl = XmlDomUtils.elementsByTagName(currentNode, ApplicationModel2XmlDom.REFERENCE_RELATION_TAG_NAME);
+        List<Element> nl = XmlDomUtils.elementsByTagName(currentNode, "rr", ApplicationModel2XmlDom.REFERENCE_RELATION_TAG_NAME);
         if (nl != null) {
             Element lcurrentNode = currentNode;
             try {
@@ -96,8 +95,8 @@ public class XmlDom2ApplicationModel<E extends ApplicationEntity<M, ?, E>, M ext
     @Override
     public void visit(ReferenceRelation<E> aRelation) {
         super.visit(aRelation);
-        final String scalarPropertyName = currentNode.getAttribute(ApplicationModel2XmlDom.SCALAR_PROP_NAME_ATTR_NAME);
-        final String collectionPropertyName = currentNode.getAttribute(ApplicationModel2XmlDom.COLLECTION_PROP_NAME_ATTR_NAME);
+        final String scalarPropertyName = XmlDomUtils.getAttribute(currentNode, "spn", ApplicationModel2XmlDom.SCALAR_PROP_NAME_ATTR_NAME);
+        final String collectionPropertyName = XmlDomUtils.getAttribute(currentNode, "cpn", ApplicationModel2XmlDom.COLLECTION_PROP_NAME_ATTR_NAME);
         aRelation.setScalarPropertyName(scalarPropertyName != null ? scalarPropertyName.trim() : null);
         aRelation.setCollectionPropertyName(collectionPropertyName != null ? collectionPropertyName.trim() : null);
         if (currentModel != null) {

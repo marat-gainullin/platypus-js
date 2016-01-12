@@ -94,7 +94,7 @@ public class PlatypusFilesSupport {
 
                 @Override
                 protected void commentedFunction(FunctionNode fn, String aComment) {
-                    if (scopeLevel == TOP_CONSTRUCTORS_SCOPE_LEVEL) {
+                    if (scopeLevel == GLOBAL_CONSTRUCTORS_SCOPE_LEVEL) {
                         JsDoc jsDoc = new JsDoc(aComment);
                         jsDoc.parseAnnotations();
                         if (jsDoc.containsTag(JsDoc.Tag.CONSTRUCTOR_TAG)) {

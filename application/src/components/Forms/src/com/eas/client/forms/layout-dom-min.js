@@ -1,148 +1,163 @@
 var layoutMin = {
     tags: {
-        lb: "Label", // se
-        bt: "Button", // se
-        ddb: "DropDownButton", // se
-        bg: "ButtonGroup", // se
-        cb: "CheckBox", // se
-        ta: "TextArea", // se
-        ha: "HtmlArea", // se
-        ff: "FormattedField", // se
-        pf: "PasswordField", // se
-        pb: "ProgressBar", // se
-        rb: "RadioButton", // se
-        s: "Slider", // se
-        tf: "TextField", // se
-        tb: "ToggleButton", // se
-        dp: "DesktopPane", // se
-        mcb: "ModelCheckBox", // se
-        mc: "ModelCombo", // se
-        md: "ModelDate", // se
-        mff: "ModelFormattedField", // se
-        msp: "ModelSpin", // se
-        mta: "ModelTextArea", // se
-        mg: "ModelGrid", // se
-        ap: "AnchorsPane", // se
-        bp: "BorderPane", // se
-        bx: "BoxPane", // se
-        cp: "CardPane", // se
-        fp: "FlowPane", // se
-        gp: "GridPane", // se
-        sp: "ScrollPane", // se
-        spl: "SplitPane", // se
-        tp: "TabbedPane", // se
-        tl: "ToolBar", // se
-        m: "Menu", // se
-        mi: "MenuItem", // se
-        cmi: "CheckMenuItem", // se
-        rmi: "RadioMenuItem", // se
-        ms: "MenuSeparator", // se
-        mb: "MenuBar", // se
-        pm: "PopupMenu", // se
-        tpc: "TabbedPaneConstraints", // se
-        bpc: "BorderPaneConstraints", // se
-        cpc: "CardPaneConstraints",
-        apc: "AnchorsPaneConstraints",
-        cgc: "CheckGridColumn",
-        rgc: "RadioGridColumn",
-        sgc: "ServiceGridColumn",
-        mgc: "ModelGridColumn",
-        ft: "font"
+        "lb": "Label", // se web
+        "bt": "Button", // se web
+        "ddb": "DropDownButton", // se web
+        "bg": "ButtonGroup", // se web
+        "cb": "CheckBox", // se web
+        "ta": "TextArea", // se web
+        "ha": "HtmlArea", // se web
+        "ff": "FormattedField", // se web
+        "pf": "PasswordField", // se web
+        "pb": "ProgressBar", // se web
+        "rb": "RadioButton", // se web
+        "s": "Slider", // se web
+        "tf": "TextField", // se web
+        "tb": "ToggleButton", // se web
+        "dp": "DesktopPane", // se web
+        "mcb": "ModelCheckBox", // se web
+        "mc": "ModelCombo", // se web
+        "md": "ModelDate", // se web
+        "mff": "ModelFormattedField", // se web
+        "msp": "ModelSpin", // se web
+        "mta": "ModelTextArea", // se web
+        "mg": "ModelGrid", // se web
+        "ap": "AnchorsPane", // se web
+        "bp": "BorderPane", // se web
+        "bx": "BoxPane", // se web
+        "cp": "CardPane", // se web
+        "fp": "FlowPane", // se web
+        "gp": "GridPane", // se web
+        "sp": "ScrollPane", // se web
+        "spl": "SplitPane", // se web
+        "tp": "TabbedPane", // se web
+        "tl": "ToolBar", // se web
+        "m": "Menu", // se web
+        "mi": "MenuItem", // se web
+        "cmi": "CheckMenuItem", // se web
+        "rmi": "RadioMenuItem", // se web
+        "ms": "MenuSeparator", // se web
+        "mb": "MenuBar", // se web
+        "pm": "PopupMenu", // se web
+        "tpc": "TabbedPaneConstraints", // se web
+        "bpc": "BorderPaneConstraints", // se web
+        "cpc": "CardPaneConstraints", // se web
+        "apc": "AnchorsPaneConstraints", // se web
+        "cgc": "CheckGridColumn", // se web
+        "rgc": "RadioGridColumn", // se web
+        "sgc": "ServiceGridColumn", // se web
+        "mgc": "ModelGridColumn", // se web
+        "ft": "font"//  se web
     }, attributes: {
-        i: "icon",
-        tx: "text",
-        ha: "horizontalAlignment",
-        va: "verticalAlignment",
-        itg: "iconTextGap",
-        htp: "horizontalTextPosition",
-        vtp: "verticalTextPosition",
-        n: "name",
-        e: "editable",
-        et: "emptyText",
-        f: "field",
-        fr: "format",
-        ft: "font",
-        bg: "background",
-        fg: "foreground",
-        d: "data",
-        en: "enabled",
-        fc: "focusable",
-        o: "opaque",
-        ttt: "toolTipText",
-        cr: "cursor",
-        v: "visible",
-        nfc: "nextFocusableComponent",
-        cpm: "componentPopupMenu",
-        bgr: "buttonGroup",
-        p: "parent",
-        tt: "tabTitle",
-        ti: "tabIcon",
-        ttp: "tabTooltipText",
-        pl: "place",
-        cn: "cardName",
-        l: "left",
-        r: "right",
-        t: "top",
-        b: "bottom",
-        w: "width",
-        h: "height",
-        fd: "field",
-        sf: "sortField",
-        tl: "title",
-        ro: "readonly",
-        mw: "minWidth",
-        mxw: "maxWidth",
-        prw: "preferredWidth",
-        m: "movable",
-        rs: "resizable",
-        so: "selectOnly",
-        st: "selected",
-        s: "sortable",
-        pw: "prefWidth",
-        ph: "prefHeight",
-        dco: "defaultCloseOperation",
-        mxe: "maximizable",
-        mne: "minimizable",
-        udr: "undecorated",
-        opc: "opacity",
-        aot: "alwaysOnTop",
-        lbp: "locationByPlatform",
-        lf: "labelFor",
-        ddm: "dropDownMenu",
-        vt: "valueType",
-        mm: "minimum",
-        vl: "value",
-        mx: "maximum",
-        nl: "nullable",
-        ls: "list",
-        dl: "displayList",
-        df: "displayField",
-        dtf: "dateField",
-        tf: "timeField",
-        frc: "frozenColumns",
-        frr: "frozenRows",
-        ie: "insertable",
-        de: "deletable",
-        hv: "headerVisible",
-        dr: "draggableRows",
-        shl: "showHorizontalLines",
-        svl: "showVerticalLines",
-        soc: "showOddRowsInOtherColor",
-        rh: "rowsHeight",
-        orc: "oddRowsColor",
-        gc: "gridColor",
-        pf: "parentField",
-        cf: "childrenField",
-        on: "orientation",
-        wse: "wheelScrollingEnabled",
-        hsp: "horizontalScrollBarPolicy",
-        vsp: "verticalScrollBarPolicy",
-        ote: "oneTouchExpandable",
-        dvl: "dividerLocation",
-        ds: "dividerSize",
-        lc: "leftComponent",
-        rc: "rightComponent",
-        tp: "tabPlacement",
-        stl: "style",
-        sz: "size"
+        "i": "icon", // web
+        "tx": "text", // web
+        "ha": "horizontalAlignment", // web
+        "va": "verticalAlignment", // web
+        "itg": "iconTextGap", // web
+        "htp": "horizontalTextPosition", // web
+        "vtp": "verticalTextPosition", // web
+        "n": "name", // web
+        "e": "editable", // web
+        "et": "emptyText", // web
+        "f": "field", // web
+        "fr": "format", // web
+        "ft": "font", // web
+        "bg": "background", // web
+        "fg": "foreground", // web
+        "d": "data", // web
+        "en": "enabled", // web
+        "fc": "focusable", // web
+        "o": "opaque", // web
+        "ttt": "toolTipText", // web
+        "cr": "cursor", // 
+        "v": "visible", // web
+        "nfc": "nextFocusableComponent", //
+        "cpm": "componentPopupMenu", // web
+        "bgr": "buttonGroup", // web
+        "p": "parent", // web
+        "tt": "tabTitle", // web
+        "ti": "tabIcon", // web
+        "ttp": "tabTooltipText", // web
+        "pl": "place", // web
+        "cn": "cardName", // web
+        "l": "left", // web
+        "r": "right", // web
+        "t": "top", // web
+        "b": "bottom", //web
+        "w": "width", // web
+        "h": "height", // web
+        "sf": "sortField", // web
+        "tl": "title", // web
+        "ro": "readonly", // web
+        "mw": "minWidth", // web
+        "mxw": "maxWidth", // web
+        "prw": "preferredWidth", // web
+        "m": "movable", // web
+        "rs": "resizable", // web
+        "so": "selectOnly", // web
+        "st": "selected", // web
+        "s": "sortable", // web
+        "pw": "prefWidth", // web
+        "ph": "prefHeight", // web
+        "dco": "defaultCloseOperation", // web
+        "mxe": "maximizable", // web
+        "mne": "minimizable", // web
+        "udr": "undecorated", // web
+        "opc": "opacity", // web
+        "aot": "alwaysOnTop", // web
+        "lbp": "locationByPlatform", // web
+        "lf": "labelFor", //
+        "ddm": "dropDownMenu", // web
+        "vt": "valueType", // web
+        "mm": "minimum", // web
+        "vl": "value", // web
+        "mx": "maximum", // web
+        "nl": "nullable", // web
+        "ls": "list", // web
+        "dl": "displayList", // web
+        "df": "displayField", // web
+        "dtp": "datePicker", //
+        "tmp": "timePicker", //
+        "frc": "frozenColumns", //web
+        "frr": "frozenRows", // web
+        "ie": "insertable", // web
+        "de": "deletable", // web
+        "hv": "headerVisible", // web
+        "dr": "draggableRows", // web
+        "shl": "showHorizontalLines", // web
+        "svl": "showVerticalLines", // web
+        "soc": "showOddRowsInOtherColor", // web
+        "rh": "rowsHeight", // web
+        "orc": "oddRowsColor", // web
+        "gc": "gridColor", // web
+        "pf": "parentField", // web
+        "cf": "childrenField", // web
+        "on": "orientation", // web
+        "wse": "wheelScrollingEnabled", // web
+        "hsp": "horizontalScrollBarPolicy", // web
+        "vsp": "verticalScrollBarPolicy", // web
+        "ote": "oneTouchExpandable", // web
+        "dvl": "dividerLocation", // web
+        "ds": "dividerSize", // 
+        "lc": "leftComponent", // web
+        "rc": "rightComponent", // web
+        "tp": "tabPlacement", // web
+        "stl": "style", // web
+        "sz": "size", // web
+        // non minified attributes
+        "step": "step",
+        "min": "min",
+        "max": "max",
+        "hgap": "hgap",
+        "vgap": "vgap",
+        "rows": "rows",
+        "columns": "columns"
     }};
+print('layout tags:');
+for (var t in layoutMin.tags) {
+    print('put("' + layoutMin.tags[t] + '","' + t + '");');
+}
+print('layout attributes:');
+for (var a in layoutMin.attributes) {
+    print('put("' + layoutMin.attributes[a] + '","' + t + '");');
+}

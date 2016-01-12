@@ -46,16 +46,25 @@ public class AppElementFiles {
 
     public String getAppElementId(int appElementType) {
         try {
-            if (appElementType == ClientConstants.ET_COMPONENT || appElementType == ClientConstants.ET_FORM || appElementType == ClientConstants.ET_REPORT) {
-                File jsFile = findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
-                String fileContent = FileUtils.readString(jsFile, PlatypusFiles.DEFAULT_ENCODING);
-                return PlatypusFilesSupport.extractModuleName(fileContent, jsFile.getPath());
-            } else if (appElementType == ClientConstants.ET_QUERY) {
-                File sqlFile = findFileByExtension(PlatypusFiles.SQL_EXTENSION);
-                String fileContent = FileUtils.readString(sqlFile, PlatypusFiles.DEFAULT_ENCODING);
-                return PlatypusFilesSupport.getAnnotationValue(fileContent, JsDoc.Tag.NAME_TAG);
-            } else if (appElementType == ClientConstants.ET_DB_SCHEME) {
-                return IDGenerator.genID() + "";
+            switch (appElementType) {
+                case ClientConstants.ET_COMPONENT:
+                case ClientConstants.ET_FORM:
+                case ClientConstants.ET_REPORT:
+                {
+                    File jsFile = findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
+                    String fileContent = FileUtils.readString(jsFile, PlatypusFiles.DEFAULT_ENCODING);
+                    return PlatypusFilesSupport.extractModuleName(fileContent, jsFile.getPath());
+                }
+                case ClientConstants.ET_QUERY:
+                {
+                    File sqlFile = findFileByExtension(PlatypusFiles.SQL_EXTENSION);
+                    String fileContent = FileUtils.readString(sqlFile, PlatypusFiles.DEFAULT_ENCODING);
+                    return PlatypusFilesSupport.getAnnotationValue(fileContent, JsDoc.Tag.NAME_TAG);
+                }
+                case ClientConstants.ET_DB_SCHEME:
+                    return IDGenerator.genID() + "";
+                default:
+                    break;
             }
         } catch (IOException ex) {
             Logger.getLogger(AppElementFiles.class.getName()).log(Level.SEVERE, null, ex);

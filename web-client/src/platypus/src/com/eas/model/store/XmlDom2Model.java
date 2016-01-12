@@ -4,11 +4,8 @@
  */
 package com.eas.model.store;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,8 +23,6 @@ import com.eas.model.Relation;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;
-import com.google.gwt.xml.client.NamedNodeMap;
-import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
 
 /**
@@ -39,45 +34,43 @@ public class XmlDom2Model implements ModelVisitor {
 	protected final static String YES_STRING = "yes";
 	protected final static String NO_STRING = "no";
 
+	// Tags
 	public static final String DATAMODEL_TAG_NAME = "datamodel";
-	public static final String DATASOURCE_NAME_TAG_NAME = "Name";
-	public static final String DATASOURCE_TITLE_TAG_NAME = "Title";
+	public static final String DATASOURCE_NAME_ATTR_NAME = "Name";
+	public static final String DATASOURCE_TITLE_ATTR_NAME = "Title";
 	public static final String ENTITY_TAG_NAME = "entity";
-	public static final String FIELDS_ENTITY_TAG_NAME = "fieldsEntity";
-	public static final String PARAMETERS_ENTITY_TAG_NAME = "parametersEntity";
+	//public static final String FIELDS_ENTITY_TAG_NAME = "fieldsEntity";
+	//public static final String PARAMETERS_ENTITY_TAG_NAME = "parametersEntity";
 	public static final String RELATION_TAG_NAME = "relation";
-	public static final String LIGHT_RELATION_TAG_NAME = "lightRelation";
+	//public static final String LIGHT_RELATION_TAG_NAME = "lightRelation";
 	public static final String REFERENCE_RELATION_TAG_NAME = "referenceRelation";
+	
+	// Attributes
 	public static final String SCALAR_PROP_NAME_ATTR_NAME = "scalarPropertyName";
 	public static final String COLLECTION_PROP_NAME_ATTR_NAME = "collectionPropertyName";
-	public static final String PRIMARY_KEYS_TAG_NAME = "primaryKeys";
-	public static final String FOREIGN_KEYS_TAG_NAME = "foreignKeys";
+	//public static final String PRIMARY_KEYS_TAG_NAME = "primaryKeys";
+	//public static final String FOREIGN_KEYS_TAG_NAME = "foreignKeys";
 	public static final String PRIMARY_KEY_TAG_NAME = "primaryKey";
-	public static final String FOREIGN_KEY_TAG_NAME = "foreignKey";
+	//public static final String FOREIGN_KEY_TAG_NAME = "foreignKey";
 	public static final String NAME_ATTR_NAME = "name";
 	public static final String DESCRIPTION_ATTR_NAME = "description";
 	public static final String TYPE_ATTR_NAME = "type";
 	public static final String NULLABLE_ATTR_NAME = "nullable";
 	public static final String MODE_ATTR_NAME = "parameterMode";
 	public static final String IS_PK_ATTR_NAME = "isPk";
-	public static final String FK_TAG_NAME = "fk";
+	//public static final String FK_TAG_NAME = "fk";
 	public static final String SELECTION_FORM_TAG_NAME = "selectionForm";
-	public static final String CLASS_HINT_TAG_NAME = "classHint";
+	//public static final String CLASS_HINT_TAG_NAME = "classHint";
 	public static final String ENTITY_ID_ATTR_NAME = "entityId";
 	public static final String QUERY_ID_ATTR_NAME = "queryId";
-	public static final String ENTITY_TABLE_ALIAS = "tableAlias";
-	public static final String ENTITY_LOCATION_X = "entityLocationX";
-	public static final String ENTITY_LOCATION_Y = "entityLocationY";
-	public static final String ENTITY_SIZE_WIDTH = "entityWidth";
-	public static final String ENTITY_SIZE_HEIGHT = "entityHeight";
-	public static final String ENTITY_ICONIFIED = "entityIconified";
+	//public static final String ENTITY_TABLE_ALIAS = "tableAlias";
 	public static final String LEFT_ENTITY_ID_ATTR_NAME = "leftEntityId";
 	public static final String LEFT_ENTITY_FIELD_ATTR_NAME = "leftEntityFieldName";
 	public static final String LEFT_ENTITY_PARAMETER_ATTR_NAME = "leftEntityParameterName";
 	public static final String RIGHT_ENTITY_ID_ATTR_NAME = "rightEntityId";
 	public static final String RIGHT_ENTITY_FIELD_ATTR_NAME = "rightEntityFieldName";
 	public static final String RIGHT_ENTITY_PARAMETER_ATTR_NAME = "rightEntityParameterName";
-	public static final String CONSTRAINT_NAME_ATTR_NAME = "name";
+	public static final String CONSTRAINT_NAME_ATTR_NAME = NAME_ATTR_NAME;
 	public static final String CONSTRAINT_FIELD_ATTR_NAME = "field";
 	public static final String CONSTRAINT_SCHEMA_ATTR_NAME = "schema";
 	public static final String CONSTRAINT_TABLE_ATTR_NAME = "table";
@@ -106,7 +99,7 @@ public class XmlDom2Model implements ModelVisitor {
 	}
 
 	protected void readModel(Model aModel) throws Exception {
-		Element el = DATAMODEL_TAG_NAME.equals(doc.getDocumentElement().getNodeName()) ? doc.getDocumentElement() : Utils.getElementByTagName(doc.getDocumentElement(), DATAMODEL_TAG_NAME);
+		Element el = DATAMODEL_TAG_NAME.equals(doc.getDocumentElement().getNodeName()) ? doc.getDocumentElement() : Utils.scanForElementByTagName(doc.getDocumentElement(), DATAMODEL_TAG_NAME, DATAMODEL_TAG_NAME);
 		if (el != null && aModel != null) {
 			model = aModel;
 			try {
@@ -116,15 +109,16 @@ public class XmlDom2Model implements ModelVisitor {
 					Element lcurrentTag = currentTag;
 					try {
 						for (int i = 0; i < nl.getLength(); i++) {
-							if (ENTITY_TAG_NAME.equals(nl.item(i).getNodeName())) {
+							String nodeName = nl.item(i).getNodeName();
+							if ("e".equals(nodeName) || ENTITY_TAG_NAME.equals(nodeName)) {
 								currentTag = (Element) nl.item(i);
 								Entity entity = new Entity();
 								entity.accept(this);
-							} else if (RELATION_TAG_NAME.equals(nl.item(i).getNodeName())) {
+							} else if ("r".equals(nodeName) || RELATION_TAG_NAME.equals(nodeName)) {
 								currentTag = (Element) nl.item(i);
 								Relation relation = new Relation();
 								relation.accept(this);
-							} else if (REFERENCE_RELATION_TAG_NAME.equals(nl.item(i).getNodeName())) {
+							} else if ("rr".equals(nodeName) || REFERENCE_RELATION_TAG_NAME.equals(nodeName)) {
 								currentTag = (Element) nl.item(i);
 								Relation relation = new ReferenceRelation();
 								relation.accept(this);
@@ -148,13 +142,13 @@ public class XmlDom2Model implements ModelVisitor {
 
 	protected void readEntity(Entity entity) {
 		if (entity != null) {
-			String entityId = readAttribute(ENTITY_ID_ATTR_NAME, null);
+			String entityId = Utils.getAttribute(currentTag, "ei", ENTITY_ID_ATTR_NAME, null);
 			if ("null".equals(entityId)) {
 				entityId = null;
 			}
 			assert entityId != null : "Entity id must be provided";
 			entity.setEntityId(entityId);
-			String queryId = readAttribute(QUERY_ID_ATTR_NAME, null);
+			String queryId = Utils.getAttribute(currentTag, "qi", QUERY_ID_ATTR_NAME, null);
 			if ("null".equals(queryId)) {
 				queryId = null;
 			}
@@ -168,14 +162,13 @@ public class XmlDom2Model implements ModelVisitor {
 
 	@Override
 	public void visit(Entity entity) {
-		NamedNodeMap attrs = currentTag.getAttributes();
-		Node a = attrs.getNamedItem(DATASOURCE_NAME_TAG_NAME);
-		if (a != null) {
-			entity.setName(a.getNodeValue());
+		String name = Utils.getAttribute(currentTag, "n", DATASOURCE_NAME_ATTR_NAME, null);
+		if(name != null){
+			entity.setName(name);
 		}
-		a = attrs.getNamedItem(DATASOURCE_TITLE_TAG_NAME);
-		if (a != null) {
-			entity.setTitle(a.getNodeValue());
+		String title = Utils.getAttribute(currentTag, "tt", DATASOURCE_TITLE_ATTR_NAME, null);
+		if(title != null){
+			entity.setTitle(title);
 		}
 		readEntity(entity);
 	}
@@ -183,18 +176,12 @@ public class XmlDom2Model implements ModelVisitor {
 	@Override
 	public void visit(final Relation relation) {
 		if (relation != null && model != null) {
-			NamedNodeMap attrs = currentTag.getAttributes();
-			Node lefna = attrs.getNamedItem(LEFT_ENTITY_FIELD_ATTR_NAME);
-			Node lepna = attrs.getNamedItem(LEFT_ENTITY_PARAMETER_ATTR_NAME);
-			Node refna = attrs.getNamedItem(RIGHT_ENTITY_FIELD_ATTR_NAME);
-			Node repna = attrs.getNamedItem(RIGHT_ENTITY_PARAMETER_ATTR_NAME);
-
-			final String leftEntityId = readAttribute(LEFT_ENTITY_ID_ATTR_NAME, null);
-			final String leftFieldName = lefna != null ? lefna.getNodeValue() : null;
-			final String leftParameterName = lepna != null ? lepna.getNodeValue() : null;
-			final String rightEntityId = readAttribute(RIGHT_ENTITY_ID_ATTR_NAME, null);
-			final String rightFieldName = refna != null ? refna.getNodeValue() : null;
-			final String rightParameterName = repna != null ? repna.getNodeValue() : null;
+			final String leftEntityId = Utils.getAttribute(currentTag, "lei", LEFT_ENTITY_ID_ATTR_NAME, null);
+			final String leftFieldName = Utils.getAttribute(currentTag, "lef", LEFT_ENTITY_FIELD_ATTR_NAME, null);
+			final String leftParameterName = Utils.getAttribute(currentTag, "lep", LEFT_ENTITY_PARAMETER_ATTR_NAME, null);
+			final String rightEntityId = Utils.getAttribute(currentTag, "rei", RIGHT_ENTITY_ID_ATTR_NAME, null);
+			final String rightFieldName = Utils.getAttribute(currentTag, "ref", RIGHT_ENTITY_FIELD_ATTR_NAME, null);
+			final String rightParameterName = Utils.getAttribute(currentTag, "rep", RIGHT_ENTITY_PARAMETER_ATTR_NAME, null);
 
 			model.addRelation(relation);
 
@@ -235,14 +222,9 @@ public class XmlDom2Model implements ModelVisitor {
 	@Override
 	public void visit(final ReferenceRelation relation) {
 		visit((Relation) relation);
-		NamedNodeMap attrs = currentTag.getAttributes();
-		Node scalarna = attrs.getNamedItem(SCALAR_PROP_NAME_ATTR_NAME);
-		Node collectionna = attrs.getNamedItem(COLLECTION_PROP_NAME_ATTR_NAME);
 
-		String scalarPropertyName = scalarna != null ? scalarna.getNodeValue() : null;
-		;
-		String collectionPropertyName = collectionna != null ? collectionna.getNodeValue() : null;
-		;
+		String scalarPropertyName = Utils.getAttribute(currentTag, "spn", SCALAR_PROP_NAME_ATTR_NAME, null);
+		String collectionPropertyName = Utils.getAttribute(currentTag, "cpn", COLLECTION_PROP_NAME_ATTR_NAME, null);
 		relation.setScalarPropertyName(scalarPropertyName != null ? scalarPropertyName.trim() : null);
 		relation.setCollectionPropertyName(collectionPropertyName != null ? collectionPropertyName.trim() : null);
 	}
@@ -250,34 +232,34 @@ public class XmlDom2Model implements ModelVisitor {
 	@Override
 	public void visit(Field aField) {
 		try {
-			NamedNodeMap attrs = currentTag.getAttributes();
-			Node a = attrs.getNamedItem(NAME_ATTR_NAME);
-			if (a != null) {
-				aField.setName(a.getNodeValue());
+			String fieldName = Utils.getAttribute(currentTag, "n", NAME_ATTR_NAME, null);
+			if (fieldName != null) {
+				aField.setName(fieldName);
 			}
-			a = attrs.getNamedItem(DESCRIPTION_ATTR_NAME);
-			if (a != null) {
-				aField.setDescription(a.getNodeValue());
+			String fieldDesc = Utils.getAttribute(currentTag, "d", DESCRIPTION_ATTR_NAME, null);
+			if (fieldDesc != null) {
+				aField.setDescription(fieldDesc);
 			}
-			a = attrs.getNamedItem(TYPE_ATTR_NAME);
-			if (a != null) {
-				aField.setType(a.getNodeValue());
+			String fieldType = Utils.getAttribute(currentTag, "t", TYPE_ATTR_NAME, null);
+			if (fieldType != null) {
+				aField.setType(fieldType);
 			}
-			aField.setNullable(readBooleanAttribute(NULLABLE_ATTR_NAME, true));
-			aField.setPk(readBooleanAttribute(IS_PK_ATTR_NAME, false));
+			aField.setNullable(Utils.getBooleanAttribute(currentTag, "nl", NULLABLE_ATTR_NAME, true));
+			aField.setPk(Utils.getBooleanAttribute(currentTag, "p", IS_PK_ATTR_NAME, false));
 
 			if (aField instanceof Parameter) {
-				((Parameter) aField).setMode(readIntegerAttribute(MODE_ATTR_NAME, 0/*
+				((Parameter) aField).setMode(Utils.getIntegerAttribute(currentTag, "pm", MODE_ATTR_NAME, 0/*
 																					 * ParameterMetaData.
 																					 * parameterModeUnknown
 																					 */));
-				if (currentTag.getAttributes().getNamedItem(SELECTION_FORM_TAG_NAME) != null && !"null".equals(currentTag.getAttributes().getNamedItem(SELECTION_FORM_TAG_NAME).getNodeValue()))
-					((Parameter) aField).setSelectionForm(readDoubleAttribute(SELECTION_FORM_TAG_NAME, null));
-
+				String selectionForm = Utils.getAttribute(currentTag, "sf", SELECTION_FORM_TAG_NAME, null);
+				if(selectionForm != null && !"null".equals(selectionForm)){
+					((Parameter) aField).setSelectionForm(selectionForm);
+				}
 			}
 			Element lcurrentTag = currentTag;
 			try {
-				currentTag = Utils.getElementByTagName(currentTag, PRIMARY_KEY_TAG_NAME);
+				currentTag = Utils.scanForElementByTagName(currentTag, "pr", PRIMARY_KEY_TAG_NAME);
 				if (currentTag != null) {
 					PrimaryKeySpec pk = new PrimaryKeySpec();
 					visit(pk);
@@ -295,113 +277,32 @@ public class XmlDom2Model implements ModelVisitor {
 
 	private void visit(PrimaryKeySpec pk) {
 		if (pk != null) {
-			NamedNodeMap attrs = currentTag.getAttributes();
-			Node a = attrs.getNamedItem(CONSTRAINT_NAME_ATTR_NAME);
-			if (a != null) {
-				pk.setCName(a.getNodeValue());
+			String name = Utils.getAttribute(currentTag, "n", CONSTRAINT_NAME_ATTR_NAME, null);
+			if (name != null) {
+				pk.setCName(name);
 			}
-			a = attrs.getNamedItem(CONSTRAINT_SCHEMA_ATTR_NAME);
-			if (a != null) {
-				pk.setSchema(a.getNodeValue());
+			String schema = Utils.getAttribute(currentTag, "s", CONSTRAINT_SCHEMA_ATTR_NAME, null);
+			if (schema != null) {
+				pk.setSchema(schema);
 			}
-			a = attrs.getNamedItem(CONSTRAINT_TABLE_ATTR_NAME);
-			if (a != null) {
-				pk.setTable(a.getNodeValue());
+			String table = Utils.getAttribute(currentTag, "tl", CONSTRAINT_TABLE_ATTR_NAME, null);
+			if (table != null) {
+				pk.setTable(table);
 			}
-			a = attrs.getNamedItem(CONSTRAINT_FIELD_ATTR_NAME);
-			if (a != null) {
-				pk.setField(a.getNodeValue());
+			String field = Utils.getAttribute(currentTag, "f", CONSTRAINT_FIELD_ATTR_NAME, null);
+			if (field != null) {
+				pk.setField(field);
 			}
 		}
 	}
 
-	protected Integer readIntegerAttribute(String attributeName, Integer defaultValue) {
-		Node a = currentTag.getAttributes().getNamedItem(attributeName);
-		if (a != null) {
-			return Integer.valueOf(a.getNodeValue());
-		}
-		return defaultValue;
-	}
-
-	protected ForeignKeySpec.ForeignKeyRule readForeignKeyRuleAttribute(String attributeName, ForeignKeySpec.ForeignKeyRule defaultValue) {
+	public static ForeignKeySpec.ForeignKeyRule readForeignKeyRuleAttribute(Element aElement, String aShortName, String aLongName, ForeignKeySpec.ForeignKeyRule defaultValue) {
 		try {
-			Node a = currentTag.getAttributes().getNamedItem(attributeName);
-			return ForeignKeySpec.ForeignKeyRule.valueOf(a.getNodeValue());
+			String attrValue = Utils.getAttribute(aElement, aShortName, aLongName, null);
+			return attrValue != null ? ForeignKeySpec.ForeignKeyRule.valueOf(attrValue) : defaultValue;
 		} catch (Exception ex) {
 			return defaultValue;
 		}
-	}
-
-	protected Boolean readBooleanAttribute(String attributeName, Boolean defaultValue) {
-		Node a = currentTag.getAttributes().getNamedItem(attributeName);
-		if (a != null) {
-			return Boolean.valueOf(a.getNodeValue());
-		}
-		return defaultValue;
-	}
-
-	protected Short readShortAttribute(String attributeName, Short defaultValue) {
-		Node a = currentTag.getAttributes().getNamedItem(attributeName);
-		if (a != null) {
-			return Short.valueOf(a.getNodeValue());
-		}
-		return defaultValue;
-	}
-
-	protected Double readDoubleAttribute(String attributeName, Double defaultValue) {
-		Node a = currentTag.getAttributes().getNamedItem(attributeName);
-		if (a != null) {
-			return Double.valueOf(a.getNodeValue());
-		}
-		return defaultValue;
-	}
-
-	protected Float readFloatAttribute(String attributeName, Float defaultValue) {
-		Node a = currentTag.getAttributes().getNamedItem(attributeName);
-		if (a != null) {
-			return Float.valueOf(a.getNodeValue());
-		}
-		return defaultValue;
-	}
-
-	protected Byte readByteAttribute(String attributeName, Byte defaultValue) {
-		Node a = currentTag.getAttributes().getNamedItem(attributeName);
-		if (a != null) {
-			return Byte.valueOf(a.getNodeValue());
-		}
-		return defaultValue;
-	}
-
-	protected String readAttribute(String attributeName, String defaultValue) {
-		Node a = currentTag.getAttributes().getNamedItem(attributeName);
-		if (a != null) {
-			return a.getNodeValue();
-		}
-		return defaultValue;
-	}
-
-	protected BigDecimal readBigDecimalAttribute(String attributeName, BigDecimal defaultValue) {
-		Node a = currentTag.getAttributes().getNamedItem(attributeName);
-		if (a != null) {
-			return new BigDecimal(a.getNodeValue());
-		}
-		return defaultValue;
-	}
-
-	protected BigInteger readBigIntegerAttribute(String attributeName, BigInteger defaultValue) {
-		Node a = currentTag.getAttributes().getNamedItem(attributeName);
-		if (a != null) {
-			return new BigInteger(a.getNodeValue());
-		}
-		return defaultValue;
-	}
-
-	protected Date readDateAttribute(String attributeName, Date defaultValue) {
-		Node a = currentTag.getAttributes().getNamedItem(attributeName);
-		if (a != null) {
-			return new Date(Long.valueOf(a.getNodeValue()));
-		}
-		return defaultValue;
 	}
 
 	@Override

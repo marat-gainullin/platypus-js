@@ -122,8 +122,8 @@ public class FormFactory {
     public void parse() throws Exception {
         oldFormat = !element.hasAttribute(Form.VIEW_SCRIPT_NAME);
         if (oldFormat) {
-            List<Element> widgetsElements = XmlDomUtils.elementsByTagName(element, "widget");
-            List<Element> legacyNonVisualElements = XmlDomUtils.elementsByTagName(element, "nonvisual");
+            List<Element> widgetsElements = XmlDomUtils.elementsByTagName(element, "widget", "widget");
+            List<Element> legacyNonVisualElements = XmlDomUtils.elementsByTagName(element, "nonvisual", "nonvisual");
             widgetsElements.addAll(legacyNonVisualElements);
             widgetsElements.stream().sequential().forEach((Element aElement) -> {
                 try {
@@ -172,13 +172,13 @@ public class FormFactory {
         viewWidget.setSize(viewWidget.getPreferredSize());
         form = new Form(viewWidget);
         form.setDefaultCloseOperation(readIntegerAttribute(element, "dco", "defaultCloseOperation", JFrame.DISPOSE_ON_CLOSE));
-        resolveIcon(getAttribute(element, "i", "icon"), (ImageIcon aLoaded) -> {
+        resolveIcon(XmlDomUtils.getAttribute(element, "i", "icon"), (ImageIcon aLoaded) -> {
             form.setIcon(aLoaded);
         }, (Exception ex) -> {
             Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, ex.getMessage());
         });
 
-        form.setTitle(getAttribute(element, "tl", "title"));
+        form.setTitle(XmlDomUtils.getAttribute(element, "tl", "title"));
         form.setMaximizable(readBooleanAttribute(element, "mxe", "maximizable", Boolean.TRUE));
         form.setMinimizable(readBooleanAttribute(element, "mne", "minimizable", Boolean.TRUE));
         form.setResizable(readBooleanAttribute(element, "rs", "resizable", Boolean.TRUE));
@@ -195,8 +195,8 @@ public class FormFactory {
 
     protected Dimension readPrefSize(Element anElement) throws NumberFormatException {
         Dimension prefSize = new Dimension();
-        String prefWidth = getAttribute(anElement, "pw", "prefWidth");
-        String prefHeight = getAttribute(anElement, "ph", "prefHeight");
+        String prefWidth = XmlDomUtils.getAttribute(anElement, "pw", "prefWidth");
+        String prefHeight = XmlDomUtils.getAttribute(anElement, "ph", "prefHeight");
         if (prefWidth.length() > 2 && prefWidth.endsWith("px")) {
             prefSize.width = Integer.parseInt(prefWidth.substring(0, prefWidth.length() - 2));
         }
@@ -252,23 +252,23 @@ public class FormFactory {
             case "LabelDesignInfo":
                 Label label = new Label();
                 readGeneralProps(anElement, label);
-                if (hasAttribute(anElement, "i", "icon")) {
-                    resolveIcon(getAttribute(anElement, "i", "icon"), (ImageIcon aLoaded) -> {
+                if (XmlDomUtils.hasAttribute(anElement, "i", "icon")) {
+                    resolveIcon(XmlDomUtils.getAttribute(anElement, "i", "icon"), (ImageIcon aLoaded) -> {
                         label.setIcon(aLoaded);
                     }, (Exception ex) -> {
                         Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, ex.getMessage());
                     });
                 }
-                if (hasAttribute(anElement, "tx", "text")) {
-                    label.setText(getAttribute(anElement, "tx", "text"));
+                if (XmlDomUtils.hasAttribute(anElement, "tx", "text")) {
+                    label.setText(XmlDomUtils.getAttribute(anElement, "tx", "text"));
                 }
                 label.setHorizontalAlignment(readIntegerAttribute(anElement, "ha", "horizontalAlignment", Label.LEFT));
                 label.setVerticalAlignment(readIntegerAttribute(anElement, "va", "verticalAlignment", Label.CENTER));
                 label.setIconTextGap(readIntegerAttribute(anElement, "itg", "iconTextGap", 4));
                 label.setHorizontalTextPosition(readIntegerAttribute(anElement, "htp", "horizontalTextPosition", Label.RIGHT));
                 label.setVerticalTextPosition(readIntegerAttribute(anElement, "vtp", "verticalTextPosition", Label.CENTER));
-                if (hasAttribute(anElement, "lf", "labelFor")) {
-                    String labelForName = getAttribute(anElement, "lf", "labelFor");
+                if (XmlDomUtils.hasAttribute(anElement, "lf", "labelFor")) {
+                    String labelForName = XmlDomUtils.getAttribute(anElement, "lf", "labelFor");
                     resolvers.add((Map<String, JComponent> aWidgets) -> {
                         if (aWidgets.containsKey(labelForName)) {
                             label.setLabelFor(aWidgets.get(labelForName));
@@ -289,8 +289,8 @@ public class FormFactory {
                 DropDownButton dropDownButton = new DropDownButton();
                 readGeneralProps(anElement, dropDownButton);
                 readButton(anElement, dropDownButton);
-                if (hasAttribute(anElement, "ddm", "dropDownMenu")) {
-                    String dropDownMenuName = getAttribute(anElement, "ddm", "dropDownMenu");
+                if (XmlDomUtils.hasAttribute(anElement, "ddm", "dropDownMenu")) {
+                    String dropDownMenuName = XmlDomUtils.getAttribute(anElement, "ddm", "dropDownMenu");
                     resolvers.add((Map<String, JComponent> aWidgets) -> {
                         if (aWidgets.containsKey(dropDownMenuName)) {
                             JComponent compMenu = aWidgets.get(dropDownMenuName);
@@ -305,8 +305,8 @@ public class FormFactory {
             case "ButtonGroup":
             case "ButtonGroupDesignInfo":
                 ButtonGroup buttonGroup = new ButtonGroup();
-                if (hasAttribute(anElement, "n", "name")) {
-                    buttonGroup.setName(getAttribute(anElement, "n", "name"));
+                if (XmlDomUtils.hasAttribute(anElement, "n", "name")) {
+                    buttonGroup.setName(XmlDomUtils.getAttribute(anElement, "n", "name"));
                 }
                 return buttonGroup;
             case "cb":
@@ -315,12 +315,12 @@ public class FormFactory {
                 CheckBox checkBox = new CheckBox();
                 readGeneralProps(anElement, checkBox);
                 readButton(anElement, checkBox);
-                if (hasAttribute(anElement, "st", "selected")) {
+                if (XmlDomUtils.hasAttribute(anElement, "st", "selected")) {
                     boolean selected = readBooleanAttribute(anElement, "st", "selected", Boolean.FALSE);
                     checkBox.setSelected(selected);
                 }
-                if (hasAttribute(anElement, "tx", "text")) {
-                    checkBox.setText(getAttribute(anElement, "tx", "text"));
+                if (XmlDomUtils.hasAttribute(anElement, "tx", "text")) {
+                    checkBox.setText(XmlDomUtils.getAttribute(anElement, "tx", "text"));
                 }
                 return checkBox;
             case "ta":
@@ -328,8 +328,8 @@ public class FormFactory {
             case "TextPaneDesignInfo":
                 TextArea textArea = new TextArea();
                 readGeneralProps(anElement, textArea);
-                if (hasAttribute(anElement, "tx", "text")) {
-                    textArea.setText(getAttribute(anElement, "tx", "text"));
+                if (XmlDomUtils.hasAttribute(anElement, "tx", "text")) {
+                    textArea.setText(XmlDomUtils.getAttribute(anElement, "tx", "text"));
                 }
                 return textArea;
             case "ha":
@@ -337,8 +337,8 @@ public class FormFactory {
             case "EditorPaneDesignInfo":
                 HtmlArea htmlArea = new HtmlArea();
                 readGeneralProps(anElement, htmlArea);
-                if (hasAttribute(anElement, "tx", "text")) {
-                    htmlArea.setText(getAttribute(anElement, "tx", "text"));
+                if (XmlDomUtils.hasAttribute(anElement, "tx", "text")) {
+                    htmlArea.setText(XmlDomUtils.getAttribute(anElement, "tx", "text"));
                 }
                 return htmlArea;
             case "ff":
@@ -346,12 +346,12 @@ public class FormFactory {
             case "FormattedFieldDesignInfo": {
                 FormattedField formattedField = new FormattedField();
                 readGeneralProps(anElement, formattedField);
-                String format = getAttribute(anElement, "fr", "format");
+                String format = XmlDomUtils.getAttribute(anElement, "fr", "format");
                 int valueType = readIntegerAttribute(anElement, "vt", "valueType", VFormattedField.REGEXP);
                 formattedField.setValueType(valueType);
                 formattedField.setFormat(format);
-                if (hasAttribute(anElement, "tx", "text")) {
-                    formattedField.setText(getAttribute(anElement, "tx", "text"));
+                if (XmlDomUtils.hasAttribute(anElement, "tx", "text")) {
+                    formattedField.setText(XmlDomUtils.getAttribute(anElement, "tx", "text"));
                 }
                 return formattedField;
             }
@@ -360,8 +360,8 @@ public class FormFactory {
             case "PasswordFieldDesignInfo":
                 PasswordField passwordField = new PasswordField();
                 readGeneralProps(anElement, passwordField);
-                if (hasAttribute(anElement, "tx", "text")) {
-                    passwordField.setText(getAttribute(anElement, "tx", "text"));
+                if (XmlDomUtils.hasAttribute(anElement, "tx", "text")) {
+                    passwordField.setText(XmlDomUtils.getAttribute(anElement, "tx", "text"));
                 }
                 return passwordField;
             case "pb":
@@ -375,8 +375,8 @@ public class FormFactory {
                 progressBar.setMinimum(minimum);
                 progressBar.setMaximum(maximum);
                 progressBar.setValue(value);
-                if (hasAttribute(anElement, "tx", "text")) {
-                    progressBar.setText(getAttribute(anElement, "tx", "text"));
+                if (XmlDomUtils.hasAttribute(anElement, "tx", "text")) {
+                    progressBar.setText(XmlDomUtils.getAttribute(anElement, "tx", "text"));
                 }
                 return progressBar;
             }
@@ -386,12 +386,12 @@ public class FormFactory {
                 RadioButton radio = new RadioButton();
                 readGeneralProps(anElement, radio);
                 readButton(anElement, radio);
-                if (hasAttribute(anElement, "st", "selected")) {
+                if (XmlDomUtils.hasAttribute(anElement, "st", "selected")) {
                     boolean selected = readBooleanAttribute(anElement, "st", "selected", Boolean.FALSE);
                     radio.setSelected(selected);
                 }
-                if (hasAttribute(anElement, "tx", "text")) {
-                    radio.setText(getAttribute(anElement, "tx", "text"));
+                if (XmlDomUtils.hasAttribute(anElement, "tx", "text")) {
+                    radio.setText(XmlDomUtils.getAttribute(anElement, "tx", "text"));
                 }
                 return radio;
             case "s":
@@ -411,8 +411,8 @@ public class FormFactory {
             case "TextFieldDesignInfo":
                 TextField textField = new TextField();
                 readGeneralProps(anElement, textField);
-                if (hasAttribute(anElement, "tx", "text")) {
-                    textField.setText(getAttribute(anElement, "tx", "text"));
+                if (XmlDomUtils.hasAttribute(anElement, "tx", "text")) {
+                    textField.setText(XmlDomUtils.getAttribute(anElement, "tx", "text"));
                 }
                 return textField;
             case "tb":
@@ -421,7 +421,7 @@ public class FormFactory {
                 ToggleButton toggle = new ToggleButton();
                 readGeneralProps(anElement, toggle);
                 readButton(anElement, toggle);
-                if (hasAttribute(anElement, "st", "selected")) {
+                if (XmlDomUtils.hasAttribute(anElement, "st", "selected")) {
                     boolean selected = readBooleanAttribute(anElement, "st", "selected", Boolean.FALSE);
                     toggle.setSelected(selected);
                 }
@@ -438,10 +438,10 @@ public class FormFactory {
             case "DbCheckDesignInfo":
                 ModelCheckBox modelCheckBox = new ModelCheckBox();
                 readGeneralProps(anElement, modelCheckBox);
-                if (hasAttribute(anElement, "tx", "text")) {
-                    modelCheckBox.setText(getAttribute(anElement, "tx", "text"));
+                if (XmlDomUtils.hasAttribute(anElement, "tx", "text")) {
+                    modelCheckBox.setText(XmlDomUtils.getAttribute(anElement, "tx", "text"));
                 }
-                if (hasAttribute(anElement, "nl", "nullable")) {
+                if (XmlDomUtils.hasAttribute(anElement, "nl", "nullable")) {
                     modelCheckBox.setNullable(readBooleanAttribute(anElement, "nl", "nullable", true));
                 }
                 return modelCheckBox;
@@ -453,26 +453,26 @@ public class FormFactory {
                 boolean list = readBooleanAttribute(anElement, "ls", "list", Boolean.TRUE);
                 modelCombo.setList(list);
                 if (oldFormat) {
-                    Element displayField = XmlDomUtils.getElementByTagName(anElement, "displayField");
+                    Element displayField = XmlDomUtils.getElementByTagName(anElement, null, "displayField");
                     if (displayField != null && displayField.hasAttribute("fieldName")) {
                         modelCombo.setDisplayField(displayField.getAttribute("fieldName"));
                     }
-                    Element valueField = XmlDomUtils.getElementByTagName(anElement, "valueField");
+                    Element valueField = XmlDomUtils.getElementByTagName(anElement, null, "valueField");
                     if (valueField != null && valueField.hasAttribute("entityId")) {
                         String entityId = valueField.getAttribute("entityId");
                         modelCombo.setDisplayList(resolveEntity(Long.valueOf(entityId)));
                     }
                 } else {
-                    if (hasAttribute(anElement, "dl", "displayList")) {
-                        String displayList = getAttribute(anElement, "dl", "displayList");
+                    if (XmlDomUtils.hasAttribute(anElement, "dl", "displayList")) {
+                        String displayList = XmlDomUtils.getAttribute(anElement, "dl", "displayList");
                         modelCombo.setDisplayList(resolveEntity(displayList));
                     }
-                    if (hasAttribute(anElement, "df", "displayField")) {
-                        String displayField = getAttribute(anElement, "df", "displayField");
+                    if (XmlDomUtils.hasAttribute(anElement, "df", "displayField")) {
+                        String displayField = XmlDomUtils.getAttribute(anElement, "df", "displayField");
                         modelCombo.setDisplayField(displayField);
                     }
                 }
-                if (hasAttribute(anElement, "nl", "nullable")) {
+                if (XmlDomUtils.hasAttribute(anElement, "nl", "nullable")) {
                     modelCombo.setNullable(readBooleanAttribute(anElement, "nl", "nullable", true));
                 }
                 return modelCombo;
@@ -481,23 +481,23 @@ public class FormFactory {
             case "DbDateDesignInfo":
                 ModelDate modelDate = new ModelDate();
                 readGeneralProps(anElement, modelDate);
-                if (hasAttribute(anElement, "fr", "format")) {
-                    String dateFormat = getAttribute(anElement, "fr", "format");
+                if (XmlDomUtils.hasAttribute(anElement, "fr", "format")) {
+                    String dateFormat = XmlDomUtils.getAttribute(anElement, "fr", "format");
                     try {
                         modelDate.setFormat(dateFormat);
                     } catch (Exception ex) {
                         Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-                if (hasAttribute(anElement, "dtf", "dateField")) {
-                    boolean selected = readBooleanAttribute(anElement, "dtf", "dateField", Boolean.FALSE);
+                if (XmlDomUtils.hasAttribute(anElement, "dtp", "datePicker")) {
+                    boolean selected = readBooleanAttribute(anElement, "dtp", "datePicker", Boolean.FALSE);
                     modelDate.setDatePicker(selected);
                 }
-                if (hasAttribute(anElement, "tf", "timeField")) {
-                    boolean selected = readBooleanAttribute(anElement, "tf", "timeField", Boolean.FALSE);
+                if (XmlDomUtils.hasAttribute(anElement, "tmp", "timePicker")) {
+                    boolean selected = readBooleanAttribute(anElement, "tmp", "timePicker", Boolean.FALSE);
                     modelDate.setTimePicker(selected);
                 }
-                if (hasAttribute(anElement, "nl", "nullable")) {
+                if (XmlDomUtils.hasAttribute(anElement, "nl", "nullable")) {
                     modelDate.setNullable(readBooleanAttribute(anElement, "nl", "nullable", true));
                 }
                 return modelDate;
@@ -507,17 +507,17 @@ public class FormFactory {
                 ModelFormattedField modelFormattedField = new ModelFormattedField();
                 readGeneralProps(anElement, modelFormattedField);
                 try {
-                    String format = getAttribute(anElement, "fr", "format");
+                    String format = XmlDomUtils.getAttribute(anElement, "fr", "format");
                     int valueType = readIntegerAttribute(anElement, "vt", "valueType", VFormattedField.REGEXP);
                     modelFormattedField.setValueType(valueType);
                     modelFormattedField.setFormat(format);
-                    if (hasAttribute(anElement, "tx", "text")) {
-                        modelFormattedField.setText(getAttribute(anElement, "tx", "text"));
+                    if (XmlDomUtils.hasAttribute(anElement, "tx", "text")) {
+                        modelFormattedField.setText(XmlDomUtils.getAttribute(anElement, "tx", "text"));
                     }
                 } catch (Exception ex) {
                     Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                if (hasAttribute(anElement, "nl", "nullable")) {
+                if (XmlDomUtils.hasAttribute(anElement, "nl", "nullable")) {
                     modelFormattedField.setNullable(readBooleanAttribute(anElement, "nl", "nullable", true));
                 }
                 return modelFormattedField;
@@ -542,7 +542,7 @@ public class FormFactory {
                 } catch (Exception ex) {
                     Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                if (hasAttribute(anElement, "nl", "nullable")) {
+                if (XmlDomUtils.hasAttribute(anElement, "nl", "nullable")) {
                     modelSpin.setNullable(readBooleanAttribute(anElement, "nl", "nullable", true));
                 }
                 return modelSpin;
@@ -551,14 +551,14 @@ public class FormFactory {
             case "DbTextDesignInfo":
                 ModelTextArea modelTextArea = new ModelTextArea();
                 readGeneralProps(anElement, modelTextArea);
-                if (hasAttribute(anElement, "tx", "text")) {
+                if (XmlDomUtils.hasAttribute(anElement, "tx", "text")) {
                     try {
-                        modelTextArea.setText(getAttribute(anElement, "tx", "text"));
+                        modelTextArea.setText(XmlDomUtils.getAttribute(anElement, "tx", "text"));
                     } catch (Exception ex) {
                         Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-                if (hasAttribute(anElement, "nl", "nullable")) {
+                if (XmlDomUtils.hasAttribute(anElement, "nl", "nullable")) {
                     modelTextArea.setNullable(readBooleanAttribute(anElement, "nl", "nullable", true));
                 }
                 return modelTextArea;
@@ -569,9 +569,9 @@ public class FormFactory {
                 readGeneralProps(anElement, grid);
                 GridColumnsNode oldFormatRowsHeader = null;
                 if (oldFormat) {
-                    Element rowsColumns = XmlDomUtils.getElementByTagName(anElement, "rowsColumnsDesignInfo");
+                    Element rowsColumns = XmlDomUtils.getElementByTagName(anElement, null, "rowsColumnsDesignInfo");
                     if (rowsColumns != null) {
-                        Element rowsDatasource = XmlDomUtils.getElementByTagName(rowsColumns, "rowsDatasource");
+                        Element rowsDatasource = XmlDomUtils.getElementByTagName(rowsColumns, null, "rowsDatasource");
                         if (rowsDatasource != null) {
                             String entityId = rowsDatasource.getAttribute("entityId");
                             try {
@@ -596,7 +596,7 @@ public class FormFactory {
                                 break;
                         }
                     }
-                    Element tree = XmlDomUtils.getElementByTagName(anElement, "treeDesignInfo");
+                    Element tree = XmlDomUtils.getElementByTagName(anElement, null, "treeDesignInfo");
                 }
                 int frozenColumns = readIntegerAttribute(anElement, "frc", "frozenColumns", 0);
                 int frozenRows = readIntegerAttribute(anElement, "frr", "frozenRows", 0);
@@ -620,20 +620,20 @@ public class FormFactory {
                 grid.setInsertable(insertable);
                 grid.setFrozenColumns(frozenColumns);
                 grid.setFrozenRows(frozenRows);
-                if (hasAttribute(anElement, "orc", "oddRowsColor")) {
-                    String oddRowsColorDesc = getAttribute(anElement, "orc", "oddRowsColor");
+                if (XmlDomUtils.hasAttribute(anElement, "orc", "oddRowsColor")) {
+                    String oddRowsColorDesc = XmlDomUtils.getAttribute(anElement, "orc", "oddRowsColor");
                     grid.setOddRowsColor(new ScriptColor(oddRowsColorDesc));
                 }
-                if (hasAttribute(anElement, "gc", "gridColor")) {
-                    String gridColorDesc = getAttribute(anElement, "gc", "gridColor");
+                if (XmlDomUtils.hasAttribute(anElement, "gc", "gridColor")) {
+                    String gridColorDesc = XmlDomUtils.getAttribute(anElement, "gc", "gridColor");
                     grid.setGridColor(new ScriptColor(gridColorDesc));
                 }
-                if (hasAttribute(anElement, "pf", "parentField")) {
-                    String parentFieldPath = getAttribute(anElement, "pf", "parentField");
+                if (XmlDomUtils.hasAttribute(anElement, "pf", "parentField")) {
+                    String parentFieldPath = XmlDomUtils.getAttribute(anElement, "pf", "parentField");
                     grid.setParentField(parentFieldPath);
                 }
-                if (hasAttribute(anElement, "cf", "childrenField")) {
-                    String childrenFieldPath = getAttribute(anElement, "cf", "childrenField");
+                if (XmlDomUtils.hasAttribute(anElement, "cf", "childrenField")) {
+                    String childrenFieldPath = XmlDomUtils.getAttribute(anElement, "cf", "childrenField");
                     grid.setChildrenField(childrenFieldPath);
                 }
                 List<GridColumnsNode> roots = readColumns(anElement);
@@ -649,16 +649,16 @@ public class FormFactory {
                 }
                 grid.setColumns(columns.toArray(new ModelColumn[]{}));
                 grid.setHeader(roots);
-                if (hasAttribute(anElement, "d", "data")) {
-                    String entityName = getAttribute(anElement, "d", "data");
+                if (XmlDomUtils.hasAttribute(anElement, "d", "data")) {
+                    String entityName = XmlDomUtils.getAttribute(anElement, "d", "data");
                     try {
                         grid.setData(resolveEntity(entityName));
                     } catch (Exception ex) {
                         Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting data to property ({0}) of widget {1} exception occured: {2}", new Object[]{entityName, grid.getName(), ex.getMessage()});
                     }
                 }
-                if (hasAttribute(anElement, "f", "field")) {
-                    String dataPropertyPath = getAttribute(anElement, "f", "field");
+                if (XmlDomUtils.hasAttribute(anElement, "f", "field")) {
+                    String dataPropertyPath = XmlDomUtils.getAttribute(anElement, "f", "field");
                     grid.setField(dataPropertyPath);
                 }
                 if (Scripts.isInitialized()) {
@@ -669,7 +669,7 @@ public class FormFactory {
             // containers   
             // layouted containers                
             case "PanelDesignInfo":// oldFormat
-                Element layoutTag = XmlDomUtils.getElementByTagName(anElement, "layout");
+                Element layoutTag = XmlDomUtils.getElementByTagName(anElement, null, "layout");
                 assert layoutTag != null : "tag layout is required for panel containers.";
                 JComponent container = readOldStyleLayoutedContainer(layoutTag);
                 readGeneralProps(anElement, container);
@@ -747,15 +747,15 @@ public class FormFactory {
                 split.setDividerSize(dividerSize);
                 split.setOrientation(orientation);
                 split.setOneTouchExpandable(oneTouchExpandable);
-                if (hasAttribute(anElement, "lc", "leftComponent")) {
-                    String leftComponentName = getAttribute(anElement, "lc", "leftComponent");
+                if (XmlDomUtils.hasAttribute(anElement, "lc", "leftComponent")) {
+                    String leftComponentName = XmlDomUtils.getAttribute(anElement, "lc", "leftComponent");
                     resolvers.add((Map<String, JComponent> aWidgets) -> {
                         JComponent leftComponent = aWidgets.get(leftComponentName);
                         split.setLeftComponent(leftComponent);
                     });
                 }
-                if (hasAttribute(anElement, "rc", "rightComponent")) {
-                    String rightComponentName = getAttribute(anElement, "rc", "rightComponent");
+                if (XmlDomUtils.hasAttribute(anElement, "rc", "rightComponent")) {
+                    String rightComponentName = XmlDomUtils.getAttribute(anElement, "rc", "rightComponent");
                     resolvers.add((Map<String, JComponent> aWidgets) -> {
                         JComponent rightComponent = aWidgets.get(rightComponentName);
                         split.setRightComponent(rightComponent);
@@ -782,8 +782,8 @@ public class FormFactory {
             case "MenuDesignInfo":
                 Menu menu = new Menu();
                 readGeneralProps(anElement, menu);
-                if (hasAttribute(anElement, "tx", "text")) {
-                    menu.setText(getAttribute(anElement, "tx", "text"));
+                if (XmlDomUtils.hasAttribute(anElement, "tx", "text")) {
+                    menu.setText(XmlDomUtils.getAttribute(anElement, "tx", "text"));
                 }
                 return menu;
             case "mi":
@@ -792,8 +792,8 @@ public class FormFactory {
                 MenuItem menuitem = new MenuItem();
                 readGeneralProps(anElement, menuitem);
                 readButton(anElement, menuitem);
-                if (hasAttribute(anElement, "tx", "text")) {
-                    menuitem.setText(getAttribute(anElement, "tx", "text"));
+                if (XmlDomUtils.hasAttribute(anElement, "tx", "text")) {
+                    menuitem.setText(XmlDomUtils.getAttribute(anElement, "tx", "text"));
                 }
                 return menuitem;
             case "cmi":
@@ -802,12 +802,12 @@ public class FormFactory {
                 CheckMenuItem checkMenuItem = new CheckMenuItem();
                 readGeneralProps(anElement, checkMenuItem);
                 readButton(anElement, checkMenuItem);
-                if (hasAttribute(anElement, "st", "selected")) {
+                if (XmlDomUtils.hasAttribute(anElement, "st", "selected")) {
                     boolean selected = readBooleanAttribute(anElement, "st", "selected", Boolean.FALSE);
                     checkMenuItem.setSelected(selected);
                 }
-                if (hasAttribute(anElement, "tx", "text")) {
-                    checkMenuItem.setText(getAttribute(anElement, "tx", "text"));
+                if (XmlDomUtils.hasAttribute(anElement, "tx", "text")) {
+                    checkMenuItem.setText(XmlDomUtils.getAttribute(anElement, "tx", "text"));
                 }
                 return checkMenuItem;
             case "rmi":
@@ -816,12 +816,12 @@ public class FormFactory {
                 RadioMenuItem radioMenuItem = new RadioMenuItem();
                 readGeneralProps(anElement, radioMenuItem);
                 readButton(anElement, radioMenuItem);
-                if (hasAttribute(anElement, "st", "selected")) {
+                if (XmlDomUtils.hasAttribute(anElement, "st", "selected")) {
                     boolean selected = readBooleanAttribute(anElement, "st", "selected", Boolean.FALSE);
                     radioMenuItem.setSelected(selected);
                 }
-                if (hasAttribute(anElement, "tx", "text")) {
-                    radioMenuItem.setText(getAttribute(anElement, "tx", "text"));
+                if (XmlDomUtils.hasAttribute(anElement, "tx", "text")) {
+                    radioMenuItem.setText(XmlDomUtils.getAttribute(anElement, "tx", "text"));
                 }
                 return radioMenuItem;
             case "ms":
@@ -848,15 +848,15 @@ public class FormFactory {
     }
 
     protected void readButton(Element anElement, AbstractButton button) {
-        if (hasAttribute(anElement, "i", "icon")) {
-            resolveIcon(getAttribute(anElement, "i", "icon"), (ImageIcon aLoaded) -> {
+        if (XmlDomUtils.hasAttribute(anElement, "i", "icon")) {
+            resolveIcon(XmlDomUtils.getAttribute(anElement, "i", "icon"), (ImageIcon aLoaded) -> {
                 button.setIcon(aLoaded);
             }, (Exception ex) -> {
                 Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, ex.getMessage());
             });
         }
-        if (hasAttribute(anElement, "tx", "text")) {
-            button.setText(getAttribute(anElement, "tx", "text"));
+        if (XmlDomUtils.hasAttribute(anElement, "tx", "text")) {
+            button.setText(XmlDomUtils.getAttribute(anElement, "tx", "text"));
         }
         button.setHorizontalAlignment(readIntegerAttribute(anElement, "ha", "horizontalAlignment", Button.CENTER));
         button.setVerticalAlignment(readIntegerAttribute(anElement, "va", "verticalAlignment", Button.CENTER));
@@ -923,17 +923,17 @@ public class FormFactory {
     }
 
     private void readGeneralProps(Element anElement, JComponent aTarget) {
-        if (hasAttribute(anElement, "n", "name")) {
-            aTarget.setName(getAttribute(anElement, "n", "name"));
+        if (XmlDomUtils.hasAttribute(anElement, "n", "name")) {
+            aTarget.setName(XmlDomUtils.getAttribute(anElement, "n", "name"));
         }
-        if (hasAttribute(anElement, "e", "editable") && aTarget instanceof HasEditable) {
+        if (XmlDomUtils.hasAttribute(anElement, "e", "editable") && aTarget instanceof HasEditable) {
             ((HasEditable) aTarget).setEditable(readBooleanAttribute(anElement, "e", "editable", Boolean.TRUE));
         }
-        if (hasAttribute(anElement, "et", "emptyText") && aTarget instanceof HasEmptyText) {
-            ((HasEmptyText) aTarget).setEmptyText(getAttribute(anElement, "et", "emptyText"));
+        if (XmlDomUtils.hasAttribute(anElement, "et", "emptyText") && aTarget instanceof HasEmptyText) {
+            ((HasEmptyText) aTarget).setEmptyText(XmlDomUtils.getAttribute(anElement, "et", "emptyText"));
         }
-        if (hasAttribute(anElement, "f", "field") && aTarget instanceof ModelWidget) {
-            String fieldPath = getAttribute(anElement, "f", "field");
+        if (XmlDomUtils.hasAttribute(anElement, "f", "field") && aTarget instanceof ModelWidget) {
+            String fieldPath = XmlDomUtils.getAttribute(anElement, "f", "field");
             try {
                 ((ModelWidget) aTarget).setField(fieldPath);
             } catch (Exception ex) {
@@ -942,7 +942,7 @@ public class FormFactory {
         }
         if (oldFormat) {
             if (aTarget instanceof ModelWidget) {
-                Element datamodelElement = XmlDomUtils.getElementByTagName(anElement, "datamodelElement");
+                Element datamodelElement = XmlDomUtils.getElementByTagName(anElement, null, "datamodelElement");
                 if (datamodelElement != null) {
                     String entityId = datamodelElement.getAttribute("entityId");
                     try {
@@ -967,16 +967,16 @@ public class FormFactory {
                 aTarget.setForeground(foreground);
             }
         } else {
-            if (hasAttribute(anElement, "bg", "background")) {
-                ScriptColor background = new ScriptColor(getAttribute(anElement, "bg", "background"));
+            if (XmlDomUtils.hasAttribute(anElement, "bg", "background")) {
+                ScriptColor background = new ScriptColor(XmlDomUtils.getAttribute(anElement, "bg", "background"));
                 aTarget.setBackground(background);
             }
-            if (hasAttribute(anElement, "fg", "foreground")) {
-                ScriptColor foreground = new ScriptColor(getAttribute(anElement, "fg", "foreground"));
+            if (XmlDomUtils.hasAttribute(anElement, "fg", "foreground")) {
+                ScriptColor foreground = new ScriptColor(XmlDomUtils.getAttribute(anElement, "fg", "foreground"));
                 aTarget.setForeground(foreground);
             }
-            if (hasAttribute(anElement, "d", "data") && aTarget instanceof ModelWidget) {
-                String entityName = getAttribute(anElement, "d", "data");
+            if (XmlDomUtils.hasAttribute(anElement, "d", "data") && aTarget instanceof ModelWidget) {
+                String entityName = XmlDomUtils.getAttribute(anElement, "d", "data");
                 try {
                     ((ModelWidget) aTarget).setData(resolveEntity(entityName));
                 } catch (Exception ex) {
@@ -990,19 +990,19 @@ public class FormFactory {
         if (font != null) {
             aTarget.setFont(font);
         }
-        if (hasAttribute(anElement, "o", "opaque")) {
+        if (XmlDomUtils.hasAttribute(anElement, "o", "opaque")) {
             aTarget.setOpaque(readBooleanAttribute(anElement, "o", "opaque", Boolean.TRUE));
         }
-        if (hasAttribute(anElement, "ttt", "toolTipText")) {
-            aTarget.setToolTipText(getAttribute(anElement, "ttt", "toolTipText"));
+        if (XmlDomUtils.hasAttribute(anElement, "ttt", "toolTipText")) {
+            aTarget.setToolTipText(XmlDomUtils.getAttribute(anElement, "ttt", "toolTipText"));
         }
         int cursorId = readIntegerAttribute(anElement, "cr", "cursor", com.eas.gui.Cursor.DEFAULT_CURSOR);
         aTarget.setCursor(new com.eas.gui.Cursor(cursorId));
-        if (hasAttribute(anElement, "v", "visible")) {
+        if (XmlDomUtils.hasAttribute(anElement, "v", "visible")) {
             aTarget.setVisible(readBooleanAttribute(anElement, "v", "visible", Boolean.TRUE));
         }
-        if (hasAttribute(anElement, "nfc", "nextFocusableComponent")) {
-            String nextFocusableName = getAttribute(anElement, "nfc", "nextFocusableComponent");
+        if (XmlDomUtils.hasAttribute(anElement, "nfc", "nextFocusableComponent")) {
+            String nextFocusableName = XmlDomUtils.getAttribute(anElement, "nfc", "nextFocusableComponent");
             if (!nextFocusableName.isEmpty()) {
                 resolvers.add((Map<String, JComponent> aWidgets) -> {
                     JComponent nextFocusable = aWidgets.get(nextFocusableName);
@@ -1010,8 +1010,8 @@ public class FormFactory {
                 });
             }
         }
-        if (hasAttribute(anElement, "cpm", "componentPopupMenu")) {
-            String popupName = getAttribute(anElement, "cpm", "componentPopupMenu");
+        if (XmlDomUtils.hasAttribute(anElement, "cpm", "componentPopupMenu")) {
+            String popupName = XmlDomUtils.getAttribute(anElement, "cpm", "componentPopupMenu");
             if (!popupName.isEmpty()) {
                 resolvers.add((Map<String, JComponent> aWidgets) -> {
                     JComponent popup = aWidgets.get(popupName);
@@ -1021,8 +1021,8 @@ public class FormFactory {
                 });
             }
         }
-        if (hasAttribute(anElement, "bgr", "buttonGroup") && aTarget instanceof HasGroup) {
-            String buttonGroupName = getAttribute(anElement, "bgr", "buttonGroup");
+        if (XmlDomUtils.hasAttribute(anElement, "bgr", "buttonGroup") && aTarget instanceof HasGroup) {
+            String buttonGroupName = XmlDomUtils.getAttribute(anElement, "bgr", "buttonGroup");
             if (!buttonGroupName.isEmpty()) {
                 resolvers.add((Map<String, JComponent> aWidgets) -> {
                     JComponent buttonGroup = aWidgets.get(buttonGroupName);
@@ -1033,8 +1033,8 @@ public class FormFactory {
                 });
             }
         }
-        if (hasAttribute(anElement, "p", "parent")) {
-            String parentName = getAttribute(anElement, "p", "parent");
+        if (XmlDomUtils.hasAttribute(anElement, "p", "parent")) {
+            String parentName = XmlDomUtils.getAttribute(anElement, "p", "parent");
             if (!parentName.isEmpty()) {
                 resolvers.add((Map<String, JComponent> aWidgets) -> {
                     JComponent parent = oldFormat && OLD_FORM_ROOT_CONTAINER_NAME.equalsIgnoreCase(parentName) ? form.getViewWidget() : aWidgets.get(parentName);
@@ -1059,11 +1059,11 @@ public class FormFactory {
     }
 
     private com.eas.gui.Font readFontTag(Element anElement, String aSubTagShortName, String aSubTagLongName) {
-        Element easFontElement = getElementByTagName(anElement, aSubTagShortName, aSubTagLongName);
+        Element easFontElement = XmlDomUtils.getElementByTagName(anElement, aSubTagShortName, aSubTagLongName);
         if (easFontElement != null) {
-            String name = getAttribute(easFontElement, "n", "name");
-            if (name == null || name.isEmpty()) {
-                name = Font.MONOSPACED;
+            String name = XmlDomUtils.getAttribute(easFontElement, "n", "name");
+            if (name == null || name.isEmpty() || "null".equals(name)) {
+                name = "Arial";
             }
             int style = readIntegerAttribute(easFontElement, "stl", "style", 0);
             int size = readIntegerAttribute(easFontElement, "sz", "size", 12);
@@ -1074,7 +1074,7 @@ public class FormFactory {
     }
 
     private void addToParent(Element anElement, JComponent aTarget, JComponent parent) {
-        Element constraintsElement = XmlDomUtils.getElementByTagName(anElement, "constraints");
+        Element constraintsElement = XmlDomUtils.getElementByTagName(anElement, null, "constraints");
         if (parent instanceof MenuBar) {
             ((MenuBar) parent).add(aTarget);
         } else if (parent instanceof PopupMenu) {
@@ -1088,15 +1088,15 @@ public class FormFactory {
             ((ToolBar) parent).add(aTarget);
         } else if (parent instanceof TabbedPane) {
             if (constraintsElement == null) {// new format
-                constraintsElement = getElementByTagName(anElement, "tpc", "TabbedPaneConstraints");
+                constraintsElement = XmlDomUtils.getElementByTagName(anElement, "tpc", "TabbedPaneConstraints");
             }
-            String tabTitle = getAttribute(constraintsElement, "tt", "tabTitle");
-            String tabIconName = getAttribute(constraintsElement, "ti", "tabIcon");
+            String tabTitle = XmlDomUtils.getAttribute(constraintsElement, "tt", "tabTitle");
+            String tabIconName = XmlDomUtils.getAttribute(constraintsElement, "ti", "tabIcon");
             String tabTooltipText;
             if (oldFormat) {
                 tabTooltipText = constraintsElement.getAttribute("tabToolTip");
             } else {
-                tabTooltipText = getAttribute(constraintsElement, "ttp", "tabTooltipText");
+                tabTooltipText = XmlDomUtils.getAttribute(constraintsElement, "ttp", "tabTooltipText");
             }
             TabbedPane tabs = (TabbedPane) parent;
             tabs.add(aTarget, tabTitle);
@@ -1122,7 +1122,7 @@ public class FormFactory {
             scroll.setView(aTarget);
         } else if (parent != null && parent.getLayout() instanceof BorderLayout) {
             if (constraintsElement == null) {// new format
-                constraintsElement = getElementByTagName(anElement, "bpc", "BorderPaneConstraints");
+                constraintsElement = XmlDomUtils.getElementByTagName(anElement, "bpc", "BorderPaneConstraints");
             }
             Dimension prefSize = readPrefSize(anElement);
             Integer place = HorizontalPosition.CENTER;
@@ -1174,9 +1174,9 @@ public class FormFactory {
             addToBoxPane(parent, aTarget, prefSize);
         } else if (parent != null && parent.getLayout() instanceof CardLayout) {
             if (constraintsElement == null) {// new format
-                constraintsElement = getElementByTagName(anElement, "cpc", "CardPaneConstraints");
+                constraintsElement = XmlDomUtils.getElementByTagName(anElement, "cpc", "CardPaneConstraints");
             }
-            String cardName = getAttribute(constraintsElement, "cn", "cardName");
+            String cardName = XmlDomUtils.getAttribute(constraintsElement, "cn", "cardName");
             addToCardPane(parent, aTarget, cardName);
         } else if (parent != null && parent.getLayout() instanceof FlowLayout) {
             Dimension prefSize = readPrefSize(anElement);
@@ -1185,7 +1185,7 @@ public class FormFactory {
             addToGridPane(parent, aTarget);
         } else if (parent != null && parent.getLayout() instanceof MarginLayout) {
             if (constraintsElement == null) {// new format
-                constraintsElement = getElementByTagName(anElement, "apc", "AnchorsPaneConstraints");
+                constraintsElement = XmlDomUtils.getElementByTagName(anElement, "apc", "AnchorsPaneConstraints");
             }
             MarginConstraints constraints = readMarginConstraints(constraintsElement);
             addToAnchorsPane(parent, aTarget, constraints);
@@ -1222,32 +1222,6 @@ public class FormFactory {
     protected void addToBorderPane(JComponent parent, JComponent aTarget, Integer place, Integer size) {
         BorderPane borderPane = (BorderPane) parent;
         borderPane.add(aTarget, place, size);
-    }
-
-    private static Element getElementByTagName(Element aParent, String aShortName, String aLongName) {
-        Node child = aParent.getFirstChild();
-        while (child != null) {
-            if (child instanceof Element) {
-                String tagName = ((Element) child).getTagName();
-                if (tagName.equals(aShortName) || tagName.equals(aLongName)) {
-                    return (Element) child;
-                }
-            }
-            child = child.getNextSibling();
-        }
-        return null;
-    }
-
-    private static boolean hasAttribute(Element anElement, String aShortName, String aLongName) {
-        return anElement.hasAttribute(aShortName) ? true : anElement.hasAttribute(aLongName);
-    }
-
-    private static String getAttribute(Element anElement, String aShortName, String aLongName) {
-        if (anElement.hasAttribute(aShortName)) {
-            return anElement.getAttribute(aShortName);
-        } else {
-            return anElement.getAttribute(aLongName);
-        }
     }
 
     private static boolean readBooleanAttribute(Element anElement, String aShortName, String aLongName, boolean aDefaultValue) {
@@ -1358,11 +1332,11 @@ public class FormFactory {
                     case "ModelGridColumn": {
                         ModelGridColumn columnn = new ModelGridColumn();
                         readColumnNode(columnn, childTag);
-                        if (hasAttribute(childTag, "f", "field")) {
-                            columnn.setField(getAttribute(childTag, "f", "field"));
+                        if (XmlDomUtils.hasAttribute(childTag, "f", "field")) {
+                            columnn.setField(XmlDomUtils.getAttribute(childTag, "f", "field"));
                         }
-                        if (hasAttribute(childTag, "sf", "sortField")) {
-                            columnn.setSortField(getAttribute(childTag, "sf", "sortField"));
+                        if (XmlDomUtils.hasAttribute(childTag, "sf", "sortField")) {
+                            columnn.setSortField(XmlDomUtils.getAttribute(childTag, "sf", "sortField"));
                         }
                         Node _childNode = childTag.getFirstChild();
                         while (_childNode != null) {
@@ -1401,16 +1375,16 @@ public class FormFactory {
     }
 
     private void readColumnNode(GridColumnsNode aNode, Element anElement) throws Exception {
-        ((ModelColumn) aNode.getTableColumn()).setName(getAttribute(anElement, "n", "name"));
-        if (hasAttribute(anElement, "tl", "title")) {
-            aNode.setTitle(getAttribute(anElement, "tl", "title"));
+        ((ModelColumn) aNode.getTableColumn()).setName(XmlDomUtils.getAttribute(anElement, "n", "name"));
+        if (XmlDomUtils.hasAttribute(anElement, "tl", "title")) {
+            aNode.setTitle(XmlDomUtils.getAttribute(anElement, "tl", "title"));
         }
-        if (hasAttribute(anElement, "bg", "background")) {
-            ScriptColor background = new ScriptColor(getAttribute(anElement, "bg", "background"));
+        if (XmlDomUtils.hasAttribute(anElement, "bg", "background")) {
+            ScriptColor background = new ScriptColor(XmlDomUtils.getAttribute(anElement, "bg", "background"));
             aNode.setBackground(background);
         }
-        if (hasAttribute(anElement, "fg", "foreground")) {
-            ScriptColor foreground = new ScriptColor(getAttribute(anElement, "fg", "foreground"));
+        if (XmlDomUtils.hasAttribute(anElement, "fg", "foreground")) {
+            ScriptColor foreground = new ScriptColor(XmlDomUtils.getAttribute(anElement, "fg", "foreground"));
             aNode.setForeground(foreground);
         }
         aNode.setReadonly(readBooleanAttribute(anElement, "ro", "readonly", Boolean.FALSE));
@@ -1419,26 +1393,26 @@ public class FormFactory {
         if (font != null) {
             aNode.setFont(font);
         }
-        if (hasAttribute(anElement, "w", "width")) {
-            String width = getAttribute(anElement, "w", "width");
+        if (XmlDomUtils.hasAttribute(anElement, "w", "width")) {
+            String width = XmlDomUtils.getAttribute(anElement, "w", "width");
             if (width.length() > 2 && width.endsWith("px")) {
                 aNode.setWidth(Integer.parseInt(width.substring(0, width.length() - 2)));
             }
         }
-        if (hasAttribute(anElement, "mw", "minWidth")) {
-            String minWidth = getAttribute(anElement, "mw", "minWidth");
+        if (XmlDomUtils.hasAttribute(anElement, "mw", "minWidth")) {
+            String minWidth = XmlDomUtils.getAttribute(anElement, "mw", "minWidth");
             if (minWidth.length() > 2 && minWidth.endsWith("px")) {
                 aNode.setMinWidth(Integer.parseInt(minWidth.substring(0, minWidth.length() - 2)));
             }
         }
-        if (hasAttribute(anElement, "mxw", "maxWidth")) {
-            String maxWidth = getAttribute(anElement, "mxw", "maxWidth");
+        if (XmlDomUtils.hasAttribute(anElement, "mxw", "maxWidth")) {
+            String maxWidth = XmlDomUtils.getAttribute(anElement, "mxw", "maxWidth");
             if (maxWidth.length() > 2 && maxWidth.endsWith("px")) {
                 aNode.setMaxWidth(Integer.parseInt(maxWidth.substring(0, maxWidth.length() - 2)));
             }
         }
-        if (hasAttribute(anElement, "prw", "preferredWidth")) {
-            String preferredWidth = getAttribute(anElement, "prw", "preferredWidth");
+        if (XmlDomUtils.hasAttribute(anElement, "prw", "preferredWidth")) {
+            String preferredWidth = XmlDomUtils.getAttribute(anElement, "prw", "preferredWidth");
             if (preferredWidth.length() > 2 && preferredWidth.endsWith("px")) {
                 aNode.setPreferredWidth(Integer.parseInt(preferredWidth.substring(0, preferredWidth.length() - 2)));
             }

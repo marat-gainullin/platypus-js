@@ -3,7 +3,7 @@
     <type>org.netbeans.modules.java.j2seproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/j2se-project/3">
-            <name>Deploy</name>
+            <name>Tools</name>
             <source-roots>
                 <root id="src.dir"/>
             </source-roots>
@@ -44,7 +44,7 @@
                 <clean-target>clean</clean-target>
                 <id>jar</id>
             </reference>
-<!--
+            <!--
             <reference>
                 <foreign-project>MetaSync</foreign-project>
                 <artifact-type>jar</artifact-type>

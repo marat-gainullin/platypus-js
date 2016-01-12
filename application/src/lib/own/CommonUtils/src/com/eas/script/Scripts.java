@@ -61,8 +61,8 @@ import jdk.nashorn.internal.runtime.options.Options;
  */
 public class Scripts {
 
-    private static final NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-    private static final NashornScriptEngine engine = (NashornScriptEngine) factory.getScriptEngine();
+    private static final NashornScriptEngineFactory SCRIPT_FACTORY = new NashornScriptEngineFactory();
+    private static final NashornScriptEngine SCRIPT_ENGINE = (NashornScriptEngine) SCRIPT_FACTORY.getScriptEngine();
     protected static final String PLATYPUS_JS_MODULENAME = "facade";
     public static final String PLATYPUS_JS_FILENAME = PLATYPUS_JS_MODULENAME + ".js";
     protected static final String INTERNALS_MODULENAME = "internals";
@@ -79,7 +79,7 @@ public class Scripts {
     public static volatile Path absoluteApiPath;
 
     public static NashornScriptEngine getEngine() {
-        return engine;
+        return SCRIPT_ENGINE;
     }
 
     private static final ThreadLocal<LocalContext> contextRef = new ThreadLocal<>();
@@ -550,12 +550,12 @@ public class Scripts {
 
         public Object exec(String aSourceName, URL aSourcePlace) throws ScriptException, URISyntaxException {
             scriptContext.setAttribute(ScriptEngine.FILENAME, aSourceName.toLowerCase().endsWith(".js") ? aSourceName.substring(0, aSourceName.length() - 3) : aSourceName, ScriptContext.ENGINE_SCOPE);
-            return engine.eval(new URLReader(aSourcePlace), scriptContext);
+            return SCRIPT_ENGINE.eval(new URLReader(aSourcePlace), scriptContext);
         }
 
         public Object exec(String aSource) throws ScriptException, URISyntaxException {
             assert scriptContext != null : SCRIPT_NOT_INITIALIZED;
-            return engine.eval(aSource, scriptContext);
+            return SCRIPT_ENGINE.eval(aSource, scriptContext);
         }
 
         public void schedule(JSObject aJsTask, long aTimeout) {
@@ -640,14 +640,14 @@ public class Scripts {
         }
 
         void initSpaceGlobal() {
-            Bindings bindings = engine.createBindings();
+            Bindings bindings = SCRIPT_ENGINE.createBindings();
             scriptContext.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
             try {
                 Scripts.LocalContext ctx = Scripts.createContext(Scripts.Space.this);
                 Scripts.setContext(ctx);
                 try {
                     scriptContext.setAttribute(ScriptEngine.FILENAME, INTERNALS_MODULENAME, ScriptContext.ENGINE_SCOPE);
-                    engine.eval(new URLReader(internalsUrl), scriptContext);
+                    SCRIPT_ENGINE.eval(new URLReader(internalsUrl), scriptContext);
                 } finally {
                     Scripts.setContext(null);
                 }
