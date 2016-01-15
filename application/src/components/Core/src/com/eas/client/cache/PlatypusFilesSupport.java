@@ -80,7 +80,6 @@ public class PlatypusFilesSupport {
         if (jsRoot != null) {
             final NodesContext cx = new NodesContext();
             jsRoot.accept(new AnnotationsMiner(jsRoot.getSource()) {
-
                 @Override
                 public boolean enterFunctionNode(FunctionNode fn) {
                     if (scopeLevel == TOP_SCOPE_LEVEL && fn != jsRoot && !fn.isAnonymous()) {

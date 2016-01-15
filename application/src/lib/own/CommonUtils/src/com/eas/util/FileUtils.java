@@ -97,23 +97,28 @@ public class FileUtils {
         }
     }
     
+    
     public static void delete(File f) throws IOException {
+        delete(f, false);
+    }
+    
+    public static void delete(File f, boolean aSkipUndeletedFiles) throws IOException {
         if (f.isDirectory()) {
             for (File c : f.listFiles()) {
-                delete(c);
+                delete(c, aSkipUndeletedFiles);
             }
         }
-        if (!f.delete()) {
+        if (!f.delete() && !aSkipUndeletedFiles) {
             throw new IOException("Failed to delete file: " + f); // NOI18N
         }
     }
     
-    public static void clearDirectory(File f) throws IOException {
+    public static void clearDirectory(File f, boolean aSkipUndeletedFiles) throws IOException {
         if (!f.isDirectory()) {
             throw new IllegalArgumentException("Only directory can be cleared."); // NOI18N
         }
         for (File c : f.listFiles()) {
-            delete(c);
+            delete(c, aSkipUndeletedFiles);
         }
     }
 }

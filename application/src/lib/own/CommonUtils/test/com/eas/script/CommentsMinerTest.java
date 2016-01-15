@@ -115,9 +115,9 @@ public class CommentsMinerTest {
     }
 
     @Test
-    public void regExpLiteralJQueryMin() throws IOException {
-        URL resource = CommentsMinerTest.class.getClassLoader().getResource("com/eas/script/reg-exp-literal.min.js");
-        Source source = Source.sourceFor("regExpLiteral-large-min", resource);
+    public void jQueryLargeFileMinified() throws IOException {
+        URL resource = CommentsMinerTest.class.getClassLoader().getResource("com/eas/script/reg-exp-literal.min-jquery.js");
+        Source source = Source.sourceFor("jquery-large-min", resource);
         AnnotationsMiner miner = new AnnotationsMiner(source) {
             @Override
             protected void commentedFunction(FunctionNode aFunction, String aComment) {
@@ -127,14 +127,26 @@ public class CommentsMinerTest {
     }
 
     @Test
-    public void regExpLiteralJQuery() throws IOException {
-        URL resource = CommentsMinerTest.class.getClassLoader().getResource("com/eas/script/reg-exp-literal.js");
-        Source source = Source.sourceFor("regExpLiteral-large", resource);
+    public void jQueryLargeFile() throws IOException {
+        URL resource = CommentsMinerTest.class.getClassLoader().getResource("com/eas/script/reg-exp-literal-jquery.js");
+        Source source = Source.sourceFor("leaflet-large", resource);
         AnnotationsMiner miner = new AnnotationsMiner(source) {
             @Override
             protected void commentedFunction(FunctionNode aFunction, String aComment) {
             }
         };
         assertEquals(1573, miner.prevComments.size());
+    }
+    
+    @Test
+    public void leafletLargeFile() throws IOException {
+        URL resource = CommentsMinerTest.class.getClassLoader().getResource("com/eas/script/numeric-literal-leaflet.js");
+        Source source = Source.sourceFor("jquery-large", resource);
+        AnnotationsMiner miner = new AnnotationsMiner(source) { 
+            @Override
+            protected void commentedFunction(FunctionNode aFunction, String aComment) {
+            }
+        };
+        assertEquals(1, miner.prevComments.size());
     }
 }
