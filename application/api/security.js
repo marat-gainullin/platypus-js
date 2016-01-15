@@ -4,7 +4,7 @@ define(['invoke'], function (Invoke) {
 
     var module = {
         /**
-         * Reuests a server about current authenticated user and passes its object to the 'aOnSuccess' callback.
+         * Requests a server about current authenticated user and passes its object to the 'aOnSuccess' callback.
          * @param {Function} aOnSuccess Success callback. It accepts a user object of the followinf structure:<br>
          * {<br>
          * &nbsp;&nbsp;&nbsp;&nbsp;name: "User's name",<br>

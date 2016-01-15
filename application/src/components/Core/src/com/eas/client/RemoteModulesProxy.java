@@ -131,7 +131,7 @@ public class RemoteModulesProxy implements ModulesProxy {
                 boolean deleted = cachePath.delete();
                 if (!deleted) {
                     if (cachePath.isDirectory()) {
-                        FileUtils.clearDirectory(cachePath);
+                        FileUtils.clearDirectory(cachePath, false);
                         cachePath.delete();
                     }
                 }

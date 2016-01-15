@@ -194,7 +194,7 @@
             <folder name="Explorer">
                 <folder name="Root">
                     <folder name="NodeProviders">
-                        <file name="ServerNodeProviderFactory.instance">
+                        <file name="H2NodeProviderFactory.instance">
                             <attr name="instanceCreate" methodvalue="com.eas.designer.explorer.h2.H2DbServerNodeProvider.getFactory"/>
                             <attr name="instanceOf" stringvalue="org.netbeans.api.db.explorer.node.NodeProviderFactory"/>
                             <attr name="position" intvalue="50"/>
