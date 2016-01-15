@@ -796,21 +796,21 @@ public class PlatypusProjectImpl implements PlatypusProject {
      */
     protected void copyContent(FileObject sourceDir, FileObject destDir) throws IOException {
         assert sourceDir.isFolder() && destDir.isFolder();
-        for (FileObject fo : sourceDir.getChildren()) {
-            if (fo.isFolder()) {
-                FileObject targetFolder = destDir.getFileObject(fo.getNameExt());
+        for (FileObject sourceFo : sourceDir.getChildren()) {
+            if (sourceFo.isFolder()) {
+                FileObject targetFolder = destDir.getFileObject(sourceFo.getNameExt());
                 if (targetFolder == null) {
-                    targetFolder = destDir.createFolder(fo.getNameExt());
+                    targetFolder = destDir.createFolder(sourceFo.getNameExt());
                 }
-                copyContent(fo, targetFolder);
+                copyContent(sourceFo, targetFolder);
             } else {
-                FileObject alreadyFO = destDir.getFileObject(fo.getName(), fo.getExt());
+                FileObject alreadyFO = destDir.getFileObject(sourceFo.getName(), sourceFo.getExt());
                 if (alreadyFO != null) {// overwrite file
                     try (OutputStream out = alreadyFO.getOutputStream()) {
-                        Files.copy(FileUtil.toFile(fo).toPath(), out);
+                        Files.copy(FileUtil.toFile(sourceFo).toPath(), out);
                     }
                 } else {// copy file
-                    FileUtil.copyFile(fo, destDir, fo.getName());
+                    FileUtil.copyFile(sourceFo, destDir, sourceFo.getName());
                 }
             }
         }
@@ -821,18 +821,18 @@ public class PlatypusProjectImpl implements PlatypusProject {
         if (webInfDir != null && webInfDir.isFolder()) {
             FileObject libsDir = webInfDir.getFileObject(LIB_DIRECTORY_NAME);
             if (libsDir != null && libsDir.isFolder()) {
-                FileUtils.clearDirectory(FileUtil.toFile(libsDir));// servlet files
+                FileUtils.clearDirectory(FileUtil.toFile(libsDir), true);// servlet files
             }
             FileObject classesDir = webInfDir.getFileObject(CLASSES_DIRECTORY_NAME);
             if (classesDir != null && classesDir.isFolder()) {
-                FileUtils.clearDirectory(FileUtil.toFile(classesDir));// js api files
+                FileUtils.clearDirectory(FileUtil.toFile(classesDir), true);// js api files
             }
         }
         FileObject webContentDir = projectDir.getFileObject(WEB_DIRECTORY);
         if (webContentDir != null && webContentDir.isFolder()) {
             FileObject pwcDir = webContentDir.getFileObject(PLATYPUS_WEB_CLIENT_DIR_NAME);
             if (pwcDir != null && pwcDir.isFolder()) {
-                FileUtils.clearDirectory(FileUtil.toFile(pwcDir));// browser client
+                FileUtils.clearDirectory(FileUtil.toFile(pwcDir), true);// browser client
             }
         }
     }

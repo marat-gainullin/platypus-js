@@ -108,11 +108,6 @@
             aTarget.P = module;
         }
     });
-    Object.defineProperty(module, "cacheBust", {
-        value: function (aValue) {
-            // not supported in SE client yet
-        }
-    });
     return module;
 }, function (module, Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend, Security) {
     for (var e in Environment) {
