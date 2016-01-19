@@ -4,8 +4,8 @@
  */
 package com.eas.client.cache;
 
-import com.eas.script.AnnotationsMiner;
 import com.eas.script.JsDoc;
+import com.eas.script.ParsedJs;
 import com.eas.script.Scripts;
 import java.util.*;
 import java.util.logging.Level;
@@ -20,6 +20,7 @@ import jdk.nashorn.internal.ir.LexicalContext;
 import jdk.nashorn.internal.ir.LiteralNode;
 import jdk.nashorn.internal.ir.Node;
 import jdk.nashorn.internal.ir.VarNode;
+import jdk.nashorn.internal.ir.visitor.NodeVisitor;
 import jdk.nashorn.internal.runtime.Source;
 
 /**
@@ -62,10 +63,10 @@ public class ScriptDocument {
         return doc;
     }
 
-    public Set<String> getModuleNames(){
+    public Set<String> getModuleNames() {
         return Collections.unmodifiableSet(modules.keySet());
     }
-    
+
     public Set<String> getModuleAllowedRoles(String aModuleName) {
         return modules.containsKey(aModuleName) ? modules.get(aModuleName).moduleAllowedRoles : Collections.emptySet();
     }
@@ -109,11 +110,15 @@ public class ScriptDocument {
     private void readScriptModules(String aSource, String aName) {
         assert aSource != null : "JavaScript source can't be null";
         Source source = Source.sourceFor(aName, aSource);
-        FunctionNode ast = Scripts.parseJs(aSource);
+        ParsedJs parsed = Scripts.parseJs(aSource);
         LexicalContext context = new LexicalContext();
-        ast.accept(new AnnotationsMiner(source, context) {
+        FunctionNode ast = parsed.getAst();
+        Map<Long, Long> prevComments = parsed.getPrevComments();
+        ast.accept(new NodeVisitor(context) {
             protected final int GLOBAL_CONSTRUCTORS_SCOPE_LEVEL = 2;
             protected final int AMD_CONSTRUCTORS_SCOPE_LEVEL = 3;
+
+            private int scopeLevel;
 
             @Override
             public boolean enterCallNode(CallNode callNode) {
@@ -208,7 +213,7 @@ public class ScriptDocument {
                                 long prevComment = prevComments.get(ft);
                                 commentedProperty(left.getProperty(), source.getString(prevComment));
                             }
-                            property(left.getProperty(), binaryNode.getAssignmentSource());
+                            processProperty(left.getProperty(), binaryNode.getAssignmentSource());
                         }
                     }
                 }
@@ -222,7 +227,7 @@ public class ScriptDocument {
                                 long prevComment = prevComments.get(ft);
                                 commentedProperty(left.getProperty(), source.getString(prevComment));
                             }
-                            property(left.getProperty(), binaryNode.getAssignmentSource());
+                            processProperty(left.getProperty(), binaryNode.getAssignmentSource());
                         }
                     }
                 }
@@ -237,22 +242,29 @@ public class ScriptDocument {
             };
 
             @Override
-            protected void commentedFunction(FunctionNode aFunction, String aComment) {
-                if (!aFunction.isAnonymous() && scopeLevel == GLOBAL_CONSTRUCTORS_SCOPE_LEVEL - 1) {
+            public boolean enterFunctionNode(FunctionNode functionNode) {
+                scopeLevel++;
+                if (!functionNode.isAnonymous() && scopeLevel == GLOBAL_CONSTRUCTORS_SCOPE_LEVEL - 1) {
                     ModuleDocument module = new ModuleDocument();
-                    gmdConstructor = aFunction;
+                    gmdConstructor = functionNode;
                     modules.put(gmdConstructor.getName(), module);
-                    JsDoc jsDoc = new JsDoc(aComment);
-                    jsDoc.parseAnnotations();
-                    jsDoc.getAnnotations().stream().forEach((JsDoc.Tag tag) -> {
-                        module.moduleAnnotations.add(tag);
-                        if (tag.getName().equalsIgnoreCase(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
-                            tag.getParams().stream().forEach((role) -> {
-                                module.moduleAllowedRoles.add(role);
-                            });
-                        }
-                    });
+                    long ft = functionNode.getFirstToken();
+                    if (prevComments.containsKey(ft)) {
+                        long prevComment = prevComments.get(ft);
+                        String commentText = source.getString(prevComment);
+                        JsDoc jsDoc = new JsDoc(commentText);
+                        jsDoc.parseAnnotations();
+                        jsDoc.getAnnotations().stream().forEach((JsDoc.Tag tag) -> {
+                            module.moduleAnnotations.add(tag);
+                            if (tag.getName().equalsIgnoreCase(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
+                                tag.getParams().stream().forEach((role) -> {
+                                    module.moduleAllowedRoles.add(role);
+                                });
+                            }
+                        });
+                    }
                 }
+                return super.enterFunctionNode(functionNode);
             }
 
             @Override
@@ -265,6 +277,7 @@ public class ScriptDocument {
                         }
                     };
                 }
+                scopeLevel--;
                 return super.leaveFunctionNode(functionNode);
             }
 
@@ -275,9 +288,9 @@ public class ScriptDocument {
                 }
             }
 
-            protected void property(String aPropertyName, Expression aValue) {
-                if (!aPropertyName.contains(".")) {
-                    if (gmdConstructor != null) {
+            protected void processProperty(String aPropertyName, Expression aValue) {
+                if (gmdConstructor != null) {
+                    if (!aPropertyName.contains(".")) {
                         ModuleDocument module = modules.get(gmdConstructor.getName());
                         module.functionProperties.add(aPropertyName);
                     }

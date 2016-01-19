@@ -1,6 +1,8 @@
 package com.eas.script;
 
 import com.eas.concurrent.DeamonThreadFactory;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -14,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -35,11 +38,8 @@ import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptUtils;
 import jdk.nashorn.api.scripting.URLReader;
 import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.ir.LexicalContext;
 import jdk.nashorn.internal.ir.Node;
-import jdk.nashorn.internal.ir.VarNode;
-import jdk.nashorn.internal.ir.visitor.NodeOperatorVisitor;
 import jdk.nashorn.internal.ir.visitor.NodeVisitor;
 import jdk.nashorn.internal.parser.Lexer;
 import jdk.nashorn.internal.parser.Parser;
@@ -286,10 +286,10 @@ public class Scripts {
             }
         }
 
-        public Object getUndefined(){
+        public Object getUndefined() {
             return Undefined.getUndefined();
         }
-        
+
         public void putPublisher(String aClassName, JSObject aPublisher) {
             publishers.put(aClassName, aPublisher);
         }
@@ -745,7 +745,7 @@ public class Scripts {
     public static boolean isValidJsIdentifier(final String aName) {
         if (aName != null && !aName.trim().isEmpty()) {
             try {
-                FunctionNode astRoot = parseJs(String.format("function %s() {}", aName));
+                FunctionNode astRoot = parseJs(String.format("function %s() {}", aName)).getAst();
                 return astRoot != null && !astRoot.getBody().getStatements().isEmpty();
             } catch (Exception ex) {
                 return false;
@@ -754,13 +754,50 @@ public class Scripts {
         return false;
     }
 
-    public static FunctionNode parseJs(String aJsContent) {
+    public static ParsedJs parseJs(String aJsContent) {
         Source source = Source.sourceFor("", aJsContent);//NOI18N
         Options options = new Options(null);
         ScriptEnvironment env = new ScriptEnvironment(options, null, null);
         ErrorManager errors = new ErrorManager();
-        Parser p = new Parser(env, source, errors);
-        return p.parse();
+        //
+        Map<Long, Long> prevComments = new TreeMap<>();
+        Parser p = new Parser(env, source, errors) {
+            @Override
+            public FunctionNode parse(String scriptName, int startPos, int len, boolean allowPropertyFunction) {
+                prevComments.clear();
+                stream = new TokenStream() {
+                    protected long prevToken;
+
+                    @Override
+                    public void put(long token) {
+                        if (Token.descType(token) != TokenType.EOL) {
+                            if (Token.descType(prevToken) == TokenType.COMMENT) {
+                                prevComments.put(token, prevToken);
+                            }
+                            prevToken = token;
+                        }
+                        super.put(token);
+                    }
+
+                };
+                lexer = new Lexer(source, stream, false);
+
+                // Set up first token (skips opening EOL.)
+                k = -1;
+                next();
+                // Begin parse.
+                try {
+                    Method program = Parser.class.getDeclaredMethod("program", new Class[]{String.class, boolean.class});
+                    program.setAccessible(true);
+                    return (FunctionNode) program.invoke(this, new Object[]{scriptName, true});
+                } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                    Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return null;
+            }
+        };
+        FunctionNode jsAst = p.parse();
+        return new ParsedJs(jsAst, prevComments);
     }
 
     /**
@@ -819,32 +856,21 @@ public class Scripts {
      * Searches for all <code>this</code> aliases in a constructor.
      *
      * @param moduleConstructor a constructor to search in
-     * @return a set of aliases including <code>this</code> itself
-    public static Set<String> getThisAliases(final FunctionNode moduleConstructor) {
-        final Set<String> aliases = new HashSet<>();
-        if (moduleConstructor != null && moduleConstructor.getBody() != null) {
-            aliases.add(THIS_KEYWORD);
-            LexicalContext lc = new LexicalContext();
-            moduleConstructor.accept(new NodeOperatorVisitor<LexicalContext>(lc) {
-
-                @Override
-                public boolean enterVarNode(VarNode varNode) {
-                    if (lc.getCurrentFunction() == moduleConstructor) {
-                        if (varNode.getAssignmentSource() instanceof IdentNode) {
-                            IdentNode in = (IdentNode) varNode.getAssignmentSource();
-                            if (THIS_KEYWORD.equals(in.getName())) {
-                                aliases.add(varNode.getAssignmentDest().getName());
-                            }
-                        }
-                    }
-                    return super.enterVarNode(varNode);
-                }
-            });
-        }
-        return aliases;
-    }
+     * @return a set of aliases including <code>this</code> itself public static
+     * Set<String> getThisAliases(final FunctionNode moduleConstructor) { final
+     * Set<String> aliases = new HashSet<>(); if (moduleConstructor != null &&
+     * moduleConstructor.getBody() != null) { aliases.add(THIS_KEYWORD);
+     * LexicalContext lc = new LexicalContext(); moduleConstructor.accept(new
+     * NodeOperatorVisitor<LexicalContext>(lc) {
+     *
+     * @Override public boolean enterVarNode(VarNode varNode) { if
+     * (lc.getCurrentFunction() == moduleConstructor) { if
+     * (varNode.getAssignmentSource() instanceof IdentNode) { IdentNode in =
+     * (IdentNode) varNode.getAssignmentSource(); if
+     * (THIS_KEYWORD.equals(in.getName())) {
+     * aliases.add(varNode.getAssignmentDest().getName()); } } } return
+     * super.enterVarNode(varNode); } }); } return aliases; }
      */
-
     protected static final String SCRIPT_NOT_INITIALIZED = "Platypus script functions are not initialized.";
 
     public static void unlisten(JSObject aCookie) {

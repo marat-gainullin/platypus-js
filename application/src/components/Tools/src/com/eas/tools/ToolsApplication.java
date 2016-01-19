@@ -341,8 +341,9 @@ public class ToolsApplication {
                 String fileName = file.getName();
                 String bundleName = appFolder.relativize(aPath).toString();
                 if (fileName.endsWith("." + PlatypusFiles.MODEL_EXTENSION)) {
-                    if (modelsBundle != null) {
-                        String fileNameWoExt = fileName.substring(0, fileName.length() - PlatypusFiles.MODEL_EXTENSION.length() - 1);
+                    String fileNameWoExt = fileName.substring(0, fileName.length() - PlatypusFiles.MODEL_EXTENSION.length() - 1);
+                    Path sqlPath = aPath.resolveSibling(fileNameWoExt + PlatypusFiles.SQL_EXTENSION);
+                    if (modelsBundle != null && !sqlPath.toFile().exists()) {
                         Path jsPath = aPath.resolveSibling(fileNameWoExt + PlatypusFiles.JAVASCRIPT_FILE_END);
                         if (jsPath.toFile().exists()) {
                             String moduleName = PlatypusFilesSupport.extractModuleName(FileUtils.readString(jsPath.toFile(), SettingsConstants.COMMON_ENCODING), jsPath.toFile().getAbsolutePath());
