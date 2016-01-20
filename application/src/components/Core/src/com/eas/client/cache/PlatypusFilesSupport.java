@@ -24,7 +24,7 @@ public class PlatypusFilesSupport {
 
     public static String extractModuleName(String aJsContent, String aFileName) {
         ScriptDocument scriptDoc = ScriptDocument.parse(aJsContent, aFileName);
-        Set<String> names = scriptDoc.getModuleNames();
+        Set<String> names = scriptDoc.getModules().keySet();
         if (names.size() == 1) {
             return names.iterator().next();
         } else {

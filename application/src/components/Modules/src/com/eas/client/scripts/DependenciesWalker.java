@@ -1,6 +1,7 @@
 package com.eas.client.scripts;
 
 import com.eas.concurrent.CallableConsumer;
+import com.eas.script.ParsedJs;
 import com.eas.script.Scripts;
 import java.util.*;
 import java.util.logging.Level;
@@ -33,7 +34,7 @@ public class DependenciesWalker {
     private final Set<String> queryDependencies = new HashSet<>();
     private final Set<String> serverDependencies = new HashSet<>();
     private final Set<String> dynamicDependencies = new HashSet<>();
-    private FunctionNode sourceRoot;
+    private ParsedJs parsedSource;
     private String source;
     private CallableConsumer<Boolean, String> validator;
 
@@ -48,8 +49,8 @@ public class DependenciesWalker {
     }
 
     public void walk() {
-        sourceRoot = Scripts.parseJs(source);
-        sourceRoot.accept(new NodeVisitor<LexicalContext>(new LexicalContext()) {
+        parsedSource = Scripts.parseJs(source);
+        parsedSource.getAst().accept(new NodeVisitor<LexicalContext>(new LexicalContext()) {
 
             private final Deque<CallNode> calls = new LinkedList<>();
 

@@ -49,6 +49,80 @@ public class ScriptDocument {
          * Functions that may be accessed over network via RPC
          */
         protected final Set<String> functionProperties = new HashSet<>();
+
+        public ModuleDocument() {
+            super();
+        }
+
+        public Set<String> getAllowedRoles() {
+            return Collections.unmodifiableSet(moduleAllowedRoles);
+        }
+
+        public Map<String, Set<String>> getPropertyAllowedRoles() {
+            return Collections.unmodifiableMap(propertyAllowedRoles);
+        }
+
+        public List<JsDoc.Tag> geеAnnotations() {
+            return Collections.unmodifiableList(moduleAnnotations);
+        }
+
+        public Map<String, Set<JsDoc.Tag>> getPropertyAnnotations() {
+            return Collections.unmodifiableMap(propertyAnnotations);
+        }
+
+        public boolean hasAnnotation(String anAnnotation) {
+            return moduleAnnotations.stream().anyMatch((JsDoc.Tag aTag) -> {
+                return aTag.getName().equalsIgnoreCase(anAnnotation);
+            });
+        }
+
+        public JsDoc.Tag getAnnotation(String anAnnotation) {
+            return moduleAnnotations.stream().filter((JsDoc.Tag aTag) -> {
+                return aTag.getName().equalsIgnoreCase(anAnnotation);
+            }).findAny().get();
+        }
+
+        public Set<String> getFunctionProperties() {
+            return Collections.unmodifiableSet(functionProperties);
+        }
+
+        void parseAnnotations(String commentText) {
+            JsDoc jsDoc = new JsDoc(commentText);
+            jsDoc.parseAnnotations();
+            jsDoc.getAnnotations().stream().forEach((JsDoc.Tag tag) -> {
+                moduleAnnotations.add(tag);
+                if (tag.getName().equalsIgnoreCase(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
+                    tag.getParams().stream().forEach((role) -> {
+                        moduleAllowedRoles.add(role);
+                    });
+                }
+            });
+        }
+
+        private void readPropertyRoles(String aPropertyName, String aJsDocBody) {
+            if (aJsDocBody != null) {
+                JsDoc jsDoc = new JsDoc(aJsDocBody);
+                jsDoc.parseAnnotations();
+                jsDoc.getAnnotations().stream().forEach((JsDoc.Tag tag) -> {
+                    Set<JsDoc.Tag> tags = propertyAnnotations.get(aPropertyName);
+                    if (tags == null) {
+                        tags = new HashSet<>();
+                        propertyAnnotations.put(aPropertyName, tags);
+                    }
+                    tags.add(tag);
+                    if (tag.getName().equalsIgnoreCase(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
+                        Set<String> roles = propertyAllowedRoles.get(aPropertyName);
+                        if (roles == null) {
+                            roles = new HashSet<>();
+                        }
+                        for (String role : tag.getParams()) {
+                            roles.add(role);
+                        }
+                        propertyAllowedRoles.put(aPropertyName, roles);
+                    }
+                });
+            }
+        }
     }
 
     private final Map<String, ModuleDocument> modules = new HashMap<>();
@@ -63,40 +137,8 @@ public class ScriptDocument {
         return doc;
     }
 
-    public Set<String> getModuleNames() {
-        return Collections.unmodifiableSet(modules.keySet());
-    }
-
-    public Set<String> getModuleAllowedRoles(String aModuleName) {
-        return modules.containsKey(aModuleName) ? modules.get(aModuleName).moduleAllowedRoles : Collections.emptySet();
-    }
-
-    public Map<String, Set<String>> getModulePropertyAllowedRoles(String aModuleName) {
-        return modules.containsKey(aModuleName) ? modules.get(aModuleName).propertyAllowedRoles : Collections.emptyMap();
-    }
-
-    public List<JsDoc.Tag> getModuleAnnotations(String aModuleName) {
-        return modules.containsKey(aModuleName) ? Collections.unmodifiableList(modules.get(aModuleName).moduleAnnotations) : null;
-    }
-
-    public Map<String, Set<JsDoc.Tag>> getModulePropertyAnnotations(String aModuleName) {
-        return modules.containsKey(aModuleName) ? Collections.unmodifiableMap(modules.get(aModuleName).propertyAnnotations) : Collections.emptyMap();
-    }
-
-    public boolean hasModuleAnnotation(String aModuleName, String anAnnotation) {
-        return modules.containsKey(aModuleName) ? modules.get(aModuleName).moduleAnnotations.stream().anyMatch((JsDoc.Tag aTag) -> {
-            return aTag.getName().equalsIgnoreCase(anAnnotation);
-        }) : false;
-    }
-
-    public JsDoc.Tag getModuleAnnotation(String aModuleName, String anAnnotation) {
-        return modules.containsKey(aModuleName) ? modules.get(aModuleName).moduleAnnotations.stream().filter((JsDoc.Tag aTag) -> {
-            return aTag.getName().equalsIgnoreCase(anAnnotation);
-        }).findAny().get() : null;
-    }
-
-    public Set<String> getModuleFunctionProperties(String aModuleName) {
-        return modules.containsKey(aModuleName) ? Collections.unmodifiableSet(modules.get(aModuleName).functionProperties) : Collections.emptySet();
+    public Map<String, ModuleDocument> getModules() {
+        return Collections.unmodifiableMap(modules);
     }
 
     /**
@@ -107,16 +149,16 @@ public class ScriptDocument {
      * annotations will be taken into account while accessing through modules.
      * @param aSource
      */
-    private void readScriptModules(String aSource, String aName) {
+    private void readScriptModules(String aSource, String aDefaultModuleName) {
         assert aSource != null : "JavaScript source can't be null";
-        Source source = Source.sourceFor(aName, aSource);
+        Source source = Source.sourceFor(aDefaultModuleName, aSource);
         ParsedJs parsed = Scripts.parseJs(aSource);
         LexicalContext context = new LexicalContext();
         FunctionNode ast = parsed.getAst();
         Map<Long, Long> prevComments = parsed.getPrevComments();
         ast.accept(new NodeVisitor(context) {
-            protected final int GLOBAL_CONSTRUCTORS_SCOPE_LEVEL = 2;
-            protected final int AMD_CONSTRUCTORS_SCOPE_LEVEL = 3;
+            protected final int GLOBAL_CONSTRUCTORS_BODY_SCOPE_LEVEL = 2;
+            protected final int AMD_CONSTRUCTORS_BODY_SCOPE_LEVEL = 3;
 
             private int scopeLevel;
 
@@ -139,7 +181,6 @@ public class ScriptDocument {
             private static final String DEFINE_FUNC_NAME = "define";
 
             protected CallNode amdDefineCall;
-            protected ModuleDocument amdModule;
 
             private void defineCall(CallNode callNode, long aCommentableToken) {
                 amdDefineCall = callNode;
@@ -151,50 +192,45 @@ public class ScriptDocument {
                 } else {
                     moduleName = null;
                 }
+                mdModule = new ModuleDocument();
                 Set<String> allowedRoles = new HashSet<>();
                 if (prevComments.containsKey(aCommentableToken)) {
                     long prevComment = prevComments.get(aCommentableToken);
                     String defineCallComment = source.getString(prevComment);
-                    JsDoc jsDoc = new JsDoc(defineCallComment);
-                    jsDoc.parseAnnotations();
+                    mdModule.parseAnnotations(defineCallComment);
                     if (moduleName == null || moduleName.isEmpty()) {
-                        JsDoc.Tag moduleTag = jsDoc.getTag(JsDoc.Tag.MODULE_TAG);
+                        JsDoc.Tag moduleTag = mdModule.getAnnotation(JsDoc.Tag.MODULE_TAG);
                         if (moduleTag != null && !moduleTag.getParams().isEmpty()) {
                             moduleName = moduleTag.getParams().get(0);
                         }
                     }
-                    jsDoc.getAnnotations().stream().forEach((JsDoc.Tag tag) -> {
-                        if (tag.getName().equalsIgnoreCase(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
-                            tag.getParams().stream().forEach((role) -> {
-                                allowedRoles.add(role);
-                            });
-                        }
-                    });
                 }
-                amdModule = new ModuleDocument();
-                amdModule.moduleAllowedRoles.addAll(allowedRoles);
+                mdModule.moduleAllowedRoles.addAll(allowedRoles);
+                if (moduleName == null || moduleName.isEmpty()) {
+                    moduleName = aDefaultModuleName;
+                }
                 if (modules.containsKey(moduleName)) {
-                    Logger.getLogger(ScriptDocument.class.getName()).log(Level.WARNING, "Module with name \"{0}\" ia already defined in script {1}.", new Object[]{moduleName != null ? moduleName : "null", aName});
+                    Logger.getLogger(ScriptDocument.class.getName()).log(Level.WARNING, "Module with name \"{0}\" ia already defined in script {1}.", new Object[]{moduleName != null ? moduleName : "null", aDefaultModuleName});
                 }
-                modules.put(moduleName, amdModule);
+                modules.put(moduleName, mdModule);
             }
 
             @Override
             public Node leaveCallNode(CallNode callNode) {
                 if (callNode == amdDefineCall) {
                     amdDefineCall = null;
-                    amdModule = null;
+                    mdModule = null;
                 }
                 return super.leaveCallNode(callNode);
             }
 
             @Override
             public boolean enterVarNode(VarNode varNode) {
-                if (gmdConstructor != null && context.getCurrentFunction() == gmdConstructor) {
+                if (mdConstructor != null && context.getCurrentFunction() == mdConstructor) {
                     if (varNode.getAssignmentSource() instanceof IdentNode) {
                         IdentNode in = (IdentNode) varNode.getAssignmentSource();
                         if (Scripts.THIS_KEYWORD.equals(in.getName())) {
-                            gmdThisAliases.add(varNode.getAssignmentDest().getName());
+                            mdThisAliases.add(varNode.getAssignmentDest().getName());
                         }
                     }
                 }
@@ -204,38 +240,41 @@ public class ScriptDocument {
             @Override
             public boolean enterBinaryNode(BinaryNode binaryNode) {
                 // For global scope modules
-                if (scopeLevel == GLOBAL_CONSTRUCTORS_SCOPE_LEVEL && binaryNode.isAssignment() && !binaryNode.isSelfModifying()) {
+                if (scopeLevel == GLOBAL_CONSTRUCTORS_BODY_SCOPE_LEVEL && binaryNode.isAssignment() && !binaryNode.isSelfModifying()) {
                     if (binaryNode.getAssignmentDest() instanceof AccessNode) {
                         AccessNode left = (AccessNode) binaryNode.getAssignmentDest();
-                        if (left.getBase() instanceof IdentNode && gmdThisAliases.contains(((IdentNode) left.getBase()).getName())) {
+                        if (left.getBase() instanceof IdentNode && mdThisAliases.contains(((IdentNode) left.getBase()).getName())) {
                             long ft = left.getBase().getToken();
+                            String comment = null;
                             if (prevComments.containsKey(ft)) {
                                 long prevComment = prevComments.get(ft);
-                                commentedProperty(left.getProperty(), source.getString(prevComment));
+                                comment = source.getString(prevComment);
                             }
-                            processProperty(left.getProperty(), binaryNode.getAssignmentSource());
+                            processProperty(left.getProperty(), binaryNode.getAssignmentSource(), comment);
                         }
                     }
                 }
                 // For AMD modules
-                if (scopeLevel == AMD_CONSTRUCTORS_SCOPE_LEVEL && binaryNode.isAssignment() && !binaryNode.isSelfModifying()) {
+                if (scopeLevel == AMD_CONSTRUCTORS_BODY_SCOPE_LEVEL && binaryNode.isAssignment() && !binaryNode.isSelfModifying()) {
                     if (binaryNode.getAssignmentDest() instanceof AccessNode) {
                         AccessNode left = (AccessNode) binaryNode.getAssignmentDest();
                         if (left.getBase() instanceof IdentNode) {
                             long ft = left.getBase().getToken();
+                            String comment = null;
                             if (prevComments.containsKey(ft)) {
                                 long prevComment = prevComments.get(ft);
-                                commentedProperty(left.getProperty(), source.getString(prevComment));
+                                comment = source.getString(prevComment);
                             }
-                            processProperty(left.getProperty(), binaryNode.getAssignmentSource());
+                            processProperty(left.getProperty(), binaryNode.getAssignmentSource(), comment);
                         }
                     }
                 }
                 return super.enterBinaryNode(binaryNode);
             }
 
-            protected FunctionNode gmdConstructor;// current GMS constructor
-            protected Set<String> gmdThisAliases = new HashSet<String>() {
+            protected ModuleDocument mdModule;// current module form nearest scope
+            protected FunctionNode mdConstructor;// current AMD/GMD constructor
+            protected Set<String> mdThisAliases = new HashSet<String>() {
                 {
                     add(Scripts.THIS_KEYWORD);
                 }
@@ -244,24 +283,15 @@ public class ScriptDocument {
             @Override
             public boolean enterFunctionNode(FunctionNode functionNode) {
                 scopeLevel++;
-                if (!functionNode.isAnonymous() && scopeLevel == GLOBAL_CONSTRUCTORS_SCOPE_LEVEL - 1) {
-                    ModuleDocument module = new ModuleDocument();
-                    gmdConstructor = functionNode;
-                    modules.put(gmdConstructor.getName(), module);
+                if (!functionNode.isAnonymous() && scopeLevel == GLOBAL_CONSTRUCTORS_BODY_SCOPE_LEVEL) {
+                    mdModule = new ModuleDocument();
+                    mdConstructor = functionNode;
+                    modules.put(functionNode.getName(), mdModule);
                     long ft = functionNode.getFirstToken();
                     if (prevComments.containsKey(ft)) {
                         long prevComment = prevComments.get(ft);
                         String commentText = source.getString(prevComment);
-                        JsDoc jsDoc = new JsDoc(commentText);
-                        jsDoc.parseAnnotations();
-                        jsDoc.getAnnotations().stream().forEach((JsDoc.Tag tag) -> {
-                            module.moduleAnnotations.add(tag);
-                            if (tag.getName().equalsIgnoreCase(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
-                                tag.getParams().stream().forEach((role) -> {
-                                    module.moduleAllowedRoles.add(role);
-                                });
-                            }
-                        });
+                        mdModule.parseAnnotations(commentText);
                     }
                 }
                 return super.enterFunctionNode(functionNode);
@@ -269,9 +299,10 @@ public class ScriptDocument {
 
             @Override
             public Node leaveFunctionNode(FunctionNode functionNode) {
-                if (functionNode == gmdConstructor) {
-                    gmdConstructor = null;
-                    gmdThisAliases = new HashSet<String>() {
+                if (functionNode == mdConstructor) {
+                    mdConstructor = null;
+                    mdModule = null;
+                    mdThisAliases = new HashSet<String>() {
                         {
                             add(Scripts.THIS_KEYWORD);
                         }
@@ -281,46 +312,16 @@ public class ScriptDocument {
                 return super.leaveFunctionNode(functionNode);
             }
 
-            protected void commentedProperty(String aPropertyName, String aComment) {
-                if (gmdConstructor != null) {
-                    ModuleDocument module = modules.get(gmdConstructor.getName());
-                    readPropertyRoles(module, aPropertyName, aComment);
-                }
-            }
-
-            protected void processProperty(String aPropertyName, Expression aValue) {
-                if (gmdConstructor != null) {
+            protected void processProperty(String aPropertyName, Expression aValue, String aComment) {
+                if (mdModule != null) {
                     if (!aPropertyName.contains(".")) {
-                        ModuleDocument module = modules.get(gmdConstructor.getName());
-                        module.functionProperties.add(aPropertyName);
+                        mdModule.functionProperties.add(aPropertyName);
+                        if (aComment != null) {
+                            mdModule.readPropertyRoles(aPropertyName, aComment);
+                        }
                     }
                 }
             }
         });
-    }
-
-    private void readPropertyRoles(ModuleDocument aModule, String aPropertyName, String aJsDocBody) {
-        if (aJsDocBody != null) {
-            JsDoc jsDoc = new JsDoc(aJsDocBody);
-            jsDoc.parseAnnotations();
-            jsDoc.getAnnotations().stream().forEach((JsDoc.Tag tag) -> {
-                Set<JsDoc.Tag> tags = aModule.propertyAnnotations.get(aPropertyName);
-                if (tags == null) {
-                    tags = new HashSet<>();
-                    aModule.propertyAnnotations.put(aPropertyName, tags);
-                }
-                tags.add(tag);
-                if (tag.getName().equalsIgnoreCase(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
-                    Set<String> roles = aModule.propertyAllowedRoles.get(aPropertyName);
-                    if (roles == null) {
-                        roles = new HashSet<>();
-                    }
-                    for (String role : tag.getParams()) {
-                        roles.add(role);
-                    }
-                    aModule.propertyAllowedRoles.put(aPropertyName, roles);
-                }
-            });
-        }
     }
 }
