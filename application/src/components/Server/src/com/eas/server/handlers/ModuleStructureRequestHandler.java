@@ -6,10 +6,8 @@
 package com.eas.server.handlers;
 
 import com.eas.server.RequestHandler;
-import com.eas.client.AppElementFiles;
 import com.eas.client.ModuleStructure;
 import com.eas.client.RemoteModulesProxy;
-import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.ScriptDocument;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
@@ -20,6 +18,8 @@ import com.eas.server.Session;
 import com.eas.util.JSONUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.AccessControlException;
 import java.util.HashSet;
 import java.util.Set;
@@ -32,7 +32,7 @@ import javax.security.auth.AuthPermission;
  */
 public class ModuleStructureRequestHandler extends RequestHandler<ModuleStructureRequest, ModuleStructureRequest.Response> {
 
-    public static final String ACCESS_DENIED_MSG = "Access denied to application element '%s' [ %s ] for user %s";
+    public static final String ACCESS_DENIED_MSG = "Access denied to module '%s' [ %s ] for user %s";
 
     public ModuleStructureRequestHandler(PlatypusServerCore aServerCore, ModuleStructureRequest aRequest) {
         super(aServerCore, aRequest);
@@ -41,21 +41,22 @@ public class ModuleStructureRequestHandler extends RequestHandler<ModuleStructur
     @Override
     public void handle(Session aSession, Consumer<ModuleStructureRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         try {
-            String moduleOrResourceName = getRequest().getModuleOrResourceName();
-            if (moduleOrResourceName == null || moduleOrResourceName.isEmpty()) {
-                moduleOrResourceName = serverCore.getDefaultAppElement();
+            String moduleName = getRequest().getModuleName();
+            if (moduleName == null || moduleName.isEmpty()) {
+                moduleName = serverCore.getStartModuleName();
             }
-            AppElementFiles files = serverCore.getIndexer().nameToFiles(moduleOrResourceName);
-            if (files != null) {
+            ScriptDocument.ModuleDocument moduleDoc = serverCore.lookupModuleDocument(moduleName);
+            if (moduleDoc != null) {
                 // Security check
-                checkModuleRoles(moduleOrResourceName, files);
+                checkModuleRoles(moduleName, moduleDoc);
                 // Actual work
-                serverCore.getModules().getModule(moduleOrResourceName, Scripts.getSpace(), (ModuleStructure aStructure) -> {
-                    String localPath = serverCore.getModules().getLocalPath();
+                serverCore.getModules().getModule(moduleName, Scripts.getSpace(), (ModuleStructure aStructure) -> {
+                    Path localPath = serverCore.getModules().getLocalPath();
                     Set<String> structure = new HashSet<>();
                     aStructure.getParts().getFiles().stream().forEach((File f) -> {
-                        String resourceName = f.getPath().substring(localPath.length());
-                        resourceName = resourceName.replace("\\", "/");
+                        Path partPath = localPath.relativize(Paths.get(f.toURI()));
+                        String resourceName = partPath.toString();
+                        resourceName = resourceName.replace(File.separator, "/");
                         if (resourceName.startsWith("/")) {
                             resourceName = resourceName.substring(1);
                         }
@@ -70,21 +71,18 @@ public class ModuleStructureRequestHandler extends RequestHandler<ModuleStructur
                     onSuccess.accept(resp);
                 }, onFailure);
             } else {
-                onFailure.accept(new FileNotFoundException("Module '" + moduleOrResourceName + "' is not found."));
+                onFailure.accept(new FileNotFoundException("Module '" + moduleName + "' is not found."));
             }
         } catch (Exception ex) {
             onFailure.accept(ex);
         }
     }
 
-    private void checkModuleRoles(String aModuleName, AppElementFiles aAppElementFiles) throws Exception {
-        if (aAppElementFiles != null && aAppElementFiles.hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
-            ScriptDocument jsDoc = serverCore.getScriptsConfigs().get(aModuleName, aAppElementFiles);
-            Set<String> rolesAllowed = jsDoc.getModuleAllowedRoles();
-            PlatypusPrincipal principal = (PlatypusPrincipal) Scripts.getContext().getPrincipal();
-            if (rolesAllowed != null && !principal.hasAnyRole(rolesAllowed)) {
-                throw new AccessControlException(String.format(ACCESS_DENIED_MSG, aModuleName, getRequest().getModuleOrResourceName(), principal.getName()), principal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
-            }
+    private void checkModuleRoles(String aModuleName, ScriptDocument.ModuleDocument aModuleDoc) throws Exception {
+        Set<String> rolesAllowed = aModuleDoc.getAllowedRoles();
+        PlatypusPrincipal principal = (PlatypusPrincipal) Scripts.getContext().getPrincipal();
+        if (rolesAllowed != null && !principal.hasAnyRole(rolesAllowed)) {
+            throw new AccessControlException(String.format(ACCESS_DENIED_MSG, aModuleName, getRequest().getModuleName(), principal.getName()), principal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
         }
     }
 }

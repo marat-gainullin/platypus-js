@@ -8,6 +8,7 @@ import com.eas.client.ClientConstants;
 import com.eas.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,16 +22,6 @@ public class PlatypusFilesSupport {
     // jsDoc or sqlDoc containing element name annotation regex parts 1 and 2
     private static final String NAMED_ANNOTATION_PATTERN_FIRST_PART = "^\\s*/\\*\\*(?=(?:(?!\\*/)[\\s\\S])*?"; //NOI18N
     private static final String NAMED_ANNOTATION_PATTERN_SECOND_PART = ")(?:(?!\\*/)[\\s\\S])*\\*/"; //NOI18N
-
-    public static String extractModuleName(String aJsContent, String aFileName) {
-        ScriptDocument scriptDoc = ScriptDocument.parse(aJsContent, aFileName);
-        Set<String> names = scriptDoc.getModules().keySet();
-        if (names.size() == 1) {
-            return names.iterator().next();
-        } else {
-            return null;
-        }
-    }
 
     /**
      * Extracts annotation value form given content. May return annotation

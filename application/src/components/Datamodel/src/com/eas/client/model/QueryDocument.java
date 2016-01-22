@@ -4,7 +4,6 @@
  */
 package com.eas.client.model;
 
-import com.eas.client.AppElementFiles;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.PlatypusFiles;
@@ -15,6 +14,8 @@ import com.eas.client.settings.SettingsConstants;
 import com.eas.util.FileUtils;
 import com.eas.xml.dom.Source2XmlDom;
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import org.w3c.dom.Document;
@@ -96,20 +97,23 @@ public class QueryDocument {
         return model;
     }
 
-    public static QueryDocument parse(String aName, AppElementFiles aFiles, DatabasesClient aBasesProxy, QueriesProxy<SqlQuery> aQueriesPrioxy) throws Exception {
+    public static QueryDocument parse(String aName, File aMainFile, DatabasesClient aBasesProxy, QueriesProxy<SqlQuery> aQueriesPrioxy) throws Exception {
+        Path mainPath = Paths.get(aMainFile.toURI());
+        String sqledName = mainPath.getFileName().toString();
+        String woExtension = sqledName.substring(0, sqledName.length() - PlatypusFiles.SQL_EXTENSION.length());
         // sql source
-        File sqlFile = aFiles.findFileByExtension(PlatypusFiles.SQL_EXTENSION);
+        File sqlFile = aMainFile;
         String sqlContent = FileUtils.readString(sqlFile, SettingsConstants.COMMON_ENCODING);
         // sql dialect source
-        File dialectFile = aFiles.findFileByExtension(PlatypusFiles.DIALECT_EXTENSION);
+        File dialectFile = mainPath.resolveSibling(woExtension + PlatypusFiles.DIALECT_EXTENSION).toFile();
         String dialectContent = FileUtils.readString(dialectFile, SettingsConstants.COMMON_ENCODING);
         // query model
-        File modelFile = aFiles.findFileByExtension(PlatypusFiles.MODEL_EXTENSION);
+        File modelFile = mainPath.resolveSibling(woExtension + PlatypusFiles.MODEL_EXTENSION).toFile();
         String modelContent = FileUtils.readString(modelFile, SettingsConstants.COMMON_ENCODING);
         Document modelDoc = Source2XmlDom.transform(modelContent);        
         QueryModel model = XmlDom2QueryModel.transform(aBasesProxy, aQueriesPrioxy, modelDoc);
         // output fields hints
-        File outFile = aFiles.findFileByExtension(PlatypusFiles.OUT_EXTENSION);
+        File outFile = mainPath.resolveSibling(woExtension + PlatypusFiles.OUT_EXTENSION).toFile();
         String outContent = FileUtils.readString(outFile, SettingsConstants.COMMON_ENCODING);
         Document outDoc = Source2XmlDom.transform(outContent);
         List<QueryDocument.StoredFieldMetadata> additionalFields = parseFieldsHintsTag(outDoc.getDocumentElement());

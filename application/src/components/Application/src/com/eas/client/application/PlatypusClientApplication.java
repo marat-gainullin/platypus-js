@@ -31,6 +31,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.concurrent.Callable;
 import java.util.logging.*;
@@ -236,8 +237,8 @@ public class PlatypusClientApplication {
                     if (f.exists() && f.isDirectory()) {
                         ModelsDocuments models = new ModelsDocuments();
                         ScriptsConfigs scriptsConfigs = new ScriptsConfigs();
-                        ValidatorsScanner validatorsScanner = new ValidatorsScanner(scriptsConfigs);
-                        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), validatorsScanner);
+                        ValidatorsScanner validatorsScanner = new ValidatorsScanner();
+                        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(Paths.get(f.toURI()), scriptsConfigs, validatorsScanner);
                         // TODO: add command line argument "watch" after watcher refactoring
                         //indexer.watch();
                         ScriptedDatabasesClient twoTierCore = new ScriptedDatabasesClient(config.defDatasource, indexer, true, validatorsScanner.getValidators(), config.threadsArgs.getMaxJdbcTreads());

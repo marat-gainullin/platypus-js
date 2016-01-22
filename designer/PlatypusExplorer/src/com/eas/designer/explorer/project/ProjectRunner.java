@@ -4,7 +4,6 @@
  */
 package com.eas.designer.explorer.project;
 
-import com.eas.client.AppElementFiles;
 import com.eas.client.application.PlatypusClientApplication;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
@@ -184,24 +183,25 @@ public class ProjectRunner {
         });
     }
 
-    private static void start(PlatypusProject aProject, String appElementName, boolean aDebug) throws Exception {
+    private static void start(PlatypusProject aProject, String aModuleName, boolean aDebug) throws Exception {
         boolean seClient = ClientType.PLATYPUS_CLIENT.equals(aProject.getSettings().getRunClientType());
-        if (appElementName != null && !appElementName.isEmpty()) {
+        if (aModuleName != null && !aModuleName.isEmpty()) {
             FileObject appSrcDir = aProject.getSrcRoot();
             FileObject startJs = appSrcDir.getFileObject(PlatypusProjectSettings.START_JS_FILE_NAME);
             if (startJs == null) {
                 startJs = appSrcDir.createData(PlatypusProjectSettings.START_JS_FILE_NAME);
             }
-            AppElementFiles startFiles = aProject.getIndexer().nameToFiles(appElementName);
-            if (startFiles != null) {
-                String requireCallabckArg = moduleIdToVarName(appElementName);
-                String startMethod = startFiles.hasExtension(PlatypusFiles.FORM_EXTENSION) ? "show" : "execute";
-                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, aProject.getSettings().getGlobalAPI() ? "facade" : "environment", aProject.getSettings().getBrowserCacheBusting() ? "" : "//", aProject.getSettings().getGlobalAPI() ? "" : "//", appElementName, requireCallabckArg, "        var m = new " + requireCallabckArg + "();\n", "        m." + startMethod + "();\n", appElementName);
+            File startModule = aProject.getIndexer().nameToFile(aModuleName);
+            if (startModule != null) {
+                String requireCallabckArg = moduleIdToVarName(aModuleName);
+                FileObject layoutBrother = FileUtil.findBrother(FileUtil.toFileObject(startModule), PlatypusFiles.FORM_EXTENSION);
+                String startMethod = layoutBrother != null ? "show" : "execute";
+                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, aProject.getSettings().getGlobalAPI() ? "facade" : "environment", aProject.getSettings().getBrowserCacheBusting() ? "" : "//", aProject.getSettings().getGlobalAPI() ? "" : "//", aModuleName, requireCallabckArg, "        var m = new " + requireCallabckArg + "();\n", "        m." + startMethod + "();\n", aModuleName);
                 FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
-            } else if (appElementName.toLowerCase().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
-                String moduleId = appElementName.substring(0, appElementName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
+            } else if (aModuleName.toLowerCase().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
+                String moduleId = aModuleName.substring(0, aModuleName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
                 String requireCallabckArg = moduleIdToVarName(moduleId);
-                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, aProject.getSettings().getGlobalAPI() ? "facade" : "environment", aProject.getSettings().getBrowserCacheBusting() ? "" : "//", aProject.getSettings().getGlobalAPI() ? "" : "//", appElementName, requireCallabckArg, "", "    //...\n", appElementName);
+                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, aProject.getSettings().getGlobalAPI() ? "facade" : "environment", aProject.getSettings().getBrowserCacheBusting() ? "" : "//", aProject.getSettings().getGlobalAPI() ? "" : "//", aModuleName, requireCallabckArg, "", "    //...\n", aModuleName);
                 FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
             }
         } else {

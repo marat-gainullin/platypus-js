@@ -6,7 +6,7 @@ package com.eas.tools;
 
 import com.eas.client.DatabasesClient;
 import com.eas.client.cache.PlatypusFiles;
-import com.eas.client.cache.PlatypusFilesSupport;
+import com.eas.client.cache.ScriptDocument;
 import com.eas.client.resourcepool.BearResourcePool;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
@@ -340,15 +340,16 @@ public class ToolsApplication {
                 File file = aPath.toFile();
                 String fileName = file.getName();
                 String bundleName = appFolder.relativize(aPath).toString();
+                bundleName = FileUtils.removeExtension(bundleName).replace(File.separator, "/");
                 if (fileName.endsWith("." + PlatypusFiles.MODEL_EXTENSION)) {
                     String fileNameWoExt = fileName.substring(0, fileName.length() - PlatypusFiles.MODEL_EXTENSION.length() - 1);
                     Path sqlPath = aPath.resolveSibling(fileNameWoExt + PlatypusFiles.SQL_EXTENSION);
                     if (modelsBundle != null && !sqlPath.toFile().exists()) {
                         Path jsPath = aPath.resolveSibling(fileNameWoExt + PlatypusFiles.JAVASCRIPT_FILE_END);
                         if (jsPath.toFile().exists()) {
-                            String moduleName = PlatypusFilesSupport.extractModuleName(FileUtils.readString(jsPath.toFile(), SettingsConstants.COMMON_ENCODING), jsPath.toFile().getAbsolutePath());
-                            if (moduleName != null && !moduleName.isEmpty()) {
-                                bundleName = moduleName;
+                            ScriptDocument scriptDoc = ScriptDocument.parse(FileUtils.readString(jsPath.toFile(), SettingsConstants.COMMON_ENCODING), bundleName);
+                            if(scriptDoc.getModules().size() == 1){
+                                bundleName = scriptDoc.getModules().keySet().iterator().next();
                             }
                         }
                         String modelContent = FileUtils.readString(file, SettingsConstants.COMMON_ENCODING);
@@ -366,14 +367,14 @@ public class ToolsApplication {
                             modelChild = modelChild.getNextSibling();
                         }
                     }
-                } else if (file.getName().endsWith("." + PlatypusFiles.FORM_EXTENSION)) {
+                } else if (bundleName.endsWith("." + PlatypusFiles.FORM_EXTENSION)) {
                     if (layoutsBundle != null) {
                         String fileNameWoExt = fileName.substring(0, fileName.length() - PlatypusFiles.FORM_EXTENSION.length() - 1);
                         Path jsPath = aPath.resolveSibling(fileNameWoExt + PlatypusFiles.JAVASCRIPT_FILE_END);
                         if (jsPath.toFile().exists()) {
-                            String moduleName = PlatypusFilesSupport.extractModuleName(FileUtils.readString(jsPath.toFile(), SettingsConstants.COMMON_ENCODING), jsPath.toFile().getAbsolutePath());
-                            if (moduleName != null && !moduleName.isEmpty()) {
-                                bundleName = moduleName;
+                            ScriptDocument scriptDoc = ScriptDocument.parse(FileUtils.readString(jsPath.toFile(), SettingsConstants.COMMON_ENCODING), bundleName);
+                            if(scriptDoc.getModules().size() == 1){
+                                bundleName = scriptDoc.getModules().keySet().iterator().next();
                             }
                         }
                         String layoutContent = FileUtils.readString(file, SettingsConstants.COMMON_ENCODING);

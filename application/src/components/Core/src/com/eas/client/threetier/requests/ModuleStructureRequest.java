@@ -13,23 +13,23 @@ import com.eas.client.threetier.Requests;
  */
 public class ModuleStructureRequest extends Request {
 
-    protected String moduleOrResourceName;
+    protected String moduleName;
     
-    public ModuleStructureRequest(String aModuleOrResourceName) {
+    public ModuleStructureRequest(String aModuleName) {
         this();
-        moduleOrResourceName = aModuleOrResourceName;
+        moduleName = aModuleName;
     }
     
     public ModuleStructureRequest() {
         super(Requests.rqModuleStructure);
     }
 
-    public String getModuleOrResourceName() {
-        return moduleOrResourceName;
+    public String getModuleName() {
+        return moduleName;
     }
 
-    public void setModuleOrResourceName(String aValue) {
-        moduleOrResourceName = aValue;
+    public void setModuleName(String aValue) {
+        moduleName = aValue;
     }
 
     @Override

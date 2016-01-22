@@ -103,7 +103,7 @@ public class ScriptedResource {
      * @throws java.lang.Exception
      */
     public static String getApplicationPath() throws Exception {
-        return app.getModules().getLocalPath();
+        return app.getModules().getLocalPath().toString();
     }
 
     /**
@@ -188,10 +188,8 @@ public class ScriptedResource {
                 Path appPath = getAbsoluteAppPath();
                 Path calledFromFile = aCalledFromFile != null ? resolveApiApp(aCalledFromFile, apiPath, appPath) : null;
                 String resourceName = calledFromFile != null ? relativizeApiApp(aResourceName, calledFromFile, apiPath, calledFromFile.getParent(), appPath) : aResourceName;
-                app.getModules().getModule(resourceName, aSpace, (ModuleStructure s) -> {
+                app.getModules().getResource(resourceName, aSpace, (File resourceFile) -> {
                     try {
-                        String sourcesPath = app.getModules().getLocalPath();
-                        File resourceFile = new File(sourcesPath + File.separator + resourceName);
                         if (resourceFile.exists() && !resourceFile.isDirectory()) {
                             byte[] data = FileUtils.readBytes(resourceFile);
                             String fileExt = FileUtils.getFileExtension(resourceFile);
@@ -252,9 +250,7 @@ public class ScriptedResource {
             Path calledFromFile = aCalledFromFile != null ? resolveApiApp(aCalledFromFile, apiPath, appPath) : null;
             String resourceName = calledFromFile != null ? relativizeApiApp(aResourceName, calledFromFile, apiPath, calledFromFile.getParent(), appPath) : aResourceName;
 
-            app.getModules().getModule(resourceName, aSpace, null, null);
-            String sourcesPath = app.getModules().getLocalPath();
-            File resourceFile = new File(sourcesPath + File.separator + resourceName);
+            File resourceFile = app.getModules().getResource(resourceName, aSpace, null, null);
             if (resourceFile.exists() && !resourceFile.isDirectory()) {
                 data = FileUtils.readBytes(resourceFile);
                 String fileExt = FileUtils.getFileExtension(resourceFile);
@@ -855,7 +851,7 @@ public class ScriptedResource {
     }
 
     public static Path getAbsoluteAppPath() {
-        return Paths.get(new File(app.getModules().getLocalPath()).toURI());
+        return app.getModules().getLocalPath();
     }
 
     protected static void qRequire(String[] aQueriesNames, Scripts.Space aSpace, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {

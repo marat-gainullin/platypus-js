@@ -4,7 +4,6 @@
  */
 package com.eas.designer.explorer.j2ee.tomcat;
 
-import com.eas.client.settings.SettingsConstants;
 import com.eas.xml.dom.XmlDomUtils;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,13 +67,13 @@ public class Context {
             Element contextTag = (Element) projectNl.item(0);
             context.docBase = contextTag.getAttribute(DOC_BASE_ATTR_NAME);
             context.path = contextTag.getAttribute(PATH_ATTR_NAME);
-            Element realmTag = XmlDomUtils.getElementByTagName(contextTag, Realm.TAG_NAME);
+            Element realmTag = XmlDomUtils.getElementByTagName(contextTag, Realm.TAG_NAME, Realm.TAG_NAME);
             context.realm = RealmFactory.getRealm(realmTag);
-            for (Element paramTag : XmlDomUtils.elementsByTagName(contextTag, Parameter.TAG_NAME)) {
+            for (Element paramTag : XmlDomUtils.elementsByTagName(contextTag, Parameter.TAG_NAME, Parameter.TAG_NAME)) {
                 Parameter param = new Parameter(paramTag.getAttribute(Parameter.NAME_ATTR_NAME), paramTag.getAttribute(Parameter.VALUE_ATTR_NAME));
                 context.params.add(param);     
             }
-            for (Element resourceTag : XmlDomUtils.elementsByTagName(contextTag, Resource.TAG_NAME)) {
+            for (Element resourceTag : XmlDomUtils.elementsByTagName(contextTag, Resource.TAG_NAME, Resource.TAG_NAME)) {
                 Resource res = ResourceFactory.getRealm(resourceTag);
                 if (res != null) {
                     context.resources.add(res);

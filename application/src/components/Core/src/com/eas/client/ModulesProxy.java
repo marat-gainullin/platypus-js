@@ -8,6 +8,8 @@ package com.eas.client;
 
 import com.eas.client.cache.PlatypusIndexer;
 import com.eas.script.Scripts;
+import java.io.File;
+import java.nio.file.Path;
 import java.util.function.Consumer;
 
 /**
@@ -18,6 +20,8 @@ public interface ModulesProxy extends PlatypusIndexer{
     
     public ModuleStructure getModule(String aName, Scripts.Space aSpace, Consumer<ModuleStructure> onSuccess, Consumer<Exception> onFailure) throws Exception;
     
-    public String getLocalPath();
+    public File getResource(String aName, Scripts.Space aSpace, Consumer<File> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    
+    public Path getLocalPath();
     
 }

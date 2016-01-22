@@ -5,6 +5,11 @@
  */
 package com.eas.client.cache;
 
+import com.eas.client.settings.SettingsConstants;
+import com.eas.util.BinaryUtils;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 import org.junit.Test;
@@ -135,7 +140,7 @@ public class ScriptDocumentTest {
                 + "";
         ScriptDocument doc = ScriptDocument.parse(jsText, "AmdDefineTestDefault");
         verifyModulesDocuments(doc);
-    }    
+    }
 
     private static void verifyModulesDocuments(ScriptDocument doc) {
         assertEquals(5, doc.getModules().size());
@@ -144,7 +149,7 @@ public class ScriptDocumentTest {
         assertTrue(doc.getModules().keySet().contains("AmdDefineTest2"));
         assertTrue(doc.getModules().keySet().contains("GlobalModule1"));
         assertTrue(doc.getModules().keySet().contains("GlobalModule2"));
-        for(Map.Entry<String, ScriptDocument.ModuleDocument> moduleEntry : doc.getModules().entrySet()){
+        for (Map.Entry<String, ScriptDocument.ModuleDocument> moduleEntry : doc.getModules().entrySet()) {
             ScriptDocument.ModuleDocument moduleDoc = moduleEntry.getValue();
             assertEquals(2, moduleDoc.getFunctionProperties().size());
             assertTrue(moduleDoc.getFunctionProperties().contains("m"));
@@ -155,5 +160,30 @@ public class ScriptDocumentTest {
             assertEquals(1, rolesOfA.size());
             assertTrue(rolesOfA.contains("rolea"));
         }
-    }    
+    }
+
+    @Test
+    public void jQueryLargeFileMinified() throws IOException {
+        URL resource = ScriptDocumentTest.class.getClassLoader().getResource("com/eas/script/reg-exp-literal.min-jquery.js");
+        ScriptDocument doc = ScriptDocument.parse(readUrl(resource), "jquery-large-min");
+    }
+
+    private String readUrl(URL resource) throws IOException {
+        try (InputStream is = resource.openStream()) {
+            byte[] content = BinaryUtils.readStream(is, -1);
+            return new String(content, SettingsConstants.COMMON_ENCODING);
+        }
+    }
+
+    @Test
+    public void jQueryLargeFile() throws IOException {
+        URL resource = ScriptDocumentTest.class.getClassLoader().getResource("com/eas/script/reg-exp-literal-jquery.js");
+        ScriptDocument.parse(readUrl(resource), "leaflet-large");
+    }
+
+    @Test
+    public void leafletLargeFile() throws IOException {
+        URL resource = ScriptDocumentTest.class.getClassLoader().getResource("com/eas/script/numeric-literal-leaflet.js");
+        ScriptDocument.parse(readUrl(resource), "jquery-large");
+    }
 }

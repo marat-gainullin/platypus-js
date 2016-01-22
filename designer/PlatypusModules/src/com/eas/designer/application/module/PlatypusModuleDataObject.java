@@ -4,9 +4,7 @@
  */
 package com.eas.designer.application.module;
 
-import com.eas.client.SqlQuery;
 import com.eas.client.cache.PlatypusFiles;
-import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.client.model.ModelEditingListener;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
@@ -19,19 +17,12 @@ import com.eas.designer.application.module.nodes.ApplicationModelNodeChildren;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.designer.explorer.PlatypusDataObject;
-import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
-import com.eas.script.Scripts;
 import com.eas.util.ListenerRegistration;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.IOException;
 import java.io.OutputStream;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.parser.Token;
-import org.netbeans.api.project.FileOwnerQuery;
-import org.netbeans.api.project.Project;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -42,18 +33,14 @@ import org.openide.nodes.AbstractNode;
 import org.openide.nodes.CookieSet;
 import org.openide.nodes.Node;
 import org.openide.nodes.Node.Cookie;
-import org.openide.util.Exceptions;
 
-public class PlatypusModuleDataObject extends PlatypusDataObject implements AstProvider, ModelProvider {
+public class PlatypusModuleDataObject extends PlatypusDataObject implements ModelProvider {
 
     public final static Object DATAOBJECT_DOC_PROPERTY = "dataObject";
     protected transient Entry modelEntry;
     protected transient ApplicationDbModel model;
     protected transient ModelNode<ApplicationDbEntity, ApplicationDbModel> modelNode;
     protected transient ModelEditingListener<ApplicationDbEntity> entitiesPublisher;
-    private transient boolean astIsValid;
-    private transient FunctionNode astRoot;
-    private transient FunctionNode constructor;
     private transient ListenerRegistration queriesReg;
     protected transient PlatypusProject.QueriesChangeListener modelValidator = () -> {
         setModelValid(false);
@@ -74,58 +61,8 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         }
     }
 
-    @Override
-    public synchronized FunctionNode getAstRoot() {
-        validateAst();
-        return astRoot;
-    }
-
-    @Override
-    public synchronized void setAstRoot(FunctionNode anAstRoot) {
-        astRoot = anAstRoot;
-        constructor = astRoot != null ? PlatypusFilesSupport.extractModuleConstructor(astRoot, getPrimaryFile().getPath()) : null;
-        astIsValid = (astRoot != null);
-    }
-
-    @Override
-    public FunctionNode getConstructor() {
-        validateAst();
-        return constructor;
-    }
-
     public ModuleCompletionContext getCompletionContext() {
         return new ModuleCompletionContext(this);
-    }
-
-    protected void validateAst() {
-        if (!astIsValid) {
-            Document doc = null;
-            try {
-                doc = getDocument();
-            } catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-            if (doc != null) {
-                FunctionNode parseResult = null;
-                try {
-                    parseResult = Scripts.parseJs(doc.getText(0, doc.getLength()));
-                } catch (BadLocationException ex) {
-                    //no op
-                }
-                if (parseResult != null) {
-                    astIsValid = true;
-                    astRoot = parseResult;
-                    constructor = PlatypusFilesSupport.extractModuleConstructor(astRoot, getPrimaryFile().getPath());
-                } else {
-                    astIsValid = false;
-                }
-
-            }
-        }
-    }
-
-    public void invalidateAst() {
-        astIsValid = false;
     }
 
     protected Cookie[] createServices() {
@@ -147,8 +84,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
             model = null;
         }
         modelNode = null;
-        astIsValid = false;
-        astRoot = null;
     }
 
     public FileObject getModelFile() {
@@ -254,15 +189,11 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
             queriesReg.remove();
             queriesReg = null;
         }
-        FunctionNode constr = getConstructor();
-        PlatypusProject project = getProject();
-        if (project != null && constr != null && project.getQueries().getCachedQuery(constr.getName()) != null) {
-            project.fireQueryChanged(constr.getName());
-        }
         super.handleDelete();
     }
 
     public void notifyModuleQueryChanged() {
+        /*
         FunctionNode constr = getConstructor();
         if (constr != null) {
             PlatypusProject project = getProject();
@@ -278,33 +209,13 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
                 }
             }
         }
+*/
     }
 
     @Override
     protected DataObject handleCopy(DataFolder df) throws IOException {
         DataObject copied = super.handleCopy(df);
-        String content = copied.getPrimaryFile().asText(PlatypusFiles.DEFAULT_ENCODING);
-        String newContent = getCopyModuleContent(FileOwnerQuery.getOwner(copied.getPrimaryFile()), content);
-        try (OutputStream os = copied.getPrimaryFile().getOutputStream()) {
-            os.write(newContent.getBytes(PlatypusFiles.DEFAULT_ENCODING));
-            os.flush();
-        }
         return copied;
-    }
-
-    private String getCopyModuleContent(Project project, String aJsContent) {
-        FunctionNode constructorFunc = PlatypusFilesSupport.extractModuleConstructor(Scripts.parseJs(aJsContent), getPrimaryFile().getPath());
-        if (constructorFunc != null) {
-            String oldName = constructorFunc.getName();
-            String newName = NewApplicationElementWizardIterator.getNewValidAppElementName(project, oldName);
-            int start = Token.descPosition(constructorFunc.getIdent().getToken());
-            StringBuilder sb = new StringBuilder(aJsContent.substring(0, start));
-            sb.append(newName);
-            sb.append(aJsContent.substring(start + oldName.length()));
-            return sb.toString();
-        } else {
-            return aJsContent;
-        }
     }
 
 }

@@ -71,10 +71,6 @@ public class ModuleCompletionContext extends CompletionContext {
         return dataObject;
     }
 
-    public CompletionContext getInstanceCompletionContext() {
-        return new ModuleInstanceCompletionContext(this);
-    }
-
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
     }
@@ -211,15 +207,6 @@ public class ModuleCompletionContext extends CompletionContext {
     public void injectVarContext(Map<String, CompletionContext> contexts, VarNode varNode) {
         if (isSystemObjectMethod(varNode.getAssignmentSource(), LOAD_MODEL_METHOD_NAME)) {
             contexts.put(varNode.getName().getName(), new ModelCompletionContext(getDataObject()));
-        } else {
-            String elementId = tryGetModuleElementId(varNode.getAssignmentSource());
-            if (elementId != null) {
-                ModuleCompletionContext mcc = getModuleCompletionContext(getDataObject().getProject(), elementId);
-                if (mcc != null) {
-                    contexts.put(varNode.getName().getName(), mcc.getInstanceCompletionContext());
-                }
-            }
-
         }
     }
 
