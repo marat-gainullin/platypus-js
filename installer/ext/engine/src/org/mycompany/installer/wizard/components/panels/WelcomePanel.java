@@ -227,6 +227,16 @@ public class WelcomePanel extends ErrorMessagePanel {
             }
 
             super.initialize();
+            
+            
+            if (!Utils.isJavaVersion(ResourceUtils.getString(WelcomePanel.class,
+                    "WP.required.java.text"),System.getProperty("java.runtime.version") )){
+                textPane.setText(StringUtils.format(ResourceUtils.getString(WelcomePanel.class,
+                    "WP.incompatible.java.text")));
+                container.getNextButton().setVisible(false);
+                LogManager.log("CANNOT INSTALL");
+            }
+            
         }
 
         // private //////////////////////////////////////////////////////////////////
