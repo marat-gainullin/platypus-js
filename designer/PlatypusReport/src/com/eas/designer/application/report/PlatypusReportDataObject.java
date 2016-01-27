@@ -6,8 +6,6 @@ package com.eas.designer.application.report;
 
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
-import com.eas.designer.application.module.completion.ModuleCompletionContext;
-import com.eas.designer.application.report.completion.ReportModuleCompletionContext;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.filesystems.MIMEResolver;
@@ -47,9 +45,4 @@ public class PlatypusReportDataObject extends PlatypusModuleDataObject {
         }
         return node;
     }
-
-    @Override
-    public ModuleCompletionContext getCompletionContext() {
-        return new ReportModuleCompletionContext(this);
-    }    
 }

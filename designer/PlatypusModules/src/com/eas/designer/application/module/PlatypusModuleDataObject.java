@@ -12,7 +12,6 @@ import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.store.ApplicationModel2XmlDom;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
 import com.eas.designer.application.PlatypusUtils;
-import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import com.eas.designer.application.module.nodes.ApplicationModelNodeChildren;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.datamodel.nodes.ModelNode;
@@ -59,10 +58,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements Mode
         if (project != null) {
             queriesReg = project.addQueriesChangeListener(modelValidator);
         }
-    }
-
-    public ModuleCompletionContext getCompletionContext() {
-        return new ModuleCompletionContext(this);
     }
 
     protected Cookie[] createServices() {

@@ -728,7 +728,7 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
             }
             /**
              * Locates a prefetched resource by module name and reads a model from it.
-             * @param {String} aModuleName Name of module that is the owner of prefetched resource (*.layout file).
+             * @param {String} aModuleName Name of module that is the owner of prefetched resource (*.model file).
              * @param {Object} aTarget Object, the model properties and methods will be defined on. Default value is new Object. (Optional).
              * @returns {Model}
              */

@@ -23,7 +23,6 @@ import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.store.QueryDocument2XmlDom;
 import com.eas.client.model.store.QueryModel2XmlDom;
 import com.eas.client.model.store.XmlDom2QueryModel;
-import com.eas.client.queries.ScriptedQueryFactory;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.project.PlatypusProject;
@@ -763,7 +762,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         }
         if (statementError == null && basesProxy != null && s != null && !s.isEmpty()) {
             try {
-                StoredQueryFactory factory = new ScriptedQueryFactory(basesProxy, getProject().getQueries(), getProject().getIndexer());
+                StoredQueryFactory factory = new StoredQueryFactory(basesProxy, getProject().getQueries(), getProject().getIndexer());
                 factory.setAliasesToTableNames(true);
                 SqlQuery outQuery = new SqlQuery(basesProxy, datasourceName, s);
                 outQuery.setEntityName(String.valueOf(IDGenerator.genID()));

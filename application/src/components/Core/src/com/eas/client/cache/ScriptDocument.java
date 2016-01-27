@@ -76,14 +76,15 @@ public class ScriptDocument {
             });
         }
 
-        public List<JsDoc.Tag> getAnnotations(){
+        public List<JsDoc.Tag> getAnnotations() {
             return Collections.unmodifiableList(moduleAnnotations);
         }
-        
+
         public JsDoc.Tag getAnnotation(String anAnnotation) {
-            return moduleAnnotations.stream().filter((JsDoc.Tag aTag) -> {
+            Optional<JsDoc.Tag> found = moduleAnnotations.stream().filter((JsDoc.Tag aTag) -> {
                 return aTag.getName().equalsIgnoreCase(anAnnotation);
-            }).findAny().get();
+            }).findAny();
+            return found.isPresent() ? found.get() : null;
         }
 
         public Set<String> getFunctionProperties() {

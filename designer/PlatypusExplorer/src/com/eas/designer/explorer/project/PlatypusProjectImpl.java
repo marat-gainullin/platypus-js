@@ -231,14 +231,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
             }
 
         };
-        queries = new LocalQueriesProxy(basesProxy, indexer) {
-
-            @Override
-            protected JSObject createModule(String aModuleName, Scripts.Space aSpace) throws Exception {
-                return createLocalEngineModule(aModuleName);
-            }
-
-        };
+        queries = new LocalQueriesProxy(basesProxy, indexer);
         basesProxy.setQueries(queries);
     }
 

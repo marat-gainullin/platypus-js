@@ -43,11 +43,8 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import com.bearsoft.org.netbeans.modules.form.completion.FormModuleCompletionContext;
 import com.eas.client.cache.PlatypusFiles;
-import com.eas.client.forms.Form;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
-import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import java.io.IOException;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -79,11 +76,6 @@ public class PlatypusFormDataObject extends PlatypusModuleDataObject {
 
     public FileObject getFormFile() {
         return formEntry.getFile();
-    }
-
-    @Override
-    public ModuleCompletionContext getCompletionContext() {
-        return new FormModuleCompletionContext(this, Form.class);
     }
 
     @Override
