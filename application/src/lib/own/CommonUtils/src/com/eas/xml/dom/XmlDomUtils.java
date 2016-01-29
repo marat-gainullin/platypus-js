@@ -227,9 +227,11 @@ public class XmlDomUtils {
             List<Element> res = new ArrayList<>();
             Node child = element.getFirstChild();
             while (child != null) {
-                String tagName = ((Element) child).getTagName();
-                if (child instanceof Element && (tagName.equals(aShortName) || tagName.equals(aLongName))) {
-                    res.add((Element) child);
+                if (child instanceof Element) {
+                    String tagName = ((Element) child).getTagName();
+                    if (tagName.equals(aShortName) || tagName.equals(aLongName)) {
+                        res.add((Element) child);
+                    }
                 }
                 child = child.getNextSibling();
             }
