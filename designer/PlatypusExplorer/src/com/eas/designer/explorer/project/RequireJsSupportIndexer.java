@@ -24,6 +24,8 @@ import org.openide.filesystems.FileUtil;
  */
 public class RequireJsSupportIndexer extends EmbeddingIndexer {
 
+    public static final String FIELD_EXPOSED_TYPES = "et"; //NOI18N
+    public static final String FIELD_MODULE_NAME = "mn"; //NOI18N
     public static final String REQUIREJS_BASE_PATH = "bp"; //NOI18N
 
     @Override
