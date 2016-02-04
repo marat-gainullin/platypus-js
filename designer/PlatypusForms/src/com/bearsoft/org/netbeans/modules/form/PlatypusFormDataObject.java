@@ -59,7 +59,7 @@ import org.openide.nodes.Node.Cookie;
 /**
  * The DataObject for forms.
  *
- * @author Ian Formanek, Petr Hamernik, mg
+ * @author mg
  */
 public class PlatypusFormDataObject extends PlatypusModuleDataObject {
 

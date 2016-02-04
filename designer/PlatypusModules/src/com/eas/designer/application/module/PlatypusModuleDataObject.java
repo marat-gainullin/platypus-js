@@ -91,18 +91,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements Mode
         return model;
     }
 
-    private Document getDocument() throws IOException {
-        EditorCookie ec = getLookup().lookup(EditorCookie.class);
-        if (ec == null) {
-            return null;
-        }
-        Document doc = ec.getDocument();
-        if (doc == null) {
-            doc = ec.openDocument();
-        }
-        return doc;
-    }
-
     private void checkModelRead() throws Exception {
         PlatypusProject project = getProject();
         assert project != null : "Project is null.";

@@ -105,6 +105,14 @@ public class RADComponentNode extends FormNode implements RADComponentCookie, Fo
 
     public final void updateName() {
         String compClassName = component.getBeanClass().getSimpleName();
+        if (component instanceof RADVisualContainer<?> && FormUtils.Panel.class.getSimpleName().equals(compClassName)) {
+            RADVisualContainer<?> radCont = (RADVisualContainer<?>) component;
+            LayoutSupportManager layoutSupportManager = radCont.getLayoutSupport();
+            if (layoutSupportManager != null && layoutSupportManager.getLayoutDelegate() != null) {
+                Class<?> layoutedContainerClass = FormUtils.getPlatypusConainerClass(layoutSupportManager.getLayoutDelegate().getSupportedClass());
+                compClassName = layoutedContainerClass.getSimpleName();
+            }
+        }
         setDisplayName(nodeNameFormat.format(new Object[]{getName(), compClassName}));
     }
 

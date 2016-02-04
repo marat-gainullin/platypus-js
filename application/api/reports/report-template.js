@@ -31,7 +31,12 @@ define(['boxing'], function(B) {
             ReportTemplate.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         /**
-         * Array of name collections, that will fixed.
+         * Time zone offset to be applied to dates in Excel's document.
+         * To get this value for your local machine, you may use this code: <code>new Date().getTimezoneOffset()</code>
+         * So, if you have to generate reports for different time zones for different clients, you may use the
+         * following technique. With the code <code>new Date().getTimezoneOffset()</code> you will get local client's machine
+         * time zone offset in JavaScript way. Then you may pass it to server module's method and it will apply it to its
+         * <code>ReportTemplate</code> instance before new report will be generated.
          */
         this.timezoneOffset = 0;
         Object.defineProperty(this, "timezoneOffset", {
@@ -59,7 +64,7 @@ define(['boxing'], function(B) {
         });
 
         /**
-         * Array of name collections, that will fixed.
+         * Array of collections names, that will be fixed.
          */
         this.fixed = new Object();
         Object.defineProperty(this, "fixed", {

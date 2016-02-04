@@ -298,8 +298,7 @@
             </test-dependencies>
             <public-packages>
                 <package>com.eas.designer.application.module</package>
-                <package>com.eas.designer.application.module.completion</package>
-                <package>com.eas.designer.application.module.events</package>
+                <package>com.eas.designer.application.module.index</package>
                 <package>com.eas.designer.application.module.nodes</package>
             </public-packages>
         </data>
