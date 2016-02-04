@@ -32,7 +32,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -241,7 +240,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                         arguments.add(new AbstractJSObject() {
                                                             @Override
                                                             public Object call(final Object thiz, final Object... largs) {
-                                                                if (!executed.get()) {
+                                                                if (!aNetworkRPC || !executed.get()) {
                                                                     executed.set(true);
                                                                     Object returned = largs.length > 0 ? largs[0] : null;
                                                                     onSuccess.accept(returned);// WARNING! Don't insert .toJava() because of RPC handler
@@ -264,7 +263,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                         arguments.add(new AbstractJSObject() {
                                                             @Override
                                                             public Object call(final Object thiz, final Object... largs) {
-                                                                if (!executed.get()) {
+                                                                if (!aNetworkRPC || !executed.get()) {
                                                                     executed.set(true);
                                                                     Object reason = largs.length > 0 ? Scripts.getSpace().toJava(largs[0]) : null;
                                                                     if (reason instanceof Exception) {
