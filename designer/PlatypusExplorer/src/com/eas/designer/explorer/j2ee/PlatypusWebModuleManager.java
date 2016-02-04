@@ -122,6 +122,7 @@ public class PlatypusWebModuleManager {
         String webAppRunUrl = null;
         assert webModule != null : "J2eeModuleProvider instance should be in the project's lookup.";
         try {
+            project.getSettings().load();
             metaInfDir = createFolderIfNotExists(projectDir, PlatypusWebModule.META_INF_DIRECTORY);
             publicDir = createFolderIfNotExists(projectDir, PlatypusWebModule.PUBLIC_DIRECTORY);
             prepareWebApplication();
