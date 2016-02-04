@@ -79,8 +79,9 @@ public class DatabasesClient {
         autoFillMetadata = aAutoFillMetadata;
     }
 
-    public void shutdown() {
-        jdbcProcessor.shutdownNow();
+    public void shutdown() throws InterruptedException {
+        jdbcProcessor.shutdown();
+        jdbcProcessor.awaitTermination(30L, TimeUnit.SECONDS);
     }
 
     public QueriesProxy<SqlQuery> getQueries() {
@@ -207,15 +208,13 @@ public class DatabasesClient {
             } else {
                 return compiled.<Map<String, String>>executeQuery(doWork, null, null, null);
             }
+        } else if (onSuccess != null) {
+            aSpace.process(() -> {
+                onSuccess.accept(new HashMap<>());
+            });
+            return null;
         } else {
-            if (onSuccess != null) {
-                aSpace.process(() -> {
-                    onSuccess.accept(new HashMap<>());
-                });
-                return null;
-            } else {
-                return null;
-            }
+            return null;
         }
     }
 
@@ -453,17 +452,20 @@ public class DatabasesClient {
                         startJdbcTask(() -> {
                             try {
                                 try {
-                                    aResult.connection.commit();
-                                    space.process(() -> {
-                                        commitProcess.complete(aResult.rowsAffected, null);
-                                    });
-                                } catch (SQLException ex) {
-                                    aResult.connection.rollback();
-                                    space.process(() -> {
-                                        commitProcess.complete(null, ex);
-                                    });
+                                    try {
+                                        aResult.connection.commit();
+                                        space.process(() -> {
+                                            commitProcess.complete(aResult.rowsAffected, null);
+                                        });
+                                    } catch (SQLException ex) {
+                                        aResult.connection.rollback();
+                                        space.process(() -> {
+                                            commitProcess.complete(null, ex);
+                                        });
+                                    } finally {
+                                        aResult.connection.setAutoCommit(aResult.autoCommit);
+                                    }
                                 } finally {
-                                    aResult.connection.setAutoCommit(aResult.autoCommit);
                                     aResult.connection.close();
                                 }
                             } catch (Exception ex) {
