@@ -55,6 +55,7 @@ import javax.script.SimpleScriptContext;
 import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
+import javax.xml.parsers.ParserConfigurationException;
 import jdk.nashorn.api.scripting.JSObject;
 import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
@@ -87,6 +88,7 @@ import org.openide.windows.InputOutput;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**
  *
@@ -644,7 +646,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 String projectVersionValue = settings.getPlatypusJsVersion();
                 String platformVersionValue = readPlatypusJsVersion();
                 return (projectVersionValue == null ? platformVersionValue != null : !projectVersionValue.equals(platformVersionValue));
-            } catch (PlatformHomePathException ex) {
+            } catch (PlatformHomePathException | SAXException | ParserConfigurationException ex) {
                 getOutputWindowIO().getErr().println(ex.getMessage());
                 return false;
             }
@@ -653,7 +655,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
         }
     }
 
-    protected String readPlatypusJsVersion() throws IOException, PlatformHomePathException {
+    protected String readPlatypusJsVersion() throws IOException, PlatformHomePathException, SAXException, ParserConfigurationException {
         FileObject platformVersion = FileUtil.toFileObject(PlatypusPlatform.getPlatformVersion());
         if (platformVersion != null) {
             Document platformVersionDoc = Source2XmlDom.transform(platformVersion.asText());
@@ -675,7 +677,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
             String platformVersion = readPlatypusJsVersion();
             settings.setPlatypusJsVersion(platformVersion);
             settings.save();
-        } catch (PlatformHomePathException ex) {
+        } catch (PlatformHomePathException | SAXException | ParserConfigurationException ex) {
             throw new IOException(ex);
         }
     }
