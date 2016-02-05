@@ -9,6 +9,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -196,17 +197,36 @@ public class Scripts {
         }
     }
 
+    public static class AmdDefine {
+
+        protected String[] amdDependencies;
+        protected JSObject moduleDefiner;
+
+        public AmdDefine(String[] aAmdDependencies, JSObject aModuleDefiner) {
+            super();
+            amdDependencies = aAmdDependencies;
+            moduleDefiner = aModuleDefiner;
+        }
+
+        public String[] getAmdDependencies() {
+            return amdDependencies;
+        }
+
+        public JSObject getModuleDefiner() {
+            return moduleDefiner;
+        }
+    }
+
     public static class Space {
 
         protected ScriptContext scriptContext;
         protected Object global;
         protected Map<String, JSObject> publishers = new HashMap<>();
         protected Set<String> required = new HashSet<>();
+        protected Map<String, AmdDefine> amdDefines = new HashMap<>();
         // script files alredy executed within this script space
-        protected Set<String> executed = new HashSet<>();
+        protected Set<URL> executed = new HashSet<>();
         protected Map<String, List<Pending>> pending = new HashMap<>();
-        protected String[] amdDependencies;
-        protected JSObject amdDefineCallback;
         protected Map<String, JSObject> defined = new HashMap<>();
 
         protected Space() {
@@ -232,8 +252,8 @@ public class Scripts {
             return required;
         }
 
-        public Set<String> getExecuted() {
-            return executed;
+        public Set<URL> getExecuted() {
+            return Collections.unmodifiableSet(executed);
         }
 
         public Map<String, List<Pending>> getPending() {
@@ -244,20 +264,17 @@ public class Scripts {
             return defined;
         }
 
-        public void setAmdDefine(String[] aAmdDependencies, JSObject aModuleDefiner) {
-            amdDependencies = aAmdDependencies;
-            amdDefineCallback = aModuleDefiner;
+        public void addAmdDefine(String aModuleName, String[] aAmdDependencies, JSObject aModuleDefiner) {
+            if (amdDefines.containsKey(aModuleName)) {
+                Logger.getLogger(Space.class.getName()).log(Level.WARNING, "{0} is already defined.", aModuleName);
+            } else {
+                amdDefines.put(aModuleName, new AmdDefine(aAmdDependencies, aModuleDefiner));
+            }
         }
 
-        public String[] consumeAmdDependencies() {
-            String[] res = amdDependencies;
-            amdDependencies = null;
-            return res;
-        }
-
-        public JSObject consumeAmdDefineCallback() {
-            JSObject res = amdDefineCallback;
-            amdDefineCallback = null;
+        public Collection<Map.Entry<String, AmdDefine>> consumeAmdDefines() {
+            Collection<Map.Entry<String, AmdDefine>> res = amdDefines.entrySet();
+            amdDefines = new HashMap<>();
             return res;
         }
 
@@ -551,7 +568,9 @@ public class Scripts {
 
         public Object exec(String aSourceName, URL aSourcePlace) throws ScriptException, URISyntaxException {
             scriptContext.setAttribute(ScriptEngine.FILENAME, aSourceName.toLowerCase().endsWith(".js") ? aSourceName.substring(0, aSourceName.length() - 3) : aSourceName, ScriptContext.ENGINE_SCOPE);
-            return SCRIPT_ENGINE.eval(new URLReader(aSourcePlace), scriptContext);
+            Object result = SCRIPT_ENGINE.eval(new URLReader(aSourcePlace), scriptContext);
+            executed.add(aSourcePlace);
+            return result;
         }
 
         public Object exec(String aSource) throws ScriptException, URISyntaxException {

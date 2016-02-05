@@ -94,10 +94,11 @@
      */
     function define() {
         if (arguments.length === 1 ||
-                arguments.length === 2) {
+                arguments.length === 2 || arguments.length === 3) {
             var calledFromFile = lookupCallerFile();
-            var aDeps = arguments.length > 1 ? arguments[0] : [];
-            var aModuleDefiner = arguments.length > 1 ? arguments[1] : arguments[0];
+            var aModuleName = arguments.length === 3 ? arguments[0] : null;
+            var aDeps = arguments.length === 3 ? arguments[1] : arguments.length === 2 ? arguments[0] : [];
+            var aModuleDefiner = arguments.length === 3 ? arguments[2] : arguments.length === 2 ? arguments[1] : arguments[0];
             if (!Array.isArray(aDeps))
                 aDeps = [aDeps];
             var sDeps = new JavaStringArrayClass(aDeps.length);
@@ -109,7 +110,7 @@
                 sDep = ScriptedResourceClass.toModuleId(apiPath, appPath, sDep, calledFromFile);
                 sDeps[s] = sDep;
             }
-            space.setAmdDefine(sDeps, function (aModuleName) {
+            space.addAmdDefine(aModuleName + '', sDeps, function (aModuleName) {
                 var defined = space.getDefined();
                 var resolved = [];
                 for (var d = 0; d < sDeps.length; d++) {
