@@ -202,6 +202,7 @@ public class Scripts {
         protected Object global;
         protected Map<String, JSObject> publishers = new HashMap<>();
         protected Set<String> required = new HashSet<>();
+        // script files alredy executed within this script space
         protected Set<String> executed = new HashSet<>();
         protected Map<String, List<Pending>> pending = new HashMap<>();
         protected String[] amdDependencies;

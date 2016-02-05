@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -608,73 +609,87 @@ public class ScriptedResource {
 
     }
 
-    private static void loadModule(Path apiPath, String scriptOrModuleName, String aCalledFromFile, Scripts.Space aSpace, Set<String> aCyclic, Consumer<Path> onSuccess, Consumer<Exception> onFailure) {
-        Path apiLocalPath = apiPath.resolve(scriptOrModuleName + PlatypusFiles.JAVASCRIPT_FILE_END);
-        if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
+    private static final Map<String, Path> scriptsOfModules = new ConcurrentHashMap<>();
+
+    private static void loadScriptOfModule(String aModuleName, String aCalledFromFile, Scripts.Space aSpace, Set<String> aCyclic, Path apiPath, Consumer<Path> onSuccess, Consumer<Exception> onFailure) {
+        Path cached = scriptsOfModules.get(aModuleName);
+        if (cached != null) {
             // network activity simulation
             aSpace.process(() -> {
-                onSuccess.accept(apiLocalPath.normalize());
+                onSuccess.accept(cached);
             });
         } else {
-            try {
-                app.getModules().getModule(scriptOrModuleName, aSpace, (ModuleStructure structure) -> {
-                    if (structure != null) {
-                        try {
-                            AppElementFiles files = structure.getParts();
-                            File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
-
-                            RequireProcess moduleProcess = new RequireProcess(3, (Void v) -> {
-                                onSuccess.accept(Paths.get(sourceFile.toURI()));
-                            }, (Exception ex) -> {
-                                onFailure.accept(ex);
-                            });
-                            if (files.isModule()) {
-                                try {
-                                    // 1
-                                    qRequire(structure.getQueryDependencies().toArray(new String[]{}), aSpace, (Void v) -> {
-                                        moduleProcess.complete(scriptOrModuleName + ".q", null);
-                                    }, (Exception ex) -> {
-                                        moduleProcess.complete(scriptOrModuleName + ".q", ex);
-                                    });
-                                    // 2
-                                    sRequire(structure.getServerDependencies().toArray(new String[]{}), aSpace, (Void v) -> {
-                                        moduleProcess.complete(scriptOrModuleName + ".s", null);
-                                    }, (Exception ex) -> {
-                                        moduleProcess.complete(scriptOrModuleName + ".s", ex);
-                                    });
-                                } catch (Exception ex) {
-                                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(scriptOrModuleName), ex.toString()});
-                                }
-                            } else {
-                                // 1
-                                moduleProcess.complete(scriptOrModuleName + ".q", null);// instead of qRequire
-                                // 2
-                                moduleProcess.complete(scriptOrModuleName + ".s", null);// instead of sRequire
-                            }
-                            // 3
-                            _require(structure.getClientDependencies().toArray(new String[]{}), aCalledFromFile, aSpace, aCyclic, (Void v) -> {
-                                moduleProcess.complete(null, null);
-                            }, (Exception ex) -> {
-                                moduleProcess.complete(null, ex);
-                            });
-                        } catch (Exception ex) {
-                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(scriptOrModuleName), ex.toString()});
-                        }
-                    } else {
-                        Exception ex = new FileNotFoundException(scriptOrModuleName);
-                        onFailure.accept(ex);
-                    }
-                }, (Exception ex) -> {
-                    onFailure.accept(ex);
+            // API is compressible and so API module name is transformed script file name
+            Path apiLocalPath = apiPath.resolve(aModuleName + PlatypusFiles.JAVASCRIPT_FILE_END);
+            if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
+                scriptsOfModules.put(aModuleName, apiLocalPath.normalize());
+                // network activity simulation
+                aSpace.process(() -> {
+                    onSuccess.accept(apiLocalPath.normalize());
                 });
-            } catch (Exception ex) {
-                Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(scriptOrModuleName), ex.toString()});
+            } else {// Module is defined -> let's discover what file contains the module.
+                try {
+                    app.getModules().getModule(aModuleName, aSpace, (ModuleStructure structure) -> {
+                        if (structure != null) {
+                            try {
+                                AppElementFiles files = structure.getParts();
+                                File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
+
+                                RequireProcess moduleProcess = new RequireProcess(3, (Void v) -> {
+                                    Path appLocalPath = Paths.get(sourceFile.toURI());
+                                    scriptsOfModules.put(aModuleName, appLocalPath);
+                                    onSuccess.accept(appLocalPath);
+                                }, (Exception ex) -> {
+                                    onFailure.accept(ex);
+                                });
+                                if (files.isModule()) {
+                                    try {
+                                        // 1
+                                        qRequire(structure.getQueryDependencies().toArray(new String[]{}), aSpace, (Void v) -> {
+                                            moduleProcess.complete(aModuleName + ".q", null);
+                                        }, (Exception ex) -> {
+                                            moduleProcess.complete(aModuleName + ".q", ex);
+                                        });
+                                        // 2
+                                        sRequire(structure.getServerDependencies().toArray(new String[]{}), aSpace, (Void v) -> {
+                                            moduleProcess.complete(aModuleName + ".s", null);
+                                        }, (Exception ex) -> {
+                                            moduleProcess.complete(aModuleName + ".s", ex);
+                                        });
+                                    } catch (Exception ex) {
+                                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{checkedScriptName(aModuleName), ex.toString()});
+                                    }
+                                } else {
+                                    // 1
+                                    moduleProcess.complete(aModuleName + ".q", null);// instead of qRequire
+                                    // 2
+                                    moduleProcess.complete(aModuleName + ".s", null);// instead of sRequire
+                                }
+                                // 3
+                                _require(structure.getClientDependencies().toArray(new String[]{}), aCalledFromFile, aSpace, aCyclic, (Void v) -> {
+                                    moduleProcess.complete(null, null);
+                                }, (Exception ex) -> {
+                                    moduleProcess.complete(null, ex);
+                                });
+                            } catch (Exception ex) {
+                                Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{checkedScriptName(aModuleName), ex.toString()});
+                            }
+                        } else {
+                            Exception ex = new FileNotFoundException(aModuleName);
+                            onFailure.accept(ex);
+                        }
+                    }, (Exception ex) -> {
+                        onFailure.accept(ex);
+                    });
+                } catch (Exception ex) {
+                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{aModuleName, ex.toString()});
+                }
             }
         }
     }
 
-    private static Object checkedScriptOrModuleName(String scriptOrModuleName) {
-        return scriptOrModuleName != null && !scriptOrModuleName.isEmpty() ? scriptOrModuleName : "[start]";
+    private static Object checkedScriptName(String aScriptName) {
+        return aScriptName != null && !aScriptName.isEmpty() ? aScriptName : "[start]";
     }
 
     public static void require(String[] aModulesNames, String aCalledFromFile, JSObject onSuccess, JSObject onFailure) throws Exception {
@@ -690,7 +705,7 @@ public class ScriptedResource {
         });
     }
 
-    private static void notifyModuleLoaded(List<Scripts.Pending> pending) {
+    private static void notifyLoaded(List<Scripts.Pending> pending) {
         Scripts.Pending[] pend = pending.toArray(new Scripts.Pending[]{});
         pending.clear();
         for (Scripts.Pending p : pend) {
@@ -698,7 +713,7 @@ public class ScriptedResource {
         }
     }
 
-    private static void notifyModuleFailed(List<Scripts.Pending> pending, Exception ex) {
+    private static void notifyFailed(List<Scripts.Pending> pending, Exception ex) {
         Scripts.Pending[] pend = pending.toArray(new Scripts.Pending[]{});
         pending.clear();
         for (Scripts.Pending p : pend) {
@@ -724,7 +739,7 @@ public class ScriptedResource {
                 if (aSpace.getDefined().containsKey(moduleName)) {
                     process.complete(moduleName, null);
                 } else if (aCyclic.contains(moduleName)) {
-                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "Cyclic dependency detected: {0}", checkedScriptOrModuleName(moduleName));
+                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "Cyclic dependency detected: {0}", checkedScriptName(moduleName));
                     process.complete(moduleName, null);
                 } else {
                     aCyclic.add(moduleName);
@@ -739,21 +754,23 @@ public class ScriptedResource {
                         process.complete(moduleName, ex);
                     }));
                     if (!aSpace.getRequired().contains(moduleName)) {
-                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "Loading {0} ...", checkedScriptOrModuleName(moduleName));
+                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "Loading {0} ...", checkedScriptName(moduleName));
                         aSpace.getRequired().add(moduleName);
-                        loadModule(apiPath, moduleName, aCalledFromFile, aSpace, aCyclic, (Path aLocalFile) -> {
+                        loadScriptOfModule(moduleName, aCalledFromFile, aSpace, aCyclic, apiPath, (Path aScriptFile) -> {
                             try {
                                 // sync require may occur while pending
                                 if (!aSpace.getDefined().containsKey(moduleName)) {
+                                    
                                     Path relativeLocalPath;
-                                    if (aLocalFile.startsWith(apiPath)) {
-                                        relativeLocalPath = apiPath.relativize(aLocalFile);
-                                    } else if (aLocalFile.startsWith(appPath)) {
-                                        relativeLocalPath = appPath.relativize(aLocalFile);
+                                    if (aScriptFile.startsWith(apiPath)) {
+                                        relativeLocalPath = apiPath.relativize(aScriptFile);
+                                    } else if (aScriptFile.startsWith(appPath)) {
+                                        relativeLocalPath = appPath.relativize(aScriptFile);
                                     } else {
-                                        relativeLocalPath = aLocalFile;
+                                        relativeLocalPath = aScriptFile;
                                     }
-                                    aSpace.exec(relativeLocalPath.toString().replace(File.separator, "/"), aLocalFile.toUri().toURL());
+                                    aSpace.exec(relativeLocalPath.toString().replace(File.separator, "/"), aScriptFile.toUri().toURL());
+                                    // TODO: Transform from scalar form to vector form 
                                     String[] amdDependencies = aSpace.consumeAmdDependencies();
                                     JSObject onDependenciesResolved = aSpace.consumeAmdDefineCallback();
                                     if (onDependenciesResolved != null) {
@@ -764,28 +781,28 @@ public class ScriptedResource {
                                             if (!aSpace.getDefined().containsKey(moduleName)) {
                                                 aSpace.getDefined().put(moduleName, null);
                                             }
-                                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedScriptOrModuleName(moduleName));
-                                            notifyModuleLoaded(pending);
+                                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedScriptName(moduleName));
+                                            notifyLoaded(pending);
                                         }, (Exception ex) -> {
-                                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(moduleName), ex.toString()});
-                                            notifyModuleFailed(pending, ex);
+                                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "{0} - Failed {1}", new Object[]{checkedScriptName(moduleName), ex.toString()});
+                                            notifyFailed(pending, ex);
                                         });
                                     } else {
                                         // Module is still not defined because of absent module definer.
-                                        // And we have to put it definition as undefined by hand.
+                                        // And we have to put its definition as undefined by hand.
                                         aSpace.getDefined().put(moduleName, null);
-                                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedScriptOrModuleName(moduleName));
-                                        notifyModuleLoaded(pending);
+                                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedScriptName(moduleName));
+                                        notifyLoaded(pending);
                                     }
                                 } else {
-                                    notifyModuleLoaded(pending);
+                                    notifyLoaded(pending);
                                 }
                             } catch (Exception ex) {
                                 Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }, (Exception ex) -> {
-                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(moduleName), ex.toString()});
-                            notifyModuleFailed(pending, ex);
+                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "{0} - Failed {1}", new Object[]{checkedScriptName(moduleName), ex.toString()});
+                            notifyFailed(pending, ex);
                         });
                     }
                 }
@@ -808,7 +825,7 @@ public class ScriptedResource {
         for (String scriptOrModuleName : aModulesNames) {
             if (!aSpace.getDefined().containsKey(scriptOrModuleName)) {
                 if (aCyclic.contains(scriptOrModuleName)) {
-                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "Cyclic dependency detected: {0}", checkedScriptOrModuleName(scriptOrModuleName));
+                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "Cyclic dependency detected: {0}", checkedScriptName(scriptOrModuleName));
                 } else {
                     aCyclic.add(scriptOrModuleName);
                     Path apiLocalPath = apiPath.resolve(scriptOrModuleName + PlatypusFiles.JAVASCRIPT_FILE_END);
