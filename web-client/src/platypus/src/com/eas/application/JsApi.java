@@ -27,12 +27,13 @@ public class JsApi {
 		}; 
 		$wnd.define = function () {
 	        if (arguments.length === 1 ||
-	                arguments.length === 2) {
-	            var aDeps = arguments.length > 1 ? arguments[0] : [];
-	            var aModuleDefiner = arguments.length > 1 ? arguments[1] : arguments[0];
+	                arguments.length === 2 || arguments.length === 3) {
+	            var aModuleName = arguments.length === 3 ? arguments[0] : null;
+	            var aDeps = arguments.length === 3 ? arguments[1] : arguments.length === 2 ? arguments[0] : [];
+	            var aModuleDefiner = arguments.length === 3 ? arguments[2] : arguments.length === 2 ? arguments[1] : arguments[0];
 	            if (!Array.isArray(aDeps))
 	                aDeps = [aDeps];
-	            @com.eas.application.Application::define(Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;)(aDeps, function(){
+	            @com.eas.application.Application::define(Ljava/lang/String;Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;)(aModuleName, aDeps, function(){
                 	return typeof aModuleDefiner === 'function' ? aModuleDefiner.apply(null, arguments) : aModuleDefiner;
 	            });
 	        } else {

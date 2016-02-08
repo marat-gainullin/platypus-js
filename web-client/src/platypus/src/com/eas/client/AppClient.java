@@ -154,7 +154,7 @@ public class AppClient {
 		};
 	}
 
-	public static String toAppModuleId(String aRelative, String aStartPoint) {
+	public static String toFilyAppModuleId(String aRelative, String aStartPoint) {
 		Element div = com.google.gwt.dom.client.Document.get().createDivElement();
 		div.setInnerHTML("<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>");
 		String absolute = div.getFirstChildElement().<AnchorElement> cast().getHref();
@@ -174,7 +174,7 @@ public class AppClient {
 
 	public static Object _jsLoad(final String aResourceName, boolean aBinary, final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
 		final String callerDir = Utils.lookupCallerJsDir();
-		SafeUri uri = AppClient.getInstance().getResourceUri(aResourceName.startsWith("./") || aResourceName.startsWith("../") ? toAppModuleId(aResourceName, callerDir) : aResourceName);
+		SafeUri uri = AppClient.getInstance().getResourceUri(aResourceName.startsWith("./") || aResourceName.startsWith("../") ? toFilyAppModuleId(aResourceName, callerDir) : aResourceName);
 		if (onSuccess != null) {
 			AppClient.getInstance().startRequest(uri, aBinary ? ResponseType.ArrayBuffer : ResponseType.Default, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
@@ -729,6 +729,8 @@ public class AppClient {
 	}
 
 	public Cancellable requestModuleStructure(final String aModuleName, final Callback<ModuleStructure, XMLHttpRequest> aCallback) throws Exception {
+		// TODO: lookup a loader flag e.g. 'local-names' and if it exists, put a fake structure in modulesStructures
+		// with aModuleName as *.js file name and with no pre-fetched resources.
 		if (modulesStructures.containsKey(aModuleName)) {
 			if (aCallback != null) {
 				Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {

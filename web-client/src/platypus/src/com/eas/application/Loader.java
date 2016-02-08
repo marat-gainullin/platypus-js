@@ -7,8 +7,10 @@ package com.eas.application;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,7 +42,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.xhr.client.XMLHttpRequest;
@@ -99,10 +100,12 @@ public class Loader {
 	public static final String TYPE_JAVASCRIPT = "text/javascript";
 	protected static final com.google.gwt.dom.client.Document htmlDom = com.google.gwt.dom.client.Document.get();
 	protected static Set<LoadHandler> handlers = new HashSet<LoadHandler>();
-	protected static Set<String> started = new HashSet<>();
-	protected static List<String> amdDependencies;
-	protected static Callback<String, Void> amdDefineCallback;
-	protected static Map<String, List<Callback<Void, String>>> pending = new HashMap<>();
+	protected static Set<String> startedModules = new HashSet<>();
+	protected static Set<String> startedScripts = new HashSet<>();
+	protected static Set<String> loadedScripts = new HashSet<>();
+	protected static List<AmdDefine> amdDefines = new ArrayList<>();
+	protected static Map<String, List<Callback<Void, String>>> pendingsOnModule = new HashMap<>();
+	protected static Map<String, List<Callback<Void, String>>> pendingsOnScript = new HashMap<>();
 
 	protected Loader() {
 	}
@@ -133,20 +136,38 @@ public class Loader {
 		return Predefine.getDefined();
 	}
 
-	public static void setAmdDefine(List<String> aDependencies, Callback<String, Void> aModuleDefiner) {
-		amdDependencies = aDependencies;
-		amdDefineCallback = aModuleDefiner;
+	public static class AmdDefine {
+		protected String moduleName;
+		protected List<String> dependencies = new ArrayList<>();
+		protected Callback<String, Void> moduleDefiner;
+
+		public AmdDefine(String aModuleName, List<String> aDependencies, Callback<String, Void> aModuleDefiner) {
+			super();
+			moduleName = aModuleName;
+			dependencies = aDependencies;
+			moduleDefiner = aModuleDefiner;
+		}
+
+		public String getModuleName() {
+			return moduleName;
+		}
+
+		public Collection<String> getDependencies() {
+			return Collections.unmodifiableList(dependencies);
+		}
+
+		public Callback<String, Void> getModuleDefiner() {
+			return moduleDefiner;
+		}
 	}
 
-	public static List<String> consumeAmdDependencies() {
-		List<String> res = amdDependencies;
-		amdDependencies = null;
-		return res;
+	public static void addAmdDefine(String aModuleName, List<String> aDependencies, Callback<String, Void> aModuleDefiner) {
+		amdDefines.add(new AmdDefine(aModuleName, aDependencies, aModuleDefiner));
 	}
 
-	public static Callback<String, Void> consumeAmdDefineCallback() {
-		Callback<String, Void> res = amdDefineCallback;
-		amdDefineCallback = null;
+	public static Collection<AmdDefine> consumeAmdDefines() {
+		List<AmdDefine> res = amdDefines;
+		amdDefines = new ArrayList<>();
 		return res;
 	}
 
@@ -396,124 +417,55 @@ public class Loader {
 		});
 	}
 
-	private static void loadFromServer(final String aModuleName, final Set<String> aCyclic) throws Exception {
+	private static void loadModuleFromServer(final String aModuleName, final Set<String> aCyclic) throws Exception {
 		AppClient.getInstance().requestModuleStructure(aModuleName, new CallbackAdapter<AppClient.ModuleStructure, XMLHttpRequest>() {
 
 			@Override
 			protected void doWork(AppClient.ModuleStructure aStructure) throws Exception {
-				final CumulativeCallbackAdapter<String, String> moduleProcess = new CumulativeCallbackAdapter<String, String>(2) {
-
-					@Override
-					protected void failed(final List<String> aReasons) {
-						notifyModuleFailed(aModuleName, aReasons);
-					}
-
-					@Override
-					protected void doWork(String aJsPart) throws Exception {
-						final String jsURL = AppClient.getInstance().checkedCacheBust(AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX + aJsPart);
-						ScriptInjector.fromUrl(jsURL).setCallback(new Callback<Void, Exception>() {
-
-							@Override
-							public void onSuccess(Void result) {
-								final List<String> amdDependencies = Loader.consumeAmdDependencies();
-								final Callback<String, Void> amdDefineCallback = Loader.consumeAmdDefineCallback();
-								if (amdDefineCallback != null) {
-									try {
-										Loader.load(amdDependencies, new Callback<Void, String>() {
-
-											@Override
-											public void onFailure(String reason) {
-												failed(Arrays.asList(new String[] { reason }));
-											}
-
-											@Override
-											public void onSuccess(Void result) {
-												amdDefineCallback.onSuccess(aModuleName);
-	                                            // If module is still not defined because of buggy definer in script,
-	                                            // we have to put it definition as undefined by hand.
-												if (!Predefine.getDefined().containsKey(aModuleName))
-													Predefine.getDefined().put(aModuleName, null);
-												fireLoaded(aModuleName);
-												notifyModuleLoaded(aModuleName);
-											}
-
-										}, new HashSet<String>());
-									} catch (Exception ex) {
-										Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
-									}
-								} else {
-                                    // Module is still not defined because of absent module definer.
-                                    // And we have to put it definition as undefined by hand.
-									Predefine.getDefined().put(aModuleName, null);
-									fireLoaded(aModuleName);
-									notifyModuleLoaded(aModuleName);
-								}
-							}
-
-							@Override
-							public void onFailure(Exception reason) {
-								failed(Arrays.asList(new String[] { reason.getMessage() }));
-								Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, "Script [" + aModuleName + "] is not loaded. Cause is: " + reason.getMessage());
-							}
-
-						}).setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).inject();
-					}
-
-				};
-				final CumulativeCallbackAdapter<String, String> structureProcess = new CumulativeCallbackAdapter<String, String>(aStructure.getStructure().size()) {
-
-					@Override
-					protected void failed(List<String> aReasons) {
-						moduleProcess.onFailure(aReasons.toString());
-					}
-
-					@Override
-					protected void doWork(String aResult) throws Exception {
-						moduleProcess.onSuccess(aResult);
-					}
-
-				};
 				assert !aStructure.getStructure().isEmpty() : "Module [" + aModuleName + "] structure should contain at least one element.";
+				String jsPart = null;
+				Set<String> prefetchedResources = new HashSet<>();
 				for (final String part : aStructure.getStructure()) {
 					if (part.toLowerCase().endsWith(".js")) {
-						Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-							@Override
-							public void execute() {
-								structureProcess.onSuccess(part);
-							}
-						});
+						jsPart = part;
 					} else {
-						AppClient.getInstance().requestDocument(part, new CallbackAdapter<Document, XMLHttpRequest>() {
-
-							@Override
-							public void onFailure(XMLHttpRequest reason) {
-								structureProcess.onFailure(reason.getStatus() + " : " + reason.getStatusText());
-							}
-
-							@Override
-							protected void doWork(Document aResult) throws Exception {
-								structureProcess.onSuccess(null);
-							}
-
-						});
+						prefetchedResources.add(part);
 					}
 				}
-				final CumulativeCallbackAdapter<Void, String> dependenciesProcess = new CumulativeCallbackAdapter<Void, String>(3) {
-
-					@Override
-					protected void failed(List<String> aReasons) {
-						moduleProcess.onFailure(aReasons.toString());
+				assert jsPart != null : "Module [" + aModuleName + "] structure should contain a *.js file.";
+				final String jsResource = jsPart;
+				if (loadedScripts.contains(jsResource)) {
+					JavaScriptObject globalModule = lookupInGlobal(aModuleName);
+					if (globalModule != null) {
+						Predefine.getDefined().put(aModuleName, null);
+						fireLoaded(aModuleName);
+						notifyModuleLoaded(aModuleName);
 					}
+				} else {
+					pendOnScript(jsResource, new CallbackAdapter<Void, String>() {
 
-					@Override
-					protected void doWork(Void aResult) throws Exception {
-						moduleProcess.onSuccess(null);
+						@Override
+						public void onFailure(String aReason) {
+							notifyModuleFailed(aModuleName, Arrays.asList(new String[] { aReason }));
+						}
+
+						@Override
+						protected void doWork(Void aResult) throws Exception {
+							JavaScriptObject globalModule = lookupInGlobal(aModuleName);
+							if (globalModule != null) {
+								Predefine.getDefined().put(aModuleName, null);
+								fireLoaded(aModuleName);
+								notifyModuleLoaded(aModuleName);
+							}
+						}
+
+					});
+					if (!startedScripts.contains(jsResource)) {
+						loadScriptFormServer(prefetchedResources, jsResource, aStructure.getClientDependencies(), aStructure.getQueriesDependencies(), aStructure.getServerDependencies(), aCyclic,
+						        aModuleName);
+						startedScripts.add(jsResource);
 					}
-
-				};
-				load(aStructure.getClientDependencies(), dependenciesProcess, aCyclic);
-				loadQueries(aStructure.getQueriesDependencies(), dependenciesProcess);
-				loadServerModules(aStructure.getServerDependencies(), dependenciesProcess);
+				}
 			}
 
 			@Override
@@ -521,6 +473,116 @@ public class Loader {
 				notifyModuleFailed(aModuleName, Arrays.asList(new String[] { reason.getStatus() + ": " + reason.getStatusText() }));
 			}
 		});
+	}
+
+	private static void loadScriptFormServer(Set<String> aPrefetchedResources, final String aJsResource, Set<String> aClientGlobalDependencies, Set<String> aQueriesDependencies,
+	        Set<String> aServerModulesDependencies, Set<String> aCyclic, final String aDefaultModuleName) throws Exception {
+		final CumulativeCallbackAdapter<Void, String> scriptProcess = new CumulativeCallbackAdapter<Void, String>(aPrefetchedResources.isEmpty() ? 1 : 2) {
+
+			@Override
+			protected void doWork(Void aResult) throws Exception {
+				final String jsURL = AppClient.getInstance().checkedCacheBust(AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX + aJsResource);
+				ScriptInjector.fromUrl(jsURL).setCallback(new Callback<Void, Exception>() {
+
+					@Override
+					public void onSuccess(Void result) {
+						loadedScripts.add(aJsResource);
+						notifyScriptLoaded(aJsResource);
+						final Collection<AmdDefine> amdDefines = Loader.consumeAmdDefines();
+						Iterator<AmdDefine> amdDefinesIt = amdDefines.iterator();
+						while (amdDefinesIt.hasNext()) {
+							AmdDefine amdDefine = amdDefinesIt.next();
+							final String amdModuleName = amdDefine.getModuleName() != null ? amdDefine.getModuleName() : aDefaultModuleName;
+							final Collection<String> amdDependencies = amdDefine.getDependencies();
+							final Callback<String, Void> amdModuleDefiner = amdDefine.getModuleDefiner();
+							try {
+								Loader.load(amdDependencies, new Callback<Void, String>() {
+
+									@Override
+									public void onFailure(String aReason) {
+										notifyModuleFailed(amdModuleName, Arrays.asList(new String[] { aReason }));
+									}
+
+									@Override
+									public void onSuccess(Void result) {
+										amdModuleDefiner.onSuccess(amdModuleName);
+										// If module is still not
+										// defined because of buggy
+										// definer in script,
+										// we have to put it definition
+										// as undefined by hand.
+										if (!Predefine.getDefined().containsKey(amdModuleName))
+											Predefine.getDefined().put(amdModuleName, null);
+										fireLoaded(amdModuleName);
+										notifyModuleLoaded(amdModuleName);
+									}
+
+								}, new HashSet<String>());
+							} catch (Exception ex) {
+								Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
+							}
+						}
+					}
+
+					@Override
+					public void onFailure(Exception reason) {
+						notifyScriptFailed(aJsResource, Arrays.asList(new String[] { reason.getMessage() }));
+						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, "Script [" + aJsResource + "] is not loaded. Cause is: " + reason.getMessage());
+					}
+
+				}).setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).inject();
+			}
+
+			@Override
+			protected void failed(List<String> aReasons) {
+				notifyScriptFailed(aJsResource, aReasons);
+			}
+
+		};
+		final CumulativeCallbackAdapter<Void, String> prefetchProcess = new CumulativeCallbackAdapter<Void, String>(aPrefetchedResources.size()) {
+
+			@Override
+			protected void failed(List<String> aReasons) {
+				scriptProcess.onFailure(aReasons.toString());
+			}
+
+			@Override
+			protected void doWork(Void aResult) throws Exception {
+				scriptProcess.onSuccess(aResult);
+			}
+
+		};
+		for (final String prefetched : aPrefetchedResources) {
+			AppClient.getInstance().requestDocument(prefetched, new CallbackAdapter<Document, XMLHttpRequest>() {
+
+				@Override
+				public void onFailure(XMLHttpRequest reason) {
+					prefetchProcess.onFailure(reason.getStatus() + " : " + reason.getStatusText());
+				}
+
+				@Override
+				protected void doWork(Document aResult) throws Exception {
+					prefetchProcess.onSuccess(null);
+				}
+
+			});
+		}
+		final CumulativeCallbackAdapter<Void, String> dependenciesProcess = new CumulativeCallbackAdapter<Void, String>(3) {
+
+			@Override
+			protected void failed(List<String> aReasons) {
+				scriptProcess.onFailure(aReasons.toString());
+			}
+
+			@Override
+			protected void doWork(Void aResult) throws Exception {
+				scriptProcess.onSuccess(null);
+			}
+
+		};
+		load(aClientGlobalDependencies, dependenciesProcess, aCyclic);
+		loadQueries(aQueriesDependencies, dependenciesProcess);
+		loadServerModules(aServerModulesDependencies, dependenciesProcess);
 	}
 
 	private static String errorsToString(List<String> aReasons) {
@@ -533,9 +595,47 @@ public class Loader {
 		return errorsSb.toString();
 	}
 
+	public static void notifyScriptFailed(String aScriptName, final List<String> aReasons) {
+		List<Callback<Void, String>> interestedPendings = new ArrayList<>(pendingsOnScript.get(aScriptName));
+		pendingsOnScript.get(aScriptName).clear();
+		final String errors = errorsToString(aReasons);
+		for (final Callback<Void, String> interestedPending : interestedPendings) {
+			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+
+				@Override
+				public void execute() {
+					interestedPending.onFailure(errors);
+				}
+			});
+		}
+	}
+
+	private static void notifyScriptLoaded(String aScriptName) {
+		List<Callback<Void, String>> interestedPendings = new ArrayList<>(pendingsOnScript.get(aScriptName));
+		pendingsOnScript.get(aScriptName).clear();
+		for (final Callback<Void, String> interestedPending : interestedPendings) {
+			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+
+				@Override
+				public void execute() {
+					interestedPending.onSuccess(null);
+				}
+			});
+		}
+	}
+
+	private static void pendOnScript(String aScriptName, Callback<Void, String> aPending) {
+		List<Callback<Void, String>> pendingOnModule = pendingsOnScript.get(aScriptName);
+		if (pendingOnModule == null) {
+			pendingOnModule = new ArrayList<>();
+			pendingsOnScript.put(aScriptName, pendingOnModule);
+		}
+		pendingOnModule.add(aPending);
+	}
+
 	public static void notifyModuleFailed(String aModuleName, final List<String> aReasons) {
-		List<Callback<Void, String>> interestedPendings = new ArrayList<>(pending.get(aModuleName));
-		pending.get(aModuleName).clear();
+		List<Callback<Void, String>> interestedPendings = new ArrayList<>(pendingsOnModule.get(aModuleName));
+		pendingsOnModule.get(aModuleName).clear();
 		final String errors = errorsToString(aReasons);
 		for (final Callback<Void, String> interestedPending : interestedPendings) {
 			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -549,8 +649,8 @@ public class Loader {
 	}
 
 	private static void notifyModuleLoaded(String aModuleName) {
-		List<Callback<Void, String>> interestedPendings = new ArrayList<>(pending.get(aModuleName));
-		pending.get(aModuleName).clear();
+		List<Callback<Void, String>> interestedPendings = new ArrayList<>(pendingsOnModule.get(aModuleName));
+		pendingsOnModule.get(aModuleName).clear();
 		for (final Callback<Void, String> interestedPending : interestedPendings) {
 			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 
@@ -563,16 +663,20 @@ public class Loader {
 	}
 
 	private static void pendOnModule(String aModuleName, Callback<Void, String> aPending) {
-		List<Callback<Void, String>> pendingOnModule = pending.get(aModuleName);
+		List<Callback<Void, String>> pendingOnModule = pendingsOnModule.get(aModuleName);
 		if (pendingOnModule == null) {
 			pendingOnModule = new ArrayList<>();
-			pending.put(aModuleName, pendingOnModule);
+			pendingsOnModule.put(aModuleName, pendingOnModule);
 		}
 		pendingOnModule.add(aPending);
 	}
 
+	public static native JavaScriptObject lookupInGlobal(String aModuleName)/*-{
+		return $wnd[aModuleName];
+	}-*/;
+
 	public static void load(final Collection<String> aModulesNames, final Callback<Void, String> aCallback, final Set<String> aCyclic) throws Exception {
-        String[] modulesNames = aModulesNames != null ? new HashSet<>(aModulesNames).toArray(new String[]{}) : null;
+		String[] modulesNames = aModulesNames != null ? new HashSet<>(aModulesNames).toArray(new String[] {}) : null;
 		if (modulesNames != null && modulesNames.length > 0) {
 			final Callback<Void, String> process = new CumulativeCallbackAdapter<Void, String>(modulesNames.length) {
 
@@ -599,8 +703,8 @@ public class Loader {
 							process.onSuccess(null);
 						}
 					});
-				}else if(aCyclic.contains(moduleName)){
-                    Logger.getLogger(Loader.class.getName()).log(Level.WARNING, "Cyclic dependency detected: " + moduleName);
+				} else if (aCyclic.contains(moduleName)) {
+					Logger.getLogger(Loader.class.getName()).log(Level.WARNING, "Cyclic dependency detected: " + moduleName);
 					Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 
 						@Override
@@ -611,13 +715,14 @@ public class Loader {
 				} else {
 					aCyclic.add(moduleName);
 					pendOnModule(moduleName, process);
-					if (!started.contains(moduleName)) {
+					if (!startedModules.contains(moduleName)) {
 						String predefinedHub = lookupPredefined(moduleName);
-						if (predefinedHub != null)
+						if (predefinedHub != null) {
 							loadPredefined(moduleName, predefinedHub);
-						else
-							loadFromServer(moduleName, aCyclic);
-						started.add(moduleName);
+						} else {
+							loadModuleFromServer(moduleName, aCyclic);
+						}
+						startedModules.add(moduleName);
 						fireStarted(moduleName);
 					}
 				}

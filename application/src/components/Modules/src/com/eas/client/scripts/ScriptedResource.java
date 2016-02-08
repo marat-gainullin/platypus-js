@@ -883,12 +883,10 @@ public class ScriptedResource {
                                 aSpace.getDefined().put(amdModuleName, null);
                             }
                         }
-                    } else // If module is still not defined (lack of definer in script, etc.)
-                    // we have to put it definition as undefined by hand.
-                    {
-                        if (!aSpace.getDefined().containsKey(moduleName)) {
-                            aSpace.getDefined().put(moduleName, null);
-                        }
+                    } else {
+                        // It seems that module is global module and it resides in the aScriptFile file.
+                        // If so, it is defined by script execution and we have to put its definition as undefined by hand.
+                        aSpace.getDefined().put(moduleName, null);
                     }
                 }
             }

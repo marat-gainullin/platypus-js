@@ -79,17 +79,13 @@ public class Application {
 		}
 	}
 
-	protected static native JavaScriptObject lookupInGlobal(String aModuleName)/*-{
-		return $wnd[aModuleName];
-	}-*/;
-
 	private static JavaScriptObject lookupResolved(List<String> deps) {
 		Map<String, JavaScriptObject> defined = Loader.getDefined();
 		Utils.JsObject resolved = JavaScriptObject.createArray().cast();
 		for (int d = 0; d < deps.size(); d++) {
 			String mName = deps.get(d);
 			JavaScriptObject m = defined.get(mName);
-			resolved.setSlot(d, m != null ? m : lookupInGlobal(mName));
+			resolved.setSlot(d, m != null ? m : Loader.lookupInGlobal(mName));
 		}
 		return resolved;
 	}
@@ -100,7 +96,7 @@ public class Application {
 		for (int i = 0; i < aDeps.length(); i++) {
 			String dep = aDeps.getString(i);
 			if (calledFromDir != null && dep.startsWith("./") || dep.startsWith("../")) {
-				dep = AppClient.toAppModuleId(dep, calledFromDir);
+				dep = AppClient.toFilyAppModuleId(dep, calledFromDir);
 			}
 			if (dep.toLowerCase().endsWith(".js")) {
 				dep = dep.substring(0, dep.length() - 3);
@@ -134,24 +130,20 @@ public class Application {
 		return lookupResolved(deps);
 	}
 
-	public static void define(final Utils.JsObject aDeps, final Utils.JsObject aModuleDefiner) {
+	public static void define(String aModuleName, final Utils.JsObject aDeps, final Utils.JsObject aModuleDefiner) {
 		String calledFromDir = Utils.lookupCallerJsDir();
 		final List<String> deps = new ArrayList<String>();
 		for (int i = 0; i < aDeps.length(); i++) {
 			String dep = aDeps.getString(i);
 			if (calledFromDir != null && dep.startsWith("./") || dep.startsWith("../")) {
-				dep = AppClient.toAppModuleId(dep, calledFromDir);
+				dep = AppClient.toFilyAppModuleId(dep, calledFromDir);
 			}
 			if (dep.endsWith(".js")) {
 				dep = dep.substring(0, dep.length() - 3);
 			}
 			deps.add(dep);
 		}
-		Loader.setAmdDefine(deps, new Callback<String, Void>() {
-
-			protected final native JavaScriptObject lookupInGlobal(String aModuleName)/*-{
-				return $wnd[aModuleName];
-			}-*/;
+		Loader.addAmdDefine(aModuleName, deps, new Callback<String, Void>() {
 
 			@Override
 			public void onSuccess(String aModuleName) {
@@ -160,7 +152,7 @@ public class Application {
 				for (int d = 0; d < deps.size(); d++) {
 					String mName = deps.get(d);
 					JavaScriptObject m = defined.get(mName);
-					resolved.setSlot(d, m != null ? m : lookupInGlobal(mName));
+					resolved.setSlot(d, m != null ? m : Loader.lookupInGlobal(mName));
 				}
 				resolved.setSlot(deps.size(), aModuleName);
 				JavaScriptObject module = (JavaScriptObject) aModuleDefiner.apply(null, resolved);
