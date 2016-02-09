@@ -21,6 +21,7 @@ import com.eas.model.ModelVisitor;
 import com.eas.model.ReferenceRelation;
 import com.eas.model.Relation;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.NodeList;
@@ -39,31 +40,32 @@ public class XmlDom2Model implements ModelVisitor {
 	public static final String DATASOURCE_NAME_ATTR_NAME = "Name";
 	public static final String DATASOURCE_TITLE_ATTR_NAME = "Title";
 	public static final String ENTITY_TAG_NAME = "entity";
-	//public static final String FIELDS_ENTITY_TAG_NAME = "fieldsEntity";
-	//public static final String PARAMETERS_ENTITY_TAG_NAME = "parametersEntity";
+	// public static final String FIELDS_ENTITY_TAG_NAME = "fieldsEntity";
+	// public static final String PARAMETERS_ENTITY_TAG_NAME =
+	// "parametersEntity";
 	public static final String RELATION_TAG_NAME = "relation";
-	//public static final String LIGHT_RELATION_TAG_NAME = "lightRelation";
+	// public static final String LIGHT_RELATION_TAG_NAME = "lightRelation";
 	public static final String REFERENCE_RELATION_TAG_NAME = "referenceRelation";
-	
+
 	// Attributes
 	public static final String SCALAR_PROP_NAME_ATTR_NAME = "scalarPropertyName";
 	public static final String COLLECTION_PROP_NAME_ATTR_NAME = "collectionPropertyName";
-	//public static final String PRIMARY_KEYS_TAG_NAME = "primaryKeys";
-	//public static final String FOREIGN_KEYS_TAG_NAME = "foreignKeys";
+	// public static final String PRIMARY_KEYS_TAG_NAME = "primaryKeys";
+	// public static final String FOREIGN_KEYS_TAG_NAME = "foreignKeys";
 	public static final String PRIMARY_KEY_TAG_NAME = "primaryKey";
-	//public static final String FOREIGN_KEY_TAG_NAME = "foreignKey";
+	// public static final String FOREIGN_KEY_TAG_NAME = "foreignKey";
 	public static final String NAME_ATTR_NAME = "name";
 	public static final String DESCRIPTION_ATTR_NAME = "description";
 	public static final String TYPE_ATTR_NAME = "type";
 	public static final String NULLABLE_ATTR_NAME = "nullable";
 	public static final String MODE_ATTR_NAME = "parameterMode";
 	public static final String IS_PK_ATTR_NAME = "isPk";
-	//public static final String FK_TAG_NAME = "fk";
+	// public static final String FK_TAG_NAME = "fk";
 	public static final String SELECTION_FORM_TAG_NAME = "selectionForm";
-	//public static final String CLASS_HINT_TAG_NAME = "classHint";
+	// public static final String CLASS_HINT_TAG_NAME = "classHint";
 	public static final String ENTITY_ID_ATTR_NAME = "entityId";
 	public static final String QUERY_ID_ATTR_NAME = "queryId";
-	//public static final String ENTITY_TABLE_ALIAS = "tableAlias";
+	// public static final String ENTITY_TABLE_ALIAS = "tableAlias";
 	public static final String LEFT_ENTITY_ID_ATTR_NAME = "leftEntityId";
 	public static final String LEFT_ENTITY_FIELD_ATTR_NAME = "leftEntityFieldName";
 	public static final String LEFT_ENTITY_PARAMETER_ATTR_NAME = "leftEntityParameterName";
@@ -74,32 +76,58 @@ public class XmlDom2Model implements ModelVisitor {
 	public static final String CONSTRAINT_FIELD_ATTR_NAME = "field";
 	public static final String CONSTRAINT_SCHEMA_ATTR_NAME = "schema";
 	public static final String CONSTRAINT_TABLE_ATTR_NAME = "table";
-	protected Document doc;
+	protected Element rootTag;
 	protected JavaScriptObject module;
 	protected Element currentTag;
 	protected Model model;
 	protected Collection<Runnable> relationsResolvers = new ArrayList<Runnable>();
 
-	public static Model transform(Document doc, JavaScriptObject aTarget) throws Exception {
+	public static Model transform(Document aDocument, String aModuleName, JavaScriptObject aTarget) throws Exception {
 		try {
-			Model model = new Model(AppClient.getInstance());
-			XmlDom2Model transformer = new XmlDom2Model(doc, aTarget);
-			model.accept(transformer);
-			return model;
+			Element modelElement = aModuleName != null ? findModelElementByBundleName(aDocument.getDocumentElement(), aModuleName) : aDocument.getDocumentElement();
+			if (modelElement != null) {
+				XmlDom2Model transformer = new XmlDom2Model(modelElement, aTarget);
+				Model model = new Model(AppClient.getInstance());
+				model.accept(transformer);
+				return model;
+			} else
+				return null;
 		} catch (Exception ex) {
 			Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
 			throw ex;
 		}
 	}
 
-	protected XmlDom2Model(Document aDoc, JavaScriptObject aTarget) {
+	private static Element findModelElementByBundleName(Element aElement, String aBundleName) {
+		if (aElement.getTagName().equals("datamodel")) {
+			return aElement;// the high level code had to do everything in the
+							// right way
+		} else {
+			Node child = aElement.getFirstChild();
+			while (child != null) {
+				if (child instanceof Element) {
+					Element el = (Element) child;
+					if (el.hasAttribute("bundle-name")) {
+						String bundleName = el.getAttribute("bundle-name");
+						if (bundleName.equals(aBundleName)) {
+							return el;
+						}
+					}
+				}
+				child = child.getNextSibling();
+			}
+		}
+		return null;
+	}
+
+	protected XmlDom2Model(Element aRootTag, JavaScriptObject aTarget) {
 		super();
-		doc = aDoc;
+		rootTag = aRootTag;
 		module = aTarget;
 	}
 
 	protected void readModel(Model aModel) throws Exception {
-		Element el = DATAMODEL_TAG_NAME.equals(doc.getDocumentElement().getNodeName()) ? doc.getDocumentElement() : Utils.scanForElementByTagName(doc.getDocumentElement(), DATAMODEL_TAG_NAME, DATAMODEL_TAG_NAME);
+		Element el = rootTag;
 		if (el != null && aModel != null) {
 			model = aModel;
 			try {
@@ -163,11 +191,11 @@ public class XmlDom2Model implements ModelVisitor {
 	@Override
 	public void visit(Entity entity) {
 		String name = Utils.getAttribute(currentTag, "n", DATASOURCE_NAME_ATTR_NAME, null);
-		if(name != null){
+		if (name != null) {
 			entity.setName(name);
 		}
 		String title = Utils.getAttribute(currentTag, "tt", DATASOURCE_TITLE_ATTR_NAME, null);
-		if(title != null){
+		if (title != null) {
 			entity.setTitle(title);
 		}
 		readEntity(entity);
@@ -249,11 +277,12 @@ public class XmlDom2Model implements ModelVisitor {
 
 			if (aField instanceof Parameter) {
 				((Parameter) aField).setMode(Utils.getIntegerAttribute(currentTag, "pm", MODE_ATTR_NAME, 0/*
-																					 * ParameterMetaData.
-																					 * parameterModeUnknown
-																					 */));
+																										 * ParameterMetaData
+																										 * .
+																										 * parameterModeUnknown
+																										 */));
 				String selectionForm = Utils.getAttribute(currentTag, "sf", SELECTION_FORM_TAG_NAME, null);
-				if(selectionForm != null && !"null".equals(selectionForm)){
+				if (selectionForm != null && !"null".equals(selectionForm)) {
 					((Parameter) aField).setSelectionForm(selectionForm);
 				}
 			}

@@ -26,7 +26,7 @@ import org.w3c.dom.Node;
 public class ApplicationModelLoader {
 
     public static ApplicationModel<?, ?> load(Document aDoc, String aModuleName, Application<?> aApp) {
-        Element modelElement = aModuleName != null ? findLayoutElementByBundleName(aDoc.getDocumentElement(), aModuleName) : aDoc.getDocumentElement();
+        Element modelElement = aModuleName != null ? findModelElementByBundleName(aDoc.getDocumentElement(), aModuleName) : aDoc.getDocumentElement();
         if (aApp.getQueries() instanceof LocalQueriesProxy) {
             LocalQueriesProxy localQueries = (LocalQueriesProxy) aApp.getQueries();
             ApplicationDbModel model = new ApplicationDbModel(localQueries.getCore(), localQueries);
@@ -43,7 +43,7 @@ public class ApplicationModelLoader {
         }
     }
 
-    private static Element findLayoutElementByBundleName(Element aElement, String aBundleName) {
+    private static Element findModelElementByBundleName(Element aElement, String aBundleName) {
         if (aElement.getTagName().equals("datamodel")) {
             return aElement;// the high level code had to do everything in the right way
         } else {
