@@ -32,7 +32,6 @@ import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import jdk.nashorn.api.scripting.ScriptObjectMirrorAccessor;
 import jdk.nashorn.api.scripting.ScriptUtils;
 import jdk.nashorn.api.scripting.URLReader;
 import jdk.nashorn.internal.ir.FunctionNode;
@@ -64,7 +63,7 @@ public class Scripts {
 
     private static final NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
     private static final NashornScriptEngine engine = (NashornScriptEngine) factory.getScriptEngine();
-    /*
+    
     private static java.lang.reflect.Field sobjField;// dirty hack, because of LPC
 
     static {
@@ -75,7 +74,7 @@ public class Scripts {
             Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-     */
+     
     protected static final String PLATYPUS_JS_MODULENAME = "facade";
     public static final String PLATYPUS_JS_FILENAME = PLATYPUS_JS_MODULENAME + ".js";
     protected static final String INTERNALS_MODULENAME = "internals";
@@ -508,8 +507,11 @@ public class Scripts {
             Object copied = copyObjectFunc.call(null, new Object[]{aSource});
             if (copied instanceof ScriptObjectMirror) {
                 ScriptObjectMirror mirror = (ScriptObjectMirror) copied;
-                copied = ScriptObjectMirrorAccessor.getScriptObject(mirror);
-                //copied = sobjField.get(mirror);
+                try {
+                    copied = sobjField.get(mirror);
+                } catch (IllegalArgumentException | IllegalAccessException ex) {
+                    Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             return copied;
         }
