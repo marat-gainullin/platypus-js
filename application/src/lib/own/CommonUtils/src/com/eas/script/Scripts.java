@@ -32,6 +32,7 @@ import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import jdk.nashorn.api.scripting.ScriptObjectMirrorAccessor;
 import jdk.nashorn.api.scripting.ScriptUtils;
 import jdk.nashorn.api.scripting.URLReader;
 import jdk.nashorn.internal.ir.FunctionNode;
@@ -63,7 +64,9 @@ public class Scripts {
 
     private static final NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
     private static final NashornScriptEngine engine = (NashornScriptEngine) factory.getScriptEngine();
+    /*
     private static java.lang.reflect.Field sobjField;// dirty hack, because of LPC
+
     static {
         try {
             sobjField = ScriptObjectMirror.class.getDeclaredField("sobj");
@@ -72,6 +75,7 @@ public class Scripts {
             Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+     */
     protected static final String PLATYPUS_JS_MODULENAME = "facade";
     public static final String PLATYPUS_JS_FILENAME = PLATYPUS_JS_MODULENAME + ".js";
     protected static final String INTERNALS_MODULENAME = "internals";
@@ -295,10 +299,10 @@ public class Scripts {
             }
         }
 
-        public Object getUndefined(){
+        public Object getUndefined() {
             return Undefined.getUndefined();
         }
-        
+
         public void putPublisher(String aClassName, JSObject aPublisher) {
             publishers.put(aClassName, aPublisher);
         }
@@ -499,12 +503,13 @@ public class Scripts {
             return (JSObject) oResult;
         }
 
-        public Object makeCopy(Object aSource) throws Exception {
+        public Object makeCopy(Object aSource) {
             assert copyObjectFunc != null : SCRIPT_NOT_INITIALIZED;
             Object copied = copyObjectFunc.call(null, new Object[]{aSource});
-            if(copied instanceof ScriptObjectMirror){
-                ScriptObjectMirror mirror = (ScriptObjectMirror)copied;
-                copied = sobjField.get(mirror);
+            if (copied instanceof ScriptObjectMirror) {
+                ScriptObjectMirror mirror = (ScriptObjectMirror) copied;
+                copied = ScriptObjectMirrorAccessor.getScriptObject(mirror);
+                //copied = sobjField.get(mirror);
             }
             return copied;
         }
