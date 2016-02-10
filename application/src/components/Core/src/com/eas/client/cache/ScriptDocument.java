@@ -291,12 +291,17 @@ public class ScriptDocument {
                 if (!functionNode.isAnonymous() && scopeLevel == GLOBAL_CONSTRUCTORS_BODY_SCOPE_LEVEL) {
                     mdModule = new ModuleDocument();
                     mdConstructor = functionNode;
-                    modules.put(functionNode.getName(), mdModule);
                     long ft = functionNode.getFirstToken();
                     if (prevComments.containsKey(ft)) {
                         long prevComment = prevComments.get(ft);
                         String commentText = source.getString(prevComment);
                         mdModule.parseAnnotations(commentText);
+                    }
+                    JsDoc.Tag moduleAnnotation = mdModule.getAnnotation(JsDoc.Tag.MODULE_TAG);
+                    if (moduleAnnotation != null && moduleAnnotation.getParams() != null && !moduleAnnotation.getParams().isEmpty()) {
+                        modules.put(moduleAnnotation.getParams().get(0), mdModule);
+                    } else {
+                        modules.put(functionNode.getName(), mdModule);
                     }
                 }
                 return super.enterFunctionNode(functionNode);

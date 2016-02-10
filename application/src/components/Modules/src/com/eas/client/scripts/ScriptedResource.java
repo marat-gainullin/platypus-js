@@ -621,7 +621,7 @@ public class ScriptedResource {
                 onSuccess.accept(cached);
             });
         } else {
-            // API is compressible and so API module name is transformed script file name
+            // API content is not compressible into bundles and so API module name is transformed into a script file name directly
             Path apiLocalPath = apiPath.resolve(aModuleName + PlatypusFiles.JAVASCRIPT_FILE_END);
             if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
                 scriptsOfModules.put(aModuleName, apiLocalPath.normalize());
@@ -629,7 +629,7 @@ public class ScriptedResource {
                 aSpace.process(() -> {
                     onSuccess.accept(apiLocalPath.normalize());
                 });
-            } else {// Module is defined -> let's discover what file contains the module.
+            } else {// Module is application module, so let's discover what file contains the module.
                 try {
                     app.getModules().getModule(aModuleName, aSpace, (ModuleStructure structure) -> {
                         if (structure != null) {
@@ -774,7 +774,6 @@ public class ScriptedResource {
                                         }
                                         aSpace.exec(relativeLocalPath.toString().replace(File.separator, "/"), scriptURL);
                                         Collection<Map.Entry<String, Scripts.AmdDefine>> amdDefines = aSpace.consumeAmdDefines();
-                                        if (!amdDefines.isEmpty()) {
                                             Iterator<Map.Entry<String, Scripts.AmdDefine>> amdDefinesIt = amdDefines.iterator();
                                             while (amdDefinesIt.hasNext()) {
                                                 Map.Entry<String, Scripts.AmdDefine> amdDefineEntry = amdDefinesIt.next();
@@ -796,9 +795,10 @@ public class ScriptedResource {
                                                     notifyFailed(pending, ex);
                                                 });
                                             }
-                                        } else {
-                                            // It seems that module is global module and it resides in the aScriptFile file.
-                                            // If so, it is defined by script execution and we have to put its definition as undefined by hand.
+                                        if(aSpace.lookupInGlobal(moduleName) != null){
+                                            // If module is global and it resides in the aScriptFile file,
+                                            // it is defined by script execution and we have to put its definition as undefined
+                                            // in AMD structure.
                                             aSpace.getDefined().put(moduleName, null);
                                             Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedModuleName(moduleName));
                                             notifyLoaded(pending);
@@ -864,28 +864,27 @@ public class ScriptedResource {
                         }
                     }
                     Collection<Map.Entry<String, Scripts.AmdDefine>> amdDefines = aSpace.consumeAmdDefines();
-                    if (!amdDefines.isEmpty()) {
-                        Iterator<Map.Entry<String, Scripts.AmdDefine>> amdDefinesIt = amdDefines.iterator();
-                        while (amdDefinesIt.hasNext()) {
-                            Map.Entry<String, Scripts.AmdDefine> entry = amdDefinesIt.next();
-                            Scripts.AmdDefine amdDefine = entry.getValue();
-                            String amdModuleName = entry.getKey();
-                            if (amdModuleName == null) {// cases of single 1 or 2 argument define in a file.
-                                amdModuleName = moduleName;
-                            }
-                            String[] moduleDefinedDependencies = amdDefine.getAmdDependencies();
-                            JSObject onDependenciesResolved = amdDefine.getModuleDefiner();
-                            _require(moduleDefinedDependencies, null, aSpace, aCyclic);
-                            onDependenciesResolved.call(null, new Object[]{amdModuleName});
-                            // If module is still not defined (buggy definer in script, etc.)
-                            // we have to put it definition as undefined by hand.
-                            if (!aSpace.getDefined().containsKey(amdModuleName)) {
-                                aSpace.getDefined().put(amdModuleName, null);
-                            }
+                    Iterator<Map.Entry<String, Scripts.AmdDefine>> amdDefinesIt = amdDefines.iterator();
+                    while (amdDefinesIt.hasNext()) {
+                        Map.Entry<String, Scripts.AmdDefine> entry = amdDefinesIt.next();
+                        Scripts.AmdDefine amdDefine = entry.getValue();
+                        String amdModuleName = entry.getKey();
+                        if (amdModuleName == null) {// cases of single 1 or 2 argument define in a file.
+                            amdModuleName = moduleName;
                         }
-                    } else {
-                        // It seems that module is global module and it resides in the aScriptFile file.
-                        // If so, it is defined by script execution and we have to put its definition as undefined by hand.
+                        String[] moduleDefinedDependencies = amdDefine.getAmdDependencies();
+                        JSObject onDependenciesResolved = amdDefine.getModuleDefiner();
+                        _require(moduleDefinedDependencies, null, aSpace, aCyclic);
+                        onDependenciesResolved.call(null, new Object[]{amdModuleName});
+                        // If module is still not defined (buggy definer in script, etc.)
+                        // we have to put it definition as undefined by hand.
+                        if (!aSpace.getDefined().containsKey(amdModuleName)) {
+                            aSpace.getDefined().put(amdModuleName, null);
+                        }
+                    }
+                    // Regardless of define calls existance, if module is global, we have to
+                    // put it as undefined in AMD structure.
+                    if (aSpace.lookupInGlobal(moduleName) != null) {
                         aSpace.getDefined().put(moduleName, null);
                     }
                 }

@@ -872,30 +872,13 @@ public class Scripts {
         return sb.toString();
     }
 
-    /**
-     * Searches for all <code>this</code> aliases in a constructor.
-     *
-     * @param moduleConstructor a constructor to search in
-     * @return a set of aliases including <code>this</code> itself public static
-     * Set<String> getThisAliases(final FunctionNode moduleConstructor) { final
-     * Set<String> aliases = new HashSet<>(); if (moduleConstructor != null &&
-     * moduleConstructor.getBody() != null) { aliases.add(THIS_KEYWORD);
-     * LexicalContext lc = new LexicalContext(); moduleConstructor.accept(new
-     * NodeOperatorVisitor<LexicalContext>(lc) {
-     *
-     * @Override public boolean enterVarNode(VarNode varNode) { if
-     * (lc.getCurrentFunction() == moduleConstructor) { if
-     * (varNode.getAssignmentSource() instanceof IdentNode) { IdentNode in =
-     * (IdentNode) varNode.getAssignmentSource(); if
-     * (THIS_KEYWORD.equals(in.getName())) {
-     * aliases.add(varNode.getAssignmentDest().getName()); } } } return
-     * super.enterVarNode(varNode); } }); } return aliases; }
-     */
     protected static final String SCRIPT_NOT_INITIALIZED = "Platypus script functions are not initialized.";
 
     public static void unlisten(JSObject aCookie) {
-        JSObject unlisten = (JSObject) aCookie.getMember("unlisten");
-        unlisten.call(null, new Object[]{});
+        if (aCookie != null) {
+            JSObject unlisten = (JSObject) aCookie.getMember("unlisten");
+            unlisten.call(null, new Object[]{});
+        }
     }
 
     public static boolean isInNode(Node node, int offset) {

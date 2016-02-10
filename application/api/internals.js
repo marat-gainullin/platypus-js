@@ -23,10 +23,10 @@
             };
         };
     }
-    var ReportClass = Java.type("com.eas.client.report.Report");
-    var ScriptsClass = Java.type("com.eas.script.Scripts");
-    var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
-    var JavaStringArrayClass = Java.type("java.lang.String[]");
+    var ReportClass = Java.type('com.eas.client.report.Report');
+    var ScriptsClass = Java.type('com.eas.script.Scripts');
+    var ScriptedResourceClass = Java.type('com.eas.client.scripts.ScriptedResource');
+    var JavaStringArrayClass = Java.type('java.lang.String[]');
     var apiPath = ScriptsClass.getAbsoluteApiPath();
     var appPath = ScriptedResourceClass.getAbsoluteAppPath();
     var space = ScriptsClass.getSpace();
@@ -129,7 +129,6 @@
     define.amd = {};
     Object.defineProperty(global, 'define', {value: define});
     Object.defineProperty(global, 'require', {value: require});
-    var Report = require('core/report');
     space.setGlobal(global);
     space.setLookupInGlobalFunc(
             function (aPropertyName) {
@@ -207,7 +206,8 @@
     space.setLoadFunc(function (aSourceLocation) {
         return load(aSourceLocation);
     });
-    var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
+    var Report = require('core/report');
+    var EngineUtilsClass = Java.type('jdk.nashorn.api.scripting.ScriptUtils');
     var HashMapClass = Java.type('java.util.HashMap');
     function copy(aValue, aMapping) {
         aValue = EngineUtilsClass.unwrap(aValue);
