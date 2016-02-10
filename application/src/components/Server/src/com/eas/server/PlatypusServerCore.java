@@ -163,7 +163,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                 Scripts.setContext(callingContext);
                 try {
                     Scripts.getSpace().process(() -> {
-                        aOnSuccess.accept(copiedRes);
+                        aOnSuccess.accept(Scripts.getSpace().restoreCopy(copiedRes));
                     });
                 } finally {
                     Scripts.setContext(oldContext);
@@ -236,7 +236,10 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                     Object oFun = moduleInstance.getMember(aMethodName);
                                                     if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
                                                         AtomicBoolean executed = new AtomicBoolean();
-                                                        List<Object> arguments = new ArrayList<>(Arrays.asList(copiedArguments));
+                                                        List<Object> arguments = new ArrayList<>();
+                                                        for(Object argument : copiedArguments){
+                                                            arguments.add(Scripts.getSpace().restoreCopy(argument));
+                                                        }
                                                         arguments.add(new AbstractJSObject() {
                                                             @Override
                                                             public Object call(final Object thiz, final Object... largs) {
