@@ -28,10 +28,10 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import javax.script.SimpleScriptContext;
-import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.api.scripting.ScriptUtils;
 import jdk.nashorn.api.scripting.URLReader;
 import jdk.nashorn.internal.ir.FunctionNode;
@@ -63,6 +63,15 @@ public class Scripts {
 
     private static final NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
     private static final NashornScriptEngine engine = (NashornScriptEngine) factory.getScriptEngine();
+    private static java.lang.reflect.Field sobjField;// dirty hack, because of LPC
+    static {
+        try {
+            sobjField = ScriptObjectMirror.class.getDeclaredField("sobj");
+            sobjField.setAccessible(true);
+        } catch (NoSuchFieldException | SecurityException ex) {
+            Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     protected static final String PLATYPUS_JS_MODULENAME = "facade";
     public static final String PLATYPUS_JS_FILENAME = PLATYPUS_JS_MODULENAME + ".js";
     protected static final String INTERNALS_MODULENAME = "internals";
@@ -490,24 +499,14 @@ public class Scripts {
             return (JSObject) oResult;
         }
 
-        private static class Wrapper {
-
-            public Object value;
-        }
-
-        public Object makeCopy(Object aSource) {
+        public Object makeCopy(Object aSource) throws Exception {
             assert copyObjectFunc != null : SCRIPT_NOT_INITIALIZED;
-            Wrapper w = new Wrapper();
-            copyObjectFunc.call(null, new Object[]{aSource, new AbstractJSObject() {
-
-                @Override
-                public Object call(Object thiz, Object... args) {
-                    w.value = args.length > 0 ? args[0] : null;
-                    return null;
-                }
-
-            }});
-            return w.value;
+            Object copied = copyObjectFunc.call(null, new Object[]{aSource});
+            if(copied instanceof ScriptObjectMirror){
+                ScriptObjectMirror mirror = (ScriptObjectMirror)copied;
+                copied = sobjField.get(mirror);
+            }
+            return copied;
         }
 
         public JSObject listen(JSObject aTarget, String aPath, JSObject aCallback) {

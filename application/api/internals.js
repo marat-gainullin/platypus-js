@@ -257,14 +257,14 @@
             }
         }
     }
-    space.setCopyObjectFunc(function (aValue, aConsumer) {
+    space.setCopyObjectFunc(function (aValue) {
         if (aValue instanceof Report) {
             aValue = aValue.unwrap();
         }
         if (aValue instanceof ReportClass) {
-            aConsumer(aValue);
+            return aValue;
         } else {
-            aConsumer(copy(aValue));
+            return copy(aValue);
         }
     });
     if(ScriptsClass.isGlobalAPI()){

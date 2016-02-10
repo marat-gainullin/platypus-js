@@ -21,19 +21,13 @@ import org.xml.sax.SAXException;
  */
 public class Source2XmlDom {
 
-    // setup documents framework
     private Source2XmlDom() {
         super();
     }
 
-    public static Document transform(String source) {
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            return builder.parse(new InputSource(new StringReader(source)));
-        } catch (SAXException | IOException | ParserConfigurationException ex) {
-            Logger.getLogger(Source2XmlDom.class.getName()).log(Level.WARNING, null, ex);
-            return null;
-        }
+    public static Document transform(String source) throws SAXException, IOException, ParserConfigurationException {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        return builder.parse(new InputSource(new StringReader(source)));
     }
 }
