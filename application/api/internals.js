@@ -245,17 +245,25 @@
                 } else if (aValue instanceof Boolean) {
                     return !!aValue;
                 } else {
-                    var copied = aValue instanceof Array ? new ArrayCopyClass() : new ObjectCopyClass();
+                    var isArray = aValue instanceof Array;
+                    var copied = isArray ? new ArrayCopyClass() : new ObjectCopyClass();
                     aMapping.put(aValue, copied);
+                    if(isArray){
+                        for(var i = 0; i < aValue.length; i++){
+                            var pValue = aValue[i];
+                            if (typeof pValue !== 'function') {
+                                var val = aMapping.containsKey(pValue) ? aMapping.get(pValue) : copy(pValue, aMapping);
+                                copied.add(val);
+                            }
+                        }
+                    }
                     for (var p in aValue) {
-                        var pValue = aValue[p];
-                        if (typeof pValue !== 'function') {
-                            var val;
-                            if (aMapping.containsKey(pValue))
-                                val = aMapping.get(pValue);
-                            else
-                                val = copy(pValue, aMapping);
-                            copied.put(p + '', val);
+                        if(!isArray || isNaN(p)){
+                            var pValue = aValue[p];
+                            if (typeof pValue !== 'function') {
+                                var val = aMapping.containsKey(pValue) ? aMapping.get(pValue) : copy(pValue, aMapping);
+                                copied.put(p + '', val);
+                            }
                         }
                     }
                     return copied;
@@ -299,18 +307,18 @@
                 } else if (aValue instanceof Boolean) {
                     return !!aValue;
                 } else {
-                    var restored = aValue instanceof ArrayCopyClass ? [] : {};
+                    var isList = aValue instanceof ArrayCopyClass;
+                    var restored = isList ? [] : {};
                     aMapping.put(aValue, restored);
+                    if(isList){
+                        for(var i = 0; i < aValue.size(); i++){
+                            restored.push(aValue.get(i));
+                        }
+                    }
                     for each (var p in aValue.keySet()) {
                         var pValue = aValue.get(p);
-                        if (typeof pValue !== 'function') {
-                            var val;
-                            if (aMapping.containsKey(pValue))
-                                val = aMapping.get(pValue);
-                            else
-                                val = restore(pValue, aMapping);
-                            restored[p] = val;
-                        }
+                        var val = aMapping.containsKey(pValue) ? aMapping.get(pValue) : restore(pValue, aMapping);
+                        restored[p] = val;
                     }
                     return restored;
                 }
