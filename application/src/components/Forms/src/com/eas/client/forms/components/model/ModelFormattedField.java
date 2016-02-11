@@ -54,7 +54,7 @@ public class ModelFormattedField extends ModelComponentDecorator<VFormattedField
     @ScriptFunction
     @Override
     public void setJsValue(Object aValue) {
-        setValue(Scripts.getSpace().toJava(aValue));
+        setValue(Scripts.isInitialized() ? Scripts.getSpace().toJava(aValue) : aValue);
     }
 
     @Override

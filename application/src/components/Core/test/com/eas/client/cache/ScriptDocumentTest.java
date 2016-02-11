@@ -21,6 +21,74 @@ import static org.junit.Assert.*;
 public class ScriptDocumentTest {
 
     @Test
+    public void annotatedGlobalAndAmd2ArgDefineTest() {
+        String jsText = ""
+                + "/**\n"
+                + " * @module GlobalModule1\n"
+                + " */"
+                + "function GM1(){"
+                + "    var self = this;"
+                + "    /**\n"
+                + "     * @rolesAllowed rolea\n"
+                + "     */\n"
+                + "    self.a = {};"
+                + "    this.m = function(){};"
+                + "}"
+                + "function GlobalModule2(){"
+                + "    var self = this;"
+                + "    /**\n"
+                + "     * @rolesAllowed rolea\n"
+                + "     */\n"
+                + "    self.a = {};"
+                + "    this.m = function(){};"
+                + "}"
+                + "/**\n"
+                + " * @module AmdDefineTest1\n"
+                + " */\n"
+                + "\n"
+                + "define(function(){"
+                + "    function module_constructor(){"
+                + "        var self = this;"
+                + "        /**\n"
+                + "         * @rolesAllowed rolea\n"
+                + "         */\n"
+                + "        self.a = {};"
+                + "        this.m = function(){};"
+                + "    }"
+                + "    return module_constructor;"
+                + "});"
+                + "define(function(){"
+                + "    function module_constructor(){"
+                + "        var self = this;"
+                + "        /**\n"
+                + "         * @rolesAllowed rolea\n"
+                + "         */\n"
+                + "        self.a = {};"
+                + "        this.m = function(){};"
+                + "    }"
+                + "    return module_constructor;"
+                + "});"
+                + "/**\n"
+                + " * @module AmdDefineTest2\n"
+                + " */\n"
+                + ""
+                + "define(function(){"
+                + "    function module_constructor(){"
+                + "        var self = this;"
+                + "        /**\n"
+                + "         * @rolesAllowed rolea\n"
+                + "         */\n"
+                + "        self.a = {};"
+                + "        this.m = function(){};"
+                + "    }"
+                + "    return module_constructor;"
+                + "});"
+                + "";
+        ScriptDocument doc = ScriptDocument.parse(jsText, "AmdDefineTestDefault");
+        verifyModulesDocuments(doc);
+    }
+    
+    @Test
     public void globalAndAmd2ArgDefineTest() {
         String jsText = ""
                 + "function GlobalModule1(){"
@@ -164,8 +232,14 @@ public class ScriptDocumentTest {
 
     @Test
     public void jQueryLargeFileMinified() throws IOException {
-        URL resource = ScriptDocumentTest.class.getClassLoader().getResource("com/eas/script/reg-exp-literal.min-jquery.js");
-        ScriptDocument doc = ScriptDocument.parse(readUrl(resource), "jquery-large-min");
+        URL resource = ScriptDocumentTest.class.getClassLoader().getResource("com/eas/client/cache/reg-exp-literal.min-jquery.js");
+        ScriptDocument.parse(readUrl(resource), "jquery-large-min");
+    }
+
+    @Test
+    public void jQueryLargeFile() throws IOException {
+        URL resource = ScriptDocumentTest.class.getClassLoader().getResource("com/eas/client/cache/reg-exp-literal-jquery.js");
+        ScriptDocument.parse(readUrl(resource), "leaflet-large");
     }
 
     private String readUrl(URL resource) throws IOException {
@@ -176,14 +250,8 @@ public class ScriptDocumentTest {
     }
 
     @Test
-    public void jQueryLargeFile() throws IOException {
-        URL resource = ScriptDocumentTest.class.getClassLoader().getResource("com/eas/script/reg-exp-literal-jquery.js");
-        ScriptDocument.parse(readUrl(resource), "leaflet-large");
-    }
-
-    @Test
     public void leafletLargeFile() throws IOException {
-        URL resource = ScriptDocumentTest.class.getClassLoader().getResource("com/eas/script/numeric-literal-leaflet.js");
+        URL resource = ScriptDocumentTest.class.getClassLoader().getResource("com/eas/client/cache/numeric-literal-leaflet.js");
         ScriptDocument.parse(readUrl(resource), "jquery-large");
     }
 }

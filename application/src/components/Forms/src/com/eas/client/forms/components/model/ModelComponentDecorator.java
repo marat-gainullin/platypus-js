@@ -781,7 +781,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
 
     @Override
     public Object getJsValue() {
-        return Scripts.getSpace().toJs(getValue());
+        return Scripts.getSpace() != null ? Scripts.getSpace().toJs(getValue()) : getValue();
     }
 
     @Override

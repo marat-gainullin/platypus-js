@@ -340,13 +340,13 @@ public class FormattedField extends VFormattedField implements HasOnValueChange,
     @Undesignable
     @Override
     public Object getJsValue() {
-        return Scripts.getSpace().toJs(super.getValue());
+        return Scripts.isInitialized() ? Scripts.getSpace().toJs(super.getValue()) : super.getValue();
     }
 
     @ScriptFunction
     @Override
     public void setJsValue(Object aValue) {
-        setValue(Scripts.getSpace().toJava(aValue));
+        setValue(aValue);
     }
 
     @Undesignable
@@ -357,13 +357,13 @@ public class FormattedField extends VFormattedField implements HasOnValueChange,
 
     @Override
     public void setValue(Object aValue) {
-        super.setValue(Scripts.getSpace().toJava(aValue));
+        super.setValue(Scripts.isInitialized() ? Scripts.getSpace().toJava(aValue) : aValue);
     }
 
     private static final String FORMAT_JSDOC = ""
             + "/**\n"
-            + "* Field text format.\n"
-            + "*/";
+            + " * Field text format.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = FORMAT_JSDOC)
     @Override
