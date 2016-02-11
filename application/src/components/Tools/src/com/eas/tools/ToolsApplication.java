@@ -101,11 +101,11 @@ public class ToolsApplication {
             put("datamodelDbId", "ddi");
             put("datamodelSchemaName", "dsn");
             put("Name", "n");
-            put("entityLocationX", "null");
-            put("entityLocationY", "null");
-            put("entityWidth", "null");
-            put("entityHeight", "null");
-            put("entityIconified", "null");
+            put("entityLocationX", null);
+            put("entityLocationY", null);
+            put("entityWidth", null);
+            put("entityHeight", null);
+            put("entityIconified", null);
         }
     };
     private static final Map<String, String> MINIFIED_LAYOUT_TAGS = new HashMap<String, String>() {
@@ -341,14 +341,14 @@ public class ToolsApplication {
                 String fileName = file.getName();
                 String bundleName = appFolder.relativize(aPath).toString();
                 bundleName = FileUtils.removeExtension(bundleName).replace(File.separator, "/");
-                if (fileName.endsWith("." + PlatypusFiles.MODEL_EXTENSION)) {
-                    String fileNameWoExt = fileName.substring(0, fileName.length() - PlatypusFiles.MODEL_EXTENSION.length() - 1);
+                if (modelsBundle != null && fileName.endsWith("." + PlatypusFiles.MODEL_EXTENSION)) {
+                    String fileNameWoExt = fileName.substring(0, fileName.length() - PlatypusFiles.MODEL_EXTENSION.length());
                     Path sqlPath = aPath.resolveSibling(fileNameWoExt + PlatypusFiles.SQL_EXTENSION);
-                    if (modelsBundle != null && !sqlPath.toFile().exists()) {
-                        Path jsPath = aPath.resolveSibling(fileNameWoExt + PlatypusFiles.JAVASCRIPT_FILE_END);
+                    if (!sqlPath.toFile().exists()) {
+                        Path jsPath = aPath.resolveSibling(fileNameWoExt + PlatypusFiles.JAVASCRIPT_EXTENSION);
                         if (jsPath.toFile().exists()) {
                             ScriptDocument scriptDoc = ScriptDocument.parse(FileUtils.readString(jsPath.toFile(), SettingsConstants.COMMON_ENCODING), bundleName);
-                            if(scriptDoc.getModules().size() == 1){
+                            if (scriptDoc.getModules().size() == 1) {
                                 bundleName = scriptDoc.getModules().keySet().iterator().next();
                             }
                         }
@@ -367,30 +367,28 @@ public class ToolsApplication {
                             modelChild = modelChild.getNextSibling();
                         }
                     }
-                } else if (bundleName.endsWith("." + PlatypusFiles.FORM_EXTENSION)) {
-                    if (layoutsBundle != null) {
-                        String fileNameWoExt = fileName.substring(0, fileName.length() - PlatypusFiles.FORM_EXTENSION.length() - 1);
-                        Path jsPath = aPath.resolveSibling(fileNameWoExt + PlatypusFiles.JAVASCRIPT_FILE_END);
-                        if (jsPath.toFile().exists()) {
-                            ScriptDocument scriptDoc = ScriptDocument.parse(FileUtils.readString(jsPath.toFile(), SettingsConstants.COMMON_ENCODING), bundleName);
-                            if(scriptDoc.getModules().size() == 1){
-                                bundleName = scriptDoc.getModules().keySet().iterator().next();
-                            }
+                } else if (layoutsBundle != null && fileName.endsWith("." + PlatypusFiles.FORM_EXTENSION)) {
+                    String fileNameWoExt = fileName.substring(0, fileName.length() - PlatypusFiles.FORM_EXTENSION.length());
+                    Path jsPath = aPath.resolveSibling(fileNameWoExt + PlatypusFiles.JAVASCRIPT_EXTENSION);
+                    if (jsPath.toFile().exists()) {
+                        ScriptDocument scriptDoc = ScriptDocument.parse(FileUtils.readString(jsPath.toFile(), SettingsConstants.COMMON_ENCODING), bundleName);
+                        if (!scriptDoc.getModules().isEmpty()) {
+                            bundleName = scriptDoc.getModules().keySet().iterator().next();
                         }
-                        String layoutContent = FileUtils.readString(file, SettingsConstants.COMMON_ENCODING);
-                        Document layoutDoc = Source2XmlDom.transform(layoutContent);
-                        Element layoutDocRoot = layoutDoc.getDocumentElement();
-                        Element processedRoot = layoutsBundle.createElement(layoutDocRoot.getTagName());
-                        processedRoot.setAttribute(BUNDLE_NAME_ATTR, bundleName);
-                        layoutsBundleRoot.appendChild(processedRoot);
-                        Node layoutChild = layoutDocRoot.getFirstChild();
-                        while (layoutChild != null) {
-                            if (layoutChild instanceof Element) {
-                                Element processedLayoutChild = minifyElement(layoutsBundle, (Element) layoutChild, MINIFIED_LAYOUT_TAGS, MINIFIED_LAYOUT_ATTRS);
-                                processedRoot.appendChild(processedLayoutChild);
-                            }
-                            layoutChild = layoutChild.getNextSibling();
+                    }
+                    String layoutContent = FileUtils.readString(file, SettingsConstants.COMMON_ENCODING);
+                    Document layoutDoc = Source2XmlDom.transform(layoutContent);
+                    Element layoutDocRoot = layoutDoc.getDocumentElement();
+                    Element processedRoot = layoutsBundle.createElement(layoutDocRoot.getTagName());
+                    processedRoot.setAttribute(BUNDLE_NAME_ATTR, bundleName);
+                    layoutsBundleRoot.appendChild(processedRoot);
+                    Node layoutChild = layoutDocRoot.getFirstChild();
+                    while (layoutChild != null) {
+                        if (layoutChild instanceof Element) {
+                            Element processedLayoutChild = minifyElement(layoutsBundle, (Element) layoutChild, MINIFIED_LAYOUT_TAGS, MINIFIED_LAYOUT_ATTRS);
+                            processedRoot.appendChild(processedLayoutChild);
                         }
+                        layoutChild = layoutChild.getNextSibling();
                     }
                 }
                 return super.visitFile(aPath, attrs);
@@ -401,7 +399,7 @@ public class ToolsApplication {
         if (modelsBundle != null) {
             assert aMinifiedModel != null;
             File file = aMinifiedModel;
-            String bundleContent = XmlDom2String.transform(modelsBundle);
+            String bundleContent = XmlDom2String.transform(modelsBundle, false);
             if (!file.getName().contains(".")) {
                 file = new File(file.getAbsolutePath() + "." + PlatypusFiles.MODEL_EXTENSION);
             }
@@ -411,7 +409,7 @@ public class ToolsApplication {
         if (layoutsBundle != null) {
             assert aMinifiedLayout != null;
             File file = aMinifiedLayout;
-            String bundleContent = XmlDom2String.transform(layoutsBundle);
+            String bundleContent = XmlDom2String.transform(layoutsBundle, false);
             if (!file.getName().contains(".")) {
                 file = new File(file.getAbsolutePath() + "." + PlatypusFiles.FORM_EXTENSION);
             }
@@ -431,10 +429,14 @@ public class ToolsApplication {
      * @throws java.lang.Exception
      */
     public static void main(String[] args) throws Exception {
-        ToolsApplication da = new ToolsApplication();
-        da.processedFolder = new File("."); // NOI18N
-        da.parseArgs(args);
-        da.doWork();
+        ToolsApplication ta = new ToolsApplication();
+        ta.processedFolder = new File("."); // NOI18N
+        try {
+            ta.parseArgs(args);
+            ta.doWork();
+        } catch (IllegalArgumentException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
     private void parseArgs(String[] args) {

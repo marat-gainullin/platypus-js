@@ -58,5 +58,5 @@ for (var a in modelMin.attributes) {
 }
 print('put("Name", "n");');
 for (var r in modelMin.removedAttributes) {
-    print('put("' + modelMin.removedAttributes[r] + '","null");');
+    print('put("' + modelMin.removedAttributes[r] + '", null);');
 }
