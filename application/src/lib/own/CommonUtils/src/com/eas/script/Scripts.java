@@ -31,7 +31,6 @@ import javax.script.SimpleScriptContext;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.api.scripting.ScriptUtils;
 import jdk.nashorn.api.scripting.URLReader;
 import jdk.nashorn.internal.ir.FunctionNode;
@@ -64,17 +63,6 @@ public class Scripts {
     private static final NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
     private static final NashornScriptEngine engine = (NashornScriptEngine) factory.getScriptEngine();
     
-    private static java.lang.reflect.Field sobjField;// dirty hack, because of LPC
-
-    static {
-        try {
-            sobjField = ScriptObjectMirror.class.getDeclaredField("sobj");
-            sobjField.setAccessible(true);
-        } catch (NoSuchFieldException | SecurityException ex) {
-            Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-     
     protected static final String PLATYPUS_JS_MODULENAME = "facade";
     public static final String PLATYPUS_JS_FILENAME = PLATYPUS_JS_MODULENAME + ".js";
     protected static final String INTERNALS_MODULENAME = "internals";
@@ -289,6 +277,7 @@ public class Scripts {
         protected JSObject listenFunc;
         protected JSObject listenElementsFunc;
         protected JSObject copyObjectFunc;
+        protected JSObject restoreObjectFunc;
 
         public void setGlobal(Object aValue) {
             if (global == null) {
@@ -414,6 +403,15 @@ public class Scripts {
             return copyObjectFunc;
         }
 
+        public void setRestoreObjectFunc(JSObject aValue) {
+            assert restoreObjectFunc == null;
+            restoreObjectFunc = aValue;
+        }
+
+        public JSObject getRestoreObjectFunc() {
+            return restoreObjectFunc;
+        }
+
         public Object toJava(Object aValue) {
             if (aValue instanceof ScriptObject) {
                 aValue = ScriptUtils.wrap((ScriptObject) aValue);
@@ -504,16 +502,12 @@ public class Scripts {
 
         public Object makeCopy(Object aSource) {
             assert copyObjectFunc != null : SCRIPT_NOT_INITIALIZED;
-            Object copied = copyObjectFunc.call(null, new Object[]{aSource});
-            if (copied instanceof ScriptObjectMirror) {
-                ScriptObjectMirror mirror = (ScriptObjectMirror) copied;
-                try {
-                    copied = sobjField.get(mirror);
-                } catch (IllegalArgumentException | IllegalAccessException ex) {
-                    Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            return copied;
+            return copyObjectFunc.call(null, new Object[]{aSource});
+        }
+
+        public Object restoreCopy(Object aSource) {
+            assert restoreObjectFunc != null : SCRIPT_NOT_INITIALIZED;
+            return restoreObjectFunc.call(null, new Object[]{aSource});
         }
 
         public JSObject listen(JSObject aTarget, String aPath, JSObject aCallback) {

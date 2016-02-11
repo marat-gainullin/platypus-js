@@ -208,6 +208,10 @@
     });
     var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
     var HashMapClass = Java.type('java.util.HashMap');
+    var DateCopyClass = Java.type('com.eas.script.copies.DateCopy');
+    var RegExpCopyClass = Java.type('com.eas.script.copies.RegExpCopy');
+    var ArrayCopyClass = Java.type('com.eas.script.copies.ArrayCopy');
+    var ObjectCopyClass = HashMapClass;
     function copy(aValue, aMapping) {
         aValue = EngineUtilsClass.unwrap(aValue);
         if (!aMapping)
@@ -224,7 +228,7 @@
                 return !!aValue;
             else if (type === 'object') {
                 if (aValue instanceof Date) {
-                    return new Date(aValue.getTime());
+                    return new DateCopyClass(aValue.getTime());
                 } else if (aValue instanceof RegExp) {
                     var flags = '';
                     if (aValue.global)
@@ -233,7 +237,7 @@
                         flags += 'i';
                     if (aValue.multiline)
                         flags += 'm';
-                    return new RegExp(aValue.source, flags);
+                    return new RegExpCopyClass(aValue.source, flags);
                 } else if (aValue instanceof Number) {
                     return +aValue;
                 } else if (aValue instanceof String) {
@@ -241,15 +245,25 @@
                 } else if (aValue instanceof Boolean) {
                     return !!aValue;
                 } else {
-                    var copied = aValue instanceof Array ? [] : {};
+                    var isArray = aValue instanceof Array;
+                    var copied = isArray ? new ArrayCopyClass() : new ObjectCopyClass();
                     aMapping.put(aValue, copied);
+                    if(isArray){
+                        for(var i = 0; i < aValue.length; i++){
+                            var pValue = aValue[i];
+                            if (typeof pValue !== 'function') {
+                                var val = aMapping.containsKey(pValue) ? aMapping.get(pValue) : copy(pValue, aMapping);
+                                copied.add(val);
+                            }
+                        }
+                    }
                     for (var p in aValue) {
-                        var pValue = aValue[p];
-                        if (typeof pValue !== 'function') {
-                            if (aMapping.containsKey(pValue))
-                                copied[p] = aMapping.get(pValue);
-                            else
-                                copied[p] = copy(pValue, aMapping);
+                        if(!isArray || isNaN(p)){
+                            var pValue = aValue[p];
+                            if (typeof pValue !== 'function') {
+                                var val = aMapping.containsKey(pValue) ? aMapping.get(pValue) : copy(pValue, aMapping);
+                                copied.put(p + '', val);
+                            }
                         }
                     }
                     return copied;
@@ -265,6 +279,60 @@
             return aValue;
         } else {
             return copy(aValue);
+        }
+    });
+    function restore(aValue, aMapping) {
+        aValue = EngineUtilsClass.unwrap(aValue);
+        if (!aMapping)
+            aMapping = new HashMapClass();
+        if (aValue === null || aValue === undefined)
+            return null;
+        else {
+            var type = typeof aValue;
+            if (type === 'number')
+                return +aValue;
+            else if (type === 'string')
+                return aValue + '';
+            else if (type === 'boolean')
+                return !!aValue;
+            else if (type === 'object') {
+                if (aValue instanceof DateCopyClass) {
+                    return new Date(aValue.getTime());
+                } else if (aValue instanceof RegExpCopyClass) {
+                    return new RegExp(aValue.getSource(), aValue.getFlags());
+                } else if (aValue instanceof Number) {
+                    return +aValue;
+                } else if (aValue instanceof String) {
+                    return aValue + '';
+                } else if (aValue instanceof Boolean) {
+                    return !!aValue;
+                } else {
+                    var isList = aValue instanceof ArrayCopyClass;
+                    var restored = isList ? [] : {};
+                    aMapping.put(aValue, restored);
+                    if(isList){
+                        for(var i = 0; i < aValue.size(); i++){
+                            restored.push(aValue.get(i));
+                        }
+                    }
+                    for each (var p in aValue.keySet()) {
+                        var pValue = aValue.get(p);
+                        var val = aMapping.containsKey(pValue) ? aMapping.get(pValue) : restore(pValue, aMapping);
+                        restored[p] = val;
+                    }
+                    return restored;
+                }
+            }
+        }
+    }
+    space.setRestoreObjectFunc(function (aValue) {
+        if (aValue instanceof Report) {
+            aValue = aValue.unwrap();
+        }
+        if (aValue instanceof ReportClass) {
+            return aValue;
+        } else {
+            return restore(aValue);
         }
     });
     if(ScriptsClass.isGlobalAPI()){
