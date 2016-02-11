@@ -738,7 +738,7 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                     var modelDocument = ScriptedResourceClass.getApp().getModels().get(file.getAbsolutePath(), file);
                     return loadModelDocument(modelDocument, aModuleName, aTarget);
                 } else {
-                    throw "Model definition for module '" + aModuleName + "' missing.";
+                    throw "Model definition for module '" + aModuleName + "' is not found.";
                 }
             }
 

@@ -34,13 +34,17 @@ define(['boxing', 'forms/form', 'forms/index', 'grid/index'], function (B, Form)
     }
     function loadForm(aModuleName, aModel, aTarget) {
         var file = FileUtils.findBrother(ScriptedResourceClass.getApp().getModules().nameToFile(aModuleName), "layout");
-        var document = ScriptedResourceClass.getApp().getForms().get(file.getAbsolutePath(), file);
-        var form = loadFormDocument(document, aModuleName, aModel, aTarget);
-        if (!form.title) {
-            form.title = aModuleName;
+        if(file){
+            var document = ScriptedResourceClass.getApp().getForms().get(file.getAbsolutePath(), file);
+            var form = loadFormDocument(document, aModuleName, aModel, aTarget);
+            if (!form.title) {
+                form.title = aModuleName;
+            }
+            form.formKey = aModuleName;
+            return form;
+        }else{
+            throw 'Layout definition for module "' + aModuleName + '" is not found';
         }
-        form.formKey = aModuleName;
-        return form;
     }
 
     function readForm(aContent, aModel, aTarget) {

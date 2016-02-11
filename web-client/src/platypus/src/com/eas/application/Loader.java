@@ -596,8 +596,11 @@ public class Loader {
 	}
 
 	public static void notifyScriptFailed(String aScriptName, final List<String> aReasons) {
-		List<Callback<Void, String>> interestedPendings = new ArrayList<>(pendingsOnScript.get(aScriptName));
-		pendingsOnScript.get(aScriptName).clear();
+		List<Callback<Void, String>> interestedPendings = new ArrayList<>();
+		if(pendingsOnScript.containsKey(aScriptName)){
+			interestedPendings.addAll(pendingsOnScript.get(aScriptName));
+			pendingsOnScript.get(aScriptName).clear();
+		}
 		final String errors = errorsToString(aReasons);
 		for (final Callback<Void, String> interestedPending : interestedPendings) {
 			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -611,8 +614,11 @@ public class Loader {
 	}
 
 	private static void notifyScriptLoaded(String aScriptName) {
-		List<Callback<Void, String>> interestedPendings = new ArrayList<>(pendingsOnScript.get(aScriptName));
-		pendingsOnScript.get(aScriptName).clear();
+		List<Callback<Void, String>> interestedPendings = new ArrayList<>();
+		if(pendingsOnScript.containsKey(aScriptName)){
+			interestedPendings.addAll(pendingsOnScript.get(aScriptName));
+			pendingsOnScript.get(aScriptName).clear();
+		}
 		for (final Callback<Void, String> interestedPending : interestedPendings) {
 			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 
@@ -634,8 +640,11 @@ public class Loader {
 	}
 
 	public static void notifyModuleFailed(String aModuleName, final List<String> aReasons) {
-		List<Callback<Void, String>> interestedPendings = new ArrayList<>(pendingsOnModule.get(aModuleName));
-		pendingsOnModule.get(aModuleName).clear();
+		List<Callback<Void, String>> interestedPendings = new ArrayList<>();
+		if(pendingsOnModule.containsKey(aModuleName)){
+			interestedPendings.addAll(pendingsOnModule.get(aModuleName));
+			pendingsOnModule.get(aModuleName).clear();
+		}
 		final String errors = errorsToString(aReasons);
 		for (final Callback<Void, String> interestedPending : interestedPendings) {
 			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -649,8 +658,11 @@ public class Loader {
 	}
 
 	private static void notifyModuleLoaded(String aModuleName) {
-		List<Callback<Void, String>> interestedPendings = new ArrayList<>(pendingsOnModule.get(aModuleName));
-		pendingsOnModule.get(aModuleName).clear();
+		List<Callback<Void, String>> interestedPendings = new ArrayList<>();
+		if(pendingsOnModule.containsKey(aModuleName)){
+			interestedPendings.addAll(pendingsOnModule.get(aModuleName));
+			pendingsOnModule.get(aModuleName).clear();
+		}
 		for (final Callback<Void, String> interestedPending : interestedPendings) {
 			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 

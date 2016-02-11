@@ -32,12 +32,16 @@ public class JsForms {
 			}
 			function loadForm(aModuleName, aModel, aTarget) {
 				var aClient = @com.eas.client.AppClient::getInstance()();
-				var appElementDoc = aClient.@com.eas.client.AppClient::getFormDocument(Ljava/lang/String;)(aModuleName);
-				var form = readFormDocument(appElementDoc, aModuleName, aModel, aTarget);
-	            if (!form.title)
-	                form.title = appElementName;
-	            form.formKey = appElementName;
-	            return form;
+				var layoutDoc = aClient.@com.eas.client.AppClient::getFormDocument(Ljava/lang/String;)(aModuleName);
+				if(layoutDoc){
+					var form = readFormDocument(layoutDoc, aModuleName, aModel, aTarget);
+		            if (!form.title)
+		                form.title = aModuleName;
+		            form.formKey = aModuleName;
+		            return form;
+				} else {
+					throw 'Layout definition for module "' + aModuleName + '" is not found';
+				}
 			}
 			function readForm(aFormContent, aModel, aTarget){
 				var doc = @com.google.gwt.xml.client.XMLParser::parse(Ljava/lang/String;)(aFormContent + "");

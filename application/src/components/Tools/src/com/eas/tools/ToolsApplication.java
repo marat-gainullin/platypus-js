@@ -307,6 +307,14 @@ public class ToolsApplication {
                 }
             }
         }
+        Node child = aElement.getFirstChild();
+        while (child != null) {
+            if (child instanceof Element) {
+                Element processedChild = minifyElement(aProcessedDocument, (Element) child, MINIFIED_LAYOUT_TAGS, MINIFIED_LAYOUT_ATTRS);
+                processedElement.appendChild(processedChild);
+            }
+            child = child.getNextSibling();
+        }
         return processedElement;
     }
 
@@ -355,8 +363,9 @@ public class ToolsApplication {
                         String modelContent = FileUtils.readString(file, SettingsConstants.COMMON_ENCODING);
                         Document modelDoc = Source2XmlDom.transform(modelContent);
                         Element modelDocRoot = modelDoc.getDocumentElement();
-                        Element processedRoot = modelsBundle.createElement(modelDocRoot.getTagName());
+                        Element processedRoot = minifyElement(modelsBundle, modelDocRoot, MINIFIED_MODEL_TAGS, MINIFIED_MODEL_ATTRS);
                         processedRoot.setAttribute(BUNDLE_NAME_ATTR, bundleName);
+
                         modelsBundleRoot.appendChild(processedRoot);
                         Node modelChild = modelDocRoot.getFirstChild();
                         while (modelChild != null) {
@@ -379,7 +388,7 @@ public class ToolsApplication {
                     String layoutContent = FileUtils.readString(file, SettingsConstants.COMMON_ENCODING);
                     Document layoutDoc = Source2XmlDom.transform(layoutContent);
                     Element layoutDocRoot = layoutDoc.getDocumentElement();
-                    Element processedRoot = layoutsBundle.createElement(layoutDocRoot.getTagName());
+                    Element processedRoot = minifyElement(layoutsBundle, (Element) layoutDocRoot, MINIFIED_LAYOUT_TAGS, MINIFIED_LAYOUT_ATTRS);
                     processedRoot.setAttribute(BUNDLE_NAME_ATTR, bundleName);
                     layoutsBundleRoot.appendChild(processedRoot);
                     Node layoutChild = layoutDocRoot.getFirstChild();

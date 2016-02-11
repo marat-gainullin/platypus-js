@@ -414,8 +414,12 @@ public class JsModel {
 			}
 			function loadModel(aModuleName, aTarget) {
 				var aClient = @com.eas.client.AppClient::getInstance()();
-				var appElementDoc = aClient.@com.eas.client.AppClient::getModelDocument(Ljava/lang/String;)(aModuleName);
-				return readModelDocument(appElementDoc, aModuleName, aTarget);
+				var modelDoc = aClient.@com.eas.client.AppClient::getModelDocument(Ljava/lang/String;)(aModuleName);
+				if(modelDoc){
+					return readModelDocument(modelDoc, aModuleName, aTarget);
+				} else {
+					throw 'Model definition for module "' + aModuleName + '" is not found';
+				}
 			}		
             var module = {};
             Object.defineProperty(module, 'loadModel', {

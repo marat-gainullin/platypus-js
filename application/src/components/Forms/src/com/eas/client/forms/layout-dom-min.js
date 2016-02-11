@@ -151,7 +151,8 @@ var layoutMin = {
         "hgap": "hgap",
         "vgap": "vgap",
         "rows": "rows",
-        "columns": "columns"
+        "columns": "columns",
+        "view": "view"
     }};
 print('layout tags:');
 for (var t in layoutMin.tags) {

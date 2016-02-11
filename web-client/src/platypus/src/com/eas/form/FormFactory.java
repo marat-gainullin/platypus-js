@@ -324,7 +324,7 @@ public class FormFactory extends UiReader {
 						try {
 							addToParent(anElement, aTarget, parent);
 						} catch (Exception ex) {
-							ex.printStackTrace();
+							Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
 				});
