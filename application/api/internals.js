@@ -110,7 +110,7 @@
                 sDep = ScriptedResourceClass.toModuleId(apiPath, appPath, sDep, calledFromFile);
                 sDeps[s] = sDep;
             }
-            space.addAmdDefine(aModuleName + '', sDeps, function (aModuleName) {
+            space.addAmdDefine(aModuleName ? aModuleName + '' : null, sDeps, function (aModuleName) {
                 var defined = space.getDefined();
                 var resolved = [];
                 for (var d = 0; d < sDeps.length; d++) {

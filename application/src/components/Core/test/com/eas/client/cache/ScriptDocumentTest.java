@@ -6,6 +6,7 @@
 package com.eas.client.cache;
 
 import com.eas.client.settings.SettingsConstants;
+import com.eas.script.JsDoc;
 import com.eas.util.BinaryUtils;
 import java.io.IOException;
 import java.io.InputStream;
@@ -208,6 +209,102 @@ public class ScriptDocumentTest {
                 + "";
         ScriptDocument doc = ScriptDocument.parse(jsText, "AmdDefineTestDefault");
         verifyModulesDocuments(doc);
+    }
+
+    @Test
+    public void globalAndAmd3ArgDefineWOModuleAnnotationTest() {
+        String jsText = ""
+                + "/*\n"
+                + " * @resident\n"
+                + " * @rolesAllowed meh1\n"
+                + " */"
+                + "define([], function(){"
+                + "    function module_constructor(){"
+                + "         var self = this;"
+                + "         /**\n"
+                + "          * @rolesAllowed rolea\n"
+                + "          */\n"
+                + "         this.a = {};"
+                + "         self.m = function(){};"
+                + "    }"
+                + "    return module_constructor;"
+                + "});"
+                + "function GlobalModule1(){"
+                + "    var self = this;"
+                + "    /**\n"
+                + "     * @rolesAllowed rolea\n"
+                + "     */\n"
+                + "    self.a = {};"
+                + "    this.m = function(){};"
+                + "}"
+                + "/*\n"
+                + " * @resident\n"
+                + " * @rolesAllowed meh2\n"
+                + " */"
+                + "function GlobalModule2(){"
+                + "    var self = this;"
+                + "    /**\n"
+                + "     * @rolesAllowed rolea\n"
+                + "     */\n"
+                + "    self.a = {};"
+                + "    this.m = function(){};"
+                + "}"
+                + "/*\n"
+                + " * @resident\n"
+                + " * @rolesAllowed meh3\n"
+                + " */"
+                + "define('AmdDefineTest1',[], function(){"
+                + "    function module_constructor(){"
+                + "         var self = this;"
+                + "         /**\n"
+                + "          * @rolesAllowed rolea\n"
+                + "          */\n"
+                + "         this.a = {};"
+                + "         self.m = function(){};"
+                + "    }"
+                + "    return module_constructor;"
+                + "});"
+                + "define('AmdDefineTest2', [], function(){"
+                + "    function module_constructor(){"
+                + "        var self = this;"
+                + "        /**\n"
+                + "         * @rolesAllowed rolea\n"
+                + "         */\n"
+                + "        this.a = {};"
+                + "        self.m = function(){};"
+                + "    }"
+                + "    return module_constructor;"
+                + "});"
+                + "";
+        ScriptDocument doc = ScriptDocument.parse(jsText, "AmdDefineTestDefault");
+        Map<String, ScriptDocument.ModuleDocument> moduleDocuments = doc.getModules();
+        assertEquals(5, doc.getModules().size());
+        assertTrue(moduleDocuments.containsKey("AmdDefineTestDefault"));
+        assertTrue(moduleDocuments.containsKey("AmdDefineTest1"));
+        assertTrue(moduleDocuments.containsKey("AmdDefineTest2"));
+        assertTrue(moduleDocuments.containsKey("GlobalModule1"));
+        assertTrue(moduleDocuments.containsKey("GlobalModule2"));
+        ScriptDocument.ModuleDocument defModule = moduleDocuments.get("AmdDefineTestDefault");
+        assertTrue(defModule.hasAnnotation(JsDoc.Tag.RESIDENT_TAG));
+        assertTrue(defModule.hasAnnotation(JsDoc.Tag.ROLES_ALLOWED_TAG));
+        assertEquals(1, defModule.getAllowedRoles().size());
+        assertTrue(defModule.getAllowedRoles().contains("meh1"));
+        ScriptDocument.ModuleDocument globalModule1 = moduleDocuments.get("GlobalModule1");
+        assertTrue(globalModule1.getAnnotations().isEmpty());
+        assertTrue(globalModule1.getAllowedRoles().isEmpty());
+        ScriptDocument.ModuleDocument globalModule2 = moduleDocuments.get("GlobalModule2");
+        assertTrue(globalModule2.hasAnnotation(JsDoc.Tag.RESIDENT_TAG));
+        assertTrue(globalModule2.hasAnnotation(JsDoc.Tag.ROLES_ALLOWED_TAG));
+        assertEquals(1, globalModule2.getAllowedRoles().size());
+        assertTrue(globalModule2.getAllowedRoles().contains("meh2"));
+        ScriptDocument.ModuleDocument amdModule1 = moduleDocuments.get("AmdDefineTest1");
+        assertTrue(amdModule1.hasAnnotation(JsDoc.Tag.RESIDENT_TAG));
+        assertTrue(amdModule1.hasAnnotation(JsDoc.Tag.ROLES_ALLOWED_TAG));
+        assertEquals(1, amdModule1.getAllowedRoles().size());
+        assertTrue(amdModule1.getAllowedRoles().contains("meh3"));
+        ScriptDocument.ModuleDocument amdModule2 = moduleDocuments.get("AmdDefineTest2");
+        assertTrue(amdModule2.getAnnotations().isEmpty());
+        assertTrue(amdModule2.getAllowedRoles().isEmpty());
     }
 
     private static void verifyModulesDocuments(ScriptDocument doc) {

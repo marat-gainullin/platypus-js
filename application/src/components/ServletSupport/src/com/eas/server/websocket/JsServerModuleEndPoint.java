@@ -161,7 +161,7 @@ public class JsServerModuleEndPoint {
         PlatypusServerCore platypusCore = lookupPlaypusServerCore();
         in(platypusCore, websocketSession, (com.eas.server.Session aSession) -> {
             try {
-                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "Container OnOpen {0}.", aSession.getId());
+                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "WebSocket container OnOpen {0}.", aSession.getId());
                 ScriptedResource._require(new String[]{"servlet-support/web-socket-server-session"}, null, Scripts.getSpace(), new HashSet<>());
                 platypusCore.executeMethod(moduleName, WS_ON_OPEN, new Object[]{new WebSocketServerSession(websocketSession)}, true, (Object aResult) -> {
                     Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_OPEN, aModuleName});
@@ -178,7 +178,7 @@ public class JsServerModuleEndPoint {
     public void messageRecieved(Session websocketSession, String aData) throws Exception {
         PlatypusServerCore platypusCore = lookupPlaypusServerCore();
         in(platypusCore, websocketSession, (com.eas.server.Session aSession) -> {
-            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "Container OnMessage {0}.", aSession.getId());
+            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "WebSocket container OnMessage {0}.", aSession.getId());
             JSObject messageEvent = Scripts.getSpace().makeObj();
             messageEvent.setMember("data", aData);
             messageEvent.setMember("id", websocketSession.getId());
@@ -194,7 +194,7 @@ public class JsServerModuleEndPoint {
     public void errorInSession(Session websocketSession, Throwable aError) throws Exception {
         PlatypusServerCore platypusCore = lookupPlaypusServerCore();
         in(platypusCore, websocketSession, (com.eas.server.Session aSession) -> {
-            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "Container OnError {0}.", aSession.getId());
+            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "WebSocket container OnError {0}.", aSession.getId());
             JSObject errorEvent = Scripts.getSpace().makeObj();
             errorEvent.setMember("message", aError.getMessage());
             errorEvent.setMember("id", websocketSession.getId());
@@ -210,7 +210,7 @@ public class JsServerModuleEndPoint {
     public void sessionClosed(Session websocketSession) throws Exception {
         PlatypusServerCore platypusCore = lookupPlaypusServerCore();
         in(platypusCore, websocketSession, (com.eas.server.Session aSession) -> {
-            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "Container OnClose {0}.", aSession.getId());
+            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "WebSocket container OnClose {0}.", aSession.getId());
             JSObject closeEvent = Scripts.getSpace().makeObj();
             closeEvent.setMember("wasClean", true);
             closeEvent.setMember("code", CloseReason.CloseCodes.NORMAL_CLOSURE.getCode());

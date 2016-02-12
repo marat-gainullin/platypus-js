@@ -314,12 +314,12 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                             onFailure.accept(ex);
                                         }
                                     };
-                                    JSObject moduleConstructor = Scripts.getSpace().lookupInGlobal(aModuleName);
+                                    JSObject moduleConstructor = Scripts.getSpace().lookup(aModuleName);
                                     if (moduleConstructor != null) {
                                         withModuleConstructor.accept(moduleConstructor);
                                     } else {
                                         ScriptedResource._require(new String[]{aModuleName}, null, Scripts.getSpace(), new HashSet<>(), (Void v) -> {
-                                            withModuleConstructor.accept(Scripts.getSpace().lookupInGlobal(aModuleName));
+                                            withModuleConstructor.accept(Scripts.getSpace().lookup(aModuleName));
                                         }, (Exception ex) -> {
                                             onFailure.accept(ex);
                                         });

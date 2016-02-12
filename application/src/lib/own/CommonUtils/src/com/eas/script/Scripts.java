@@ -542,7 +542,7 @@ public class Scripts {
 
         public JSObject createModule(String aModuleName) {
             assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
-            JSObject jsConstructor = lookupInGlobal(aModuleName);
+            JSObject jsConstructor = lookup(aModuleName);
             if (jsConstructor != null && jsConstructor.isFunction()) {
                 return (JSObject) jsConstructor.newObject(new Object[]{});
             } else {
@@ -550,15 +550,19 @@ public class Scripts {
             }
         }
 
-        public JSObject lookupInGlobal(String aName) {
-            assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
+        public JSObject lookup(String aName) {
             JSObject amd = defined.get(aName);
             if (amd != null) {
                 return amd;
             } else {
-                Object res = lookupInGlobalFunc.call(null, new Object[]{aName});
-                return res instanceof JSObject ? (JSObject) res : null;
+                return lookupInGlobal(aName);
             }
+        }
+
+        public JSObject lookupInGlobal(String aName) {
+            assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
+            Object res = lookupInGlobalFunc.call(null, new Object[]{aName});
+            return res instanceof JSObject ? (JSObject) res : null;
         }
 
         public void putInGlobal(String aName, JSObject aValue) {
