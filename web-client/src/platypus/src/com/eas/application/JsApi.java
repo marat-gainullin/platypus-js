@@ -33,7 +33,7 @@ public class JsApi {
 	            var aModuleDefiner = arguments.length === 3 ? arguments[2] : arguments.length === 2 ? arguments[1] : arguments[0];
 	            if (!Array.isArray(aDeps))
 	                aDeps = [aDeps];
-	            @com.eas.application.Application::define(Ljava/lang/String;Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;)(aModuleName, aDeps, function(){
+	            @com.eas.application.Application::define(Ljava/lang/String;Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;)(aModuleName ? aModuleName + '' : null, aDeps, function(){
                 	return typeof aModuleDefiner === 'function' ? aModuleDefiner.apply(null, arguments) : aModuleDefiner;
 	            });
 	        } else {

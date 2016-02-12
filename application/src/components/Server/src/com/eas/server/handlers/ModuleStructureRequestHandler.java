@@ -45,44 +45,42 @@ public class ModuleStructureRequestHandler extends RequestHandler<ModuleStructur
             if (moduleName == null || moduleName.isEmpty()) {
                 moduleName = serverCore.getStartModuleName();
             }
-            ScriptDocument.ModuleDocument moduleDoc = serverCore.lookupModuleDocument(moduleName);
-            if (moduleDoc != null) {
-                // Security check
-                checkModuleRoles(moduleName, moduleDoc);
-                // Actual work
-                serverCore.getModules().getModule(moduleName, Scripts.getSpace(), (ModuleStructure aStructure) -> {
-                    Path localPath = serverCore.getModules().getLocalPath();
-                    Set<String> structure = new HashSet<>();
-                    aStructure.getParts().getFiles().stream().forEach((File f) -> {
-                        Path partPath = localPath.relativize(Paths.get(f.toURI()));
-                        String resourceName = partPath.toString();
-                        resourceName = resourceName.replace(File.separator, "/");
-                        if (resourceName.startsWith("/")) {
-                            resourceName = resourceName.substring(1);
-                        }
-                        structure.add(resourceName);
-                    });
-                    StringBuilder json = JSONUtils.o(new StringBuilder(RemoteModulesProxy.STRUCTURE_PROP_NAME), JSONUtils.as(structure.toArray(new String[]{})),
-                            new StringBuilder(RemoteModulesProxy.CLIENT_DEPENDENCIES_PROP_NAME), JSONUtils.as(aStructure.getClientDependencies().toArray(new String[]{})),
-                            new StringBuilder(RemoteModulesProxy.QUERY_DEPENDENCIES_PROP_NAME), JSONUtils.as(aStructure.getQueryDependencies().toArray(new String[]{})),
-                            new StringBuilder(RemoteModulesProxy.SERVER_DEPENDENCIES_PROP_NAME), JSONUtils.as(aStructure.getServerDependencies().toArray(new String[]{}))
-                    );
-                    ModuleStructureRequest.Response resp = new ModuleStructureRequest.Response(json.toString());
-                    onSuccess.accept(resp);
-                }, onFailure);
-            } else {
-                onFailure.accept(new FileNotFoundException("Module '" + moduleName + "' is not found."));
-            }
+            // Security check
+            checkModuleRoles(moduleName);
+            // Actual work
+            serverCore.getModules().getModule(moduleName, Scripts.getSpace(), (ModuleStructure aStructure) -> {
+                Path localAppPath = serverCore.getModules().getLocalPath();
+                Set<String> structure = new HashSet<>();
+                aStructure.getParts().getFiles().stream().forEach((File f) -> {
+                    Path partPath = localAppPath.relativize(Paths.get(f.toURI()));
+                    String resourceName = partPath.toString();
+                    resourceName = resourceName.replace(File.separator, "/");
+                    if (resourceName.startsWith("/")) {
+                        resourceName = resourceName.substring(1);
+                    }
+                    structure.add(resourceName);
+                });
+                StringBuilder json = JSONUtils.o(new StringBuilder(RemoteModulesProxy.STRUCTURE_PROP_NAME), JSONUtils.as(structure.toArray(new String[]{})),
+                        new StringBuilder(RemoteModulesProxy.CLIENT_DEPENDENCIES_PROP_NAME), JSONUtils.as(aStructure.getClientDependencies().toArray(new String[]{})),
+                        new StringBuilder(RemoteModulesProxy.QUERY_DEPENDENCIES_PROP_NAME), JSONUtils.as(aStructure.getQueryDependencies().toArray(new String[]{})),
+                        new StringBuilder(RemoteModulesProxy.SERVER_DEPENDENCIES_PROP_NAME), JSONUtils.as(aStructure.getServerDependencies().toArray(new String[]{}))
+                );
+                ModuleStructureRequest.Response resp = new ModuleStructureRequest.Response(json.toString());
+                onSuccess.accept(resp);
+            }, onFailure);
         } catch (Exception ex) {
             onFailure.accept(ex);
         }
     }
 
-    private void checkModuleRoles(String aModuleName, ScriptDocument.ModuleDocument aModuleDoc) throws Exception {
-        Set<String> rolesAllowed = aModuleDoc.getAllowedRoles();
-        PlatypusPrincipal principal = (PlatypusPrincipal) Scripts.getContext().getPrincipal();
-        if (rolesAllowed != null && !principal.hasAnyRole(rolesAllowed)) {
-            throw new AccessControlException(String.format(ACCESS_DENIED_MSG, aModuleName, getRequest().getModuleName(), principal.getName()), principal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
+    private void checkModuleRoles(String aModuleName) throws Exception {
+        ScriptDocument.ModuleDocument moduleDoc = serverCore.lookupModuleDocument(aModuleName);
+        if (moduleDoc != null) {
+            Set<String> rolesAllowed = moduleDoc.getAllowedRoles();
+            PlatypusPrincipal principal = (PlatypusPrincipal) Scripts.getContext().getPrincipal();
+            if (rolesAllowed != null && !principal.hasAnyRole(rolesAllowed)) {
+                throw new AccessControlException(String.format(ACCESS_DENIED_MSG, aModuleName, getRequest().getModuleName(), principal.getName()), principal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
+            }
         }
     }
 }

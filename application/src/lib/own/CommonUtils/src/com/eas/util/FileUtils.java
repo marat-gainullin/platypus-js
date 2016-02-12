@@ -32,10 +32,10 @@ public class FileUtils {
         return getFileExtension(file.getName());
     }
 
-    public File findBrother(File aFile, String aExtension) {
+    public static File findBrother(File aFile, String aExtension) {
         if (aFile != null) {
             String woExt = removeExtension(aFile.getAbsolutePath());
-            File brother = new File(woExt + aExtension);
+            File brother = new File(woExt + "." + aExtension);
             return brother.exists() ? brother : null;
         } else {
             return null;

@@ -62,7 +62,7 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
                         if (file.getName().endsWith(PlatypusFiles.SQL_FILE_END)) {
                             query = factory.loadQuery(aName);
                         } else {
-                            throw new IllegalStateException("Queries can be constructed with only platypus queries application elements.");
+                            throw new IllegalStateException("Query " + aName + " can't be constructed. Queries can be constructed with only platypus queries application elements.");
                         }
                         entries.put(aName, new ActualCacheEntry<>(query, filesTimeStamp));
                     } else {

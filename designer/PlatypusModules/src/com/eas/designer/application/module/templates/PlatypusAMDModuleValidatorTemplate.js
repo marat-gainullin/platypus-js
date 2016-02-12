@@ -2,11 +2,10 @@
  * @author ${user}
  * Validator module checks changes made by application on client or server side.
  * Validator module can validate changes made in context of script and relational datasources.
- * @module ${appElementName}
  * @validator DataSource1, DataSource2
  * @stateless
  */
-define(['logger'], function (Logger, ModuleName) {
+define('${appElementName}', ['logger'], function (Logger, ModuleName) {
     function module_constructor() {
         var self = this;
         /**

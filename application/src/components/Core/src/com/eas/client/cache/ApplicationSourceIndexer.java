@@ -161,15 +161,26 @@ public class ApplicationSourceIndexer implements PlatypusIndexer {
             if (file != null) {
                 return file;
             } else {
-                Path resourcePath = appPath.resolve(aName.replace('/', File.separatorChar));
-                if (resourcePath.toFile().exists()) {// plain resource relative 'app' directory
-                    return resourcePath.toFile();
+                String filyName = aName.replace('/', File.separatorChar);
+                Path appResource = appPath.resolve(filyName);
+                if (appResource.toFile().exists()) {// plain resource relative 'app' directory
+                    return appResource.toFile();
                 } else {
-                    File plainResource = new File(aName);// plain resource by absolute path
-                    if (plainResource.exists()) {
-                        return plainResource;
+                    Path appJsResource = appPath.resolve(filyName + PlatypusFiles.JAVASCRIPT_FILE_END);
+                    if (appJsResource.toFile().exists()) {// *.js resource relative 'app' directory
+                        return appJsResource.toFile();
                     } else {
-                        return null;
+                        File absoluteResource = new File(filyName);// plain resource by absolute path
+                        if (absoluteResource.exists()) {
+                            return absoluteResource;
+                        } else {
+                            File absoluteJsResource = new File(filyName + PlatypusFiles.JAVASCRIPT_FILE_END);
+                            if (absoluteJsResource.exists()) {
+                                return absoluteJsResource;
+                            } else {
+                                return null;
+                            }
+                        }
                     }
                 }
             }

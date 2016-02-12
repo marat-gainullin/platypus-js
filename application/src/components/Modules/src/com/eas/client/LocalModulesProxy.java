@@ -73,7 +73,7 @@ public class LocalModulesProxy implements ModulesProxy {
                             if (depFile.getName().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
                                 return true;
                             } else {
-                                Logger.getLogger(LocalModulesProxy.class.getName()).log(Level.WARNING, "Possible name duplication (JavaScript identifier {0} found that is the same with non-module application element).", aModuleCandidate);
+                                Logger.getLogger(LocalModulesProxy.class.getName()).log(Level.WARNING, "JavaScript identifier: {0} found that is the same with non-module application element.", aModuleCandidate);
                             }
                         }// ordinary script class
                         return false;

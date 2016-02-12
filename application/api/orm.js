@@ -320,7 +320,7 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
             var ValueClass = Java.type('com.eas.client.changes.ChangeValue');
 
             function loadModelDocument(aDocument, aModuleName, aTarget) {
-                var model = ModelLoaderClass.load(aDocument, aModuleName);
+                var model = ModelLoaderClass.load(aDocument, aModuleName, ScriptedResourceClass.getApp());
                 var modelCTor;
                 if (model instanceof TwoTierModelClass) {
                     modelCTor = ApplicationDbModel;

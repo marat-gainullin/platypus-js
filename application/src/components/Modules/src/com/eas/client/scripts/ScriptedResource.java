@@ -777,7 +777,27 @@ public class ScriptedResource {
                                             relativeLocalPath = aScriptFile;
                                         }
                                         aSpace.exec(relativeLocalPath.toString().replace(File.separator, "/"), scriptURL);
+                                        Set<String> amdNames = new HashSet<>();
                                         Collection<Map.Entry<String, Scripts.AmdDefine>> amdDefines = aSpace.consumeAmdDefines();
+                                        for(Map.Entry<String, Scripts.AmdDefine> amdDefineEntry: amdDefines){// Wraning! Don't join this peace of code with the following while cycle
+                                            final String amdModuleName = amdDefineEntry.getKey() != null ? amdDefineEntry.getKey() : moduleName;
+                                            amdNames.add(amdModuleName);
+                                        }
+                                        if (!amdNames.contains(moduleName)) {
+                                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedModuleName(moduleName));
+                                            notifyLoaded(pending);
+                                            if (aSpace.lookupInGlobal(moduleName) != null) {
+                                                // If module is global and it resides in the aScriptFile file,
+                                                // it is defined by script execution and we have to put its definition as undefined
+                                                // in AMD structure.
+                                                if (!aSpace.getDefined().containsKey(moduleName)) {
+                                                    aSpace.getDefined().put(moduleName, null);
+                                                } else {
+                                                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "Module {0} exists both as AMD module and as a global function", checkedModuleName(moduleName));
+                                                }
+                                            }
+                                        }
+                                        // Amd in action...
                                         Iterator<Map.Entry<String, Scripts.AmdDefine>> amdDefinesIt = amdDefines.iterator();
                                         while (amdDefinesIt.hasNext()) {
                                             Map.Entry<String, Scripts.AmdDefine> amdDefineEntry = amdDefinesIt.next();
@@ -799,18 +819,6 @@ public class ScriptedResource {
                                                 Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "{0} - Failed {1}", new Object[]{checkedModuleName(moduleName), ex.toString()});
                                                 notifyFailed(amdPending, ex);
                                             });
-                                        }
-                                        if (aSpace.lookupInGlobal(moduleName) != null) {
-                                            // If module is global and it resides in the aScriptFile file,
-                                            // it is defined by script execution and we have to put its definition as undefined
-                                            // in AMD structure.
-                                            if (!aSpace.getDefined().containsKey(moduleName)) {
-                                                aSpace.getDefined().put(moduleName, null);
-                                                Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedModuleName(moduleName));
-                                                notifyLoaded(pending);
-                                            } else {
-                                                Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "Module {0} exists both as AMD module and as a global function", checkedModuleName(moduleName));
-                                            }
                                         }
                                     }
                                 } else {
@@ -872,8 +880,7 @@ public class ScriptedResource {
                             throw new FileNotFoundException(moduleName);
                         }
                     }
-                    Collection<Map.Entry<String, Scripts.AmdDefine>> amdDefines = aSpace.consumeAmdDefines();
-                    Iterator<Map.Entry<String, Scripts.AmdDefine>> amdDefinesIt = amdDefines.iterator();
+                    Iterator<Map.Entry<String, Scripts.AmdDefine>> amdDefinesIt = aSpace.consumeAmdDefines().iterator();
                     while (amdDefinesIt.hasNext()) {
                         Map.Entry<String, Scripts.AmdDefine> entry = amdDefinesIt.next();
                         Scripts.AmdDefine amdDefine = entry.getValue();

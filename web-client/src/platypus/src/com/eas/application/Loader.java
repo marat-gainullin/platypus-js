@@ -93,6 +93,7 @@ public class Loader {
 	public static final UrlQueryProcessor URL_QUERY_PROCESSOR = GWT.create(UrlQueryProcessor.class);
 	public static final String INJECTED_SCRIPT_CLASS_NAME = "platypus-injected-script";
 	public static final String SERVER_MODULE_TOUCHED_NAME = "Proxy-";
+	public static final String SERVER_ENTITY_TOUCHED_NAME = "Entity-";
 	public static final String MODEL_TAG_NAME = "datamodel";
 	public static final String ENTITY_TAG_NAME = "entity";
 	public static final String QUERY_ID_ATTR_NAME = "queryId";
@@ -102,7 +103,7 @@ public class Loader {
 	protected static Set<LoadHandler> handlers = new HashSet<LoadHandler>();
 	protected static Set<String> startedModules = new HashSet<>();
 	protected static Set<String> startedScripts = new HashSet<>();
-	protected static Set<String> loadedScripts = new HashSet<>();
+	protected static Map<String, Collection<String>> loadedScripts = new HashMap<>();
 	protected static List<AmdDefine> amdDefines = new ArrayList<>();
 	protected static Map<String, List<Callback<Void, String>>> pendingsOnModule = new HashMap<>();
 	protected static Map<String, List<Callback<Void, String>>> pendingsOnScript = new HashMap<>();
@@ -410,11 +411,21 @@ public class Loader {
 			}
 
 			@Override
-			public void onFailure(String reason) {
-				notifyModuleFailed(aModuleName, Arrays.asList(new String[] { reason }));
+			public void onFailure(String aReason) {
+				notifyModuleFailed(aModuleName, Arrays.asList(new String[] { aReason }));
 			}
 
 		});
+	}
+
+	private static void scriptOfModuleLoaded(String aScriptName, String aModuleName) {
+		Collection<String> amdOrderedModules = loadedScripts.get(aScriptName);
+		if (!amdOrderedModules.contains(aModuleName)) {
+			// It seems, that module is either global module or it is a file stub
+			Predefine.getDefined().put(aModuleName, null);
+			fireLoaded(aModuleName);
+			notifyModuleLoaded(aModuleName);
+		}
 	}
 
 	private static void loadModuleFromServer(final String aModuleName, final Set<String> aCyclic) throws Exception {
@@ -434,13 +445,8 @@ public class Loader {
 				}
 				assert jsPart != null : "Module [" + aModuleName + "] structure should contain a *.js file.";
 				final String jsResource = jsPart;
-				if (loadedScripts.contains(jsResource)) {
-					JavaScriptObject globalModule = lookupInGlobal(aModuleName);
-					if (globalModule != null) {
-						Predefine.getDefined().put(aModuleName, null);
-						fireLoaded(aModuleName);
-						notifyModuleLoaded(aModuleName);
-					}
+				if (loadedScripts.containsKey(jsResource)) {
+					scriptOfModuleLoaded(jsResource, aModuleName);
 				} else {
 					pendOnScript(jsResource, new CallbackAdapter<Void, String>() {
 
@@ -451,12 +457,7 @@ public class Loader {
 
 						@Override
 						protected void doWork(Void aResult) throws Exception {
-							JavaScriptObject globalModule = lookupInGlobal(aModuleName);
-							if (globalModule != null) {
-								Predefine.getDefined().put(aModuleName, null);
-								fireLoaded(aModuleName);
-								notifyModuleLoaded(aModuleName);
-							}
+							scriptOfModuleLoaded(jsResource, aModuleName);
 						}
 
 					});
@@ -486,13 +487,20 @@ public class Loader {
 
 					@Override
 					public void onSuccess(Void result) {
-						loadedScripts.add(aJsResource);
-						notifyScriptLoaded(aJsResource);
 						final Collection<AmdDefine> amdDefines = Loader.consumeAmdDefines();
+						Set<String> amdModulesOfScript = new HashSet<>();
+						for(AmdDefine amdDefine : amdDefines){
+							String amdModuleName = amdDefine.getModuleName() != null ? amdDefine.getModuleName() : aDefaultModuleName;
+							amdModulesOfScript.add(amdModuleName);
+						}
+						loadedScripts.put(aJsResource, amdModulesOfScript);
+						notifyScriptLoaded(aJsResource);
+						// Amd in action ...
 						Iterator<AmdDefine> amdDefinesIt = amdDefines.iterator();
 						while (amdDefinesIt.hasNext()) {
 							AmdDefine amdDefine = amdDefinesIt.next();
 							final String amdModuleName = amdDefine.getModuleName() != null ? amdDefine.getModuleName() : aDefaultModuleName;
+							amdModulesOfScript.add(amdModuleName);
 							final Collection<String> amdDependencies = amdDefine.getDependencies();
 							final Callback<String, Void> amdModuleDefiner = amdDefine.getModuleDefiner();
 							try {
@@ -597,7 +605,7 @@ public class Loader {
 
 	public static void notifyScriptFailed(String aScriptName, final List<String> aReasons) {
 		List<Callback<Void, String>> interestedPendings = new ArrayList<>();
-		if(pendingsOnScript.containsKey(aScriptName)){
+		if (pendingsOnScript.containsKey(aScriptName)) {
 			interestedPendings.addAll(pendingsOnScript.get(aScriptName));
 			pendingsOnScript.get(aScriptName).clear();
 		}
@@ -615,7 +623,7 @@ public class Loader {
 
 	private static void notifyScriptLoaded(String aScriptName) {
 		List<Callback<Void, String>> interestedPendings = new ArrayList<>();
-		if(pendingsOnScript.containsKey(aScriptName)){
+		if (pendingsOnScript.containsKey(aScriptName)) {
 			interestedPendings.addAll(pendingsOnScript.get(aScriptName));
 			pendingsOnScript.get(aScriptName).clear();
 		}
@@ -641,7 +649,7 @@ public class Loader {
 
 	public static void notifyModuleFailed(String aModuleName, final List<String> aReasons) {
 		List<Callback<Void, String>> interestedPendings = new ArrayList<>();
-		if(pendingsOnModule.containsKey(aModuleName)){
+		if (pendingsOnModule.containsKey(aModuleName)) {
 			interestedPendings.addAll(pendingsOnModule.get(aModuleName));
 			pendingsOnModule.get(aModuleName).clear();
 		}
@@ -659,7 +667,7 @@ public class Loader {
 
 	private static void notifyModuleLoaded(String aModuleName) {
 		List<Callback<Void, String>> interestedPendings = new ArrayList<>();
-		if(pendingsOnModule.containsKey(aModuleName)){
+		if (pendingsOnModule.containsKey(aModuleName)) {
 			interestedPendings.addAll(pendingsOnModule.get(aModuleName));
 			pendingsOnModule.get(aModuleName).clear();
 		}
@@ -814,7 +822,7 @@ public class Loader {
 
 					@Override
 					public void doWork(Query aQuery) throws Exception {
-						fireLoaded(queryName);
+						fireLoaded(SERVER_ENTITY_TOUCHED_NAME + queryName);
 						process.onSuccess(null);
 					}
 
@@ -824,7 +832,7 @@ public class Loader {
 						process.onFailure(reason);
 					}
 				}));
-				fireStarted(queryName);
+				fireStarted(SERVER_ENTITY_TOUCHED_NAME + queryName);
 			}
 		} else {
 			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
