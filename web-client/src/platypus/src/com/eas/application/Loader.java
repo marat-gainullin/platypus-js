@@ -533,9 +533,9 @@ public class Loader {
 					}
 
 					@Override
-					public void onFailure(Exception reason) {
-						notifyScriptFailed(aJsResource, Arrays.asList(new String[] { reason.getMessage() }));
-						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, "Script [" + aJsResource + "] is not loaded. Cause is: " + reason.getMessage());
+					public void onFailure(Exception aReason) {
+						notifyScriptFailed(aJsResource, Arrays.asList(new String[] { aReason.getMessage() }));
+						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, "Script [" + aJsResource + "] is not loaded. Cause is: " + aReason.getMessage());
 					}
 
 				}).setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).inject();
