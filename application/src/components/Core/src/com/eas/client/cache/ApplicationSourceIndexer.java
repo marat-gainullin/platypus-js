@@ -1,24 +1,18 @@
 package com.eas.client.cache;
 
-import com.eas.client.AppElementFiles;
+import com.eas.script.JsDoc;
+import com.eas.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardWatchEventKinds;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -32,95 +26,31 @@ public class ApplicationSourceIndexer implements PlatypusIndexer {
 
     public interface ScanCallback {
 
-        public void fileScanned(String aAppElementName, File aFile);
+        public void moduleScanned(String aModuleName, ScriptDocument.ModuleDocument aModule, File aFile);
     }
 
-    protected class FilesWatchDog implements Runnable {
-
-        public FilesWatchDog() {
-            super();
-        }
-
-        @Override
-        public void run() {
-            try {
-                for (;;) {
-                    WatchKey keyTaken = service.take();
-                    if (keyTaken.isValid() && watchKey2Directory.containsKey(keyTaken)) {
-                        Path directoryPathTaken = watchKey2Directory.get(keyTaken);
-                        List<WatchEvent<?>> events = keyTaken.pollEvents();
-                        events.stream().forEach((event) -> {
-                            try {
-                                Path path = (Path) event.context();
-                                WatchEvent.Kind<Path> kind = (WatchEvent.Kind<Path>) event.kind();
-                                if (path != null && directoryPathTaken != null) {
-                                    Path resolvedPath = directoryPathTaken.resolve(path);
-                                    if (resolvedPath != null) {
-                                        File subject = resolvedPath.toFile();
-                                        if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
-                                            if (subject.exists()) {
-                                                if (subject.isDirectory()) {
-                                                    scanSource(subject);
-                                                } else {
-                                                    addFileToIndex(subject);
-                                                }
-                                            }
-                                        } else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
-                                            if (subject.isDirectory() || !subject.getName().contains(".")) {
-                                                clearFamiliesByPathPrefix(resolvedPath);
-                                            } else {
-                                                removeFileFromIndex(subject);
-                                            }
-                                        } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
-                                            if (subject.exists() && !subject.isDirectory()) {
-                                                readdFileToIndex(subject);
-                                            }
-                                        }
-                                    }
-                                }
-                            } catch (Exception ex) {
-                                Logger.getLogger(ApplicationSourceIndexer.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        });
-                    }
-                    boolean resetted = keyTaken.reset();
-                    if (!keyTaken.isValid() || !resetted) {
-                        keyTaken.cancel();
-                        Path directoryPathTaken = watchKey2Directory.remove(keyTaken);
-                        if (directoryPathTaken != null) {
-                            clearFamiliesByPathPrefix(directoryPathTaken);
-                        }
-                    }
-                }
-            } catch (InterruptedException ex) {
-                Logger.getLogger(ApplicationSourceIndexer.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ClosedWatchServiceException ex1) {
-                //no-op
-            }
-        }
-    }
-    protected String appPathName;
-    protected Thread watchDog;
-    protected Map<WatchKey, Path> watchKey2Directory = new HashMap<>();
-    protected Map<String, Set<String>> id2Paths = new HashMap<>();
-    protected Map<String, String> path2Id = new HashMap<>();
-    protected Map<String, AppElementFiles> families = new HashMap<>();
+    protected Path projectPath;
+    protected Path appPath;
+    protected Map<String, File> id2Paths = new HashMap<>();
     protected WatchService service;
     protected ScanCallback scanCallback;
     protected boolean autoScan = true;
+    protected ScriptsConfigs scriptsConfigs;
 
-    public ApplicationSourceIndexer(String aAppPathName) throws Exception {
-        this(aAppPathName, true, null);
+    public ApplicationSourceIndexer(Path aProjectPath, ScriptsConfigs aScriptConfigs) throws Exception {
+        this(aProjectPath, aScriptConfigs, true, null);
     }
 
-    public ApplicationSourceIndexer(String aAppPathName, ScanCallback aScanCallback) throws Exception {
-        this(aAppPathName, true, aScanCallback);
+    public ApplicationSourceIndexer(Path aProjectPath, ScriptsConfigs aScriptConfigs, ScanCallback aScanCallback) throws Exception {
+        this(aProjectPath, aScriptConfigs, true, aScanCallback);
     }
 
-    public ApplicationSourceIndexer(String aAppPathName, boolean aAutoScan, ScanCallback aScanCallback) throws Exception {
+    public ApplicationSourceIndexer(Path aProjectPath, ScriptsConfigs aScriptConfigs, boolean aAutoScan, ScanCallback aScanCallback) throws Exception {
         super();
         autoScan = aAutoScan;
-        appPathName = aAppPathName;
+        projectPath = aProjectPath;
+        scriptsConfigs = aScriptConfigs;
+        appPath = projectPath.resolve(PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT);
         scanCallback = aScanCallback;
         if (autoScan) {
             File srcDirectory = checkRootDirectory();
@@ -129,36 +59,25 @@ public class ApplicationSourceIndexer implements PlatypusIndexer {
     }
 
     private File checkRootDirectory() throws IllegalArgumentException {
-        String srcPathName = calcSrcPath();
-        File srcDirectory = new File(srcPathName);
+        File srcDirectory = appPath.toFile();
         if (!srcDirectory.exists() || !srcDirectory.isDirectory()) {
-            throw new IllegalArgumentException(String.format("%s doesn't point to a directory.", srcPathName));
+            throw new IllegalArgumentException(String.format("%s doesn't point to a directory.", appPath.toString()));
         }
         return srcDirectory;
     }
 
     public void watch() throws Exception {
         service = FileSystems.getDefault().newWatchService();
-        File srcDirectory = checkRootDirectory();
-        register(srcDirectory);
-        watchDog = new Thread(new FilesWatchDog());
-        watchDog.setDaemon(true);
-        watchDog.start();
     }
 
     public void unwatch() throws Exception {
-        assert service != null && watchDog != null;
+        assert service != null;
         service.close();
-        watchDog.join();
         service = null;
-        watchDog = null;
-        watchKey2Directory.clear();
     }
 
     public void rescan() {
         id2Paths.clear();
-        path2Id.clear();
-        families.clear();
         File srcDirectory = checkRootDirectory();
         scanSource(srcDirectory);
     }
@@ -170,28 +89,7 @@ public class ApplicationSourceIndexer implements PlatypusIndexer {
                 @Override
                 public FileVisitResult visitFile(Path aFilePath, BasicFileAttributes attrs) throws IOException {
                     try {
-                        addFileToIndex(aFilePath.toFile());
-                    } catch (Exception ex) {
-                        Logger.getLogger(ApplicationSourceIndexer.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        } catch (Exception ex) {
-            // Files.walkFileTree may fail due to some programs activity
-            Logger.getLogger(ApplicationSourceIndexer.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    private void register(File aDirectory) {
-        assert aDirectory.exists() && aDirectory.isDirectory();
-        try {
-            Files.walkFileTree(Paths.get(aDirectory.toURI()), new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult preVisitDirectory(Path aDirectoryPath, BasicFileAttributes attrs) throws IOException {
-                    try {
-                        WatchKey wk = aDirectoryPath.register(service, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
-                        watchKey2Directory.put(wk, aDirectoryPath);
+                        add(aFilePath.toFile());
                     } catch (Exception ex) {
                         Logger.getLogger(ApplicationSourceIndexer.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -214,84 +112,39 @@ public class ApplicationSourceIndexer implements PlatypusIndexer {
         }
     }
 
-    protected void readdFileToIndex(File aFile) {
-        removeFileFromIndex(aFile);
-        addFileToIndex(aFile);
-    }
-
-    protected void addFileToIndex(File aFile) {
-        try {
-            String familyPath = fileNameWithoutExtension(aFile);
-            if (familyPath != null) {
-                AppElementFiles family = families.get(familyPath);
-                if (family == null) {
-                    family = new AppElementFiles();
-                    families.put(familyPath, family);
+    protected void add(File aFile) throws Exception {
+        if (aFile.getName().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
+            String defaultModuleName = getDefaultModuleName(aFile);
+            ScriptDocument scriptDoc = scriptsConfigs.get(defaultModuleName, aFile);
+            Set<Map.Entry<String, ScriptDocument.ModuleDocument>> modulesDocs = scriptDoc.getModules().entrySet();
+            modulesDocs.forEach((Map.Entry<String, ScriptDocument.ModuleDocument> aModuleDocEntry) -> {
+                id2Paths.put(aModuleDocEntry.getKey(), aFile);
+                if (scanCallback != null) {
+                    scanCallback.moduleScanned(aModuleDocEntry.getKey(), aModuleDocEntry.getValue(), aFile);
                 }
-                Integer type1 = family.getAppElementType();
-                String id1 = type1 != null ? family.getAppElementId(type1) : null;
-                family.addFile(aFile);
-                Integer type2 = family.getAppElementType();
-                String id2 = type2 != null ? family.getAppElementId(type2) : null;
-                // remove old values
-                String familyId = path2Id.remove(familyPath);
-                Set<String> paths = id2Paths.get(familyId);
-                if (paths != null) {
-                    paths.remove(familyPath);
-                    if (paths.isEmpty()) {
-                        id2Paths.remove(familyId);
-                    }
-                }
-                if (id2 != null) {
-                    path2Id.put(familyPath, id2);
-                    Set<String> newPaths = id2Paths.get(id2);
-                    if (newPaths == null) {
-                        newPaths = new HashSet<>();
-                        id2Paths.put(id2, newPaths);
-                    }
-                    newPaths.add(familyPath);
-                }
-                if (scanCallback != null && id2 != null) {
-                    for (File f : family.getFiles()) {
-                        scanCallback.fileScanned(id2, f);
-                    }
-                }
+            });
+        } else if (aFile.getName().endsWith(PlatypusFiles.SQL_FILE_END)) {
+            String fileContent = FileUtils.readString(aFile, PlatypusFiles.DEFAULT_ENCODING);
+            String queryName = PlatypusFilesSupport.getAnnotationValue(fileContent, JsDoc.Tag.NAME_TAG);
+            if (queryName != null && !queryName.isEmpty()) {
+                id2Paths.put(queryName, aFile);
             }
-        } catch (Exception ex) {
-            Logger.getLogger(ApplicationSourceIndexer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    protected void removeFileFromIndex(File aFile) {
-        try {
-            String familyPath = fileNameWithoutExtension(aFile);
-            if (familyPath != null) {
-                AppElementFiles family = families.get(familyPath);
-                if (family != null) {
-                    family.removeFile(aFile);
-                    Integer type2 = family.getAppElementType();
-                    if (type2 == null) {
-                        String familyId = path2Id.remove(familyPath);
-                        Set<String> paths = id2Paths.get(familyId);
-                        if (paths != null) {
-                            paths.remove(familyPath);
-                            if (paths.isEmpty()) {
-                                id2Paths.remove(familyId);
-                            }
-                        }
-                    }
-                    if (family.isEmpty()) {
-                        families.remove(familyPath);
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(ApplicationSourceIndexer.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    @Override
+    public String getDefaultModuleName(File aFile) {
+        String defaultModuleName = appPath.relativize(Paths.get(aFile.toURI())).toString().replace(File.separator, "/");
+        defaultModuleName = defaultModuleName.substring(0, defaultModuleName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
+        return defaultModuleName;
     }
 
-    public String calcSrcPath() {
-        return appPathName + File.separator + PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT;
+    public Path getProjectPath() {
+        return projectPath;
+    }
+
+    public Path getAppPath() {
+        return appPath;
     }
 
     /**
@@ -302,59 +155,37 @@ public class ApplicationSourceIndexer implements PlatypusIndexer {
      * @throws Exception
      */
     @Override
-    public AppElementFiles nameToFiles(String aName) throws Exception {
+    public File nameToFile(String aName) throws Exception {
         if (aName != null) {
-            Set<String> paths = id2Paths.get(aName);
-            if (paths != null && !paths.isEmpty()) {
-                AppElementFiles files = families.get(paths.iterator().next());
-                if (files != null) {
-                    return files.copy();
-                } else {
-                    return null;
-                }
+            File file = id2Paths.get(aName);
+            if (file != null) {
+                return file;
             } else {
-                String resourceName = calcSrcPath() + File.separator + aName.replace('/', File.separatorChar);
-                AppElementFiles files = families.get(resourceName);
-                if (files != null) {
-                    return files.copy();
+                String filyName = aName.replace('/', File.separatorChar);
+                Path appResource = appPath.resolve(filyName);
+                if (appResource.toFile().exists()) {// plain resource relative 'app' directory
+                    return appResource.toFile();
                 } else {
-                    File plainResource = new File(resourceName);
-                    if (plainResource.exists()) {
-                        files = new AppElementFiles();
-                        files.addFile(plainResource);
-                        return files;
+                    Path appJsResource = appPath.resolve(filyName + PlatypusFiles.JAVASCRIPT_FILE_END);
+                    if (appJsResource.toFile().exists()) {// *.js resource relative 'app' directory
+                        return appJsResource.toFile();
                     } else {
-                        return null;
+                        File absoluteResource = new File(filyName);// plain resource by absolute path
+                        if (absoluteResource.exists()) {
+                            return absoluteResource;
+                        } else {
+                            File absoluteJsResource = new File(filyName + PlatypusFiles.JAVASCRIPT_FILE_END);
+                            if (absoluteJsResource.exists()) {
+                                return absoluteJsResource;
+                            } else {
+                                return null;
+                            }
+                        }
                     }
                 }
             }
         } else {
             return null;
-        }
-    }
-
-    protected void unregister(Path aPathPrefix) {
-        List<WatchKey> toRemove = new ArrayList<>();
-        watchKey2Directory.entrySet().stream().filter((entry) -> {
-            return entry.getValue().startsWith(aPathPrefix);
-        }).forEach((entry) -> {
-            toRemove.add(entry.getKey());
-        });
-        toRemove.stream().forEach((wk) -> {
-            if (wk.isValid()) {
-                wk.cancel();
-            }
-            watchKey2Directory.remove(wk);
-        });
-    }
-
-    protected void clearFamiliesByPathPrefix(Path aPathPrefix) {
-        for (String familyPath : families.keySet().toArray(new String[]{})) {
-            if (familyPath.startsWith(aPathPrefix.toString())) {
-                String id = path2Id.remove(familyPath);
-                id2Paths.remove(id);
-                families.remove(familyPath);
-            }
         }
     }
 }

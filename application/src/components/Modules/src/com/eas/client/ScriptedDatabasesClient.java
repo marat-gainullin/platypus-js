@@ -1,6 +1,5 @@
 package com.eas.client;
 
-import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusIndexer;
 import com.eas.client.changes.Change;
 import com.eas.client.scripts.ScriptedResource;
@@ -31,13 +30,13 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     protected Map<String, Collection<String>> validators = new HashMap<>();
 
     /**
-     * 
+     *
      * @param aDefaultDatasourceName
      * @param aIndexer
      * @param aAutoFillMetadata
      * @param aValidators
      * @param aMaxJdbcThreads
-     * @throws Exception 
+     * @throws Exception
      */
     public ScriptedDatabasesClient(String aDefaultDatasourceName, PlatypusIndexer aIndexer, boolean aAutoFillMetadata, Map<String, Collection<String>> aValidators, int aMaxJdbcThreads) throws Exception {
         this(aDefaultDatasourceName, aIndexer, aAutoFillMetadata, aMaxJdbcThreads);
@@ -45,12 +44,12 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     /**
-     * 
+     *
      * @param aDefaultDatasourceName
      * @param aIndexer
      * @param aAutoFillMetadata
      * @param aMaxJdbcThreads
-     * @throws Exception 
+     * @throws Exception
      */
     public ScriptedDatabasesClient(String aDefaultDatasourceName, PlatypusIndexer aIndexer, boolean aAutoFillMetadata, int aMaxJdbcThreads) throws Exception {
         super(aDefaultDatasourceName, aAutoFillMetadata, aMaxJdbcThreads);
@@ -77,72 +76,11 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     @Override
-    public MetadataCache getMetadataCache(String aDatasourceName) throws Exception {
-        AppElementFiles files = indexer.nameToFiles(aDatasourceName);
-        if (files == null || !files.hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
-            return super.getMetadataCache(aDatasourceName);
-        } else {
-            return null;
-        }
-    }
-
-    @Override
     protected ApplyResult apply(final String aDatasourceName, final List<Change> aLog, Scripts.Space aSpace, Consumer<ApplyResult> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
             validate(aDatasourceName, aLog, (Void v) -> {
                 try {
-                    AppElementFiles files = indexer.nameToFiles(aDatasourceName);
-                    if (files != null && files.isModule()) {
-                        JSObject module = createModule(aDatasourceName, aSpace);
-                        if (module != null) {
-                            Object oApply = module.getMember("apply");
-                            if (oApply instanceof JSObject && ((JSObject) oApply).isFunction()) {
-                                JSObject applyFunction = (JSObject) oApply;
-                                aSpace.toJava(applyFunction.call(module, new Object[]{aSpace.toJs(aLog.toArray()),
-                                    new AbstractJSObject() {
-
-                                        @Override
-                                        public Object call(final Object thiz, final Object... args) {
-                                            int affected = 0;
-                                            if (args.length > 0) {
-                                                Object oAffected = aSpace.toJava(args[0]);
-                                                if (oAffected instanceof Number) {
-                                                    affected = ((Number) oAffected).intValue();
-                                                }
-                                            }
-                                            onSuccess.accept(new ApplyResult(affected, new DummySqlConnection(), true));
-                                            return null;
-                                        }
-
-                                    },
-                                    new AbstractJSObject() {
-
-                                        @Override
-                                        public Object call(final Object thiz, final Object... args) {
-                                            if (onFailure != null) {
-                                                if (args.length > 0) {
-                                                    if (args[0] instanceof Exception) {
-                                                        onFailure.accept((Exception) args[0]);
-                                                    } else {
-                                                        onFailure.accept(new Exception(String.valueOf(aSpace.toJava(args[0]))));
-                                                    }
-                                                } else {
-                                                    onFailure.accept(new Exception("No error information from apply method"));
-                                                }
-                                            }
-                                            return null;
-                                        }
-                                    }
-                                }));
-                            } else {
-                                onFailure.accept(new IllegalStateException(String.format(APPLY_MISSING_MSG, aDatasourceName)));
-                            }
-                        } else {
-                            onFailure.accept(new IllegalStateException(String.format(CANT_CREATE_MODULE_MSG, aDatasourceName)));
-                        }
-                    } else {
-                        super.apply(aDatasourceName, aLog, aSpace, onSuccess, onFailure);
-                    }
+                    super.apply(aDatasourceName, aLog, aSpace, onSuccess, onFailure);
                 } catch (Exception ex) {
                     onFailure.accept(ex);
                 }
@@ -150,32 +88,10 @@ public class ScriptedDatabasesClient extends DatabasesClient {
             return null;
         } else {
             validate(aDatasourceName, aLog, null, null, aSpace);
-            AppElementFiles files = indexer.nameToFiles(aDatasourceName);
-            if (files != null && files.isModule()) {
-                JSObject module = createModule(aDatasourceName, aSpace);
-                if (module != null) {
-                    Object oApply = module.getMember("apply");
-                    if (oApply instanceof JSObject && ((JSObject) oApply).isFunction()) {
-                        JSObject applyFunction = (JSObject) oApply;
-                        int affectedInModules = 0;
-                        Object oAffected = aSpace.toJava(applyFunction.call(module, new Object[]{aSpace.toJs(aLog.toArray())}));
-                        if (oAffected instanceof Number) {
-                            affectedInModules = ((Number) oAffected).intValue();
-                        }
-                        return new ApplyResult(affectedInModules, new DummySqlConnection(), true);
-                    } else {
-                        throw new IllegalStateException(String.format(APPLY_MISSING_MSG, aDatasourceName));
-                    }
-                } else {
-                    throw new IllegalStateException(String.format(CANT_CREATE_MODULE_MSG, aDatasourceName));
-                }
-            } else {
-                return super.apply(aDatasourceName, aLog, null, null, null);
-            }
+            return super.apply(aDatasourceName, aLog, null, null, null);
         }
     }
     protected static final String CANT_CREATE_MODULE_MSG = "Can't create module %s";
-    protected static final String APPLY_MISSING_MSG = "Can't find apply function in module %s";
 
     private static class CallPoint {
 
@@ -213,17 +129,15 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                     if (onSuccess != null) {
                         onSuccess.accept(null);
                     }
-                } else {
-                    if (onFailure != null) {
-                        StringBuilder eMessagesSum = new StringBuilder();
-                        exceptions.stream().forEach((ex) -> {
-                            if (eMessagesSum.length() > 0) {
-                                eMessagesSum.append("\n");
-                            }
-                            eMessagesSum.append(ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage() : ex.toString());
-                        });
-                        onFailure.accept(new IllegalStateException(eMessagesSum.toString()));
-                    }
+                } else if (onFailure != null) {
+                    StringBuilder eMessagesSum = new StringBuilder();
+                    exceptions.stream().forEach((ex) -> {
+                        if (eMessagesSum.length() > 0) {
+                            eMessagesSum.append("\n");
+                        }
+                        eMessagesSum.append(ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage() : ex.toString());
+                    });
+                    onFailure.accept(new IllegalStateException(eMessagesSum.toString()));
                 }
             }
         }

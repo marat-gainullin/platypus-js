@@ -26,8 +26,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
 
 /**
  *
@@ -49,24 +47,8 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
         super();
     }
 
-    protected Element getElementByTagName(Document aDoc, String name) {
-        List<Element> nl = XmlDomUtils.elementsByTagName(aDoc, name);
-        if (nl != null && nl.size() == 1) {
-            return nl.get(0);
-        }
-        return null;
-    }
-
-    protected Element getElementByTagName(Element aElement, String name) {
-        List<Element> nl = XmlDomUtils.elementsByTagName(aElement, name);
-        if (nl != null && nl.size() == 1) {
-            return nl.get(0);
-        }
-        return null;
-    }
-
     public Runnable readModel(final M aModel) {
-        Element elModel = doc != null ? getElementByTagName(doc, Model2XmlDom.DATAMODEL_TAG_NAME) : modelElement;
+        Element elModel = doc != null ? doc.getDocumentElement() : modelElement;
         if (elModel != null && aModel != null) {
             currentModel = aModel;
             try {
@@ -91,8 +73,8 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
     }
 
     protected void readEntities(final M aModel) {
-        List<Element> dsnl = XmlDomUtils.elementsByTagName(currentNode, Model2XmlDom.ENTITY_TAG_NAME);
-        List<Element> fnl = XmlDomUtils.elementsByTagName(currentNode, Model2XmlDom.FIELDS_ENTITY_TAG_NAME);
+        List<Element> dsnl = XmlDomUtils.elementsByTagName(currentNode, "e", Model2XmlDom.ENTITY_TAG_NAME);
+        List<Element> fnl = XmlDomUtils.elementsByTagName(currentNode, "fe", Model2XmlDom.FIELDS_ENTITY_TAG_NAME);
         List<Element> nl = new ArrayList<>();
         if (dsnl != null) {
             nl.addAll(dsnl);
@@ -116,21 +98,21 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
 
     public void readEntity(E entity) {
         if (entity != null) {
-            entity.setEntityId(readLongAttribute(Model2XmlDom.ENTITY_ID_ATTR_NAME, null));
-            if (currentNode.hasAttribute(Model2XmlDom.QUERY_ID_ATTR_NAME)) {
-                String sQueryId = currentNode.getAttribute(Model2XmlDom.QUERY_ID_ATTR_NAME);
+            entity.setEntityId(readLongAttribute(currentNode, "ei", Model2XmlDom.ENTITY_ID_ATTR_NAME, null));
+            if (XmlDomUtils.hasAttribute(currentNode, "qi", Model2XmlDom.QUERY_ID_ATTR_NAME)) {
+                String sQueryId = XmlDomUtils.getAttribute(currentNode, "qi", Model2XmlDom.QUERY_ID_ATTR_NAME);
                 if (!sQueryId.equals("null")) {
                     entity.setQueryName(sQueryId);
                 }
             }
-            if (currentNode.hasAttribute(Model2XmlDom.TABLE_DB_ID_ATTR_NAME)) {
-                String aTableDbId = currentNode.getAttribute(Model2XmlDom.TABLE_DB_ID_ATTR_NAME);
+            if (XmlDomUtils.hasAttribute(currentNode, "tbn", Model2XmlDom.TABLE_DB_ID_ATTR_NAME)) {
+                String aTableDbId = XmlDomUtils.getAttribute(currentNode, "tbn", Model2XmlDom.TABLE_DB_ID_ATTR_NAME);
                 if (!aTableDbId.equals("null")) {
                     entity.setTableDatasourceName(aTableDbId);
                 }
             }
-            entity.setTableSchemaName(currentNode.getAttribute(Model2XmlDom.TABLE_SCHEMA_NAME_ATTR_NAME));
-            entity.setTableName(currentNode.getAttribute(Model2XmlDom.TABLE_NAME_ATTR_NAME));
+            entity.setTableSchemaName(XmlDomUtils.getAttribute(currentNode, "tsn", Model2XmlDom.TABLE_SCHEMA_NAME_ATTR_NAME));
+            entity.setTableName(XmlDomUtils.getAttribute(currentNode, "tn", Model2XmlDom.TABLE_NAME_ATTR_NAME));
             readEntityDesignAttributes(entity);
             Model<E, ?> dm = entity.getModel();
             if (dm != null) {
@@ -140,22 +122,22 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
     }
 
     protected void readEntityDesignAttributes(E entity) {
-        entity.setX(readIntegerAttribute(Model2XmlDom.ENTITY_LOCATION_X, 0));
-        entity.setY(readIntegerAttribute(Model2XmlDom.ENTITY_LOCATION_Y, 0));
-        entity.setWidth(readIntegerAttribute(Model2XmlDom.ENTITY_SIZE_WIDTH, 0));
-        entity.setHeight(readIntegerAttribute(Model2XmlDom.ENTITY_SIZE_HEIGHT, 0));
-        entity.setIconified(readBooleanAttribute(Model2XmlDom.ENTITY_ICONIFIED, false));
+        entity.setX(readIntegerAttribute(currentNode, Model2XmlDom.ENTITY_LOCATION_X, Model2XmlDom.ENTITY_LOCATION_X, 0));
+        entity.setY(readIntegerAttribute(currentNode, Model2XmlDom.ENTITY_LOCATION_Y, Model2XmlDom.ENTITY_LOCATION_Y, 0));
+        entity.setWidth(readIntegerAttribute(currentNode, Model2XmlDom.ENTITY_SIZE_WIDTH, Model2XmlDom.ENTITY_SIZE_WIDTH, 0));
+        entity.setHeight(readIntegerAttribute(currentNode, Model2XmlDom.ENTITY_SIZE_HEIGHT, Model2XmlDom.ENTITY_SIZE_HEIGHT, 0));
+        entity.setIconified(readBooleanAttribute(currentNode, Model2XmlDom.ENTITY_ICONIFIED, Model2XmlDom.ENTITY_ICONIFIED, false));
     }
 
     @Override
     public void visit(final Relation<E> relation) {
         if (relation != null) {
-            final Long leftEntityId = readLongAttribute(Model2XmlDom.LEFT_ENTITY_ID_ATTR_NAME, null);
-            final String leftFieldName = currentNode.getAttribute(Model2XmlDom.LEFT_ENTITY_FIELD_ATTR_NAME);
-            final String leftParameterName = currentNode.getAttribute(Model2XmlDom.LEFT_ENTITY_PARAMETER_ATTR_NAME);
-            final Long rightEntityId = readLongAttribute(Model2XmlDom.RIGHT_ENTITY_ID_ATTR_NAME, null);
-            final String rightFieldName = currentNode.getAttribute(Model2XmlDom.RIGHT_ENTITY_FIELD_ATTR_NAME);
-            final String rightParameterName = currentNode.getAttribute(Model2XmlDom.RIGHT_ENTITY_PARAMETER_ATTR_NAME);
+            final Long leftEntityId = readLongAttribute(currentNode, "lei", Model2XmlDom.LEFT_ENTITY_ID_ATTR_NAME, null);
+            final String leftFieldName = XmlDomUtils.getAttribute(currentNode, "lef", Model2XmlDom.LEFT_ENTITY_FIELD_ATTR_NAME);
+            final String leftParameterName = XmlDomUtils.getAttribute(currentNode, "lep", Model2XmlDom.LEFT_ENTITY_PARAMETER_ATTR_NAME);
+            final Long rightEntityId = readLongAttribute(currentNode, "rei", Model2XmlDom.RIGHT_ENTITY_ID_ATTR_NAME, null);
+            final String rightFieldName = XmlDomUtils.getAttribute(currentNode, "ref", Model2XmlDom.RIGHT_ENTITY_FIELD_ATTR_NAME);
+            final String rightParameterName = XmlDomUtils.getAttribute(currentNode, "rep", Model2XmlDom.RIGHT_ENTITY_PARAMETER_ATTR_NAME);
             if (currentNode.hasAttribute(Model2XmlDom.POLYLINE_ATTR_NAME)) {
                 final String polyline = currentNode.getAttribute(Model2XmlDom.POLYLINE_ATTR_NAME);
                 if (polyline != null && !polyline.isEmpty()) {
@@ -240,9 +222,9 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
     @Override
     public void visit(Field aField) {
         try {
-            aField.setName(currentNode.getAttribute(Model2XmlDom.NAME_ATTR_NAME));
-            aField.setDescription(currentNode.getAttribute(Model2XmlDom.DESCRIPTION_ATTR_NAME));
-            String fieldType = currentNode.getAttribute(Model2XmlDom.TYPE_ATTR_NAME);
+            aField.setName(XmlDomUtils.getAttribute(currentNode, "n", Model2XmlDom.NAME_ATTR_NAME));
+            aField.setDescription(XmlDomUtils.getAttribute(currentNode, "d", Model2XmlDom.DESCRIPTION_ATTR_NAME));
+            String fieldType = XmlDomUtils.getAttribute(currentNode, "t", Model2XmlDom.TYPE_ATTR_NAME);
             if (legacyStringTypes.contains(fieldType)) {
                 aField.setType(Scripts.STRING_TYPE_NAME);
             } else if (legacyNumberTypes.contains(fieldType)) {
@@ -256,17 +238,17 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
             } else {
                 aField.setType(fieldType);// modern code :-)
             }
-            aField.setNullable(readBooleanAttribute(Model2XmlDom.NULLABLE_ATTR_NAME, true));
-            aField.setPk(readBooleanAttribute(Model2XmlDom.IS_PK_ATTR_NAME, false));
+            aField.setNullable(readBooleanAttribute(currentNode, "nl", Model2XmlDom.NULLABLE_ATTR_NAME, true));
+            aField.setPk(readBooleanAttribute(currentNode, "p", Model2XmlDom.IS_PK_ATTR_NAME, false));
 
             if (aField instanceof Parameter) {
-                ((Parameter) aField).setMode(readIntegerAttribute(Model2XmlDom.MODE_ATTR_NAME, ParameterMetaData.parameterModeUnknown));
-                ((Parameter) aField).setSelectionForm(currentNode.getAttribute(Model2XmlDom.SELECTION_FORM_TAG_NAME));
+                ((Parameter) aField).setMode(readIntegerAttribute(currentNode, "pm", Model2XmlDom.MODE_ATTR_NAME, ParameterMetaData.parameterModeUnknown));
+                ((Parameter) aField).setSelectionForm(XmlDomUtils.getAttribute(currentNode, "sf", Model2XmlDom.SELECTION_FORM_TAG_NAME));
 
-                List<Element> dvEls = XmlDomUtils.elementsByTagName(currentNode, Model2XmlDom.DEFAULT_VALUE_TAG_NAME);
+                List<Element> dvEls = XmlDomUtils.elementsByTagName(currentNode, "dv", Model2XmlDom.DEFAULT_VALUE_TAG_NAME);
                 if (dvEls != null && dvEls.size() == 1) {
                     Element dvTag = dvEls.get(0);
-                    String simpleClassName = dvTag.getAttribute(Model2XmlDom.CLASS_HINT_TAG_NAME);
+                    String simpleClassName = XmlDomUtils.getAttribute(dvTag, "ch", Model2XmlDom.CLASS_HINT_TAG_NAME);
                     if (simpleClassName != null && !simpleClassName.isEmpty() && !simpleClassName.toLowerCase().equals("null")) {
                         String val = dvTag.getNodeValue();
                         if (val != null && !val.isEmpty() && !val.toLowerCase().equals("null")) {
@@ -278,7 +260,7 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
             }
             Element lcurrentNode = currentNode;
             try {
-                currentNode = getElementByTagName(currentNode, Model2XmlDom.PRIMARY_KEY_TAG_NAME);
+                currentNode = XmlDomUtils.getElementByTagName(currentNode, "pr", Model2XmlDom.PRIMARY_KEY_TAG_NAME);
                 if (currentNode != null) {
                     PrimaryKeySpec pk = new PrimaryKeySpec();
                     visit(pk);
@@ -295,28 +277,10 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
 
     private void visit(PrimaryKeySpec pk) {
         if (pk != null) {
-            pk.setCName(currentNode.getAttribute(Model2XmlDom.CONSTRAINT_NAME_ATTR_NAME));
-            pk.setSchema(currentNode.getAttribute(Model2XmlDom.CONSTRAINT_SCHEMA_ATTR_NAME));
-            pk.setTable(currentNode.getAttribute(Model2XmlDom.CONSTRAINT_TABLE_ATTR_NAME));
-            pk.setField(currentNode.getAttribute(Model2XmlDom.CONSTRAINT_FIELD_ATTR_NAME));
-        }
-    }
-
-    public void visit(Map<String, Object> unknownTags) {
-        if (unknownTags != null && currentNode != null) {
-            NamedNodeMap nm = currentNode.getAttributes();
-            if (nm != null) {
-                for (int i = 0; i < nm.getLength(); i++) {
-                    Node node = nm.item(i);
-                    String name = node.getNodeName();
-                    if (name != null && !name.isEmpty()) {
-                        String[] splitted = name.split("\\.");
-                        if (splitted != null && splitted.length == 2) {
-                            unknownTags.put(splitted[0], readTypedAttribute(splitted[1].toLowerCase(), name, node));
-                        }
-                    }
-                }
-            }
+            pk.setCName(XmlDomUtils.getAttribute(currentNode, "n", Model2XmlDom.CONSTRAINT_NAME_ATTR_NAME));
+            pk.setSchema(XmlDomUtils.getAttribute(currentNode, "s", Model2XmlDom.CONSTRAINT_SCHEMA_ATTR_NAME));
+            pk.setTable(XmlDomUtils.getAttribute(currentNode, "tl", Model2XmlDom.CONSTRAINT_TABLE_ATTR_NAME));
+            pk.setField(XmlDomUtils.getAttribute(currentNode, "f", Model2XmlDom.CONSTRAINT_FIELD_ATTR_NAME));
         }
     }
 
@@ -359,6 +323,55 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
         return resO;
     }
 
+    protected void readRelations() {
+        List<Element> nl = XmlDomUtils.elementsByTagName(currentNode, "r", Model2XmlDom.RELATION_TAG_NAME);
+        if (nl != null) {
+            Element lcurrentNode = currentNode;
+            try {
+                nl.stream().forEach((Element nl1) -> {
+                    currentNode = nl1;
+                    Relation<E> relation = new Relation<>();
+                    relation.accept(this);
+                });
+            } finally {
+                currentNode = lcurrentNode;
+            }
+        }
+    }
+
+    protected static ForeignKeySpec.ForeignKeyRule readForeignKeyRuleAttribute(Element aElement, String aShortName, String aLongName, ForeignKeySpec.ForeignKeyRule defaultValue) {
+        try {
+            return ForeignKeySpec.ForeignKeyRule.valueOf(XmlDomUtils.getAttribute(aElement, aShortName, aLongName));
+        } catch (Exception ex) {
+            return defaultValue;
+        }
+    }
+
+    protected Long readLongAttribute(Element aElement, String aShortName, String aLongName, Long defaulValue) {
+        if (aElement.hasAttribute(aShortName)) {
+            return XmlDomUtils.readLongAttribute(aElement, aShortName, defaulValue);
+        } else {
+            return XmlDomUtils.readLongAttribute(aElement, aLongName, defaulValue);
+        }
+    }
+
+    protected static int readIntegerAttribute(Element aElement, String aShortName, String aLongName, int defaulValue) {
+        if (aElement.hasAttribute(aShortName)) {
+            return XmlDomUtils.readIntegerAttribute(aElement, aShortName, defaulValue);
+        } else {
+            return XmlDomUtils.readIntegerAttribute(aElement, aLongName, defaulValue);
+        }
+    }
+
+    protected static boolean readBooleanAttribute(Element aElement, String aShortName, String aLongName, boolean defaultValue) {
+        if (aElement.hasAttribute(aShortName)) {
+            return XmlDomUtils.readBooleanAttribute(aElement, aShortName, defaultValue);
+        } else {
+            return XmlDomUtils.readBooleanAttribute(aElement, aLongName, defaultValue);
+        }
+    }
+
+    /*
     protected Object readTypedAttribute(String typeName, String name, Node node) {
         Object resO = null;
         if (typeName.equals(Long.class.getSimpleName().toLowerCase())) {
@@ -387,26 +400,6 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
             resO = node.getNodeValue();
         }
         return resO;
-    }
-
-    protected Long readLongAttribute(String attributeName, Long defaulValue) {
-        return XmlDomUtils.readLongAttribute(currentNode, attributeName, defaulValue);
-    }
-
-    protected Integer readIntegerAttribute(String attributeName, Integer defaulValue) {
-        return XmlDomUtils.readIntegerAttribute(currentNode, attributeName, defaulValue);
-    }
-
-    protected ForeignKeySpec.ForeignKeyRule readForeignKeyRuleAttribute(String attributeName, ForeignKeySpec.ForeignKeyRule defaultValue) {
-        try {
-            return ForeignKeySpec.ForeignKeyRule.valueOf(currentNode.getAttribute(attributeName));
-        } catch (Exception ex) {
-            return defaultValue;
-        }
-    }
-
-    protected Boolean readBooleanAttribute(String attributeName, Boolean defaultValue) {
-        return XmlDomUtils.readBooleanAttribute(currentNode, attributeName, defaultValue);
     }
 
     protected Short readShortAttribute(String attributeName, Short defaulValue) {
@@ -440,20 +433,5 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
     protected Time readTimeAttribute(String attributeName, Time defaultValue) {
         return XmlDomUtils.readTimeAttribute(currentNode, attributeName, defaultValue);
     }
-
-    protected void readRelations() {
-        List<Element> nl = XmlDomUtils.elementsByTagName(currentNode, Model2XmlDom.RELATION_TAG_NAME);
-        if (nl != null) {
-            Element lcurrentNode = currentNode;
-            try {
-                nl.stream().forEach((Element nl1) -> {
-                    currentNode = nl1;
-                    Relation<E> relation = new Relation<>();
-                    relation.accept(this);
-                });
-            } finally {
-                currentNode = lcurrentNode;
-            }
-        }
-    }
+     */
 }

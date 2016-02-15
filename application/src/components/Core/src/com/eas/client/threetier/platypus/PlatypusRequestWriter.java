@@ -69,7 +69,7 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
     @Override
     public void visit(ModuleStructureRequest rq) throws Exception {
         ProtoWriter pw = new ProtoWriter(out);
-        pw.put(RequestsTags.TAG_MODULE_NAME, rq.getModuleOrResourceName());
+        pw.put(RequestsTags.TAG_MODULE_NAME, rq.getModuleName());
         pw.flush();
     }
 

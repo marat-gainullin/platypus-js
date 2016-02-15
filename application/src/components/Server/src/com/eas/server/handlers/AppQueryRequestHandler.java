@@ -5,7 +5,6 @@
 package com.eas.server.handlers;
 
 import com.eas.server.RequestHandler;
-import com.eas.client.AppElementFiles;
 import com.eas.client.SqlQuery;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
@@ -17,6 +16,7 @@ import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.script.Scripts;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.security.AccessControlException;
 import java.util.Date;
@@ -59,8 +59,8 @@ public class AppQueryRequestHandler extends RequestHandler<AppQueryRequest, AppQ
                     assert query.getEntityName().equals(getRequest().getQueryName());
                     if (onSuccess != null) {
                         AppQueryRequest.Response resp = new AppQueryRequest.Response(null, null);
-                        AppElementFiles files = getServerCore().getIndexer().nameToFiles(getRequest().getQueryName());
-                        Date serverQueryTime = files.getLastModified();
+                        File file = getServerCore().getIndexer().nameToFile(getRequest().getQueryName());
+                        Date serverQueryTime = new Date(file.lastModified());
                         Date clientQueryTime = getRequest().getTimeStamp();
                         if (clientQueryTime == null || serverQueryTime.after(clientQueryTime)) {
                             PlatypusQuery pQuery = new PlatypusQuery(null);

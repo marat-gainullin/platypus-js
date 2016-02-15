@@ -105,6 +105,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
         } else if (result instanceof Report) {
             writeReportResponse((Report) result);
         } else if (result instanceof JSObject) {
+            /*
             JSObject jsResult = (JSObject) result;
             JSObject p = space.lookupInGlobal("P");
             if (p != null) {
@@ -118,6 +119,8 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
             } else {
                 writeJsonResponse(space.toJson(result), servletResponse, async);
             }
+             */
+            writeJsonResponse(space.toJson(result), servletResponse, async);
         } else {// including null result
             writeJsonResponse(space.toJson(space.toJs(result)), servletResponse, async);
         }
@@ -135,7 +138,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
         if (reportName.toLowerCase().endsWith(suffix.toLowerCase())) {
             reportName = reportName.substring(0, reportName.length() - suffix.length());
         }
-        reportName += "-"+IDGenerator.genID() + suffix;
+        reportName += "-" + IDGenerator.genID() + suffix;
         File rep = new File(docsRoot + userHomeInApplication + reportName);
         try (FileOutputStream out = new FileOutputStream(rep)) {
             out.write(report.getBody());

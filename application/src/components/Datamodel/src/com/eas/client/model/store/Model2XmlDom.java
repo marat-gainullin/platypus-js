@@ -104,6 +104,8 @@ public abstract class Model2XmlDom<E extends Entity<M, ?, E>, M extends Model<E,
         }
     }
     public static final String NAME_ATTR_NAME = "name";
+    public static final String DATASOURCE_NAMEE_ATTR_NAME = "Name";
+    public static final String DATASOURCE_TITLE_ATTR_NAME = "Title";
     public static final String DESCRIPTION_ATTR_NAME = "description";
     public static final String TYPE_ATTR_NAME = "type";
     public static final String SIZE_ATTR_NAME = "size";
@@ -275,7 +277,7 @@ public abstract class Model2XmlDom<E extends Entity<M, ?, E>, M extends Model<E,
      * visit(pk); } finally { currentNode = lcurrentNode; } } } }
      */
     public static final String DATAMODEL_DB_ID = "datamodelDbId";
-    public static final String DATAMODEL_DATASOURCE = "datasource";
     public static final String DATAMODEL_DB_SCHEMA_NAME = "datamodelSchemaName";
+    public static final String DATAMODEL_DATASOURCE = "datasource";
     public static final String DATAMODEL_DATASOURCE_SCHEMA_NAME = "schema";
 }

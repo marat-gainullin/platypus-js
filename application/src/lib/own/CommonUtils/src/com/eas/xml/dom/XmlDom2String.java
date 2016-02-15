@@ -27,20 +27,28 @@ public class XmlDom2String {
         super();
     }
 
-    public static String transform(Document doc) {
+    public static String transform(Document aDocument) {
+        return transform(aDocument, true);
+    }
+
+    public static String transform(Document aDocument, boolean aIndent) {
         try {
-            if (doc != null) {
+            if (aDocument != null) {
                 TransformerFactory tfactory = factories.get();
                 if (tfactory == null) {
                     tfactory = TransformerFactory.newInstance();
                     factories.set(tfactory);
                 }
                 Transformer transformer = tfactory.newTransformer();
-                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+                if (aIndent) {
+                    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+                } else {
+                    transformer.setOutputProperty(OutputKeys.INDENT, "no");
+                }
                 StringWriter sw = new StringWriter();
                 StreamResult res = new StreamResult(sw);
-                transformer.transform(new DOMSource(doc), res);
+                transformer.transform(new DOMSource(aDocument), res);
                 return sw.toString();
             }
         } catch (IllegalArgumentException | TransformerException ex) {

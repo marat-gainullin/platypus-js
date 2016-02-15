@@ -28,7 +28,6 @@ import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.LocalQueriesProxy;
-import com.eas.client.queries.ScriptedQueryFactory;
 import com.eas.client.scripts.JSObjectFacade;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
@@ -141,7 +140,7 @@ public class QueryResultsView extends javax.swing.JPanel {
     }
 
     protected static String extractText(PlatypusQueryDataObject aQueryDataObject) throws Exception {
-        StoredQueryFactory factory = new ScriptedQueryFactory(aQueryDataObject.getBasesProxy(), aQueryDataObject.getProject().getQueries(), aQueryDataObject.getProject().getIndexer());
+        StoredQueryFactory factory = new StoredQueryFactory(aQueryDataObject.getBasesProxy(), aQueryDataObject.getProject().getQueries(), aQueryDataObject.getProject().getIndexer());
         String queryText = aQueryDataObject.getSqlTextDocument().getText(0, aQueryDataObject.getSqlTextDocument().getLength());
         String dialectQueryText = aQueryDataObject.getSqlFullTextDocument().getText(0, aQueryDataObject.getSqlFullTextDocument().getLength());
         if (dialectQueryText != null && !dialectQueryText.isEmpty() && !dialectQueryText.replaceAll("\\s", "").isEmpty()) {

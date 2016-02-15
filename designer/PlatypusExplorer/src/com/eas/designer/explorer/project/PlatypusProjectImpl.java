@@ -4,7 +4,6 @@
  */
 package com.eas.designer.explorer.project;
 
-import com.eas.client.AppElementFiles;
 import com.eas.client.MetadataCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.ScriptedDatabasesClient;
@@ -77,7 +76,6 @@ import org.openide.awt.StatusDisplayer;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataNode;
-import org.openide.loaders.DataObject;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
@@ -192,21 +190,22 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 new PlatypusWebModule(this),
                 new PlatypusWebModuleManager(this),
                 getSearchInfoDescription());
-        indexer = (String aAppElementName) -> {
-            if (aAppElementName != null && !aAppElementName.isEmpty()) {
-                FileObject fo = IndexerQuery.appElementId2File(PlatypusProjectImpl.this, aAppElementName);
-                if (fo != null) {
-                    DataObject dObject = DataObject.find(fo);
-                    if (dObject != null) {
-                        AppElementFiles files = new AppElementFiles();
-                        dObject.files().stream().forEach((dofo) -> {
-                            files.addFile(FileUtil.toFile(dofo));
-                        });
-                        return files;
+        indexer = new PlatypusIndexer() {
+            @Override
+            public File nameToFile(String aAppElementName) throws Exception {
+                if (aAppElementName != null && !aAppElementName.isEmpty()) {
+                    FileObject fo = IndexerQuery.appElementId2File(PlatypusProjectImpl.this, aAppElementName);
+                    if (fo != null) {
+                        return FileUtil.toFile(fo);
                     }
                 }
+                return null;
             }
-            return null;
+
+            @Override
+            public String getDefaultModuleName(File file) {
+                return null;                
+            }
         };
         basesProxy = new ScriptedDatabasesClient(settings.getDefaultDataSourceName(), indexer, false, BearResourcePool.DEFAULT_MAXIMUM_SIZE) {
 
@@ -234,14 +233,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
             }
 
         };
-        queries = new LocalQueriesProxy(basesProxy, indexer) {
-
-            @Override
-            protected JSObject createModule(String aModuleName, Scripts.Space aSpace) throws Exception {
-                return createLocalEngineModule(aModuleName);
-            }
-
-        };
+        queries = new LocalQueriesProxy(basesProxy, indexer);
         basesProxy.setQueries(queries);
     }
 

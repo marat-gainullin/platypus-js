@@ -397,21 +397,29 @@ public class JsModel {
 				}
 				@com.eas.application.Loader::jsLoadQueries(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(entities, aOnSuccess, aOnFailure);
 			}
-			function readModelDocument(aDocument, aTarget){
+			function readModelDocument(aDocument, aModuleName, aTarget){
 				if(!aTarget)
 					aTarget = {};
-				var nativeModel = @com.eas.model.store.XmlDom2Model::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(aDocument, aTarget);
-				nativeModel.@com.eas.model.Model::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);			
-				return aTarget;
+				var nativeModel = @com.eas.model.store.XmlDom2Model::transform(Lcom/google/gwt/xml/client/Document;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDocument, aModuleName, aTarget);
+				if(nativeModel){
+					nativeModel.@com.eas.model.Model::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);			
+					return aTarget;
+				}else{
+					return null;
+				}
 			}
 			function readModel(aModelContent, aTarget){
 				var doc = @com.google.gwt.xml.client.XMLParser::parse(Ljava/lang/String;)(aModelContent ? aModelContent + "" : "");
-				return readModelDocument(doc, aTarget);
+				return readModelDocument(doc, null, aTarget);
 			}
-			function loadModel(appElementName, aTarget) {
+			function loadModel(aModuleName, aTarget) {
 				var aClient = @com.eas.client.AppClient::getInstance()();
-				var appElementDoc = aClient.@com.eas.client.AppClient::getModelDocument(Ljava/lang/String;)(appElementName);
-				return readModelDocument(appElementDoc, aTarget);
+				var modelDoc = aClient.@com.eas.client.AppClient::getModelDocument(Ljava/lang/String;)(aModuleName);
+				if(modelDoc){
+					return readModelDocument(modelDoc, aModuleName, aTarget);
+				} else {
+					throw 'Model definition for module "' + aModuleName + '" is not found';
+				}
 			}		
             var module = {};
             Object.defineProperty(module, 'loadModel', {

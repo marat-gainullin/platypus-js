@@ -262,7 +262,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
     public void visit(ModuleStructureRequest rq) throws Exception {
         method = PlatypusHttpConstants.HTTP_METHOD_GET;
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.TYPE, "" + rq.getType()));
-        params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.MODULE_NAME, rq.getModuleOrResourceName()));
+        params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.MODULE_NAME, rq.getModuleName()));
         pushRequest(rq, null);
     }
 

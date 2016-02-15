@@ -86,16 +86,6 @@ public class JsDoc {
         public static final String AUTHOR_TAG = "@author";
 
         /**
-         * Marker for a module's constructor.
-         */
-        public static final String CONSTRUCTOR_TAG = "@constructor";
-
-        /**
-         * module's description.
-         */
-        public static final String MODULE_TAG = "@module";
-
-        /**
          * Annotation for defining application element's name.
          */
         public static final String NAME_TAG = "@name";

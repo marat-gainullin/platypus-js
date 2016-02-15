@@ -83,7 +83,7 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
         if (!dom.containsChild(RequestsTags.TAG_MODULE_NAME)) {
             throw new NullPointerException("No module name specified");
         }
-        rq.setModuleOrResourceName(dom.getChild(RequestsTags.TAG_MODULE_NAME).getString());
+        rq.setModuleName(dom.getChild(RequestsTags.TAG_MODULE_NAME).getString());
     }
 
     @Override

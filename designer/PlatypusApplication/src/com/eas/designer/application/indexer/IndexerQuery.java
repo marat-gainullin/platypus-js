@@ -27,14 +27,14 @@ public class IndexerQuery {
      * index
      *
      * @param project a project the application element belongs
-     * @param appElementId application element name
+     * @param appElementName application element name
      * @return primary file for application element
      */
-    public static FileObject appElementId2File(Project project, String appElementId) {
+    public static FileObject appElementId2File(Project project, String appElementName) {
         try {
             final Collection<FileObject> roots = new ArrayList<>(QuerySupport.findRoots(project, null, Collections.<String>emptyList(), Collections.<String>emptyList()));
-            QuerySupport q = QuerySupport.forRoots(FileIndexer.INDEXER_NAME, FileIndexer.INDEXER_VERSION, roots.toArray(new FileObject[roots.size()]));
-            Collection<? extends IndexResult> results = q.query(FileIndexer.APP_ELEMENT_NAME, appElementId, QuerySupport.Kind.EXACT);
+            QuerySupport q = QuerySupport.forRoots(FileIndexer.INDEXER_NAME, FileIndexer.INDEXER_VERSION, roots.toArray(new FileObject[]{}));
+            Collection<? extends IndexResult> results = q.query(FileIndexer.APP_ELEMENT_NAME, appElementName, QuerySupport.Kind.EXACT);
             if (!results.isEmpty()) {
                 IndexResult result = results.iterator().next();
                 return result.getFile();

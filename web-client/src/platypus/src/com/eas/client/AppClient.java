@@ -62,7 +62,7 @@ public class AppClient {
 	//
 	private static final RegExp httpPrefixPattern = RegExp.compile("https?://.*");
 	public static final String APPLICATION_URI = "/application";
-	public static final String APP_RESOURCE_PREFIX = "/app/";
+	private static String sourcePath = "/";
 	public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
 	//
 	private static AppClient appClient;
@@ -139,6 +139,22 @@ public class AppClient {
 		appClient = aClient;
 	}
 
+	public static String sourcePath() {
+		return sourcePath;
+	}
+
+	public static void setSourcePath(String aValue) {
+		if (aValue != null && !aValue.isEmpty()) {
+			sourcePath = aValue;
+			if (!sourcePath.endsWith("/")) {
+				aValue += "/";
+			}
+			if (!sourcePath.startsWith("/")) {
+				aValue = "/" + aValue;
+			}
+		}
+	}
+
 	public SafeUri getResourceUri(final String aResourceName) {
 		return new SafeUri() {
 
@@ -148,17 +164,17 @@ public class AppClient {
 				if (htppMatch != null) {
 					return aResourceName;
 				} else {
-					return relativeUri() + APP_RESOURCE_PREFIX + aResourceName;
+					return relativeUri() + sourcePath() + aResourceName;
 				}
 			}
 		};
 	}
 
-	public static String toAppModuleId(String aRelative, String aStartPoint) {
+	public static String toFilyAppModuleId(String aRelative, String aStartPoint) {
 		Element div = com.google.gwt.dom.client.Document.get().createDivElement();
 		div.setInnerHTML("<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>");
 		String absolute = div.getFirstChildElement().<AnchorElement> cast().getHref();
-		String hostContextPrefix = AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX;
+		String hostContextPrefix = AppClient.relativeUri() + AppClient.sourcePath();
 		absolute = URL.decode(absolute);
 		String appModuleId = absolute.substring(hostContextPrefix.length());
 		return appModuleId;
@@ -174,7 +190,7 @@ public class AppClient {
 
 	public static Object _jsLoad(final String aResourceName, boolean aBinary, final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
 		final String callerDir = Utils.lookupCallerJsDir();
-		SafeUri uri = AppClient.getInstance().getResourceUri(aResourceName.startsWith("./") || aResourceName.startsWith("../") ? toAppModuleId(aResourceName, callerDir) : aResourceName);
+		SafeUri uri = AppClient.getInstance().getResourceUri(aResourceName.startsWith("./") || aResourceName.startsWith("../") ? toFilyAppModuleId(aResourceName, callerDir) : aResourceName);
 		if (onSuccess != null) {
 			AppClient.getInstance().startRequest(uri, aBinary ? ResponseType.ArrayBuffer : ResponseType.Default, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
@@ -668,15 +684,15 @@ public class AppClient {
 
 			@Override
 			protected void doWork(String aResult) throws Exception {
-				if(onSuccess != null){
-					onSuccess.<Utils.JsObject>cast().call(null, Utils.toJs(aResult));
+				if (onSuccess != null) {
+					onSuccess.<Utils.JsObject> cast().call(null, Utils.toJs(aResult));
 				}
 			}
 
 			@Override
 			public void onFailure(String reason) {
-				if(onFailure != null){
-					onFailure.<Utils.JsObject>cast().call(null, Utils.toJs(reason));
+				if (onFailure != null) {
+					onFailure.<Utils.JsObject> cast().call(null, Utils.toJs(reason));
 				}
 			}
 		});
@@ -729,6 +745,9 @@ public class AppClient {
 	}
 
 	public Cancellable requestModuleStructure(final String aModuleName, final Callback<ModuleStructure, XMLHttpRequest> aCallback) throws Exception {
+		// TODO: lookup a loader flag e.g. 'local-names' and if it exists, put a
+		// fake structure in modulesStructures
+		// with aModuleName as *.js file name and with no pre-fetched resources.
 		if (modulesStructures.containsKey(aModuleName)) {
 			if (aCallback != null) {
 				Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -818,7 +837,7 @@ public class AppClient {
 
 				@Override
 				public String asString() {
-					return checkedCacheBust(relativeUri() + APP_RESOURCE_PREFIX + aResourceName);
+					return checkedCacheBust(relativeUri() + sourcePath() + aResourceName);
 				}
 
 			};
@@ -1066,4 +1085,5 @@ public class AppClient {
 	public String checkedCacheBust(String aUrl) {
 		return cacheBustEnabled ? aUrl + "?" + PlatypusHttpRequestParams.CACHE_BUSTER + "=" + IDGenerator.genId() : aUrl;
 	}
+
 }

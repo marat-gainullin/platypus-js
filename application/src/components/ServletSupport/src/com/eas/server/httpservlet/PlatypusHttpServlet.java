@@ -7,6 +7,7 @@ import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.ModelsDocuments;
+import com.eas.client.cache.ScriptDocument;
 import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
@@ -108,11 +109,11 @@ public class PlatypusHttpServlet extends HttpServlet {
                 File f = new File(new URI(realRootUrl));
                 if (f.exists() && f.isDirectory()) {
                     ScriptsConfigs lsecurityConfigs = new ScriptsConfigs();
-                    final ServerTasksScanner tasksScanner = new ServerTasksScanner(lsecurityConfigs);
-                    restScanner = new RestPointsScanner(lsecurityConfigs);
-                    ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), (String aAppElementName, File aFile) -> {
-                        tasksScanner.fileScanned(aAppElementName, aFile);
-                        restScanner.fileScanned(aAppElementName, aFile);
+                    final ServerTasksScanner tasksScanner = new ServerTasksScanner();
+                    restScanner = new RestPointsScanner();
+                    ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(Paths.get(f.toURI()), lsecurityConfigs, (String aModuleName, ScriptDocument.ModuleDocument aModuleDocument, File aFile) -> {
+                        tasksScanner.moduleScanned(aModuleName, aModuleDocument, aFile);
+                        restScanner.moduleScanned(aModuleName, aModuleDocument, aFile);
                     });
                     ScriptedDatabasesClient basesProxy = new ScriptedDatabasesClient(platypusConfig.getDefaultDatasourceName(), indexer, true, tasksScanner.getValidators(), platypusConfig.getMaximumJdbcThreads());
                     QueriesProxy<SqlQuery> queries = new LocalQueriesProxy(basesProxy, indexer);
@@ -482,7 +483,7 @@ public class PlatypusHttpServlet extends HttpServlet {
 
     protected Request readPlatypusRequest(HttpServletRequest aHttpRequest, HttpServletResponse aResponse) throws Exception {
         String sType = aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE);
-        if(sType == null && aHttpRequest.getParameter(PlatypusHttpRequestParams.MODULE_NAME) != null && aHttpRequest.getParameter(PlatypusHttpRequestParams.METHOD_NAME) != null){
+        if (sType == null && aHttpRequest.getParameter(PlatypusHttpRequestParams.MODULE_NAME) != null && aHttpRequest.getParameter(PlatypusHttpRequestParams.METHOD_NAME) != null) {
             sType = "" + Requests.rqExecuteServerModuleMethod;
         }
         if (sType != null) {

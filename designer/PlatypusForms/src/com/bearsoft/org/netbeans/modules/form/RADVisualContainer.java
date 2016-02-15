@@ -106,7 +106,7 @@ public class RADVisualContainer<C extends Container> extends RADVisualComponent<
 
     public void setLayoutSupportDelegate(LayoutSupportDelegate layoutDelegate)
             throws Exception {
-        layoutSupport.setLayoutDelegate(layoutDelegate);//,false);
+        layoutSupport.setLayoutDelegate(layoutDelegate);
         setLayoutNodeReference(null);
     }
 
@@ -126,9 +126,9 @@ public class RADVisualContainer<C extends Container> extends RADVisualComponent<
         if (!(cont instanceof ScrollPane)) { // Issue 128797
             cont.setLayout(null); // Issue 77904
         }
-        for (RADVisualComponent<?> sub : subComponents) {
+        subComponents.stream().forEach((sub) -> {
             cont.add(sub.getBeanInstance());
-        }
+        });
     }
 
     public boolean hasDedicatedLayoutSupport() {

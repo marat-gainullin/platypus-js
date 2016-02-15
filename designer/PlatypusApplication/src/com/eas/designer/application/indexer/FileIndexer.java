@@ -6,6 +6,7 @@ package com.eas.designer.application.indexer;
 
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
+import com.eas.client.cache.ScriptDocument;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.script.JsDoc;
 import com.eas.util.FileUtils;
@@ -60,33 +61,32 @@ public class FileIndexer extends CustomIndexer {
                     // By default look for application element name in annotation
                     File f = FileUtil.toFile(fo);
                     if (f != null) {
-                        String appElementName = null;
-                        boolean isPublic = false;
                         String fileContent = FileUtils.readString(f, PlatypusFiles.DEFAULT_ENCODING);
                         if (nameExt.endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
-                            appElementName = PlatypusFilesSupport.extractModuleName(fileContent, f.getPath());
-                            if (appElementName == null) {
-                                Project fileProject = FileOwnerQuery.getOwner(fo);
-                                if (fileProject instanceof PlatypusProject) {
-                                    PlatypusProject pProject = (PlatypusProject) fileProject;
-                                    appElementName = FileUtil.getRelativePath(pProject.getSrcRoot(), fo);
-                                    if (appElementName == null) {
-                                        appElementName = FileUtil.getRelativePath(pProject.getApiRoot(), fo);
-                                    }
-                                    if (appElementName != null) {
-                                        appElementName = appElementName.substring(0, appElementName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
-                                        appElementName = appElementName.replace(File.separator, "/");
-                                    }
+                            Project fileProject = FileOwnerQuery.getOwner(fo);
+                            if (fileProject instanceof PlatypusProject) {
+                                PlatypusProject pProject = (PlatypusProject) fileProject;
+                                String defaultModuleName = FileUtil.getRelativePath(pProject.getSrcRoot(), fo);
+                                if (defaultModuleName == null) {
+                                    defaultModuleName = FileUtil.getRelativePath(pProject.getApiRoot(), fo);
+                                }
+                                if (defaultModuleName != null) {
+                                    defaultModuleName = defaultModuleName.substring(0, defaultModuleName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
+                                    defaultModuleName = defaultModuleName.replace(File.separator, "/");
+                                    ScriptDocument scriptDoc = ScriptDocument.parse(fileContent, defaultModuleName);
+                                    scriptDoc.getModules().keySet().forEach((String aModuleName)->{
+                                        d.addPair(APP_ELEMENT_NAME, aModuleName, true, true);
+                                    });
                                 }
                             }
                         } else {
-                            appElementName = PlatypusFilesSupport.getAnnotationValue(fileContent, JsDoc.Tag.NAME_TAG);
+                            String appElementName = PlatypusFilesSupport.getAnnotationValue(fileContent, JsDoc.Tag.NAME_TAG);
+                            boolean isPublic = PlatypusFilesSupport.getAnnotationValue(fileContent, JsDoc.Tag.PUBLIC_TAG) != null;
+                            if (appElementName != null) {
+                                d.addPair(APP_ELEMENT_NAME, appElementName, true, true);
+                            }
+                            d.addPair(PUBLIC_FIELD_NAME, Boolean.toString(isPublic), true, true);
                         }
-                        isPublic = PlatypusFilesSupport.getAnnotationValue(fileContent, JsDoc.Tag.PUBLIC_TAG) != null;
-                        if (appElementName != null) {
-                            d.addPair(APP_ELEMENT_NAME, appElementName, true, true);
-                        }
-                        d.addPair(PUBLIC_FIELD_NAME, Boolean.toString(isPublic), true, true);
                         d.addPair(FIELD_NAME, nameExt, true, true);
                         d.addPair(FULL_PATH, fo.getPath(), true, true);
                         is.addDocument(d);

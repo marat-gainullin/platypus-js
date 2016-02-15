@@ -3,9 +3,8 @@
  * @author ${user}
  * @resident
  * @public
- * @module ${appElementName}
  */
-define(['orm'], function (Orm, ModuleName) {
+define('${appElementName}', ['orm'], function (Orm, ModuleName) {
     function module_constructor() {
         var self = this, model = Orm.loadModel(ModuleName);
 

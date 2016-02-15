@@ -25,6 +25,7 @@ import com.eas.util.args.ThreadsArgsConsumer;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -210,8 +211,8 @@ public class ServerMain {
                 Logger.getLogger(ServerMain.class.getName()).log(Level.INFO, "Application is located at: {0}", f.getPath());
                 GeneralResourceProvider.registerDrivers();
                 ScriptsConfigs scriptsConfigs = new ScriptsConfigs();
-                ServerTasksScanner tasksScanner = new ServerTasksScanner(scriptsConfigs);
-                ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
+                ServerTasksScanner tasksScanner = new ServerTasksScanner();
+                ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(Paths.get(f.toURI()), scriptsConfigs, tasksScanner);
                 // TODO: add command line argument "watch" after watcher refactoring
                 //indexer.watch();
                 Scripts.initBIO(threadsConfig.getMaxServicesTreads());

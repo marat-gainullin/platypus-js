@@ -208,13 +208,30 @@ public class XmlDomUtils {
         return defaulValue;
     }
 
-    public static List<Element> elementsByTagName(Node element, String aName) {
-        if (element != null && aName != null && !aName.isEmpty()) {
+    public static Element getElementByTagName(Element aParent, String aShortName, String aLongName) {
+        Node child = aParent.getFirstChild();
+        while (child != null) {
+            if (child instanceof Element) {
+                String tagName = ((Element) child).getTagName();
+                if (tagName.equals(aShortName) || tagName.equals(aLongName)) {
+                    return (Element) child;
+                }
+            }
+            child = child.getNextSibling();
+        }
+        return null;
+    }
+
+    public static List<Element> elementsByTagName(Node element, String aShortName, String aLongName) {
+        if (element != null && aShortName != null && !aShortName.isEmpty() && aLongName != null && !aLongName.isEmpty()) {
             List<Element> res = new ArrayList<>();
             Node child = element.getFirstChild();
             while (child != null) {
-                if (child instanceof Element && ((Element) child).getTagName().equals(aName)) {
-                    res.add((Element) child);
+                if (child instanceof Element) {
+                    String tagName = ((Element) child).getTagName();
+                    if (tagName.equals(aShortName) || tagName.equals(aLongName)) {
+                        res.add((Element) child);
+                    }
                 }
                 child = child.getNextSibling();
             }
@@ -223,15 +240,15 @@ public class XmlDomUtils {
         return null;
     }
 
-    public static Element getElementByTagName(Element aParent, String aName) {
-        Node child = aParent.getFirstChild();
-        while (child != null) {
-            if (child instanceof Element && ((Element) child).getTagName().equals(aName)) {
-                return (Element) child;
-            }
-            child = child.getNextSibling();
-        }
-        return null;
+    public static boolean hasAttribute(Element anElement, String aShortName, String aLongName) {
+        return anElement.hasAttribute(aShortName) ? true : anElement.hasAttribute(aLongName);
     }
 
+    public static String getAttribute(Element anElement, String aShortName, String aLongName) {
+        if (anElement.hasAttribute(aShortName)) {
+            return anElement.getAttribute(aShortName);
+        } else {
+            return anElement.getAttribute(aLongName);
+        }
+    }
 }

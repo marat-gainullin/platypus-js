@@ -123,8 +123,8 @@ public class FormFactory extends UiReader {
 			Logger.getLogger(FormFactory.class.getName()).log(Level.WARNING, "view widget missing. Falling back to AnchrosPane.");
 		}
 		form = new PlatypusWindow((Widget) viewWidget);
-		form.setDefaultCloseOperation(Utils.getIntegerAttribute(element, "defaultCloseOperation", 2));
-		String iconImage = element.getAttribute("icon");
+		form.setDefaultCloseOperation(Utils.getIntegerAttribute(element, "dco", "defaultCloseOperation", 2));
+		String iconImage = Utils.getAttribute(element, "i", "icon", null);
 		if (iconImage != null && !iconImage.isEmpty()) {
 			PlatypusImageResource.load(iconImage, new CallbackAdapter<ImageResource, String>() {
 				@Override
@@ -138,14 +138,14 @@ public class FormFactory extends UiReader {
 				}
 			});
 		}
-		form.setTitle(element.getAttribute("title"));
-		form.setMaximizable(Utils.getBooleanAttribute(element, "maximizable", Boolean.TRUE));
-		form.setMinimizable(Utils.getBooleanAttribute(element, "minimizable", Boolean.TRUE));
-		form.setResizable(Utils.getBooleanAttribute(element, "resizable", Boolean.TRUE));
-		form.setUndecorated(Utils.getBooleanAttribute(element, "undecorated", Boolean.FALSE));
-		form.setOpacity(Utils.getFloatAttribute(element, "opacity", 1.0f));
-		form.setAlwaysOnTop(Utils.getBooleanAttribute(element, "alwaysOnTop", Boolean.FALSE));
-		form.setLocationByPlatform(Utils.getBooleanAttribute(element, "locationByPlatform", Boolean.TRUE));
+		form.setTitle(Utils.getAttribute(element, "tl", "title", null));
+		form.setMaximizable(Utils.getBooleanAttribute(element, "mxe", "maximizable", Boolean.TRUE));
+		form.setMinimizable(Utils.getBooleanAttribute(element, "mne", "minimizable", Boolean.TRUE));
+		form.setResizable(Utils.getBooleanAttribute(element, "rs", "resizable", Boolean.TRUE));
+		form.setUndecorated(Utils.getBooleanAttribute(element, "udr", "undecorated", Boolean.FALSE));
+		form.setOpacity(Utils.getFloatAttribute(element, "opc", "opacity", 1.0f));
+		form.setAlwaysOnTop(Utils.getBooleanAttribute(element, "aot", "alwaysOnTop", Boolean.FALSE));
+		form.setLocationByPlatform(Utils.getBooleanAttribute(element, "lbp", "locationByPlatform", Boolean.TRUE));
 		// form.setDesignedViewSize(viewWidget.getPreferredSize());
 		for (int i = 0; i < resolvers.size(); i++) {
 			Runnable r = resolvers.get(i);
@@ -154,10 +154,10 @@ public class FormFactory extends UiReader {
 	}
 
 	protected Dimension readPrefSize(Element anElement) throws NumberFormatException {
-		if (anElement.hasAttribute("prefWidth") && anElement.hasAttribute("prefHeight")) {
+		if (Utils.hasAttribute(anElement, "pw", "prefWidth") && Utils.hasAttribute(anElement, "ph", "prefHeight")) {
 			Dimension prefSize = new Dimension();
-			String prefWidth = anElement.getAttribute("prefWidth");
-			String prefHeight = anElement.getAttribute("prefHeight");
+			String prefWidth = Utils.getAttribute(anElement, "pw", "prefWidth", null);
+			String prefHeight = Utils.getAttribute(anElement, "ph", "prefHeight", null);
 			if (prefWidth.length() > 2 && prefWidth.endsWith("px")) {
 				prefSize.width = Integer.parseInt(prefWidth.substring(0, prefWidth.length() - 2));
 			}
@@ -198,8 +198,8 @@ public class FormFactory extends UiReader {
 	}
 
 	public void readImageParagraph(Element anElement, final UIObject aImageParagraph) throws Exception {
-		if (anElement.hasAttribute("icon") && aImageParagraph instanceof HasImageResource) {
-			String iconImage = anElement.getAttribute("icon");
+		if (Utils.hasAttribute(anElement, "i", "icon") && aImageParagraph instanceof HasImageResource) {
+			String iconImage = Utils.getAttribute(anElement, "i", "icon", null);
 			PlatypusImageResource.load(iconImage, new CallbackAdapter<ImageResource, String>() {
 				@Override
 				protected void doWork(ImageResource aResult) throws Exception {
@@ -212,46 +212,46 @@ public class FormFactory extends UiReader {
 				}
 			});
 		}
-		if (anElement.hasAttribute("text") && aImageParagraph instanceof HasText) {
-			((HasText) aImageParagraph).setText(anElement.getAttribute("text"));
+		if (Utils.hasAttribute(anElement, "tx", "text") && aImageParagraph instanceof HasText) {
+			((HasText) aImageParagraph).setText(Utils.getAttribute(anElement, "tx", "text", null));
 		}
 		if (aImageParagraph instanceof HasImageParagraph) {
 			HasImageParagraph hip = (HasImageParagraph) aImageParagraph;
-			hip.setHorizontalAlignment(Utils.getIntegerAttribute(anElement, "horizontalAlignment",
+			hip.setHorizontalAlignment(Utils.getIntegerAttribute(anElement, "ha", "horizontalAlignment",
 			        aImageParagraph instanceof ImageButton || aImageParagraph instanceof DropDownButton ? HasImageParagraph.CENTER : HasImageParagraph.LEFT));
-			hip.setVerticalAlignment(Utils.getIntegerAttribute(anElement, "verticalAlignment", HasImageParagraph.CENTER));
-			hip.setIconTextGap(Utils.getIntegerAttribute(anElement, "iconTextGap", 4));
-			hip.setHorizontalTextPosition(Utils.getIntegerAttribute(anElement, "horizontalTextPosition", HasImageParagraph.RIGHT));
-			hip.setVerticalTextPosition(Utils.getIntegerAttribute(anElement, "verticalTextPosition", HasImageParagraph.CENTER));
+			hip.setVerticalAlignment(Utils.getIntegerAttribute(anElement, "va", "verticalAlignment", HasImageParagraph.CENTER));
+			hip.setIconTextGap(Utils.getIntegerAttribute(anElement, "itg", "iconTextGap", 4));
+			hip.setHorizontalTextPosition(Utils.getIntegerAttribute(anElement, "htp", "horizontalTextPosition", HasImageParagraph.RIGHT));
+			hip.setVerticalTextPosition(Utils.getIntegerAttribute(anElement, "vtp", "verticalTextPosition", HasImageParagraph.CENTER));
 		}
 	}
 
 	public void readGeneralProps(final Element anElement, final UIObject aTarget) throws Exception {
 		String widgetName = "";
-		if (anElement.hasAttribute("name") && aTarget instanceof HasJsName) {
-			widgetName = anElement.getAttribute("name");
+		if (Utils.hasAttribute(anElement, "n", "name") && aTarget instanceof HasJsName) {
+			widgetName = Utils.getAttribute(anElement, "n", "name", null);
 			((HasJsName) aTarget).setJsName(widgetName);
 		}
 		/*
-		 * if (anElement.hasAttribute("editable") && aTarget instanceof
+		 * if (Utils.hasAttribute(anElement, "e", "editable") && aTarget instanceof
 		 * HasEditable) { ((HasEditable)
-		 * aTarget).setEditable(Utils.getBooleanAttribute(anElement, "editable",
+		 * aTarget).setEditable(Utils.getBooleanAttribute(anElement, "e", "editable",
 		 * Boolean.TRUE)); }
 		 */
-		if (anElement.hasAttribute("emptyText") && aTarget instanceof HasEmptyText) {
-			((HasEmptyText) aTarget).setEmptyText(anElement.getAttribute("emptyText"));
+		if (Utils.hasAttribute(anElement, "et", "emptyText") && aTarget instanceof HasEmptyText) {
+			((HasEmptyText) aTarget).setEmptyText(Utils.getAttribute(anElement, "et", "emptyText", null));
 		}
 		if (aTarget instanceof HasBinding) {
-			if (anElement.hasAttribute("field")) {
-				String fieldPath = anElement.getAttribute("field");
+			if (Utils.hasAttribute(anElement, "f", "field")) {
+				String fieldPath = Utils.getAttribute(anElement, "f", "field", null);
 				try {
 					((HasBinding) aTarget).setField(fieldPath);
 				} catch (Exception ex) {
 					Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting field (" + fieldPath + ") to widget " + widgetName + " exception occured: " + ex.getMessage());
 				}
 			}
-			if (anElement.hasAttribute("data")) {
-				String entityName = anElement.getAttribute("data");
+			if (Utils.hasAttribute(anElement, "d", "data")) {
+				String entityName = Utils.getAttribute(anElement, "d", "data", null);
 				try {
 					((HasBinding) aTarget).setData(resolveEntity(entityName));
 				} catch (Exception ex) {
@@ -261,8 +261,8 @@ public class FormFactory extends UiReader {
 			}
 		}
 		if (aTarget instanceof HasEnabled)
-			((HasEnabled) aTarget).setEnabled(Utils.getBooleanAttribute(anElement, "enabled", Boolean.TRUE));
-		// aTarget.setFocusable(Utils.getBooleanAttribute(anElement,
+			((HasEnabled) aTarget).setEnabled(Utils.getBooleanAttribute(anElement, "en", "enabled", Boolean.TRUE));
+		// aTarget.setFocusable(Utils.getBooleanAttribute(anElement, "fc",
 		// "focusable", Boolean.TRUE));
 		if (aTarget instanceof Widget && aTarget instanceof HasPublished) {
 			PublishedComponent pComp = ((HasPublished) aTarget).getPublished().cast();
@@ -270,27 +270,27 @@ public class FormFactory extends UiReader {
 			if (font != null) {
 				pComp.setFont(font);
 			}
-			if (anElement.hasAttribute("opaque")) {
-				pComp.setOpaque(Utils.getBooleanAttribute(anElement, "opaque", Boolean.TRUE));
+			if (Utils.hasAttribute(anElement, "o", "opaque")) {
+				pComp.setOpaque(Utils.getBooleanAttribute(anElement, "o", "opaque", Boolean.TRUE));
 			}
-			if (anElement.hasAttribute("background")) {
-				PublishedColor background = PublishedColor.parse(anElement.getAttribute("background"));
+			if (Utils.hasAttribute(anElement, "bg", "background")) {
+				PublishedColor background = PublishedColor.parse(Utils.getAttribute(anElement, "bg", "background", null));
 				pComp.setBackground(background);
 			}
-			if (anElement.hasAttribute("foreground")) {
-				PublishedColor foreground = PublishedColor.parse(anElement.getAttribute("foreground"));
+			if (Utils.hasAttribute(anElement, "fg", "foreground")) {
+				PublishedColor foreground = PublishedColor.parse(Utils.getAttribute(anElement, "fg", "foreground", null));
 				pComp.setForeground(foreground);
 			}
-			if (anElement.hasAttribute("toolTipText")) {
-				pComp.setToolTipText(anElement.getAttribute("toolTipText"));
+			if (Utils.hasAttribute(anElement, "ttt", "toolTipText")) {
+				pComp.setToolTipText(Utils.getAttribute(anElement, "ttt", "toolTipText", null));
 			}
 		}
-		if (anElement.hasAttribute("visible")) {
-			aTarget.setVisible(Utils.getBooleanAttribute(anElement, "visible", Boolean.TRUE));
+		if (Utils.hasAttribute(anElement, "v", "visible")) {
+			aTarget.setVisible(Utils.getBooleanAttribute(anElement, "v", "visible", Boolean.TRUE));
 		}
-		if (anElement.hasAttribute("componentPopupMenu") && aTarget instanceof HasComponentPopupMenu) {
-			final String popupName = anElement.getAttribute("componentPopupMenu");
-			if (!popupName.isEmpty()) {
+		if (Utils.hasAttribute(anElement, "cpm", "componentPopupMenu") && aTarget instanceof HasComponentPopupMenu) {
+			final String popupName = Utils.getAttribute(anElement, "cpm", "componentPopupMenu", null);
+			if (popupName != null && !popupName.isEmpty()) {
 				resolvers.add(new Runnable() {
 					public void run() {
 						UIObject popup = widgets.get(popupName);
@@ -301,9 +301,9 @@ public class FormFactory extends UiReader {
 				});
 			}
 		}
-		if (anElement.hasAttribute("buttonGroup") && aTarget instanceof HasPlatypusButtonGroup) {
-			final String buttonGroupName = anElement.getAttribute("buttonGroup");
-			if (!buttonGroupName.isEmpty()) {
+		if (Utils.hasAttribute(anElement, "bgr", "buttonGroup") && aTarget instanceof HasPlatypusButtonGroup) {
+			final String buttonGroupName = Utils.getAttribute(anElement, "bgr", "buttonGroup", null);
+			if (buttonGroupName != null && !buttonGroupName.isEmpty()) {
 				resolvers.add(new Runnable() {
 					public void run() {
 						UIObject buttonGroup = widgets.get(buttonGroupName);
@@ -315,16 +315,16 @@ public class FormFactory extends UiReader {
 				});
 			}
 		}
-		if (anElement.hasAttribute("parent")) {
-			final String parentName = anElement.getAttribute("parent");
-			if (!parentName.isEmpty()) {
+		if (Utils.hasAttribute(anElement, "p", "parent")) {
+			final String parentName = Utils.getAttribute(anElement, "p", "parent", null);
+			if (parentName != null && !parentName.isEmpty()) {
 				resolvers.add(new Runnable() {
 					public void run() {
 						UIObject parent = widgets.get(parentName);
 						try {
 							addToParent(anElement, aTarget, parent);
 						} catch (Exception ex) {
-							ex.printStackTrace();
+							Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
 				});
@@ -341,7 +341,7 @@ public class FormFactory extends UiReader {
 	}
 
 	public PublishedFont readFont(Element anElement) throws Exception {
-		PublishedFont font = readFontTag(anElement, "font");
+		PublishedFont font = readFontTag(anElement, "ft", "font");
 		if (font != null) {
 			return font;
 		} else {
@@ -349,15 +349,15 @@ public class FormFactory extends UiReader {
 		}
 	}
 
-	private PublishedFont readFontTag(Element anElement, String aSubTagName) throws Exception {
-		Element easFontElement = Utils.getElementByTagName(anElement, aSubTagName);
+	private PublishedFont readFontTag(Element anElement, String aShortName, String aLongName) throws Exception {
+		Element easFontElement = Utils.scanForElementByTagName(anElement, aShortName, aLongName);
 		if (easFontElement != null) {
-			String name = easFontElement.getAttribute("name");
-			if (name == null || name.isEmpty()) {
+			String name = Utils.getAttribute(easFontElement, "n", "name", null);
+			if (name == null || name.isEmpty() || "null".equals(name)) {
 				name = "Arial";
 			}
-			int style = Utils.getIntegerAttribute(easFontElement, "style", 0);
-			int size = Utils.getIntegerAttribute(easFontElement, "size", 12);
+			int style = Utils.getIntegerAttribute(easFontElement, "stl", "style", 0);
+			int size = Utils.getIntegerAttribute(easFontElement, "sz", "size", 12);
 			return PublishedFont.create(name, style, size);
 		} else {
 			return null;
@@ -374,10 +374,10 @@ public class FormFactory extends UiReader {
 		} else if (parent instanceof ToolBar) {
 			((ToolBar) parent).add((Widget) aTarget);
 		} else if (parent instanceof TabbedPane) {
-			Element constraintsElement = Utils.getElementByTagName(anElement, TabbedPane.class.getSimpleName() + "Constraints");
-			String tabTitle = constraintsElement.getAttribute("tabTitle");
-			String tabIconName = constraintsElement.getAttribute("tabIcon");
-			String tabTooltipText = constraintsElement.getAttribute("tabTooltipText");
+			Element constraintsElement = Utils.scanForElementByTagName(anElement, "tpc", "TabbedPaneConstraints");
+			String tabTitle = Utils.getAttribute(constraintsElement, "tt", "tabTitle", null);
+			String tabIconName = Utils.getAttribute(constraintsElement, "ti", "tabIcon", null);
+			String tabTooltipText = Utils.getAttribute(constraintsElement, "ttp", "tabTooltipText", null);
 			((TabbedPane) parent).add((Widget) aTarget, tabTitle, false, null);
 			// ((TabbedPane) parent).add(aTarget, tabTitle,
 			// resolveIcon(tabIconName));
@@ -393,9 +393,9 @@ public class FormFactory extends UiReader {
 			// aTarget.setSize(prefSize.width + "px", prefSize.height + "px");
 			scroll.setWidget((Widget) aTarget);
 		} else if (parent instanceof BorderPane) {
-			Element constraintsElement = Utils.getElementByTagName(anElement, "BorderPaneConstraints");
+			Element constraintsElement = Utils.scanForElementByTagName(anElement, "bpc", "BorderPaneConstraints");
 			Dimension prefSize = readPrefSize(anElement);
-			Integer place = Utils.getIntegerAttribute(constraintsElement, "place", HorizontalPosition.CENTER);
+			Integer place = Utils.getIntegerAttribute(constraintsElement, "pl", "place", HorizontalPosition.CENTER);
 			Integer size = 0;
 			switch (place) {
 			case HorizontalPosition.LEFT:
@@ -422,8 +422,8 @@ public class FormFactory extends UiReader {
 				box.add((Widget) aTarget, prefSize.height);
 			}
 		} else if (parent instanceof CardPane) {
-			Element constraintsElement = Utils.getElementByTagName(anElement, "CardPaneConstraints");
-			String cardName = constraintsElement.getAttribute("cardName");
+			Element constraintsElement = Utils.scanForElementByTagName(anElement, "cpc", "CardPaneConstraints");
+			String cardName = Utils.getAttribute(constraintsElement, "cn", "cardName", null);
 			((CardPane) parent).add((Widget) aTarget, cardName);
 		} else if (parent instanceof FlowPane) {
 			// Dimension prefSize = readPrefSize(anElement);
@@ -433,7 +433,7 @@ public class FormFactory extends UiReader {
 			GridPane gridPane = (GridPane) parent;
 			gridPane.addToFreeCell((Widget) aTarget);
 		} else if (parent instanceof AnchorsPane) {
-			Element constraintsElement = Utils.getElementByTagName(anElement, "AnchorsPaneConstraints");
+			Element constraintsElement = Utils.scanForElementByTagName(anElement, "apc", "AnchorsPaneConstraints");
 			MarginConstraints constraints = readMarginConstraints(constraintsElement);
 			((AnchorsPane) parent).add((Widget) aTarget, constraints);
 		}
@@ -441,23 +441,23 @@ public class FormFactory extends UiReader {
 
 	private static MarginConstraints readMarginConstraints(Element anElement) {
 		MarginConstraints result = new MarginConstraints();
-		if (anElement.hasAttribute("left")) {
-			result.setLeft(MarginConstraints.Margin.parse(anElement.getAttribute("left")));
+		if (Utils.hasAttribute(anElement, "l", "left")) {
+			result.setLeft(MarginConstraints.Margin.parse(Utils.getAttribute(anElement, "l", "left", null)));
 		}
-		if (anElement.hasAttribute("right")) {
-			result.setRight(MarginConstraints.Margin.parse(anElement.getAttribute("right")));
+		if (Utils.hasAttribute(anElement, "r", "right")) {
+			result.setRight(MarginConstraints.Margin.parse(Utils.getAttribute(anElement, "r", "right", null)));
 		}
-		if (anElement.hasAttribute("top")) {
-			result.setTop(MarginConstraints.Margin.parse(anElement.getAttribute("top")));
+		if (Utils.hasAttribute(anElement, "t", "top")) {
+			result.setTop(MarginConstraints.Margin.parse(Utils.getAttribute(anElement, "t", "top", null)));
 		}
-		if (anElement.hasAttribute("bottom")) {
-			result.setBottom(MarginConstraints.Margin.parse(anElement.getAttribute("bottom")));
+		if (Utils.hasAttribute(anElement, "b", "bottom")) {
+			result.setBottom(MarginConstraints.Margin.parse(Utils.getAttribute(anElement, "b", "bottom", null)));
 		}
-		if (anElement.hasAttribute("width")) {
-			result.setWidth(MarginConstraints.Margin.parse(anElement.getAttribute("width")));
+		if (Utils.hasAttribute(anElement, "w", "width")) {
+			result.setWidth(MarginConstraints.Margin.parse(Utils.getAttribute(anElement, "w", "width", null)));
 		}
-		if (anElement.hasAttribute("height")) {
-			result.setHeight(MarginConstraints.Margin.parse(anElement.getAttribute("height")));
+		if (Utils.hasAttribute(anElement, "h", "height")) {
+			result.setHeight(MarginConstraints.Margin.parse(Utils.getAttribute(anElement, "h", "height", null)));
 		}
 		return result;
 	}

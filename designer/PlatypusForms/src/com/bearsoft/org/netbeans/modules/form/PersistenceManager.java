@@ -123,7 +123,7 @@ public class PersistenceManager {
 
     protected static DocumentBuilderFactory docsBuidlersFactory = DocumentBuilderFactory.newInstance();
 
-    public FormModel loadForm(FileObject formFileObject, PlatypusDataObject formDataObject, List<Throwable> nonfatalErrors) throws PersistenceException {
+    public synchronized FormModel loadForm(FileObject formFileObject, PlatypusDataObject formDataObject, List<Throwable> nonfatalErrors) throws PersistenceException {
         try {
             String formContent = formFileObject.asText(PlatypusUtils.COMMON_ENCODING_NAME);
             Document doc = Source2XmlDom.transform(formContent);
@@ -350,7 +350,7 @@ public class PersistenceManager {
         }
     }
 
-    public void saveForm(FileObject formFileObject, FormEditor formEditor, List<Throwable> nonfatalErrors) throws PersistenceException {
+    public synchronized void saveForm(FileObject formFileObject, FormEditor formEditor, List<Throwable> nonfatalErrors) throws PersistenceException {
         try {
             DocumentBuilder builder = docsBuidlersFactory.newDocumentBuilder();
             Document doc = builder.newDocument();

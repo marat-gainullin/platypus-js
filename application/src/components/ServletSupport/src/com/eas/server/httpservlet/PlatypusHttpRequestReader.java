@@ -113,7 +113,7 @@ public class PlatypusHttpRequestReader implements PlatypusRequestVisitor {
     @Override
     public void visit(ModuleStructureRequest rq) throws Exception {
         String moduleName = httpRequest.getParameter(PlatypusHttpRequestParams.MODULE_NAME);
-        rq.setModuleOrResourceName(moduleName);
+        rq.setModuleName(moduleName);
     }
 
     @Override

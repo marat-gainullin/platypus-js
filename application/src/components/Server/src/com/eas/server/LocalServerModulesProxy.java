@@ -5,7 +5,6 @@
  */
 package com.eas.server;
 
-import com.eas.client.AppElementFiles;
 import com.eas.client.ServerModuleInfo;
 import com.eas.client.ServerModulesProxy;
 import com.eas.client.cache.ScriptDocument;
@@ -30,10 +29,9 @@ public class LocalServerModulesProxy implements ServerModulesProxy {
 
     @Override
     public ServerModuleInfo getCachedStructure(String aModuleName) throws Exception {
-        AppElementFiles files = serverCore.getIndexer().nameToFiles(aModuleName);
-        if (files != null && files.isModule()) {
-            ScriptDocument config = serverCore.getScriptsConfigs().get(aModuleName, files);
-            ServerModuleInfo info = new ServerModuleInfo(aModuleName, config.getFunctionProperties(), true);
+        ScriptDocument.ModuleDocument moduleDoc = serverCore.lookupModuleDocument(aModuleName);
+        if (moduleDoc != null) {
+            ServerModuleInfo info = new ServerModuleInfo(aModuleName, moduleDoc.getFunctionProperties(), true);
             return info;
         } else {
             throw new IllegalArgumentException(String.format("No module: %s, or it is not a module", aModuleName));
