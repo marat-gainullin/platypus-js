@@ -165,7 +165,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                 Scripts.setContext(callingContext);
                 try {
                     Scripts.getSpace().process(() -> {
-                        aOnSuccess.accept(copiedRes);
+                        aOnSuccess.accept(Scripts.getSpace().restoreCopy(copiedRes));
                     });
                 } finally {
                     Scripts.setContext(oldContext);
@@ -237,11 +237,14 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                 Object oFun = moduleInstance.getMember(aMethodName);
                                                 if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
                                                     AtomicBoolean executed = new AtomicBoolean();
-                                                    List<Object> arguments = new ArrayList<>(Arrays.asList(copiedArguments));
+                                                    List<Object> arguments = new ArrayList<>();
+                                                    for (Object argument : copiedArguments) {
+                                                        arguments.add(Scripts.getSpace().restoreCopy(argument));
+                                                    }
                                                     arguments.add(new AbstractJSObject() {
                                                         @Override
                                                         public Object call(final Object thiz, final Object... largs) {
-                                                            if (!executed.get()) {
+                                                            if (!aNetworkRPC || !executed.get()) {
                                                                 executed.set(true);
                                                                 Object returned = largs.length > 0 ? largs[0] : null;
                                                                 onSuccess.accept(returned);// WARNING! Don't insert .toJava() because of RPC handler
@@ -264,7 +267,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                     arguments.add(new AbstractJSObject() {
                                                         @Override
                                                         public Object call(final Object thiz, final Object... largs) {
-                                                            if (!executed.get()) {
+                                                            if (!aNetworkRPC || !executed.get()) {
                                                                 executed.set(true);
                                                                 Object reason = largs.length > 0 ? Scripts.getSpace().toJava(largs[0]) : null;
                                                                 if (reason instanceof Exception) {

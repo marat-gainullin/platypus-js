@@ -5,8 +5,8 @@ set UPDATER_PATH=%PLATYPUS_HOME%\lib\own\Updater.jar
 set TMP_UPDATE_NAME=%PLATYPUS_HOME%\app.zip
 set MAIN_CLASS=com.eas.client.updater.Updater
 set LAF_CLASS=com.jtattoo.plaf.fast.FastLookAndFeel
-set URL_CONFIG=http://platypus-platform.org/platform/updates/5.4/client/NightlyBuild/version.xml
-set URL_UPDATE=http://platypus-platform.org/platform/updates/5.4/client/NightlyBuild/application.zip
+set URL_CONFIG=http://platypus-platform.org/platform/updates/5.4/client/NightlyBuild/version.xml 
+set URL_UPDATE=http://platypus-platform.org/platform/updates/5.4/client/NightlyBuild/application.zip 
 set CONFIG_NAME_PATH=%BASEDIR%version.xml
 set EXT_CLASSES=%PLATYPUS_HOME%\ext\*
 

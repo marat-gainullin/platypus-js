@@ -1,6 +1,6 @@
 <project name="build installers" default="build" basedir=".">
     <!--<property file="${basedir}/template.properties"/>-->
-    
+	<echo message="SUITE ===== ${suite.props.app.name}" />    
     <target name="build" depends="init,prepare-sources,prepare-zip,-build,post-build,run-build"/>
 
     <target name="-init-props">

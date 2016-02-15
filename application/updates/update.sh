@@ -24,7 +24,7 @@ configFile="update.ini"
 urlConfigRegEx="URLConfig\s*=\s*([\S]+)"
 urlUpdateRegEx="URLUpdate\s*=\s*([\S]+)"
 configNameRegEx="ConfigFileName\s*=\s*([\S]+)"
-URL_CONFIG_DEFAULT=http://platypus-platform.org/platform/updates/5.4/client/NightlyBuild/version.xml
+URL_CONFIG_DEFAULT=http://platypus-platform.org/platform/updates/5.4/client/NightlyBuild/version.xml 
 URL_CONFIG=$URL_CONFIG_DEFAULT
 URL_UPDATE_DEFAULT=http://platypus-platform.org/platform/updates/5.4/client/NightlyBuild/application.zip
 URL_UPDATE=$URL_UPDATE_DEFAULT

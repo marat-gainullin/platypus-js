@@ -32,7 +32,6 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import javax.script.SimpleScriptContext;
-import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
@@ -295,6 +294,7 @@ public class Scripts {
         protected JSObject listenFunc;
         protected JSObject listenElementsFunc;
         protected JSObject copyObjectFunc;
+        protected JSObject restoreObjectFunc;
 
         public void setGlobal(Object aValue) {
             if (global == null) {
@@ -420,6 +420,15 @@ public class Scripts {
             return copyObjectFunc;
         }
 
+        public void setRestoreObjectFunc(JSObject aValue) {
+            assert restoreObjectFunc == null;
+            restoreObjectFunc = aValue;
+        }
+
+        public JSObject getRestoreObjectFunc() {
+            return restoreObjectFunc;
+        }
+
         public Object toJava(Object aValue) {
             if (aValue instanceof ScriptObject) {
                 aValue = ScriptUtils.wrap((ScriptObject) aValue);
@@ -508,24 +517,14 @@ public class Scripts {
             return (JSObject) oResult;
         }
 
-        private static class Wrapper {
-
-            public Object value;
-        }
-
         public Object makeCopy(Object aSource) {
             assert copyObjectFunc != null : SCRIPT_NOT_INITIALIZED;
-            Wrapper w = new Wrapper();
-            copyObjectFunc.call(null, new Object[]{aSource, new AbstractJSObject() {
+            return copyObjectFunc.call(null, new Object[]{aSource});
+        }
 
-                @Override
-                public Object call(Object thiz, Object... args) {
-                    w.value = args.length > 0 ? args[0] : null;
-                    return null;
-                }
-
-            }});
-            return w.value;
+        public Object restoreCopy(Object aSource) {
+            assert restoreObjectFunc != null : SCRIPT_NOT_INITIALIZED;
+            return restoreObjectFunc.call(null, new Object[]{aSource});
         }
 
         public JSObject listen(JSObject aTarget, String aPath, JSObject aCallback) {

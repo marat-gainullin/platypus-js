@@ -160,7 +160,11 @@ public class PlatypusHttpServlet extends HttpServlet {
         }
         Scripts.shutdown();
         if (platypusCore.getDatabasesClient() != null) {
-            platypusCore.getDatabasesClient().shutdown();
+            try {
+                platypusCore.getDatabasesClient().shutdown();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         if (selfExecutor != null) {
             selfExecutor.shutdown();
