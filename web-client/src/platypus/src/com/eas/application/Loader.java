@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -421,7 +420,8 @@ public class Loader {
 	private static void scriptOfModuleLoaded(String aScriptName, String aModuleName) {
 		Collection<String> amdOrderedModules = loadedScripts.get(aScriptName);
 		if (!amdOrderedModules.contains(aModuleName)) {
-			// It seems, that module is either global module or it is a file stub
+			// It seems, that module is either global module or it is a file
+			// stub
 			Predefine.getDefined().put(aModuleName, null);
 			fireLoaded(aModuleName);
 			notifyModuleLoaded(aModuleName);
@@ -462,8 +462,7 @@ public class Loader {
 
 					});
 					if (!startedScripts.contains(jsResource)) {
-						loadScriptFormServer(prefetchedResources, jsResource, aStructure.getClientDependencies(), aStructure.getQueriesDependencies(), aStructure.getServerDependencies(), aCyclic,
-						        aModuleName);
+						loadScriptFormServer(prefetchedResources, jsResource, aStructure.getClientDependencies(), aStructure.getQueriesDependencies(), aStructure.getServerDependencies(), aCyclic);
 						startedScripts.add(jsResource);
 					}
 				}
@@ -477,30 +476,26 @@ public class Loader {
 	}
 
 	private static void loadScriptFormServer(Set<String> aPrefetchedResources, final String aJsResource, Set<String> aClientGlobalDependencies, Set<String> aQueriesDependencies,
-	        Set<String> aServerModulesDependencies, Set<String> aCyclic, final String aDefaultModuleName) throws Exception {
+	        Set<String> aServerModulesDependencies, Set<String> aCyclic) throws Exception {
 		final CumulativeCallbackAdapter<Void, String> scriptProcess = new CumulativeCallbackAdapter<Void, String>(aPrefetchedResources.isEmpty() ? 1 : 2) {
 
 			@Override
 			protected void doWork(Void aResult) throws Exception {
-				final String jsURL = AppClient.getInstance().checkedCacheBust(AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX + aJsResource);
+				final String jsURL = AppClient.getInstance().checkedCacheBust(AppClient.relativeUri() + AppClient.sourcePath() + aJsResource);
 				ScriptInjector.fromUrl(jsURL).setCallback(new Callback<Void, Exception>() {
 
 					@Override
 					public void onSuccess(Void result) {
 						final Collection<AmdDefine> amdDefines = Loader.consumeAmdDefines();
 						Set<String> amdModulesOfScript = new HashSet<>();
-						for(AmdDefine amdDefine : amdDefines){
-							String amdModuleName = amdDefine.getModuleName() != null ? amdDefine.getModuleName() : aDefaultModuleName;
-							amdModulesOfScript.add(amdModuleName);
+						for (AmdDefine amdDefine : amdDefines) {
+							amdModulesOfScript.add(amdDefine.getModuleName());
 						}
 						loadedScripts.put(aJsResource, amdModulesOfScript);
 						notifyScriptLoaded(aJsResource);
 						// Amd in action ...
-						Iterator<AmdDefine> amdDefinesIt = amdDefines.iterator();
-						while (amdDefinesIt.hasNext()) {
-							AmdDefine amdDefine = amdDefinesIt.next();
-							final String amdModuleName = amdDefine.getModuleName() != null ? amdDefine.getModuleName() : aDefaultModuleName;
-							amdModulesOfScript.add(amdModuleName);
+						for (AmdDefine amdDefine : amdDefines) {
+							final String amdModuleName = amdDefine.getModuleName();
 							final Collection<String> amdDependencies = amdDefine.getDependencies();
 							final Callback<String, Void> amdModuleDefiner = amdDefine.getModuleDefiner();
 							try {
@@ -604,37 +599,35 @@ public class Loader {
 	}
 
 	public static void notifyScriptFailed(String aScriptName, final List<String> aReasons) {
-		List<Callback<Void, String>> interestedPendings = new ArrayList<>();
-		if (pendingsOnScript.containsKey(aScriptName)) {
-			interestedPendings.addAll(pendingsOnScript.get(aScriptName));
-			pendingsOnScript.get(aScriptName).clear();
-		}
-		final String errors = errorsToString(aReasons);
-		for (final Callback<Void, String> interestedPending : interestedPendings) {
-			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+		List<Callback<Void, String>> interestedPendings = pendingsOnScript.remove(aScriptName);
+		if (interestedPendings != null) {
+			final String errors = errorsToString(aReasons);
+			for (final Callback<Void, String> interestedPending : interestedPendings) {
+				Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 
-				@Override
-				public void execute() {
-					interestedPending.onFailure(errors);
-				}
-			});
+					@Override
+					public void execute() {
+						interestedPending.onFailure(errors);
+					}
+				});
+			}
+			interestedPendings.clear();
 		}
 	}
 
 	private static void notifyScriptLoaded(String aScriptName) {
-		List<Callback<Void, String>> interestedPendings = new ArrayList<>();
-		if (pendingsOnScript.containsKey(aScriptName)) {
-			interestedPendings.addAll(pendingsOnScript.get(aScriptName));
-			pendingsOnScript.get(aScriptName).clear();
-		}
-		for (final Callback<Void, String> interestedPending : interestedPendings) {
-			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+		List<Callback<Void, String>> interestedPendings = pendingsOnScript.remove(aScriptName);
+		if (interestedPendings != null) {
+			for (final Callback<Void, String> interestedPending : interestedPendings) {
+				Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 
-				@Override
-				public void execute() {
-					interestedPending.onSuccess(null);
-				}
-			});
+					@Override
+					public void execute() {
+						interestedPending.onSuccess(null);
+					}
+				});
+			}
+			interestedPendings.clear();
 		}
 	}
 
@@ -648,37 +641,35 @@ public class Loader {
 	}
 
 	public static void notifyModuleFailed(String aModuleName, final List<String> aReasons) {
-		List<Callback<Void, String>> interestedPendings = new ArrayList<>();
-		if (pendingsOnModule.containsKey(aModuleName)) {
-			interestedPendings.addAll(pendingsOnModule.get(aModuleName));
-			pendingsOnModule.get(aModuleName).clear();
-		}
-		final String errors = errorsToString(aReasons);
-		for (final Callback<Void, String> interestedPending : interestedPendings) {
-			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+		List<Callback<Void, String>> interestedPendings = pendingsOnModule.remove(aModuleName);
+		if (interestedPendings != null) {
+			final String errors = errorsToString(aReasons);
+			for (final Callback<Void, String> interestedPending : interestedPendings) {
+				Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 
-				@Override
-				public void execute() {
-					interestedPending.onFailure(errors);
-				}
-			});
+					@Override
+					public void execute() {
+						interestedPending.onFailure(errors);
+					}
+				});
+			}
+			interestedPendings.clear();
 		}
 	}
 
 	private static void notifyModuleLoaded(String aModuleName) {
-		List<Callback<Void, String>> interestedPendings = new ArrayList<>();
-		if (pendingsOnModule.containsKey(aModuleName)) {
-			interestedPendings.addAll(pendingsOnModule.get(aModuleName));
-			pendingsOnModule.get(aModuleName).clear();
-		}
-		for (final Callback<Void, String> interestedPending : interestedPendings) {
-			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+		List<Callback<Void, String>> interestedPendings = pendingsOnModule.remove(aModuleName);
+		if (interestedPendings != null) {
+			for (final Callback<Void, String> interestedPending : interestedPendings) {
+				Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 
-				@Override
-				public void execute() {
-					interestedPending.onSuccess(null);
-				}
-			});
+					@Override
+					public void execute() {
+						interestedPending.onSuccess(null);
+					}
+				});
+			}
+			interestedPendings.clear();
 		}
 	}
 

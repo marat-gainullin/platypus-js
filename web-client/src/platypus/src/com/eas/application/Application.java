@@ -66,16 +66,28 @@ public class Application {
 		JsUi.init();
 		loaderHandlerRegistration.add(Loader.addHandler(new LoggingLoadHandler()));
 		NodeList<Element> scriptTags = Document.get().getElementsByTagName("script");
-		for(int s = 0; s < scriptTags.getLength(); s++){
+		String entryPoint = null;
+		String sourcePrefix = null;
+		for (int s = 0; s < scriptTags.getLength(); s++) {
 			ScriptElement script = scriptTags.getItem(s).cast();
-			if(script.getSrc().endsWith("pwc.nocache.js") && script.hasAttribute("entry-point")){
-				String entryPoint = script.getAttribute("entry-point");
-				if(!entryPoint.toLowerCase().endsWith(".js"))
-					entryPoint += ".js";
-				String entryPointJsUrl = AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX + entryPoint;
-				ScriptInjector.fromUrl(entryPointJsUrl).setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).inject();
+			if (script.getSrc().endsWith("pwc.nocache.js")) {
+				if (script.hasAttribute("entry-point")) {
+					entryPoint = script.getAttribute("entry-point");
+					if (!entryPoint.toLowerCase().endsWith(".js")) {
+						entryPoint += ".js";
+					}
+				}
+				if (script.hasAttribute("source-path")) {
+					sourcePrefix = script.getAttribute("source-path").toLowerCase();
+				}
 				break;
 			}
+		}
+		AppClient.setSourcePath(sourcePrefix);
+		if (entryPoint != null && !entryPoint.isEmpty()) {
+			ScriptInjector.fromUrl(AppClient.relativeUri() + AppClient.sourcePath() + entryPoint).setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).inject();
+		} else {
+			Logger.getLogger(Application.class.getName()).log(Level.SEVERE, "\"entry-point\" attribute missing while initializing modules loader");
 		}
 	}
 
@@ -131,7 +143,10 @@ public class Application {
 	}
 
 	public static void define(String aModuleName, final Utils.JsObject aDeps, final Utils.JsObject aModuleDefiner) {
-		String calledFromDir = Utils.lookupCallerJsDir();
+		String calledFromFile = Utils.lookupCallerJsFile();
+		int lastSlashIndex = calledFromFile.lastIndexOf('/');
+		String calledFromDir = calledFromFile.substring(0, lastSlashIndex);
+		String calledFromFileShort = calledFromFile.substring(lastSlashIndex + 1, calledFromFile.length());
 		final List<String> deps = new ArrayList<String>();
 		for (int i = 0; i < aDeps.length(); i++) {
 			String dep = aDeps.getString(i);
@@ -142,6 +157,12 @@ public class Application {
 				dep = dep.substring(0, dep.length() - 3);
 			}
 			deps.add(dep);
+		}
+		if (aModuleName == null) {
+			aModuleName = AppClient.toFilyAppModuleId("./" + calledFromFileShort, calledFromDir);
+			if (aModuleName.endsWith(".js")) {
+				aModuleName = aModuleName.substring(0, aModuleName.length() - 3);
+			}
 		}
 		Loader.addAmdDefine(aModuleName, deps, new Callback<String, Void>() {
 

@@ -96,7 +96,7 @@
         if (arguments.length === 1 ||
                 arguments.length === 2 || arguments.length === 3) {
             var calledFromFile = lookupCallerFile();
-            var aModuleName = arguments.length === 3 ? arguments[0] : null;
+            var aModuleName = arguments.length === 3 ? arguments[0] : calledFromFile.substring(0, calledFromFile.length - 3);
             var aDeps = arguments.length === 3 ? arguments[1] : arguments.length === 2 ? arguments[0] : [];
             var aModuleDefiner = arguments.length === 3 ? arguments[2] : arguments.length === 2 ? arguments[1] : arguments[0];
             if (!Array.isArray(aDeps))
@@ -110,7 +110,7 @@
                 sDep = ScriptedResourceClass.toModuleId(apiPath, appPath, sDep, calledFromFile);
                 sDeps[s] = sDep;
             }
-            space.addAmdDefine(aModuleName ? aModuleName + '' : null, sDeps, function (aModuleName) {
+            space.addAmdDefine(aModuleName, sDeps, function (aModuleName) {
                 var defined = space.getDefined();
                 var resolved = [];
                 for (var d = 0; d < sDeps.length; d++) {
@@ -313,7 +313,9 @@
                     aMapping.put(aValue, restored);
                     if(isList){
                         for(var i = 0; i < aValue.size(); i++){
-                            restored.push(aValue.get(i));
+                            var pValue = aValue.get(i);
+                            var val = aMapping.containsKey(pValue) ? aMapping.get(pValue) : restore(pValue, aMapping);
+                            restored.push(val);
                         }
                     }
                     for each (var p in aValue.keySet()) {

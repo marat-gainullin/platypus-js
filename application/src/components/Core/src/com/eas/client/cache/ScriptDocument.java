@@ -203,12 +203,6 @@ public class ScriptDocument {
                     long prevComment = prevComments.get(aCommentableToken);
                     String defineCallComment = source.getString(prevComment);
                     mdModule.parseAnnotations(defineCallComment);
-                    if (moduleName == null || moduleName.isEmpty()) {
-                        JsDoc.Tag moduleTag = mdModule.getAnnotation(JsDoc.Tag.MODULE_TAG);
-                        if (moduleTag != null && !moduleTag.getParams().isEmpty()) {
-                            moduleName = moduleTag.getParams().get(0);
-                        }
-                    }
                 }
                 mdModule.moduleAllowedRoles.addAll(allowedRoles);
                 if (moduleName == null || moduleName.isEmpty()) {
@@ -297,12 +291,7 @@ public class ScriptDocument {
                         String commentText = source.getString(prevComment);
                         mdModule.parseAnnotations(commentText);
                     }
-                    JsDoc.Tag moduleAnnotation = mdModule.getAnnotation(JsDoc.Tag.MODULE_TAG);
-                    if (moduleAnnotation != null && moduleAnnotation.getParams() != null && !moduleAnnotation.getParams().isEmpty()) {
-                        modules.put(moduleAnnotation.getParams().get(0), mdModule);
-                    } else {
-                        modules.put(functionNode.getName(), mdModule);
-                    }
+                    modules.put(functionNode.getName(), mdModule);
                 }
                 return super.enterFunctionNode(functionNode);
             }

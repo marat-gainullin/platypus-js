@@ -511,9 +511,9 @@ public class Utils {
 		return attrValue != null && !"null".equals(attrValue) ? Boolean.valueOf(attrValue) : defaultValue;
 	}
 
-    public static boolean hasAttribute(Element anElement, String aShortName, String aLongName) {
-        return anElement.hasAttribute(aShortName) ? true : anElement.hasAttribute(aLongName);
-    }
+	public static boolean hasAttribute(Element anElement, String aShortName, String aLongName) {
+		return anElement.hasAttribute(aShortName) ? true : anElement.hasAttribute(aLongName);
+	}
 
 	public static String getAttribute(Element aElement, String aShortName, String aLongName, String defaultValue) {
 		NamedNodeMap attrs = aElement.getAttributes();
@@ -763,11 +763,20 @@ public class Utils {
 	}
 
 	public static String lookupCallerJsDir() {
-		String calledFromDir = null;
+		String calledFromFile = lookupCallerJsFile();
+		if (calledFromFile != null) {
+			int lastSlashIndex = calledFromFile.lastIndexOf('/');
+			return calledFromFile.substring(0, lastSlashIndex);
+		} else {
+			return null;
+		}
+	}
+
+	public static String lookupCallerJsFile() {
+		String calledFromFile = null;
 		try {
-			throw new Exception("current file test");
+			throw new Exception("Current file test");
 		} catch (Exception ex) {
-			String calledFromFile = null;
 			StackTraceElement[] stackFrames = ex.getStackTrace();
 			String firstFileName = extractFileName(stackFrames[0]);
 			if (firstFileName != null) {
@@ -775,15 +784,12 @@ public class Utils {
 					String fileName = extractFileName(stackFrames[frameIdx]);
 					if (fileName != null && !fileName.equals(firstFileName)) {
 						calledFromFile = fileName;
-						break;
+						int lastQuestionIndex = calledFromFile.lastIndexOf('?');
+						return calledFromFile.substring(0, lastQuestionIndex);
 					}
 				}
 			}
-			if (calledFromFile != null) {
-				int lastSlashIndex = calledFromFile.lastIndexOf('/');
-				calledFromDir = calledFromFile.substring(0, lastSlashIndex);
-			}
 		}
-		return calledFromDir;
+		return calledFromFile;
 	}
 }

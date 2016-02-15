@@ -157,7 +157,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
      */
     public void executeMethod(String aModuleName, String aMethodName, Object[] aArguments, boolean aNetworkRPC, Consumer<Object> aOnSuccess, Consumer<Exception> aOnFailure) {
         Scripts.LocalContext callingContext = Scripts.getContext();
-        Object[] copiedArguments = copyArgumnets(aArguments, callingContext);
+        Object[] copiedArguments = copyArguments(aArguments, callingContext);
         Consumer<Object> onSuccess = (Object res) -> {
             if (aOnSuccess != null) {
                 Scripts.LocalContext oldContext = Scripts.getContext();
@@ -372,7 +372,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
         }
     }
 
-    public Object[] copyArgumnets(Object[] aArguments, Scripts.LocalContext callingContext) {
+    public Object[] copyArguments(Object[] aArguments, Scripts.LocalContext callingContext) {
         Object[] arguments = Arrays.copyOf(aArguments, aArguments.length);
         for (int a = 0; a < arguments.length; a++) {
             if (arguments[a] instanceof HasPublished) {

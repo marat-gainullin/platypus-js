@@ -198,13 +198,19 @@ public class Scripts {
 
     public static class AmdDefine {
 
+        protected String moduleName;
         protected String[] amdDependencies;
         protected JSObject moduleDefiner;
 
-        public AmdDefine(String[] aAmdDependencies, JSObject aModuleDefiner) {
+        public AmdDefine(String aModuleName, String[] aAmdDependencies, JSObject aModuleDefiner) {
             super();
+            moduleName = aModuleName;
             amdDependencies = aAmdDependencies;
             moduleDefiner = aModuleDefiner;
+        }
+
+        public String getModuleName() {
+            return moduleName;
         }
 
         public String[] getAmdDependencies() {
@@ -221,10 +227,9 @@ public class Scripts {
         protected ScriptContext scriptContext;
         protected Object global;
         protected Map<String, JSObject> publishers = new HashMap<>();
-        protected Set<String> required = new HashSet<>();
-        protected Map<String, AmdDefine> amdDefines = new HashMap<>();
+        protected Collection<AmdDefine> amdDefines = new ArrayList<>();
         // script files alredy executed within this script space
-        protected Set<URL> executed = new HashSet<>();
+        protected Map<URL, Set<String>> executed = new HashMap<>();
         protected Map<String, List<Pending>> pending = new HashMap<>();
         protected Map<String, JSObject> defined = new HashMap<>();
 
@@ -247,12 +252,30 @@ public class Scripts {
             return (String) scriptContext.getAttribute(ScriptEngine.FILENAME);
         }
 
-        public Set<String> getRequired() {
-            return required;
+        public void notifyLoaded(String aModuleName) {
+            List<Scripts.Pending> pendings = pending.remove(aModuleName);
+            if (pendings != null) {
+                Scripts.Pending[] pend = pendings.toArray(new Scripts.Pending[]{});
+                pendings.clear();
+                for (Scripts.Pending p : pend) {
+                    p.loaded();
+                }
+            }
         }
 
-        public Set<URL> getExecuted() {
-            return Collections.unmodifiableSet(executed);
+        public void notifyFailed(String aModuleName, Exception ex) {
+            List<Scripts.Pending> pendings = pending.remove(aModuleName);
+            if (pendings != null) {
+                Scripts.Pending[] pend = pendings.toArray(new Scripts.Pending[]{});
+                pendings.clear();
+                for (Scripts.Pending p : pend) {
+                    p.failed(ex);
+                }
+            }
+        }
+
+        public Map<URL, Set<String>> getExecuted() {
+            return Collections.unmodifiableMap(executed);
         }
 
         public Map<String, List<Pending>> getPending() {
@@ -264,16 +287,12 @@ public class Scripts {
         }
 
         public void addAmdDefine(String aModuleName, String[] aAmdDependencies, JSObject aModuleDefiner) {
-            if (amdDefines.containsKey(aModuleName)) {
-                Logger.getLogger(Space.class.getName()).log(Level.WARNING, "{0} is already defined.", aModuleName);
-            } else {
-                amdDefines.put(aModuleName, new AmdDefine(aAmdDependencies, aModuleDefiner));
-            }
+            amdDefines.add(new AmdDefine(aModuleName, aAmdDependencies, aModuleDefiner));
         }
 
-        public Collection<Map.Entry<String, AmdDefine>> consumeAmdDefines() {
-            Collection<Map.Entry<String, AmdDefine>> res = amdDefines.entrySet();
-            amdDefines = new HashMap<>();
+        public Collection<AmdDefine> consumeAmdDefines() {
+            Collection<AmdDefine> res = amdDefines;
+            amdDefines = new ArrayList<>();
             return res;
         }
 
@@ -560,7 +579,7 @@ public class Scripts {
 
         public JSObject lookupInGlobal(String aName) {
             assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
-            Object res = lookupInGlobalFunc.call(null, new Object[]{aName});
+            Object res = aName != null && !aName.isEmpty() ? lookupInGlobalFunc.call(null, new Object[]{aName}) : null;
             return res instanceof JSObject ? (JSObject) res : null;
         }
 
@@ -572,7 +591,7 @@ public class Scripts {
         public Object exec(String aSourceName, URL aSourcePlace) throws ScriptException, URISyntaxException {
             scriptContext.setAttribute(ScriptEngine.FILENAME, aSourceName.toLowerCase().endsWith(".js") ? aSourceName.substring(0, aSourceName.length() - 3) : aSourceName, ScriptContext.ENGINE_SCOPE);
             Object result = SCRIPT_ENGINE.eval(new URLReader(aSourcePlace), scriptContext);
-            executed.add(aSourcePlace);
+            executed.put(aSourcePlace, new HashSet<>());
             return result;
         }
 

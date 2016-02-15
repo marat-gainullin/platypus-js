@@ -24,6 +24,8 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -32,6 +34,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 /**
  *
@@ -353,51 +356,59 @@ public class ToolsApplication {
                     String fileNameWoExt = fileName.substring(0, fileName.length() - PlatypusFiles.MODEL_EXTENSION.length());
                     Path sqlPath = aPath.resolveSibling(fileNameWoExt + PlatypusFiles.SQL_EXTENSION);
                     if (!sqlPath.toFile().exists()) {
-                        Path jsPath = aPath.resolveSibling(fileNameWoExt + PlatypusFiles.JAVASCRIPT_EXTENSION);
-                        if (jsPath.toFile().exists()) {
-                            ScriptDocument scriptDoc = ScriptDocument.parse(FileUtils.readString(jsPath.toFile(), SettingsConstants.COMMON_ENCODING), bundleName);
-                            if (scriptDoc.getModules().size() == 1) {
-                                bundleName = scriptDoc.getModules().keySet().iterator().next();
+                        try {
+                            Path jsPath = aPath.resolveSibling(fileNameWoExt + PlatypusFiles.JAVASCRIPT_EXTENSION);
+                            if (jsPath.toFile().exists()) {
+                                ScriptDocument scriptDoc = ScriptDocument.parse(FileUtils.readString(jsPath.toFile(), SettingsConstants.COMMON_ENCODING), bundleName);
+                                if (scriptDoc.getModules().size() == 1) {
+                                    bundleName = scriptDoc.getModules().keySet().iterator().next();
+                                }
                             }
-                        }
-                        String modelContent = FileUtils.readString(file, SettingsConstants.COMMON_ENCODING);
-                        Document modelDoc = Source2XmlDom.transform(modelContent);
-                        Element modelDocRoot = modelDoc.getDocumentElement();
-                        Element processedRoot = minifyElement(modelsBundle, modelDocRoot, MINIFIED_MODEL_TAGS, MINIFIED_MODEL_ATTRS);
-                        processedRoot.setAttribute(BUNDLE_NAME_ATTR, bundleName);
+                            String modelContent = FileUtils.readString(file, SettingsConstants.COMMON_ENCODING);
+                            Document modelDoc = Source2XmlDom.transform(modelContent);
+                            Element modelDocRoot = modelDoc.getDocumentElement();
+                            Element processedRoot = minifyElement(modelsBundle, modelDocRoot, MINIFIED_MODEL_TAGS, MINIFIED_MODEL_ATTRS);
+                            processedRoot.setAttribute(BUNDLE_NAME_ATTR, bundleName);
 
-                        modelsBundleRoot.appendChild(processedRoot);
-                        Node modelChild = modelDocRoot.getFirstChild();
-                        while (modelChild != null) {
-                            if (modelChild instanceof Element) {
-                                Element processedModelChild = minifyElement(modelsBundle, (Element) modelChild, MINIFIED_MODEL_TAGS, MINIFIED_MODEL_ATTRS);
-                                processedRoot.appendChild(processedModelChild);
+                            modelsBundleRoot.appendChild(processedRoot);
+                            Node modelChild = modelDocRoot.getFirstChild();
+                            while (modelChild != null) {
+                                if (modelChild instanceof Element) {
+                                    Element processedModelChild = minifyElement(modelsBundle, (Element) modelChild, MINIFIED_MODEL_TAGS, MINIFIED_MODEL_ATTRS);
+                                    processedRoot.appendChild(processedModelChild);
+                                }
+                                modelChild = modelChild.getNextSibling();
                             }
-                            modelChild = modelChild.getNextSibling();
+                        } catch (SAXException | ParserConfigurationException ex) {
+                            Logger.getLogger(ToolsApplication.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                 } else if (layoutsBundle != null && fileName.endsWith("." + PlatypusFiles.FORM_EXTENSION)) {
-                    String fileNameWoExt = fileName.substring(0, fileName.length() - PlatypusFiles.FORM_EXTENSION.length());
-                    Path jsPath = aPath.resolveSibling(fileNameWoExt + PlatypusFiles.JAVASCRIPT_EXTENSION);
-                    if (jsPath.toFile().exists()) {
-                        ScriptDocument scriptDoc = ScriptDocument.parse(FileUtils.readString(jsPath.toFile(), SettingsConstants.COMMON_ENCODING), bundleName);
-                        if (!scriptDoc.getModules().isEmpty()) {
-                            bundleName = scriptDoc.getModules().keySet().iterator().next();
+                    try {
+                        String fileNameWoExt = fileName.substring(0, fileName.length() - PlatypusFiles.FORM_EXTENSION.length());
+                        Path jsPath = aPath.resolveSibling(fileNameWoExt + PlatypusFiles.JAVASCRIPT_EXTENSION);
+                        if (jsPath.toFile().exists()) {
+                            ScriptDocument scriptDoc = ScriptDocument.parse(FileUtils.readString(jsPath.toFile(), SettingsConstants.COMMON_ENCODING), bundleName);
+                            if (!scriptDoc.getModules().isEmpty()) {
+                                bundleName = scriptDoc.getModules().keySet().iterator().next();
+                            }
                         }
-                    }
-                    String layoutContent = FileUtils.readString(file, SettingsConstants.COMMON_ENCODING);
-                    Document layoutDoc = Source2XmlDom.transform(layoutContent);
-                    Element layoutDocRoot = layoutDoc.getDocumentElement();
-                    Element processedRoot = minifyElement(layoutsBundle, (Element) layoutDocRoot, MINIFIED_LAYOUT_TAGS, MINIFIED_LAYOUT_ATTRS);
-                    processedRoot.setAttribute(BUNDLE_NAME_ATTR, bundleName);
-                    layoutsBundleRoot.appendChild(processedRoot);
-                    Node layoutChild = layoutDocRoot.getFirstChild();
-                    while (layoutChild != null) {
-                        if (layoutChild instanceof Element) {
-                            Element processedLayoutChild = minifyElement(layoutsBundle, (Element) layoutChild, MINIFIED_LAYOUT_TAGS, MINIFIED_LAYOUT_ATTRS);
-                            processedRoot.appendChild(processedLayoutChild);
+                        String layoutContent = FileUtils.readString(file, SettingsConstants.COMMON_ENCODING);
+                        Document layoutDoc = Source2XmlDom.transform(layoutContent);
+                        Element layoutDocRoot = layoutDoc.getDocumentElement();
+                        Element processedRoot = minifyElement(layoutsBundle, (Element) layoutDocRoot, MINIFIED_LAYOUT_TAGS, MINIFIED_LAYOUT_ATTRS);
+                        processedRoot.setAttribute(BUNDLE_NAME_ATTR, bundleName);
+                        layoutsBundleRoot.appendChild(processedRoot);
+                        Node layoutChild = layoutDocRoot.getFirstChild();
+                        while (layoutChild != null) {
+                            if (layoutChild instanceof Element) {
+                                Element processedLayoutChild = minifyElement(layoutsBundle, (Element) layoutChild, MINIFIED_LAYOUT_TAGS, MINIFIED_LAYOUT_ATTRS);
+                                processedRoot.appendChild(processedLayoutChild);
+                            }
+                            layoutChild = layoutChild.getNextSibling();
                         }
-                        layoutChild = layoutChild.getNextSibling();
+                    } catch (SAXException | ParserConfigurationException ex) {
+                        Logger.getLogger(ToolsApplication.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
                 return super.visitFile(aPath, attrs);
@@ -414,6 +425,7 @@ public class ToolsApplication {
             }
             file.createNewFile();
             FileUtils.writeString(file, bundleContent, SettingsConstants.COMMON_ENCODING);
+            System.out.println("Minified and concatenated models (*.model) written to bundle: " + file.getAbsolutePath());
         }
         if (layoutsBundle != null) {
             assert aMinifiedLayout != null;
@@ -424,6 +436,7 @@ public class ToolsApplication {
             }
             file.createNewFile();
             FileUtils.writeString(file, bundleContent, SettingsConstants.COMMON_ENCODING);
+            System.out.println("Minified and concatenated layouts (*.layout) written to bundle: " + file.getAbsolutePath());
         }
     }
     private static final String LAYOUTS_BUNDLE_ROOT_TAG = "layouts-bundle";

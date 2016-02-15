@@ -9,7 +9,7 @@ define(['boxing', 'forms/form', 'forms/index', 'grid/index'], function (B, Form)
     var FormLoaderClass = Java.type('com.eas.client.scripts.ModelFormLoader');
 
     function loadFormDocument(aDocument, aModuleName, aModel, aTarget) {
-        var formFactory = FormLoaderClass.load(aDocument, aModuleName, ScriptedResourceClass.getApp(), arguments[1] ? aModel : null);
+        var formFactory = FormLoaderClass.load(aDocument, aModuleName, aModel ? aModel : null);
         var form = formFactory.form;
         if (aTarget) {
             Form.call(aTarget, null, null, form);

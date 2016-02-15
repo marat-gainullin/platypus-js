@@ -342,19 +342,21 @@ public class ProgressBar extends VProgressBar implements HasOnValueChange, HasPu
         super.setValue(aValue);
     }
 
+    protected String text;
+    
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * String representation of the current progress.\n"
             + " */")
     @Override
     public String getText() {
-        return super.getText();
+        return text;
     }
 
     @ScriptFunction
     @Override
     public void setText(String aValue) {
-        super.setText(aValue);
+        text = aValue;
     }
 
     protected JSObject published;
