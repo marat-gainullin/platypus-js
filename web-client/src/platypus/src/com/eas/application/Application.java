@@ -66,11 +66,21 @@ public class Application {
 		JsUi.init();
 		loaderHandlerRegistration.add(Loader.addHandler(new LoggingLoadHandler()));
 		NodeList<Element> scriptTags = Document.get().getElementsByTagName("script");
+		String init = null;
 		String entryPoint = null;
 		String sourcePrefix = null;
-		for (int s = 0; s < scriptTags.getLength(); s++) {
+		boolean simpleModules = false;
+		int gwtScripts = 0;
+		for (int s = 0; s < scriptTags.getLength() && gwtScripts < 2; s++) {
 			ScriptElement script = scriptTags.getItem(s).cast();
 			if (script.getSrc().endsWith("pwc.nocache.js")) {
+				gwtScripts++;
+				if (script.hasAttribute("init")) {
+					init = script.getAttribute("init");
+					if (!init.toLowerCase().endsWith(".js")) {
+						init += ".js";
+					}
+				}
 				if (script.hasAttribute("entry-point")) {
 					entryPoint = script.getAttribute("entry-point");
 					if (!entryPoint.toLowerCase().endsWith(".js")) {
@@ -80,12 +90,28 @@ public class Application {
 				if (script.hasAttribute("source-path")) {
 					sourcePrefix = script.getAttribute("source-path").toLowerCase();
 				}
-				break;
+				simpleModules = script.hasAttribute("simple-modules");
 			}
 		}
+		AppClient.setSimpleModules(simpleModules);
 		AppClient.setSourcePath(sourcePrefix);
 		if (entryPoint != null && !entryPoint.isEmpty()) {
-			ScriptInjector.fromUrl(AppClient.relativeUri() + AppClient.sourcePath() + entryPoint).setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).inject();
+			if (init != null && !init.isEmpty()) {
+				final String _entryPoint = entryPoint;
+				ScriptInjector.fromUrl(AppClient.relativeUri() + AppClient.getSourcePath() + init).setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).setCallback(new Callback<Void, Exception>() {
+					@Override
+					public void onFailure(Exception reason) {
+						Logger.getLogger(Application.class.getName()).log(Level.SEVERE, "Error while initializing modules loader", reason);
+					}
+
+					@Override
+					public void onSuccess(Void result) {
+						ScriptInjector.fromUrl(AppClient.relativeUri() + AppClient.getSourcePath() + _entryPoint).setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).inject();
+					}
+				}).inject();
+			} else {
+				ScriptInjector.fromUrl(AppClient.relativeUri() + AppClient.getSourcePath() + entryPoint).setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).inject();
+			}
 		} else {
 			Logger.getLogger(Application.class.getName()).log(Level.SEVERE, "\"entry-point\" attribute missing while initializing modules loader");
 		}

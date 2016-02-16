@@ -1,8 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package com.eas.form;
+package com.eas.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,27 +10,11 @@ import java.util.logging.Logger;
 import com.eas.client.CallbackAdapter;
 import com.eas.core.HasPublished;
 import com.eas.core.Utils;
+import com.eas.form.PlatypusWindow;
 import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusMenu;
 import com.eas.menu.PlatypusMenuBar;
 import com.eas.menu.PlatypusPopupMenu;
-import com.eas.ui.ButtonGroup;
-import com.eas.ui.HasBinding;
-import com.eas.ui.HasEmptyText;
-import com.eas.ui.HasImageParagraph;
-import com.eas.ui.HasImageResource;
-import com.eas.ui.HasJsName;
-import com.eas.ui.HasPlatypusButtonGroup;
-import com.eas.ui.HorizontalPosition;
-import com.eas.ui.MarginConstraints;
-import com.eas.ui.Orientation;
-import com.eas.ui.PlatypusImageResource;
-import com.eas.ui.PublishedColor;
-import com.eas.ui.PublishedComponent;
-import com.eas.ui.PublishedFont;
-import com.eas.ui.UiReader;
-import com.eas.ui.UiWidgetReader;
-import com.eas.ui.VerticalPosition;
 import com.eas.widgets.AnchorsPane;
 import com.eas.widgets.BorderPane;
 import com.eas.widgets.BoxPane;
@@ -57,27 +37,22 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
 
-/**
- * 
- * @author mg
- */
-public class FormFactory extends UiReader {
+public class DefaultUiReader extends UiReader {
 
 	protected static class Dimension {
 		public int width;
 		public int height;
 	}
 
+	protected String rootContainerName;
 	protected Element element;
-	protected Utils.JsObject model;
-	protected PlatypusWindow form;
 	protected Map<String, UIObject> widgets = new HashMap<>();
 	protected List<UIObject> widgetsList = new ArrayList<>();
-	protected String rootContainerName;
-	//
 	protected List<Runnable> resolvers = new ArrayList<>();
+	protected UIObject viewWidget;
+	protected Utils.JsObject model;
 
-	public FormFactory(Element anElement, JavaScriptObject aModel) {
+	public DefaultUiReader(Element anElement, JavaScriptObject aModel) {
 		super();
 		element = anElement;
 		model = aModel != null ? aModel.<Utils.JsObject> cast() : null;
@@ -89,10 +64,6 @@ public class FormFactory extends UiReader {
 
 	public List<UIObject> getWidgetsList() {
 		return widgetsList;
-	}
-
-	public PlatypusWindow getForm() {
-		return form;
 	}
 
 	public void parse() throws Exception {
@@ -110,47 +81,26 @@ public class FormFactory extends UiReader {
 						widgets.put(wName, widget);
 						widgetsList.add(widget);
 					} else {
-						Logger.getLogger(FormFactory.class.getName()).log(Level.WARNING, "Unknown widget tag name: " + ((Element)childNode).getTagName() + ". skipping.");
+						Logger.getLogger(DefaultUiReader.class.getName()).log(Level.WARNING, "Unknown widget tag name: " + ((Element) childNode).getTagName() + ". skipping.");
 					}
 				}
 				childNode = childNode.getNextSibling();
 			}
 		}
-		UIObject viewWidget = widgets.get(rootContainerName);
-		if (viewWidget == null) {
-			viewWidget = new AnchorsPane();
-			viewWidget.setSize(400 + "px", 300 + "px");
-			Logger.getLogger(FormFactory.class.getName()).log(Level.WARNING, "view widget missing. Falling back to AnchrosPane.");
-		}
-		form = new PlatypusWindow((Widget) viewWidget);
-		form.setDefaultCloseOperation(Utils.getIntegerAttribute(element, "dco", "defaultCloseOperation", 2));
-		String iconImage = Utils.getAttribute(element, "i", "icon", null);
-		if (iconImage != null && !iconImage.isEmpty()) {
-			PlatypusImageResource.load(iconImage, new CallbackAdapter<ImageResource, String>() {
-				@Override
-				protected void doWork(ImageResource aResult) throws Exception {
-					form.setIcon(aResult);
-				}
-
-				@Override
-				public void onFailure(String reason) {
-					Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, "Factory failed to load window title icon. " + reason);
-				}
-			});
-		}
-		form.setTitle(Utils.getAttribute(element, "tl", "title", null));
-		form.setMaximizable(Utils.getBooleanAttribute(element, "mxe", "maximizable", Boolean.TRUE));
-		form.setMinimizable(Utils.getBooleanAttribute(element, "mne", "minimizable", Boolean.TRUE));
-		form.setResizable(Utils.getBooleanAttribute(element, "rs", "resizable", Boolean.TRUE));
-		form.setUndecorated(Utils.getBooleanAttribute(element, "udr", "undecorated", Boolean.FALSE));
-		form.setOpacity(Utils.getFloatAttribute(element, "opc", "opacity", 1.0f));
-		form.setAlwaysOnTop(Utils.getBooleanAttribute(element, "aot", "alwaysOnTop", Boolean.FALSE));
-		form.setLocationByPlatform(Utils.getBooleanAttribute(element, "lbp", "locationByPlatform", Boolean.TRUE));
-		// form.setDesignedViewSize(viewWidget.getPreferredSize());
 		for (int i = 0; i < resolvers.size(); i++) {
 			Runnable r = resolvers.get(i);
 			r.run();
 		}
+		viewWidget = widgets.get(rootContainerName);
+		if (viewWidget == null) {
+			viewWidget = new AnchorsPane();
+			viewWidget.setSize(400 + "px", 300 + "px");
+			Logger.getLogger(DefaultUiReader.class.getName()).log(Level.WARNING, "view widget missing. Falling back to AnchrosPane.");
+		}
+	}
+
+	public UIObject getViewWidget() {
+		return viewWidget;
 	}
 
 	protected Dimension readPrefSize(Element anElement) throws NumberFormatException {
@@ -167,20 +117,6 @@ public class FormFactory extends UiReader {
 			return prefSize;
 		} else
 			return null;
-	}
-
-	public Utils.JsObject resolveEntity(String aEntityName) throws Exception {
-		if (model.has(aEntityName)) {
-			JavaScriptObject oEntity = model.getJs(aEntityName);
-			if (oEntity != null) {
-				return oEntity.cast();
-			}
-		}
-		return null;
-	}
-
-	protected Utils.JsObject resolveEntity(long aEntityId) throws Exception {
-		return null;
 	}
 
 	public void addResolver(Runnable aResolver) {
@@ -233,10 +169,10 @@ public class FormFactory extends UiReader {
 			((HasJsName) aTarget).setJsName(widgetName);
 		}
 		/*
-		 * if (Utils.hasAttribute(anElement, "e", "editable") && aTarget instanceof
-		 * HasEditable) { ((HasEditable)
-		 * aTarget).setEditable(Utils.getBooleanAttribute(anElement, "e", "editable",
-		 * Boolean.TRUE)); }
+		 * if (Utils.hasAttribute(anElement, "e", "editable") && aTarget
+		 * instanceof HasEditable) { ((HasEditable)
+		 * aTarget).setEditable(Utils.getBooleanAttribute(anElement, "e",
+		 * "editable", Boolean.TRUE)); }
 		 */
 		if (Utils.hasAttribute(anElement, "et", "emptyText") && aTarget instanceof HasEmptyText) {
 			((HasEmptyText) aTarget).setEmptyText(Utils.getAttribute(anElement, "et", "emptyText", null));
@@ -247,7 +183,7 @@ public class FormFactory extends UiReader {
 				try {
 					((HasBinding) aTarget).setField(fieldPath);
 				} catch (Exception ex) {
-					Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting field (" + fieldPath + ") to widget " + widgetName + " exception occured: " + ex.getMessage());
+					Logger.getLogger(DefaultUiReader.class.getName()).log(Level.SEVERE, "While setting field (" + fieldPath + ") to widget " + widgetName + " exception occured: " + ex.getMessage());
 				}
 			}
 			if (Utils.hasAttribute(anElement, "d", "data")) {
@@ -255,7 +191,7 @@ public class FormFactory extends UiReader {
 				try {
 					((HasBinding) aTarget).setData(resolveEntity(entityName));
 				} catch (Exception ex) {
-					Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE,
+					Logger.getLogger(DefaultUiReader.class.getName()).log(Level.SEVERE,
 					        "While setting data to named model's property (" + entityName + ") to widget " + widgetName + " exception occured: " + ex.getMessage());
 				}
 			}
@@ -324,7 +260,7 @@ public class FormFactory extends UiReader {
 						try {
 							addToParent(anElement, aTarget, parent);
 						} catch (Exception ex) {
-							Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
+							Logger.getLogger(DefaultUiReader.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
 				});
@@ -439,6 +375,16 @@ public class FormFactory extends UiReader {
 		}
 	}
 
+	public Utils.JsObject resolveEntity(String aEntityName) throws Exception {
+		if (model.has(aEntityName)) {
+			JavaScriptObject oEntity = model.getJs(aEntityName);
+			if (oEntity != null) {
+				return oEntity.cast();
+			}
+		}
+		return null;
+	}
+
 	private static MarginConstraints readMarginConstraints(Element anElement) {
 		MarginConstraints result = new MarginConstraints();
 		if (Utils.hasAttribute(anElement, "l", "left")) {
@@ -461,5 +407,4 @@ public class FormFactory extends UiReader {
 		}
 		return result;
 	}
-
 }

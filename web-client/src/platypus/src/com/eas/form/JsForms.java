@@ -12,12 +12,12 @@ public class JsForms {
 			function readFormDocument(aDocumnet, aModuleName, aModel, aTarget){
 				var factory = @com.eas.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDocumnet, aModuleName, aModel);
 				if(factory){
-					var nativeForm = factory.@com.eas.form.FormFactory::getForm()(); 
+					var nativeForm = factory.@com.eas.form.FormReader::getForm()(); 
 					if(aTarget)
 						Form.call(aTarget, null, null, nativeForm);
 					else
 						aTarget = new Form(null, null, nativeForm);
-					var nwList = factory.@com.eas.form.FormFactory::getWidgetsList()();
+					var nwList = factory.@com.eas.form.FormReader::getWidgetsList()();
 					for(var i = 0; i < nwList.@java.util.List::size()(); i++){
 						var nWidget = nwList.@java.util.List::get(I)(i);
 						var pWidget = nWidget.@com.eas.core.HasPublished::getPublished()();

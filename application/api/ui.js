@@ -1,6 +1,11 @@
 /* global Java*/
 define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font'], function (B, Color, Cursor, Font) {
     var global = this;
+    // core imports
+    var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
+    var Source2XmlDom = Java.type('com.eas.xml.dom.Source2XmlDom');
+    var FileUtils = Java.type("com.eas.util.FileUtils");
+    var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
     // gui imports
     var KeyEventClass = Java.type("java.awt.event.KeyEvent");
     var FileChooserClass = Java.type("javax.swing.JFileChooser");
@@ -12,6 +17,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     var HorizontalPositionClass = Java.type("com.eas.client.forms.HorizontalPosition");
     var VerticalPositionClass = Java.type("com.eas.client.forms.VerticalPosition");
     var OrientationClass = Java.type("com.eas.client.forms.Orientation");
+    var FormLoaderClass = Java.type('com.eas.client.scripts.ModelFormLoader');
 
     //
     function lookupCallerFile() {
@@ -47,6 +53,25 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             return IconResourcesClass.load(B.boxAsJava(aResName), B.boxAsJava(calledFromFile), B.boxAsJava(onSuccess), B.boxAsJava(onFailure));
         }
     });
+
+    function loadWidget(aModuleName, aModel){
+        var file = FileUtils.findBrother(ScriptedResourceClass.getApp().getModules().nameToFile(aModuleName), "layout");
+        if(file){
+            var document = ScriptedResourceClass.getApp().getForms().get(file.getAbsolutePath(), file);
+            var formFactory = FormLoaderClass.load(document, aModuleName, aModel ? aModel : null);
+            var nForm = formFactory.form;
+            return EngineUtilsClass.unwrap(nForm.getView());
+        }else{
+            throw 'Layout definition for module "' + aModuleName + '" is not found';
+        }
+    }
+
+    function readWidget(aContent, aModel){
+        var document = Source2XmlDom.transform(aContent);
+        var formFactory = FormLoaderClass.load(document, null, aModel ? aModel : null);
+        var nForm = formFactory.form;
+        return EngineUtilsClass.unwrap(nForm.getView());
+    }
 
     /**
      * Opens a file dialog box 
@@ -413,6 +438,14 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
          */
         FontStyle: FontStyle
     };
+    Object.defineProperty(module, 'loadWidget', {
+        enumerable: true,
+        value: loadWidget
+    });
+    Object.defineProperty(module, 'readWidget', {
+        enumerable: true,
+        value: readWidget
+    });
     Object.defineProperty(module, 'Colors', {
         enumerable: true,
         value: Color

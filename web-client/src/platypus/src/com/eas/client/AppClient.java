@@ -63,6 +63,7 @@ public class AppClient {
 	private static final RegExp httpPrefixPattern = RegExp.compile("https?://.*");
 	public static final String APPLICATION_URI = "/application";
 	private static String sourcePath = "/";
+	private static boolean simpleModules;
 	public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
 	//
 	private static AppClient appClient;
@@ -81,12 +82,41 @@ public class AppClient {
 		protected Set<String> serverDependencies = new HashSet<>();
 		protected Set<String> queriesDependencies = new HashSet<>();
 
+		public ModuleStructure(String aRelativeFileName) {
+			super();
+			structure.add(aRelativeFileName);
+		}
+
 		public ModuleStructure(Set<String> aStructure, Set<String> aClientDependencies, Set<String> aServerDependencies, Set<String> aQueriesDependencies) {
 			super();
 			structure.addAll(aStructure);
 			clientDependencies.addAll(aClientDependencies);
 			serverDependencies.addAll(aServerDependencies);
 			queriesDependencies.addAll(aQueriesDependencies);
+		}
+
+		public ModuleStructure(String aRelativeFileName, JsArrayString prefetchedResources, JsArrayString autoDependencies, JsArrayString rpcDependencies, JsArrayString entitiesDependencies) {
+			this(aRelativeFileName);
+			if (prefetchedResources != null) {
+				for (int i = 0; i < prefetchedResources.length(); i++) {
+					structure.add(prefetchedResources.get(i));
+				}
+			}
+			if (autoDependencies != null) {
+				for (int i = 0; i < autoDependencies.length(); i++) {
+					clientDependencies.add(autoDependencies.get(i));
+				}
+			}
+			if (rpcDependencies != null) {
+				for (int i = 0; i < rpcDependencies.length(); i++) {
+					serverDependencies.add(rpcDependencies.get(i));
+				}
+			}
+			if (entitiesDependencies != null) {
+				for (int i = 0; i < entitiesDependencies.length(); i++) {
+					queriesDependencies.add(entitiesDependencies.get(i));
+				}
+			}
 		}
 
 		public Set<String> getStructure() {
@@ -139,7 +169,15 @@ public class AppClient {
 		appClient = aClient;
 	}
 
-	public static String sourcePath() {
+	public static boolean isSimpleModules() {
+		return simpleModules;
+	}
+
+	public static void setSimpleModules(boolean aValue) {
+		simpleModules = aValue;
+	}
+
+	public static String getSourcePath() {
 		return sourcePath;
 	}
 
@@ -147,11 +185,13 @@ public class AppClient {
 		if (aValue != null && !aValue.isEmpty()) {
 			sourcePath = aValue;
 			if (!sourcePath.endsWith("/")) {
-				aValue += "/";
+				sourcePath = sourcePath + "/";
 			}
 			if (!sourcePath.startsWith("/")) {
-				aValue = "/" + aValue;
+				sourcePath = "/" + sourcePath;
 			}
+		} else {
+			sourcePath = "/";
 		}
 	}
 
@@ -164,7 +204,7 @@ public class AppClient {
 				if (htppMatch != null) {
 					return aResourceName;
 				} else {
-					return relativeUri() + sourcePath() + aResourceName;
+					return relativeUri() + getSourcePath() + aResourceName;
 				}
 			}
 		};
@@ -174,7 +214,7 @@ public class AppClient {
 		Element div = com.google.gwt.dom.client.Document.get().createDivElement();
 		div.setInnerHTML("<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>");
 		String absolute = div.getFirstChildElement().<AnchorElement> cast().getHref();
-		String hostContextPrefix = AppClient.relativeUri() + AppClient.sourcePath();
+		String hostContextPrefix = AppClient.relativeUri() + AppClient.getSourcePath();
 		absolute = URL.decode(absolute);
 		String appModuleId = absolute.substring(hostContextPrefix.length());
 		return appModuleId;
@@ -744,10 +784,33 @@ public class AppClient {
 		return modulesStructures.get(aModuleName);
 	}
 
+	public ModuleStructure putModuleStructure(String aModuleName, ModuleStructure aStructure) {
+		return modulesStructures.put(aModuleName, aStructure);
+	}
+
+	private native static void checkModulesIndex(AppClient aClient)/*-{
+		if ($wnd.define) {
+			var index = $wnd.define['modules-index'];
+			for (var fileName in index) {
+				var structure = index[fileName];
+				var mstructure = @com.eas.client.AppClient.ModuleStructure::new(Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JsArrayString;)(fileName, structure.prefetched, structure['global-deps'], structure.rpc, structure.entities);
+				var defaultModuleName = fileName;
+				if (defaultModuleName.endsWith('.js')) {
+					defaultModuleName = defaultModuleName.substring(0, defaultModuleName.length - 3);
+				}
+				aClient.@com.eas.client.AppClient::putModuleStructure(Ljava/lang/String;Lcom/eas/client/AppClient$ModuleStructure;)(defaultModuleName, mstructure);
+				if(structure.modules){
+					for ( var i = 0; i < structure.modules.length; i++) {
+						aClient.@com.eas.client.AppClient::putModuleStructure(Ljava/lang/String;Lcom/eas/client/AppClient$ModuleStructure;)(structure.modules[i], mstructure);
+					}
+				}
+			}
+			$wnd.define['modules-index'] = {};
+		}
+	}-*/;
+
 	public Cancellable requestModuleStructure(final String aModuleName, final Callback<ModuleStructure, XMLHttpRequest> aCallback) throws Exception {
-		// TODO: lookup a loader flag e.g. 'local-names' and if it exists, put a
-		// fake structure in modulesStructures
-		// with aModuleName as *.js file name and with no pre-fetched resources.
+		checkModulesIndex(this);
 		if (modulesStructures.containsKey(aModuleName)) {
 			if (aCallback != null) {
 				Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -755,6 +818,26 @@ public class AppClient {
 					@Override
 					public void execute() {
 						aCallback.onSuccess(modulesStructures.get(aModuleName));
+					}
+				});
+			}
+			return new Cancellable() {
+				@Override
+				public void cancel() {
+				}
+			};
+		} else if (simpleModules) {
+			if (aCallback != null) {
+				Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+
+					@Override
+					public void execute() {
+						String fakeRelativeFileName = aModuleName;
+						if (!fakeRelativeFileName.toLowerCase().endsWith(".js")) {
+							fakeRelativeFileName = fakeRelativeFileName + ".js";
+						}
+						ModuleStructure s = new ModuleStructure(fakeRelativeFileName);
+						aCallback.onSuccess(s);
 					}
 				});
 			}
@@ -837,7 +920,7 @@ public class AppClient {
 
 				@Override
 				public String asString() {
-					return checkedCacheBust(relativeUri() + sourcePath() + aResourceName);
+					return checkedCacheBust(relativeUri() + getSourcePath() + aResourceName);
 				}
 
 			};

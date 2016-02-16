@@ -481,7 +481,7 @@ public class Loader {
 
 			@Override
 			protected void doWork(Void aResult) throws Exception {
-				final String jsURL = AppClient.getInstance().checkedCacheBust(AppClient.relativeUri() + AppClient.sourcePath() + aJsResource);
+				final String jsURL = AppClient.getInstance().checkedCacheBust(AppClient.relativeUri() + AppClient.getSourcePath() + aJsResource);
 				ScriptInjector.fromUrl(jsURL).setCallback(new Callback<Void, Exception>() {
 
 					@Override

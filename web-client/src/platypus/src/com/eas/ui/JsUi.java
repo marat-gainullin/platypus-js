@@ -16,6 +16,8 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.xml.client.Element;
+import com.google.gwt.xml.client.Node;
 
 public class JsUi {
 	
@@ -644,7 +646,40 @@ public class JsUi {
 				} 
 			});
 			
+			function readWidgetElement(widgetRootElement, aModel){
+				var uiReader = @com.eas.ui.DefaultUiReader::new(Lcom/google/gwt/xml/client/Element;Lcom/google/gwt/core/client/JavaScriptObject;)(widgetRootElement, aModel);
+				uiReader.@com.eas.ui.DefaultUiReader::parse()();
+				var nView = uiReader.@com.eas.ui.DefaultUiReader::getViewWidget()();
+				return nView.@com.eas.core.HasPublished::getPublished()();
+			}
+			
+			function loadWidget(aModuleName, aModel){
+				var aClient = @com.eas.client.AppClient::getInstance()();
+				var layoutDoc = aClient.@com.eas.client.AppClient::getFormDocument(Ljava/lang/String;)(aModuleName);
+				if(layoutDoc){
+					var rootElement = layoutDoc.@com.google.gwt.xml.client.Document::getDocumentElement()();
+					var widgetRootElement = aModuleName ? @com.eas.ui.JsUi::findLayoutElementByBundleName(Lcom/google/gwt/xml/client/Element;Ljava/lang/String;)(rootElement, aModuleName) : rootElement;
+					return readWidgetElement(widgetRootElement, aModel);
+				} else {
+					throw 'Layout definition for module "' + aModuleName + '" is not found';
+				}
+			}
+			
+			function readWidget(aContent, aModel){
+				var layoutDoc = @com.google.gwt.xml.client.XMLParser::parse(Ljava/lang/String;)(aContent + "");
+				var rootElement = layoutDoc.@com.google.gwt.xml.client.Document::getDocumentElement()();
+				return readWidgetElement(rootElement, aModel);
+			}
+			
 			var module = {};
+		    Object.defineProperty(module, 'loadWidget', {
+		        enumerable: true,
+		        value: loadWidget
+		    });
+		    Object.defineProperty(module, 'readWidget', {
+		        enumerable: true,
+		        value: readWidget
+		    });
 		    Object.defineProperty(module, 'Colors', {
 		        enumerable: true,
 		        value: Color
@@ -776,4 +811,25 @@ public class JsUi {
 		    return module;
 		});
 	}-*/;
+	
+    public static Element findLayoutElementByBundleName(Element aElement, String aBundleName) {
+        if (aElement.getTagName().equals("layout")) {
+            return aElement;// the high level code had to do everything in the right way
+        } else {
+            Node child = aElement.getFirstChild();
+            while (child != null) {
+                if (child instanceof Element) {
+                    Element el = (Element) child;
+                    if (el.hasAttribute("bundle-name")) {
+                        String bundleName = el.getAttribute("bundle-name");
+                        if (bundleName.equals(aBundleName)) {
+                            return el;
+                        }
+                    }
+                }
+                child = child.getNextSibling();
+            }
+        }
+        return null;
+    }
 }
