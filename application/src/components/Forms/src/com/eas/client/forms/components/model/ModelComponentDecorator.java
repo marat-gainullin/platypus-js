@@ -904,7 +904,8 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
             removeValueChangeListener(cellEditingCompletedAlerter);
             setJsValue((V) value);
             addValueChangeListener(cellEditingCompletedAlerter);
-            EventQueue.invokeLater(() -> {
+            extraTools.setVisible(false);
+            EventQueue.invokeLater(()->{
                 extraTools.setVisible(true);
             });
             return this;
