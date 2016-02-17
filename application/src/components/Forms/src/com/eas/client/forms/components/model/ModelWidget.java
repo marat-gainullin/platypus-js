@@ -23,7 +23,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasValue<V>, HasJsValue {
 
     public static Object getPathData(JSObject anElement, String aPath) {
-        if (aPath != null && !aPath.isEmpty() && Scripts.isInitialized()/*Crazy designer :(*/) {
+        if (aPath != null && !aPath.isEmpty()) {
             JSObject target = anElement;
             String[] path = aPath.split("\\.");
             String propName = path[0];
@@ -39,7 +39,7 @@ public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasV
             }
             Object value = null;
             if (propName != null) {
-                value = Scripts.getSpace().toJava(target.getMember(propName));
+                value = Scripts.isInitialized()/* Carzy designer :(*/ ? Scripts.getSpace().toJava(target.getMember(propName)) : target.getMember(propName);
             } else {
                 Logger.getLogger(ModelWidget.class.getName()).log(Level.FINE, PROPERTY_PATH_MISSING_MSG, aPath);
             }
@@ -65,7 +65,7 @@ public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasV
                 }
             }
             if (propName != null) {
-                Object jsData = Scripts.isInitialized() ? Scripts.getSpace().toJs(aValue) : aValue;
+                Object jsData = Scripts.isInitialized()/* Carzy designer :(*/ ? Scripts.getSpace().toJs(aValue) : aValue;
                 target.setMember(propName, jsData);
             } else {
                 Logger.getLogger(ModelWidget.class.getName()).log(Level.FINE, PROPERTY_PATH_MISSING_MSG, aPath);

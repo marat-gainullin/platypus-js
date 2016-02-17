@@ -132,10 +132,10 @@ public class GridTable extends JTable implements ModelCellEditingListener {
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
         Scripts.setContext(Forms.getContext());
         Component res = super.prepareRenderer(renderer, row, column);
-            int lrow = row;
-            if (aboveNeightbour != null) {
-                lrow += aboveNeightbour.getRowCount();
-            }
+        int lrow = row;
+        if (aboveNeightbour != null) {
+            lrow += aboveNeightbour.getRowCount();
+        }
         if (showOddRowsInOtherColor) {
             if ((lrow + 1) % 2 != 0) {
                 if (getBackground().equals(res.getBackground())) {
