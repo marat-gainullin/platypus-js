@@ -72,7 +72,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         return target;
     }
 
-    function loadWidget(aModuleName, aModel){
+    function loadWidgets(aModuleName, aModel){
         var file = FileUtils.findBrother(ScriptedResourceClass.getApp().getModules().nameToFile(aModuleName), "layout");
         if(file){
             var document = ScriptedResourceClass.getApp().getForms().get(file.getAbsolutePath(), file);
@@ -83,7 +83,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         }
     }
 
-    function readWidget(aContent, aModel){
+    function readWidgets(aContent, aModel){
         var document = Source2XmlDom.transform(aContent);
         var formFactory = FormLoaderClass.load(document, null, aModel ? aModel : null);
         return publishWidgetsList(formFactory);
@@ -454,13 +454,13 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
          */
         FontStyle: FontStyle
     };
-    Object.defineProperty(module, 'loadWidget', {
+    Object.defineProperty(module, 'loadWidgets', {
         enumerable: true,
-        value: loadWidget
+        value: loadWidgets
     });
-    Object.defineProperty(module, 'readWidget', {
+    Object.defineProperty(module, 'readWidgets', {
         enumerable: true,
-        value: readWidget
+        value: readWidgets
     });
     Object.defineProperty(module, 'Colors', {
         enumerable: true,

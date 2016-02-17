@@ -661,7 +661,7 @@ public class JsUi {
 				return target;
 			}
 			
-			function loadWidget(aModuleName, aModel){
+			function loadWidgets(aModuleName, aModel){
 				var aClient = @com.eas.client.AppClient::getInstance()();
 				var layoutDoc = aClient.@com.eas.client.AppClient::getFormDocument(Ljava/lang/String;)(aModuleName);
 				if(layoutDoc){
@@ -673,20 +673,20 @@ public class JsUi {
 				}
 			}
 			
-			function readWidget(aContent, aModel){
+			function readWidgets(aContent, aModel){
 				var layoutDoc = @com.google.gwt.xml.client.XMLParser::parse(Ljava/lang/String;)(aContent + "");
 				var rootElement = layoutDoc.@com.google.gwt.xml.client.Document::getDocumentElement()();
 				return readWidgetElement(rootElement, aModel);
 			}
 			
 			var module = {};
-		    Object.defineProperty(module, 'loadWidget', {
+		    Object.defineProperty(module, 'loadWidgets', {
 		        enumerable: true,
-		        value: loadWidget
+		        value: loadWidgets
 		    });
-		    Object.defineProperty(module, 'readWidget', {
+		    Object.defineProperty(module, 'readWidgets', {
 		        enumerable: true,
-		        value: readWidget
+		        value: readWidgets
 		    });
 		    Object.defineProperty(module, 'Colors', {
 		        enumerable: true,
