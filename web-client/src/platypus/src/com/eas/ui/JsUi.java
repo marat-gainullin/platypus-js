@@ -649,8 +649,16 @@ public class JsUi {
 			function readWidgetElement(widgetRootElement, aModel){
 				var uiReader = @com.eas.ui.DefaultUiReader::new(Lcom/google/gwt/xml/client/Element;Lcom/google/gwt/core/client/JavaScriptObject;)(widgetRootElement, aModel);
 				uiReader.@com.eas.ui.DefaultUiReader::parse()();
-				var nView = uiReader.@com.eas.ui.DefaultUiReader::getViewWidget()();
-				return nView.@com.eas.core.HasPublished::getPublished()();
+				var nwList = uiReader.@com.eas.ui.DefaultUiReader::getWidgetsList()();
+				var target = {};
+				for(var i = 0; i < nwList.@java.util.List::size()(); i++){
+					var nWidget = nwList.@java.util.List::get(I)(i);
+					var pWidget = nWidget.@com.eas.core.HasPublished::getPublished()();
+					if(pWidget.name){
+						target[pWidget.name] = pWidget;
+					}
+				}
+				return target;
 			}
 			
 			function loadWidget(aModuleName, aModel){

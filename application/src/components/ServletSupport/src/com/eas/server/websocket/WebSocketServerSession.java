@@ -5,6 +5,7 @@
  */
 package com.eas.server.websocket;
 
+import com.eas.script.LpcTransient;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,7 +16,7 @@ import javax.websocket.Session;
  *
  * @author mg
  */
-public class WebSocketServerSession {
+public class WebSocketServerSession implements LpcTransient {
 
     protected final Session session;
 

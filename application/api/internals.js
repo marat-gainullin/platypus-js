@@ -23,11 +23,10 @@
             };
         };
     }
-    var ReportClass = Java.type('com.eas.client.report.Report');
+    var LpcTransientClass = Java.type('com.eas.script.LpcTransient');
     var ScriptsClass = Java.type('com.eas.script.Scripts');
     var ScriptedResourceClass = Java.type('com.eas.client.scripts.ScriptedResource');
     var JavaStringArrayClass = Java.type('java.lang.String[]');
-    var WebSocketServerSessionClass = Java.type('com.eas.server.websocket.WebSocketServerSession');
     var apiPath = ScriptsClass.getAbsoluteApiPath();
     var appPath = ScriptedResourceClass.getAbsoluteAppPath();
     var space = ScriptsClass.getSpace();
@@ -277,7 +276,7 @@
         if (aValue instanceof Report) {
             aValue = aValue.unwrap();
         }
-        if (aValue instanceof ReportClass || aValue instanceof WebSocketServerSessionClass) {
+        if (aValue instanceof LpcTransientClass) {
             return aValue;
         } else {
             return copy(aValue);
@@ -333,7 +332,7 @@
         if (aValue instanceof Report) {
             aValue = aValue.unwrap();
         }
-        if (aValue instanceof ReportClass || aValue instanceof WebSocketServerSessionClass) {
+        if (aValue instanceof LpcTransientClass) {
             return aValue;
         } else {
             return restore(aValue);

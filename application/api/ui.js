@@ -54,13 +54,30 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         }
     });
 
+    function publishWidgetsList(aFormFactory){
+        var comps = aFormFactory.getWidgetsList();
+        var target = {};
+        for (var c = 0; c < comps.length; c++) {
+            (function () {
+                var comp = EngineUtilsClass.unwrap(B.boxAsJs(comps[c]));
+                if (comp.name) {
+                    Object.defineProperty(target, comp.name, {
+                        get: function () {
+                            return comp;
+                        }
+                    });
+                }
+            })();
+        }
+        return target;
+    }
+
     function loadWidget(aModuleName, aModel){
         var file = FileUtils.findBrother(ScriptedResourceClass.getApp().getModules().nameToFile(aModuleName), "layout");
         if(file){
             var document = ScriptedResourceClass.getApp().getForms().get(file.getAbsolutePath(), file);
             var formFactory = FormLoaderClass.load(document, aModuleName, aModel ? aModel : null);
-            var nForm = formFactory.form;
-            return EngineUtilsClass.unwrap(nForm.getView());
+            return publishWidgetsList(formFactory);
         }else{
             throw 'Layout definition for module "' + aModuleName + '" is not found';
         }
@@ -69,8 +86,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     function readWidget(aContent, aModel){
         var document = Source2XmlDom.transform(aContent);
         var formFactory = FormLoaderClass.load(document, null, aModel ? aModel : null);
-        var nForm = formFactory.form;
-        return EngineUtilsClass.unwrap(nForm.getView());
+        return publishWidgetsList(formFactory);
     }
 
     /**

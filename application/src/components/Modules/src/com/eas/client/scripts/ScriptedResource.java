@@ -760,7 +760,7 @@ public class ScriptedResource {
                                     Collection<Scripts.AmdDefine> amdDefines = aSpace.consumeAmdDefines();
                                     // Amd in action...
                                     for (Scripts.AmdDefine amdDefine : amdDefines) {
-                                        assert amdDefine.getModuleName() != null;
+                                        assert amdDefine.getModuleName() != null : DEFAULT_MODULE_NAME_ASSERT_MSG;
                                         amdNames.add(amdDefine.getModuleName());
                                         final String amdModuleName = amdDefine.getModuleName();
                                         String[] amdDependencies = amdDefine.getAmdDependencies();
@@ -772,10 +772,10 @@ public class ScriptedResource {
                                             if (!aSpace.getDefined().containsKey(amdModuleName)) {
                                                 aSpace.getDefined().put(amdModuleName, null);
                                             }
-                                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedModuleName(moduleName));
+                                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedModuleName(amdModuleName));
                                             aSpace.notifyLoaded(amdModuleName);
                                         }, (Exception ex) -> {
-                                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "{0} - Failed {1}", new Object[]{checkedModuleName(moduleName), ex.toString()});
+                                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "{0} - Failed {1}", new Object[]{checkedModuleName(amdModuleName), ex.toString()});
                                             aSpace.notifyFailed(amdModuleName, ex);
                                         });
                                     }
@@ -811,6 +811,7 @@ public class ScriptedResource {
             });
         }
     }
+    private static final String DEFAULT_MODULE_NAME_ASSERT_MSG = "Default module name assumption failed";
 
     public static void require(String[] aModulesNames, String aCalledFromFile) throws Exception {
         Scripts.Space space = Scripts.getSpace();
@@ -852,8 +853,11 @@ public class ScriptedResource {
                         }
                     }
                     Collection<Scripts.AmdDefine> amdDefines = aSpace.consumeAmdDefines();
+                    Collection<String> amdNames = new HashSet<>();
                     for (Scripts.AmdDefine amdDefine : amdDefines) {
-                        final String amdModuleName = amdDefine.getModuleName() != null ? amdDefine.getModuleName() : moduleName;
+                        assert amdDefine.getModuleName() != null : DEFAULT_MODULE_NAME_ASSERT_MSG;
+                        amdNames.add(amdDefine.getModuleName());
+                        final String amdModuleName = amdDefine.getModuleName();
                         final String[] amdDependencies = amdDefine.getAmdDependencies();
                         final JSObject amdModuleDefiner = amdDefine.getModuleDefiner();
                         _require(amdDependencies, null, aSpace, aCyclic);
@@ -864,12 +868,14 @@ public class ScriptedResource {
                             aSpace.getDefined().put(amdModuleName, null);
                         }
                     }
-                    // Regardless of define calls existance, if module is global or it is a plain *.js file, we have to
+                    // If module is global or it is a plain *.js file, we have to
                     // put it as undefined in AMD structure.
-                    if (!aSpace.getDefined().containsKey(moduleName)) {
-                        aSpace.getDefined().put(moduleName, null);
-                    } else {
-                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "Module {0} is defined multiple times. May be it exists both as AMD module and as a global function", checkedModuleName(moduleName));
+                    if (!amdNames.contains(moduleName)) {
+                        if (!aSpace.getDefined().containsKey(moduleName)) {
+                            aSpace.getDefined().put(moduleName, null);
+                        } else {
+                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "Module {0} is defined multiple times. May be it exists both as AMD module and as a global function", checkedModuleName(moduleName));
+                        }
                     }
                 }
             }

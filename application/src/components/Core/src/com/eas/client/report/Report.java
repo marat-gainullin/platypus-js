@@ -10,6 +10,7 @@ import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
+import com.eas.script.LpcTransient;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
@@ -25,7 +26,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author Andrew
  */
-public class Report implements HasPublished {
+public class Report implements HasPublished, LpcTransient {
 
     private final byte[] body;
     protected JSObject scriptData;
