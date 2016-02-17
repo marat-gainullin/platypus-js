@@ -8,25 +8,19 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
+import static junit.framework.TestCase.assertEquals;
 
-import junit.framework.TestCase;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.test.TestException;
 import net.sf.jsqlparser.test.simpleparsing.CCJSqlParserManagerTest;
+import org.junit.Test;
 
-public class TablesNamesFinderTest extends TestCase {
+public class TablesNamesFinderTest {
 
     CCJSqlParserManager pm = new CCJSqlParserManager();
 
-    public TablesNamesFinderTest(String arg0) {
-        super(arg0);
-    }
-
-    public static void main(String[] args) {
-        junit.swingui.TestRunner.run(TablesNamesFinderTest.class);
-    }
-
+    @Test
     public void testRUBiSTableList() throws Exception {
 
         BufferedReader in = new BufferedReader(new FileReader("testfiles" + File.separator + "RUBiS-select-requests.txt"));
@@ -97,6 +91,7 @@ public class TablesNamesFinderTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetTableList() throws Exception {
 
         String sql =

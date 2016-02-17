@@ -15,15 +15,13 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SubSelect;
+import org.junit.Test;
 
 public class InsertTest extends TestCase {
 
     CCJSqlParserManager parserManager = new CCJSqlParserManager();
 
-    public InsertTest(String arg0) {
-        super(arg0);
-    }
-
+    @Test
     public void testRegularInsert() throws JSQLParserException {
         String statement = "INSERT INTO mytable (col1, col2, col3) VALUES (?, 'sadfsd', 234)";
         Insert insert = (Insert) parserManager.parse(new StringReader(statement));
@@ -45,9 +43,9 @@ public class InsertTest extends TestCase {
         assertTrue(((ExpressionList) insert.getItemsList()).getExpressions().get(0) instanceof JdbcParameter);
         assertEquals(2.3, ((DoubleValue) ((ExpressionList) insert.getItemsList()).getExpressions().get(2)).getValue(), 0.0);
         assertEquals(statement, "" + insert);
-
     }
     
+    @Test
     public void testComment() throws JSQLParserException {
         String statement =
                 "/*90053*/ INSERT /*erte*/ INTO /*jkl;kl;*/ mytable /*dfgdg*/ (/*24242*/ col1 /*werfwer*/, /*24242*/ col2 /*werwerw*/, /*24242*/ col3 /*werwerw*/ ) /*werfsfs*/ VALUES /*weruwer*/ (/**/ ? /**/, /**/ 'sadfsd' /**/, /**/ 234 /**/ ) /*eiortouei*/";
@@ -59,6 +57,7 @@ public class InsertTest extends TestCase {
         assertEquals(statement, "" + insert);
     }
     
+    @Test
     public void testInsertFromSelect() throws JSQLParserException {
         String statement = "INSERT INTO mytable t (col1, col2, col3) SELECT * FROM mytable2";
         Insert insert = (Insert) parserManager.parse(new StringReader(statement));
@@ -73,9 +72,5 @@ public class InsertTest extends TestCase {
         //toString uses brakets
         String statementToString = "INSERT INTO mytable t (col1, col2, col3) (SELECT * FROM mytable2)";
         assertEquals(statementToString, "" + insert);
-    }
-
-    public static void main(String[] args) {
-        junit.swingui.TestRunner.run(InsertTest.class);
     }
 }

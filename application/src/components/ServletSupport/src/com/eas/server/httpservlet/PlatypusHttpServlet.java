@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -123,11 +124,15 @@ public class PlatypusHttpServlet extends HttpServlet {
                     Scripts.initBIO(platypusConfig.getMaximumBIOTreads());
                     ScriptedResource.init(platypusCore, Paths.get(realRoot.toURI()).resolve("WEB-INF").resolve("classes"), platypusConfig.isGlobalAPI());
                     Scripts.initTasks((Runnable aTask) -> {
-                        if (containerExecutor != null) {// J2EE 7+
-                            containerExecutor.submit(aTask);
-                        } else {
-                            // Other environment
-                            selfExecutor.submit(aTask);
+                        try {
+                            if (containerExecutor != null) {// J2EE 7+
+                                containerExecutor.submit(aTask);
+                            } else {
+                                // Other environment
+                                selfExecutor.submit(aTask);
+                            }
+                        } catch (RejectedExecutionException ex) {
+                            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, ex.toString());
                         }
                     });
                     if (platypusConfig.isWatch()) {

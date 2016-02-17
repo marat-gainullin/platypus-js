@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import junit.framework.TestCase;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
@@ -17,15 +16,14 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.create.table.Index;
 import net.sf.jsqlparser.test.TestException;
 import net.sf.jsqlparser.test.tablesfinder.TablesNamesFinder;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class CreateTableTest extends TestCase {
+public class CreateTableTest{
 
     CCJSqlParserManager parserManager = new CCJSqlParserManager();
 
-    public CreateTableTest(String arg0) {
-        super(arg0);
-    }
-
+    @Test
     public void testCreateTable() throws JSQLParserException {
         String statement =
                 "CREATE TABLE mytab (mycol a (10, 20) c nm g, mycol2 mypar1 mypar2 (23,323,3) asdf ('23','123') dasd, "
@@ -39,6 +37,7 @@ public class CreateTableTest extends TestCase {
         assertEquals(statement, "" + createTable);
     }
     
+    @Test
     public void testComment() throws JSQLParserException {
         String statement =
                 "/*90053*/ CREATE /*11*/ TEMPORARY /**/ TABLE /**/ mytab /**/ (/**/ mycol /**/ a /**/ (/**/ 10 /**/, /**/ 20 /**/ ) "
@@ -50,6 +49,7 @@ public class CreateTableTest extends TestCase {
         assertEquals(statement, "" + createTable);
     }
     
+    @Test
     public void testRUBiSCreateList() throws Exception {
 
         BufferedReader in = new BufferedReader(new FileReader("testfiles" + File.separator + "RUBiS-create-requests.txt"));
@@ -172,9 +172,5 @@ public class CreateTableTest extends TestCase {
         }
 
         return line;
-    }
-
-    public static void main(String[] args) {
-        junit.swingui.TestRunner.run(CreateTableTest.class);
     }
 }

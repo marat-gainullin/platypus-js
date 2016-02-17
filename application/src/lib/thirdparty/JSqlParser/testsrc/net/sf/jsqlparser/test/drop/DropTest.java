@@ -6,15 +6,13 @@ import junit.framework.TestCase;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.statement.drop.Drop;
+import org.junit.Test;
 
 public class DropTest extends TestCase {
 
     CCJSqlParserManager parserManager = new CCJSqlParserManager();
 
-    public DropTest(String arg0) {
-        super(arg0);
-    }
-
+    @Test
     public void testDrop() throws JSQLParserException {
         String statement =
                 "DROP TABLE mytab";
@@ -32,14 +30,11 @@ public class DropTest extends TestCase {
         assertEquals(statement, "" + drop);
     }
     
+    @Test
     public void testComment() throws JSQLParserException {
         String statement =
                 "/*90053*/ DROP /*erlgjter*/ TABLE /*weweporwepr*/ mytab /*wekljrhs*/ CAS /*erpuppwe*/ MAS /*eiortouei*/";
         Drop drop = (Drop) parserManager.parse(new StringReader(statement));
         assertEquals(statement, "" + drop);
-    }
-    
-    public static void main(String[] args) {
-        junit.swingui.TestRunner.run(DropTest.class);
     }
 }

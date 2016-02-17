@@ -104,17 +104,20 @@ public class PlatypusFormDataLoader extends MultiFileLoader {
         return findPrimaryFileImpl(fo);
     }
 
-    public static FileObject findPrimaryFileImpl(FileObject fo) {
+    private static FileObject findPrimaryFileImpl(FileObject fo) {
         // never recognize folders.
         if (!fo.isFolder()) {
-            String ext = fo.getExt();
-            if (ext.equals(MODEL_EXTENSION) && FileUtil.findBrother(fo, FORM_EXTENSION) != null) {
-                return FileUtil.findBrother(fo, JS_EXTENSION);
-            } else if (ext.equals(FORM_EXTENSION) && FileUtil.findBrother(fo, PlatypusFiles.MODEL_EXTENSION) != null) {
-                return FileUtil.findBrother(fo, JS_EXTENSION);
-            } else if (ext.equals(JS_EXTENSION)
-                    && FileUtil.findBrother(fo, MODEL_EXTENSION) != null
-                    && FileUtil.findBrother(fo, FORM_EXTENSION) != null) {
+            FileObject jsBrother = FileUtil.findBrother(fo, JS_EXTENSION);
+            FileObject layoutBrother = FileUtil.findBrother(fo, FORM_EXTENSION);
+            FileObject modelBrother = FileUtil.findBrother(fo, PlatypusFiles.MODEL_EXTENSION);
+            String foMimeType = fo.getMIMEType();
+            if ("text/model+xml".equals(foMimeType) && layoutBrother != null && "text/layout+xml".equals(layoutBrother.getMIMEType())) {
+                return jsBrother;
+            } else if ("text/layout+xml".equals(foMimeType) && modelBrother != null && "text/model+xml".equals(modelBrother.getMIMEType())) {
+                return jsBrother;
+            } else if ("text/javascript".equals(foMimeType)
+                    && modelBrother != null && "text/model+xml".equals(modelBrother.getMIMEType())
+                    && layoutBrother != null && "text/layout+xml".equals(layoutBrother.getMIMEType())) {
                 return fo;
             }
         }
