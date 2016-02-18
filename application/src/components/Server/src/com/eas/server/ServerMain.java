@@ -10,6 +10,7 @@ import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.ModelsDocuments;
+import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.QueriesProxy;
@@ -25,6 +26,7 @@ import com.eas.util.args.ThreadsArgsConsumer;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
@@ -212,7 +214,8 @@ public class ServerMain {
                 GeneralResourceProvider.registerDrivers();
                 ScriptsConfigs scriptsConfigs = new ScriptsConfigs();
                 ServerTasksScanner tasksScanner = new ServerTasksScanner();
-                ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(Paths.get(f.toURI()), scriptsConfigs, tasksScanner);
+                Path appFolder = Paths.get(f.toURI()).resolve(PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT);
+                ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(appFolder, scriptsConfigs, tasksScanner);
                 // TODO: add command line argument "watch" after watcher refactoring
                 //indexer.watch();
                 Scripts.initBIO(threadsConfig.getMaxServicesTreads());

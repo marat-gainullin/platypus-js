@@ -4,6 +4,7 @@ import com.eas.client.*;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
+import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.ReportsConfigs;
 import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.forms.Forms;
@@ -31,6 +32,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.concurrent.Callable;
@@ -238,7 +240,8 @@ public class PlatypusClientApplication {
                         ModelsDocuments models = new ModelsDocuments();
                         ScriptsConfigs scriptsConfigs = new ScriptsConfigs();
                         ValidatorsScanner validatorsScanner = new ValidatorsScanner();
-                        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(Paths.get(f.toURI()), scriptsConfigs, validatorsScanner);
+                        Path appFolder = Paths.get(f.toURI()).resolve(PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT);
+                        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(appFolder, scriptsConfigs, validatorsScanner);
                         // TODO: add command line argument "watch" after watcher refactoring
                         //indexer.watch();
                         ScriptedDatabasesClient twoTierCore = new ScriptedDatabasesClient(config.defDatasource, indexer, true, validatorsScanner.getValidators(), config.threadsArgs.getMaxJdbcTreads());

@@ -7,6 +7,7 @@ import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.ModelsDocuments;
+import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.ScriptDocument;
 import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
@@ -26,6 +27,7 @@ import com.eas.util.IDGenerator;
 import com.eas.util.JSONUtils;
 import java.io.*;
 import java.net.URI;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.AccessControlException;
 import java.security.Principal;
@@ -112,7 +114,8 @@ public class PlatypusHttpServlet extends HttpServlet {
                     ScriptsConfigs lsecurityConfigs = new ScriptsConfigs();
                     final ServerTasksScanner tasksScanner = new ServerTasksScanner();
                     restScanner = new RestPointsScanner();
-                    ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(Paths.get(f.toURI()), lsecurityConfigs, (String aModuleName, ScriptDocument.ModuleDocument aModuleDocument, File aFile) -> {
+                    Path appFolder = Paths.get(f.toURI()).resolve(PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT);
+                    ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(appFolder, lsecurityConfigs, (String aModuleName, ScriptDocument.ModuleDocument aModuleDocument, File aFile) -> {
                         tasksScanner.moduleScanned(aModuleName, aModuleDocument, aFile);
                         restScanner.moduleScanned(aModuleName, aModuleDocument, aFile);
                     });

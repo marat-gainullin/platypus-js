@@ -29,28 +29,26 @@ public class ApplicationSourceIndexer implements PlatypusIndexer {
         public void moduleScanned(String aModuleName, ScriptDocument.ModuleDocument aModule, File aFile);
     }
 
-    protected Path projectPath;
-    protected Path appPath;
+    protected Path sourcePath;
     protected Map<String, File> id2Paths = new HashMap<>();
     protected WatchService service;
     protected ScanCallback scanCallback;
     protected boolean autoScan = true;
     protected ScriptsConfigs scriptsConfigs;
 
-    public ApplicationSourceIndexer(Path aProjectPath, ScriptsConfigs aScriptConfigs) throws Exception {
-        this(aProjectPath, aScriptConfigs, true, null);
+    public ApplicationSourceIndexer(Path aSourcePath, ScriptsConfigs aScriptsConfigs) throws Exception {
+        this(aSourcePath, aScriptsConfigs, true, null);
     }
 
-    public ApplicationSourceIndexer(Path aProjectPath, ScriptsConfigs aScriptConfigs, ScanCallback aScanCallback) throws Exception {
-        this(aProjectPath, aScriptConfigs, true, aScanCallback);
+    public ApplicationSourceIndexer(Path aSourcePath, ScriptsConfigs aScriptsConfigs, ScanCallback aScanCallback) throws Exception {
+        this(aSourcePath, aScriptsConfigs, true, aScanCallback);
     }
 
-    public ApplicationSourceIndexer(Path aProjectPath, ScriptsConfigs aScriptConfigs, boolean aAutoScan, ScanCallback aScanCallback) throws Exception {
+    public ApplicationSourceIndexer(Path aSourcePath, ScriptsConfigs aScriptsConfigs, boolean aAutoScan, ScanCallback aScanCallback) throws Exception {
         super();
         autoScan = aAutoScan;
-        projectPath = aProjectPath;
-        scriptsConfigs = aScriptConfigs;
-        appPath = projectPath.resolve(PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT);
+        scriptsConfigs = aScriptsConfigs;
+        sourcePath = aSourcePath;
         scanCallback = aScanCallback;
         if (autoScan) {
             File srcDirectory = checkRootDirectory();
@@ -59,9 +57,9 @@ public class ApplicationSourceIndexer implements PlatypusIndexer {
     }
 
     private File checkRootDirectory() throws IllegalArgumentException {
-        File srcDirectory = appPath.toFile();
+        File srcDirectory = sourcePath.toFile();
         if (!srcDirectory.exists() || !srcDirectory.isDirectory()) {
-            throw new IllegalArgumentException(String.format("%s doesn't point to a directory.", appPath.toString()));
+            throw new IllegalArgumentException(String.format("%s doesn't point to a directory.", sourcePath.toString()));
         }
         return srcDirectory;
     }
@@ -134,17 +132,13 @@ public class ApplicationSourceIndexer implements PlatypusIndexer {
 
     @Override
     public String getDefaultModuleName(File aFile) {
-        String defaultModuleName = appPath.relativize(Paths.get(aFile.toURI())).toString().replace(File.separator, "/");
+        String defaultModuleName = sourcePath.relativize(Paths.get(aFile.toURI())).toString().replace(File.separator, "/");
         defaultModuleName = defaultModuleName.substring(0, defaultModuleName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
         return defaultModuleName;
     }
-
-    public Path getProjectPath() {
-        return projectPath;
-    }
-
+    
     public Path getAppPath() {
-        return appPath;
+        return sourcePath;
     }
 
     /**
@@ -162,11 +156,11 @@ public class ApplicationSourceIndexer implements PlatypusIndexer {
                 return file;
             } else {
                 String filyName = aName.replace('/', File.separatorChar);
-                Path appResource = appPath.resolve(filyName);
+                Path appResource = sourcePath.resolve(filyName);
                 if (appResource.toFile().exists()) {// plain resource relative 'app' directory
                     return appResource.toFile();
                 } else {
-                    Path appJsResource = appPath.resolve(filyName + PlatypusFiles.JAVASCRIPT_FILE_END);
+                    Path appJsResource = sourcePath.resolve(filyName + PlatypusFiles.JAVASCRIPT_FILE_END);
                     if (appJsResource.toFile().exists()) {// *.js resource relative 'app' directory
                         return appJsResource.toFile();
                     } else {

@@ -5,8 +5,10 @@
 package com.eas.tools;
 
 import com.eas.client.DatabasesClient;
+import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.ScriptDocument;
+import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.resourcepool.BearResourcePool;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.scripts.DependenciesWalker;
@@ -64,6 +66,7 @@ public class ToolsApplication {
     public static final String MINIFIED_MODEL_CMD_SWITCH = "minified-models";
     public static final String MINIFIED_LAYOUT_CMD_SWITCH = "minified-layouts";
     public static final String INDEXED_MODULES_CMD_SWITCH = "indexed-modules";
+    public static final String FORCE_CMD_SWITCH = "force";
     //
     private static final Map<String, String> MINIFIED_MODEL_TAGS = new HashMap<String, String>() {
         {
@@ -287,6 +290,7 @@ public class ToolsApplication {
             + CMD_SWITCHS_PREFIX + MINIFIED_MODEL_CMD_SWITCH + " <file-path> - sets file to write minified content of *.model files into\n"
             + CMD_SWITCHS_PREFIX + MINIFIED_LAYOUT_CMD_SWITCH + " <file-path> - sets file to write the minified content of *.layout files into\n"
             + CMD_SWITCHS_PREFIX + INDEXED_MODULES_CMD_SWITCH + " <file-path> - sets file to write modules index into\n"
+            + CMD_SWITCHS_PREFIX + FORCE_CMD_SWITCH + " - forces output files to be overwritten without notice\n"
             + CMD_SWITCHS_PREFIX + URL_CMD_SWITCH + " <url> - database JDBC URL\n"
             + CMD_SWITCHS_PREFIX + DBSCHEMA_CMD_SWITCH + " <schema> - database schema\n"
             + CMD_SWITCHS_PREFIX + DBUSER_CMD_SWITCH + " <user-name> - database user name\n"
@@ -300,6 +304,7 @@ public class ToolsApplication {
     private File minifiedModel;
     private File minifiedLayout;
     private File indexedModules;
+    private boolean force;
     private Command command = Command.PRINT_HELP;
 
     // setup documents framework
@@ -415,7 +420,9 @@ public class ToolsApplication {
             if (!file.getName().contains(".")) {
                 file = new File(file.getAbsolutePath() + "." + PlatypusFiles.MODEL_EXTENSION);
             }
-            file.createNewFile();
+            if (!file.exists()) {
+                file.createNewFile();
+            }
             FileUtils.writeString(file, bundleContent, SettingsConstants.COMMON_ENCODING);
             System.out.println("Minified and concatenated models (*.model) written to bundle: " + file.getAbsolutePath());
         }
@@ -426,7 +433,9 @@ public class ToolsApplication {
             if (!file.getName().contains(".")) {
                 file = new File(file.getAbsolutePath() + "." + PlatypusFiles.FORM_EXTENSION);
             }
-            file.createNewFile();
+            if (!file.exists()) {
+                file.createNewFile();
+            }
             FileUtils.writeString(file, bundleContent, SettingsConstants.COMMON_ENCODING);
             System.out.println("Minified and concatenated layouts (*.layout) written to bundle: " + file.getAbsolutePath());
         }
@@ -434,54 +443,71 @@ public class ToolsApplication {
     private static final String LAYOUTS_BUNDLE_ROOT_TAG = "layouts-bundle";
     private static final String MODELS_BUNDLE_ROOT_TAG = "models-bundle";
 
-    private static void index(Path appFolder, Path aFolder, File aIndexedModules) throws IOException {
+    private static void index(Path appFolder, Path aFolder, File aIndexedModules) throws Exception {
+        ScriptsConfigs scriptsConfigs = new ScriptsConfigs();
+        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(appFolder, scriptsConfigs, false, null);
+        indexer.rescan();
         List<StringBuilder> modules = new ArrayList<>();
         Files.walkFileTree(aFolder, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path aPath, BasicFileAttributes attrs) throws IOException {
                 File file = aPath.toFile();
                 if (!file.isDirectory() && file.getName().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
-                    String relativeResourceName = appFolder.relativize(aPath).toString().replace(File.separator, "/");
-                    String defaultModuleName = FileUtils.removeExtension(relativeResourceName);
-                    String jsContent = FileUtils.readString(file, SettingsConstants.COMMON_ENCODING);
-                    ScriptDocument scriptDoc = ScriptDocument.parse(jsContent, defaultModuleName);
-                    DependenciesWalker walker = new DependenciesWalker(jsContent);
-                    walker.walk();
-                    List<String> resources = new ArrayList<>();
-                    File modelFile = FileUtils.findBrother(file, PlatypusFiles.MODEL_EXTENSION);
-                    if (modelFile != null && modelFile.exists()) {
-                        String relativeModelResourceName = appFolder.relativize(Paths.get(modelFile.toURI())).toString().replace(File.separator, "/");
-                        resources.add(relativeModelResourceName);
+                    try {
+                        String relativeResourceName = appFolder.relativize(aPath).toString().replace(File.separator, "/");
+                        String defaultModuleName = FileUtils.removeExtension(relativeResourceName);
+                        ScriptDocument scriptDoc = scriptsConfigs.get(defaultModuleName, file);
+                        String jsContent = FileUtils.readString(file, SettingsConstants.COMMON_ENCODING);
+                        DependenciesWalker walker = new DependenciesWalker(jsContent, (String aModuleCandidate) -> {
+                            File depFile = indexer.nameToFile(aModuleCandidate);
+                            if (depFile != null && depFile.exists()) {
+                                if (depFile.getName().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
+                                    return true;
+                                } else {
+                                    Logger.getLogger(ToolsApplication.class.getName()).log(Level.WARNING, "JavaScript identifier: {0} found that is the same with non-module application element.", aModuleCandidate);
+                                }
+                            }// ordinary script class
+                            return false;
+                        });
+                        walker.walk();
+                        List<String> resources = new ArrayList<>();
+                        File modelFile = FileUtils.findBrother(file, PlatypusFiles.MODEL_EXTENSION);
+                        if (modelFile != null && modelFile.exists()) {
+                            String relativeModelResourceName = appFolder.relativize(Paths.get(modelFile.toURI())).toString().replace(File.separator, "/");
+                            resources.add(relativeModelResourceName);
+                        }
+                        File layoutFile = FileUtils.findBrother(file, PlatypusFiles.FORM_EXTENSION);
+                        if (layoutFile != null && layoutFile.exists()) {
+                            String relativeLayoutResourceName = appFolder.relativize(Paths.get(layoutFile.toURI())).toString().replace(File.separator, "/");
+                            resources.add(relativeLayoutResourceName);
+                        }
+                        List<StringBuilder> moduleNamesAndProps = new ArrayList<>();
+                        if (!scriptDoc.getModules().isEmpty()) {
+                            moduleNamesAndProps.add(new StringBuilder("modules"));
+                            moduleNamesAndProps.add(JSONUtils.as(scriptDoc.getModules().keySet().toArray(new String[]{})));
+                        }
+                        if (!resources.isEmpty()) {
+                            moduleNamesAndProps.add(new StringBuilder("prefetched"));
+                            moduleNamesAndProps.add(JSONUtils.as(resources.toArray(new String[]{})));
+                        }
+                        if (!walker.getDependencies().isEmpty()) {
+                            moduleNamesAndProps.add(new StringBuilder("global-deps"));
+                            moduleNamesAndProps.add(JSONUtils.as(walker.getDependencies().toArray(new String[]{})));
+                        }
+                        if (!walker.getQueryDependencies().isEmpty()) {
+                            moduleNamesAndProps.add(new StringBuilder("entities"));
+                            moduleNamesAndProps.add(JSONUtils.as(walker.getQueryDependencies().toArray(new String[]{})));
+                        }
+                        if (!walker.getServerDependencies().isEmpty()) {
+                            moduleNamesAndProps.add(new StringBuilder("rpc"));
+                            moduleNamesAndProps.add(JSONUtils.as(walker.getServerDependencies().toArray(new String[]{})));
+                        }
+                        StringBuilder module = JSONUtils.o(moduleNamesAndProps.toArray(new StringBuilder[]{}));
+                        modules.add(new StringBuilder(relativeResourceName));
+                        modules.add(module);
+                    } catch (Exception ex) {
+                        Logger.getLogger(ToolsApplication.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    File layoutFile = FileUtils.findBrother(file, PlatypusFiles.FORM_EXTENSION);
-                    if (layoutFile != null && layoutFile.exists()) {
-                        String relativeLayoutResourceName = appFolder.relativize(Paths.get(layoutFile.toURI())).toString().replace(File.separator, "/");
-                        resources.add(relativeLayoutResourceName);
-                    }
-                    List<StringBuilder> moduleNamesAndProps = new ArrayList<>();
-                    if (!scriptDoc.getModules().isEmpty()) {
-                        moduleNamesAndProps.add(new StringBuilder("modules"));
-                        moduleNamesAndProps.add(JSONUtils.as(scriptDoc.getModules().keySet().toArray(new String[]{})));
-                    }
-                    if (!resources.isEmpty()) {
-                        moduleNamesAndProps.add(new StringBuilder("prefetched"));
-                        moduleNamesAndProps.add(JSONUtils.as(resources.toArray(new String[]{})));
-                    }
-                    if (!walker.getDependencies().isEmpty()) {
-                        moduleNamesAndProps.add(new StringBuilder("global-deps"));
-                        moduleNamesAndProps.add(JSONUtils.as(walker.getDependencies().toArray(new String[]{})));
-                    }
-                    if (!walker.getQueryDependencies().isEmpty()) {
-                        moduleNamesAndProps.add(new StringBuilder("entities"));
-                        moduleNamesAndProps.add(JSONUtils.as(walker.getQueryDependencies().toArray(new String[]{})));
-                    }
-                    if (!walker.getServerDependencies().isEmpty()) {
-                        moduleNamesAndProps.add(new StringBuilder("rpc"));
-                        moduleNamesAndProps.add(JSONUtils.as(walker.getServerDependencies().toArray(new String[]{})));
-                    }
-                    StringBuilder module = JSONUtils.o(moduleNamesAndProps.toArray(new StringBuilder[]{}));
-                    modules.add(new StringBuilder(relativeResourceName));
-                    modules.add(module);
                 }
                 return FileVisitResult.CONTINUE;
             }
@@ -491,7 +517,9 @@ public class ToolsApplication {
         js.append("define[\"modules-index\"] = ");
         js.append(jsonModules);
         js.append(";");
-        aIndexedModules.createNewFile();
+        if (!aIndexedModules.exists()) {
+            aIndexedModules.createNewFile();
+        }
         FileUtils.writeString(aIndexedModules, js.toString(), SettingsConstants.COMMON_ENCODING);
         System.out.println("Modules index generated and written to file: " + aIndexedModules.getAbsolutePath());
     }
@@ -550,9 +578,6 @@ public class ToolsApplication {
             } else if ((CMD_SWITCHS_PREFIX + MINIFIED_MODEL_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {
                     minifiedModel = new File(args[i + 1]);
-                    if (minifiedModel.exists()) {
-                        throw new IllegalArgumentException(minifiedModel.getAbsolutePath() + " already exists.");
-                    }
                     i += 2;
                 } else {
                     throw new IllegalArgumentException("Minified models syntax: " + CMD_SWITCHS_PREFIX + MINIFIED_MODEL_CMD_SWITCH + " <value>");
@@ -560,9 +585,6 @@ public class ToolsApplication {
             } else if ((CMD_SWITCHS_PREFIX + MINIFIED_LAYOUT_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {
                     minifiedLayout = new File(args[i + 1]);
-                    if (minifiedLayout.exists()) {
-                        throw new IllegalArgumentException(minifiedLayout.getAbsolutePath() + " already exists.");
-                    }
                     i += 2;
                 } else {
                     throw new IllegalArgumentException("Minified layouts syntax: " + CMD_SWITCHS_PREFIX + MINIFIED_LAYOUT_CMD_SWITCH + " <value>");
@@ -570,13 +592,13 @@ public class ToolsApplication {
             } else if ((CMD_SWITCHS_PREFIX + INDEXED_MODULES_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {
                     indexedModules = new File(args[i + 1]);
-                    if (indexedModules.exists()) {
-                        throw new IllegalArgumentException(indexedModules.getAbsolutePath() + " already exists.");
-                    }
                     i += 2;
                 } else {
                     throw new IllegalArgumentException("Indexed modules syntax: " + CMD_SWITCHS_PREFIX + INDEXED_MODULES_CMD_SWITCH + " <value>");
                 }
+            } else if ((CMD_SWITCHS_PREFIX + FORCE_CMD_SWITCH).equalsIgnoreCase(args[i])) {
+                force = true;
+                i++;
             } else if ((CMD_SWITCHS_PREFIX + URL_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {
                     url = args[i + 1];
@@ -632,6 +654,12 @@ public class ToolsApplication {
                 if (minifiedModel == null && minifiedLayout == null) {
                     throw new IllegalArgumentException("No any file to concatenate minified content into is set.");
                 }
+                if (!force && minifiedModel.exists()) {
+                    throw new IllegalArgumentException(minifiedModel.getAbsolutePath() + " already exists.");
+                }
+                if (!force && minifiedLayout.exists()) {
+                    throw new IllegalArgumentException(minifiedLayout.getAbsolutePath() + " already exists.");
+                }
                 minify(appFolder, processedFolder, minifiedModel, minifiedLayout);
                 break;
             case INDEX:
@@ -643,6 +671,9 @@ public class ToolsApplication {
                 }
                 if (indexedModules == null) {
                     throw new IllegalArgumentException("File to to output modules index into is not set.");
+                }
+                if (!force && indexedModules.exists()) {
+                    throw new IllegalArgumentException(indexedModules.getAbsolutePath() + " already exists.");
                 }
                 index(appFolder, processedFolder, indexedModules);
                 break;
