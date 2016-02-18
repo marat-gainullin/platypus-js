@@ -158,17 +158,13 @@ public abstract class VFormattedField extends JFormattedTextField implements Has
     protected JSObject onParse;
     protected boolean valueIsNull = true;
     protected PropertyChangeListener valueIsNullClearer = (PropertyChangeEvent pce) -> {
-        if (valueIsNull) {
-            String superText = super.getText();
-            valueIsNull = superText.isEmpty();
-        }
+        valueIsNull = false;
     };
 
     public VFormattedField(Object aValue) {
         super();
         setFormatterFactory(new DefaultFormatterFactory(formatter));
         setValue(aValue);
-        addValueChangeListener(valueIsNullClearer);
     }
 
     public VFormattedField() {
@@ -220,7 +216,6 @@ public abstract class VFormattedField extends JFormattedTextField implements Has
     public void setText(String aValue) {
         try {
             super.setText(aValue != null ? aValue : "");
-            valueIsNull = true;
             super.commitEdit();
         } catch (ParseException ex) {
             Logger.getLogger(VFormattedField.class.getName()).log(Level.WARNING, ex.getMessage());

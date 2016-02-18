@@ -930,24 +930,12 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     @Override
     public boolean stopCellEditing() {
         fireEditingStopped();
-        /*
-         if (isFieldContentModified()) {
-         fireEditingStopped();
-         } else {
-         fireEditingCancelled();
-         }
-         */
         return true;
     }
 
     @Override
     public void cancelCellEditing() {
         fireEditingCancelled();
-        /*
-         EventQueue.invokeLater(() -> {
-         extraTools.setVisible(false);
-         });
-         */
     }
 
     protected void fireEditingStopped() {
@@ -1063,7 +1051,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
             JButton btnNullingField = new JButton();
             btnNullingField.setAction(new NullerAction());
             btnNullingField.setPreferredSize(new Dimension(EXTRA_BUTTON_WIDTH, EXTRA_BUTTON_WIDTH));
-            btnNullingField.setFocusable(false);
+            //btnNullingField.setFocusable(false);
             extraTools.add(btnNullingField);
         }
         for (Component comp : extraTools.getComponents()) {

@@ -16,6 +16,9 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.text.ParseException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import jdk.nashorn.api.scripting.JSObject;
@@ -171,6 +174,16 @@ public class ModelFormattedField extends ModelComponentDecorator<VFormattedField
             decorated.requestFocus();
         });
         return super.getTableCellEditorComponent(table, value, isSelected, row, column);
+    }
+
+    @Override
+    public boolean stopCellEditing() {
+        try {
+            decorated.commitEdit();
+        } catch (ParseException ex) {
+            Logger.getLogger(ModelDate.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return super.stopCellEditing();
     }
 
     @Override

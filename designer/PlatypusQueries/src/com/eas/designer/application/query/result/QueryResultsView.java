@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -865,7 +866,7 @@ public class QueryResultsView extends javax.swing.JPanel {
             Parameter newParameter = new Parameter(parsedParameter.getName());
             newParameter.setMode(1);
             newParameter.setType(Scripts.STRING_TYPE_NAME);
-            newParameter.setValue("");
+            newParameter.setValue(null);
             parameters.add(newParameter);
         });
     }
@@ -904,36 +905,36 @@ public class QueryResultsView extends javax.swing.JPanel {
         });
     }
 
-    private void loadParametersValues() {
+    private void loadParametersValues() throws BackingStoreException {
         Preferences modulePreferences = NbPreferences.forModule(QueryResultsView.class);
         Preferences paramsPreferences = modulePreferences.node(queryName);
-        for (Field pField : parameters.toCollection()) {
-            Parameter parameter = (Parameter) pField;
-            Preferences paramNode = paramsPreferences.node(parameter.getName());
-            try {
-                String paramType = parameter.getType();
-                if (Scripts.DATE_TYPE_NAME.equals(paramType)) {
-                    long lValue = paramNode.getLong(VALUE_PREF_KEY, -1);
-                    if (lValue != -1) {
-                        parameter.setValue(new Date(lValue));
-                    }
-                } else if (Scripts.BOOLEAN_TYPE_NAME.equals(paramType)) {
-                    paramNode.getBoolean(VALUE_PREF_KEY, false);
-                } else if (Scripts.NUMBER_TYPE_NAME.equals(paramType)) {
-                    paramNode.getDouble(VALUE_PREF_KEY, 0d);
-                } else {
-                    Object val = paramNode.get(VALUE_PREF_KEY, ""); //NOI18N
-                    if (val != null) {
+        for (String paramPrefNodeName : paramsPreferences.childrenNames()) {
+            Parameter parameter = parameters.get(paramPrefNodeName);
+            if (parameter != null) {
+                Preferences paramNode = paramsPreferences.node(parameter.getName());
+                try {
+                    String paramType = parameter.getType();
+                    if (Scripts.DATE_TYPE_NAME.equals(paramType)) {
+                        long lValue = paramNode.getLong(VALUE_PREF_KEY, -1);
+                        if (lValue != -1) {
+                            parameter.setValue(new Date(lValue));
+                        }
+                    } else if (Scripts.BOOLEAN_TYPE_NAME.equals(paramType)) {
+                        paramNode.getBoolean(VALUE_PREF_KEY, false);
+                    } else if (Scripts.NUMBER_TYPE_NAME.equals(paramType)) {
+                        paramNode.getDouble(VALUE_PREF_KEY, 0d);
+                    } else {
+                        Object val = paramNode.get(VALUE_PREF_KEY, ""); //NOI18N
                         ((Parameter) parameter).setValue(val);
                     }
+                } catch (Exception ex) {
+                    //no-op
                 }
-            } catch (Exception ex) {
-                //no-op
             }
         }
     }
 
-    private void saveParametersValues() {
+    private void saveParametersValues() throws BackingStoreException {
         Preferences modulePreferences = NbPreferences.forModule(QueryResultsView.class);
         Preferences paramsPreferences = modulePreferences.node(queryName);
         parameters.toCollection().stream().forEach((pField) -> {
@@ -950,14 +951,17 @@ public class QueryResultsView extends javax.swing.JPanel {
                     } else if (parameter.getValue() instanceof String) {
                         String sVal = (String) parameter.getValue();
                         paramNode.put(VALUE_PREF_KEY, sVal);
+                    } else {
+                        paramNode.remove(VALUE_PREF_KEY);
                     }
                 } else {
-                    paramNode.remove(VALUE_PREF_KEY);
+                    paramNode.removeNode();
                 }
             } catch (Exception ex) {
                 //no-op
             }
         });
+        paramsPreferences.flush();
     }
 
     public void close() throws Exception {

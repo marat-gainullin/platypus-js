@@ -292,7 +292,7 @@ public class QuerySetupView extends javax.swing.JPanel {
                 Parameter newParameter = new Parameter(parsedParameter.getName());
                 newParameter.setMode(1);
                 newParameter.setType(Scripts.STRING_TYPE_NAME);
-                newParameter.setValue("");
+                newParameter.setValue(null);
                 parameters.add(newParameter);
             }
         });
