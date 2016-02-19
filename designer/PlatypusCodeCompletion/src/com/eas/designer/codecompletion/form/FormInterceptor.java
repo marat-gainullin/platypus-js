@@ -5,7 +5,7 @@
  */
 package com.eas.designer.codecompletion.form;
 
-import com.eas.designer.codecompletion.TemplateInterceptor;
+import com.eas.designer.codecompletion.InterceptorUtils;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,7 +61,7 @@ public abstract class FormInterceptor implements FunctionInterceptor {
                             if (jsForm != null) {
                                 try {
                                     FileObject fo = jsForm.getFileObject();
-                                    Collection<TypeUsage> apiFormTypes = TemplateInterceptor.getModuleExposedTypes(fo, loadFormOffset, factory, FORM_MODULE_NAME);
+                                    Collection<TypeUsage> apiFormTypes = InterceptorUtils.getModuleExposedTypes(fo, loadFormOffset, factory, FORM_MODULE_NAME);
                                     apiFormTypes.stream().forEach((apiFormType) -> {
                                         jsForm.addAssignment(apiFormType, apiFormType.getOffset());
                                     });

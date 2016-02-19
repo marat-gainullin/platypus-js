@@ -13,7 +13,7 @@ import com.bearsoft.org.netbeans.modules.form.PlatypusFormSupport;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADVisualContainer;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
-import com.eas.designer.codecompletion.TemplateInterceptor;
+import com.eas.designer.codecompletion.InterceptorUtils;
 import java.util.Collection;
 import java.util.regex.Pattern;
 import org.netbeans.modules.csl.api.OffsetRange;
@@ -70,7 +70,7 @@ public class LoadFormInterceptor extends FormInterceptor {
                     } else {
                         widgetModuleName = dashify(beanCalssShortName);
                     }
-                    Collection<TypeUsage> apiWidgetTypes = TemplateInterceptor.getModuleExposedTypes(fo, loadFormOffset, factory, widgetModuleName);
+                    Collection<TypeUsage> apiWidgetTypes = InterceptorUtils.getModuleExposedTypes(fo, loadFormOffset, factory, widgetModuleName);
                     apiWidgetTypes.stream().forEach((apiEntityType) -> {
                         jsWidget.addAssignment(apiEntityType, apiEntityType.getOffset());
                     });

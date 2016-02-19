@@ -5,7 +5,7 @@
  */
 package com.eas.designer.codecompletion.report;
 
-import com.eas.designer.codecompletion.TemplateInterceptor;
+import com.eas.designer.codecompletion.InterceptorUtils;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -46,7 +46,7 @@ public class LoadTemplateInterceptor implements FunctionInterceptor {
             DeclarationScope scope, ModelElementFactory factory, Collection<FunctionArgument> args) {
         try {
             FileObject fo = globalObject.getFileObject();
-            return TemplateInterceptor.getModuleExposedTypes(fo, -1, factory, REPORT_TEMPLATE_MODULE_NAME);
+            return InterceptorUtils.getModuleExposedTypes(fo, -1, factory, REPORT_TEMPLATE_MODULE_NAME);
         } catch (IOException ex) {
             Logger.getLogger(GenerateReportInterceptor.class.getName()).log(Level.SEVERE, null, ex);
             return Collections.emptySet();

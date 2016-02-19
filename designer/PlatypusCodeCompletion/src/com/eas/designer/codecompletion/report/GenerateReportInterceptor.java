@@ -5,7 +5,7 @@
  */
 package com.eas.designer.codecompletion.report;
 
-import com.eas.designer.codecompletion.TemplateInterceptor;
+import com.eas.designer.codecompletion.InterceptorUtils;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -81,7 +81,7 @@ public class GenerateReportInterceptor implements FunctionInterceptor {
                     if (jsReport != null) {
                         try {
                             FileObject fo = jsReport.getFileObject();
-                            Collection<TypeUsage> apiReportTypes = TemplateInterceptor.getModuleExposedTypes(fo, generateReportOffset, factory, REPORT_MODULE_NAME);
+                            Collection<TypeUsage> apiReportTypes = InterceptorUtils.getModuleExposedTypes(fo, generateReportOffset, factory, REPORT_MODULE_NAME);
                             apiReportTypes.stream().forEach((apiReportType) -> {
                                 jsReport.addAssignment(apiReportType, apiReportType.getOffset());
                             });

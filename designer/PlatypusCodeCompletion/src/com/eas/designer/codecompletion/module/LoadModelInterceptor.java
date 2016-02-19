@@ -13,7 +13,7 @@ import com.eas.client.metadata.Parameters;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
-import com.eas.designer.codecompletion.TemplateInterceptor;
+import com.eas.designer.codecompletion.InterceptorUtils;
 import java.util.Collection;
 import java.util.regex.Pattern;
 import org.netbeans.modules.csl.api.OffsetRange;
@@ -65,7 +65,7 @@ public class LoadModelInterceptor extends ModelInterceptor {
                     TypeUsage entityQueryType = factory.newType(modelEntity.getQueryName(), loadModelOffset, false);
                     TypeUsage localEntityType = factory.newType(jsModel.getFullyQualifiedName() + "." + jsEntity.getName(), loadModelOffset, true);
                     //
-                    Collection<TypeUsage> apiEntityTypes = TemplateInterceptor.getModuleExposedTypes(fo, loadModelOffset, factory, ENTITY_MODULE_NAME);
+                    Collection<TypeUsage> apiEntityTypes = InterceptorUtils.getModuleExposedTypes(fo, loadModelOffset, factory, ENTITY_MODULE_NAME);
                     apiEntityTypes.stream().forEach((apiEntityType) -> {
                         jsEntity.addAssignment(apiEntityType, apiEntityType.getOffset());
                     });
@@ -83,7 +83,7 @@ public class LoadModelInterceptor extends ModelInterceptor {
                         JsObject jsSchemaLength = factory.newObject(jsSchema, LENGTH_PROP_NAME, new OffsetRange(loadModelOffset, loadModelOffset), false);
                         jsSchemaLength.addAssignment(numberType, -1);
                         jsSchema.addProperty(jsSchemaLength.getName(), jsSchemaLength);
-                        Collection<TypeUsage> apiFieldTypes = TemplateInterceptor.getModuleExposedTypes(fo, loadModelOffset, factory, FIELD_MODULE_NAME);
+                        Collection<TypeUsage> apiFieldTypes = InterceptorUtils.getModuleExposedTypes(fo, loadModelOffset, factory, FIELD_MODULE_NAME);
                         for (int i = 1; i < fields.getFieldsCount(); i++) {
                             Field field = fields.get(i);
                             JsObject jsField = factory.newObject(jsSchema, field.getName(), new OffsetRange(loadModelOffset, loadModelOffset), false);
@@ -101,7 +101,7 @@ public class LoadModelInterceptor extends ModelInterceptor {
                         JsObject jsParamsLength = factory.newObject(jsParams, LENGTH_PROP_NAME, new OffsetRange(loadModelOffset, loadModelOffset), false);
                         jsParamsLength.addAssignment(numberType, loadModelOffset);
                         jsParams.addProperty(jsParamsLength.getName(), jsParamsLength);
-                        Collection<TypeUsage> apiParameterTypes = TemplateInterceptor.getModuleExposedTypes(fo, loadModelOffset, factory, PARAMETER_MODULE_NAME);
+                        Collection<TypeUsage> apiParameterTypes = InterceptorUtils.getModuleExposedTypes(fo, loadModelOffset, factory, PARAMETER_MODULE_NAME);
                         for (int i = 1; i < params.getParametersCount(); i++) {
                             Parameter parameter = params.get(i);
                             JsObject jsParameter = factory.newObject(jsParams, parameter.getName(), new OffsetRange(loadModelOffset, loadModelOffset), false);

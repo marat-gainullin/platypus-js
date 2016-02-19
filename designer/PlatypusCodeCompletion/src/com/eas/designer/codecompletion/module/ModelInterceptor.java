@@ -5,7 +5,7 @@
  */
 package com.eas.designer.codecompletion.module;
 
-import com.eas.designer.codecompletion.TemplateInterceptor;
+import com.eas.designer.codecompletion.InterceptorUtils;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,7 +61,7 @@ public abstract class ModelInterceptor implements FunctionInterceptor {
                             if (jsModel != null) {
                                 try {
                                     FileObject fo = jsModel.getFileObject();
-                                    Collection<TypeUsage> apiModelTypes = TemplateInterceptor.getModuleExposedTypes(fo, loadModelOffset, factory, MODEL_MODULE_NAME);
+                                    Collection<TypeUsage> apiModelTypes = InterceptorUtils.getModuleExposedTypes(fo, loadModelOffset, factory, MODEL_MODULE_NAME);
                                     apiModelTypes.stream().forEach((apiModelType) -> {
                                         jsModel.addAssignment(apiModelType, apiModelType.getOffset());
                                     });

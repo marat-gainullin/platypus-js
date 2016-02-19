@@ -22,7 +22,7 @@ import org.openide.filesystems.FileObject;
  *
  * @author mg
  */
-public class TemplateInterceptor {
+public class InterceptorUtils {
 
     public static Collection<TypeUsage> getModuleExposedTypes(FileObject aSource, int aOffset, ModelElementFactory aFactory, String aModuleName) throws IOException {
         QuerySupport querySupport = getQuerySupport(aSource);
