@@ -914,18 +914,32 @@ public class QueryResultsView extends javax.swing.JPanel {
                 Preferences paramNode = paramsPreferences.node(parameter.getName());
                 try {
                     String paramType = parameter.getType();
-                    if (Scripts.DATE_TYPE_NAME.equals(paramType)) {
-                        long lValue = paramNode.getLong(VALUE_PREF_KEY, -1);
-                        if (lValue != -1) {
-                            parameter.setValue(new Date(lValue));
+                    if (null != paramType) {
+                        switch (paramType) {
+                            case Scripts.DATE_TYPE_NAME:
+                                long lValue = paramNode.getLong(VALUE_PREF_KEY, -1);
+                                if (lValue != -1) {
+                                    parameter.setValue(new Date(lValue));
+                                } else {
+                                    parameter.setValue(null);
+                                }
+                                break;
+                            case Scripts.BOOLEAN_TYPE_NAME: {
+                                Object val = paramNode.getBoolean(VALUE_PREF_KEY, false);
+                                parameter.setValue(val);
+                                break;
+                            }
+                            case Scripts.NUMBER_TYPE_NAME: {
+                                Object val = paramNode.getDouble(VALUE_PREF_KEY, 0d);
+                                parameter.setValue(val);
+                                break;
+                            }
+                            default: {
+                                Object val = paramNode.get(VALUE_PREF_KEY, ""); //NOI18N
+                                parameter.setValue(val);
+                                break;
+                            }
                         }
-                    } else if (Scripts.BOOLEAN_TYPE_NAME.equals(paramType)) {
-                        paramNode.getBoolean(VALUE_PREF_KEY, false);
-                    } else if (Scripts.NUMBER_TYPE_NAME.equals(paramType)) {
-                        paramNode.getDouble(VALUE_PREF_KEY, 0d);
-                    } else {
-                        Object val = paramNode.get(VALUE_PREF_KEY, ""); //NOI18N
-                        ((Parameter) parameter).setValue(val);
                     }
                 } catch (Exception ex) {
                     //no-op
