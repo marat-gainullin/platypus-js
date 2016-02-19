@@ -16,7 +16,6 @@ import org.openide.nodes.Node;
  *
  * @author mg
  */
-//@MIMEResolver.ExtensionRegistration(displayName = "#LBL_Form_Layout_Files", extension = "layout", mimeType = "text/layout+xml")
 @MIMEResolver.NamespaceRegistration(checkedExtension = "layout", elementName = "layout", displayName = "#LBL_Form_Layout_Files", mimeType = "text/layout+xml")
 public class PlatypusLayoutDataObject extends PlatypusDataObject {
     
