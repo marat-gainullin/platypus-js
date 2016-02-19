@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.designer.application.module.index;
+package com.eas.designer.codecompletion.form;
 
 import java.util.regex.Pattern;
 import org.netbeans.modules.javascript2.editor.model.JsObject;
@@ -17,13 +17,13 @@ import org.openide.loaders.DataObjectNotFoundException;
  * @author mg
  */
 @FunctionInterceptor.Registration
-public class ReadModelInterceptor extends ModelInterceptor {
+public class ReadFormInterceptor extends FormInterceptor {
 
-    private static final String READ_MODEL_NAME = "readModel";
-    private static final Pattern PATTERN = Pattern.compile(".+\\." + READ_MODEL_NAME);
+    private static final String READ_FORM_NAME = "readForm";
+    private static final Pattern PATTERN = Pattern.compile(".+\\." + READ_FORM_NAME);
 
-    public ReadModelInterceptor() {
-        super(READ_MODEL_NAME);
+    public ReadFormInterceptor() {
+        super(READ_FORM_NAME);
     }
 
     @Override
@@ -32,8 +32,8 @@ public class ReadModelInterceptor extends ModelInterceptor {
     }
 
     @Override
-    protected void fillJsModel(FileObject fo, ModelElementFactory factory, int loadModelOffset, JsObject jsModel) throws DataObjectNotFoundException, Exception {
-        // TODO: Fill the read model with entities if model's content is passed in as a string literal
+    protected void fillJsForm(FileObject fo, ModelElementFactory factory, int loadFormOffset, JsObject jsForm) throws DataObjectNotFoundException, Exception {
+        // TODO: Fill the read form with widgets if form's content is passed in as a string literal
     }
 
 }

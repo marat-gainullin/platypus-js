@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.bearsoft.org.netbeans.modules.form.index;
+package com.eas.designer.codecompletion.form;
 
 import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.FormUtils;
@@ -13,7 +13,7 @@ import com.bearsoft.org.netbeans.modules.form.PlatypusFormSupport;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADVisualContainer;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
-import com.eas.designer.application.module.index.TemplateInterceptor;
+import com.eas.designer.codecompletion.TemplateInterceptor;
 import java.util.Collection;
 import java.util.regex.Pattern;
 import org.netbeans.modules.csl.api.OffsetRange;

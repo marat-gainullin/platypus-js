@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.designer.application.module.index;
+package com.eas.designer.codecompletion.module;
 
 import com.eas.client.SqlQuery;
 import com.eas.client.metadata.Field;
@@ -13,6 +13,7 @@ import com.eas.client.metadata.Parameters;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
+import com.eas.designer.codecompletion.TemplateInterceptor;
 import java.util.Collection;
 import java.util.regex.Pattern;
 import org.netbeans.modules.csl.api.OffsetRange;

@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.bearsoft.org.netbeans.modules.form.index;
+package com.eas.designer.codecompletion.form;
 
-import com.eas.designer.application.module.index.TemplateInterceptor;
+import com.eas.designer.codecompletion.TemplateInterceptor;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;

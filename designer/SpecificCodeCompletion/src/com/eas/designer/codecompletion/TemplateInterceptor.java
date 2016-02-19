@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.designer.application.module.index;
+package com.eas.designer.codecompletion;
 
 import com.eas.designer.explorer.project.RequireJsSupportIndexer;
 import java.io.IOException;

@@ -143,7 +143,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                         //indexer.watch();
                     }
                 } else {
-                    throw new IllegalArgumentException("applicationUrl: " + realRootUrl + " doesn't point to existent directory.");
+                    throw new IllegalArgumentException("application url: " + realRootUrl + " doesn't point to existent directory.");
                 }
             } else {
                 throw new Exception("Unknown protocol in url: " + realRootUrl);

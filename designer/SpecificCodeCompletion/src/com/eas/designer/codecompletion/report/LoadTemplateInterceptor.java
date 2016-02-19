@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.designer.application.report.index;
+package com.eas.designer.codecompletion.report;
 
-import com.eas.designer.application.module.index.TemplateInterceptor;
+import com.eas.designer.codecompletion.TemplateInterceptor;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
