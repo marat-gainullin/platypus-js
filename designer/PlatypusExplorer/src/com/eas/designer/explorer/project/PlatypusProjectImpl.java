@@ -9,7 +9,6 @@ import com.eas.client.DatabasesClient;
 import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusIndexer;
-import com.eas.client.forms.Forms;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.resourcepool.BearResourcePool;
 import com.eas.client.resourcepool.GeneralResourceProvider;
@@ -103,7 +102,10 @@ public class PlatypusProjectImpl implements PlatypusProject {
             return Charset.forName(PlatypusFiles.DEFAULT_ENCODING);
         }
     }
-    protected static final Scripts.Space jsSpace = initScriptSpace();
+
+    static {
+        Scripts.setSpace(initScriptSpace());
+    }
 
     static Scripts.Space initScriptSpace() {
         try {
@@ -117,11 +119,6 @@ public class PlatypusProjectImpl implements PlatypusProject {
             Object global = jsEngine.eval("load('classpath:com/eas/designer/explorer/designer-js.js', space);", jsContext);
 
             space.setGlobal(global);
-            Scripts.LocalContext context = Scripts.createContext(space);
-            EventQueue.invokeLater(() -> {
-                Scripts.setContext(context);
-                Forms.initContext(context);
-            });
             return space;
         } catch (ScriptException ex) {
             throw new IllegalStateException(ex);
@@ -129,7 +126,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
     }
 
     public static Scripts.Space getJsSpace() {
-        return jsSpace;
+        return Scripts.getSpace();
     }
 
     protected Lookup pLookup;
@@ -204,7 +201,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
             @Override
             public String getDefaultModuleName(File file) {
-                return null;                
+                return null;
             }
         };
         basesProxy = new ScriptedDatabasesClient(settings.getDefaultDataSourceName(), indexer, false, BearResourcePool.DEFAULT_MAXIMUM_SIZE) {
@@ -240,8 +237,8 @@ public class PlatypusProjectImpl implements PlatypusProject {
     protected JSObject createLocalEngineModule(String aModuleName) throws Exception {
         FileObject jsFo = IndexerQuery.appElementId2File(PlatypusProjectImpl.this, aModuleName);
         if (jsFo != null) {
-            jsSpace.exec(aModuleName, jsFo.toURL());
-            return jsSpace.createModule(aModuleName);
+            Scripts.getSpace().exec(aModuleName, jsFo.toURL());
+            return Scripts.getSpace().createModule(aModuleName);
         } else {
             return null;
         }

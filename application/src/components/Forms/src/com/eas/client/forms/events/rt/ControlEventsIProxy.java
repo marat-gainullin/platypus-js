@@ -108,7 +108,6 @@ public class ControlEventsIProxy implements MouseListener,
         try {
             JSObject handler = handlers.get(aEventId);
             if (handler != null) {                
-                Scripts.setContext(Forms.getContext());
                 return Scripts.getSpace().toJava(handler.call(eventThis, new Object[]{Scripts.getSpace().toJs(wrapEvent(anEvent))}));
             } else {
                 return null;

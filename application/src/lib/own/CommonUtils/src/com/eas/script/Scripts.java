@@ -83,13 +83,22 @@ public class Scripts {
     }
 
     private static final ThreadLocal<LocalContext> contextRef = new ThreadLocal<>();
-
-    public static Space getSpace() {
-        return getContext() != null ? getContext().getSpace() : null;
-    }
+    private static final ThreadLocal<Space> spaceRef = new ThreadLocal<>();
 
     public static boolean isGlobalAPI() {
         return globalAPI;
+    }
+
+    public static Space getSpace() {
+        return spaceRef.get();
+    }
+
+    public static void setSpace(Space aSpace) {
+        if (aSpace != null) {
+            spaceRef.set(aSpace);
+        } else {
+            spaceRef.remove();
+        }
     }
 
     public static LocalContext getContext() {
@@ -106,45 +115,39 @@ public class Scripts {
 
     public static class LocalContext {
 
-        protected Object request;
-        protected Object response;
-        protected Object principal;
-        protected Object session;
+        protected final Object request;
+        protected final Object response;
+        protected final Object principal;
+        protected final Object session;
 
         protected Integer asyncsCount;
 
-        protected Scripts.Space space;
+        public LocalContext(Object aPrincipal, Object aSession) {
+            this(null, null, aPrincipal, aSession);
+        }
+
+        public LocalContext(Object aRequest, Object aResponse, Object aPrincipal, Object aSession) {
+            super();
+            request = aRequest;
+            response = aResponse;
+            principal = aPrincipal;
+            session = aSession;
+        }
 
         public Object getSession() {
             return session;
-        }
-
-        public void setSession(Object aValue) {
-            session = aValue;
         }
 
         public Object getRequest() {
             return request;
         }
 
-        public void setRequest(Object aRequest) {
-            request = aRequest;
-        }
-
         public Object getResponse() {
             return response;
         }
 
-        public void setResponse(Object aResponse) {
-            response = aResponse;
-        }
-
         public Object getPrincipal() {
             return principal;
-        }
-
-        public void setPrincipal(Object aSession) {
-            principal = aSession;
         }
 
         public int getAsyncsCount() {
@@ -160,20 +163,6 @@ public class Scripts {
         public void initAsyncs(Integer aSeed) {
             asyncsCount = aSeed;
         }
-
-        public Space getSpace() {
-            return space;
-        }
-
-        public void setSpace(Space aValue) {
-            space = aValue;
-        }
-    }
-
-    public static LocalContext createContext(Scripts.Space aSpace) {
-        LocalContext res = new LocalContext();
-        res.setSpace(aSpace);
-        return res;
     }
 
     public static class Pending {
@@ -631,12 +620,21 @@ public class Scripts {
 
         public void process(Runnable aTask) {
             Scripts.LocalContext context = Scripts.getContext();
+            process(context, aTask);
+        }
+
+        public void process(Scripts.LocalContext context, Runnable aTask) {
             Runnable taskWrapper = () -> {
-                Scripts.setContext(context);
+                setContext(context);
                 try {
-                    aTask.run();
+                    setSpace(Space.this);
+                    try {
+                        aTask.run();
+                    } finally {
+                        setSpace(null);
+                    }
                 } finally {
-                    Scripts.setContext(null);
+                    setContext(null);
                 }
             };
             queue.offer(taskWrapper);
@@ -685,13 +683,12 @@ public class Scripts {
             Bindings bindings = SCRIPT_ENGINE.createBindings();
             scriptContext.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
             try {
-                Scripts.LocalContext ctx = Scripts.createContext(Scripts.Space.this);
-                Scripts.setContext(ctx);
+                Scripts.setSpace(Scripts.Space.this);
                 try {
                     scriptContext.setAttribute(ScriptEngine.FILENAME, INTERNALS_MODULENAME, ScriptContext.ENGINE_SCOPE);
                     SCRIPT_ENGINE.eval(new URLReader(internalsUrl), scriptContext);
                 } finally {
-                    Scripts.setContext(null);
+                    Scripts.setSpace(null);
                 }
             } catch (ScriptException ex) {
                 Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
@@ -734,7 +731,9 @@ public class Scripts {
 
     public static void offerTask(Runnable aTask) {
         assert tasks != null : "Scripts tasks are not initialized";
-        Scripts.getContext().incAsyncsCount();
+        if (Scripts.getContext() != null) {
+            Scripts.getContext().incAsyncsCount();
+        }
         tasks.accept(aTask);
     }
 
@@ -754,7 +753,9 @@ public class Scripts {
 
     public static void startBIO(Runnable aBioTask) {
         LocalContext context = getContext();
-        context.incAsyncsCount();
+        if (context != null) {
+            context.incAsyncsCount();
+        }
         bio.submit(() -> {
             setContext(context);
             try {
@@ -776,7 +777,7 @@ public class Scripts {
     }
 
     public static boolean isInitialized() {
-        Space space = getContext() != null ? getContext().getSpace() : null;
+        Space space = getSpace();
         return space != null
                 && space.listenElementsFunc != null
                 && space.listenFunc != null

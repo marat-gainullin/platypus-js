@@ -157,32 +157,27 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
      */
     public void executeMethod(String aModuleName, String aMethodName, Object[] aArguments, boolean aNetworkRPC, Consumer<Object> aOnSuccess, Consumer<Exception> aOnFailure) {
         Scripts.LocalContext callingContext = Scripts.getContext();
-        Object[] copiedArguments = copyArguments(aArguments, callingContext);
+        Scripts.Space callingSpace = Scripts.getSpace();
+        Object[] copiedArguments = makeArgumentsCopy(callingSpace, aArguments);
         Consumer<Object> onSuccess = (Object res) -> {
             if (aOnSuccess != null) {
-                Scripts.LocalContext oldContext = Scripts.getContext();
-                Object copiedRes = oldContext.getSpace().makeCopy(res);
-                Scripts.setContext(callingContext);
-                try {
-                    Scripts.getSpace().process(() -> {
-                        aOnSuccess.accept(Scripts.getSpace().restoreCopy(copiedRes));
-                    });
-                } finally {
-                    Scripts.setContext(oldContext);
-                }
+                //Scripts.LocalContext targetContext = Scripts.getContext();
+                Scripts.Space targetSpace = Scripts.getSpace();
+                Object copiedRes = targetSpace.makeCopy(res);
+                callingSpace.process(callingContext, () -> {
+                    assert Scripts.getSpace() == callingSpace;
+                    aOnSuccess.accept(callingSpace.restoreCopy(copiedRes));
+                });
             }
         };
         Consumer<Exception> onFailure = (Exception ex) -> {
             if (aOnFailure != null) {
-                Scripts.LocalContext oldContext = Scripts.getContext();
-                Scripts.setContext(callingContext);
-                try {
-                    Scripts.getSpace().process(() -> {
-                        aOnFailure.accept(ex);
-                    });
-                } finally {
-                    Scripts.setContext(oldContext);
-                }
+                //Scripts.LocalContext targetContext = Scripts.getContext();
+                //Scripts.Space targetSpace = Scripts.getSpace();
+                callingSpace.process(callingContext, () -> {
+                    assert Scripts.getSpace() == callingSpace;
+                    aOnFailure.accept(ex);
+                });
             }
         };
         if (aModuleName == null || aModuleName.isEmpty()) {
@@ -208,132 +203,126 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                             targetSession = (Session) callingContext.getSession();
                             targetSpace = targetSession.getSpace();
                         }
-                        Scripts.LocalContext targetContext = Scripts.createContext(targetSpace);
-                        targetContext.setPrincipal(callingContext.getPrincipal());
-                        targetContext.setRequest(callingContext.getRequest());
-                        targetContext.setResponse(callingContext.getResponse());
-                        targetContext.setSession(callingContext.getSession());
-                        Scripts.setContext(targetContext);
-                        try {
-                            targetSpace.process(() -> {
-                                try {
-                                    Consumer<JSObject> withModuleConstructor = (JSObject constr) -> {
-                                        try {
-                                            JSObject moduleInstance;
-                                            if (targetSession == null || !targetSession.containsModule(aModuleName)) {
-                                                if (constr != null) {
-                                                    moduleInstance = (JSObject) constr.newObject(new Object[]{});
-                                                    if (targetSession != null) {
-                                                        targetSession.registerModule(aModuleName, moduleInstance);
-                                                    }
-                                                } else {
-                                                    throw new IllegalArgumentException(String.format(RPCRequestHandler.MODULE_MISSING_OR_NOT_A_MODULE, aModuleName));
+                        Scripts.LocalContext targetContext = new Scripts.LocalContext(callingContext.getRequest(), callingContext.getResponse(), callingContext.getPrincipal(), callingContext.getSession());
+                        targetSpace.process(targetContext, () -> {
+                            assert Scripts.getSpace() == targetSpace;
+                            try {
+                                Consumer<JSObject> withModuleConstructor = (JSObject constr) -> {
+                                    assert Scripts.getSpace() == targetSpace;
+                                    try {
+                                        JSObject moduleInstance;
+                                        if (targetSession == null || !targetSession.containsModule(aModuleName)) {
+                                            if (constr != null) {
+                                                moduleInstance = (JSObject) constr.newObject(new Object[]{});
+                                                if (targetSession != null) {
+                                                    targetSession.registerModule(aModuleName, moduleInstance);
                                                 }
                                             } else {
-                                                moduleInstance = targetSession.getModule(aModuleName);
+                                                throw new IllegalArgumentException(String.format(RPCRequestHandler.MODULE_MISSING_OR_NOT_A_MODULE, aModuleName));
                                             }
-                                            if (moduleInstance != null) {
-                                                Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.FINE, RPCRequestHandler.EXECUTING_METHOD_TRACE_MSG, new Object[]{aMethodName, aModuleName});
-                                                Object oFun = moduleInstance.getMember(aMethodName);
-                                                if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
-                                                    AtomicBoolean executed = new AtomicBoolean();
-                                                    List<Object> arguments = new ArrayList<>();
-                                                    for (Object argument : copiedArguments) {
-                                                        arguments.add(Scripts.getSpace().restoreCopy(argument));
-                                                    }
-                                                    arguments.add(new AbstractJSObject() {
-                                                        @Override
-                                                        public Object call(final Object thiz, final Object... largs) {
-                                                            if (!aNetworkRPC || !executed.get()) {
-                                                                executed.set(true);
-                                                                Object returned = largs.length > 0 ? largs[0] : null;
-                                                                onSuccess.accept(returned);// WARNING! Don't insert .toJava() because of RPC handler
-                                                            } else {
-                                                                Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
-                                                            }
-                                                            return null;
-                                                        }
-
-                                                        @Override
-                                                        public Object getDefaultValue(Class<?> hint) {
-                                                            if (String.class.isAssignableFrom(hint)) {
-                                                                return super.toString();
-                                                            } else {
-                                                                return null;
-                                                            }
-                                                        }
-
-                                                    });
-                                                    arguments.add(new AbstractJSObject() {
-                                                        @Override
-                                                        public Object call(final Object thiz, final Object... largs) {
-                                                            if (!aNetworkRPC || !executed.get()) {
-                                                                executed.set(true);
-                                                                Object reason = largs.length > 0 ? Scripts.getSpace().toJava(largs[0]) : null;
-                                                                if (reason instanceof Exception) {
-                                                                    onFailure.accept((Exception) reason);
-                                                                } else {
-                                                                    onFailure.accept(new Exception(String.valueOf(reason)));
-                                                                }
-                                                            } else {
-                                                                Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
-                                                            }
-                                                            return null;
-                                                        }
-
-                                                        @Override
-                                                        public Object getDefaultValue(Class<?> hint) {
-                                                            if (String.class.isAssignableFrom(hint)) {
-                                                                return super.toString();
-                                                            } else {
-                                                                return null;
-                                                            }
-                                                        }
-
-                                                    });
-                                                    Scripts.getContext().initAsyncs(0);
-                                                    try {
-                                                        ServerModuleStructureRequestHandler.checkPrincipalPermission(config.getPropertyAllowedRoles().get(aMethodName), aModuleName + "." + aMethodName);
-                                                        Object result = ((JSObject) oFun).call(moduleInstance, arguments.toArray());
-                                                        int asyncs = Scripts.getContext().getAsyncsCount();
-                                                        if (!(result instanceof Undefined) || asyncs == 0) {
-                                                            if (!executed.get()) {
-                                                                executed.set(true);
-                                                                onSuccess.accept(result);// WARNING! Don't insert .toJava() because of RPC handler
-                                                            } else {
-                                                                Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
-                                                            }
-                                                        }
-                                                    } finally {
-                                                        Scripts.getContext().initAsyncs(null);
-                                                    }
-                                                } else {
-                                                    throw new Exception(String.format(RPCRequestHandler.METHOD_MISSING_MSG, aMethodName, aModuleName));
-                                                }
-                                            } else {
-                                                throw new Exception(String.format(RPCRequestHandler.MODULE_MISSING_MSG, aModuleName));
-                                            }
-                                        } catch (Exception ex) {
-                                            onFailure.accept(ex);
+                                        } else {
+                                            moduleInstance = targetSession.getModule(aModuleName);
                                         }
-                                    };
-                                    JSObject moduleConstructor = Scripts.getSpace().lookup(aModuleName);
-                                    if (moduleConstructor != null) {
-                                        withModuleConstructor.accept(moduleConstructor);
-                                    } else {
-                                        ScriptedResource._require(new String[]{aModuleName}, null, Scripts.getSpace(), new HashSet<>(), (Void v) -> {
-                                            withModuleConstructor.accept(Scripts.getSpace().lookup(aModuleName));
-                                        }, (Exception ex) -> {
-                                            onFailure.accept(ex);
-                                        });
+                                        if (moduleInstance != null) {
+                                            Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.FINE, RPCRequestHandler.EXECUTING_METHOD_TRACE_MSG, new Object[]{aMethodName, aModuleName});
+                                            Object oFun = moduleInstance.getMember(aMethodName);
+                                            if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
+                                                AtomicBoolean executed = new AtomicBoolean();
+                                                List<Object> arguments = new ArrayList<>();
+                                                for (Object argument : copiedArguments) {
+                                                    arguments.add(targetSpace.restoreCopy(argument));
+                                                }
+                                                arguments.add(new AbstractJSObject() {
+                                                    @Override
+                                                    public Object call(final Object thiz, final Object... largs) {
+                                                        if (!aNetworkRPC || !executed.get()) {
+                                                            executed.set(true);
+                                                            Object returned = largs.length > 0 ? largs[0] : null;
+                                                            onSuccess.accept(returned);// WARNING! Don't insert .toJava() because of RPC handler
+                                                        } else {
+                                                            Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
+                                                        }
+                                                        return null;
+                                                    }
+
+                                                    @Override
+                                                    public Object getDefaultValue(Class<?> hint) {
+                                                        if (String.class.isAssignableFrom(hint)) {
+                                                            return super.toString();
+                                                        } else {
+                                                            return null;
+                                                        }
+                                                    }
+
+                                                });
+                                                arguments.add(new AbstractJSObject() {
+                                                    @Override
+                                                    public Object call(final Object thiz, final Object... largs) {
+                                                        if (!aNetworkRPC || !executed.get()) {
+                                                            executed.set(true);
+                                                            Object reason = largs.length > 0 ? targetSpace.toJava(largs[0]) : null;
+                                                            if (reason instanceof Exception) {
+                                                                onFailure.accept((Exception) reason);
+                                                            } else {
+                                                                onFailure.accept(new Exception(String.valueOf(reason)));
+                                                            }
+                                                        } else {
+                                                            Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
+                                                        }
+                                                        return null;
+                                                    }
+
+                                                    @Override
+                                                    public Object getDefaultValue(Class<?> hint) {
+                                                        if (String.class.isAssignableFrom(hint)) {
+                                                            return super.toString();
+                                                        } else {
+                                                            return null;
+                                                        }
+                                                    }
+
+                                                });
+                                                Scripts.getContext().initAsyncs(0);
+                                                try {
+                                                    ServerModuleStructureRequestHandler.checkPrincipalPermission(config.getPropertyAllowedRoles().get(aMethodName), aModuleName + "." + aMethodName);
+                                                    Object result = ((JSObject) oFun).call(moduleInstance, arguments.toArray());
+                                                    int asyncs = Scripts.getContext().getAsyncsCount();
+                                                    if (!(result instanceof Undefined) || asyncs == 0) {
+                                                        if (!executed.get()) {
+                                                            executed.set(true);
+                                                            onSuccess.accept(result);// WARNING! Don't insert .toJava() because of RPC handler
+                                                        } else {
+                                                            Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
+                                                        }
+                                                    }
+                                                } finally {
+                                                    Scripts.getContext().initAsyncs(null);
+                                                }
+                                            } else {
+                                                throw new Exception(String.format(RPCRequestHandler.METHOD_MISSING_MSG, aMethodName, aModuleName));
+                                            }
+                                        } else {
+                                            throw new Exception(String.format(RPCRequestHandler.MODULE_MISSING_MSG, aModuleName));
+                                        }
+                                    } catch (Exception ex) {
+                                        onFailure.accept(ex);
                                     }
-                                } catch (Exception ex) {
-                                    onFailure.accept(ex);
+                                };
+                                JSObject moduleConstructor = targetSpace.lookup(aModuleName);
+                                if (moduleConstructor != null) {
+                                    withModuleConstructor.accept(moduleConstructor);
+                                } else {
+                                    ScriptedResource._require(new String[]{aModuleName}, null, targetSpace, new HashSet<>(), (Void v) -> {
+                                        assert Scripts.getSpace() == targetSpace;
+                                        withModuleConstructor.accept(targetSpace.lookup(aModuleName));
+                                    }, (Exception ex) -> {
+                                        onFailure.accept(ex);
+                                    });
                                 }
-                            });
-                        } finally {
-                            Scripts.setContext(callingContext);
-                        }
+                            } catch (Exception ex) {
+                                onFailure.accept(ex);
+                            }
+                        });
                     } else {
                         throw new AccessControlException(String.format("Public access to module %s is denied.", aModuleName));//NOI18N
                     }
@@ -372,13 +361,13 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
         }
     }
 
-    public Object[] copyArguments(Object[] aArguments, Scripts.LocalContext callingContext) {
+    public Object[] makeArgumentsCopy(Scripts.Space aSpace, Object[] aArguments) {
         Object[] arguments = Arrays.copyOf(aArguments, aArguments.length);
         for (int a = 0; a < arguments.length; a++) {
             if (arguments[a] instanceof HasPublished) {
                 arguments[a] = ((HasPublished) arguments[a]).getPublished();
             } else {
-                arguments[a] = callingContext.getSpace().makeCopy(arguments[a]);
+                arguments[a] = aSpace.makeCopy(arguments[a]);
             }
         }
         return arguments;

@@ -69,6 +69,7 @@ public class LocalServerModulesProxy implements ServerModulesProxy {
     @Override
     public Object callServerModuleMethod(String aModuleName, String aMethodName, Scripts.Space aSpace, JSObject onSuccess, JSObject onFailure, Object... aArguments) throws Exception {
         Scripts.getContext().incAsyncsCount();
+        assert Scripts.getSpace() == aSpace;
         serverCore.executeMethod(aModuleName, aMethodName, aArguments, false, onSuccess != null ? (Object aResult) -> {
             onSuccess.call(null, new Object[]{aSpace.toJs(aResult)});
         } : null, (Exception ex) -> {
@@ -78,7 +79,7 @@ public class LocalServerModulesProxy implements ServerModulesProxy {
                 Logger.getLogger(LocalServerModulesProxy.class.getName()).log(Level.SEVERE, ex.toString());
             }
         });
-        return null;
+        return null;// Only asynchronous form is allowed.
     }
 
 }

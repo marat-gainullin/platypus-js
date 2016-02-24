@@ -37,10 +37,10 @@ public class RPCRequestHandler extends RequestHandler<RPCRequest, RPCRequest.Res
         String[] jsons = getRequest().getArgumentsJsons();
         Object[] arguments = new Object[jsons.length];
         for (int i = 0; i < arguments.length; i++) {
-            arguments[i] = Scripts.getSpace().parseJsonWithDates(jsons[i]);
+            arguments[i] = aSession.getSpace().parseJsonWithDates(jsons[i]);
         }
         serverCore.executeMethod(getRequest().getModuleName(), getRequest().getMethodName(), arguments, true, (Object result) -> {
-            onSuccess.accept(new RPCRequest.Response(result instanceof Report ? result : Scripts.getSpace().toJson(result)));
+            onSuccess.accept(new RPCRequest.Response(result instanceof Report ? result : aSession.getSpace().toJson(result)));
         }, onFailure);
     }
 

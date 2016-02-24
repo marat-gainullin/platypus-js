@@ -100,7 +100,6 @@ public class GridTable extends JTable implements ModelCellEditingListener {
 
     @Override
     public boolean editCellAt(int row, int column, EventObject e) {
-        Scripts.setContext(Forms.getContext());
         return super.editCellAt(row, column, e);
     }
 
@@ -130,7 +129,6 @@ public class GridTable extends JTable implements ModelCellEditingListener {
 
     @Override
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-        Scripts.setContext(Forms.getContext());
         Component res = super.prepareRenderer(renderer, row, column);
         int lrow = row;
         if (aboveNeightbour != null) {

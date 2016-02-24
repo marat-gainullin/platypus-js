@@ -7,7 +7,6 @@ import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.ReportsConfigs;
 import com.eas.client.cache.ScriptsConfigs;
-import com.eas.client.forms.Forms;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.ConnectionsSelector;
 import com.eas.client.login.Credentials;
@@ -296,9 +295,7 @@ public class PlatypusClientApplication {
                     throw new Exception("Unknown protocol in url: " + config.url);
                 }
                 ScriptedResource.init(app, ScriptedResource.lookupPlatypusJs(), false);
-                Scripts.LocalContext context = Scripts.createContext(Scripts.createSpace());
-                Forms.initContext(context);
-                Scripts.setContext(context);
+                Scripts.setSpace(Scripts.createSpace());
                 try {
                     Scripts.getSpace().process(() -> {
                         try {
@@ -312,7 +309,7 @@ public class PlatypusClientApplication {
                         }
                     });
                 } finally {
-                    Scripts.setContext(null);
+                    Scripts.setSpace(null);
                 }
             } else {
                 throw new IllegalArgumentException("Application url is missing. url is a required parameter.");

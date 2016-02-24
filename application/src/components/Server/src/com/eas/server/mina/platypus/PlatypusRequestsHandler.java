@@ -124,24 +124,15 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                             // So, the following call to DatabaseAuthorizer.authorize and further initialization
                             // of platypus session in callback body is safe.
                             ioSession.setAttribute(SESSION_ID, session.getId());
-                            Scripts.LocalContext context = Scripts.createContext(session.getSpace());
-                            context.setSession(session);
-                            Scripts.setContext(context);
-                            try {
-                                DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, Scripts.getSpace(), (PlatypusPrincipal aPrincipal) -> {
-                                    session.setPrincipal(aPrincipal);
-                                    // The only place to use this getter.
-                                    // See its javadoc please.
-                                    context.setPrincipal(session.getPrincipal());
-                                    Scripts.getSpace().process(() -> {
-                                        handler.handle(session, (Response aResponse) -> {
-                                            ioSession.write(aResponse);
-                                        }, onError);
-                                    });
-                                }, onError);
-                            } finally {
-                                Scripts.setContext(null);
-                            }
+                            DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, session.getSpace(), (PlatypusPrincipal aPrincipal) -> {
+                                session.setPrincipal(aPrincipal);
+                                Scripts.LocalContext context = new Scripts.LocalContext(session.getPrincipal(), session);
+                                session.getSpace().process(context, () -> {
+                                    handler.handle(session, (Response aResponse) -> {
+                                        ioSession.write(aResponse);
+                                    }, onError);
+                                });
+                            }, onError);
                         } catch (ScriptException ex) {
                             Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -149,21 +140,12 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                         Session session = server.getSessionManager().get(requestEnv.ticket);
                         if (session != null) {
                             ioSession.setAttribute(SESSION_ID, session.getId());
-                            Scripts.LocalContext context = Scripts.createContext(session.getSpace());
-                            // The only place to use this getter.
-                            // See its javadoc please.
-                            context.setPrincipal(session.getPrincipal());
-                            context.setSession(session);
-                            Scripts.setContext(context);
-                            try {
-                                Scripts.getSpace().process(() -> {
-                                    handler.handle(session, (Response aResponse) -> {
-                                        ioSession.write(aResponse);
-                                    }, onError);
-                                });
-                            } finally {
-                                Scripts.setContext(null);
-                            }
+                            Scripts.LocalContext context = new Scripts.LocalContext(session.getPrincipal(), session);
+                            session.getSpace().process(context, () -> {
+                                handler.handle(session, (Response aResponse) -> {
+                                    ioSession.write(aResponse);
+                                }, onError);
+                            });
                         } else {
                             throw new AccessControlException("Bad session ticket.", new NetPermission("*"));
                         }
