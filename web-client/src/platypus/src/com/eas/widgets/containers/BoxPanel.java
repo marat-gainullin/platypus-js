@@ -234,23 +234,18 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 		}
 	}
 
-	protected boolean ajustWidth() {
+	protected void ajustWidth() {
 		if (isAttached() && (getParent() instanceof ScrollPanel || (getParent() instanceof BoxPanel && ((BoxPanel) getParent()).getOrientation() == Orientation.HORIZONTAL))) {
 			if (getWidgetCount() > 0) {
 				double width = 0;
 				for (Widget child : getChildren()) {
 					String ssChildWidth = child.getElement().getStyle().getWidth();
-					double sChildWidth = ssChildWidth.isEmpty() ? 0 : Double.valueOf(ssChildWidth.substring(0, ssChildWidth.length() - 2));
+					double sChildWidth = ssChildWidth.isEmpty() ? child.getElement().getOffsetWidth() : Double.valueOf(ssChildWidth.substring(0, ssChildWidth.length() - 2));
 					width += sChildWidth;
 				}
 				width += hgap * (getWidgetCount() - 1);
 				setAjustedWidth(width);
-				return true;
-			} else {
-				return false;
 			}
-		} else {
-			return false;
 		}
 	}
 
@@ -280,24 +275,18 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 		return direction;
 	}
 
-	protected boolean ajustHeight() {
+	protected void ajustHeight() {
 		if (isAttached() && (getParent() instanceof ScrollPanel || (getParent() instanceof BoxPanel && ((BoxPanel) getParent()).getOrientation() == Orientation.VERTICAL))) {
 			if (getWidgetCount() > 0) {
 				int height = 0;
-				for (int i = 0; i < getWidgetCount(); i++) {
-					Widget w = getWidget(i);
-					String ssChildHeight = w.getElement().getStyle().getHeight();
-					double sChildHeight = ssChildHeight.isEmpty() ? 0 : Double.valueOf(ssChildHeight.substring(0, ssChildHeight.length() - 2));
+				for (Widget child : getChildren()) {
+					String ssChildHeight = child.getElement().getStyle().getHeight();
+					double sChildHeight = ssChildHeight.isEmpty() ? child.getElement().getOffsetHeight() : Double.valueOf(ssChildHeight.substring(0, ssChildHeight.length() - 2));
 					height += sChildHeight;
 				}
 				height += (getWidgetCount() - 1) * vgap;
 				setAjustedHeight(height);
-				return true;
-			} else {
-				return false;
 			}
-		} else {
-			return false;
 		}
 	}
 
