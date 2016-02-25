@@ -314,6 +314,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                 } else {
                                     ScriptedResource._require(new String[]{aModuleName}, null, targetSpace, new HashSet<>(), (Void v) -> {
                                         assert Scripts.getSpace() == targetSpace;
+                                        assert Scripts.getContext() == targetContext;
                                         withModuleConstructor.accept(targetSpace.lookup(aModuleName));
                                     }, (Exception ex) -> {
                                         onFailure.accept(ex);

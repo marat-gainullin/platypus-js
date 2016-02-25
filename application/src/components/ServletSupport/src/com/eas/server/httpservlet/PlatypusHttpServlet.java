@@ -393,14 +393,12 @@ public class PlatypusHttpServlet extends HttpServlet {
                              aHttpResponse.sendError(accEx.getPermission() instanceof AuthPermission ? HttpServletResponse.SC_UNAUTHORIZED : HttpServletResponse.SC_FORBIDDEN, ex.getMessage());
                              */
                             aHttpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, ex.getMessage());
-                            aAsync.complete();
                         } else if (ex instanceof FileNotFoundException) {
                             aHttpResponse.sendError(HttpServletResponse.SC_NOT_FOUND, ex.getMessage());
-                            aAsync.complete();
                         } else {
                             aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
-                            aAsync.complete();
                         }
+                        aAsync.complete();
                     } catch (IOException ex1) {
                         Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
                     }

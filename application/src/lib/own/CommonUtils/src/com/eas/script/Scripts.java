@@ -169,6 +169,7 @@ public class Scripts {
 
         protected Consumer<Void> onLoad;
         protected Consumer<Exception> onError;
+        protected LocalContext context = getContext();
 
         public Pending(Consumer<Void> aOnLoad, Consumer<Exception> aOnError) {
             super();
@@ -177,11 +178,23 @@ public class Scripts {
         }
 
         public void loaded() {
-            onLoad.accept(null);
+            LocalContext oldContext = getContext();
+            setContext(context);
+            try {
+                onLoad.accept(null);
+            } finally {
+                setContext(oldContext);
+            }
         }
 
         public void failed(Exception ex) {
-            onError.accept(ex);
+            LocalContext oldContext = getContext();
+            setContext(context);
+            try {
+                onError.accept(ex);
+            } finally {
+                setContext(oldContext);
+            }
         }
     }
 
@@ -239,6 +252,15 @@ public class Scripts {
          */
         public String getFileNameFromContext() {
             return (String) scriptContext.getAttribute(ScriptEngine.FILENAME);
+        }
+
+        public void pendOn(String aModuleName, Scripts.Pending aPending) {
+            List<Scripts.Pending> pends = pending.get(aModuleName);
+            if (pends == null) {
+                pends = new ArrayList<>();
+                pending.put(aModuleName, pends);
+            }
+            pends.add(aPending);
         }
 
         public void notifyLoaded(String aModuleName) {
@@ -627,11 +649,12 @@ public class Scripts {
             Runnable taskWrapper = () -> {
                 setContext(context);
                 try {
+                    Space oldSpace = getSpace();
                     setSpace(Space.this);
                     try {
                         aTask.run();
                     } finally {
-                        setSpace(null);
+                        setSpace(oldSpace);
                     }
                 } finally {
                     setContext(null);
@@ -660,7 +683,7 @@ public class Scripts {
                         try {
                             // already single threaded environment
                             if (global == null) {
-                                Scripts.Space.this.initSpaceGlobal();
+                                Space.this.initSpaceGlobal();
                             }
                             // Zombie processing ...
                             Runnable task = queue.poll();
@@ -683,12 +706,13 @@ public class Scripts {
             Bindings bindings = SCRIPT_ENGINE.createBindings();
             scriptContext.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
             try {
-                Scripts.setSpace(Scripts.Space.this);
+                Space oldSpace = getSpace();
+                setSpace(Space.this);
                 try {
                     scriptContext.setAttribute(ScriptEngine.FILENAME, INTERNALS_MODULENAME, ScriptContext.ENGINE_SCOPE);
                     SCRIPT_ENGINE.eval(new URLReader(internalsUrl), scriptContext);
                 } finally {
-                    Scripts.setSpace(null);
+                    setSpace(oldSpace);
                 }
             } catch (ScriptException ex) {
                 Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);

@@ -36,6 +36,7 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.concurrent.Callable;
 import java.util.logging.*;
+import javax.script.ScriptException;
 import javax.swing.UIManager;
 
 /**
@@ -295,22 +296,24 @@ public class PlatypusClientApplication {
                     throw new Exception("Unknown protocol in url: " + config.url);
                 }
                 ScriptedResource.init(app, ScriptedResource.lookupPlatypusJs(), false);
-                Scripts.setSpace(Scripts.createSpace());
-                try {
-                    Scripts.getSpace().process(() -> {
-                        try {
-                            ScriptedResource._require(new String[]{""}, null, Scripts.getSpace(), new HashSet<>(), (Void v) -> {
-                                Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.INFO, "Platypus application started.");
-                            }, (Exception ex) -> {
+                EventQueue.invokeLater(() -> {
+                    try {
+                        Scripts.setSpace(Scripts.createSpace());
+                        Scripts.getSpace().process(() -> {
+                            try {
+                                ScriptedResource._require(new String[]{""}, null, Scripts.getSpace(), new HashSet<>(), (Void v) -> {
+                                    Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.INFO, "Platypus application started.");
+                                }, (Exception ex) -> {
+                                    Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
+                                });
+                            } catch (Exception ex) {
                                 Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
-                            });
-                        } catch (Exception ex) {
-                            Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    });
-                } finally {
-                    Scripts.setSpace(null);
-                }
+                            }
+                        });
+                    } catch (ScriptException ex) {
+                        Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                });
             } else {
                 throw new IllegalArgumentException("Application url is missing. url is a required parameter.");
             }

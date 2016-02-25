@@ -237,7 +237,9 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
 
     @Override
     public <R extends Response> void enqueueRequest(Request aRequest, Scripts.Space aSpace, Consumer<R> onSuccess, Consumer<Exception> onFailure) {
-        Scripts.getContext().incAsyncsCount();
+        if (Scripts.getContext() != null) {
+            Scripts.getContext().incAsyncsCount();
+        }
         Attempts attemps = new Attempts();
         Consumer<Response> responseHandler = (Response response) -> {
             if (response instanceof ErrorResponse) {
@@ -245,14 +247,12 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                     Exception cause = handleErrorResponse((ErrorResponse) response);
                     onFailure.accept(cause);
                 }
-            } else {
-                if (onSuccess != null) {
-                    if (aRequest instanceof LogoutRequest) {
-                        credentials = null;
-                        sessionTicket = null;
-                    }
-                    onSuccess.accept((R) response);
+            } else if (onSuccess != null) {
+                if (aRequest instanceof LogoutRequest) {
+                    credentials = null;
+                    sessionTicket = null;
                 }
+                onSuccess.accept((R) response);
             }
 
         };

@@ -13,7 +13,7 @@ import org.netbeans.contrib.yenta.Yenta;
  *
  * @author mg
  */
-public class Install extends Yenta {
+public class Installer extends Yenta {
 
     @Override
     protected Set<String> friends() {

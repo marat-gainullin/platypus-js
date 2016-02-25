@@ -730,11 +730,7 @@ public class ScriptedResource {
                 } else {
                     aCyclic.add(moduleName);
                     // add callbacks to pendings
-                    if (!aSpace.getPending().containsKey(moduleName)) {
-                        aSpace.getPending().put(moduleName, new ArrayList<>());
-                    }
-                    List<Scripts.Pending> pending = aSpace.getPending().get(moduleName);
-                    pending.add(new Scripts.Pending((Void v) -> {
+                    aSpace.pendOn(moduleName, new Scripts.Pending((Void v) -> {
                         process.complete(moduleName, null);
                     }, (Exception ex) -> {
                         process.complete(moduleName, ex);
