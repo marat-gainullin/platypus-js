@@ -212,7 +212,7 @@
     var DateCopyClass = Java.type('com.eas.script.copies.DateCopy');
     var RegExpCopyClass = Java.type('com.eas.script.copies.RegExpCopy');
     var ArrayCopyClass = Java.type('com.eas.script.copies.ArrayCopy');
-    var ObjectCopyClass = HashMapClass;
+    var ObjectCopyClass = Java.type('com.eas.script.copies.ObjectCopy');
     function copy(aValue, aMapping) {
         aValue = EngineUtilsClass.unwrap(aValue);
         if (!aMapping)

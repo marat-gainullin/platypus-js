@@ -5,20 +5,20 @@
  */
 package com.eas.script.copies;
 
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 /**
  *
  * @author mg
  */
-public class ArrayCopy extends LinkedList<Object> {
+public class ObjectCopy extends TreeMap<String, Object>{
 
     protected Object key = new Object();
-    protected Map<String, Object> props = new TreeMap<>();
-
+    
+    public ObjectCopy() {
+        super();
+    }
+    
     @Override
     public int hashCode() {
         return key.hashCode();
@@ -26,23 +26,12 @@ public class ArrayCopy extends LinkedList<Object> {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof ArrayCopy) {
-            ArrayCopy other = (ArrayCopy) o;
+        if (o instanceof ObjectCopy) {
+            ObjectCopy other = (ObjectCopy) o;
             return other.key == key;
         } else {
             return false;
         }
     }
 
-    public Object get(String k) {
-        return props.get(k);
-    }
-
-    public Object put(String k, Object v) {
-        return props.put(k, v);
-    }
-
-    public Set<String> keySet() {
-        return props.keySet();
-    }
 }
