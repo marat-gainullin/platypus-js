@@ -104,7 +104,13 @@ public class PlatypusProjectImpl implements PlatypusProject {
     }
 
     static {
-        Scripts.setSpace(initScriptSpace());
+        if (EventQueue.isDispatchThread()) {
+            Scripts.setSpace(initScriptSpace());
+        } else {
+            EventQueue.invokeLater(() -> {
+                Scripts.setSpace(initScriptSpace());
+            });
+        }
     }
 
     static Scripts.Space initScriptSpace() {
@@ -345,9 +351,9 @@ public class PlatypusProjectImpl implements PlatypusProject {
                         mdCache.clear();
                     }
                 }
-                clientListeners.stream().forEach((onChange) -> {
-                    onChange.disconnected(aDatasourceName);
-                });
+                for (ClientChangeListener l : clientListeners.toArray(new ClientChangeListener[]{})) {
+                    l.disconnected(aDatasourceName);
+                }
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }
@@ -357,9 +363,9 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
     private synchronized void fireClientDefaultDatasourceChanged(final String aOldDatasourceName, final String aNewDatasourceName) {
         EventQueue.invokeLater(() -> {
-            clientListeners.stream().forEach((onChange) -> {
-                onChange.defaultDatasourceNameChanged(aOldDatasourceName, aNewDatasourceName);
-            });
+            for (ClientChangeListener l : clientListeners.toArray(new ClientChangeListener[]{})) {
+                l.defaultDatasourceNameChanged(aOldDatasourceName, aNewDatasourceName);
+            }
             fireQueriesChanged();
         });
     }
