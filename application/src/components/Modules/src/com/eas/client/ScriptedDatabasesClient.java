@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.ECMAException;
 
 /**
  * Multi data source client. It allows to use js modules as datasources,
@@ -172,32 +173,36 @@ public class ScriptedDatabasesClient extends DatabasesClient {
             } else {
                 ValidateProcess process = new ValidateProcess(toBeCalled.size(), onSuccess, onFailure);
                 toBeCalled.stream().forEach((v) -> {
-                    v.function.call(v.module, new Object[]{aSpace.toJs(aLog.toArray()), aDatasourceName,
-                        new AbstractJSObject() {
+                    try {
+                        v.function.call(v.module, new Object[]{aSpace.toJs(aLog.toArray()), aDatasourceName,
+                            new AbstractJSObject() {
 
-                            @Override
-                            public Object call(final Object thiz, final Object... args) {
-                                process.complete(null);
-                                return null;
-                            }
-                        },
-                        new AbstractJSObject() {
-
-                            @Override
-                            public Object call(final Object thiz, final Object... args) {
-                                if (args.length > 0) {
-                                    if (args[0] instanceof Exception) {
-                                        process.complete((Exception) args[0]);
-                                    } else {
-                                        process.complete(new Exception(String.valueOf(aSpace.toJava(args[0]))));
-                                    }
-                                } else {
-                                    process.complete(new Exception("No error information from validate method"));
+                                @Override
+                                public Object call(final Object thiz, final Object... args) {
+                                    process.complete(null);
+                                    return null;
                                 }
-                                return null;
+                            },
+                            new AbstractJSObject() {
+
+                                @Override
+                                public Object call(final Object thiz, final Object... args) {
+                                    if (args.length > 0) {
+                                        if (args[0] instanceof Exception) {
+                                            process.complete((Exception) args[0]);
+                                        } else {
+                                            process.complete(new Exception(String.valueOf(aSpace.toJava(args[0]))));
+                                        }
+                                    } else {
+                                        process.complete(new Exception("No error information from validate method"));
+                                    }
+                                    return null;
+                                }
                             }
-                        }
-                    });
+                        });
+                    } catch (ECMAException ex) {
+                        process.complete(ex);
+                    }
                 });
             }
         } else {
