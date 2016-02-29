@@ -416,6 +416,7 @@ public class PlatypusHtmlEditor extends Composite implements HasJsFacade, HasVal
 		textContainer.addFocusHandler(new FocusHandler() {
 			@Override
 			public void onFocus(FocusEvent event) {
+				toolBar.hideOverflowPopup();
 				FocusEvent.fireNativeEvent(event.getNativeEvent(), PlatypusHtmlEditor.this);
 			}
 		});

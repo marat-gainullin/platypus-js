@@ -83,6 +83,10 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements Mode
         return modelEntry.getFile();
     }
 
+    public boolean isModelRead(){
+        return model != null;
+    }
+    
     @Override
     public ApplicationDbModel getModel() throws Exception {
         checkModelRead();
@@ -171,26 +175,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements Mode
             queriesReg = null;
         }
         super.handleDelete();
-    }
-
-    public void notifyModuleQueryChanged() {
-        /*
-        FunctionNode constr = getConstructor();
-        if (constr != null) {
-            PlatypusProject project = getProject();
-            if (project != null) {
-                SqlQuery moduleQuery = project.getQueries().getCachedQuery(constr.getName());
-                if (moduleQuery != null) {
-                    if (queriesReg != null) {
-                        queriesReg.remove();
-                        queriesReg = null;
-                    }
-                    project.fireQueryChanged(constr.getName());
-                    queriesReg = project.addQueriesChangeListener(modelValidator);
-                }
-            }
-        }
-*/
     }
 
     @Override

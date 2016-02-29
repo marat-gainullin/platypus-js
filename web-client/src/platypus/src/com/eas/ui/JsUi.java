@@ -108,35 +108,37 @@ public class JsUi {
 	}
 
 	public static void selectColor(String aOldValue, final Callback<String, String> aCallback) {
-		final TextBox tmpField = new TextBox();
-		tmpField.getElement().setAttribute("type", "color");
-		tmpField.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
-		tmpField.setWidth("10px");
-		tmpField.setHeight("10px");
-		tmpField.setValue(aOldValue);
+		final TextBox tb = new TextBox();
+		tb.getElement().setAttribute("type", "color");
+		tb.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+		tb.setWidth("10px");
+		tb.setHeight("10px");
+		tb.setValue(aOldValue);
+		tb.getElement().getStyle().setLeft(-100, Style.Unit.PX);
+		tb.getElement().getStyle().setTop(-100, Style.Unit.PX);
 
-		tmpField.addChangeHandler(new ChangeHandler() {
+		tb.addChangeHandler(new ChangeHandler() {
 
 			@Override
 			public void onChange(ChangeEvent event) {
 				try {
-					aCallback.onSuccess(tmpField.getValue());
+					aCallback.onSuccess(tb.getValue());
 				} finally {
-					tmpField.removeFromParent();
+					tb.removeFromParent();
 				}
 			}
 
 		});
-		RootPanel.get().add(tmpField, 100, 100);
+		RootPanel.get().add(tb, -100, -100);
 		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 			@Override
 			public void execute() {
-				tmpField.setFocus(true);
-				tmpField.getElement().<XElement>cast().click();
+				tb.setFocus(true);
+				tb.getElement().<XElement>cast().click();
 				Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
 					@Override
 					public boolean execute() {
-						tmpField.removeFromParent();
+						tb.removeFromParent();
 						return false;
 					}
 				}, 1000 * 60 * 1);// 1 min

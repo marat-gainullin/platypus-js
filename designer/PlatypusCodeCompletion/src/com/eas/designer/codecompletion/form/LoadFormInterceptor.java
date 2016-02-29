@@ -51,30 +51,31 @@ public class LoadFormInterceptor extends FormInterceptor {
             PlatypusFormDataObject formDataObject = (PlatypusFormDataObject) dataObject;
             PlatypusFormSupport formContainer = formDataObject.getLookup().lookup(PlatypusFormSupport.class);
             assert formContainer != null;
-            formContainer.loadForm();
-            FormModel model = formContainer.getFormModel();
-            for (RADComponent<?> radComp : model.getOrderedComponentList()) {
-                if (radComp.getName() != null && !radComp.getName().isEmpty()) {
-                    JsObject jsWidget = factory.newObject(jsForm, radComp.getName(), new OffsetRange(loadFormOffset, loadFormOffset), false);
-                    String beanCalssShortName = radComp.getBeanClass().getSimpleName();
-                    String widgetModuleName;
-                    if (Panel.class.getSimpleName().equals(beanCalssShortName)) {
-                        RADVisualContainer<?> radCont = (RADVisualContainer<?>) radComp;
-                        LayoutSupportManager layoutSupportManager = radCont.getLayoutSupport();
-                        if (layoutSupportManager != null && layoutSupportManager.getLayoutDelegate() != null) {
-                            Class<?> layoutedContainerClass = FormUtils.getPlatypusConainerClass(layoutSupportManager.getLayoutDelegate().getSupportedClass());
-                            widgetModuleName = dashify(layoutedContainerClass.getSimpleName());
+            if (formContainer.isOpened()) {
+                FormModel model = formContainer.getFormModel();
+                for (RADComponent<?> radComp : model.getOrderedComponentList()) {
+                    if (radComp.getName() != null && !radComp.getName().isEmpty()) {
+                        JsObject jsWidget = factory.newObject(jsForm, radComp.getName(), new OffsetRange(loadFormOffset, loadFormOffset), false);
+                        String beanCalssShortName = radComp.getBeanClass().getSimpleName();
+                        String widgetModuleName;
+                        if (Panel.class.getSimpleName().equals(beanCalssShortName)) {
+                            RADVisualContainer<?> radCont = (RADVisualContainer<?>) radComp;
+                            LayoutSupportManager layoutSupportManager = radCont.getLayoutSupport();
+                            if (layoutSupportManager != null && layoutSupportManager.getLayoutDelegate() != null) {
+                                Class<?> layoutedContainerClass = FormUtils.getPlatypusConainerClass(layoutSupportManager.getLayoutDelegate().getSupportedClass());
+                                widgetModuleName = dashify(layoutedContainerClass.getSimpleName());
+                            } else {
+                                widgetModuleName = dashify(beanCalssShortName);
+                            }
                         } else {
                             widgetModuleName = dashify(beanCalssShortName);
                         }
-                    } else {
-                        widgetModuleName = dashify(beanCalssShortName);
+                        Collection<TypeUsage> apiWidgetTypes = InterceptorUtils.getModuleExposedTypes(fo, loadFormOffset, factory, widgetModuleName);
+                        apiWidgetTypes.stream().forEach((apiEntityType) -> {
+                            jsWidget.addAssignment(apiEntityType, apiEntityType.getOffset());
+                        });
+                        jsForm.addProperty(jsWidget.getName(), jsWidget);
                     }
-                    Collection<TypeUsage> apiWidgetTypes = InterceptorUtils.getModuleExposedTypes(fo, loadFormOffset, factory, widgetModuleName);
-                    apiWidgetTypes.stream().forEach((apiEntityType) -> {
-                        jsWidget.addAssignment(apiEntityType, apiEntityType.getOffset());
-                    });
-                    jsForm.addProperty(jsWidget.getName(), jsWidget);
                 }
             }
         }

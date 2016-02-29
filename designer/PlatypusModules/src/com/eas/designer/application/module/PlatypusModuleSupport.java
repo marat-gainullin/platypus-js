@@ -184,7 +184,6 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
     }
     
     protected void notifyModuleChanged(){
-        dataObject.notifyModuleQueryChanged();
         /*
         try {
             dataObject.notifyChanged();

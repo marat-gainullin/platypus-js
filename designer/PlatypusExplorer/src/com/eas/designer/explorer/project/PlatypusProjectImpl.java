@@ -326,9 +326,9 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
     private synchronized void fireClientConnected(final String aDatasourceName) {
         EventQueue.invokeLater(() -> {
-            clientListeners.stream().forEach((onChange) -> {
-                onChange.connected(aDatasourceName);
-            });
+            for (ClientChangeListener l : clientListeners.toArray(new ClientChangeListener[]{})) {
+                l.connected(aDatasourceName);
+            }
             fireQueriesChanged();
         });
     }
@@ -373,17 +373,17 @@ public class PlatypusProjectImpl implements PlatypusProject {
     @Override
     public synchronized void fireQueriesChanged() {
         queries.clearCachedQueries();
-        queriesListeners.stream().forEach((onChange) -> {
-            onChange.changed();
-        });
+        for (QueriesChangeListener l : queriesListeners.toArray(new QueriesChangeListener[]{})) {
+            l.changed();
+        }
     }
 
     @Override
     public synchronized void fireQueryChanged(String aQueryName) {
         queries.clearCachedQuery(aQueryName);
-        queriesListeners.stream().forEach((onChange) -> {
-            onChange.changed();
-        });
+        for (QueriesChangeListener l : queriesListeners.toArray(new QueriesChangeListener[]{})) {
+            l.changed();
+        }
     }
 
     @Override

@@ -55,64 +55,66 @@ public class LoadModelInterceptor extends ModelInterceptor {
         DataObject dataObject = DataObject.find(fo);
         if (dataObject instanceof PlatypusModuleDataObject) {
             PlatypusModuleDataObject modelContainer = (PlatypusModuleDataObject) dataObject;
-            ApplicationDbModel model = modelContainer.getModel();
-            TypeUsage numberType = factory.newType("Number", loadModelOffset, true);
-            TypeUsage arrayType = factory.newType("Array", loadModelOffset, true);
-            TypeUsage objectType = factory.newType("Object", loadModelOffset, true);
-            for (ApplicationDbEntity modelEntity : model.getEntities().values()) {
-                if (modelEntity.getName() != null && !modelEntity.getName().isEmpty()) {
-                    JsObject jsEntity = factory.newObject(jsModel, modelEntity.getName(), new OffsetRange(loadModelOffset, loadModelOffset), false);
-                    TypeUsage entityQueryType = factory.newType(modelEntity.getQueryName(), loadModelOffset, false);
-                    TypeUsage localEntityType = factory.newType(jsModel.getFullyQualifiedName() + "." + jsEntity.getName(), loadModelOffset, true);
-                    //
-                    Collection<TypeUsage> apiEntityTypes = InterceptorUtils.getModuleExposedTypes(fo, loadModelOffset, factory, ENTITY_MODULE_NAME);
-                    apiEntityTypes.stream().forEach((apiEntityType) -> {
-                        jsEntity.addAssignment(apiEntityType, apiEntityType.getOffset());
-                    });
-                    //
-                    jsEntity.addAssignment(arrayType, loadModelOffset);
-                    jsEntity.addAssignment(entityQueryType, loadModelOffset);
-                    jsEntity.addAssignment(localEntityType, loadModelOffset);
-                    //
-                    SqlQuery sqlQuery = modelEntity.getQuery();
-                    if (sqlQuery != null) {
-                        Fields fields = sqlQuery.getFields();
-                        JsObject jsSchema = factory.newObject(jsEntity, SCHEMA_PROP_NAME, new OffsetRange(loadModelOffset, loadModelOffset), false);
-                        jsSchema.addAssignment(factory.newType(jsEntity.getFullyQualifiedName() + "." + SCHEMA_PROP_NAME, loadModelOffset, true), loadModelOffset);
-                        jsSchema.addAssignment(objectType, loadModelOffset);
-                        JsObject jsSchemaLength = factory.newObject(jsSchema, LENGTH_PROP_NAME, new OffsetRange(loadModelOffset, loadModelOffset), false);
-                        jsSchemaLength.addAssignment(numberType, -1);
-                        jsSchema.addProperty(jsSchemaLength.getName(), jsSchemaLength);
-                        Collection<TypeUsage> apiFieldTypes = InterceptorUtils.getModuleExposedTypes(fo, loadModelOffset, factory, FIELD_MODULE_NAME);
-                        for (int i = 1; i < fields.getFieldsCount(); i++) {
-                            Field field = fields.get(i);
-                            JsObject jsField = factory.newObject(jsSchema, field.getName(), new OffsetRange(loadModelOffset, loadModelOffset), false);
-                            apiFieldTypes.stream().forEach((apiFieldType) -> {
-                                jsField.addAssignment(apiFieldType, apiFieldType.getOffset());
-                            });
-                            jsSchema.addProperty(jsField.getName(), jsField);
-                        }
-                        jsEntity.addProperty(jsSchema.getName(), jsSchema);
+            if (modelContainer.isModelRead()) {
+                ApplicationDbModel model = modelContainer.getModel();
+                TypeUsage numberType = factory.newType("Number", loadModelOffset, true);
+                TypeUsage arrayType = factory.newType("Array", loadModelOffset, true);
+                TypeUsage objectType = factory.newType("Object", loadModelOffset, true);
+                for (ApplicationDbEntity modelEntity : model.getEntities().values()) {
+                    if (modelEntity.getName() != null && !modelEntity.getName().isEmpty()) {
+                        JsObject jsEntity = factory.newObject(jsModel, modelEntity.getName(), new OffsetRange(loadModelOffset, loadModelOffset), false);
+                        TypeUsage entityQueryType = factory.newType(modelEntity.getQueryName(), loadModelOffset, false);
+                        TypeUsage localEntityType = factory.newType(jsModel.getFullyQualifiedName() + "." + jsEntity.getName(), loadModelOffset, true);
                         //
-                        Parameters params = sqlQuery.getParameters();
-                        JsObject jsParams = factory.newObject(jsEntity, PARAMS_PROP_NAME, new OffsetRange(loadModelOffset, loadModelOffset), false);
-                        jsParams.addAssignment(factory.newType(jsEntity.getFullyQualifiedName() + "." + PARAMS_PROP_NAME, loadModelOffset, true), loadModelOffset);
-                        jsParams.addAssignment(objectType, loadModelOffset);
-                        JsObject jsParamsLength = factory.newObject(jsParams, LENGTH_PROP_NAME, new OffsetRange(loadModelOffset, loadModelOffset), false);
-                        jsParamsLength.addAssignment(numberType, loadModelOffset);
-                        jsParams.addProperty(jsParamsLength.getName(), jsParamsLength);
-                        Collection<TypeUsage> apiParameterTypes = InterceptorUtils.getModuleExposedTypes(fo, loadModelOffset, factory, PARAMETER_MODULE_NAME);
-                        for (int i = 1; i < params.getParametersCount(); i++) {
-                            Parameter parameter = params.get(i);
-                            JsObject jsParameter = factory.newObject(jsParams, parameter.getName(), new OffsetRange(loadModelOffset, loadModelOffset), false);
-                            apiParameterTypes.stream().forEach((apiParameterType) -> {
-                                jsParameter.addAssignment(apiParameterType, apiParameterType.getOffset());
-                            });
-                            jsParams.addProperty(jsParameter.getName(), jsParameter);
-                        }
-                        jsEntity.addProperty(jsParams.getName(), jsParams);
+                        Collection<TypeUsage> apiEntityTypes = InterceptorUtils.getModuleExposedTypes(fo, loadModelOffset, factory, ENTITY_MODULE_NAME);
+                        apiEntityTypes.stream().forEach((apiEntityType) -> {
+                            jsEntity.addAssignment(apiEntityType, apiEntityType.getOffset());
+                        });
                         //
-                        jsModel.addProperty(jsEntity.getName(), jsEntity);
+                        jsEntity.addAssignment(arrayType, loadModelOffset);
+                        jsEntity.addAssignment(entityQueryType, loadModelOffset);
+                        jsEntity.addAssignment(localEntityType, loadModelOffset);
+                        //
+                        SqlQuery sqlQuery = modelEntity.getQuery();
+                        if (sqlQuery != null) {
+                            Fields fields = sqlQuery.getFields();
+                            JsObject jsSchema = factory.newObject(jsEntity, SCHEMA_PROP_NAME, new OffsetRange(loadModelOffset, loadModelOffset), false);
+                            jsSchema.addAssignment(factory.newType(jsEntity.getFullyQualifiedName() + "." + SCHEMA_PROP_NAME, loadModelOffset, true), loadModelOffset);
+                            jsSchema.addAssignment(objectType, loadModelOffset);
+                            JsObject jsSchemaLength = factory.newObject(jsSchema, LENGTH_PROP_NAME, new OffsetRange(loadModelOffset, loadModelOffset), false);
+                            jsSchemaLength.addAssignment(numberType, -1);
+                            jsSchema.addProperty(jsSchemaLength.getName(), jsSchemaLength);
+                            Collection<TypeUsage> apiFieldTypes = InterceptorUtils.getModuleExposedTypes(fo, loadModelOffset, factory, FIELD_MODULE_NAME);
+                            for (int i = 1; i < fields.getFieldsCount(); i++) {
+                                Field field = fields.get(i);
+                                JsObject jsField = factory.newObject(jsSchema, field.getName(), new OffsetRange(loadModelOffset, loadModelOffset), false);
+                                apiFieldTypes.stream().forEach((apiFieldType) -> {
+                                    jsField.addAssignment(apiFieldType, apiFieldType.getOffset());
+                                });
+                                jsSchema.addProperty(jsField.getName(), jsField);
+                            }
+                            jsEntity.addProperty(jsSchema.getName(), jsSchema);
+                            //
+                            Parameters params = sqlQuery.getParameters();
+                            JsObject jsParams = factory.newObject(jsEntity, PARAMS_PROP_NAME, new OffsetRange(loadModelOffset, loadModelOffset), false);
+                            jsParams.addAssignment(factory.newType(jsEntity.getFullyQualifiedName() + "." + PARAMS_PROP_NAME, loadModelOffset, true), loadModelOffset);
+                            jsParams.addAssignment(objectType, loadModelOffset);
+                            JsObject jsParamsLength = factory.newObject(jsParams, LENGTH_PROP_NAME, new OffsetRange(loadModelOffset, loadModelOffset), false);
+                            jsParamsLength.addAssignment(numberType, loadModelOffset);
+                            jsParams.addProperty(jsParamsLength.getName(), jsParamsLength);
+                            Collection<TypeUsage> apiParameterTypes = InterceptorUtils.getModuleExposedTypes(fo, loadModelOffset, factory, PARAMETER_MODULE_NAME);
+                            for (int i = 1; i < params.getParametersCount(); i++) {
+                                Parameter parameter = params.get(i);
+                                JsObject jsParameter = factory.newObject(jsParams, parameter.getName(), new OffsetRange(loadModelOffset, loadModelOffset), false);
+                                apiParameterTypes.stream().forEach((apiParameterType) -> {
+                                    jsParameter.addAssignment(apiParameterType, apiParameterType.getOffset());
+                                });
+                                jsParams.addProperty(jsParameter.getName(), jsParameter);
+                            }
+                            jsEntity.addProperty(jsParams.getName(), jsParams);
+                            //
+                            jsModel.addProperty(jsEntity.getName(), jsEntity);
+                        }
                     }
                 }
             }

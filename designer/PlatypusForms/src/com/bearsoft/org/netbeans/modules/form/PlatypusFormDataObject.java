@@ -117,10 +117,4 @@ public class PlatypusFormDataObject extends PlatypusModuleDataObject {
             throws java.io.IOException, ClassNotFoundException {
         is.defaultReadObject();
     }
-
-    @Override
-    protected DataObject handleCopyRename(DataFolder df, String name, String ext) throws IOException {
-        FileObject fo = getPrimaryEntry().copyRename(df.getPrimaryFile(), name, ext);
-        return DataObject.find(fo);
-    }
 }
