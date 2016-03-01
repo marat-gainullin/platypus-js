@@ -26,7 +26,7 @@
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="projectTiteTextField" pref="171" max="32767" attributes="0"/>
+                  <Component id="projectTitleTextField" pref="171" max="32767" attributes="0"/>
                   <Component id="createdFileTextField" alignment="0" pref="171" max="32767" attributes="0"/>
                   <Component id="projectNameTextField" alignment="1" pref="171" max="32767" attributes="0"/>
                   <Component id="projectLocationTextField" alignment="1" pref="171" max="32767" attributes="0"/>
@@ -66,7 +66,7 @@
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="projectTiteTextField" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="projectTitleTextField" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="projectTitleLabel" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace pref="177" max="32767" attributes="0"/>
@@ -140,7 +140,7 @@
         </Property>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="projectTiteTextField">
+    <Component class="javax.swing.JTextField" name="projectTitleTextField">
     </Component>
   </SubComponents>
 </Form>
