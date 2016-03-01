@@ -20,7 +20,7 @@ public class ReportsConfigs extends ActualCache<ReportConfig> {
 
     @Override
     protected ReportConfig parse(String aName, File aFile) throws Exception {
-        return new ReportConfig(aFile.getAbsolutePath(), FileUtils.getFileExtension(aFile), FileUtils.readBytes(aFile));
+        return new ReportConfig(aName, FileUtils.getFileExtension(aFile), FileUtils.readBytes(aFile));
     }
 
 }

@@ -71,6 +71,7 @@ public class ClientConstants {
     //tableIndexOther - this is some other style of index
     public static final String JDBCIDX_ORDINAL_POSITION = "ORDINAL_POSITION";//short => column sequence number within index; zero when TYPE is tableIndexStatistic
     public static final String JDBCIDX_ASC_OR_DESC = "ASC_OR_DESC";//String => column sort sequence, "A" => ascending, "D" => descending, may be null if sort sequence is not supported; null when TYPE is tableIndexStatistic
+    public static final String JDBCPKS_TABLE_CAT_FIELD_NAME = "TABLE_CAT";
     public static final String JDBCPKS_TABLE_TYPE_FIELD_NAME = "TABLE_TYPE";
     public static final String JDBCPKS_TABLE_TYPE_TABLE = "TABLE";
     public static final String JDBCPKS_TABLE_TYPE_VIEW = "VIEW";

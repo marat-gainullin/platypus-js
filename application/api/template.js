@@ -16,7 +16,12 @@ define(['core/report', 'reports/report-template'], function (Report, ReportTempl
             file = FileUtils.findBrother(ScriptedResourceClass.getApp().getModules().nameToFile(aModuleName), "xls");
         }
         if (file) {
-            var reportConfig = ScriptedResourceClass.getApp().getReports().get(aModuleName, file);
+            var nameTemplate = aModuleName;
+            var lastSlash = nameTemplate.lastIndexOf('/');
+            if (lastSlash !== -1) {
+                nameTemplate = nameTemplate.substring(lastSlash + 1, nameTemplate.length);
+            }
+            var reportConfig = ScriptedResourceClass.getApp().getReports().get(nameTemplate, file);
             if (aTarget) {
                 ReportTemplate.call(aTarget, reportConfig.getTemplateContent(), reportConfig.getNameTemplate(), reportConfig.getFormat(), aData);
             } else {
