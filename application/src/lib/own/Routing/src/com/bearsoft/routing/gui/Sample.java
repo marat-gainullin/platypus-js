@@ -156,9 +156,12 @@ public class Sample extends javax.swing.JFrame {
     private void initComponents() {
 
         pnlDraw = new DrawablePanel();
+        lblHintObstacle = new javax.swing.JLabel();
+        lblHintDeleteObstacle = new javax.swing.JLabel();
+        lblDescirption = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Тест построения графа видимости");
+        setTitle("Visibility graph building test");
 
         pnlDraw.setBackground(new java.awt.Color(255, 255, 255));
         pnlDraw.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -178,15 +181,35 @@ public class Sample extends javax.swing.JFrame {
             }
         });
 
+        lblHintObstacle.setText("Drag & drop to create a new obstacle");
+
+        lblHintDeleteObstacle.setText("Hit \"Delete\" key to remove highlighted obstacle");
+
+        lblDescirption.setText("Two points are connected by straight line if an atomic (two segment) orthogonal path can be constructed between them");
+
         javax.swing.GroupLayout pnlDrawLayout = new javax.swing.GroupLayout(pnlDraw);
         pnlDraw.setLayout(pnlDrawLayout);
         pnlDrawLayout.setHorizontalGroup(
             pnlDrawLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(pnlDrawLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlDrawLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlDrawLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(lblHintObstacle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(lblHintDeleteObstacle, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE))
+                    .addComponent(lblDescirption, javax.swing.GroupLayout.PREFERRED_SIZE, 747, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(231, Short.MAX_VALUE))
         );
         pnlDrawLayout.setVerticalGroup(
             pnlDrawLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(pnlDrawLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblHintObstacle)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblHintDeleteObstacle)
+                .addGap(18, 18, 18)
+                .addComponent(lblDescirption)
+                .addContainerGap(562, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -293,6 +316,9 @@ public class Sample extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel lblDescirption;
+    private javax.swing.JLabel lblHintDeleteObstacle;
+    private javax.swing.JLabel lblHintObstacle;
     private javax.swing.JPanel pnlDraw;
     // End of variables declaration//GEN-END:variables
 
