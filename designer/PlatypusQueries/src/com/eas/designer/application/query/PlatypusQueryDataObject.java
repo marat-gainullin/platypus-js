@@ -62,6 +62,8 @@ import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
+import org.netbeans.api.project.FileOwnerQuery;
+import org.netbeans.api.project.Project;
 import org.netbeans.modules.editor.NbEditorDocument;
 import org.openide.ErrorManager;
 import org.openide.awt.StatusDisplayer;
@@ -690,7 +692,8 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         }
         return schemas;
     }
-/*
+
+    /*
     public Map<String, Fields> achieveTables(final String aSchema) throws Exception {
         final Map<String, Fields> tables = new HashMap<>();
         DatabasesClient basesProxy = getBasesProxy();
@@ -717,7 +720,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         }
         return tables;
     }
-*/
+     */
     public MetadataCache getMetadataCache() throws Exception {
         DatabasesClient basesProxy = getBasesProxy();
         return basesProxy != null ? basesProxy.getMetadataCache(datasourceName) : null;
@@ -802,13 +805,17 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
     @Override
     protected DataObject handleCopy(DataFolder df) throws IOException {
         DataObject copied = super.handleCopy(df);
-        String content = copied.getPrimaryFile().asText(PlatypusFiles.DEFAULT_ENCODING);
-        String oldPlatypusId = PlatypusFilesSupport.getAnnotationValue(content, JsDoc.Tag.NAME_TAG);
-        String newPlatypusId = NewApplicationElementWizardIterator.getNewValidAppElementName(getProject(), oldPlatypusId);
-        content = PlatypusFilesSupport.replaceAnnotationValue(content, JsDoc.Tag.NAME_TAG, newPlatypusId);
-        try (OutputStream os = copied.getPrimaryFile().getOutputStream()) {
-            os.write(content.getBytes(PlatypusFiles.DEFAULT_ENCODING));
-            os.flush();
+        Project projectOfThis = FileOwnerQuery.getOwner(getPrimaryFile());
+        Project projectOfCopied = FileOwnerQuery.getOwner(copied.getPrimaryFile());
+        if (projectOfThis == projectOfCopied) {
+            String content = copied.getPrimaryFile().asText(PlatypusFiles.DEFAULT_ENCODING);
+            String oldPlatypusId = PlatypusFilesSupport.getAnnotationValue(content, JsDoc.Tag.NAME_TAG);
+            String newPlatypusId = NewApplicationElementWizardIterator.getNewValidAppElementName(getProject(), oldPlatypusId);
+            content = PlatypusFilesSupport.replaceAnnotationValue(content, JsDoc.Tag.NAME_TAG, newPlatypusId);
+            try (OutputStream os = copied.getPrimaryFile().getOutputStream()) {
+                os.write(content.getBytes(PlatypusFiles.DEFAULT_ENCODING));
+                os.flush();
+            }
         }
         return copied;
     }
