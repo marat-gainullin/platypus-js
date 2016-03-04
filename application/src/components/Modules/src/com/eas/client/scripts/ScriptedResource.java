@@ -37,7 +37,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -611,76 +610,77 @@ public class ScriptedResource {
 
     }
 
-    private static final Map<String, Path> scriptsOfModules = new ConcurrentHashMap<>();
+    private static final Map<String, ModuleStructure> scriptsOfModulesStructures = new ConcurrentHashMap<>();
 
     private static void loadScriptOfModule(String aModuleName, String aCalledFromFile, Scripts.Space aSpace, Set<String> aCyclic, Path apiPath, Consumer<Path> onSuccess, Consumer<Exception> onFailure) {
-        Path cached = scriptsOfModules.get(aModuleName);
-        if (cached != null) {
+        // API content is not compressible into bundles and so API module name is transformed into a script file name directly
+        // Also API files can't have global dependencies and can't have prefetched resources
+        Path apiLocalPath = apiPath.resolve(aModuleName + PlatypusFiles.JAVASCRIPT_FILE_END);
+        if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
             // network activity simulation
             aSpace.process(() -> {
-                onSuccess.accept(cached);
+                onSuccess.accept(apiLocalPath.normalize());
             });
-        } else {
-            // API content is not compressible into bundles and so API module name is transformed into a script file name directly
-            Path apiLocalPath = apiPath.resolve(aModuleName + PlatypusFiles.JAVASCRIPT_FILE_END);
-            if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
-                scriptsOfModules.put(aModuleName, apiLocalPath.normalize());
-                // network activity simulation
-                aSpace.process(() -> {
-                    onSuccess.accept(apiLocalPath.normalize());
-                });
-            } else {// Module is application module, so let's discover what file contains the module.
-                try {
-                    app.getModules().getModule(aModuleName, aSpace, (ModuleStructure structure) -> {
-                        if (structure != null) {
-                            try {
-                                AppElementFiles files = structure.getParts();
-                                File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
+        } else {// Module is application module, so let's discover what file contains the module.
+            Consumer<ModuleStructure> withModuleStructure = (ModuleStructure structure) -> {
+                if (structure != null) {
+                    scriptsOfModulesStructures.put(aModuleName, structure);
+                    try {
+                        AppElementFiles files = structure.getParts();
+                        File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
 
-                                RequireProcess moduleProcess = new RequireProcess(3, (Void v) -> {
-                                    Path appLocalPath = Paths.get(sourceFile.toURI());
-                                    scriptsOfModules.put(aModuleName, appLocalPath);
-                                    onSuccess.accept(appLocalPath);
+                        RequireProcess moduleProcess = new RequireProcess(3, (Void v) -> {
+                            Path appLocalPath = Paths.get(sourceFile.toURI());
+                            onSuccess.accept(appLocalPath);
+                        }, (Exception ex) -> {
+                            onFailure.accept(ex);
+                        });
+                        if (files.isModule()) {
+                            try {
+                                // 1
+                                qRequire(structure.getQueryDependencies().toArray(new String[]{}), aSpace, (Void v) -> {
+                                    moduleProcess.complete(aModuleName + ".q", null);
                                 }, (Exception ex) -> {
-                                    onFailure.accept(ex);
+                                    moduleProcess.complete(aModuleName + ".q", ex);
                                 });
-                                if (files.isModule()) {
-                                    try {
-                                        // 1
-                                        qRequire(structure.getQueryDependencies().toArray(new String[]{}), aSpace, (Void v) -> {
-                                            moduleProcess.complete(aModuleName + ".q", null);
-                                        }, (Exception ex) -> {
-                                            moduleProcess.complete(aModuleName + ".q", ex);
-                                        });
-                                        // 2
-                                        sRequire(structure.getServerDependencies().toArray(new String[]{}), aSpace, (Void v) -> {
-                                            moduleProcess.complete(aModuleName + ".s", null);
-                                        }, (Exception ex) -> {
-                                            moduleProcess.complete(aModuleName + ".s", ex);
-                                        });
-                                    } catch (Exception ex) {
-                                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{checkedModuleName(aModuleName), ex.toString()});
-                                    }
-                                } else {
-                                    // 1
-                                    moduleProcess.complete(aModuleName + ".q", null);// instead of qRequire
-                                    // 2
-                                    moduleProcess.complete(aModuleName + ".s", null);// instead of sRequire
-                                }
-                                // 3
-                                _require(structure.getClientDependencies().toArray(new String[]{}), aCalledFromFile, aSpace, aCyclic, (Void v) -> {
-                                    moduleProcess.complete(null, null);
+                                // 2
+                                sRequire(structure.getServerDependencies().toArray(new String[]{}), aSpace, (Void v) -> {
+                                    moduleProcess.complete(aModuleName + ".s", null);
                                 }, (Exception ex) -> {
-                                    moduleProcess.complete(null, ex);
+                                    moduleProcess.complete(aModuleName + ".s", ex);
                                 });
                             } catch (Exception ex) {
                                 Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{checkedModuleName(aModuleName), ex.toString()});
                             }
                         } else {
-                            Exception ex = new FileNotFoundException(aModuleName);
-                            onFailure.accept(ex);
+                            // 1
+                            moduleProcess.complete(aModuleName + ".q", null);// instead of qRequire
+                            // 2
+                            moduleProcess.complete(aModuleName + ".s", null);// instead of sRequire
                         }
-                    }, (Exception ex) -> {
+                        // 3
+                        _require(structure.getClientDependencies().toArray(new String[]{}), aCalledFromFile, aSpace, aCyclic, (Void v) -> {
+                            moduleProcess.complete(null, null);
+                        }, (Exception ex) -> {
+                            moduleProcess.complete(null, ex);
+                        });
+                    } catch (Exception ex) {
+                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{checkedModuleName(aModuleName), ex.toString()});
+                    }
+                } else {
+                    Exception ex = new FileNotFoundException(aModuleName);
+                    onFailure.accept(ex);
+                }
+            };
+            ModuleStructure cached = scriptsOfModulesStructures.get(aModuleName);
+            if (cached != null) {
+                // network activity simulation
+                aSpace.process(() -> {
+                    withModuleStructure.accept(cached);
+                });
+            } else {
+                try {
+                    app.getModules().getModule(aModuleName, aSpace, withModuleStructure, (Exception ex) -> {
                         onFailure.accept(ex);
                     });
                 } catch (Exception ex) {
