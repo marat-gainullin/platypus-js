@@ -4,14 +4,15 @@
  */
 package com.eas.designer.application.module;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.List;
 import javax.swing.JComponent;
-import javax.swing.JEditorPane;
+import javax.swing.JPanel;
 import javax.swing.JToolBar;
-import javax.swing.text.Document;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
@@ -19,7 +20,6 @@ import org.netbeans.core.spi.multiview.MultiViewFactory;
 import org.netbeans.spi.debugger.ui.EditorContextDispatcher;
 import org.openide.nodes.Node;
 import org.openide.text.CloneableEditor;
-import org.openide.text.NbDocument;
 import org.openide.windows.CloneableTopComponent;
 import org.openide.windows.TopComponent;
 
@@ -31,6 +31,7 @@ public final class PlatypusModuleSourceView extends CloneableEditor implements M
     static final long serialVersionUID = 53142032923497728L;
     protected PlatypusModuleDataObject dataObject;
     protected transient MultiViewElementCallback callback;
+    protected transient JPanel toolsWrapper = new JPanel(new BorderLayout());
     protected transient JToolBar tools;
 
     public PlatypusModuleSourceView() {
@@ -43,6 +44,26 @@ public final class PlatypusModuleSourceView extends CloneableEditor implements M
         setLayout(new java.awt.BorderLayout());
         dataObject = aDataObject;
         setActivatedNodes(new Node[]{dataObject.getNodeDelegate()});
+    }
+
+    @Override
+    public void add(Component comp, Object constraints, int index) {
+        // HACK.
+        // WARNING!!!
+        // Don't refactor this code as getEditorPane().getDocument() | NbDocument.CustomToolbar | ((NbDocument.CustomToolbar) doc).createToolbar(lpane)
+        // in getToolbarRepresentation() method.
+        // NetBeans contains deadlock :( while waiting of document initializing from another thread and some stuff about Swing GUI inside this initializing and thus that thread.
+        if (tools == null && comp instanceof JToolBar) {
+            tools = (JToolBar) comp;
+            toolsWrapper.add(comp, BorderLayout.CENTER);
+        } else {
+            super.add(comp, constraints, index);
+        }
+    }
+
+    @Override
+    public void add(Component comp, Object constraints) {
+        add(comp, constraints, -1);
     }
 
     @Override
@@ -133,16 +154,8 @@ public final class PlatypusModuleSourceView extends CloneableEditor implements M
 
     @Override
     public JComponent getToolbarRepresentation() {
-        if (tools == null) {
-            JEditorPane lpane = getEditorPane();
-            if (lpane != null) {
-                Document doc = lpane.getDocument();
-                if (doc instanceof NbDocument.CustomToolbar) {
-                    tools = ((NbDocument.CustomToolbar) doc).createToolbar(lpane);
-                }
-            }
-        }
-        return tools;
+        // See add() method hack.
+        return toolsWrapper;
     }
 
     @Override
