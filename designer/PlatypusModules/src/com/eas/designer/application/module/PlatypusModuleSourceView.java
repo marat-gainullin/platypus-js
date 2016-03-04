@@ -48,11 +48,14 @@ public final class PlatypusModuleSourceView extends CloneableEditor implements M
 
     @Override
     public void add(Component comp, Object constraints, int index) {
-        // HACK.
         // WARNING!!!
-        // Don't refactor this code as getEditorPane().getDocument() | NbDocument.CustomToolbar | ((NbDocument.CustomToolbar) doc).createToolbar(lpane)
+        // Don't refactor this code as getEditorPane().getDocument() | ((NbDocument.CustomToolbar) doc).createToolbar(lpane)
         // in getToolbarRepresentation() method.
-        // NetBeans contains deadlock :( while waiting of document initializing from another thread and some stuff about Swing GUI inside this initializing and thus that thread.
+        // NetBeans contains deadlock :(
+        // Document initializing is performed in another thread and EDT thread wait untils it happens.
+        // Initializing thread can perform some stuff like a new DebugJSAction() while document initialization.
+        // Thus initializing thread wait for AWT treeLock already auqired by EDT and EDT waits for initializing thread.
+        // HACK :(
         if (tools == null && comp instanceof JToolBar) {
             tools = (JToolBar) comp;
             toolsWrapper.add(comp, BorderLayout.CENTER);
