@@ -82,7 +82,6 @@ fieldset[disabled] a.btn {
 .btn-default:focus,
 .btn-default.focus {
     color: #333;
-//    background-color: #e6e6e6;
     border-color: #8c8c8c;
 }
 .btn-default:hover {
@@ -1456,6 +1455,7 @@ select.form-control{
 .content-decor{
     border-radius: 3px;
     box-shadow: 3px 3px 3px 3px rgba(0, 0, 0, 0.1);
+    background-color: white;
 }
 
 .content-decor-active{
