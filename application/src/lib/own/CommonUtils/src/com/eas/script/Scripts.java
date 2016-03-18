@@ -858,13 +858,13 @@ public class Scripts {
                     program.setAccessible(true);
                     return (FunctionNode) program.invoke(this, new Object[]{scriptName, true});
                 } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                    Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(Scripts.class.getName()).log(Level.WARNING, null, ex);
+                    return null;
                 }
-                return null;
             }
         };
         FunctionNode jsAst = p.parse();
-        return new ParsedJs(jsAst, prevComments);
+        return jsAst != null ? new ParsedJs(jsAst, prevComments) : null;
     }
 
     /**

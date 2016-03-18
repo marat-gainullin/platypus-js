@@ -74,7 +74,7 @@ public class FileIndexer extends CustomIndexer {
                                     defaultModuleName = defaultModuleName.substring(0, defaultModuleName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
                                     defaultModuleName = defaultModuleName.replace(File.separator, "/");
                                     ScriptDocument scriptDoc = ScriptDocument.parse(fileContent, defaultModuleName);
-                                    scriptDoc.getModules().keySet().forEach((String aModuleName)->{
+                                    scriptDoc.getModules().keySet().forEach((String aModuleName) -> {
                                         d.addPair(APP_ELEMENT_NAME, aModuleName, true, true);
                                     });
                                 }

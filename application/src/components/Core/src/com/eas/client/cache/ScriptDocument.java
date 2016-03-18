@@ -158,169 +158,171 @@ public class ScriptDocument {
         assert aSource != null : "JavaScript source can't be null";
         Source source = Source.sourceFor(aDefaultModuleName, aSource);
         ParsedJs parsed = Scripts.parseJs(aSource);
-        LexicalContext context = new LexicalContext();
-        FunctionNode ast = parsed.getAst();
-        Map<Long, Long> prevComments = parsed.getPrevComments();
-        ast.accept(new NodeVisitor(context) {
-            protected final int GLOBAL_CONSTRUCTORS_BODY_SCOPE_LEVEL = 2;
-            protected final int AMD_CONSTRUCTORS_BODY_SCOPE_LEVEL = 3;
+        if (parsed != null) {
+            LexicalContext context = new LexicalContext();
+            FunctionNode ast = parsed.getAst();
+            Map<Long, Long> prevComments = parsed.getPrevComments();
+            ast.accept(new NodeVisitor(context) {
+                protected final int GLOBAL_CONSTRUCTORS_BODY_SCOPE_LEVEL = 2;
+                protected final int AMD_CONSTRUCTORS_BODY_SCOPE_LEVEL = 3;
 
-            private int scopeLevel;
+                private int scopeLevel;
 
-            @Override
-            public boolean enterCallNode(CallNode callNode) {
-                Expression func = callNode.getFunction();
-                if (func instanceof AccessNode) {
-                    AccessNode an = (AccessNode) func;
-                    if (DEFINE_FUNC_NAME.equals(an.getProperty())) {
-                        defineCall(callNode, an.getBase().getToken());
-                    }
-                } else if (func instanceof IdentNode) {
-                    IdentNode in = (IdentNode) func;
-                    if (DEFINE_FUNC_NAME.equals(in.getName())) {
-                        defineCall(callNode, in.getToken());
-                    }
-                }
-                return super.enterCallNode(callNode);
-            }
-            private static final String DEFINE_FUNC_NAME = "define";
-
-            protected CallNode amdDefineCall;
-
-            private void defineCall(CallNode callNode, long aCommentableToken) {
-                amdDefineCall = callNode;
-
-                String moduleName;
-                if (callNode.getArgs().size() == 3 && callNode.getArgs().get(0) instanceof LiteralNode
-                        && ((LiteralNode) callNode.getArgs().get(0)).getType().isString()) {
-                    moduleName = ((LiteralNode) callNode.getArgs().get(0)).getString();
-                } else {
-                    moduleName = null;
-                }
-                mdModule = new ModuleDocument();
-                Set<String> allowedRoles = new HashSet<>();
-                if (prevComments.containsKey(aCommentableToken)) {
-                    long prevComment = prevComments.get(aCommentableToken);
-                    String defineCallComment = source.getString(prevComment);
-                    mdModule.parseAnnotations(defineCallComment);
-                }
-                mdModule.moduleAllowedRoles.addAll(allowedRoles);
-                if (moduleName == null || moduleName.isEmpty()) {
-                    moduleName = aDefaultModuleName;
-                }
-                if (modules.containsKey(moduleName)) {
-                    Logger.getLogger(ScriptDocument.class.getName()).log(Level.WARNING, "Module with name \"{0}\" ia already defined in script {1}.", new Object[]{moduleName != null ? moduleName : "null", aDefaultModuleName});
-                }
-                modules.put(moduleName, mdModule);
-            }
-
-            @Override
-            public Node leaveCallNode(CallNode callNode) {
-                if (callNode == amdDefineCall) {
-                    amdDefineCall = null;
-                    mdModule = null;
-                }
-                return super.leaveCallNode(callNode);
-            }
-
-            @Override
-            public boolean enterVarNode(VarNode varNode) {
-                if (mdConstructor != null && context.getCurrentFunction() == mdConstructor) {
-                    if (varNode.getAssignmentSource() instanceof IdentNode) {
-                        IdentNode in = (IdentNode) varNode.getAssignmentSource();
-                        if (Scripts.THIS_KEYWORD.equals(in.getName())) {
-                            mdThisAliases.add(varNode.getAssignmentDest().getName());
+                @Override
+                public boolean enterCallNode(CallNode callNode) {
+                    Expression func = callNode.getFunction();
+                    if (func instanceof AccessNode) {
+                        AccessNode an = (AccessNode) func;
+                        if (DEFINE_FUNC_NAME.equals(an.getProperty())) {
+                            defineCall(callNode, an.getBase().getToken());
+                        }
+                    } else if (func instanceof IdentNode) {
+                        IdentNode in = (IdentNode) func;
+                        if (DEFINE_FUNC_NAME.equals(in.getName())) {
+                            defineCall(callNode, in.getToken());
                         }
                     }
+                    return super.enterCallNode(callNode);
                 }
-                return super.enterVarNode(varNode);
-            }
+                private static final String DEFINE_FUNC_NAME = "define";
 
-            @Override
-            public boolean enterBinaryNode(BinaryNode binaryNode) {
-                // For global scope modules
-                if (scopeLevel == GLOBAL_CONSTRUCTORS_BODY_SCOPE_LEVEL && binaryNode.isAssignment() && !binaryNode.isSelfModifying()) {
-                    if (binaryNode.getAssignmentDest() instanceof AccessNode) {
-                        AccessNode left = (AccessNode) binaryNode.getAssignmentDest();
-                        if (left.getBase() instanceof IdentNode && mdThisAliases.contains(((IdentNode) left.getBase()).getName())) {
-                            long ft = left.getBase().getToken();
-                            String comment = null;
-                            if (prevComments.containsKey(ft)) {
-                                long prevComment = prevComments.get(ft);
-                                comment = source.getString(prevComment);
-                            }
-                            processProperty(left.getProperty(), binaryNode.getAssignmentSource(), comment);
-                        }
+                protected CallNode amdDefineCall;
+
+                private void defineCall(CallNode callNode, long aCommentableToken) {
+                    amdDefineCall = callNode;
+
+                    String moduleName;
+                    if (callNode.getArgs().size() == 3 && callNode.getArgs().get(0) instanceof LiteralNode
+                            && ((LiteralNode) callNode.getArgs().get(0)).getType().isString()) {
+                        moduleName = ((LiteralNode) callNode.getArgs().get(0)).getString();
+                    } else {
+                        moduleName = null;
                     }
-                }
-                // For AMD modules
-                if (scopeLevel == AMD_CONSTRUCTORS_BODY_SCOPE_LEVEL && binaryNode.isAssignment() && !binaryNode.isSelfModifying()) {
-                    if (binaryNode.getAssignmentDest() instanceof AccessNode) {
-                        AccessNode left = (AccessNode) binaryNode.getAssignmentDest();
-                        if (left.getBase() instanceof IdentNode) {
-                            long ft = left.getBase().getToken();
-                            String comment = null;
-                            if (prevComments.containsKey(ft)) {
-                                long prevComment = prevComments.get(ft);
-                                comment = source.getString(prevComment);
-                            }
-                            processProperty(left.getProperty(), binaryNode.getAssignmentSource(), comment);
-                        }
-                    }
-                }
-                return super.enterBinaryNode(binaryNode);
-            }
-
-            protected ModuleDocument mdModule;// current module form nearest scope
-            protected FunctionNode mdConstructor;// current AMD/GMD constructor
-            protected Set<String> mdThisAliases = new HashSet<String>() {
-                {
-                    add(Scripts.THIS_KEYWORD);
-                }
-            };
-
-            @Override
-            public boolean enterFunctionNode(FunctionNode functionNode) {
-                scopeLevel++;
-                if (!functionNode.isAnonymous() && scopeLevel == GLOBAL_CONSTRUCTORS_BODY_SCOPE_LEVEL) {
                     mdModule = new ModuleDocument();
-                    mdConstructor = functionNode;
-                    long ft = functionNode.getFirstToken();
-                    if (prevComments.containsKey(ft)) {
-                        long prevComment = prevComments.get(ft);
-                        String commentText = source.getString(prevComment);
-                        mdModule.parseAnnotations(commentText);
+                    Set<String> allowedRoles = new HashSet<>();
+                    if (prevComments.containsKey(aCommentableToken)) {
+                        long prevComment = prevComments.get(aCommentableToken);
+                        String defineCallComment = source.getString(prevComment);
+                        mdModule.parseAnnotations(defineCallComment);
                     }
-                    modules.put(functionNode.getName(), mdModule);
+                    mdModule.moduleAllowedRoles.addAll(allowedRoles);
+                    if (moduleName == null || moduleName.isEmpty()) {
+                        moduleName = aDefaultModuleName;
+                    }
+                    if (modules.containsKey(moduleName)) {
+                        Logger.getLogger(ScriptDocument.class.getName()).log(Level.WARNING, "Module with name \"{0}\" ia already defined in script {1}.", new Object[]{moduleName != null ? moduleName : "null", aDefaultModuleName});
+                    }
+                    modules.put(moduleName, mdModule);
                 }
-                return super.enterFunctionNode(functionNode);
-            }
 
-            @Override
-            public Node leaveFunctionNode(FunctionNode functionNode) {
-                if (functionNode == mdConstructor) {
-                    mdConstructor = null;
-                    mdModule = null;
-                    mdThisAliases = new HashSet<String>() {
-                        {
-                            add(Scripts.THIS_KEYWORD);
+                @Override
+                public Node leaveCallNode(CallNode callNode) {
+                    if (callNode == amdDefineCall) {
+                        amdDefineCall = null;
+                        mdModule = null;
+                    }
+                    return super.leaveCallNode(callNode);
+                }
+
+                @Override
+                public boolean enterVarNode(VarNode varNode) {
+                    if (mdConstructor != null && context.getCurrentFunction() == mdConstructor) {
+                        if (varNode.getAssignmentSource() instanceof IdentNode) {
+                            IdentNode in = (IdentNode) varNode.getAssignmentSource();
+                            if (Scripts.THIS_KEYWORD.equals(in.getName())) {
+                                mdThisAliases.add(varNode.getAssignmentDest().getName());
+                            }
                         }
-                    };
+                    }
+                    return super.enterVarNode(varNode);
                 }
-                scopeLevel--;
-                return super.leaveFunctionNode(functionNode);
-            }
 
-            protected void processProperty(String aPropertyName, Expression aValue, String aComment) {
-                if (mdModule != null) {
-                    if (!aPropertyName.contains(".")) {
-                        mdModule.functionProperties.add(aPropertyName);
-                        if (aComment != null) {
-                            mdModule.readPropertyRoles(aPropertyName, aComment);
+                @Override
+                public boolean enterBinaryNode(BinaryNode binaryNode) {
+                    // For global scope modules
+                    if (scopeLevel == GLOBAL_CONSTRUCTORS_BODY_SCOPE_LEVEL && binaryNode.isAssignment() && !binaryNode.isSelfModifying()) {
+                        if (binaryNode.getAssignmentDest() instanceof AccessNode) {
+                            AccessNode left = (AccessNode) binaryNode.getAssignmentDest();
+                            if (left.getBase() instanceof IdentNode && mdThisAliases.contains(((IdentNode) left.getBase()).getName())) {
+                                long ft = left.getBase().getToken();
+                                String comment = null;
+                                if (prevComments.containsKey(ft)) {
+                                    long prevComment = prevComments.get(ft);
+                                    comment = source.getString(prevComment);
+                                }
+                                processProperty(left.getProperty(), binaryNode.getAssignmentSource(), comment);
+                            }
+                        }
+                    }
+                    // For AMD modules
+                    if (scopeLevel == AMD_CONSTRUCTORS_BODY_SCOPE_LEVEL && binaryNode.isAssignment() && !binaryNode.isSelfModifying()) {
+                        if (binaryNode.getAssignmentDest() instanceof AccessNode) {
+                            AccessNode left = (AccessNode) binaryNode.getAssignmentDest();
+                            if (left.getBase() instanceof IdentNode) {
+                                long ft = left.getBase().getToken();
+                                String comment = null;
+                                if (prevComments.containsKey(ft)) {
+                                    long prevComment = prevComments.get(ft);
+                                    comment = source.getString(prevComment);
+                                }
+                                processProperty(left.getProperty(), binaryNode.getAssignmentSource(), comment);
+                            }
+                        }
+                    }
+                    return super.enterBinaryNode(binaryNode);
+                }
+
+                protected ModuleDocument mdModule;// current module form nearest scope
+                protected FunctionNode mdConstructor;// current AMD/GMD constructor
+                protected Set<String> mdThisAliases = new HashSet<String>() {
+                    {
+                        add(Scripts.THIS_KEYWORD);
+                    }
+                };
+
+                @Override
+                public boolean enterFunctionNode(FunctionNode functionNode) {
+                    scopeLevel++;
+                    if (!functionNode.isAnonymous() && scopeLevel == GLOBAL_CONSTRUCTORS_BODY_SCOPE_LEVEL) {
+                        mdModule = new ModuleDocument();
+                        mdConstructor = functionNode;
+                        long ft = functionNode.getFirstToken();
+                        if (prevComments.containsKey(ft)) {
+                            long prevComment = prevComments.get(ft);
+                            String commentText = source.getString(prevComment);
+                            mdModule.parseAnnotations(commentText);
+                        }
+                        modules.put(functionNode.getName(), mdModule);
+                    }
+                    return super.enterFunctionNode(functionNode);
+                }
+
+                @Override
+                public Node leaveFunctionNode(FunctionNode functionNode) {
+                    if (functionNode == mdConstructor) {
+                        mdConstructor = null;
+                        mdModule = null;
+                        mdThisAliases = new HashSet<String>() {
+                            {
+                                add(Scripts.THIS_KEYWORD);
+                            }
+                        };
+                    }
+                    scopeLevel--;
+                    return super.leaveFunctionNode(functionNode);
+                }
+
+                protected void processProperty(String aPropertyName, Expression aValue, String aComment) {
+                    if (mdModule != null) {
+                        if (!aPropertyName.contains(".")) {
+                            mdModule.functionProperties.add(aPropertyName);
+                            if (aComment != null) {
+                                mdModule.readPropertyRoles(aPropertyName, aComment);
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 }
