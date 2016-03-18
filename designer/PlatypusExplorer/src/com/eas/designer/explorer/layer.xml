@@ -158,7 +158,7 @@
             <file name="Web_hidden"/>
         </folder>
          
-            <file name="js-test-driver_hidden"/>
+        <file name="js-test-driver_hidden"/>
     </folder>
     <folder name="Toolbars">
         <folder name="Build">
@@ -184,29 +184,23 @@
             </folder>
         </folder>
     </folder>
-    <folder name="Servers">
-        <file name="PlatypusServerInstanceProvider.instance">
-            <attr name="instanceClass" stringvalue="com.eas.designer.explorer.server.PlatypusServerInstanceProvider"/>
-            <attr name="instanceOf" stringvalue="org.netbeans.spi.server.ServerInstanceProvider"/>
-        </file>
-    </folder>
-        <folder name="Databases">
-            <folder name="Explorer">
-                <folder name="Root">
-                    <folder name="NodeProviders">
-                        <file name="H2NodeProviderFactory.instance">
-                            <attr name="instanceCreate" methodvalue="com.eas.designer.explorer.h2.H2DbServerNodeProvider.getFactory"/>
-                            <attr name="instanceOf" stringvalue="org.netbeans.api.db.explorer.node.NodeProviderFactory"/>
-                            <attr name="position" intvalue="50"/>
-                        </file>
-                    </folder>
+    <folder name="Databases">
+        <folder name="Explorer">
+            <folder name="Root">
+                <folder name="NodeProviders">
+                    <file name="H2NodeProviderFactory.instance">
+                        <attr name="instanceCreate" methodvalue="com.eas.designer.explorer.h2.H2DbServerNodeProvider.getFactory"/>
+                        <attr name="instanceOf" stringvalue="org.netbeans.api.db.explorer.node.NodeProviderFactory"/>
+                        <attr name="position" intvalue="50"/>
+                    </file>
                 </folder>
             </folder>
-            <folder name="Runtimes">
-                <file name="H2Runtime.instance">
-                    <attr name="instanceCreate" methodvalue="com.eas.designer.explorer.h2.H2Dabatabase.getDefault"/>
-                    <attr name="instanceOf" stringvalue="org.netbeans.spi.db.explorer.DatabaseRuntime"/>
-                </file>
-            </folder>
         </folder>
+        <folder name="Runtimes">
+            <file name="H2Runtime.instance">
+                <attr name="instanceCreate" methodvalue="com.eas.designer.explorer.h2.H2Dabatabase.getDefault"/>
+                <attr name="instanceOf" stringvalue="org.netbeans.spi.db.explorer.DatabaseRuntime"/>
+            </file>
+        </folder>
+    </folder>
 </filesystem>

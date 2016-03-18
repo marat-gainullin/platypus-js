@@ -39,7 +39,7 @@ public class LocalModulesProxy implements ModulesProxy {
         super();
         indexer = aIndexer;
         modelsDocs = aModelsDocs;
-        if (aStartModuleName.toLowerCase().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
+        if (aStartModuleName != null && aStartModuleName.toLowerCase().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
             startModuleName = aStartModuleName.substring(0, aStartModuleName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
         } else {
             startModuleName = aStartModuleName;

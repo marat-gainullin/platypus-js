@@ -47,7 +47,7 @@ public class StopH2DbServerAction extends AbstractAction implements ContextAware
                 @Override
                 public Object getValue(String key) {
                     if (Action.NAME.equals(key)) {
-                        return NbBundle.getMessage(StopServerAction.class, "CTL_CancelServerAction"); // NOI18N
+                        return NbBundle.getMessage(StopH2DbServerAction.class, "CTL_CancelServerAction"); // NOI18N
                     } else {
                         return super.getValue(key);
                     }

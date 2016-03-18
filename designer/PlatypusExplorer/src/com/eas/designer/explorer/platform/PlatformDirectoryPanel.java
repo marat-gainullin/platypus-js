@@ -4,6 +4,7 @@
  */
 package com.eas.designer.explorer.platform;
 
+import com.eas.designer.application.platform.PlatypusPlatform;
 import javax.swing.JFileChooser;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -47,7 +48,7 @@ public class PlatformDirectoryPanel extends javax.swing.JPanel {
     
     private void setErrorMsg() {
         if (pathTextField.getText() == null || pathTextField.getText().isEmpty()) {
-            lblError.setText(NbBundle.getMessage(PlatformDirectoryPanel.class, "LBL_Platform_Home_Not_Set")); //NOI18N
+            lblError.setText(NbBundle.getMessage(PlatypusPlatform.class, "LBL_Platform_Home_Not_Set")); //NOI18N
         } else {
             lblError.setText(""); //NOI18N
         }

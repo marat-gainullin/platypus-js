@@ -87,6 +87,8 @@ public interface PlatypusProject extends Project {
 
     FileObject getApiRoot();
 
+    FileObject getLibRoot();
+    
     PlatypusProjectInformation getProjectInfo();
 
     SubTreeSearchOptions getSubTreeSearchOptions();

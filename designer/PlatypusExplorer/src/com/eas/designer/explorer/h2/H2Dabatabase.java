@@ -31,7 +31,6 @@ import org.openide.util.NbBundle;
  */
 public class H2Dabatabase implements DatabaseRuntime, Server {
 
-    
     private final String H2_INSTANCE_NAME = "H2"; // NOI18N
     private final String H2_DIRECTORY_NAME = "h2"; // NOI18N
     private final String H2_CONSOLE_CLASS_NAME = "org.h2.tools.Console"; // NOI18N
@@ -44,9 +43,9 @@ public class H2Dabatabase implements DatabaseRuntime, Server {
     private Future<Integer> serverRunTask;
     private static H2Dabatabase platypusDevDbServer;
 
-    private H2Dabatabase() {    
+    private H2Dabatabase() {
     }
-    
+
     public static synchronized H2Dabatabase getDefault() {
         if (platypusDevDbServer == null) {
             platypusDevDbServer = new H2Dabatabase();
@@ -73,7 +72,7 @@ public class H2Dabatabase implements DatabaseRuntime, Server {
     public boolean canStart() {
         return ServerState.STOPPED == getServerState();
     }
-    
+
     public void addChangeListener(final ChangeListener listener) {
         changeSupport.addChangeListener(listener);
     }
@@ -98,31 +97,25 @@ public class H2Dabatabase implements DatabaseRuntime, Server {
         ExecutionDescriptor descriptor = new ExecutionDescriptor()
                 .frontWindow(true)
                 .controllable(true)
-                .preExecution(new Runnable() {
-            @Override
-            public void run() {
-            }
-        })
-                .postExecution(new Runnable() {
-            @Override
-            public void run() {
-                setServerState(ServerState.STOPPED);
-                disconnectAllH2Connections();
-                serverRunTask = null;
-            }
-        });
+                .preExecution(() -> {
+                })
+                .postExecution(() -> {
+                    setServerState(ServerState.STOPPED);
+                    disconnectAllH2Connections();
+                    serverRunTask = null;
+                });
         File h2Dir = null;
         File libDir;
-        try {       
+        try {
             libDir = PlatypusPlatform.getThirdpartyLibDirectory();
-            h2Dir = new File(libDir, H2_DIRECTORY_NAME);         
+            h2Dir = new File(libDir, H2_DIRECTORY_NAME);
         } catch (PlatformHomePathException | IllegalStateException ex) {
             StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(H2Dabatabase.class, "LBL_Unable_Start_H2_Path")); // NOI18N
             if (PlatypusPlatformDialog.showPlatformHomeDialog()) {
                 try {
                     libDir = PlatypusPlatform.getThirdpartyLibDirectory();
                     h2Dir = new File(libDir, H2_DIRECTORY_NAME);
-                } catch (        PlatformHomePathException | IllegalStateException ex1) {
+                } catch (PlatformHomePathException | IllegalStateException ex1) {
                     StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(H2Dabatabase.class, "LBL_Unable_Start_H2_Path")); // NOI18N
                     return;
                 }
@@ -130,7 +123,7 @@ public class H2Dabatabase implements DatabaseRuntime, Server {
                 return;
             }
         }
-        
+
         ExternalProcessBuilder processBuilder = new ExternalProcessBuilder(ProjectRunner.JVM_RUN_COMMAND_NAME);
 
         processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ProjectRunner.CLASSPATH_OPTION_NAME);
@@ -138,11 +131,10 @@ public class H2Dabatabase implements DatabaseRuntime, Server {
 
         processBuilder = processBuilder.addArgument(H2_CONSOLE_CLASS_NAME);
 
-
         processBuilder = processBuilder.addArgument(H2_TCP_OPTION);
         processBuilder = processBuilder.addArgument(H2_WEB_OPTION);
         processBuilder = processBuilder.addArgument(H2_TOOL_OPTION);
-        
+
         ExecutionService service = ExecutionService.newService(processBuilder, descriptor, "H2 Database");
         setServerState(ServerState.STARTING);
         Future<Integer> runTask = service.run();
@@ -155,7 +147,7 @@ public class H2Dabatabase implements DatabaseRuntime, Server {
                 stop();
                 setServerState(ServerState.STOPPED);
                 return;
-            } 
+            }
             setServerState(ServerState.RUNNING);
         }
     }
@@ -174,7 +166,7 @@ public class H2Dabatabase implements DatabaseRuntime, Server {
             }
         }
     }
-    
+
     private String getClasspath(File dir) {
         return dir.getAbsolutePath() + "/*"; //NOI18N
     }
