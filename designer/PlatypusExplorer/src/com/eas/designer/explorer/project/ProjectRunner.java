@@ -134,7 +134,7 @@ public class ProjectRunner {
      * executable file.
      * @throws Exception If something goes wrong.
      */
-    public static void run(final PlatypusProject project, final String appElementName) throws Exception {
+    public static void run(final PlatypusProjectImpl project, final String appElementName) throws Exception {
         saveAll();
         if (runTask == null) {
             runTask = project.getRequestProcessor().create(() -> {
@@ -162,7 +162,7 @@ public class ProjectRunner {
      * executable file.
      * @throws Exception If something goes wrong.
      */
-    public static void debug(final PlatypusProject project, final String appElementName) throws Exception {
+    public static void debug(final PlatypusProjectImpl project, final String appElementName) throws Exception {
         saveAll();
         project.getRequestProcessor().post(() -> {
             try {
@@ -173,8 +173,7 @@ public class ProjectRunner {
         });
     }
 
-    private static void start(PlatypusProject aProject, String aModuleName, boolean aDebug) throws Exception {
-        boolean seClient = ClientType.PLATYPUS_CLIENT.equals(aProject.getSettings().getRunClientType());
+    private static void start(PlatypusProjectImpl aProject, String aModuleName, boolean aDebug) throws Exception {
         if (aModuleName != null && !aModuleName.isEmpty()) {
             FileObject appSrcDir = aProject.getSrcRoot();
             FileObject startJs = appSrcDir.getFileObject(PlatypusProjectSettings.START_JS_FILE_NAME);
@@ -202,9 +201,20 @@ public class ProjectRunner {
             io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Application_Starting"));
             PlatypusProjectSettings pps = aProject.getSettings();
             String appUrl = null;
-            boolean startServer = !pps.isNotStartServer();
-            if (startServer) {
-                if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) {
+            if (AppServerType.J2EE_SERVER.equals(pps.getRunAppServerType())) {
+                io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Deploying_J2EE_Container"));//NOI18N
+                PlatypusWebModuleManager webManager = aProject.getLookup().lookup(PlatypusWebModuleManager.class);
+                if (webManager != null) {
+                    appUrl = webManager.start(aDebug);
+                } else {
+                    throw new IllegalStateException("An instance of PlatypusWebModuleManager is not found in project's lookup.");
+                }
+            } else if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) {
+                // Because of undeploy() before update Platypus.js runtime in case of web application
+                aProject.getSettings().load();
+                aProject.forceUpdatePlatypusRuntime();
+                boolean startServer = !pps.isNotStartServer();
+                if (startServer) {
                     io.getOut().println("");
                     io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Starting_Platypus_Server"));//NOI18N
                     Future<Integer> serverStarting = PlatypusServerRunner.start(aProject, aDebug);
@@ -227,17 +237,14 @@ public class ProjectRunner {
                     io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Waiting_Platypus_Server"));//NOI18N
                     PlatypusServerRunner.waitForServer(LOCAL_HOSTNAME, pps.getServerPort());
                     io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Platypus_Server_Started"));//NOI18N
-                } else if (AppServerType.J2EE_SERVER.equals(pps.getRunAppServerType())) {
-                    io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Deploying_J2EE_Container"));//NOI18N
-                    PlatypusWebModuleManager webManager = aProject.getLookup().lookup(PlatypusWebModuleManager.class);
-                    if (webManager != null) {
-                        appUrl = webManager.start(aDebug);
-                    } else {
-                        throw new IllegalStateException("An instance of PlatypusWebModuleManager is not found in project's lookup.");
-                    }
                 }
+            } else {
+                // Because of undeploy() before update Platypus.js runtime in case of web application
+                aProject.getSettings().load();
+                aProject.forceUpdatePlatypusRuntime();
             }
-            if (seClient) {
+            // Clients...
+            if (ClientType.PLATYPUS_CLIENT.equals(aProject.getSettings().getRunClientType())) {
                 io.getOut().println("");//NOI18N
                 io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Starting_Platypus_Client"));//NOI18N
                 ExecutionDescriptor descriptor = new ExecutionDescriptor()

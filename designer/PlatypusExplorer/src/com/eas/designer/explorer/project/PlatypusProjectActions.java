@@ -4,7 +4,6 @@
  */
 package com.eas.designer.explorer.project;
 
-import com.eas.designer.application.project.PlatypusProject;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -37,7 +36,7 @@ public class PlatypusProjectActions implements ActionProvider {
             COMMAND_CONNECT,
             COMMAND_DISCONNECT));
 
-    protected PlatypusProject project;
+    protected PlatypusProjectImpl project;
 
     public PlatypusProjectActions(PlatypusProjectImpl aProject) {
         super();
