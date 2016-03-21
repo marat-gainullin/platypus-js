@@ -4,7 +4,6 @@
  */
 package com.eas.designer.explorer.project.wizard;
 
-import com.eas.client.cache.PlatypusFiles;
 import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import java.awt.Component;
 import java.io.File;
@@ -66,10 +65,11 @@ public class PlatypusApplicationWizardIterator implements WizardDescriptor./*Pro
         File projSpecDir = new File(projDir, projName);
         if (projSpecDir.mkdirs()) {
             try {
-                File appDir = new File(projSpecDir, PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT);
+                File appDir = new File(projSpecDir, "app");
                 appDir.mkdir();
                 PlatypusProjectSettingsImpl settings = new PlatypusProjectSettingsImpl(FileUtil.toFileObject(projSpecDir));
                 settings.setDisplayName(projTitle);
+                settings.setSourcePath("app");
                 settings.save();
             } catch (Exception ex) {
                 ErrorManager.getDefault().notify(ex);

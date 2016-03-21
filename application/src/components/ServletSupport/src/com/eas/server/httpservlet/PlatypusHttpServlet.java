@@ -7,7 +7,6 @@ import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.ModelsDocuments;
-import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.ScriptDocument;
 import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
@@ -26,7 +25,6 @@ import com.eas.server.*;
 import com.eas.util.IDGenerator;
 import com.eas.util.JSONUtils;
 import java.io.*;
-import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.AccessControlException;
@@ -80,7 +78,7 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String PLATYPUS_USER_CONTEXT_ATTR_NAME = "platypus-user-context";
 
     private static volatile PlatypusServerCore platypusCore;
-    private String realRootPath;
+    private String realRootPathName;
     private PlatypusServerConfig platypusConfig;
     private RestPointsScanner restScanner;
     private ExecutorService containerExecutor;
@@ -90,7 +88,7 @@ public class PlatypusHttpServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         try {
             super.init(config);
-            realRootPath = config.getServletContext().getRealPath("/");
+            realRootPathName = config.getServletContext().getRealPath("/");
             platypusConfig = PlatypusServerConfig.parse(config);
             try {
                 containerExecutor = (ExecutorService) InitialContext.doLookup("java:comp/DefaultManagedExecutorService");
@@ -106,47 +104,42 @@ public class PlatypusHttpServlet extends HttpServlet {
                     ((ThreadPoolExecutor) selfExecutor).allowCoreThreadTimeOut(true);
                 }
             }
-            File realRoot = new File(realRootPath);
-            String realRootUrl = realRoot.toURI().toURL().toString();
-            if (realRootUrl.toLowerCase().startsWith("file")) {
-                File f = new File(new URI(realRootUrl));
-                if (f.exists() && f.isDirectory()) {
-                    ScriptsConfigs lsecurityConfigs = new ScriptsConfigs();
-                    final ServerTasksScanner tasksScanner = new ServerTasksScanner();
-                    restScanner = new RestPointsScanner();
-                    Path appFolder = Paths.get(f.toURI()).resolve(PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT);
-                    ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(appFolder, lsecurityConfigs, (String aModuleName, ScriptDocument.ModuleDocument aModuleDocument, File aFile) -> {
-                        tasksScanner.moduleScanned(aModuleName, aModuleDocument, aFile);
-                        restScanner.moduleScanned(aModuleName, aModuleDocument, aFile);
-                    });
-                    ScriptedDatabasesClient basesProxy = new ScriptedDatabasesClient(platypusConfig.getDefaultDatasourceName(), indexer, true, tasksScanner.getValidators(), platypusConfig.getMaximumJdbcThreads());
-                    QueriesProxy<SqlQuery> queries = new LocalQueriesProxy(basesProxy, indexer);
-                    basesProxy.setQueries(queries);
-                    platypusCore = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), platypusConfig.getAppElementName()), queries, basesProxy, lsecurityConfigs, platypusConfig.getAppElementName(), SessionManager.Singleton.instance, platypusConfig.getMaximumSpaces());
-                    basesProxy.setContextHost(platypusCore);
-                    Scripts.initBIO(platypusConfig.getMaximumBIOTreads());
-                    ScriptedResource.init(platypusCore, Paths.get(realRoot.toURI()).resolve("WEB-INF").resolve("classes"), platypusConfig.isGlobalAPI());
-                    Scripts.initTasks((Runnable aTask) -> {
-                        try {
-                            if (containerExecutor != null) {// J2EE 7+
-                                containerExecutor.submit(aTask);
-                            } else {
-                                // Other environment
-                                selfExecutor.submit(aTask);
-                            }
-                        } catch (RejectedExecutionException ex) {
-                            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, ex.toString());
+            File realRoot = new File(realRootPathName);
+            if (realRoot.exists() && realRoot.isDirectory()) {
+                ScriptsConfigs lsecurityConfigs = new ScriptsConfigs();
+                final ServerTasksScanner tasksScanner = new ServerTasksScanner();
+                restScanner = new RestPointsScanner();
+                Path projectRoot = Paths.get(realRoot.toURI());
+                Path appFolder = platypusConfig.getSourcePath() != null ? projectRoot.resolve(platypusConfig.getSourcePath()) : projectRoot;
+                ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(appFolder, lsecurityConfigs, (String aModuleName, ScriptDocument.ModuleDocument aModuleDocument, File aFile) -> {
+                    tasksScanner.moduleScanned(aModuleName, aModuleDocument, aFile);
+                    restScanner.moduleScanned(aModuleName, aModuleDocument, aFile);
+                });
+                ScriptedDatabasesClient basesProxy = new ScriptedDatabasesClient(platypusConfig.getDefaultDatasourceName(), indexer, true, tasksScanner.getValidators(), platypusConfig.getMaximumJdbcThreads());
+                QueriesProxy<SqlQuery> queries = new LocalQueriesProxy(basesProxy, indexer);
+                basesProxy.setQueries(queries);
+                platypusCore = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), platypusConfig.getAppElementName()), queries, basesProxy, lsecurityConfigs, platypusConfig.getAppElementName(), SessionManager.Singleton.instance, platypusConfig.getMaximumSpaces());
+                basesProxy.setContextHost(platypusCore);
+                Scripts.initBIO(platypusConfig.getMaximumBIOTreads());
+                ScriptedResource.init(platypusCore, Paths.get(realRoot.toURI()).resolve("WEB-INF").resolve("classes"), platypusConfig.isGlobalAPI());
+                Scripts.initTasks((Runnable aTask) -> {
+                    try {
+                        if (containerExecutor != null) {// J2EE 7+
+                            containerExecutor.submit(aTask);
+                        } else {
+                            // Other environment
+                            selfExecutor.submit(aTask);
                         }
-                    });
-                    if (platypusConfig.isWatch()) {
-                        // TODO: uncomment after watcher refactoring
-                        //indexer.watch();
+                    } catch (RejectedExecutionException ex) {
+                        Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, ex.toString());
                     }
-                } else {
-                    throw new IllegalArgumentException("application url: " + realRootUrl + " doesn't point to existent directory.");
+                });
+                if (platypusConfig.isWatch()) {
+                    // TODO: uncomment after watcher refactoring
+                    //indexer.watch();
                 }
             } else {
-                throw new Exception("Unknown protocol in url: " + realRootUrl);
+                throw new IllegalArgumentException("Application path: " + realRootPathName + " doesn't point to existent directory.");
             }
         } catch (Throwable ex) {
             throw new ServletException(ex);

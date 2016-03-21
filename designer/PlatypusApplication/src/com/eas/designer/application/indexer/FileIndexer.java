@@ -66,9 +66,9 @@ public class FileIndexer extends CustomIndexer {
                             Project fileProject = FileOwnerQuery.getOwner(fo);
                             if (fileProject instanceof PlatypusProject) {
                                 PlatypusProject pProject = (PlatypusProject) fileProject;
-                                String defaultModuleName = FileUtil.getRelativePath(pProject.getSrcRoot(), fo);
+                                String defaultModuleName = FileUtil.getRelativePath(pProject.getApiRoot(), fo);
                                 if (defaultModuleName == null) {
-                                    defaultModuleName = FileUtil.getRelativePath(pProject.getApiRoot(), fo);
+                                    defaultModuleName = FileUtil.getRelativePath(pProject.getSrcRoot(), fo);
                                 }
                                 if (defaultModuleName != null) {
                                     defaultModuleName = defaultModuleName.substring(0, defaultModuleName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());

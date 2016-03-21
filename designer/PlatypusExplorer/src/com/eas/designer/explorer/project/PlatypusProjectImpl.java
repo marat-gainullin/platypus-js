@@ -536,7 +536,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
     @Override
     public final FileObject getSrcRoot() {
-        return getDirectory(PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT);
+        return settings.getSourcePath() != null ? getDirectory(settings.getSourcePath()) : getProjectDirectory();
     }
 
     @Override

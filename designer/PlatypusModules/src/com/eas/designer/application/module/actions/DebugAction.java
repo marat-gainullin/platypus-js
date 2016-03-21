@@ -40,11 +40,11 @@ public final class DebugAction implements ActionListener {
         if (project instanceof PlatypusProjectImpl) {
             try {
                 PlatypusProjectImpl pProject = (PlatypusProjectImpl) project;
-                String appElementId = IndexerQuery.file2AppElementId(dataObject.getPrimaryFile());
-                if (appElementId == null) {
-                    appElementId = FileUtil.getRelativePath(pProject.getSrcRoot(), dataObject.getPrimaryFile());
+                String appElementName = IndexerQuery.file2AppElementId(dataObject.getPrimaryFile());
+                if (appElementName == null) {
+                    appElementName = FileUtil.getRelativePath(pProject.getSrcRoot(), dataObject.getPrimaryFile());
                 }
-                ProjectRunner.debug(pProject, appElementId);
+                ProjectRunner.debug(pProject, appElementName);
             } catch (Exception ex) {
                 ErrorManager.getDefault().notify(ex);
             }

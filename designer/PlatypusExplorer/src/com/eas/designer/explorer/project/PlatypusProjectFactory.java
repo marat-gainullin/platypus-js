@@ -23,7 +23,7 @@ public final class PlatypusProjectFactory implements ProjectFactory {
         if (!fo.isFolder()) {
             return false;
         }
-        FileObject appDirectory = fo.getFileObject(PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT);
+        FileObject appDirectory = fo.getFileObject("app");
         return appDirectory != null 
                 && appDirectory.isFolder()
                 && fo.getFileObject(PlatypusProjectSettingsImpl.PROJECT_SETTINGS_FILE) != null;

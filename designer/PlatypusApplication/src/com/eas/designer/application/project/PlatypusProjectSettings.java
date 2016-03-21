@@ -33,6 +33,21 @@ public interface PlatypusProjectSettings {
     void setRunElement(String aValue) throws Exception;
 
     /**
+     * Gets sources path within the project.
+     *
+     * @return Source path subfolder
+     */
+    String getSourcePath();
+
+    /**
+     * Sets sources path within the project.
+     *
+     * @param aValue Subfolder value
+     * @throws java.lang.Exception
+     */
+    void setSourcePath(String aValue) throws Exception;
+
+    /**
      * Get the default data source name
      *
      * @return string of the default data source name

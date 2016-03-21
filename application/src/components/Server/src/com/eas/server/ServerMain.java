@@ -48,6 +48,7 @@ public class ServerMain {
     public static final String APP_URL_CONF_PARAM = "url";
     public static final String DEF_DATASOURCE_CONF_PARAM = "default-datasource";
     public static final String GLOBAL_API_CONF_PARAM = "global-api";
+    public static final String SOURCE_PATH_CONF_PARAM = "source-path";
 
     public static final String IFACE_CONF_PARAM = "iface";
     public static final String PROTOCOLS_CONF_PARAM = "protocols";
@@ -66,6 +67,7 @@ public class ServerMain {
     public static final String BACKGROUND_TASK_WITHOUT_VALUE_MSG = "Background task not specified";
     public static final String BAD_APP_URL_MSG = "url not specified";
     public static final String BAD_DEF_DATASOURCE_MSG = "default-datasource value not specified";
+    public static final String BAD_SOURCE_PATH_MSG = "source-path value not specified";
 
     public static final String BAD_TASK_MSG = "Background task is specified with '-backgroundTask <moduleName>:<moduleId>'";
     public static final String LOG_FILE_WITHOUT_VALUE_MSG = "Log file is not specified.";
@@ -82,6 +84,7 @@ public class ServerMain {
 
     private static String url;
     private static String defDatasource;
+    private static String sourcePath;
     private static String iface;
     private static String protocols;
     private static String numWorkerThreads;
@@ -129,6 +132,13 @@ public class ServerMain {
             } else if ((CMD_SWITCHS_PREFIX + GLOBAL_API_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 globalAPI = true;
                 i += 1;
+            } else if ((CMD_SWITCHS_PREFIX + SOURCE_PATH_CONF_PARAM).equalsIgnoreCase(args[i])) {
+                if (i + 1 < args.length) {
+                    sourcePath = args[i + 1];
+                    i += 2;
+                } else {
+                    printHelp(BAD_SOURCE_PATH_MSG);
+                }
             } else if ((CMD_SWITCHS_PREFIX + IFACE_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     iface = args[i + 1];
@@ -214,7 +224,8 @@ public class ServerMain {
                 GeneralResourceProvider.registerDrivers();
                 ScriptsConfigs scriptsConfigs = new ScriptsConfigs();
                 ServerTasksScanner tasksScanner = new ServerTasksScanner();
-                Path appFolder = Paths.get(f.toURI()).resolve(PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT);
+                Path projectRoot = Paths.get(f.toURI());
+                Path appFolder = sourcePath != null ? projectRoot.resolve(sourcePath) : projectRoot;
                 ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(appFolder, scriptsConfigs, tasksScanner);
                 // TODO: add command line argument "watch" after watcher refactoring
                 //indexer.watch();
