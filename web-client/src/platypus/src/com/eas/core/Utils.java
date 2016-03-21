@@ -784,8 +784,8 @@ public class Utils {
 					String fileName = extractFileName(stackFrames[frameIdx]);
 					if (fileName != null && !fileName.equals(firstFileName)) {
 						calledFromFile = fileName;
-						int lastQuestionIndex = calledFromFile.lastIndexOf('?');
-						return calledFromFile.substring(0, lastQuestionIndex);
+						int lastQuestionIndex = calledFromFile.lastIndexOf('?');// case of cache busting
+						return lastQuestionIndex != -1 ? calledFromFile.substring(0, lastQuestionIndex) : calledFromFile;
 					}
 				}
 			}

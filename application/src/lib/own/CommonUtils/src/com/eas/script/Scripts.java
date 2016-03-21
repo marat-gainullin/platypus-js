@@ -63,10 +63,8 @@ public class Scripts {
 
     private static final NashornScriptEngineFactory SCRIPT_FACTORY = new NashornScriptEngineFactory();
     private static final NashornScriptEngine SCRIPT_ENGINE = (NashornScriptEngine) SCRIPT_FACTORY.getScriptEngine();
-    protected static final String PLATYPUS_JS_MODULENAME = "facade";
-    public static final String PLATYPUS_JS_FILENAME = PLATYPUS_JS_MODULENAME + ".js";
     protected static final String INTERNALS_MODULENAME = "internals";
-    protected static final String INTERNALS_JS_FILENAME = INTERNALS_MODULENAME + ".js";
+    public static final String INTERNALS_JS_FILENAME = INTERNALS_MODULENAME + ".js";
     public static final String STRING_TYPE_NAME = "String";//NOI18N
     public static final String NUMBER_TYPE_NAME = "Number";//NOI18N
     public static final String DATE_TYPE_NAME = "Date";//NOI18N
@@ -74,7 +72,6 @@ public class Scripts {
     public static final String GEOMETRY_TYPE_NAME = "Geometry";//NOI18N
     public static final String THIS_KEYWORD = "this";//NOI18N
     public static /*final*/ URL internalsUrl;
-    public static /*final*/ URL platypusJsUrl;
     public static /*final*/ boolean globalAPI;
     public static volatile Path absoluteApiPath;
 
@@ -739,7 +736,6 @@ public class Scripts {
 
     public static void init(Path aAbsoluteApiPath, boolean aGlobalAPI) throws MalformedURLException {
         globalAPI = aGlobalAPI;
-        platypusJsUrl = aAbsoluteApiPath.resolve(PLATYPUS_JS_FILENAME).toUri().toURL();
         internalsUrl = aAbsoluteApiPath.resolve(INTERNALS_JS_FILENAME).toUri().toURL();
         absoluteApiPath = aAbsoluteApiPath;
     }
