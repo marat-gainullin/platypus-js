@@ -7,7 +7,6 @@ package com.eas.server.handlers;
 import com.eas.client.report.Report;
 import com.eas.server.RequestHandler;
 import com.eas.client.threetier.requests.RPCRequest;
-import com.eas.script.Scripts;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
 import java.util.function.Consumer;
@@ -44,6 +43,6 @@ public class RPCRequestHandler extends RequestHandler<RPCRequest, RPCRequest.Res
         }, onFailure);
     }
 
-    public static final String MODULE_MISSING_OR_NOT_A_MODULE = "No module: %s, or it is not a module";
+    public static final String MODULE_MISSING_OR_NOT_A_MODULE = "No module %s, or it is not a module";
     public static final String BOTH_IO_MODELS_MSG = "Method {0} in module {1} attempts to call a callback more than once or it returns value and calls a callback. Sync and async IO models both are not allowed. You should make a choice.";
 }

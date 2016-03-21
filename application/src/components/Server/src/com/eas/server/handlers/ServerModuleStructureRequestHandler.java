@@ -55,7 +55,7 @@ public class ServerModuleStructureRequestHandler extends RequestHandler<ServerMo
                     }
                     onSuccess.accept(response);
                 } else {
-                    onFailure.accept(new IllegalArgumentException(String.format("No module: %s, or it is not a module", moduleName)));
+                    onFailure.accept(new IllegalArgumentException(String.format("No module %s, or it is not a module", moduleName)));
                 }
             } catch (AccessControlException ex) {
                 if (ex.getPermission() instanceof AuthPermission) {

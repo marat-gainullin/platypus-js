@@ -254,6 +254,11 @@ public class PlatypusClientApplication {
                             protected ReportsConfigs reports = new ReportsConfigs();
 
                             @Override
+                            public Application.Type getType() {
+                                return Type.CLIENT;
+                            }
+
+                            @Override
                             public QueriesProxy getQueries() {
                                 return qp;
                             }

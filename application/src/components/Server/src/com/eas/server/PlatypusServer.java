@@ -71,6 +71,11 @@ public class PlatypusServer extends PlatypusServerCore {
         retranslateFactory = obtainRetranslateFactory();
     }
 
+    @Override
+    public Type getType() {
+        return Type.TSA;
+    }
+
     public void start(Set<String> aResidents, Map<String, String> aAcceptors) throws Exception {
         //instance = this;// Hack, but server is natural singleton and so it is ok.
         for (InetSocketAddress s : listenAddresses) {
@@ -135,7 +140,7 @@ public class PlatypusServer extends PlatypusServerCore {
         /*
         acceptor.getFilterChain().addLast("executor", new ExecutorFilter(executor, IoEventType.EXCEPTION_CAUGHT,
                 IoEventType.MESSAGE_RECEIVED, IoEventType.MESSAGE_SENT, IoEventType.SESSION_CLOSED, IoEventType.SESSION_IDLE, IoEventType.CLOSE, IoEventType.WRITE));
-        */
+         */
         PlatypusRequestsHandler handler = new PlatypusRequestsHandler(this);
         acceptor.setHandler(handler);
 

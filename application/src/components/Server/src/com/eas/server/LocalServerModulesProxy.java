@@ -34,7 +34,7 @@ public class LocalServerModulesProxy implements ServerModulesProxy {
             ServerModuleInfo info = new ServerModuleInfo(aModuleName, moduleDoc.getFunctionProperties(), true);
             return info;
         } else {
-            throw new IllegalArgumentException(String.format("No module: %s, or it is not a module", aModuleName));
+            throw new IllegalArgumentException(String.format("No module %s, or it is not a module", aModuleName));
         }
     }
 

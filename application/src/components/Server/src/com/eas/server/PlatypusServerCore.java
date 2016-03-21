@@ -48,7 +48,7 @@ import jdk.nashorn.internal.runtime.Undefined;
  *
  * @author mg
  */
-public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
+public abstract class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
     protected String startModuleName;
     protected final Scripts.Space[] statelessSpaces;

@@ -1,5 +1,6 @@
 package com.eas.server.httpservlet;
 
+import com.eas.client.Application;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
 import com.eas.client.LocalModulesProxy;
@@ -122,7 +123,12 @@ public class PlatypusHttpServlet extends HttpServlet {
                     ScriptedDatabasesClient basesProxy = new ScriptedDatabasesClient(platypusConfig.getDefaultDatasourceName(), indexer, true, tasksScanner.getValidators(), platypusConfig.getMaximumJdbcThreads());
                     QueriesProxy<SqlQuery> queries = new LocalQueriesProxy(basesProxy, indexer);
                     basesProxy.setQueries(queries);
-                    platypusCore = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), platypusConfig.getAppElementName()), queries, basesProxy, lsecurityConfigs, platypusConfig.getAppElementName(), SessionManager.Singleton.instance, platypusConfig.getMaximumSpaces());
+                    platypusCore = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), platypusConfig.getAppElementName()), queries, basesProxy, lsecurityConfigs, platypusConfig.getAppElementName(), SessionManager.Singleton.instance, platypusConfig.getMaximumSpaces()) {
+                        @Override
+                        public Application.Type getType() {
+                            return Application.Type.SERVLET;
+                        }
+                    };
                     basesProxy.setContextHost(platypusCore);
                     Scripts.initBIO(platypusConfig.getMaximumBIOTreads());
                     ScriptedResource.init(platypusCore, Paths.get(realRoot.toURI()).resolve("WEB-INF").resolve("classes"), platypusConfig.isGlobalAPI());

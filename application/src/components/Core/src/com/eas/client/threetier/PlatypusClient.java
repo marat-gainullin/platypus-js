@@ -64,6 +64,11 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
     }
 
     @Override
+    public Type getType() {
+        return Type.CLIENT;
+    }
+
+    @Override
     public QueriesProxy<PlatypusQuery> getQueries() {
         return queries;
     }
