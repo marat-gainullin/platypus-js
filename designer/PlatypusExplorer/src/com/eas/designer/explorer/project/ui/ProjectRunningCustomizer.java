@@ -118,7 +118,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                 cbClientLogLevel.setSelectedItem(projectSettings.getClientLogLevel());
                 cbServerLogLevel.setSelectedItem(projectSettings.getServerLogLevel());
                 selectServerInstance();
-                
+
                 if (projectSettings.getServerContext() != null) {
                     txtContext.setText(projectSettings.getServerContext());
                 }
@@ -763,6 +763,11 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             }
         });
 
+        txtSourcePath.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtSourcePathFocusLost(evt);
+            }
+        });
         txtSourcePath.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtSourcePathActionPerformed(evt);
@@ -1065,12 +1070,12 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     }//GEN-LAST:event_cbAppServerTypeActionPerformed
 
     private void txtSourcePathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSourcePathActionPerformed
-        try {
-            projectSettings.setSourcePath(txtSourcePath.getText());
-        } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
-        }
+        projectSettings.setSourcePath(txtSourcePath.getText());
     }//GEN-LAST:event_txtSourcePathActionPerformed
+
+    private void txtSourcePathFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSourcePathFocusLost
+        projectSettings.setSourcePath(txtSourcePath.getText());
+    }//GEN-LAST:event_txtSourcePathFocusLost
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddDatasource;

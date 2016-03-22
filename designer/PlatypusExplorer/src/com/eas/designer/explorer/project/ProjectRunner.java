@@ -201,47 +201,49 @@ public class ProjectRunner {
             io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Application_Starting"));
             PlatypusProjectSettings pps = aProject.getSettings();
             String appUrl = null;
-            if (AppServerType.J2EE_SERVER.equals(pps.getRunAppServerType())) {
-                io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Deploying_J2EE_Container"));//NOI18N
-                PlatypusWebModuleManager webManager = aProject.getLookup().lookup(PlatypusWebModuleManager.class);
-                if (webManager != null) {
-                    appUrl = webManager.start(aDebug);
-                } else {
-                    throw new IllegalStateException("An instance of PlatypusWebModuleManager is not found in project's lookup.");
-                }
-            } else if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) {
-                // Because of undeploy() before update Platypus.js runtime in case of web application
-                aProject.getSettings().load();
-                aProject.forceUpdatePlatypusRuntime();
-                boolean startServer = !pps.isNotStartServer();
-                if (startServer) {
-                    io.getOut().println("");
-                    io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Starting_Platypus_Server"));//NOI18N
-                    Future<Integer> serverStarting = PlatypusServerRunner.start(aProject, aDebug);
-                    if (aDebug) {
-                        DebuggerEngine[] startedEngines = DebuggerManager.getDebuggerManager().startDebugging(DebuggerInfo.create(AttachingDICookie.ID, new Object[]{AttachingDICookie.create(LOCAL_HOSTNAME, aProject.getSettings().getDebugServerPort())}));
-                        DebuggerEngine justStartedEngine = startedEngines[0];
-                        DebuggerManager.getDebuggerManager().addDebuggerListener(new DebuggerManagerAdapter() {
-
-                            @Override
-                            public void engineRemoved(DebuggerEngine engine) {
-                                if (engine == justStartedEngine) {
-                                    serverStarting.cancel(true);
-                                    DebuggerManager.getDebuggerManager().removeDebuggerListener(this);
+            if (null != pps.getRunAppServerType()) switch (pps.getRunAppServerType()) {
+                case J2EE_SERVER:
+                    io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Deploying_J2EE_Container"));//NOI18N
+                    PlatypusWebModuleManager webManager = aProject.getLookup().lookup(PlatypusWebModuleManager.class);
+                    if (webManager != null) {
+                        appUrl = webManager.start(aDebug);
+                    } else {
+                        throw new IllegalStateException("An instance of PlatypusWebModuleManager is not found in project's lookup.");
+                    }   break;
+                case PLATYPUS_SERVER:
+                    // Because of undeploy() before update Platypus.js runtime in case of web application
+                    aProject.getSettings().load();
+                    aProject.forceUpdatePlatypusRuntime();
+                    boolean startServer = !pps.isNotStartServer();
+                    if (startServer) {
+                        io.getOut().println("");
+                        io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Starting_Platypus_Server"));//NOI18N
+                        Future<Integer> serverStarting = PlatypusServerRunner.start(aProject, aDebug);
+                        if (aDebug) {
+                            DebuggerEngine[] startedEngines = DebuggerManager.getDebuggerManager().startDebugging(DebuggerInfo.create(AttachingDICookie.ID, new Object[]{AttachingDICookie.create(LOCAL_HOSTNAME, aProject.getSettings().getDebugServerPort())}));
+                            DebuggerEngine justStartedEngine = startedEngines[0];
+                            DebuggerManager.getDebuggerManager().addDebuggerListener(new DebuggerManagerAdapter() {
+                                
+                                @Override
+                                public void engineRemoved(DebuggerEngine engine) {
+                                    if (engine == justStartedEngine) {
+                                        serverStarting.cancel(true);
+                                        DebuggerManager.getDebuggerManager().removeDebuggerListener(this);
+                                    }
                                 }
-                            }
-
-                        });
-                        aProject.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Server_Debug_Activated"));//NOI18N
-                    }
-                    io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Waiting_Platypus_Server"));//NOI18N
-                    PlatypusServerRunner.waitForServer(LOCAL_HOSTNAME, pps.getServerPort());
-                    io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Platypus_Server_Started"));//NOI18N
-                }
-            } else {
-                // Because of undeploy() before update Platypus.js runtime in case of web application
-                aProject.getSettings().load();
-                aProject.forceUpdatePlatypusRuntime();
+                                
+                            });
+                            aProject.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Server_Debug_Activated"));//NOI18N
+                        }
+                        io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Waiting_Platypus_Server"));//NOI18N
+                        PlatypusServerRunner.waitForServer(LOCAL_HOSTNAME, pps.getServerPort());
+                        io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Platypus_Server_Started"));//NOI18N
+                    }   break;
+                default:
+                    // Because of undeploy() before update Platypus.js runtime in case of web application
+                    aProject.getSettings().load();
+                    aProject.forceUpdatePlatypusRuntime();
+                    break;
             }
             // Clients...
             if (ClientType.PLATYPUS_CLIENT.equals(aProject.getSettings().getRunClientType())) {
@@ -328,6 +330,10 @@ public class ProjectRunner {
                     } else {
                         throw new IllegalStateException(NbBundle.getMessage(ProjectRunner.class, "MSG_Cnt_Start_Platypus_Client"));
                     }
+                }
+                if(aProject.getSettings().getSourcePath() != null && !aProject.getSettings().getSourcePath().isEmpty()){
+                    arguments.add(OPTION_PREFIX + PlatypusClientApplication.SOURCE_PATH_CONF_PARAM);
+                    arguments.add(aProject.getSettings().getSourcePath());
                 }
                 if (aProject.getSettings().getRunUser() != null && !aProject.getSettings().getRunUser().trim().isEmpty() && aProject.getSettings().getRunPassword() != null && !aProject.getSettings().getRunPassword().trim().isEmpty()) {
                     arguments.add(OPTION_PREFIX + PlatypusClientApplication.USER_CMD_SWITCH);

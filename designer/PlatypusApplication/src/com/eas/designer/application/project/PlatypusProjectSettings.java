@@ -45,7 +45,7 @@ public interface PlatypusProjectSettings {
      * @param aValue Subfolder value
      * @throws java.lang.Exception
      */
-    void setSourcePath(String aValue) throws Exception;
+    void setSourcePath(String aValue);
 
     /**
      * Get the default data source name

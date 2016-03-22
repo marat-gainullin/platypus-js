@@ -240,6 +240,9 @@ public class PlatypusWebModuleManager {
         if (project.getSettings().getGlobalAPI()) {
             wa.addInitParam(new ContextParam(PlatypusServerConfig.GLOBAL_API_CONF_PARAM, "" + true));
         }
+        if (project.getSettings().getSourcePath() != null && !project.getSettings().getSourcePath().isEmpty()) {
+            wa.addInitParam(new ContextParam(PlatypusServerConfig.SOURCE_PATH_CONF_PARAM, project.getSettings().getSourcePath()));
+        }
     }
 
     private void configureServlet(WebApplication wa) {

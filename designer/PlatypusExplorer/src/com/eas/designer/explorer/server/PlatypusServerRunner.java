@@ -129,6 +129,10 @@ public final class PlatypusServerRunner {
         arguments.add(aProject.getProjectDirectory().toURI().toASCIIString());
         io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerRunner.class, "MSG_App_Sources"),//NOI18N
                 aProject.getProjectDirectory().toURI().toASCIIString()));
+        if (aProject.getSettings().getSourcePath() != null && !aProject.getSettings().getSourcePath().isEmpty()) {
+            arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.SOURCE_PATH_CONF_PARAM);
+            arguments.add(aProject.getSettings().getSourcePath());
+        }
 
         if (!ProjectRunner.isSetByOption(ServerMain.IFACE_CONF_PARAM, aProject.getSettings().getRunServerOptions())) {
             arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.IFACE_CONF_PARAM);

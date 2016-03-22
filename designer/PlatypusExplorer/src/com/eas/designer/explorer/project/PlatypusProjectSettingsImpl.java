@@ -158,10 +158,10 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
         if (oldValue == null ? aValue != null : !oldValue.equals(aValue)) {
             if (aValue != null && !aValue.isEmpty()) {
                 projectProperties.setProperty(RUN_ELEMENT_KEY, aValue);
-                projectPropertiesIsDirty = true;
             } else {
                 projectProperties.remove(RUN_ELEMENT_KEY);
             }
+            projectPropertiesIsDirty = true;
             changeSupport.firePropertyChange(RUN_ELEMENT_KEY, oldValue, aValue);
         }
     }
@@ -172,15 +172,15 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     }
 
     @Override
-    public void setSourcePath(String aValue) throws Exception {
+    public void setSourcePath(String aValue) {
         String oldValue = getSourcePath();
         if (oldValue == null ? aValue != null : !oldValue.equals(aValue)) {
             if (aValue != null && !aValue.isEmpty()) {
                 projectProperties.setProperty(SOURCE_PATH_KEY, aValue);
-                projectPropertiesIsDirty = true;
             } else {
                 projectProperties.remove(SOURCE_PATH_KEY);
             }
+            projectPropertiesIsDirty = true;
             changeSupport.firePropertyChange(SOURCE_PATH_KEY, oldValue, aValue);
         }
     }
