@@ -1,27 +1,7 @@
 package com.eas.client.scripts;
 
-import static jdk.nashorn.internal.codegen.CompilerConstants.ARGUMENTS;
-import static jdk.nashorn.internal.codegen.CompilerConstants.ARGUMENTS_VAR;
-import static jdk.nashorn.internal.codegen.CompilerConstants.CALLEE;
-import static jdk.nashorn.internal.codegen.CompilerConstants.EXCEPTION_PREFIX;
-import static jdk.nashorn.internal.codegen.CompilerConstants.ITERATOR_PREFIX;
-import static jdk.nashorn.internal.codegen.CompilerConstants.RETURN;
-import static jdk.nashorn.internal.codegen.CompilerConstants.SCOPE;
-import static jdk.nashorn.internal.codegen.CompilerConstants.SWITCH_TAG_PREFIX;
-import static jdk.nashorn.internal.codegen.CompilerConstants.THIS;
-import static jdk.nashorn.internal.codegen.CompilerConstants.VARARGS;
-import static jdk.nashorn.internal.ir.Symbol.HAS_OBJECT_VALUE;
-import static jdk.nashorn.internal.ir.Symbol.IS_CONST;
-import static jdk.nashorn.internal.ir.Symbol.IS_FUNCTION_SELF;
-import static jdk.nashorn.internal.ir.Symbol.IS_GLOBAL;
-import static jdk.nashorn.internal.ir.Symbol.IS_INTERNAL;
-import static jdk.nashorn.internal.ir.Symbol.IS_LET;
-import static jdk.nashorn.internal.ir.Symbol.IS_PARAM;
-import static jdk.nashorn.internal.ir.Symbol.IS_PROGRAM_LEVEL;
-import static jdk.nashorn.internal.ir.Symbol.IS_SCOPE;
-import static jdk.nashorn.internal.ir.Symbol.IS_THIS;
-import static jdk.nashorn.internal.ir.Symbol.IS_VAR;
-import static jdk.nashorn.internal.ir.Symbol.KINDMASK;
+import static jdk.nashorn.internal.codegen.CompilerConstants.*;
+import static jdk.nashorn.internal.ir.Symbol.*;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
