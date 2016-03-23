@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 import jdk.nashorn.internal.ir.AccessNode;
 import jdk.nashorn.internal.ir.CallNode;
 import jdk.nashorn.internal.ir.Expression;
-import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.ir.LexicalContext;
 import jdk.nashorn.internal.ir.LiteralNode;
@@ -28,12 +27,9 @@ public class DependenciesWalker {
     public static final String LOAD_ENTITY = "loadEntity";
     public static final String SERVER_MODULE = "ServerModule";
     public static final String RPC_PROXY = "Proxy";
-    private final Set<String> localFunctions = new HashSet<>();
-    private final Set<String> dependenceLikeIdentifiers = new HashSet<>();
     private final Set<String> dependencies = new HashSet<>();
     private final Set<String> queryDependencies = new HashSet<>();
     private final Set<String> serverDependencies = new HashSet<>();
-    private final Set<String> dynamicDependencies = new HashSet<>();
     private ParsedJs parsedSource;
     private String source;
     private CallableConsumer<Boolean, String> validator;
@@ -50,6 +46,8 @@ public class DependenciesWalker {
 
     public void walk() {
         parsedSource = Scripts.parseJs(source);
+        SymbolsResolver outerDefinedFinder = new SymbolsResolver();
+        parsedSource.getAst().accept(outerDefinedFinder);
         parsedSource.getAst().accept(new NodeVisitor<LexicalContext>(new LexicalContext()) {
 
             private final Deque<CallNode> calls = new LinkedList<>();
@@ -57,10 +55,6 @@ public class DependenciesWalker {
             @Override
             public boolean enterCallNode(CallNode callNode) {
                 calls.push(callNode);
-                if (callNode.getFunction() instanceof IdentNode) {
-                    IdentNode toBeCalled = (IdentNode) callNode.getFunction();
-                    processIdentNode(toBeCalled);
-                }
                 return super.enterCallNode(callNode);
             }
 
@@ -71,47 +65,17 @@ public class DependenciesWalker {
             }
 
             @Override
-            public boolean enterIdentNode(IdentNode identNode) {
-                processIdentNode(identNode);
-                return super.enterIdentNode(identNode);
-            }
-
-            @Override
             public boolean enterLiteralNode(LiteralNode<?> literalNode) {
                 if (literalNode.getType().isString() && !calls.isEmpty()) {
                     String value = literalNode.getString();
                     CallNode lastCall = calls.peek();
-                    boolean arrayAtFirstArg = lastCall.getArgs().size() >= 1 && lastCall.getArgs().get(0) instanceof LiteralNode.ArrayLiteralNode;
+                    //boolean arrayAtFirstArg = lastCall.getArgs().size() >= 1 && lastCall.getArgs().get(0) instanceof LiteralNode.ArrayLiteralNode;
                     boolean atFirstArg = lastCall.getArgs().size() >= 1 && lastCall.getArgs().get(0) == literalNode;
                     Expression fe = lastCall.getFunction();
-                    if (fe instanceof IdentNode) {
-                        IdentNode defineCall = (IdentNode) fe;
-                        String funcName = defineCall.getName();
-                        if (REQUIRE_FUNCTION_NAME.equals(funcName)) {
-                            if (arrayAtFirstArg) {
-                                LiteralNode.ArrayLiteralNode a = (LiteralNode.ArrayLiteralNode) lastCall.getArgs().get(0);
-                                if (a.getElementExpressions().contains(literalNode)) {
-                                    dynamicDependencies.add(value);
-                                }
-                            }
-                            if (atFirstArg) {
-                                dynamicDependencies.add(value);
-                            }
-                        }
-                    } else if (fe instanceof AccessNode) {
+                    if (fe instanceof AccessNode) {
                         AccessNode lastAccess = (AccessNode) fe;
                         String funcName = lastAccess.getProperty();
-                        if (REQUIRE_FUNCTION_NAME.equals(funcName)) {
-                            if (arrayAtFirstArg) {
-                                LiteralNode.ArrayLiteralNode a = (LiteralNode.ArrayLiteralNode) lastCall.getArgs().get(0);
-                                if (a.getElementExpressions().contains(literalNode)) {
-                                    dynamicDependencies.add(value);
-                                }
-                            }
-                            if (atFirstArg) {
-                                dynamicDependencies.add(value);
-                            }
-                        } else if (/*lastCall.isNew() && */atFirstArg) {
+                        if (/*lastCall.isNew() && */atFirstArg) {
                             switch (funcName) {
                                 case RPC_PROXY:
                                 case SERVER_MODULE:
@@ -131,80 +95,19 @@ public class DependenciesWalker {
                 }
                 return super.enterLiteralNode(literalNode);
             }
-
-            private void processIdentNode(IdentNode identNode) {
-                String name = identNode.getName();
-                dependenceLikeIdentifiers.add(name);
-                try {
-                    if (validator != null && validator.call(name) && defineCallbackScopeLevel <= 0) {
-                        dependencies.add(name);
-                    }
-                } catch (Exception ex) {
-                    Logger.getLogger(DependenciesWalker.class.getName()).log(Level.SEVERE, ex.getMessage());
-                }
-            }
-
-            private int scopeLevel;
-            private int defineCallbackScopeLevel;
-
-            @Override
-            public boolean enterFunctionNode(FunctionNode functionNode) {
-                scopeLevel++;
-                if (scopeLevel == 2 && !functionNode.isAnonymous()) {
-                    localFunctions.add(functionNode.getName());
-                }
-                if (!calls.isEmpty()) {
-                    CallNode lastCall = calls.peek();
-                    Expression ifDefineCall = lastCall.getFunction();
-                    if (ifDefineCall instanceof AccessNode) {
-                        AccessNode acc = (AccessNode) ifDefineCall;
-                        if(DEFINE_FUNCTION_NAME.equals(acc.getProperty())){
-                            defineCallbackScopeLevel++;
-                        }
-                        if (DEFINE_FUNCTION_NAME.equals(acc.getProperty()) || REQUIRE_FUNCTION_NAME.equals(acc.getProperty())) {
-                            functionNode.getParameters().stream().forEach((definerArg) -> {
-                                dynamicDependencies.add(definerArg.getName());
-                            });
-                        }
-                    } else if (ifDefineCall instanceof IdentNode) {
-                        IdentNode toBeCalled = (IdentNode) lastCall.getFunction();
-                        if (DEFINE_FUNCTION_NAME.equals(toBeCalled.getName())){
-                            defineCallbackScopeLevel++;
-                        }
-                        if (DEFINE_FUNCTION_NAME.equals(toBeCalled.getName()) || REQUIRE_FUNCTION_NAME.equals(toBeCalled.getName())) {
-                            functionNode.getParameters().stream().forEach((definerArg) -> {
-                                dynamicDependencies.add(definerArg.getName());
-                            });
-                        }
-                    }
-                }
-                return super.enterFunctionNode(functionNode);
-            }
-
-            @Override
-            public Node leaveFunctionNode(FunctionNode functionNode) {
-                scopeLevel--;
-                if (!calls.isEmpty()) {
-                    CallNode lastCall = calls.peek();
-                    Expression ifDefineCall = lastCall.getFunction();
-                    if (ifDefineCall instanceof AccessNode) {
-                        AccessNode acc = (AccessNode) ifDefineCall;
-                        if(DEFINE_FUNCTION_NAME.equals(acc.getProperty())){
-                            defineCallbackScopeLevel--;
-                        }
-                    } else if (ifDefineCall instanceof IdentNode) {
-                        IdentNode toBeCalled = (IdentNode) lastCall.getFunction();
-                        if (DEFINE_FUNCTION_NAME.equals(toBeCalled.getName())){
-                            defineCallbackScopeLevel--;
-                        }
-                    }
-                }
-                return super.leaveFunctionNode(functionNode);
-            }
-
         });
-        dependencies.removeAll(localFunctions);
-        dependencies.removeAll(dynamicDependencies);
+        dependencies.removeAll(Arrays.asList(new String[]{REQUIRE_FUNCTION_NAME, DEFINE_FUNCTION_NAME}));
+        outerDefinedFinder.getGlobalSymbols().forEach((String aIfGlobalDependency) -> {
+            try {
+                if (!REQUIRE_FUNCTION_NAME.equals(aIfGlobalDependency)
+                        && !DEFINE_FUNCTION_NAME.equals(aIfGlobalDependency)
+                        && validator != null && validator.call(aIfGlobalDependency)) {
+                    dependencies.add(aIfGlobalDependency);
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(DependenciesWalker.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
     }
 
     public Set<String> getQueryDependencies() {
@@ -230,9 +133,4 @@ public class DependenciesWalker {
             serverDependencies.add(aModuleName);
         }
     }
-
-    public Set<String> getDependenceLikeIdentifiers() {
-        return dependenceLikeIdentifiers;
-    }
-
 }

@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -823,7 +822,7 @@ public class Scripts {
         ScriptEnvironment env = new ScriptEnvironment(options, null, null);
         ErrorManager errors = new ErrorManager();
         //
-        Map<Long, Long> prevComments = new TreeMap<>();
+        Map<Long, Long> prevComments = new HashMap<>();
         Parser p = new Parser(env, source, errors) {
             @Override
             public FunctionNode parse(String scriptName, int startPos, int len, boolean allowPropertyFunction) {
