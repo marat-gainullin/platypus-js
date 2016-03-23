@@ -175,8 +175,6 @@ public class PlatypusProjectImpl implements PlatypusProject {
                             Exceptions.printStackTrace(ex);
                         }
                     });
-                }else if(PlatypusProjectSettingsImpl.SOURCE_PATH_KEY.equals(evt.getPropertyName())){
-                    indexer.rescan();
                 }
             }
         });

@@ -65,8 +65,8 @@ public class PlatypusHttpConnection extends PlatypusConnection {
     private final ThreadPoolExecutor bioExecutor;
     protected boolean basicSchemeMet = false;
 
-    public PlatypusHttpConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, int aMaximumBIOThreads) throws Exception {
-        super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
+    public PlatypusHttpConnection(URL aUrl, String aSourcePath, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, int aMaximumBIOThreads) throws Exception {
+        super(aUrl, aSourcePath, aOnCredentials, aMaximumAuthenticateAttempts);
         bioExecutor = new ThreadPoolExecutor(aMaximumBIOThreads, aMaximumBIOThreads,
                 1L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
@@ -129,7 +129,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
             bioExecutor.submit(() -> {
                 Scripts.setContext(context);
                 try {
-                    PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, localCookies, basicSchemeMet ? new Credentials(credentials.userName, credentials.password) : null);
+                    PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, sourcePath, localCookies, basicSchemeMet ? new Credentials(credentials.userName, credentials.password) : null);
                     aRequest.accept(httpSender);// bio in a background thread
                     aSpace.process(() -> {
                         try {
@@ -275,7 +275,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
 
     @Override
     public <R extends Response> R executeRequest(Request aRequest) throws Exception {
-        PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, cookies, basicSchemeMet ? credentials : null);
+        PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, sourcePath, cookies, basicSchemeMet ? credentials : null);
         aRequest.accept(httpSender);// bio
         acceptCookies(httpSender.conn);
         int authenticationAttempts = 0;
@@ -284,7 +284,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
             credentials = onCredentials.call();
             if (res.authScheme.toLowerCase().contains(PlatypusHttpConstants.BASIC_AUTH_NAME.toLowerCase())) {
                 basicSchemeMet = true;
-                httpSender = new PlatypusHttpRequestWriter(url, cookies, credentials);
+                httpSender = new PlatypusHttpRequestWriter(url, sourcePath, cookies, credentials);
                 aRequest.accept(httpSender);// bio
                 acceptCookies(httpSender.conn);
             } else if (PlatypusHttpConstants.FORM_AUTH_NAME.equalsIgnoreCase(res.authScheme)) {
@@ -304,7 +304,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                 }
                 int responseCode = securityFormConn.getResponseCode();
                 acceptCookies(securityFormConn);
-                httpSender = new PlatypusHttpRequestWriter(url, cookies, null);
+                httpSender = new PlatypusHttpRequestWriter(url, sourcePath, cookies, null);
                 aRequest.accept(httpSender);// bio
                 acceptCookies(httpSender.conn);
             } else {

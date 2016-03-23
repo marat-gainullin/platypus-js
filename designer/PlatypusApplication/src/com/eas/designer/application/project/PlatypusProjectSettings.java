@@ -43,7 +43,6 @@ public interface PlatypusProjectSettings {
      * Sets sources path within the project.
      *
      * @param aValue Subfolder value
-     * @throws java.lang.Exception
      */
     void setSourcePath(String aValue);
 

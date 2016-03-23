@@ -77,7 +77,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     private final Socket syncSocket;
 
     public PlatypusPlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, Executor aNetworkProcessor, int aMaximumConnections, boolean aInteractive) throws Exception {
-        super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
+        super(aUrl, null, aOnCredentials, aMaximumAuthenticateAttempts);
 
         host = aUrl.getHost();
         port = aUrl.getPort();

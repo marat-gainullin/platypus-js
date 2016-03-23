@@ -236,9 +236,9 @@ public class PlatypusClientApplication {
                 Application app;
                 PlatypusPrincipal.setClientSpacePrincipal(new AnonymousPlatypusPrincipal());
                 if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTP)) {
-                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
+                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, config.sourcePath, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
                 } else if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTPS)) {
-                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
+                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, config.sourcePath, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
                 } else if (config.url.getProtocol().equalsIgnoreCase("platypus")) {
                     app = new PlatypusClient(new PlatypusPlatypusConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, (Runnable aTask) -> {
                         EventQueue.invokeLater(aTask);

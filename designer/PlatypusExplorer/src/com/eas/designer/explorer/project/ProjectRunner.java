@@ -201,7 +201,7 @@ public class ProjectRunner {
             io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Application_Starting"));
             PlatypusProjectSettings pps = aProject.getSettings();
             String appUrl = null;
-            if (null != pps.getRunAppServerType()) switch (pps.getRunAppServerType()) {
+            switch (pps.getRunAppServerType()) {
                 case J2EE_SERVER:
                     io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Deploying_J2EE_Container"));//NOI18N
                     PlatypusWebModuleManager webManager = aProject.getLookup().lookup(PlatypusWebModuleManager.class);
