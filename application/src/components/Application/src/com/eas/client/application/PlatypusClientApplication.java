@@ -235,6 +235,7 @@ public class PlatypusClientApplication {
                 });
                 Application app;
                 PlatypusPrincipal.setClientSpacePrincipal(new AnonymousPlatypusPrincipal());
+                Path apiFolder = ScriptedResource.lookupPlatypusJs();
                 if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTP)) {
                     app = new PlatypusClient(new PlatypusHttpConnection(config.url, config.sourcePath, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
                 } else if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTPS)) {
@@ -251,7 +252,7 @@ public class PlatypusClientApplication {
                         ValidatorsScanner validatorsScanner = new ValidatorsScanner();
                         Path projectRoot = Paths.get(f.toURI());
                         Path appFolder = config.sourcePath != null ? projectRoot.resolve(config.sourcePath) : projectRoot;
-                        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(appFolder, scriptsConfigs, validatorsScanner);
+                        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(appFolder, apiFolder, scriptsConfigs, validatorsScanner);
                         // TODO: add command line argument "watch" after watcher refactoring
                         //indexer.watch();
                         ScriptedDatabasesClient twoTierCore = new ScriptedDatabasesClient(config.defDatasource, indexer, true, validatorsScanner.getValidators(), config.threadsArgs.getMaxJdbcTreads());
@@ -305,7 +306,7 @@ public class PlatypusClientApplication {
                 } else {
                     throw new Exception("Unknown protocol in url: " + config.url);
                 }
-                ScriptedResource.init(app, ScriptedResource.lookupPlatypusJs(), false);
+                ScriptedResource.init(app, apiFolder, false);
                 EventQueue.invokeLater(() -> {
                     try {
                         Scripts.setSpace(Scripts.createSpace());

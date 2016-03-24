@@ -74,7 +74,7 @@ public final class PlatypusServerRunner {
         }
 
         io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerRunner.class, "MSG_Logging_Level"), aProject.getSettings().getServerLogLevel()));//NOI18N
-        ProjectRunner.setLogging(arguments, aProject.getSettings().getServerLogLevel());
+        ProjectRunner.setupLogging(arguments, aProject.getSettings().getServerLogLevel());
 
         PlatypusProjectSettings pps = aProject.getSettings();
 

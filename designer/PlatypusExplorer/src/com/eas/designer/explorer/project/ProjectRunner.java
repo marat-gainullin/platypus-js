@@ -8,6 +8,7 @@ import com.eas.client.application.PlatypusClientApplication;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.designer.application.PlatypusUtils;
+import com.eas.designer.application.platform.PlatypusPlatform;
 import com.eas.designer.application.project.AppServerType;
 import com.eas.designer.application.project.ClientType;
 import com.eas.designer.application.project.PlatypusProject;
@@ -262,15 +263,20 @@ public class ProjectRunner {
                 }
 
                 io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Logging_Level"), aProject.getSettings().getClientLogLevel()));//NOI18N
-                setLogging(arguments, aProject.getSettings().getClientLogLevel());
+                setupLogging(arguments, aProject.getSettings().getClientLogLevel());
 
-                String classPath = StringUtils.join(File.pathSeparator, aProject.getApiRoot().getPath(), getDirectoryClasspath(aProject.getLibRoot()));
-                arguments.add(OPTION_PREFIX + CLASSPATH_OPTION_NAME);
-                arguments.add(classPath);
-
-                arguments.add(PlatypusClientApplication.class.getName());
+                if (pps.getRunClientOptions() != null && !pps.getRunClientOptions().isEmpty()) {
+                    addArguments(arguments, pps.getRunClientOptions());
+                    io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Run_Options"), pps.getRunClientOptions()));//NOI18N
+                }
 
                 if (AppServerType.NONE.equals(pps.getRunAppServerType())) {
+                    String classPath = StringUtils.join(File.pathSeparator, aProject.getApiRoot().getPath(), getDirectoryClasspath(aProject.getLibRoot()));
+                    arguments.add(OPTION_PREFIX + CLASSPATH_OPTION_NAME);
+                    arguments.add(classPath);
+
+                    arguments.add(PlatypusClientApplication.class.getName());
+
                     arguments.add(OPTION_PREFIX + PlatypusClientApplication.APPELEMENT_CMD_SWITCH);
                     arguments.add(PlatypusProjectSettings.START_JS_FILE_NAME);
                     io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Start_App_Element") + PlatypusProjectSettings.START_JS_FILE_NAME); //NOI18N
@@ -312,6 +318,15 @@ public class ProjectRunner {
                     arguments.add(aProject.getProjectDirectory().toURI().toASCIIString());
                     io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_App_Sources"), aProject.getProjectDirectory().toURI().toASCIIString()));//NOI18N
                 } else {
+                    String classPath = StringUtils.join(File.pathSeparator
+                            , PlatypusPlatform.getPlatformBinDirectory().getAbsolutePath() + File.separator + "Application.jar"
+                            , PlatypusPlatform.getPlatformApiDirectory().getAbsolutePath()
+                            , getDirectoryClasspath(FileUtil.toFileObject(PlatypusPlatform.getPlatformExtDirectory()) ));
+                    arguments.add(OPTION_PREFIX + CLASSPATH_OPTION_NAME);
+                    arguments.add(classPath);
+
+                    arguments.add(PlatypusClientApplication.class.getName());
+
                     if (AppServerType.J2EE_SERVER.equals(pps.getRunAppServerType())) {
                         io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Deploying_J2EE_Container"));//NOI18N
                         PlatypusWebModuleManager webManager = aProject.getLookup().lookup(PlatypusWebModuleManager.class);
@@ -320,7 +335,7 @@ public class ProjectRunner {
                         } else {
                             throw new IllegalStateException("An instance of PlatypusWebModuleManager is not found in project's lookup.");
                         }
-                    } else if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) {
+                    } else/* if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) */{
                         appUrl = getDevPlatypusServerUrl(pps);
                     }
                     if (appUrl != null && !appUrl.isEmpty()) {
@@ -341,10 +356,6 @@ public class ProjectRunner {
                     arguments.add(OPTION_PREFIX + PlatypusClientApplication.PASSWORD_CMD_SWITCH);
                     arguments.add(aProject.getSettings().getRunPassword());
                     io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Login_As_User") + aProject.getSettings().getRunUser());//NOI18N
-                }
-                if (pps.getRunClientOptions() != null && !pps.getRunClientOptions().isEmpty()) {
-                    addArguments(arguments, pps.getRunClientOptions());
-                    io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Run_Options"), pps.getRunClientOptions()));//NOI18N
                 }
                 ExternalProcessBuilder processBuilder = new ExternalProcessBuilder(JVM_RUN_COMMAND_NAME);
                 for (String argument : arguments) {
@@ -419,7 +430,7 @@ public class ProjectRunner {
         return sb.toString();
     }
 
-    public static void setLogging(List<String> arguments, Level logLevel) {
+    public static void setupLogging(List<String> arguments, Level logLevel) {
         arguments.add(OPTION_PREFIX
                 + LOG_LEVEL_OPTION_NAME
                 + EQUALS_SIGN

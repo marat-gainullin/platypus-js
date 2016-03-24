@@ -142,7 +142,7 @@
         </folder>
     </folder>
     <!-- default workspaces, frames and their layout defined by core -->
-    <folder name="Templates">
+    <!--folder name="Templates">
         <file name="Classes_hidden"/>
         <file name="ClientSide_hidden"/>
         <file name="JSP_Servlet_hidden"/>
@@ -152,14 +152,12 @@
         <file name="WebServices_hidden"/>
         <file name="XML_hidden"/>
         <folder name="Project">
-            <folder name="Platypus">
-                <attr name="displayName" bundlevalue="com.eas.designer.explorer.Bundle#Templates/Project/Platypus"/>
+            <folder name="Platypus.js">
             </folder>
-            <file name="Web_hidden"/>
         </folder>
          
         <file name="js-test-driver_hidden"/>
-    </folder>
+    </folder-->
     <folder name="Toolbars">
         <folder name="Build">
             <file name="org-netbeans-modules-web-clientproject-browser-ActiveBrowserAction.shadow_hidden"/>

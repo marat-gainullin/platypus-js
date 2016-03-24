@@ -111,7 +111,8 @@ public class PlatypusHttpServlet extends HttpServlet {
                 restScanner = new RestPointsScanner();
                 Path projectRoot = Paths.get(realRoot.toURI());
                 Path appFolder = platypusConfig.getSourcePath() != null ? projectRoot.resolve(platypusConfig.getSourcePath()) : projectRoot;
-                ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(appFolder, lsecurityConfigs, (String aModuleName, ScriptDocument.ModuleDocument aModuleDocument, File aFile) -> {
+                Path apiFolder = projectRoot.resolve("WEB-INF" + File.separator + "classes");
+                ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(appFolder, apiFolder, lsecurityConfigs, (String aModuleName, ScriptDocument.ModuleDocument aModuleDocument, File aFile) -> {
                     tasksScanner.moduleScanned(aModuleName, aModuleDocument, aFile);
                     restScanner.moduleScanned(aModuleName, aModuleDocument, aFile);
                 });
@@ -121,7 +122,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                 platypusCore = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), platypusConfig.getAppElementName()), queries, basesProxy, lsecurityConfigs, platypusConfig.getAppElementName(), SessionManager.Singleton.instance, platypusConfig.getMaximumSpaces());
                 basesProxy.setContextHost(platypusCore);
                 Scripts.initBIO(platypusConfig.getMaximumBIOTreads());
-                ScriptedResource.init(platypusCore, Paths.get(realRoot.toURI()).resolve("WEB-INF").resolve("classes"), platypusConfig.isGlobalAPI());
+                ScriptedResource.init(platypusCore, apiFolder, platypusConfig.isGlobalAPI());
                 Scripts.initTasks((Runnable aTask) -> {
                     try {
                         if (containerExecutor != null) {// J2EE 7+

@@ -444,8 +444,9 @@ public class ToolsApplication {
     private static final String MODELS_BUNDLE_ROOT_TAG = "models-bundle";
 
     private static void index(Path appFolder, Path aFolder, File aIndexedModules) throws Exception {
+        Path apiFolder = appFolder.resolve("WEB-INF" + File.separator + "classes");
         ScriptsConfigs scriptsConfigs = new ScriptsConfigs();
-        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(appFolder, scriptsConfigs, false, null);
+        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(appFolder, apiFolder, scriptsConfigs, false, null);
         indexer.rescan();
         List<StringBuilder> modules = new ArrayList<>();
         Files.walkFileTree(aFolder, new SimpleFileVisitor<Path>() {

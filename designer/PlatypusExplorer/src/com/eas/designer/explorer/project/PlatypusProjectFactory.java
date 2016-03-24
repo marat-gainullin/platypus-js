@@ -4,7 +4,6 @@
  */
 package com.eas.designer.explorer.project;
 
-import com.eas.client.cache.PlatypusFiles;
 import java.io.IOException;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.project.ProjectFactory;
@@ -20,13 +19,14 @@ public final class PlatypusProjectFactory implements ProjectFactory {
 
     @Override
     public boolean isProject(FileObject fo) {
-        if (!fo.isFolder()) {
+        if (fo.isFolder()) {
+            FileObject appDirectory = fo.getFileObject(PlatypusProjectSettingsImpl.DEFAULT_APP_FOLDER);
+            return appDirectory != null
+                    && appDirectory.isFolder()
+                    && fo.getFileObject(PlatypusProjectSettingsImpl.PROJECT_SETTINGS_FILE) != null;
+        } else {
             return false;
         }
-        FileObject appDirectory = fo.getFileObject("app");
-        return appDirectory != null 
-                && appDirectory.isFolder()
-                && fo.getFileObject(PlatypusProjectSettingsImpl.PROJECT_SETTINGS_FILE) != null;
     }
 
     @Override
