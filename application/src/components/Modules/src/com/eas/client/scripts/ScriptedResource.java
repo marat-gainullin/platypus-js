@@ -348,9 +348,13 @@ public class ScriptedResource {
 
     public static Path lookupPlatypusJs() throws URISyntaxException {
         URL platypusURL = Thread.currentThread().getContextClassLoader().getResource(Scripts.INTERNALS_JS_FILENAME);
-        Path apiPath = Paths.get(platypusURL.toURI());
-        apiPath = apiPath.getParent();
-        return apiPath;
+        if (platypusURL != null) {
+            Path apiPath = Paths.get(platypusURL.toURI());
+            apiPath = apiPath.getParent();
+            return apiPath;
+        } else {
+            throw new IllegalStateException("Couldn't find Platypus.js API script " + Scripts.INTERNALS_JS_FILENAME);
+        }
     }
 
     protected static class SEHttpResponse {

@@ -4,7 +4,6 @@ import com.eas.client.*;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
-import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.ReportsConfigs;
 import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
@@ -51,6 +50,7 @@ public class PlatypusClientApplication {
     public static final String URL_CMD_SWITCH = "url";
     // container switches
     public static final String DEF_DATASOURCE_CONF_PARAM = "default-datasource";
+    public static final String SOURCE_PATH_CONF_PARAM = "source-path";
     // login switchs
     public static final String USER_CMD_SWITCH = "user";
     public static final String PASSWORD_CMD_SWITCH = "password";
@@ -58,6 +58,7 @@ public class PlatypusClientApplication {
 
     // error messages
     public static final String BAD_DEF_DATASOURCE_MSG = "default-datasource value not specified";
+    public static final String BAD_SOURCE_PATH_MSG = "source-path value not specified";
     public static final String USER_HOME_ABSENTFILE_MSG = ClientConstants.USER_HOME_PROP_NAME + " property points to non-existent location";
     public static final String USER_HOME_MISSING_MSG = ClientConstants.USER_HOME_PROP_NAME + " property missing. Please specify it with -D" + ClientConstants.USER_HOME_PROP_NAME + "=... command line switch";
     public static final String USER_HOME_NOT_A_DIRECTORY_MSG = ClientConstants.USER_HOME_PROP_NAME + " property points to non-directory";
@@ -80,6 +81,7 @@ public class PlatypusClientApplication {
         protected int maximumAuthenticateAttempts = Integer.MAX_VALUE;
         protected URL url;
         protected String defDatasource;
+        protected String sourcePath;
         protected DatasourcesArgsConsumer datasourcesArgs;
         protected ThreadsArgsConsumer threadsArgs = new ThreadsArgsConsumer();
 
@@ -108,6 +110,13 @@ public class PlatypusClientApplication {
                         i += 2;
                     } else {
                         throw new IllegalArgumentException(BAD_DEF_DATASOURCE_MSG);
+                    }
+                } else if ((CMD_SWITCHS_PREFIX + SOURCE_PATH_CONF_PARAM).equalsIgnoreCase(args[i])) {
+                    if (i < args.length - 1) {
+                        commonArgs.sourcePath = args[i + 1];
+                        i += 2;
+                    } else {
+                        throw new IllegalArgumentException(BAD_SOURCE_PATH_MSG);
                     }
                 } else if ((CMD_SWITCHS_PREFIX + USER_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                     if (i < args.length - 1) {
@@ -226,10 +235,11 @@ public class PlatypusClientApplication {
                 });
                 Application app;
                 PlatypusPrincipal.setClientSpacePrincipal(new AnonymousPlatypusPrincipal());
+                Path apiFolder = ScriptedResource.lookupPlatypusJs();
                 if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTP)) {
-                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
+                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, config.sourcePath, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
                 } else if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTPS)) {
-                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
+                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, config.sourcePath, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
                 } else if (config.url.getProtocol().equalsIgnoreCase("platypus")) {
                     app = new PlatypusClient(new PlatypusPlatypusConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, (Runnable aTask) -> {
                         EventQueue.invokeLater(aTask);
@@ -240,8 +250,9 @@ public class PlatypusClientApplication {
                         ModelsDocuments models = new ModelsDocuments();
                         ScriptsConfigs scriptsConfigs = new ScriptsConfigs();
                         ValidatorsScanner validatorsScanner = new ValidatorsScanner();
-                        Path appFolder = Paths.get(f.toURI()).resolve(PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT);
-                        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(appFolder, scriptsConfigs, validatorsScanner);
+                        Path projectRoot = Paths.get(f.toURI());
+                        Path appFolder = config.sourcePath != null ? projectRoot.resolve(config.sourcePath) : projectRoot;
+                        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(appFolder, apiFolder, scriptsConfigs, validatorsScanner);
                         // TODO: add command line argument "watch" after watcher refactoring
                         //indexer.watch();
                         ScriptedDatabasesClient twoTierCore = new ScriptedDatabasesClient(config.defDatasource, indexer, true, validatorsScanner.getValidators(), config.threadsArgs.getMaxJdbcTreads());
@@ -300,7 +311,7 @@ public class PlatypusClientApplication {
                 } else {
                     throw new Exception("Unknown protocol in url: " + config.url);
                 }
-                ScriptedResource.init(app, ScriptedResource.lookupPlatypusJs(), false);
+                ScriptedResource.init(app, apiFolder, false);
                 EventQueue.invokeLater(() -> {
                     try {
                         Scripts.setSpace(Scripts.createSpace());

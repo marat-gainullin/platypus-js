@@ -34,37 +34,9 @@
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
           <Component id="tabbedPane" max="32767" attributes="0"/>
-          <Group type="102" alignment="0" attributes="0">
-              <EmptySpace min="-2" max="-2" attributes="0"/>
+          <Group type="102" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" attributes="0">
-                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                          <Component id="lblClientType" alignment="0" max="32767" attributes="0"/>
-                          <Component id="lblRunPath" alignment="0" max="32767" attributes="0"/>
-                          <Component id="lblServeType" alignment="0" max="32767" attributes="0"/>
-                          <Component id="lblDefDatasource" alignment="0" max="32767" attributes="0"/>
-                      </Group>
-                      <EmptySpace min="-2" max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" attributes="0">
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="cbClientType" alignment="0" max="32767" attributes="0"/>
-                                  <Component id="txtRunPath" alignment="0" max="32767" attributes="0"/>
-                                  <Component id="cbAppServerType" alignment="0" max="32767" attributes="0"/>
-                                  <Component id="cbConnections" alignment="0" max="32767" attributes="0"/>
-                              </Group>
-                              <EmptySpace min="-2" max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="btnBrowse" pref="105" max="32767" attributes="0"/>
-                                  <Component id="btnAddDatasource" max="32767" attributes="0"/>
-                              </Group>
-                          </Group>
-                          <Group type="102" attributes="0">
-                              <Component id="lblClientServerMessage" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                          </Group>
-                      </Group>
-                  </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="1" max="-2" attributes="0">
                           <Component id="cbAutoUpdatePlatypusJs" alignment="0" max="32767" attributes="0"/>
@@ -72,6 +44,36 @@
                       </Group>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Component id="chGlobalApi" max="32767" attributes="0"/>
+                  </Group>
+                  <Group type="102" attributes="0">
+                      <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                          <Component id="lblServeType" alignment="0" max="32767" attributes="0"/>
+                          <Component id="lblClientType" alignment="0" max="32767" attributes="0"/>
+                          <Component id="lblSourcePath" alignment="0" max="32767" attributes="0"/>
+                          <Component id="lblRunPath" alignment="0" pref="110" max="32767" attributes="0"/>
+                          <Component id="lblDefDatasource" max="32767" attributes="0"/>
+                      </Group>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="lblClientServerMessage" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="1" attributes="0">
+                              <Group type="103" groupAlignment="1" attributes="0">
+                                  <Component id="txtSourcePath" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="cbConnections" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="cbClientType" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="cbAppServerType" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="txtRunPath" max="32767" attributes="0"/>
+                              </Group>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="btnAddDatasource" alignment="1" min="-2" pref="105" max="-2" attributes="0"/>
+                                  <Component id="btnBrowse" alignment="1" min="-2" pref="105" max="-2" attributes="0"/>
+                              </Group>
+                          </Group>
+                      </Group>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -87,7 +89,12 @@
                   <Component id="lblRunPath" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnBrowse" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="txtSourcePath" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="lblSourcePath" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="cbClientType" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="lblClientType" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -112,8 +119,8 @@
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="cbAutoUpdatePlatypusJs" min="-2" max="-2" attributes="0"/>
-              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Component id="tabbedPane" pref="278" max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="tabbedPane" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -121,8 +128,8 @@
   <SubComponents>
     <Component class="javax.swing.JTextField" name="txtRunPath">
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtRunPathActionPerformed"/>
         <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtRunPathFocusLost"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtRunPathActionPerformed"/>
       </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="lblRunPath">
@@ -188,7 +195,7 @@
                                   <Component id="spClientDebugPort" max="32767" attributes="0"/>
                                   <Component id="cbClientLogLevel" min="-2" pref="109" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace pref="324" max="32767" attributes="0"/>
+                              <EmptySpace pref="366" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -232,7 +239,7 @@
                           <Component id="lblClientDebugPort" min="-2" pref="24" max="-2" attributes="0"/>
                           <Component id="spClientDebugPort" min="-2" pref="22" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="57" max="32767" attributes="0"/>
+                      <EmptySpace pref="53" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -380,7 +387,7 @@
                                           <Component id="spServerDebugPort" alignment="0" min="-2" pref="109" max="-2" attributes="0"/>
                                           <Component id="spServerPort" alignment="0" min="-2" pref="109" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="0" pref="303" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="345" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                           </Group>
@@ -419,7 +426,7 @@
                       </Group>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="cbNotStartServer" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="79" max="32767" attributes="0"/>
+                      <EmptySpace pref="75" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -545,7 +552,7 @@
                               </Group>
                               <EmptySpace min="-2" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="cbj2eeServer" pref="242" max="32767" attributes="0"/>
+                                  <Component id="cbj2eeServer" pref="284" max="32767" attributes="0"/>
                                   <Component id="txtContext" max="32767" attributes="0"/>
                               </Group>
                           </Group>
@@ -574,7 +581,7 @@
                       <Component id="cbEnableWebSecurity" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="cbAutoApply" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="137" max="32767" attributes="0"/>
+                      <EmptySpace pref="133" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -677,6 +684,7 @@
       </Properties>
       <Events>
         <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="cbAppServerTypeItemStateChanged"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cbAppServerTypeActionPerformed"/>
       </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="lblClientServerMessage">
@@ -737,6 +745,19 @@
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cbAutoUpdatePlatypusJsActionPerformed"/>
       </Events>
+    </Component>
+    <Component class="javax.swing.JTextField" name="txtSourcePath">
+      <Events>
+        <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtSourcePathFocusLost"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtSourcePathActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="lblSourcePath">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="com/eas/designer/explorer/project/ui/Bundle.properties" key="ProjectRunningCustomizer.lblSourcePath.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

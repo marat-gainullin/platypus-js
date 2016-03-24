@@ -78,6 +78,7 @@ public abstract class PlatypusConnection implements AppConnection {
     public static final int DEFAULT_MAX_THREADS = 25;
 
     protected final URL url;
+    protected final String sourcePath;
     protected Credentials credentials;
     protected Callable<Credentials> onCredentials;
     protected int maximumAuthenticateAttempts = 1;
@@ -90,9 +91,10 @@ public abstract class PlatypusConnection implements AppConnection {
         public int count;
     }
 
-    public PlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts) {
+    public PlatypusConnection(URL aUrl, String aSourcePath, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts) {
         super();
         url = aUrl;
+        sourcePath = aSourcePath;
         onCredentials = aOnCredentials;
         maximumAuthenticateAttempts = Math.max(1, aMaximumAuthenticateAttempts);
     }

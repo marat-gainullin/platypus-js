@@ -4,7 +4,6 @@
  */
 package com.eas.designer.explorer.project.wizard;
 
-import com.eas.client.cache.PlatypusFiles;
 import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import java.awt.Component;
 import java.io.File;
@@ -15,7 +14,6 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.event.ChangeListener;
-import org.netbeans.api.templates.TemplateRegistration;
 import org.netbeans.spi.project.ui.support.ProjectChooser;
 import org.openide.ErrorManager;
 import org.openide.WizardDescriptor;
@@ -23,39 +21,25 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.NbBundle;
 
-public class PlatypusApplicationWizardIterator implements WizardDescriptor./*Progress*/InstantiatingIterator<WizardDescriptor> {
-    
+public abstract class PlatypusProjectWizard implements WizardDescriptor./*Progress*/InstantiatingIterator<WizardDescriptor> {
+
     private int index;
     private WizardDescriptor.Panel<WizardDescriptor>[] panels;
     private WizardDescriptor wiz;
-    
-    public PlatypusApplicationWizardIterator() {
+
+    public PlatypusProjectWizard() {
         super();
     }
-    
-    @TemplateRegistration(folder = "Project/Platypus",
-            position = 100,
-            content = "/com/eas/designer/explorer/PlatypusApplicationProject",
-            displayName = "com.eas.designer.explorer.Bundle#Templates/Project/Platypus/PlatypusApplicationProject",
-            description = "PlatypusApplicationDescription.html",
-            iconBase = "com/eas/designer/explorer/project/pencil-ruler.png")
-    public static PlatypusApplicationWizardIterator createIterator() {
-        return new PlatypusApplicationWizardIterator();
-    }
-    
-    private WizardDescriptor.Panel<WizardDescriptor>[] createPanels() {
-        return new WizardDescriptor.Panel[]{
-                    new NameAndLocationWizardPanel()
-                };
-    }
-    
+
+    protected abstract WizardDescriptor.Panel<WizardDescriptor>[] createPanels();
+
     private String[] createSteps() {
         return new String[]{
-                    NbBundle.getMessage(PlatypusApplicationWizardIterator.class, "LBL_CreateProjectStep"),
-                    NbBundle.getMessage(PlatypusApplicationWizardIterator.class, "LBL_SetupProjectStep")
-                };
+            NbBundle.getMessage(PlatypusProjectWizard.class, "LBL_CreateProjectStep"),
+            NbBundle.getMessage(PlatypusProjectWizard.class, "LBL_SetupProjectStep")
+        };
     }
-    
+
     @Override
     public Set<FileObject> instantiate(/*ProgressHandle handle*/) throws IOException {
         Set<FileObject> resultSet = new LinkedHashSet<>();
@@ -64,25 +48,30 @@ public class PlatypusApplicationWizardIterator implements WizardDescriptor./*Pro
         String projTitle = (String) wiz.getProperty("projTitle");
         File projDir = FileUtil.normalizeFile(new File(projDirName).getAbsoluteFile());
         File projSpecDir = new File(projDir, projName);
-        if (projSpecDir.mkdirs()) {
-            try {
-                File appDir = new File(projSpecDir, PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT);
+        if (!projSpecDir.exists()) {
+            projSpecDir.mkdirs();
+        }
+        try {
+            File appDir = new File(projSpecDir, PlatypusProjectSettingsImpl.DEFAULT_APP_FOLDER);
+            if (!appDir.exists()) {
                 appDir.mkdir();
+            }
+            File propertiesFile = new File(projSpecDir, PlatypusProjectSettingsImpl.PROJECT_SETTINGS_FILE);
+            if (!propertiesFile.exists()) {
                 PlatypusProjectSettingsImpl settings = new PlatypusProjectSettingsImpl(FileUtil.toFileObject(projSpecDir));
                 settings.setDisplayName(projTitle);
+                settings.setSourcePath(PlatypusProjectSettingsImpl.DEFAULT_APP_FOLDER);
                 settings.save();
-            } catch (Exception ex) {
-                ErrorManager.getDefault().notify(ex);
             }
-            // Always open file as a project:
-            resultSet.add(FileUtil.toFileObject(projSpecDir));
-            ProjectChooser.setProjectsFolder(projSpecDir);
-            return resultSet;
-        } else {
-            throw new IOException("Can't create project folder.");
+        } catch (Exception ex) {
+            ErrorManager.getDefault().notify(ex);
         }
+        // Always open file as a project:
+        resultSet.add(FileUtil.toFileObject(projSpecDir));
+        ProjectChooser.setProjectsFolder(projSpecDir);
+        return resultSet;
     }
-    
+
     @Override
     public void initialize(WizardDescriptor wiz) {
         this.wiz = wiz;
@@ -102,13 +91,13 @@ public class PlatypusApplicationWizardIterator implements WizardDescriptor./*Pro
                 JComponent jc = (JComponent) c;
                 // Step #.
                 // TODO if using org.openide.dialogs >= 7.8, can use WizardDescriptor.PROP_*:
-                jc.putClientProperty("WizardPanel_contentSelectedIndex", new Integer(i));
+                jc.putClientProperty("WizardPanel_contentSelectedIndex", i);
                 // Step name (actually the whole list for reference).
                 jc.putClientProperty("WizardPanel_contentData", steps);
             }
         }
     }
-    
+
     @Override
     public void uninitialize(WizardDescriptor wd) {
         wd.putProperty("projDir", null);
@@ -117,23 +106,23 @@ public class PlatypusApplicationWizardIterator implements WizardDescriptor./*Pro
         wd = null;
         panels = null;
     }
-    
+
     @Override
     public String name() {
         return MessageFormat.format("{0} of {1}",
-                new Object[]{new Integer(index + 1), new Integer(panels.length)});
+                new Object[]{index + 1, panels.length});
     }
-    
+
     @Override
     public boolean hasNext() {
         return index < panels.length - 1;
     }
-    
+
     @Override
     public boolean hasPrevious() {
         return index > 0;
     }
-    
+
     @Override
     public void nextPanel() {
         if (!hasNext()) {
@@ -141,7 +130,7 @@ public class PlatypusApplicationWizardIterator implements WizardDescriptor./*Pro
         }
         index++;
     }
-    
+
     @Override
     public void previousPanel() {
         if (!hasPrevious()) {
@@ -149,7 +138,7 @@ public class PlatypusApplicationWizardIterator implements WizardDescriptor./*Pro
         }
         index--;
     }
-    
+
     @Override
     public WizardDescriptor.Panel<WizardDescriptor> current() {
         return panels[index];
@@ -159,7 +148,7 @@ public class PlatypusApplicationWizardIterator implements WizardDescriptor./*Pro
     @Override
     public final void addChangeListener(ChangeListener l) {
     }
-    
+
     @Override
     public final void removeChangeListener(ChangeListener l) {
     }

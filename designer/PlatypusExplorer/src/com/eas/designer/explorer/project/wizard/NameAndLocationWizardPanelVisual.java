@@ -16,7 +16,7 @@ import org.openide.WizardValidationException;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.NbBundle;
 
-public class NameAndLocationWizardPanelVisual extends JPanel implements DocumentListener {
+public abstract class NameAndLocationWizardPanelVisual extends JPanel implements DocumentListener {
 
     public static final String PROP_PROJECT_NAME = "projectName";
     private final NameAndLocationWizardPanel panel;
@@ -163,8 +163,7 @@ public class NameAndLocationWizardPanelVisual extends JPanel implements Document
         projectNameTextField.requestFocus();
     }
 
-    boolean valid(WizardDescriptor wizardDescriptor) {
-
+    boolean isProjectPropertiesValid(WizardDescriptor wizardDescriptor) {
         String projDirName = projectLocationTextField.getText();
         String projName = projectNameTextField.getText();
 
@@ -187,15 +186,7 @@ public class NameAndLocationWizardPanelVisual extends JPanel implements Document
             return false;
         }
         String consideredFileName = projDir.getAbsolutePath() + File.separator + projName;
-        if (projDir != null && projName != null) {
-            createdFileTextField.setText(consideredFileName);
-        }
-        final File destFolder = FileUtil.normalizeFile(new File(consideredFileName).getAbsoluteFile());
-        if (destFolder.exists()) {
-            wizardDescriptor.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE,
-                    NbBundle.getMessage(NameAndLocationWizardPanelVisual.class, "PlatypusApplicationPanelVisual.projectFileAlreadyExists"));
-            return false;
-        }
+        createdFileTextField.setText(consideredFileName);
         String projTitle = projectTitleTextField.getText();
         if (projTitle == null || projTitle.isEmpty()) {
             wizardDescriptor.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE,
@@ -203,6 +194,18 @@ public class NameAndLocationWizardPanelVisual extends JPanel implements Document
             return false;
         }
         wizardDescriptor.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE, "");
+        return true;
+    }
+
+    protected abstract boolean isProjectDestFolderValid(WizardDescriptor wizardDescriptor, String aPath);
+
+    boolean valid(WizardDescriptor wizardDescriptor) {
+        if (!isProjectPropertiesValid(wizardDescriptor)) {
+            return false;
+        }
+        if (!isProjectDestFolderValid(wizardDescriptor, createdFileTextField.getText())) {
+            return false;
+        }
         return true;
     }
 

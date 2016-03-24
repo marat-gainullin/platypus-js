@@ -30,38 +30,39 @@ public class ApplicationSourceIndexer implements PlatypusIndexer {
     }
 
     protected Path sourcePath;
+    protected Path apiPath;
     protected Map<String, File> id2Paths = new HashMap<>();
     protected WatchService service;
     protected ScanCallback scanCallback;
     protected boolean autoScan = true;
     protected ScriptsConfigs scriptsConfigs;
 
-    public ApplicationSourceIndexer(Path aSourcePath, ScriptsConfigs aScriptsConfigs) throws Exception {
-        this(aSourcePath, aScriptsConfigs, true, null);
+    public ApplicationSourceIndexer(Path aSourcePath, Path aApiPath, ScriptsConfigs aScriptsConfigs) throws Exception {
+        this(aSourcePath, aApiPath, aScriptsConfigs, true, null);
     }
 
-    public ApplicationSourceIndexer(Path aSourcePath, ScriptsConfigs aScriptsConfigs, ScanCallback aScanCallback) throws Exception {
-        this(aSourcePath, aScriptsConfigs, true, aScanCallback);
+    public ApplicationSourceIndexer(Path aSourcePath, Path aApiPath, ScriptsConfigs aScriptsConfigs, ScanCallback aScanCallback) throws Exception {
+        this(aSourcePath, aApiPath, aScriptsConfigs, true, aScanCallback);
     }
 
-    public ApplicationSourceIndexer(Path aSourcePath, ScriptsConfigs aScriptsConfigs, boolean aAutoScan, ScanCallback aScanCallback) throws Exception {
+    public ApplicationSourceIndexer(Path aSourcePath, Path aApiPath, ScriptsConfigs aScriptsConfigs, boolean aAutoScan, ScanCallback aScanCallback) throws Exception {
         super();
         autoScan = aAutoScan;
         scriptsConfigs = aScriptsConfigs;
         sourcePath = aSourcePath;
+        apiPath = aApiPath;
         scanCallback = aScanCallback;
         if (autoScan) {
-            File srcDirectory = checkRootDirectory();
-            scanSource(srcDirectory);
+            checkRootDirectory();
+            scanSource();
         }
     }
 
-    private File checkRootDirectory() throws IllegalArgumentException {
+    private void checkRootDirectory() throws IllegalArgumentException {
         File srcDirectory = sourcePath.toFile();
         if (!srcDirectory.exists() || !srcDirectory.isDirectory()) {
             throw new IllegalArgumentException(String.format("%s doesn't point to a directory.", sourcePath.toString()));
         }
-        return srcDirectory;
     }
 
     public void watch() throws Exception {
@@ -76,22 +77,25 @@ public class ApplicationSourceIndexer implements PlatypusIndexer {
 
     public void rescan() {
         id2Paths.clear();
-        File srcDirectory = checkRootDirectory();
-        scanSource(srcDirectory);
+        checkRootDirectory();
+        scanSource();
     }
 
-    private void scanSource(File aDirectory) {
-        assert aDirectory.exists() && aDirectory.isDirectory();
+    private void scanSource() {
         try {
-            Files.walkFileTree(Paths.get(aDirectory.toURI()), new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path aFilePath, BasicFileAttributes attrs) throws IOException {
-                    try {
-                        add(aFilePath.toFile());
-                    } catch (Exception ex) {
-                        Logger.getLogger(ApplicationSourceIndexer.class.getName()).log(Level.SEVERE, null, ex);
+                    if (apiPath != null && aFilePath.startsWith(apiPath)) {
+                        return FileVisitResult.SKIP_SUBTREE;
+                    } else {
+                        try {
+                            add(aFilePath.toFile());
+                        } catch (Exception ex) {
+                            Logger.getLogger(ApplicationSourceIndexer.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        return FileVisitResult.CONTINUE;
                     }
-                    return FileVisitResult.CONTINUE;
                 }
             });
         } catch (Exception ex) {
@@ -136,7 +140,7 @@ public class ApplicationSourceIndexer implements PlatypusIndexer {
         defaultModuleName = defaultModuleName.substring(0, defaultModuleName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
         return defaultModuleName;
     }
-    
+
     public Path getAppPath() {
         return sourcePath;
     }
