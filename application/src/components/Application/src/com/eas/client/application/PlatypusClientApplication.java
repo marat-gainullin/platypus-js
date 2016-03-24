@@ -314,7 +314,7 @@ public class PlatypusClientApplication {
                 ScriptedResource.init(app, apiFolder, false);
                 EventQueue.invokeLater(() -> {
                     try {
-                        Scripts.setSpace(Scripts.createSpace());
+                        Scripts.setOnlySpace(Scripts.createSpace());
                         Scripts.getSpace().process(() -> {
                             try {
                                 ScriptedResource._require(new String[]{""}, null, Scripts.getSpace(), new HashSet<>(), (Void v) -> {

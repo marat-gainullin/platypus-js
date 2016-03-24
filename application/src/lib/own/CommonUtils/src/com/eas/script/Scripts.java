@@ -80,13 +80,14 @@ public class Scripts {
 
     private static final ThreadLocal<LocalContext> contextRef = new ThreadLocal<>();
     private static final ThreadLocal<Space> spaceRef = new ThreadLocal<>();
+    private static Space onlySpace; // for single threaded environment
 
     public static boolean isGlobalAPI() {
         return globalAPI;
     }
 
     public static Space getSpace() {
-        return spaceRef.get();
+        return onlySpace != null ? onlySpace : spaceRef.get();
     }
 
     public static void setSpace(Space aSpace) {
@@ -95,6 +96,14 @@ public class Scripts {
         } else {
             spaceRef.remove();
         }
+    }
+
+    /**
+     * Warning! Use it only once and only in single threaded environment
+     * @param aSpace 
+     */
+    public static void setOnlySpace(Space aSpace) {
+        onlySpace = aSpace;
     }
 
     public static LocalContext getContext() {

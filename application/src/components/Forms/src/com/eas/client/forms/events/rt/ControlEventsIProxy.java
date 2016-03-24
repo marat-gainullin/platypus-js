@@ -4,7 +4,6 @@
  */
 package com.eas.client.forms.events.rt;
 
-import com.eas.client.forms.Forms;
 import com.eas.client.forms.components.rt.HasValue;
 import com.eas.client.forms.events.EventsWrapper;
 import com.eas.script.Scripts;
