@@ -9,7 +9,7 @@ import com.eas.designer.explorer.PlatypusDataObject;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import java.beans.PropertyChangeEvent;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,7 +34,9 @@ public class PlatypusProjectNodesList implements NodeList<FileObject> {
 
     private static final String JAVASCRIPT_FILE_EXTENSION = "js";
     private static final String PACKAGE_PREFIX = "com/eas/designer/explorer/project/ui/";
-    public static final ImageIcon sourceIcon = ImageUtilities.loadImageIcon(PACKAGE_PREFIX + "elements.png", true);
+    public static final ImageIcon sourceIcon = ImageUtilities.loadImageIcon(PACKAGE_PREFIX + "package.gif", true);
+    public static final ImageIcon apiIcon = ImageUtilities.loadImageIcon(PACKAGE_PREFIX + "interface.png", true);
+    public static final ImageIcon libIcon = ImageUtilities.loadImageIcon(PACKAGE_PREFIX + "libraries.gif", true);
     public static final DataFilter APPLICATION_TYPES_FILTER = new ApplicationTypesFilter();
     protected PlatypusProjectImpl project;
     protected Set<ChangeListener> listeners = new HashSet<>();
@@ -51,7 +53,7 @@ public class PlatypusProjectNodesList implements NodeList<FileObject> {
 
     @Override
     public List<FileObject> keys() {
-        return Collections.singletonList(project.getSrcRoot());
+        return Arrays.asList(new FileObject[]{project.getSrcRoot(), project.getApiRoot(), project.getLibRoot()});
     }
 
     @Override
@@ -66,12 +68,28 @@ public class PlatypusProjectNodesList implements NodeList<FileObject> {
 
     @Override
     public Node node(FileObject aFilePoint) {
-        return new CategoryNode(project,
-                DataFolder.findFolder(aFilePoint),
-                sourceIcon,
-                sourceIcon,
-                PlatypusUtils.ELEMENTS_SOURCES_GROUP,
-                NbBundle.getMessage(PlatypusProjectImpl.class, PlatypusUtils.ELEMENTS_SOURCES_GROUP));
+        if (project.getSrcRoot() == aFilePoint) {
+            return new CategoryNode(project,
+                    DataFolder.findFolder(aFilePoint),
+                    sourceIcon,
+                    sourceIcon,
+                    PlatypusUtils.ELEMENTS_SOURCES_GROUP,
+                    NbBundle.getMessage(PlatypusProjectImpl.class, PlatypusUtils.ELEMENTS_SOURCES_GROUP));
+        } else if (project.getApiRoot() == aFilePoint) {
+            return new CategoryNode(project,
+                    DataFolder.findFolder(aFilePoint),
+                    apiIcon,
+                    apiIcon,
+                    PlatypusUtils.ELEMENTS_API_GROUP,
+                    NbBundle.getMessage(PlatypusProjectImpl.class, PlatypusUtils.ELEMENTS_API_GROUP));
+        } else {
+            return new CategoryNode(project,
+                    DataFolder.findFolder(aFilePoint),
+                    libIcon,
+                    libIcon,
+                    PlatypusUtils.ELEMENTS_LIB_GROUP,
+                    NbBundle.getMessage(PlatypusProjectImpl.class, PlatypusUtils.ELEMENTS_LIB_GROUP));
+        }
     }
 
     @Override

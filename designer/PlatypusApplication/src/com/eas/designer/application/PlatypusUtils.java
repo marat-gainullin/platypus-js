@@ -4,15 +4,6 @@
  */
 package com.eas.designer.application;
 
-import com.eas.client.ClientConstants;
-import com.eas.client.SQLUtils;
-import com.eas.client.sqldrivers.SqlDriver;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  *
  * @author mg
@@ -22,6 +13,8 @@ public class PlatypusUtils {
     public static final String COMMON_ENCODING_NAME = "utf-8";
     public static final String DATAFOLDER_REORDERABLE_PROP_NAME = "DataFolder.Index.reorderable";
     public static final String ELEMENTS_SOURCES_GROUP = "applicationElements";
+    public static final String ELEMENTS_API_GROUP = "apiElements";
+    public static final String ELEMENTS_LIB_GROUP = "libElements";
 /*
     public static List<String> achieveSchemas(String aUrl, String aUser, String aPassword) throws Exception {
         List<String> schemas = new ArrayList<>();
