@@ -591,8 +591,7 @@ public class AppClient {
 					 */
 					String errorMsg = XMLHttpRequest2.getBrowserSpecificFailure(xhr);
 					if (errorMsg != null) {
-						Throwable exception = new RuntimeException(errorMsg);
-						Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, exception);
+						Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, errorMsg);
 						try {
 							if (aCallback != null)
 								aCallback.onFailure(xhr);
@@ -791,7 +790,7 @@ public class AppClient {
 	private native static void checkModulesIndex(AppClient aClient)/*-{
 		if ($wnd.define) {
 			var index = $wnd.define['modules-index'];
-			for (var fileName in index) {
+			for ( var fileName in index) {
 				var structure = index[fileName];
 				var mstructure = @com.eas.client.AppClient.ModuleStructure::new(Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JsArrayString;)(fileName, structure.prefetched, structure['global-deps'], structure.rpc, structure.entities);
 				var defaultModuleName = fileName;
@@ -799,7 +798,7 @@ public class AppClient {
 					defaultModuleName = defaultModuleName.substring(0, defaultModuleName.length - 3);
 				}
 				aClient.@com.eas.client.AppClient::putModuleStructure(Ljava/lang/String;Lcom/eas/client/AppClient$ModuleStructure;)(defaultModuleName, mstructure);
-				if(structure.modules){
+				if (structure.modules) {
 					for ( var i = 0; i < structure.modules.length; i++) {
 						aClient.@com.eas.client.AppClient::putModuleStructure(Ljava/lang/String;Lcom/eas/client/AppClient$ModuleStructure;)(structure.modules[i], mstructure);
 					}
@@ -1028,7 +1027,8 @@ public class AppClient {
 					String responseType = aResponse.getResponseHeader("content-type");
 					if (responseType != null) {
 						responseType = responseType.toLowerCase();
-						if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
+						if (responseType.contains("application/json") || responseType.contains("application/javascript") || responseType.contains("text/json")
+						        || responseType.contains("text/javascript")) {
 							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
 						} else if (responseType.contains(REPORT_LOCATION_CONTENT_TYPE)) {
 							Utils.executeScriptEventVoid(onSuccess, onSuccess, createReport(aReportConstructor, aResponse.getResponseText()));
@@ -1045,7 +1045,14 @@ public class AppClient {
 					if (onFailure != null) {
 						try {
 							String responseText = aResponse.getResponseText();
-							Utils.executeScriptEventVoid(onSuccess, onFailure, Utils.toJs(responseText != null && !responseText.isEmpty() ? responseText : aResponse.getStatusText()));
+							String responseType = aResponse.getResponseHeader("content-type");
+							if (responseType != null
+							        && (responseType.contains("application/json") || responseType.contains("application/javascript") || responseType.contains("text/json") || responseType
+							                .contains("text/javascript"))) {
+								Utils.executeScriptEventVoid(onFailure, onFailure, Utils.jsonParse(responseText));
+							} else {
+								Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(responseText != null && !responseText.isEmpty() ? responseText : aResponse.getStatusText()));
+							}
 						} catch (Exception ex) {
 							Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
 						}

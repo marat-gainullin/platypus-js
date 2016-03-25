@@ -27,6 +27,7 @@ import com.eas.script.JsDoc;
 import com.eas.script.Scripts;
 import com.eas.server.handlers.ServerModuleStructureRequestHandler;
 import com.eas.server.handlers.RPCRequestHandler;
+import com.eas.server.scripts.JsObjectException;
 import java.io.File;
 import java.security.AccessControlException;
 import java.util.ArrayList;
@@ -171,9 +172,12 @@ public abstract class PlatypusServerCore implements ContextHost, Application<Sql
         };
         Consumer<Exception> onFailure = (Exception ex) -> {
             if (aOnFailure != null) {
+                Scripts.Space targetSpace = Scripts.getSpace();
+                Exception copiedEx = ex instanceof JsObjectException ? new JsObjectException(targetSpace.makeCopy(((JsObjectException) ex).getData())) : ex;
                 callingSpace.process(callingContext, () -> {
                     assert Scripts.getSpace() == callingSpace;
-                    aOnFailure.accept(ex);
+                    Exception restoredEx = copiedEx instanceof JsObjectException ? new JsObjectException(callingSpace.restoreCopy(((JsObjectException) copiedEx).getData())) : copiedEx;
+                    aOnFailure.accept(restoredEx);
                 });
             }
         };
@@ -261,7 +265,7 @@ public abstract class PlatypusServerCore implements ContextHost, Application<Sql
                                                             if (reason instanceof Exception) {
                                                                 onFailure.accept((Exception) reason);
                                                             } else {
-                                                                onFailure.accept(new Exception(String.valueOf(reason)));
+                                                                onFailure.accept(new JsObjectException(largs[0]));
                                                             }
                                                         } else {
                                                             Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});

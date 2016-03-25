@@ -9,6 +9,7 @@ import com.eas.client.ServerModuleInfo;
 import com.eas.client.ServerModulesProxy;
 import com.eas.client.cache.ScriptDocument;
 import com.eas.script.Scripts;
+import com.eas.server.scripts.JsObjectException;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -76,7 +77,7 @@ public class LocalServerModulesProxy implements ServerModulesProxy {
             onSuccess.call(null, new Object[]{aSpace.toJs(aResult)});
         } : null, (Exception ex) -> {
             if (onFailure != null) {
-                onFailure.call(null, new Object[]{ex.toString()});
+                onFailure.call(null, new Object[]{ex instanceof JsObjectException ? ((JsObjectException) ex).getData() : ex.toString()});
             } else {
                 Logger.getLogger(LocalServerModulesProxy.class.getName()).log(Level.SEVERE, ex.toString());
             }

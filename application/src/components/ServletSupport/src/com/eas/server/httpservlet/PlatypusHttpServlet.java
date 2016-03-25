@@ -23,6 +23,7 @@ import com.eas.client.threetier.requests.*;
 import com.eas.concurrent.DeamonThreadFactory;
 import com.eas.script.Scripts;
 import com.eas.server.*;
+import com.eas.server.scripts.JsObjectException;
 import com.eas.util.IDGenerator;
 import com.eas.util.JSONUtils;
 import java.io.*;
@@ -395,6 +396,10 @@ public class PlatypusHttpServlet extends HttpServlet {
                             aHttpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, ex.getMessage());
                         } else if (ex instanceof FileNotFoundException) {
                             aHttpResponse.sendError(HttpServletResponse.SC_NOT_FOUND, ex.getMessage());
+                        } else if (ex instanceof JsObjectException) {
+                            String errorBody = aPlatypusSession.getSpace().toJson(((JsObjectException) ex).getData());
+                            aHttpResponse.setStatus(HttpServletResponse.SC_CONFLICT);
+                            PlatypusHttpResponseWriter.writeJsonResponse(errorBody, aHttpResponse, null);
                         } else {
                             aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
                         }
