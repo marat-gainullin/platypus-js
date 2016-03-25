@@ -181,7 +181,7 @@ public class Utils {
 		public static native JavaScriptObject dateReviver()/*-{
 			return function(k, v) {
 				if (typeof v === 'string' && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(v)) {
-					return new Date(v);
+					return new $wnd.Date(v);
 				} else {
 					return v;
 				}
@@ -397,7 +397,7 @@ public class Utils {
 
 	public native static Object jsonParse(String aData) throws Exception /*-{
 		var B = @com.eas.core.Predefine::boxing;
-		return B.boxAsJava(JSON.parse(aData));
+		return B.boxAsJava(JSON.parse(aData, @com.eas.core.Utils.JsObject::dateReviver()()));
 	}-*/;
 
 	public native static String jsonStringify(Object aToJsedObject) /*-{

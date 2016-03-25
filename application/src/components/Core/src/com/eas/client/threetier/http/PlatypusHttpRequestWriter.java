@@ -205,8 +205,8 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         if (contentTypeCharset == null || contentTypeCharset.length == 0) {
             throw new IOException("Response must contain ContentType header with charset");
         }
-        if (!contentTypeCharset[0].toLowerCase().startsWith("text/")) {
-            throw new IOException("Response ContentType must be text/...");
+        if (!contentTypeCharset[0].toLowerCase().startsWith("text/") && !contentTypeCharset[0].toLowerCase().startsWith("application/json")) {
+            throw new IOException("Response header 'ContentType' must be text/... or application/json");
         }
         if (contentTypeCharset.length > 1) {
             String[] charsetNameValue = contentTypeCharset[1].split("=");
