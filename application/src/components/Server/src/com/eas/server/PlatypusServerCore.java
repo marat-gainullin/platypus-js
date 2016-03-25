@@ -161,7 +161,6 @@ public abstract class PlatypusServerCore implements ContextHost, Application<Sql
         Object[] copiedArguments = makeArgumentsCopy(callingSpace, aArguments);
         Consumer<Object> onSuccess = (Object res) -> {
             if (aOnSuccess != null) {
-                //Scripts.LocalContext targetContext = Scripts.getContext();
                 Scripts.Space targetSpace = Scripts.getSpace();
                 Object copiedRes = targetSpace.makeCopy(res);
                 callingSpace.process(callingContext, () -> {
@@ -172,8 +171,6 @@ public abstract class PlatypusServerCore implements ContextHost, Application<Sql
         };
         Consumer<Exception> onFailure = (Exception ex) -> {
             if (aOnFailure != null) {
-                //Scripts.LocalContext targetContext = Scripts.getContext();
-                //Scripts.Space targetSpace = Scripts.getSpace();
                 callingSpace.process(callingContext, () -> {
                     assert Scripts.getSpace() == callingSpace;
                     aOnFailure.accept(ex);
