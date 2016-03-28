@@ -16,6 +16,10 @@ public class SqlExceptionResponse extends ExceptionResponse {
     private Integer sqlErrorCode;
     private String sqlState;
 
+    public SqlExceptionResponse() {
+        super();
+    }
+
     public SqlExceptionResponse(SQLException aException) {
         super(aException);
         sqlState = aException.getSQLState();

@@ -7,6 +7,7 @@ package com.eas.client.threetier.platypus;
 import com.eas.client.report.Report;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
+import com.eas.client.threetier.requests.AccessControlExceptionResponse;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.client.threetier.requests.ServerModuleStructureRequest;
@@ -19,13 +20,16 @@ import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
 import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.client.threetier.requests.CredentialRequest;
+import com.eas.client.threetier.requests.JsonExceptionResponse;
 import com.eas.client.threetier.requests.PlatypusResponsesFactory;
+import com.eas.client.threetier.requests.SqlExceptionResponse;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoReader;
 import com.eas.proto.dom.ProtoDOMBuilder;
 import com.eas.proto.dom.ProtoNode;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /**
  *
@@ -41,13 +45,13 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     }
 
     public static Response read(ProtoReader reader, Request aRequest) throws Exception {
-        boolean ordinaryReponse = false;
+        boolean regularReponse = false;
         boolean errorResponse = false;
         byte[] data = null;
         do {
             switch (reader.getNextTag()) {
                 case RequestsTags.TAG_RESPONSE:
-                    ordinaryReponse = true;
+                    regularReponse = true;
                     break;
                 case RequestsTags.TAG_ERROR_RESPONSE:
                     errorResponse = true;
@@ -59,9 +63,9 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
                     if (data != null) {
                         Response rsp;
                         if (errorResponse) {
-                            rsp = new ExceptionResponse();
+                            rsp = peekResponse(data);
                         } else {
-                            assert ordinaryReponse;
+                            assert regularReponse : "Error / regular response assumption failed";
                             PlatypusResponsesFactory factory = new PlatypusResponsesFactory();
                             aRequest.accept(factory);
                             rsp = factory.getResponse();
@@ -77,8 +81,43 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
         return null;
     }
 
+    private static ExceptionResponse peekResponse(byte[] bytes) throws IOException {
+        ProtoReader reader = new ProtoReader(new ByteArrayInputStream(bytes));
+        do {
+            switch (reader.getNextTag()) {
+                case RequestsTags.TAG_RESPONSE_ACCESS_CONTROL:
+                    return new AccessControlExceptionResponse();
+                case RequestsTags.TAG_RESPONSE_SQL_ERROR_CODE:
+                case RequestsTags.TAG_RESPONSE_SQL_ERROR_STATE:
+                    return new SqlExceptionResponse();
+                case RequestsTags.TAG_RESPONSE_JS_OBJECT:
+                    return new JsonExceptionResponse();
+            }
+        } while (reader.getCurrentTag() != CoreTags.TAG_EOF);
+        return new ExceptionResponse();
+    }
+
     @Override
     public void visit(ExceptionResponse rsp) throws Exception {
+        final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
+        if (input.containsChild(RequestsTags.TAG_RESPONSE_ERROR)) {
+            rsp.setErrorMessage(input.getChild(RequestsTags.TAG_RESPONSE_ERROR).getString());
+        }
+    }
+
+    @Override
+    public void visit(AccessControlExceptionResponse rsp) throws Exception {
+        final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
+        if (input.containsChild(RequestsTags.TAG_RESPONSE_ERROR)) {
+            rsp.setErrorMessage(input.getChild(RequestsTags.TAG_RESPONSE_ERROR).getString());
+        }
+        if (input.containsChild(RequestsTags.TAG_RESPONSE_ACCESS_CONTROL_NOT_LOGGED_IN)) {
+            rsp.setNotLoggedIn(true);
+        }
+    }
+
+    @Override
+    public void visit(SqlExceptionResponse rsp) throws Exception {
         final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
         if (input.containsChild(RequestsTags.TAG_RESPONSE_ERROR)) {
             rsp.setErrorMessage(input.getChild(RequestsTags.TAG_RESPONSE_ERROR).getString());
@@ -89,12 +128,15 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
         if (input.containsChild(RequestsTags.TAG_RESPONSE_SQL_ERROR_STATE)) {
             rsp.setSqlState(input.getChild(RequestsTags.TAG_RESPONSE_SQL_ERROR_STATE).getString());
         }
-        if (input.containsChild(RequestsTags.TAG_RESPONSE_ACCESS_CONTROL)) {
-            rsp.setAccessControl(true);
-            if (input.containsChild(RequestsTags.TAG_RESPONSE_ACCESS_CONTROL_NOT_LOGGED_IN)) {
-                rsp.setNotLoggedIn(true);
-            }
+    }
+
+    @Override
+    public void visit(JsonExceptionResponse rsp) throws Exception {
+        final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
+        if (input.containsChild(RequestsTags.TAG_RESPONSE_ERROR)) {
+            rsp.setErrorMessage(input.getChild(RequestsTags.TAG_RESPONSE_ERROR).getString());
         }
+        rsp.setJsonContent(input.getChild(RequestsTags.TAG_RESPONSE_JS_OBJECT).getString());
     }
 
     @Override

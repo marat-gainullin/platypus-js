@@ -15,6 +15,10 @@ public class JsonExceptionResponse extends ExceptionResponse {
 
     protected String jsonContent;
 
+    public JsonExceptionResponse() {
+        super();
+    }
+
     public JsonExceptionResponse(JsObjectException aException, String aJsonContent) {
         super(aException);
         jsonContent = aJsonContent;
@@ -24,4 +28,13 @@ public class JsonExceptionResponse extends ExceptionResponse {
         return jsonContent;
     }
 
+    public void setJsonContent(String aValue) {
+        jsonContent = aValue;
+    }
+
+    @Override
+    public void accept(PlatypusResponseVisitor aVisitor) throws Exception {
+        aVisitor.visit(this);
+    }
+    
 }

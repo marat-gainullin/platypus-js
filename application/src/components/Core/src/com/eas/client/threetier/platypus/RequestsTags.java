@@ -58,6 +58,7 @@ public class RequestsTags extends CoreTags{
     public static final int TAG_RESPONSE_SQL_ERROR_STATE = 40; //string, sql exception SQLState property (if it is SQLException).
     public static final int TAG_RESPONSE_ACCESS_CONTROL = 41; //flag tag, indicating that access control exception occured on the server side.
     public static final int TAG_RESPONSE_ACCESS_CONTROL_NOT_LOGGED_IN = 42;
+    public static final int TAG_RESPONSE_JS_OBJECT = 401; //flag tag, indicating that JsObjectException occured on the server side.
     //StartAppElementRequest.Response
     //SetServerModulePropertyRequest.Response
     public static final int TAG_FILE_NAME = 43;

@@ -18,7 +18,7 @@ public class ExceptionResponse extends Response {
         super();
     }
 
-    public ExceptionResponse(Exception aException) {
+    public ExceptionResponse(Throwable aException) {
         super();
         errorMessage = aException.getMessage() != null && !aException.getMessage().isEmpty() ? aException.getMessage() : aException.toString();
     }

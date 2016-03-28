@@ -16,6 +16,10 @@ public class AccessControlExceptionResponse extends ExceptionResponse {
 
     private boolean notLoggedIn;
 
+    public AccessControlExceptionResponse() {
+        super();
+    }
+
     public AccessControlExceptionResponse(AccessControlException aException) {
         super(aException);
         if (aException.getPermission() instanceof AuthPermission) {

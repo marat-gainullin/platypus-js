@@ -9,18 +9,21 @@ import com.eas.client.report.Report;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
 import com.eas.client.threetier.http.PlatypusHttpResponseReader;
+import com.eas.client.threetier.requests.AccessControlExceptionResponse;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.client.threetier.requests.ServerModuleStructureRequest;
 import com.eas.client.threetier.requests.CredentialRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
-import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.client.threetier.requests.ExceptionResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
+import com.eas.client.threetier.requests.JsonExceptionResponse;
 import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
 import com.eas.client.threetier.requests.ResourceRequest;
+import com.eas.client.threetier.requests.SqlExceptionResponse;
 import com.eas.script.Scripts;
 import com.eas.util.IDGenerator;
 import com.eas.util.JSONUtils;
@@ -59,21 +62,35 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(ErrorResponse resp) throws Exception {
-        if (resp.isAccessControl()) {
-            /*
+    public void visit(ExceptionResponse resp) throws Exception {
+        servletResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, resp.getErrorMessage());
+        async.complete();
+    }
+
+    @Override
+    public void visit(AccessControlExceptionResponse acer) throws Exception {
+        /*
              // we can't send HttpServletResponse.SC_UNAUTHORIZED without knowlege about login mechanisms
-             // of J2EE container.
+             // of Sevlet/J2EE container.
              if (resp.isNotLoggedIn()) {
              servletResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, resp.getErrorMessage());
              } else {
              servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN, resp.getErrorMessage());
              }
-             */
-            servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN, resp.getErrorMessage());
-        } else {
-            servletResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, resp.getErrorMessage());
-        }
+         */
+        servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN, acer.getErrorMessage());
+        async.complete();
+    }
+
+    @Override
+    public void visit(JsonExceptionResponse jer) throws Exception {
+        servletResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, jer.getErrorMessage());
+        async.complete();
+    }
+
+    @Override
+    public void visit(SqlExceptionResponse ser) throws Exception {
+        servletResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ser.getErrorMessage());
         async.complete();
     }
 
