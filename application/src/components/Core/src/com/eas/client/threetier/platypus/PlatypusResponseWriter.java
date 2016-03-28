@@ -10,7 +10,7 @@ import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.client.threetier.requests.ServerModuleStructureRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
-import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.client.threetier.requests.ExceptionResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
@@ -41,7 +41,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     }
 
     public static void write(Response response, ProtoWriter writer) throws Exception {
-        if (response instanceof ErrorResponse) {
+        if (response instanceof ExceptionResponse) {
             writer.put(RequestsTags.TAG_ERROR_RESPONSE);
         } else {
             writer.put(RequestsTags.TAG_RESPONSE);
@@ -68,7 +68,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(ErrorResponse rsp) throws Exception {
+    public void visit(ExceptionResponse rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         if (rsp.getErrorMessage() != null) {
             writer.put(RequestsTags.TAG_RESPONSE_ERROR, rsp.getErrorMessage());

@@ -10,7 +10,7 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.report.Report;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.PlatypusClient;
-import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.client.threetier.requests.ExceptionResponse;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
@@ -95,9 +95,9 @@ public class PlatypusHttpConnection extends PlatypusConnection {
             Scripts.getContext().incAsyncsCount();
         }
         Consumer<PlatypusHttpRequestWriter> responseHandler = (PlatypusHttpRequestWriter aHttpSender) -> {
-            if (aHttpSender.response instanceof ErrorResponse) {
+            if (aHttpSender.response instanceof ExceptionResponse) {
                 if (onFailure != null) {
-                    Exception cause = handleErrorResponse((ErrorResponse) aHttpSender.response);
+                    Exception cause = handleErrorResponse((ExceptionResponse) aHttpSender.response, aSpace);
                     onFailure.accept(cause);
                 }
             } else {
@@ -311,8 +311,8 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                 Logger.getLogger(PlatypusHttpRequestWriter.class.getName()).log(Level.SEVERE, "Unsupported authorization scheme: {0}", res.authScheme);
             }
         }
-        if (httpSender.response instanceof ErrorResponse) {
-            throw handleErrorResponse((ErrorResponse) httpSender.response);
+        if (httpSender.response instanceof ExceptionResponse) {
+            throw handleErrorResponse((ExceptionResponse) httpSender.response, Scripts.getSpace());
         } else {
             PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, httpSender.conn, httpSender.responseBody);
             httpSender.response.accept(reader);

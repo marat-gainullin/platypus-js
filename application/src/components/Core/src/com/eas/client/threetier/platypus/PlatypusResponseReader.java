@@ -11,7 +11,7 @@ import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.client.threetier.requests.ServerModuleStructureRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
-import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.client.threetier.requests.ExceptionResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
@@ -59,7 +59,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
                     if (data != null) {
                         Response rsp;
                         if (errorResponse) {
-                            rsp = new ErrorResponse();
+                            rsp = new ExceptionResponse();
                         } else {
                             assert ordinaryReponse;
                             PlatypusResponsesFactory factory = new PlatypusResponsesFactory();
@@ -78,7 +78,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(ErrorResponse rsp) throws Exception {
+    public void visit(ExceptionResponse rsp) throws Exception {
         final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
         if (input.containsChild(RequestsTags.TAG_RESPONSE_ERROR)) {
             rsp.setErrorMessage(input.getChild(RequestsTags.TAG_RESPONSE_ERROR).getString());

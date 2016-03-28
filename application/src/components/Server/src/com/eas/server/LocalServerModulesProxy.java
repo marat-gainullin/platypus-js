@@ -9,7 +9,7 @@ import com.eas.client.ServerModuleInfo;
 import com.eas.client.ServerModulesProxy;
 import com.eas.client.cache.ScriptDocument;
 import com.eas.script.Scripts;
-import com.eas.server.scripts.JsObjectException;
+import com.eas.script.JsObjectException;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
