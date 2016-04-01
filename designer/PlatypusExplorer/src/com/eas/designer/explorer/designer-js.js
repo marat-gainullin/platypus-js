@@ -8,7 +8,7 @@
         },
         define: function () {
             var moduleDefiner = arguments.length === 1 ? arguments[0] : arguments.length === 2 ? arguments[1] : null;
-            if (moduleDefiner){
+            if (moduleDefiner) {
                 var moduleName = aSpace.getFileNameFromContext();
                 var module = moduleDefiner.call(null, moduleName);
                 aSpace.getDefined().put(moduleName, module);
@@ -49,5 +49,18 @@
     aSpace.setLoadFunc(function (aSourceLocation) {
         return load(aSourceLocation);
     });
+    aSpace.setListenFunc(function listenInstance(aTarget, aPath, aPropListener) {
+        return {
+            unlisten: function () {
+            }
+        };
+    });
+    aSpace.setListenElementsFunc(function listenElements(aData, aPropListener) {
+        return {
+            unlisten: function () {
+            }
+        };
+    });
+
     return global;
 })(space);

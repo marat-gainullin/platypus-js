@@ -104,13 +104,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
     }
 
     static {
-        if (EventQueue.isDispatchThread()) {
-            Scripts.setSpace(initScriptSpace());
-        } else {
-            EventQueue.invokeLater(() -> {
-                Scripts.setSpace(initScriptSpace());
-            });
-        }
+        Scripts.setOnlySpace(initScriptSpace());
     }
 
     static Scripts.Space initScriptSpace() {

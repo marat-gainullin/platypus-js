@@ -654,12 +654,11 @@ public class Scripts {
             Runnable taskWrapper = () -> {
                 setContext(context);
                 try {
-                    Space oldSpace = getSpace();
                     setSpace(Space.this);
                     try {
                         aTask.run();
                     } finally {
-                        setSpace(oldSpace);
+                        setSpace(null);
                     }
                 } finally {
                     setContext(null);
@@ -711,13 +710,12 @@ public class Scripts {
             Bindings bindings = SCRIPT_ENGINE.createBindings();
             scriptContext.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
             try {
-                Space oldSpace = getSpace();
                 setSpace(Space.this);
                 try {
                     scriptContext.setAttribute(ScriptEngine.FILENAME, INTERNALS_MODULENAME, ScriptContext.ENGINE_SCOPE);
                     SCRIPT_ENGINE.eval(new URLReader(internalsUrl), scriptContext);
                 } finally {
-                    setSpace(oldSpace);
+                    setSpace(null);
                 }
             } catch (ScriptException ex) {
                 Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
@@ -807,10 +805,11 @@ public class Scripts {
     public static boolean isInitialized() {
         Space space = getSpace();
         return space != null
-                && space.listenElementsFunc != null
-                && space.listenFunc != null
-                && space.scalarDefFunc != null
-                && space.collectionDefFunc != null;
+                && space.lookupInGlobalFunc != null
+                && space.toPrimitiveFunc != null
+                && space.toDateFunc != null
+                && space.makeObjFunc != null
+                && space.makeArrayFunc != null;
     }
 
     public static boolean isValidJsIdentifier(final String aName) {
