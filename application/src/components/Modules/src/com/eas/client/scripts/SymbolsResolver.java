@@ -770,7 +770,6 @@ public class SymbolsResolver extends SimpleNodeVisitor {
 
     @Override
     public Node leaveTryNode(final TryNode tryNode) {
-        assert tryNode.getFinallyBody() == null;
         return tryNode.setException(lc, exceptionSymbol());
     }
 

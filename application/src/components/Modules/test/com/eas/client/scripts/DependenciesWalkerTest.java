@@ -16,7 +16,7 @@ public class DependenciesWalkerTest {
     @Test
     public void testParseDependencies5() {
         String va1 = "var report = new P.ServerModule(\"ANY_REPORT_NAME\"); var module = new ANY_MODULE_NAME(); var servModule = new P.ServerModule(\"ANY_MODULE_NAME\");";
-        DependenciesWalker walker = new DependenciesWalker(va1, (String aIfDependency)->{
+        DependenciesWalker walker = new DependenciesWalker(va1, (String aIfDependency) -> {
             return "ANY_MODULE_NAME".equals(aIfDependency);
         });
         walker.walk();
@@ -28,7 +28,7 @@ public class DependenciesWalkerTest {
     @Test
     public void testParseDependencies6() {
         String va1 = "P.require([\"ANY_REPORT_NAME\", \"ANY_MODULE_NAME\"], function(){var report = new RPC.Proxy(\"ANY_REPORT_NAME\"); var module = new ANY_MODULE1_NAME(); var servModule = new P.ServerModule(\"ANY_MODULE_NAME\");});";
-        DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{
+        DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency) -> {
             return "ANY_MODULE1_NAME".equals(aIfDependency);
         });
         walker.walk();
@@ -54,7 +54,7 @@ public class DependenciesWalkerTest {
         assertTrue(walker.getDependencies().isEmpty());
         assertFalse(walker.getServerDependencies().isEmpty());
     }
-    
+
     @Test
     public void testParseAmdDependencies1() {
         String va1 = ""
@@ -65,14 +65,14 @@ public class DependenciesWalkerTest {
                 + "        var sm = P.ServerModule('ServerCalc');"
                 + "    };"
                 + "});";
-        DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{
+        DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency) -> {
             return "AnyModule1".equals(aIfDependency);
         });
         walker.walk();
         assertTrue(walker.getDependencies().isEmpty());
         assertFalse(walker.getServerDependencies().isEmpty());
     }
-    
+
     @Test
     public void testParseAmdDependencies2() {
         String va1 = ""
@@ -84,7 +84,7 @@ public class DependenciesWalkerTest {
                 + "        var sm = RPC.Proxy('ServerCalc');"
                 + "    };"
                 + "});";
-        DependenciesWalker walker = new DependenciesWalker(va1, (ifDependency)->{
+        DependenciesWalker walker = new DependenciesWalker(va1, (ifDependency) -> {
             return "AnyModule1".equals(ifDependency) || "AnyModule2".equals(ifDependency);
         });
         walker.walk();
@@ -94,7 +94,7 @@ public class DependenciesWalkerTest {
         assertEquals(1, walker.getServerDependencies().size());
         assertTrue(walker.getServerDependencies().contains("ServerCalc"));
     }
-    
+
     @Test
     public void testParseAmdDependencies3() {
         String va1 = ""
@@ -107,7 +107,7 @@ public class DependenciesWalkerTest {
                 + "        var sm = RPC.Proxy('ServerCalc');"
                 + "    };"
                 + "});";
-        DependenciesWalker walker = new DependenciesWalker(va1, (ifDependency)->{
+        DependenciesWalker walker = new DependenciesWalker(va1, (ifDependency) -> {
             return "AnyModule1".equals(ifDependency) || "AnyModule2".equals(ifDependency) || "AnyModule3".equals(ifDependency);
         });
         walker.walk();
@@ -117,7 +117,7 @@ public class DependenciesWalkerTest {
         assertEquals(1, walker.getServerDependencies().size());
         assertTrue(walker.getServerDependencies().contains("ServerCalc"));
     }
-    
+
     @Test
     public void testParseAmdDependencies4() {
         String va1 = ""
@@ -128,14 +128,14 @@ public class DependenciesWalkerTest {
                 + "        var sm = P.ServerModule('ServerCalc');"
                 + "    };"
                 + "});";
-        DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{
+        DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency) -> {
             return "AnyModule1".equals(aIfDependency);
         });
         walker.walk();
         assertTrue(walker.getDependencies().isEmpty());
         assertFalse(walker.getServerDependencies().isEmpty());
     }
-    
+
     @Test
     public void testParseAmdDependencies5() {
         String va1 = ""
@@ -146,14 +146,14 @@ public class DependenciesWalkerTest {
                 + "        var sm = RPC.Proxy('ServerCalc');"
                 + "    };"
                 + "});";
-        DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{
+        DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency) -> {
             return "AnyModule2".equals(aIfDependency);
         });
         walker.walk();
         assertTrue(walker.getDependencies().isEmpty());
         assertFalse(walker.getServerDependencies().isEmpty());
     }
-    
+
     @Test
     public void testParseDependencies9() {
         String va1 = "var q = model.loadEntity('someQuery');";
@@ -164,7 +164,7 @@ public class DependenciesWalkerTest {
         assertEquals(1, walker.getQueryDependencies().size());
         assertTrue(walker.getQueryDependencies().contains("someQuery"));
     }
-    
+
     @Test
     public void testParseDependencies10() {
         String va1 = "var m = HY.HT.IO.PK.SomeModule;";
@@ -174,11 +174,11 @@ public class DependenciesWalkerTest {
         assertTrue(walker.getServerDependencies().isEmpty());
         assertTrue(walker.getQueryDependencies().isEmpty());
     }
-    
+
     @Test
     public void testParseDependencies11() {
         String va1 = "var m = new SomeModule();";
-        DependenciesWalker walker = new DependenciesWalker(va1, (String aIfDependence)->{
+        DependenciesWalker walker = new DependenciesWalker(va1, (String aIfDependence) -> {
             return "SomeModule".equals(aIfDependence);
         });
         walker.walk();
@@ -187,11 +187,11 @@ public class DependenciesWalkerTest {
         assertTrue(walker.getServerDependencies().isEmpty());
         assertTrue(walker.getQueryDependencies().isEmpty());
     }
-    
+
     @Test
     public void testParseDependencies12() {
         String va1 = "var m = SomeConstructor;";
-        DependenciesWalker walker = new DependenciesWalker(va1, (String aIfDependency)->{
+        DependenciesWalker walker = new DependenciesWalker(va1, (String aIfDependency) -> {
             return "SomeConstructor".equals(aIfDependency) || "m".equals(aIfDependency);
         });
         walker.walk();
@@ -200,4 +200,46 @@ public class DependenciesWalkerTest {
         assertTrue(walker.getServerDependencies().isEmpty());
         assertTrue(walker.getQueryDependencies().isEmpty());
     }
+
+    @Test
+    public void testTryCatchTryFinally() {
+        String sample = ""
+                + "try{"
+                + "}catch(e){"
+                + "  try{"
+                + "  }finally{"
+                + "    try{"
+                + "    }catch(e1){"
+                + "    }"
+                + "  }"
+                + "}";
+        DependenciesWalker walker = new DependenciesWalker(sample, null);
+        walker.walk();
+        assertTrue(walker.getDependencies().isEmpty());
+        assertTrue(walker.getServerDependencies().isEmpty());
+        assertTrue(walker.getQueryDependencies().isEmpty());
+    }
+
+    @Test
+    public void testTryFinallyTryCatch() {
+        String sample = ""
+                + "try{"
+                + "}finally{"
+                + "  try{"
+                + "  }catch(e){"
+                + "    try{"
+                + "    }finally{"
+                + "      try{"
+                + "      }catch(e1){"
+                + "      }"
+                + "    }"
+                + "  }"
+                + "}";
+        DependenciesWalker walker = new DependenciesWalker(sample, null);
+        walker.walk();
+        assertTrue(walker.getDependencies().isEmpty());
+        assertTrue(walker.getServerDependencies().isEmpty());
+        assertTrue(walker.getQueryDependencies().isEmpty());
+    }
+
 }
