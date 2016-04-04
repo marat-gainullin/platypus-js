@@ -18,10 +18,10 @@ import java.awt.EventQueue;
 import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
@@ -57,7 +57,7 @@ public class ModelFormattedField extends ModelComponentDecorator<VFormattedField
     @ScriptFunction
     @Override
     public void setJsValue(Object aValue) {
-        setValue(Scripts.isInitialized() ? Scripts.getSpace().toJava(aValue) : aValue);
+        setValue(aValue != null ? JSType.toString(aValue) : null);
     }
 
     @Override

@@ -802,14 +802,16 @@ public class Scripts {
         return space;
     }
 
+    /**
+     * If scripts are initialized, then Platypua.ja system will work in full manner.
+     * Otherwise it will not perform some actions, such as data binding.
+     * @return True if scripts are fully initialized, false otherwise.
+     */
     public static boolean isInitialized() {
         Space space = getSpace();
         return space != null
-                && space.lookupInGlobalFunc != null
-                && space.toPrimitiveFunc != null
-                && space.toDateFunc != null
-                && space.makeObjFunc != null
-                && space.makeArrayFunc != null;
+                && space.copyObjectFunc != null
+                && space.restoreObjectFunc != null;
     }
 
     public static boolean isValidJsIdentifier(final String aName) {

@@ -774,6 +774,7 @@ public class QueryResultsView extends javax.swing.JPanel {
 
     private void initModelGrid() throws Exception {
         grid = new ModelGrid();
+        grid.setRowsHeight(20);
         grid.setAutoRefreshHeader(false);
         gridPanel.add(grid);
         Fields fields = query.getFields();
