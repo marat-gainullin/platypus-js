@@ -97,8 +97,14 @@ public class PlatypusHttpConnection extends PlatypusConnection {
         Consumer<PlatypusHttpRequestWriter> responseHandler = (PlatypusHttpRequestWriter aHttpSender) -> {
             if (aHttpSender.response instanceof ExceptionResponse) {
                 if (onFailure != null) {
-                    Exception cause = handleErrorResponse((ExceptionResponse) aHttpSender.response, aSpace);
-                    onFailure.accept(cause);
+                    try {
+                        PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, aHttpSender.conn, aHttpSender.responseBody);
+                        aHttpSender.response.accept(reader);
+                        Exception cause = handleErrorResponse((ExceptionResponse) aHttpSender.response, aSpace);
+                        onFailure.accept(cause);
+                    } catch (Exception ex) {
+                        Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             } else {
                 if (aRequest instanceof LogoutRequest) {

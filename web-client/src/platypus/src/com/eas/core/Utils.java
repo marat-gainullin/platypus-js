@@ -189,19 +189,19 @@ public class Utils {
 		}-*/;
 
 		public static native JavaScriptObject parseJSON(String aText)/*-{
-			return JSON.parse(aText);
+			return $wnd.JSON.parse(aText);
 		}-*/;
 
 		public static native String stringifyJSON(Object aValue)/*-{
-			return JSON.stringify(aValue);
+			return $wnd.JSON.stringify(aValue);
 		}-*/;
 
 		public static native JavaScriptObject parseJSONDateReviver(String aText)/*-{
-			return JSON.parse(aText, @com.eas.core.Utils.JsObject::dateReviver()());
+			return $wnd.JSON.parse(aText, @com.eas.core.Utils.JsObject::dateReviver()());
 		}-*/;
 
 		public static native String writeJSON(JavaScriptObject changeLog)/*-{
-			return JSON.stringify(changeLog);
+			return $wnd.JSON.stringify(changeLog);
 		}-*/;
 
 		public native final int indexOf(JavaScriptObject anElement)/*-{
@@ -397,12 +397,12 @@ public class Utils {
 
 	public native static Object jsonParse(String aData) throws Exception /*-{
 		var B = @com.eas.core.Predefine::boxing;
-		return B.boxAsJava(JSON.parse(aData, @com.eas.core.Utils.JsObject::dateReviver()()));
+		return B.boxAsJava($wnd.JSON.parse(aData, @com.eas.core.Utils.JsObject::dateReviver()()));
 	}-*/;
 
 	public native static String jsonStringify(Object aToJsedObject) /*-{
 		var B = @com.eas.core.Predefine::boxing;
-		return JSON.stringify(B.boxAsJs(aToJsedObject));
+		return $wnd.JSON.stringify(B.boxAsJs(aToJsedObject));
 	}-*/;
 
 	public native static void invokeJsFunction(JavaScriptObject aHandler) /*-{
@@ -567,7 +567,7 @@ public class Utils {
             if (!(val instanceof Object) || val instanceof Date || 
                 val instanceof Number || val instanceof String || 
                 val instanceof Boolean) {
-                m.@java.util.HashMap::put(Ljava/lang/Object;Ljava/lang/Object;)(key, JSON.stringify(val));  	
+                m.@java.util.HashMap::put(Ljava/lang/Object;Ljava/lang/Object;)(key, $wnd.JSON.stringify(val));  	
             }		
         }	
         return m;

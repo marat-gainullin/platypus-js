@@ -8,6 +8,7 @@ import com.eas.client.application.PlatypusClientApplication;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.designer.application.PlatypusUtils;
+import com.eas.designer.application.platform.PlatformHomePathException;
 import com.eas.designer.application.platform.PlatypusPlatform;
 import com.eas.designer.application.project.AppServerType;
 import com.eas.designer.application.project.ClientType;
@@ -210,7 +211,8 @@ public class ProjectRunner {
                         appUrl = webManager.start(aDebug);
                     } else {
                         throw new IllegalStateException("An instance of PlatypusWebModuleManager is not found in project's lookup.");
-                    }   break;
+                    }
+                    break;
                 case PLATYPUS_SERVER:
                     // Because of undeploy() before update Platypus.js runtime in case of web application
                     aProject.getSettings().load();
@@ -224,7 +226,7 @@ public class ProjectRunner {
                             DebuggerEngine[] startedEngines = DebuggerManager.getDebuggerManager().startDebugging(DebuggerInfo.create(AttachingDICookie.ID, new Object[]{AttachingDICookie.create(LOCAL_HOSTNAME, aProject.getSettings().getDebugServerPort())}));
                             DebuggerEngine justStartedEngine = startedEngines[0];
                             DebuggerManager.getDebuggerManager().addDebuggerListener(new DebuggerManagerAdapter() {
-                                
+
                                 @Override
                                 public void engineRemoved(DebuggerEngine engine) {
                                     if (engine == justStartedEngine) {
@@ -232,14 +234,15 @@ public class ProjectRunner {
                                         DebuggerManager.getDebuggerManager().removeDebuggerListener(this);
                                     }
                                 }
-                                
+
                             });
                             aProject.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Server_Debug_Activated"));//NOI18N
                         }
                         io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Waiting_Platypus_Server"));//NOI18N
                         PlatypusServerRunner.waitForServer(LOCAL_HOSTNAME, pps.getServerPort());
                         io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Platypus_Server_Started"));//NOI18N
-                    }   break;
+                    }
+                    break;
                 default:
                     // Because of undeploy() before update Platypus.js runtime in case of web application
                     aProject.getSettings().load();
@@ -318,12 +321,14 @@ public class ProjectRunner {
                     arguments.add(aProject.getProjectDirectory().toURI().toASCIIString());
                     io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_App_Sources"), aProject.getProjectDirectory().toURI().toASCIIString()));//NOI18N
                 } else {
-                    String classPath = StringUtils.join(File.pathSeparator
-                            , PlatypusPlatform.getPlatformBinDirectory().getAbsolutePath() + File.separator + "Application.jar"
-                            , PlatypusPlatform.getPlatformApiDirectory().getAbsolutePath()
-                            , getDirectoryClasspath(FileUtil.toFileObject(PlatypusPlatform.getPlatformExtDirectory()) ));
-                    arguments.add(OPTION_PREFIX + CLASSPATH_OPTION_NAME);
-                    arguments.add(classPath);
+                    try {
+                        String classPath = StringUtils.join(File.pathSeparator, PlatypusPlatform.getPlatformBinDirectory().getAbsolutePath() + File.separator + "Application.jar", PlatypusPlatform.getPlatformApiDirectory().getAbsolutePath(), getDirectoryClasspath(FileUtil.toFileObject(PlatypusPlatform.getPlatformExtDirectory())));
+                        arguments.add(OPTION_PREFIX + CLASSPATH_OPTION_NAME);
+                        arguments.add(classPath);
+                    } catch (PlatformHomePathException ex) {
+                        io.getOut().println(ex.getMessage());//NOI18N
+                        throw new IllegalStateException(ex);
+                    }
 
                     arguments.add(PlatypusClientApplication.class.getName());
 
@@ -335,7 +340,7 @@ public class ProjectRunner {
                         } else {
                             throw new IllegalStateException("An instance of PlatypusWebModuleManager is not found in project's lookup.");
                         }
-                    } else/* if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) */{
+                    } else/* if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) */ {
                         appUrl = getDevPlatypusServerUrl(pps);
                     }
                     if (appUrl != null && !appUrl.isEmpty()) {
@@ -346,7 +351,7 @@ public class ProjectRunner {
                         throw new IllegalStateException(NbBundle.getMessage(ProjectRunner.class, "MSG_Cnt_Start_Platypus_Client"));
                     }
                 }
-                if(aProject.getSettings().getSourcePath() != null && !aProject.getSettings().getSourcePath().isEmpty()){
+                if (aProject.getSettings().getSourcePath() != null && !aProject.getSettings().getSourcePath().isEmpty()) {
                     arguments.add(OPTION_PREFIX + PlatypusClientApplication.SOURCE_PATH_CONF_PARAM);
                     arguments.add(aProject.getSettings().getSourcePath());
                 }

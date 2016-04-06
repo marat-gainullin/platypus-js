@@ -10,7 +10,7 @@ import com.eas.proto.CoreTags;
  *
  * @author mg
  */
-public class RequestsTags extends CoreTags{
+public class RequestsTags extends CoreTags {
 
     /**
      * ******************* requests tags *************************************
@@ -50,7 +50,10 @@ public class RequestsTags extends CoreTags{
      * ******************* responses tags *************************************
      */
     public static final int TAG_RESPONSE = 34; //marker of an ordinary response.
-    public static final int TAG_ERROR_RESPONSE = 35; //marker of an error response.
+    public static final int TAG_ERROR_RESPONSE = 35; //marker of a general error response.
+    public static final int TAG_JSON_ERROR_RESPONSE = 136; //flag tag, indicating that JsObjectException occured on the server side.
+    public static final int TAG_SQL_ERROR_RESPONSE = 137; //flag tag, indicating that JsObjectException occured on the server side.
+    public static final int TAG_ACCESS_CONTROL_ERROR_RESPONSE = 138; //flag tag, indicating that JsObjectException occured on the server side.
     public static final int TAG_RESPONSE_ERROR = 36; //string inside, message of exception.
     public static final int TAG_RESPONSE_DATA = 37; //any request-specific response data as a substream.
     public static final int TAG_RESPONSE_END = 38; //empty, marks the end of a response.
@@ -58,7 +61,7 @@ public class RequestsTags extends CoreTags{
     public static final int TAG_RESPONSE_SQL_ERROR_STATE = 40; //string, sql exception SQLState property (if it is SQLException).
     public static final int TAG_RESPONSE_ACCESS_CONTROL = 41; //flag tag, indicating that access control exception occured on the server side.
     public static final int TAG_RESPONSE_ACCESS_CONTROL_NOT_LOGGED_IN = 42;
-    public static final int TAG_RESPONSE_JS_OBJECT = 401; //flag tag, indicating that JsObjectException occured on the server side.
+    public static final int TAG_RESPONSE_JSON = 143;
     //StartAppElementRequest.Response
     //SetServerModulePropertyRequest.Response
     public static final int TAG_FILE_NAME = 43;

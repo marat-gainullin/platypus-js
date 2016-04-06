@@ -213,7 +213,7 @@ public class JsModel {
 			            var datum = anObject[aKeyName];
 			            if (key.length > 0)
 			                key += ' | ';
-			            key += datum instanceof Date ? JSON.stringify(datum) : '' + datum;
+			            key += datum instanceof Date ? $wnd.JSON.stringify(datum) : '' + datum;
 			        });
 			        return key;
 			    }

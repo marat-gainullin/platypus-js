@@ -128,13 +128,6 @@ public abstract class PlatypusConnection implements AppConnection {
     }
 
     protected static KeyManager[] createKeyManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
-        /*
-         KeyStore ks = KeyStore.getInstance(DEFAULT_CETRS_STORE_TYPE);     
-         ks.load(null, null);
-         final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
-         keyManagerFactory.init(ks, "changeit".toCharArray());
-         return keyManagerFactory.getKeyManagers();
-         */
         KeyStore ks = KeyStore.getInstance(DEFAULT_CETRS_STORE_TYPE);
         // get user password and file input stream
         char[] password = DEFAULT_KEYSTORE_PASSWORD.toCharArray();

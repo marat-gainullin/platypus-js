@@ -44,7 +44,13 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     }
 
     public static void write(Response response, ProtoWriter writer) throws Exception {
-        if (response instanceof ExceptionResponse) {
+        if (response instanceof SqlExceptionResponse) {
+            writer.put(RequestsTags.TAG_SQL_ERROR_RESPONSE);
+        } else if (response instanceof JsonExceptionResponse) {
+            writer.put(RequestsTags.TAG_JSON_ERROR_RESPONSE);
+        } else if (response instanceof AccessControlExceptionResponse) {
+            writer.put(RequestsTags.TAG_ACCESS_CONTROL_ERROR_RESPONSE);
+        } else if (response instanceof ExceptionResponse) {
             writer.put(RequestsTags.TAG_ERROR_RESPONSE);
         } else {
             writer.put(RequestsTags.TAG_RESPONSE);
@@ -106,7 +112,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     public void visit(JsonExceptionResponse rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         writer.put(RequestsTags.TAG_RESPONSE_ERROR, rsp.getErrorMessage());
-        writer.put(RequestsTags.TAG_RESPONSE_JS_OBJECT, rsp.getJsonContent());
+        writer.put(RequestsTags.TAG_RESPONSE_JSON, rsp.getJsonContent());
         writer.flush();
     }
 

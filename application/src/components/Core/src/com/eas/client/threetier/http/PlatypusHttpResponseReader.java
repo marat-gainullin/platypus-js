@@ -92,7 +92,8 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
 
     @Override
     public void visit(JsonExceptionResponse rsp) throws Exception {
-        // Error response has no body
+        String json = extractText();
+        rsp.setJsonContent(json);
     }
 
     @Override

@@ -29,7 +29,6 @@ import com.eas.proto.dom.ProtoDOMBuilder;
 import com.eas.proto.dom.ProtoNode;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 /**
  *
@@ -45,56 +44,40 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     }
 
     public static Response read(ProtoReader reader, Request aRequest) throws Exception {
-        boolean regularReponse = false;
-        boolean errorResponse = false;
         byte[] data = null;
+        Response rsp = null;
         do {
             switch (reader.getNextTag()) {
                 case RequestsTags.TAG_RESPONSE:
-                    regularReponse = true;
+                    PlatypusResponsesFactory factory = new PlatypusResponsesFactory();
+                    aRequest.accept(factory);
+                    rsp = factory.getResponse();
                     break;
                 case RequestsTags.TAG_ERROR_RESPONSE:
-                    errorResponse = true;
+                    rsp = new ExceptionResponse();
+                    break;
+                case RequestsTags.TAG_SQL_ERROR_RESPONSE:
+                    rsp = new SqlExceptionResponse();
+                    break;
+                case RequestsTags.TAG_JSON_ERROR_RESPONSE:
+                    rsp = new JsonExceptionResponse();
+                    break;
+                case RequestsTags.TAG_ACCESS_CONTROL_ERROR_RESPONSE:
+                    rsp = new AccessControlExceptionResponse();
                     break;
                 case RequestsTags.TAG_RESPONSE_DATA:
                     data = reader.getSubStreamData();
                     break;
                 case RequestsTags.TAG_RESPONSE_END:
-                    if (data != null) {
-                        Response rsp;
-                        if (errorResponse) {
-                            rsp = peekResponse(data);
-                        } else {
-                            assert regularReponse : "Error / regular response assumption failed";
-                            PlatypusResponsesFactory factory = new PlatypusResponsesFactory();
-                            aRequest.accept(factory);
-                            rsp = factory.getResponse();
-                        }
-                        PlatypusResponseReader responseReader = new PlatypusResponseReader(data);
-                        rsp.accept(responseReader);
-                        return rsp;
-                    } else {
-                        throw new NullPointerException("Response data must present");
-                    }
             }
-        } while (reader.getCurrentTag() != CoreTags.TAG_EOF && reader.getCurrentTag() != RequestsTags.TAG_REQUEST_END);
-        return null;
-    }
-
-    private static ExceptionResponse peekResponse(byte[] bytes) throws IOException {
-        ProtoReader reader = new ProtoReader(new ByteArrayInputStream(bytes));
-        do {
-            switch (reader.getNextTag()) {
-                case RequestsTags.TAG_RESPONSE_ACCESS_CONTROL:
-                    return new AccessControlExceptionResponse();
-                case RequestsTags.TAG_RESPONSE_SQL_ERROR_CODE:
-                case RequestsTags.TAG_RESPONSE_SQL_ERROR_STATE:
-                    return new SqlExceptionResponse();
-                case RequestsTags.TAG_RESPONSE_JS_OBJECT:
-                    return new JsonExceptionResponse();
-            }
-        } while (reader.getCurrentTag() != CoreTags.TAG_EOF);
-        return new ExceptionResponse();
+        } while (reader.getCurrentTag() != CoreTags.TAG_EOF && reader.getCurrentTag() != RequestsTags.TAG_RESPONSE_END);
+        if (rsp != null && data != null) {
+            PlatypusResponseReader responseReader = new PlatypusResponseReader(data);
+            rsp.accept(responseReader);
+            return rsp;
+        } else {
+            throw new NullPointerException("Response data must present");
+        }
     }
 
     @Override
@@ -136,7 +119,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
         if (input.containsChild(RequestsTags.TAG_RESPONSE_ERROR)) {
             rsp.setErrorMessage(input.getChild(RequestsTags.TAG_RESPONSE_ERROR).getString());
         }
-        rsp.setJsonContent(input.getChild(RequestsTags.TAG_RESPONSE_JS_OBJECT).getString());
+        rsp.setJsonContent(input.getChild(RequestsTags.TAG_RESPONSE_JSON).getString());
     }
 
     @Override

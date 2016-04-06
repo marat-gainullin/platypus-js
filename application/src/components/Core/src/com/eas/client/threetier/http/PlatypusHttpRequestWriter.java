@@ -182,6 +182,11 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
                     response = responseFactory.getResponse();
                 }
             }
+        } else if (responseCode == HttpURLConnection.HTTP_CONFLICT && conn.getContentType().toLowerCase().startsWith("application/json")) {
+            response = new JsonExceptionResponse();
+            try (InputStream in = conn.getErrorStream()) {
+                responseBody = BinaryUtils.readStream(in, -1);
+            }
         } else {
             Logger.getLogger(PlatypusHttpRequestWriter.class.getName()).log(Level.SEVERE, String.format("Server error %d. %s", conn.getResponseCode(), conn.getResponseMessage()));
             response = new ExceptionResponse();

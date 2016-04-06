@@ -38,7 +38,7 @@ public class ResponseEncoder implements ProtocolEncoder {
     }
 
     @Override
-    public void dispose(IoSession arg0) throws Exception {
+    public void dispose(IoSession aSession) throws Exception {
         //nothing to dispose
     }
 }
