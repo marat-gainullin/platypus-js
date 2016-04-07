@@ -539,7 +539,7 @@ public class JsApi {
 					for (var j = 0; j < argsLength; j++) {
 						var to = typeof arguments[j];
 						if(to !== 'undefined' && to !== 'function'){ 
-							params[j] = JSON.stringify(arguments[j]);
+							params[j] = $wnd.JSON.stringify(arguments[j]);
 						}else{
 							break;
 						}
@@ -550,11 +550,11 @@ public class JsApi {
 								if(typeof aResult === 'object' && aResult instanceof Report)
 									onSuccess(aResult);
 								else
-									onSuccess(JSON.parse(aResult, @com.eas.core.Utils.JsObject::dateReviver()()));
+									onSuccess($wnd.JSON.parse(aResult, @com.eas.core.Utils.JsObject::dateReviver()()));
 							}, onFailure, Report);
 					} else {
 						var result = nativeClient.@com.eas.client.AppClient::requestServerMethodExecution(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params, null, null, Report);
-						return typeof result === 'object' && result instanceof Report ? result : JSON.parse(result, @com.eas.core.Utils.JsObject::dateReviver()()); 
+						return typeof result === 'object' && result instanceof Report ? result : $wnd.JSON.parse(result, @com.eas.core.Utils.JsObject::dateReviver()()); 
 					}
 				};
 			}

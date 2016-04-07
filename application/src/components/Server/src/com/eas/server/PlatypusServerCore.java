@@ -27,7 +27,7 @@ import com.eas.script.JsDoc;
 import com.eas.script.Scripts;
 import com.eas.server.handlers.ServerModuleStructureRequestHandler;
 import com.eas.server.handlers.RPCRequestHandler;
-import com.eas.server.scripts.JsObjectException;
+import com.eas.script.JsObjectException;
 import java.io.File;
 import java.security.AccessControlException;
 import java.util.ArrayList;

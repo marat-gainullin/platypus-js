@@ -10,7 +10,8 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
-import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.client.threetier.requests.AccessControlExceptionResponse;
+import com.eas.client.threetier.requests.ExceptionResponse;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.concurrent.DeamonThreadFactory;
 import com.eas.script.Scripts;
@@ -242,9 +243,9 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
         }
         Attempts attemps = new Attempts();
         Consumer<Response> responseHandler = (Response response) -> {
-            if (response instanceof ErrorResponse) {
+            if (response instanceof ExceptionResponse) {
                 if (onFailure != null) {
-                    Exception cause = handleErrorResponse((ErrorResponse) response);
+                    Exception cause = handleErrorResponse((ExceptionResponse) response, aSpace);
                     onFailure.accept(cause);
                 }
             } else if (onSuccess != null) {
@@ -267,7 +268,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
             try {
                 aSpace.process(() -> {
                     try {
-                        if (response instanceof ErrorResponse && ((ErrorResponse) response).isNotLoggedIn()) {
+                        if (response instanceof AccessControlExceptionResponse && ((AccessControlExceptionResponse) response).isNotLoggedIn()) {
                             if (attemps.count++ < maximumAuthenticateAttempts) {
                                 if (credentials != null && !credentials.equals(sentCreds)) {
                                     retry(aRequest, aSpace, responseHandler, attemps);
@@ -352,7 +353,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     public <R extends Response> R executeRequest(Request aRequest) throws Exception {
         R response = retrySync(aRequest);
         int authenticateAttempts = 0;
-        while (response instanceof ErrorResponse && ((ErrorResponse) response).isNotLoggedIn() && authenticateAttempts++ < maximumAuthenticateAttempts && onCredentials != null) {
+        while (response instanceof AccessControlExceptionResponse && ((AccessControlExceptionResponse) response).isNotLoggedIn() && authenticateAttempts++ < maximumAuthenticateAttempts && onCredentials != null) {
             Credentials creds = onCredentials.call();
             if (creds != null) {
                 credentials = creds;
@@ -360,8 +361,8 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
             }
             response = retrySync(aRequest);
         }
-        if (response instanceof ErrorResponse) {
-            throw handleErrorResponse((ErrorResponse) response);
+        if (response instanceof ExceptionResponse) {
+            throw handleErrorResponse((ExceptionResponse) response, Scripts.getSpace());
         } else {
             if (aRequest instanceof LogoutRequest) {
                 credentials = null;

@@ -10,6 +10,7 @@ import com.eas.client.report.Report;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.client.threetier.requests.ServerModuleStructureRequest;
+import com.eas.script.JsObjectException;
 import com.eas.script.Scripts;
 import java.util.Date;
 import java.util.HashSet;
@@ -105,7 +106,7 @@ public class RemoteServerModulesProxy implements ServerModulesProxy{
                 onSuccess.call(null, new Object[]{aResult});
             }, (Exception ex) -> {
                 if (onFailure != null) {
-                    onFailure.call(null, new Object[]{ex.getMessage()});
+                    onFailure.call(null, new Object[]{ex instanceof JsObjectException ? ((JsObjectException)ex).getData()  : ex.getMessage()});
                 }
             }, aArguments);
             return null;

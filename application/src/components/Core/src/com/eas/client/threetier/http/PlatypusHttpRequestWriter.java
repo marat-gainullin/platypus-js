@@ -9,7 +9,7 @@ import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.*;
-import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.client.threetier.requests.ExceptionResponse;
 import com.eas.concurrent.CallableConsumer;
 import com.eas.util.BinaryUtils;
 import java.io.IOException;
@@ -155,26 +155,26 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         String redirectLocation = null;
         if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
             authScheme = conn.getHeaderField(PlatypusHttpConstants.HEADER_WWW_AUTH);
-            response = new ErrorResponse(conn.getResponseCode() + " " + conn.getResponseMessage());
-            ((ErrorResponse) response).setAccessControl(true);
-            ((ErrorResponse) response).setNotLoggedIn(true);
+            response = new AccessControlExceptionResponse();
+            ((AccessControlExceptionResponse) response).setErrorMessage(conn.getResponseCode() + " " + conn.getResponseMessage());
+            ((AccessControlExceptionResponse) response).setNotLoggedIn(true);
         } else if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP
                 && conn.getHeaderField(PlatypusHttpConstants.HEADER_LOCATION) != null
                 && conn.getHeaderField(PlatypusHttpConstants.HEADER_LOCATION).toLowerCase().contains(PlatypusHttpConstants.SECURITY_REDIRECT_LOCATION.toLowerCase())) {
             redirectLocation = PlatypusHttpConstants.SECURITY_REDIRECT_LOCATION;
             authScheme = PlatypusHttpConstants.FORM_AUTH_NAME;
-            response = new ErrorResponse(conn.getResponseCode() + " " + conn.getResponseMessage());
-            ((ErrorResponse) response).setAccessControl(true);
-            ((ErrorResponse) response).setNotLoggedIn(true);
+            response = new AccessControlExceptionResponse();
+            ((AccessControlExceptionResponse) response).setErrorMessage(conn.getResponseCode() + " " + conn.getResponseMessage());
+            ((AccessControlExceptionResponse) response).setNotLoggedIn(true);
         } else if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
             try (InputStream in = conn.getInputStream()) {
                 responseBody = BinaryUtils.readStream(in, -1);
                 if (checkIfSecirutyForm(responseBody)) {
                     redirectLocation = PlatypusHttpConstants.SECURITY_REDIRECT_LOCATION;
                     authScheme = PlatypusHttpConstants.FORM_AUTH_NAME;
-                    response = new ErrorResponse(HttpURLConnection.HTTP_UNAUTHORIZED + "");
-                    ((ErrorResponse) response).setAccessControl(true);
-                    ((ErrorResponse) response).setNotLoggedIn(true);
+                    response = new AccessControlExceptionResponse();
+                    ((AccessControlExceptionResponse) response).setErrorMessage(HttpURLConnection.HTTP_UNAUTHORIZED + "");
+                    ((AccessControlExceptionResponse) response).setNotLoggedIn(true);
                 } else {
                     // background bio waiting thread will enqueue responseBody reading to a working thread
                     PlatypusResponsesFactory responseFactory = new PlatypusResponsesFactory();
@@ -182,9 +182,15 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
                     response = responseFactory.getResponse();
                 }
             }
+        } else if (responseCode == HttpURLConnection.HTTP_CONFLICT && conn.getContentType().toLowerCase().startsWith("application/json")) {
+            response = new JsonExceptionResponse();
+            try (InputStream in = conn.getErrorStream()) {
+                responseBody = BinaryUtils.readStream(in, -1);
+            }
         } else {
             Logger.getLogger(PlatypusHttpRequestWriter.class.getName()).log(Level.SEVERE, String.format("Server error %d. %s", conn.getResponseCode(), conn.getResponseMessage()));
-            response = new ErrorResponse(conn.getResponseCode() + " " + conn.getResponseMessage());
+            response = new ExceptionResponse();
+            ((ExceptionResponse) response).setErrorMessage(conn.getResponseCode() + " " + conn.getResponseMessage());
         }
         return new HttpResult(responseCode, authScheme, redirectLocation);
     }

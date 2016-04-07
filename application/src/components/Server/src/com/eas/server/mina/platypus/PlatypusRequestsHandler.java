@@ -8,7 +8,11 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.platypus.RequestEnvelope;
-import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.client.threetier.requests.AccessControlExceptionResponse;
+import com.eas.client.threetier.requests.ExceptionResponse;
+import com.eas.client.threetier.requests.JsonExceptionResponse;
+import com.eas.client.threetier.requests.SqlExceptionResponse;
+import com.eas.script.JsObjectException;
 import com.eas.script.Scripts;
 import com.eas.server.*;
 import com.eas.server.DatabaseAuthorizer;
@@ -33,9 +37,10 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
     public static final String BAD_PROTOCOL_MSG = "The message is not Platypus protocol request.";
     public static final String GOT_SIGNATURE_MSG = "Got signature from client.";
     public static final String SESSION_ID = "platypus-session-id";
-    private static final String GENERAL_EXCEPTION_MESSAGE = "Exception on request of type %d | %s. %s";
+    private static final String GENERAL_EXCEPTION_MESSAGE = "Exception on request of type %d | %s. Message: %s";
     private static final String ACCESS_CONTROL_EXCEPTION_MESSAGE = "AccessControlException on request of type %d | %s. Message: %s.";
     private static final String SQL_EXCEPTION_MESSAGE = "SQLException on request of type %d | %s. Message: %s. sqlState: %s, errorCode: %d";
+    private static final String JS_OBJECT_EXCEPTION_MESSAGE = "JsObjectException on request of type %d | %s. Message: %s.";
     public static final int IDLE_TIME_EVENT = 5 * 60; // 5 minutes
     public static final int SESSION_TIME_OUT = 60 * 60; // 1 hour
     protected int sessionIdleCheckInterval = IDLE_TIME_EVENT;
@@ -100,14 +105,14 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                     if (ex instanceof SQLException) {
                         SQLException sex = (SQLException) ex;
                         Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(SQL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), sex.getMessage(), sex.getSQLState(), sex.getErrorCode()));
-                        ioSession.write(new ErrorResponse(sex));
+                        ioSession.write(new SqlExceptionResponse(sex));
                     } else if (ex instanceof AccessControlException) {
                         AccessControlException aex = (AccessControlException) ex;
                         Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(ACCESS_CONTROL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), aex.getMessage()));
-                        ioSession.write(new ErrorResponse(aex));
+                        ioSession.write(new AccessControlExceptionResponse(aex));
                     } else {
                         Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(GENERAL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), ex.toString()));
-                        ioSession.write(new ErrorResponse(ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage() : ex.toString()));
+                        ioSession.write(new ExceptionResponse(ex));
                     }
                 };
                 Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.FINE, "Request {0}", requestEnv.request.toString());
@@ -130,7 +135,15 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                                 session.getSpace().process(context, () -> {
                                     handler.handle(session, (Response aResponse) -> {
                                         ioSession.write(aResponse);
-                                    }, onError);
+                                    }, (Exception ex) -> {
+                                        if (ex instanceof JsObjectException) {
+                                            JsObjectException jsoex = (JsObjectException) ex;
+                                            Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(JS_OBJECT_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), jsoex.getMessage()));
+                                            ioSession.write(new JsonExceptionResponse(jsoex, session.getSpace().toJson(jsoex.getData())));
+                                        } else {
+                                            onError.accept(ex);
+                                        }
+                                    });
                                 });
                             }, onError);
                         } catch (ScriptException ex) {
@@ -144,7 +157,15 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                             session.getSpace().process(context, () -> {
                                 handler.handle(session, (Response aResponse) -> {
                                     ioSession.write(aResponse);
-                                }, onError);
+                                }, (Exception ex) -> {
+                                    if (ex instanceof JsObjectException) {
+                                        JsObjectException jsoex = (JsObjectException) ex;
+                                        Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(JS_OBJECT_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), jsoex.getMessage()));
+                                        ioSession.write(new JsonExceptionResponse(jsoex, session.getSpace().toJson(jsoex.getData())));
+                                    } else {
+                                        onError.accept(ex);
+                                    }
+                                });
                             });
                         } else {
                             throw new AccessControlException("Bad session ticket.", new NetPermission("*"));
@@ -154,7 +175,7 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                     throw new IllegalStateException("Unknown request type " + requestEnv.request.getType());
                 }
             } catch (Throwable ex) {
-                ioSession.write(new ErrorResponse(ex.getMessage()));
+                ioSession.write(new ExceptionResponse(ex));
                 Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, ex.toString());
             }
         } else {
