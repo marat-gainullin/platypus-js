@@ -212,18 +212,6 @@
                 <package>com.eas.util</package>
                 <package>com.eas.util.logging</package>
                 <package>com.eas.xml.dom</package>
-                <package>com.ibm.db2.jcc</package>
-                <package>com.ibm.db2.jcc.a</package>
-                <package>com.ibm.db2.jcc.am</package>
-                <package>com.ibm.db2.jcc.osgi</package>
-                <package>com.ibm.db2.jcc.resources</package>
-                <package>com.ibm.db2.jcc.sqlj</package>
-                <package>com.ibm.db2.jcc.t2</package>
-                <package>com.ibm.db2.jcc.t2zos</package>
-                <package>com.ibm.db2.jcc.t4</package>
-                <package>com.ibm.db2.jcc.uw</package>
-                <package>com.ibm.db2.jcc.uw.a</package>
-                <package>com.ibm.db2.jcc.uw.classloader</package>
                 <package>com.vividsolutions.jts.geom</package>
                 <package>com.vividsolutions.jts.index</package>
                 <package>com.vividsolutions.jts.index.quadtree</package>
@@ -245,8 +233,6 @@
                 <package>net.sf.jsqlparser.statement.truncate</package>
                 <package>net.sf.jsqlparser.statement.update</package>
                 <package>net.sf.jsqlparser.util.deparser</package>
-                <package>oracle.jdbc</package>
-                <package>oracle.jdbc.driver</package>
                 <package>org.apache.poi.ss.usermodel</package>
                 <package>org.geotools.data</package>
                 <package>org.geotools.data.oracle</package>
@@ -255,8 +241,6 @@
                 <package>org.jfree.ui</package>
                 <package>org.jinterop.dcom.common</package>
                 <package>org.opengis.filter.temporal</package>
-                <package>org.postgis</package>
-                <package>org.postgis.binary</package>
                 <package>rpc</package>
             </public-packages>
             <class-path-extension>
@@ -288,16 +272,8 @@
                 <binary-origin>release/modules/ext/Modules.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/ojdbc6.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/ojdbc6.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/jcommon-1.0.18.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/jcommon-1.0.18.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/h2-1.3.167.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/h2-1.3.167.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/Forms.jar</runtime-relative-path>
@@ -310,10 +286,6 @@
             <class-path-extension>
                 <runtime-relative-path>ext/CommonUtils.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/CommonUtils.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/jtds-1.2.3.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jtds-1.2.3.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/ScalablePane.jar</runtime-relative-path>
@@ -334,10 +306,6 @@
             <class-path-extension>
                 <runtime-relative-path>ext/Grid.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/Grid.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/db2jcc.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/db2jcc.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/BinaryTags.jar</runtime-relative-path>
@@ -392,10 +360,6 @@
                 <binary-origin>release/modules/ext/jcifs-1.2.19.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/mysql-connector-java-5.1.20-bin.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/mysql-connector-java-5.1.20-bin.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/commons-beanutils-1.8.2.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/commons-beanutils-1.8.2.jar</binary-origin>
             </class-path-extension>
@@ -422,10 +386,6 @@
             <class-path-extension>
                 <runtime-relative-path>ext/j-interopdeps.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/j-interopdeps.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/postgis-jdbc-2.1.0.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/postgis-jdbc-2.1.0.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>

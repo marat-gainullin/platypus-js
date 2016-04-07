@@ -391,11 +391,18 @@ public class PlatypusProjectImpl implements PlatypusProject {
         final DatabaseConnection conn = DatabaseConnections.lookup(aDatasourceName);
         assert conn != null : "Already connected datasource disappeared";
         String datasourceName = (aDatasourceName == null ? basesProxy.getDefaultDatasourceName() != null : !aDatasourceName.equals(basesProxy.getDefaultDatasourceName())) ? aDatasourceName : null;
-        MetadataCache mdCache = basesProxy.getMetadataCache(datasourceName);
-        if (mdCache != null) {
-            mdCache.clear();
-            mdCache.fillTablesCacheByConnectionSchema();
+        ClassLoader nativeClassLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(new org.netbeans.ProxyClassLoader(new ClassLoader[]{nativeClassLoader, conn.getJDBCConnection().getClass().getClassLoader()}, true));
+        try {
+            MetadataCache mdCache = basesProxy.getMetadataCache(datasourceName);
+            if (mdCache != null) {
+                mdCache.clear();
+                mdCache.fillTablesCacheByConnectionSchema();
+            }
+        } finally {
+            Thread.currentThread().setContextClassLoader(nativeClassLoader);
         }
+
         String dbConnectingCompleteMsg = NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Connecting_Complete", aDatasourceName); // NOI18N
         StatusDisplayer.getDefault().setStatusText(dbConnectingCompleteMsg);
         getOutputWindowIO().getOut().println(dbConnectingCompleteMsg);

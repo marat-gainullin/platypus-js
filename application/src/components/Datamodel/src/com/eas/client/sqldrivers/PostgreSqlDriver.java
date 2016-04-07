@@ -28,7 +28,7 @@ import org.postgis.PGgeometry;
  *
  * @author mg
  */
-public class PostgreSqlDriver extends SqlDriver {
+public class PostgreSqlDriver extends SqlDriver implements SqlDriver.Postgre {
 
     // настройка экранирования наименования объектов БД
     private static final TwinString[] charsForWrap = {new TwinString("\"", "\"")};
@@ -386,7 +386,7 @@ public class PostgreSqlDriver extends SqlDriver {
             if (read instanceof PGgeometry) {
                 PGgeometry pgg = (PGgeometry) read;
                 read = pgg.getGeometry();
-            }else if(read.getClass().getName().equals(PGgeometry.class.getName())){// Crazy netbeans designer!
+            }else if(read.getClass().getName().equals(PGgeometry.class.getName())){// Crazy designer!
                 return read.toString();
             }
             if (read instanceof org.postgis.Geometry) {

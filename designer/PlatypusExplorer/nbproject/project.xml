@@ -7,6 +7,15 @@
             <suite-component/>
             <module-dependencies>
                 <dependency>
+                    <code-name-base>org.netbeans.bootstrap</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <release-version>1</release-version>
+                        <specification-version>2.50</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
                     <code-name-base>com.eas.designer.application</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>

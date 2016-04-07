@@ -4,7 +4,6 @@
  */
 package com.eas.client.sqldrivers;
 
-import com.eas.client.ClientConstants;
 import com.eas.client.changes.JdbcChangeValue;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
@@ -27,7 +26,7 @@ import java.util.Set;
  *
  * @author vy
  */
-public class MySqlSqlDriver extends SqlDriver {
+public class MySqlSqlDriver extends SqlDriver implements SqlDriver.MySql {
 
     // настройка экранирования наименования объектов БД
     private static final TwinString[] charsForWrap = {new TwinString("`", "`")};

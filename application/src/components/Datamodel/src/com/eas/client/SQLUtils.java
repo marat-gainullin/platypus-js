@@ -10,16 +10,12 @@
 package com.eas.client;
 
 import com.eas.client.sqldrivers.SqlDriver;
-import com.eas.client.sqldrivers.H2SqlDriver;
-import com.eas.client.sqldrivers.Db2SqlDriver;
-import com.eas.client.sqldrivers.MySqlSqlDriver;
-import com.eas.client.sqldrivers.MsSqlSqlDriver;
-import com.eas.client.sqldrivers.OracleSqlDriver;
-import com.eas.client.sqldrivers.PostgreSqlDriver;
 import com.eas.client.metadata.Fields;
 import com.eas.client.sqldrivers.GenericSqlDriver;
 import java.sql.*;
+import java.util.Iterator;
 import java.util.ResourceBundle;
+import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -85,22 +81,30 @@ public class SQLUtils {
         return dialect;
     }
 
-    public static SqlDriver getSqlDriver(String aDialect) {
+    public static SqlDriver getSqlDriver(String aDialect) throws SQLException {
+        ServiceLoader<? extends SqlDriver.Loadable> sqlDriverLoader;
         if (ClientConstants.SERVER_PROPERTY_ORACLE_DIALECT.equalsIgnoreCase(aDialect)) {
-            return new OracleSqlDriver();
+            sqlDriverLoader = ServiceLoader.load(SqlDriver.Oracle.class);
         } else if (ClientConstants.SERVER_PROPERTY_MSSQL_DIALECT.equalsIgnoreCase(aDialect)) {
-            return new MsSqlSqlDriver();
+            sqlDriverLoader = ServiceLoader.load(SqlDriver.MsSql.class);
         } else if (ClientConstants.SERVER_PROPERTY_POSTGRE_DIALECT.equalsIgnoreCase(aDialect)) {
-            return new PostgreSqlDriver();
+            sqlDriverLoader = ServiceLoader.load(SqlDriver.Postgre.class);
         } else if (ClientConstants.SERVER_PROPERTY_MYSQL_DIALECT.equalsIgnoreCase(aDialect)) {
-            return new MySqlSqlDriver();
+            sqlDriverLoader = ServiceLoader.load(SqlDriver.MySql.class);
         } else if (ClientConstants.SERVER_PROPERTY_DB2_DIALECT.equalsIgnoreCase(aDialect)) {
-            return new Db2SqlDriver();
+            sqlDriverLoader = ServiceLoader.load(SqlDriver.Db2.class);
         } else if (ClientConstants.SERVER_PROPERTY_H2_DIALECT.equalsIgnoreCase(aDialect)) {
-            return new H2SqlDriver();
+            sqlDriverLoader = ServiceLoader.load(SqlDriver.H2.class);
         } else {
-            return new GenericSqlDriver();
+            sqlDriverLoader = null;
         }
+        if (sqlDriverLoader != null) {
+            Iterator<? extends SqlDriver.Loadable> loadables = sqlDriverLoader.iterator();
+            if (loadables.hasNext()) {
+                return (SqlDriver) loadables.next();
+            }
+        }
+        return new GenericSqlDriver();
     }
 
     public static SqlQuery validateTableSqlQuery(String aTableDatasource, String tableName, String tableSchemaName, DatabasesClient aClient) throws Exception {

@@ -24,7 +24,7 @@ import java.util.List;
  *
  * @author kl
  */
-public class Db2SqlDriver extends SqlDriver {
+public class Db2SqlDriver extends SqlDriver implements SqlDriver.Db2 {
 
     // настройка экранирования наименования объектов БД
     private static final TwinString[] charsForWrap = {new TwinString("\"", "\"")};

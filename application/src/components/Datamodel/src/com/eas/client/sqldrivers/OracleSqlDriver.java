@@ -39,7 +39,7 @@ import org.geotools.data.oracle.sdo.GeometryConverter;
  *
  * @author mg
  */
-public class OracleSqlDriver extends SqlDriver {
+public class OracleSqlDriver extends SqlDriver implements SqlDriver.Oracle {
 
     // настройка экранирования наименования объектов БД
     private static final TwinString[] charsForWrap = {new TwinString("\"", "\"")};

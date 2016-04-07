@@ -38,6 +38,27 @@ import java.util.logging.Logger;
  */
 public abstract class SqlDriver implements StatementsGenerator.GeometryConverter {
 
+    public interface Loadable {
+    }
+
+    public interface Db2 extends Loadable {
+    }
+
+    public interface H2 extends Loadable {
+    }
+
+    public interface MsSql extends Loadable {
+    }
+
+    public interface MySql extends Loadable {
+    }
+
+    public interface Oracle extends Loadable {
+    }
+
+    public interface Postgre extends Loadable {
+    }
+
     protected static class TwinString {
 
         private final String left;

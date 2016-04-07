@@ -22,7 +22,7 @@ import java.util.List;
  *
  * @author mg
  */
-public class MsSqlSqlDriver extends SqlDriver {
+public class MsSqlSqlDriver extends SqlDriver implements SqlDriver.MsSql {
 
     // настройка экранирования наименования объектов БД
     private static final TwinString[] charsForWrap = {new TwinString("\"", "\""), new TwinString("[", "]")};
