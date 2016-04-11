@@ -224,10 +224,9 @@ public class XmlDom2Model implements ModelVisitor {
 							} else if (leftFieldName != null && !leftFieldName.isEmpty()) {
 								relation.setLeftField(lEntity.getFields().get(leftFieldName));
 							}
+							relation.setLeftEntity(lEntity);
+							lEntity.addOutRelation(relation);
 						}
-						relation.setLeftEntity(lEntity);
-						lEntity.addOutRelation(relation);
-
 						Entity rEntity = model.getEntityById(rightEntityId);
 						if (rEntity != null) {
 							if (rightParameterName != null && !rightParameterName.isEmpty()) {
@@ -235,9 +234,9 @@ public class XmlDom2Model implements ModelVisitor {
 							} else if (rightFieldName != null && !rightFieldName.isEmpty()) {
 								relation.setRightField(rEntity.getFields().get(rightFieldName));
 							}
+							relation.setRightEntity(rEntity);
+							rEntity.addInRelation(relation);
 						}
-						relation.setRightEntity(rEntity);
-						rEntity.addInRelation(relation);
 					} catch (Exception ex) {
 						Logger.getLogger(XmlDom2Model.class.getName()).log(Level.SEVERE, null, ex);
 					}

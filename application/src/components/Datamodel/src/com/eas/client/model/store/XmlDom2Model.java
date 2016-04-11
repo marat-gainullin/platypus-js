@@ -173,7 +173,6 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
                 relation.setLeftEntity(lEntity);
                 lEntity.addOutRelation(relation);
             }
-
             E rEntity = aModel.getEntityById(rightEntityId);
             if (rEntity != null) {
                 if (rightParameterName != null && !rightParameterName.isEmpty()) {
