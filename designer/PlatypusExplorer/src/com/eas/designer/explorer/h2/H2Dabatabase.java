@@ -41,14 +41,18 @@ public class H2Dabatabase implements DatabaseRuntime, Server {
     private volatile ServerState serverState = ServerState.STOPPED;
     private final ChangeSupport changeSupport = new ChangeSupport(this);
     private Future<Integer> serverRunTask;
-    private static H2Dabatabase platypusDevDbServer;
+    private static volatile H2Dabatabase platypusDevDbServer;
 
     private H2Dabatabase() {
     }
 
-    public static synchronized H2Dabatabase getDefault() {
+    public static H2Dabatabase getDefault() {
         if (platypusDevDbServer == null) {
-            platypusDevDbServer = new H2Dabatabase();
+            synchronized (H2Dabatabase.class) {
+                if (platypusDevDbServer == null) {
+                    platypusDevDbServer = new H2Dabatabase();
+                }
+            }
         }
         return platypusDevDbServer;
     }

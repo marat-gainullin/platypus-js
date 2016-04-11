@@ -319,8 +319,10 @@
                 <package>com.eas.designer.explorer</package>
                 <package>com.eas.designer.explorer.actions</package>
                 <package>com.eas.designer.explorer.files.wizard</package>
+                <package>com.eas.designer.explorer.h2</package>
                 <package>com.eas.designer.explorer.j2ee</package>
                 <package>com.eas.designer.explorer.model.windows</package>
+                <package>com.eas.designer.explorer.platform</package>
                 <package>com.eas.designer.explorer.project</package>
                 <package>com.eas.designer.explorer.selectors</package>
                 <package>com.eas.designer.explorer.utils</package>

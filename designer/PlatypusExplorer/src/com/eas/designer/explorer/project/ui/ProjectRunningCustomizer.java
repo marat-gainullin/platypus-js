@@ -53,7 +53,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     protected ComboBoxModel<ServerInstance> j2eeServersModel;
     private boolean isInit;
     private final DefaultComboBoxModel serversModel;
-    private final ServerRegistryChangeListener serverRegistryLister = new ServerRegistryChangeListener();
+    private final ServerRegistryChangeListener serverRegistryListener = new ServerRegistryChangeListener();
 
     /**
      * Creates new form ProjectRunningCustomizer
@@ -1000,11 +1000,11 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     private void btnManageServersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnManageServersActionPerformed
         Lookup.Result<ServerInstanceProvider> result = Lookups.forPath(SERVERS_PATH).lookupResult(ServerInstanceProvider.class);
         result.allInstances().stream().forEach((provider) -> {
-            provider.addChangeListener(serverRegistryLister);
+            provider.addChangeListener(serverRegistryListener);
         });
         CommonServerUIs.showCustomizer(null);
         result.allInstances().stream().forEach((provider) -> {
-            provider.removeChangeListener(serverRegistryLister);
+            provider.removeChangeListener(serverRegistryListener);
         });
     }//GEN-LAST:event_btnManageServersActionPerformed
 
