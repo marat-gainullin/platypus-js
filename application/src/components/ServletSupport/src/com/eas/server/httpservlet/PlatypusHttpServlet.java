@@ -20,7 +20,7 @@ import com.eas.client.threetier.Requests;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.http.PlatypusHttpRequestParams;
 import com.eas.client.threetier.requests.*;
-import com.eas.concurrent.DeamonThreadFactory;
+import com.eas.concurrent.PlatypusThreadFactory;
 import com.eas.script.JsObjectException;
 import com.eas.script.Scripts;
 import com.eas.server.*;
@@ -102,7 +102,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                     selfExecutor = new ThreadPoolExecutor(maxSelfThreads, maxSelfThreads,
                             1L, TimeUnit.SECONDS,
                             new LinkedBlockingQueue<>(platypusConfig.getMaximumLpcQueueSize()),
-                            new DeamonThreadFactory("platypus-worker-", false));
+                            new PlatypusThreadFactory("platypus-worker-", false));
                     ((ThreadPoolExecutor) selfExecutor).allowCoreThreadTimeOut(true);
                 }
             }

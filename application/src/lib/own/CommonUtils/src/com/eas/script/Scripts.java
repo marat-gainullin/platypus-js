@@ -1,6 +1,6 @@
 package com.eas.script;
 
-import com.eas.concurrent.DeamonThreadFactory;
+import com.eas.concurrent.PlatypusThreadFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -767,7 +767,7 @@ public class Scripts {
         bio = new ThreadPoolExecutor(aMaxThreads, aMaxThreads,
                 1L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
-                new DeamonThreadFactory("platypus-abio-", false));
+                new PlatypusThreadFactory("platypus-abio-", false));
         bio.allowCoreThreadTimeOut(true);
     }
 

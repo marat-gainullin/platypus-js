@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author mg
  */
-public class DeamonThreadFactory implements ThreadFactory {
+public class PlatypusThreadFactory implements ThreadFactory {
 
     private static final AtomicInteger poolNumber = new AtomicInteger(1);
     private final ThreadGroup group;
@@ -19,11 +19,11 @@ public class DeamonThreadFactory implements ThreadFactory {
     private final String namePrefix;
     private final boolean defaultDeamon;
 
-    public DeamonThreadFactory() {
+    public PlatypusThreadFactory() {
         this("", true);
     }
     
-    public DeamonThreadFactory(String aNamePrefix, boolean aDefaultDeamon) {
+    public PlatypusThreadFactory(String aNamePrefix, boolean aDefaultDeamon) {
         super();
         defaultDeamon = aDefaultDeamon;
         SecurityManager s = System.getSecurityManager();

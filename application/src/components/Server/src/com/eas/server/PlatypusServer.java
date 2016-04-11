@@ -10,7 +10,7 @@ import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.queries.QueriesProxy;
-import com.eas.concurrent.DeamonThreadFactory;
+import com.eas.concurrent.PlatypusThreadFactory;
 import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
 import com.eas.server.mina.platypus.PlatypusRequestsHandler;
@@ -133,7 +133,7 @@ public class PlatypusServer extends PlatypusServerCore {
         ThreadPoolExecutor connectionsPollerExecutor = new ThreadPoolExecutor(1, 1,
                 3L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
-                new DeamonThreadFactory("nio-polling-", false));
+                new PlatypusThreadFactory("nio-polling-", false));
         final IoAcceptor acceptor = new NioSocketAcceptor(connectionsPollerExecutor, new NioProcessor(executor));
         //acceptor.getFilterChain().addLast("encryption", sslFilter); commented out until MINA Sslfilter bugs will be fixed
         acceptor.getFilterChain().addLast("platypusCodec", new ProtocolCodecFilter(new ResponseEncoder(), new RequestDecoder()));

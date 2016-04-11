@@ -13,7 +13,7 @@ import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.AccessControlExceptionResponse;
 import com.eas.client.threetier.requests.ExceptionResponse;
 import com.eas.client.threetier.requests.LogoutRequest;
-import com.eas.concurrent.DeamonThreadFactory;
+import com.eas.concurrent.PlatypusThreadFactory;
 import com.eas.script.Scripts;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -100,7 +100,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
         ThreadPoolExecutor ioProcessorExecutor = new ThreadPoolExecutor(1, 1,
                 3L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
-                new DeamonThreadFactory("polling-", false));
+                new PlatypusThreadFactory("polling-", false));
         ioProcessorExecutor.allowCoreThreadTimeOut(true);
         NioSocketConnector lconnector = new NioSocketConnector(aProcessor, new NioProcessor(ioProcessorExecutor));
         lconnector.setDefaultRemoteAddress(new InetSocketAddress(host, port));

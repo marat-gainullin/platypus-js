@@ -18,7 +18,7 @@ import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.client.threetier.PlatypusConnection;
-import com.eas.concurrent.DeamonThreadFactory;
+import com.eas.concurrent.PlatypusThreadFactory;
 import com.eas.script.Scripts;
 import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
@@ -236,7 +236,7 @@ public class ServerMain {
                 ThreadPoolExecutor serverProcessor = new ThreadPoolExecutor(maxWorkerThreads, maxWorkerThreads,
                         3L, TimeUnit.SECONDS,
                         new LinkedBlockingQueue<>(),
-                        new DeamonThreadFactory("TSA-", false));
+                        new PlatypusThreadFactory("TSA-", false));
                 serverProcessor.allowCoreThreadTimeOut(true);
 
                 Scripts.initTasks((Runnable aTask) -> {

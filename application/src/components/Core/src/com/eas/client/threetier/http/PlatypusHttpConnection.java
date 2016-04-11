@@ -16,7 +16,7 @@ import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.RPCRequest;
-import com.eas.concurrent.DeamonThreadFactory;
+import com.eas.concurrent.PlatypusThreadFactory;
 import com.eas.script.Scripts;
 import com.eas.util.BinaryUtils;
 import java.io.IOException;
@@ -70,7 +70,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
         bioExecutor = new ThreadPoolExecutor(aMaximumBIOThreads, aMaximumBIOThreads,
                 1L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
-                new DeamonThreadFactory("http-client-", false));
+                new PlatypusThreadFactory("http-client-", false));
         bioExecutor.allowCoreThreadTimeOut(true);
     }
 
