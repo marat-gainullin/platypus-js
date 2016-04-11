@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import oracle.jdbc.OracleConnection;
 import oracle.sql.STRUCT;
-import org.geotools.data.oracle.sdo.GeometryConverter;
 
 /**
  *
@@ -373,17 +372,17 @@ public class OracleSqlDriver extends SqlDriver {
         if (!(aConnection instanceof OracleConnection)) {
             aConnection = aConnection.unwrap(OracleConnection.class);
         }
-        try {
-            GeometryConverter gc = new GeometryConverter((OracleConnection) aConnection);
+        //try {
+            //GeometryConverter gc = new GeometryConverter((OracleConnection) aConnection);
             JdbcChangeValue jdbcValue = new JdbcChangeValue(null, null, 0, null);
             WKTReader reader = new WKTReader();
-            jdbcValue.value = aValue != null ? gc.toSDO(reader.read(aValue)) : null;
+            jdbcValue.value = null;//aValue != null ? gc.toSDO(reader.read(aValue)) : null;
             jdbcValue.jdbcType = Types.STRUCT;
             jdbcValue.sqlTypeName = "MDSYS.SDO_GEOMETRY";
             return jdbcValue;
-        } catch (ParseException ex) {
-            throw new SQLException(ex);
-        }
+//        } catch (ParseException ex) {
+//            throw new SQLException(ex);
+//        }
     }
 
     @Override
@@ -393,6 +392,7 @@ public class OracleSqlDriver extends SqlDriver {
         if (wasNull) {
             return null;
         } else {
+            /*
             if (read instanceof STRUCT) {
                 STRUCT struct = (STRUCT) read;
                 GeometryConverter reader = new GeometryConverter(struct.getInternalConnection());
@@ -400,8 +400,9 @@ public class OracleSqlDriver extends SqlDriver {
                 WKTWriter writer = new WKTWriter();
                 return writer.write(geometry);
             } else {
-                return null;
-            }
+             */
+            return null;
+//            }
         }
     }
 }

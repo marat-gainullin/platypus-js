@@ -31,7 +31,8 @@ public class StoredQueryFactoryTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        indexer = new ApplicationSourceIndexer(Paths.get("c:/projects/PlatypusTests/app"), new ScriptsConfigs());
+        String testsPath = "c:/projects/PlatypusTests/";
+        indexer = new ApplicationSourceIndexer(Paths.get(testsPath).resolve("app"), Paths.get(testsPath).resolve("WEB-INF").resolve("classes"), new ScriptsConfigs());
         DbConnectionSettings settings = new DbConnectionSettings();
         settings.setUrl("jdbc:oracle:thin:@asvr/adb");
         settings.setUser("eas");
