@@ -174,13 +174,13 @@ public class XmlDom2Model implements ModelVisitor {
 			if ("null".equals(entityId)) {
 				entityId = null;
 			}
-			assert entityId != null : "Entity id must be provided";
+			assert entityId != null : "Entity id must present";
 			entity.setEntityId(entityId);
 			String queryId = Utils.getAttribute(currentTag, "qi", QUERY_ID_ATTR_NAME, null);
 			if ("null".equals(queryId)) {
 				queryId = null;
 			}
-			assert queryId != null : "Query id must be provided";
+			assert queryId != null : "Query id must present";
 			entity.setQueryName(queryId);
 			assert model != null;
 			entity.setModel(model);
