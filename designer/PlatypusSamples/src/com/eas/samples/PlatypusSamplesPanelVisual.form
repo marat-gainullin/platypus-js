@@ -17,29 +17,23 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
               <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                  <Component id="lblDBLocation" alignment="0" pref="127" max="32767" attributes="0"/>
-                  <Component id="lblDBName" alignment="0" max="32767" attributes="0"/>
                   <Component id="createdFolderLabel" max="32767" attributes="0"/>
-                  <Component id="projectLocationLabel" alignment="0" max="32767" attributes="0"/>
+                  <Component id="projectLocationLabel" alignment="0" pref="127" max="32767" attributes="0"/>
                   <Component id="projectNameLabel" alignment="0" max="32767" attributes="0"/>
                   <Component id="lblServer" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="cbj2eeServer" pref="295" max="32767" attributes="0"/>
+                  <Component id="cbj2eeServer" pref="272" max="32767" attributes="0"/>
                   <Component id="projectNameTextField" max="32767" attributes="2"/>
-                  <Component id="txtDBName" alignment="0" max="32767" attributes="2"/>
                   <Component id="createdFolderTextField" alignment="0" max="32767" attributes="2"/>
-                  <Component id="txtDBLocation" alignment="0" max="32767" attributes="2"/>
                   <Component id="projectLocationTextField" alignment="0" max="32767" attributes="2"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                   <Component id="btnPickPlatypusHome" pref="135" max="32767" attributes="0"/>
-                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Component id="browseButton" max="32767" attributes="0"/>
-                      <Component id="btnManageServers" pref="135" max="32767" attributes="0"/>
-                  </Group>
+                  <Component id="browseButton" max="32767" attributes="0"/>
+                  <Component id="btnManageServers" pref="135" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -53,7 +47,6 @@
                   <Component id="projectNameLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="projectNameTextField" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
@@ -76,17 +69,8 @@
                   <Component id="lblServer" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="txtDBName" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="lblDBName" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="btnPickPlatypusHome" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="txtDBLocation" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="lblDBLocation" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <Component id="btnPickPlatypusHome" min="-2" max="-2" attributes="0"/>
+              <EmptySpace pref="21" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -158,44 +142,6 @@
         <Property name="editable" type="boolean" value="false"/>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>
-    </Component>
-    <Component class="javax.swing.JLabel" name="lblDBName">
-      <Properties>
-        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
-          <ComponentRef name="txtDBName"/>
-        </Property>
-        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/samples/Bundle.properties" key="LBL_DBName" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
-        </Property>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JTextField" name="txtDBName">
-      <AccessibilityProperties>
-        <Property name="AccessibleContext.accessibleDescription" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="org/netbeans/modules/j2ee/samples/Bundle.properties" key="LBL_DBName_A11YDesc" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
-        </Property>
-      </AccessibilityProperties>
-    </Component>
-    <Component class="javax.swing.JLabel" name="lblDBLocation">
-      <Properties>
-        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
-          <ComponentRef name="txtDBLocation"/>
-        </Property>
-        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/samples/Bundle.properties" key="LBL_DBLocation" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
-        </Property>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JTextField" name="txtDBLocation">
-      <Properties>
-        <Property name="editable" type="boolean" value="false"/>
-        <Property name="enabled" type="boolean" value="false"/>
-      </Properties>
-      <AccessibilityProperties>
-        <Property name="AccessibleContext.accessibleDescription" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="org/netbeans/modules/j2ee/samples/Bundle.properties" key="LBL_DBLocation_A11YDesc" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
-        </Property>
-      </AccessibilityProperties>
     </Component>
     <Component class="javax.swing.JButton" name="btnManageServers">
       <Properties>

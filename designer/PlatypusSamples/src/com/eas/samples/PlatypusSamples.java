@@ -7,6 +7,5 @@ package com.eas.samples;
 public class PlatypusSamples {
     public static final String NAME = "name"; //NOI18N
     public static final String PROJ_DIR = "projdir"; //NOI18N
-    public static final String DB_NAME = "dbName"; //NOI18N
     public static final String SERVER_ID = "serverId"; //NOI18N
 }

@@ -20,20 +20,18 @@ public class PlatypusSamplesWizardPanel implements WizardDescriptor.Panel,
 
     private WizardDescriptor wizardDescriptor;
     private PlatypusSamplesPanelVisual component;
-    private boolean withDb;
 
     /**
      * Creates a new instance of templateWizardPanel
      */
-    public PlatypusSamplesWizardPanel(boolean aWithDb) {
+    public PlatypusSamplesWizardPanel() {
         super();
-        withDb = aWithDb;
     }
 
     @Override
     public Component getComponent() {
         if (component == null) {
-            component = new PlatypusSamplesPanelVisual(this, withDb);
+            component = new PlatypusSamplesPanelVisual(this);
             component.setName(NbBundle.getMessage(PlatypusSamplesWizardPanel.class, "LBL_CreateProjectStep"));
             component.putClientProperty("NewProjectWizard_Title", NbBundle.getMessage(PlatypusSamplesWizardPanel.class, "LBL_TXT_NewPlatypusSample"));
         }

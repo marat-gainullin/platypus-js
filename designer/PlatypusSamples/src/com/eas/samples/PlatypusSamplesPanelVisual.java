@@ -8,7 +8,6 @@ import javax.swing.JPanel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
-import org.netbeans.api.j2ee.core.Profile;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.InstanceRemovedException;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.J2eePlatform;
@@ -33,7 +32,7 @@ import org.openide.util.lookup.Lookups;
 
 public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListener {
 
-    private static final class J2eePlatformAdapter {
+    public static final class J2eePlatformAdapter {
 
         public static final J2eePlatformAdapter UNKNOWN_PLATFORM_ADAPRER = new J2eePlatformAdapter(null, null);
         private final J2eePlatform platform;
@@ -76,8 +75,7 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
 
     }
 
-    private boolean withDB;
-    private PlatypusSamplesWizardPanel panel;
+    private final PlatypusSamplesWizardPanel panel;
     private final DefaultComboBoxModel serversModel;
     private final ServerRegistryChangeListener serverRegistryListener = new ServerRegistryChangeListener();
     private String serverInstanceId;
@@ -85,7 +83,7 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
     /**
      * Creates new form PanelProjectLocationVisual
      */
-    public PlatypusSamplesPanelVisual(PlatypusSamplesWizardPanel aPanel, boolean aWithDB) {
+    public PlatypusSamplesPanelVisual(PlatypusSamplesWizardPanel aPanel) {
         super();
         panel = aPanel;
         serversModel = new DefaultComboBoxModel(getJ2eePlatforms());
@@ -93,18 +91,9 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
         EventQueue.invokeLater(() -> {
             cbj2eeServer.setSelectedItem(J2eePlatformAdapter.UNKNOWN_PLATFORM_ADAPRER);
         });
-        withDB = aWithDB;
         // Register listener on the textFields to make the automatic updates
         projectNameTextField.getDocument().addDocumentListener(this);
         projectLocationTextField.getDocument().addDocumentListener(this);
-        txtDBName.getDocument().addDocumentListener(this);
-
-        if (!aWithDB) {
-            txtDBName.setVisible(false);
-            lblDBName.setVisible(false);
-            txtDBLocation.setVisible(false);
-            lblDBLocation.setVisible(false);
-        }
     }
 
     private void selectServerInstance() {
@@ -150,10 +139,6 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
         browseButton = new javax.swing.JButton();
         createdFolderLabel = new javax.swing.JLabel();
         createdFolderTextField = new javax.swing.JTextField();
-        lblDBName = new javax.swing.JLabel();
-        txtDBName = new javax.swing.JTextField();
-        lblDBLocation = new javax.swing.JLabel();
-        txtDBLocation = new javax.swing.JTextField();
         btnManageServers = new javax.swing.JButton();
         btnPickPlatypusHome = new javax.swing.JButton();
         cbj2eeServer = new javax.swing.JComboBox();
@@ -179,15 +164,6 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
 
         createdFolderTextField.setEditable(false);
         createdFolderTextField.setEnabled(false);
-
-        lblDBName.setLabelFor(txtDBName);
-        org.openide.awt.Mnemonics.setLocalizedText(lblDBName, org.openide.util.NbBundle.getMessage(PlatypusSamplesPanelVisual.class, "LBL_DBName")); // NOI18N
-
-        lblDBLocation.setLabelFor(txtDBLocation);
-        org.openide.awt.Mnemonics.setLocalizedText(lblDBLocation, org.openide.util.NbBundle.getMessage(PlatypusSamplesPanelVisual.class, "LBL_DBLocation")); // NOI18N
-
-        txtDBLocation.setEditable(false);
-        txtDBLocation.setEnabled(false);
 
         org.openide.awt.Mnemonics.setLocalizedText(btnManageServers, org.openide.util.NbBundle.getMessage(PlatypusSamplesPanelVisual.class, "btnManageServers.text")); // NOI18N
         btnManageServers.addActionListener(new java.awt.event.ActionListener() {
@@ -223,26 +199,21 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(lblDBLocation, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 127, Short.MAX_VALUE)
-                    .addComponent(lblDBName, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(createdFolderLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(projectLocationLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(projectLocationLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 127, Short.MAX_VALUE)
                     .addComponent(projectNameLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblServer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cbj2eeServer, 0, 295, Short.MAX_VALUE)
+                    .addComponent(cbj2eeServer, 0, 272, Short.MAX_VALUE)
                     .addComponent(projectNameTextField)
-                    .addComponent(txtDBName)
                     .addComponent(createdFolderTextField)
-                    .addComponent(txtDBLocation)
                     .addComponent(projectLocationTextField))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btnPickPlatypusHome, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(browseButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnManageServers, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE)))
+                    .addComponent(browseButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnManageServers, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -252,7 +223,6 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(projectNameLabel)
                     .addComponent(projectNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(32, 32, 32)
@@ -270,21 +240,12 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
                     .addComponent(btnManageServers)
                     .addComponent(lblServer))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtDBName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblDBName)
-                    .addComponent(btnPickPlatypusHome))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtDBLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblDBLocation))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(btnPickPlatypusHome)
+                .addContainerGap(21, Short.MAX_VALUE))
         );
 
         projectLocationTextField.getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(PlatypusSamplesPanelVisual.class, "LBL_ProjectLocation_A11YDesc")); // NOI18N
         browseButton.getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(PlatypusSamplesPanelVisual.class, "LBL_Browse_A11YDesc")); // NOI18N
-        txtDBName.getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(PlatypusSamplesPanelVisual.class, "LBL_DBName_A11YDesc")); // NOI18N
-        txtDBLocation.getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(PlatypusSamplesPanelVisual.class, "LBL_DBLocation_A11YDesc")); // NOI18N
     }// </editor-fold>//GEN-END:initComponents
 
     private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButtonActionPerformed
@@ -351,15 +312,11 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
     private javax.swing.JComboBox cbj2eeServer;
     private javax.swing.JLabel createdFolderLabel;
     private javax.swing.JTextField createdFolderTextField;
-    private javax.swing.JLabel lblDBLocation;
-    private javax.swing.JLabel lblDBName;
     private javax.swing.JLabel lblServer;
     private javax.swing.JLabel projectLocationLabel;
     private javax.swing.JTextField projectLocationTextField;
     private javax.swing.JLabel projectNameLabel;
     private javax.swing.JTextField projectNameTextField;
-    private javax.swing.JTextField txtDBLocation;
-    private javax.swing.JTextField txtDBName;
     // End of variables declaration//GEN-END:variables
 
     @Override
@@ -371,7 +328,6 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
     }
 
     boolean valid(WizardDescriptor wizardDescriptor) {
-
         String p = PlatypusPlatform.getPlatformHomePath();
         if (p == null || p.isEmpty()) {
             wizardDescriptor.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE,
@@ -381,7 +337,6 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
         } else {
             btnPickPlatypusHome.setVisible(false);
         }
-
         if (projectNameTextField.getText().length() == 0) {
 
             wizardDescriptor.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE,
@@ -408,13 +363,11 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
 
             return false;
         }
-
         if (FileUtil.toFileObject(projLoc) == null) {
             String message = NbBundle.getMessage(PlatypusSamplesPanelVisual.class, "MSG_InvalidPath");
             wizardDescriptor.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE, message);
             return false;
         }
-
         File[] kids = destFolder.listFiles();
         if (destFolder.exists() && kids != null && kids.length > 0) {
             // Folder exists and is not empty
@@ -423,25 +376,13 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
 
             return false;
         }
-
         if (cbj2eeServer.getSelectedItem() == null || cbj2eeServer.getSelectedItem() == J2eePlatformAdapter.UNKNOWN_PLATFORM_ADAPRER) {
             wizardDescriptor.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE,
                     NbBundle.getMessage(PlatypusSamplesPanelVisual.class, "ERR_MissingJavaEE6AppServer"));
 
             return false;
         }
-
-        if (withDB) {
-            File newDbFile = new File(txtDBLocation.getText());
-            if (newDbFile.exists()) {
-                String message = NbBundle.getMessage(PlatypusSamplesPanelVisual.class, "MSG_DatabaseAlreadyExists");
-                wizardDescriptor.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE, message);
-                return false;
-            }
-        }
-
         wizardDescriptor.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE, null);
-
         return true;
     }
 
@@ -452,11 +393,6 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
         settings.putProperty(PlatypusSamples.PROJ_DIR, new File(folder));
         settings.putProperty(PlatypusSamples.NAME, name);
         settings.putProperty(PlatypusSamples.SERVER_ID, cbj2eeServer.getSelectedItem());
-
-        if (withDB) {
-            String dbName = txtDBName.getText().trim();
-            settings.putProperty(PlatypusSamples.DB_NAME, dbName);
-        }
     }
 
     void read(WizardDescriptor settings) {
@@ -475,13 +411,6 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
         projectNameTextField.setText(projectName);
         projectNameTextField.selectAll();
         cbj2eeServer.setSelectedItem(settings.getProperty(PlatypusSamples.SERVER_ID));
-
-        if (withDB) {
-            String dbName = getFirstFreeDatabaseName(projectName);
-            txtDBName.setText(dbName);
-            txtDBName.selectAll();
-            updateDBPath(dbName);
-        }
     }
 
     void validate(WizardDescriptor d) throws WizardValidationException {
@@ -508,7 +437,6 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
      * Handles changes in the Project name and project directory,
      */
     private void updateTexts(DocumentEvent e) {
-
         if (projectNameTextField.getDocument() == e.getDocument()) {
             firePropertyChange(PlatypusSamples.NAME, null, projectNameTextField.getText());
         }
@@ -520,56 +448,11 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
         Document doc = e.getDocument();
 
         if (doc == projectNameTextField.getDocument() || doc == projectLocationTextField.getDocument()) {
-            // Change in the project name
-
             String projectName = projectNameTextField.getText();
             String projectFolder = projectLocationTextField.getText();
-
-            //if (projectFolder.trim().length() == 0 || projectFolder.equals(oldName)) {
             createdFolderTextField.setText(projectFolder + File.separatorChar + projectName);
-            //}
-
-        } else if (doc == txtDBName.getDocument()) {
-            String dbName = txtDBName.getText();
-            firePropertyChange(PlatypusSamples.DB_NAME, null, dbName);
-            updateDBPath(dbName);
         }
 
         panel.fireChangeEvent(); // Notify that the panel changed
-    }
-
-    private static final String USER_HOME_PROPERTY = System.getProperty("user.home");
-
-    private void updateDBPath(String dbName) {
-        String dbPath = new File(USER_HOME_PROPERTY, dbName).getPath();
-        txtDBLocation.setText(dbPath + H2DB_SUFFIX);
-    }
-    private static final String H2DB_SUFFIX = ".h2.db";
-
-    private String getFirstFreeDatabaseName(String aDefaultName) {
-        String freeName = aDefaultName;
-        File dbCandidate = new File(USER_HOME_PROPERTY, freeName + H2DB_SUFFIX);
-        int counter = 0;
-        while (dbCandidate.exists()) {
-            freeName = aDefaultName + "_" + ++counter;
-            dbCandidate = new File(USER_HOME_PROPERTY, freeName + H2DB_SUFFIX);
-        }
-        return freeName;
-    }
-
-    private boolean isJavaEECapableServerRegistered() {
-        for (String serverInstanceID : Deployment.getDefault().getServerInstanceIDs()) {
-            try {
-                J2eePlatform j2eePlatform = Deployment.getDefault().getServerInstance(serverInstanceID).getJ2eePlatform();
-
-                if (j2eePlatform.getSupportedProfiles().contains(Profile.JAVA_EE_6_WEB)) {
-                    return true;
-                }
-            } catch (InstanceRemovedException ex) {
-                Logger.getLogger(PlatypusSamplesPanelVisual.class.getName()).log(Level.INFO, "Cannot find registerred JavaEE 5/JavaEE 6  server", ex);
-            }
-        }
-
-        return false;
     }
 }

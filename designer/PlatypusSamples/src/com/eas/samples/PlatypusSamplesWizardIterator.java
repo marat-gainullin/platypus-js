@@ -1,10 +1,15 @@
 package com.eas.samples;
 
+import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import java.awt.Component;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -20,7 +25,9 @@ import org.openide.WizardDescriptor;
 import org.openide.filesystems.FileLock;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.EditableProperties;
 import org.openide.util.NbBundle;
+import org.openide.util.Utilities;
 
 public class PlatypusSamplesWizardIterator implements WizardDescriptor.ProgressInstantiatingIterator {
 
@@ -37,7 +44,7 @@ public class PlatypusSamplesWizardIterator implements WizardDescriptor.ProgressI
 
     protected WizardDescriptor.Panel[] createPanels() {
         return new WizardDescriptor.Panel[]{
-            new PlatypusSamplesWizardPanel(false)
+            new PlatypusSamplesWizardPanel()
         };
     }
 
@@ -60,19 +67,38 @@ public class PlatypusSamplesWizardIterator implements WizardDescriptor.ProgressI
 
         Set resultSet = new LinkedHashSet();
         File projectDir = FileUtil.normalizeFile((File) wiz.getProperty(PlatypusSamples.PROJ_DIR));
-        String name = (String) wiz.getProperty(PlatypusSamples.NAME);
-        FileObject template = Templates.getTemplate(wiz);
-
         projectDir.mkdirs();
-        unZipFile(template.getInputStream(), projectDir);
-
-        // TODO: filter project.properties and private.properties
-        // insert Web context, project name, project datasource, j2ee server id
         
+        FileObject template = Templates.getTemplate(wiz);
+        try (InputStream templateStream = template.getInputStream()) {
+            unZipFile(templateStream, projectDir);
+        }
+
+        Path projectDirPath = Paths.get(Utilities.toURI(projectDir));
+        Path generalPropertiesPath = projectDirPath.resolve(PlatypusProjectSettingsImpl.PROJECT_SETTINGS_FILE);
+        EditableProperties generalProperties = new EditableProperties(true);
+        try (InputStream ppIn = new FileInputStream(generalPropertiesPath.toFile())) {
+            generalProperties.load(ppIn);
+        }
+        Path privatePropertiesPath = projectDirPath.resolve(PlatypusProjectSettingsImpl.PROJECT_PRIVATE_SETTINGS_FILE);
+        EditableProperties privateProperties = new EditableProperties(true);
+        try (InputStream ppIn = new FileInputStream(privatePropertiesPath.toFile())) {
+            privateProperties.load(ppIn);
+        }
+
+        processProjectProperties(generalProperties, privateProperties);
+
+        try (OutputStream ppOut = new FileOutputStream(generalPropertiesPath.toFile())) {
+            generalProperties.store(ppOut);
+        }
+        try (OutputStream pppOut = new FileOutputStream(privatePropertiesPath.toFile())) {
+            privateProperties.store(pppOut);
+        }
+
         ProjectManager.getDefault().clearNonProjectCache();
         handle.progress(NbBundle.getMessage(PlatypusSamplesWizardIterator.class, "LBL_NewSampleProjectWizardIterator_WizardProgress_PreparingToOpen"), 2); // NOI18N
 
-        // Always open top dir as a project:
+        // Open top folder as a project
         resultSet.add(FileUtil.toFileObject(projectDir));
 
         File parent = projectDir.getParentFile();
@@ -82,6 +108,14 @@ public class PlatypusSamplesWizardIterator implements WizardDescriptor.ProgressI
 
         handle.finish();
         return resultSet;
+    }
+
+    protected void processProjectProperties(EditableProperties aGeneralProperties, EditableProperties aPrivateProperties) {
+        String projectName = (String) wiz.getProperty(PlatypusSamples.NAME);
+        PlatypusSamplesPanelVisual.J2eePlatformAdapter j2eeServer = (PlatypusSamplesPanelVisual.J2eePlatformAdapter) wiz.getProperty(PlatypusSamples.SERVER_ID);
+        aGeneralProperties.setProperty(PlatypusProjectSettingsImpl.PROJECT_DISPLAY_NAME_KEY, projectName);
+        aGeneralProperties.setProperty(PlatypusProjectSettingsImpl.SERVER_CONTEXT_KEY, projectName);
+        aPrivateProperties.setProperty(PlatypusProjectSettingsImpl.J2EE_SERVER_ID_KEY, j2eeServer.getServerInstanceId());
     }
 
     @Override
@@ -172,27 +206,23 @@ public class PlatypusSamplesWizardIterator implements WizardDescriptor.ProgressI
     }
 
     private static void unZipFile(InputStream source, File aDestination) throws IOException {
-        try {
-            FileObject destination = FileUtil.toFileObject(aDestination);
-            ZipInputStream str = new ZipInputStream(source);
-            ZipEntry entry;
-            while ((entry = str.getNextEntry()) != null) {
-                if (entry.isDirectory()) {
-                    FileUtil.createFolder(destination, entry.getName());
-                } else {
-                    FileObject fo = FileUtil.createData(destination, entry.getName());
-                    FileLock lock = fo.lock();
-                    try {
-                        try (OutputStream out = fo.getOutputStream(lock)) {
-                            FileUtil.copy(str, out);
-                        }
-                    } finally {
-                        lock.releaseLock();
+        FileObject destination = FileUtil.toFileObject(aDestination);
+        ZipInputStream str = new ZipInputStream(source);
+        ZipEntry entry;
+        while ((entry = str.getNextEntry()) != null) {
+            if (entry.isDirectory()) {
+                FileUtil.createFolder(destination, entry.getName());
+            } else {
+                FileObject fo = FileUtil.createData(destination, entry.getName());
+                FileLock lock = fo.lock();
+                try {
+                    try (OutputStream out = fo.getOutputStream(lock)) {
+                        FileUtil.copy(str, out);
                     }
+                } finally {
+                    lock.releaseLock();
                 }
             }
-        } finally {
-            source.close();
         }
     }
 }
