@@ -89,7 +89,11 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
         serversModel = new DefaultComboBoxModel(getJ2eePlatforms());
         initComponents();
         EventQueue.invokeLater(() -> {
-            cbj2eeServer.setSelectedItem(J2eePlatformAdapter.UNKNOWN_PLATFORM_ADAPRER);
+            if (serversModel.getSize() == 2) {
+                cbj2eeServer.setSelectedItem(J2eePlatformAdapter.UNKNOWN_PLATFORM_ADAPRER == serversModel.getElementAt(0) ? serversModel.getElementAt(1) : serversModel.getElementAt(0));
+            } else {
+                cbj2eeServer.setSelectedItem(J2eePlatformAdapter.UNKNOWN_PLATFORM_ADAPRER);
+            }
         });
         // Register listener on the textFields to make the automatic updates
         projectNameTextField.getDocument().addDocumentListener(this);
@@ -112,7 +116,9 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
         j2eePlatforms.add(J2eePlatformAdapter.UNKNOWN_PLATFORM_ADAPRER);
         for (String serverInstance : serverInstanceIDs) {
             try {
-                j2eePlatforms.add(new J2eePlatformAdapter(Deployment.getDefault().getServerInstance(serverInstance).getJ2eePlatform(), serverInstance));
+                if (serverInstance.contains("tomcat")) {
+                    j2eePlatforms.add(new J2eePlatformAdapter(Deployment.getDefault().getServerInstance(serverInstance).getJ2eePlatform(), serverInstance));
+                }
             } catch (InstanceRemovedException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.WARNING, "Server instance has been removed.", ex); //NOI18N
             }
