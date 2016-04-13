@@ -415,7 +415,7 @@ public class ProjectRunner {
         if (lastFileSepIndex != -1) {
             requireCallabckArg = requireCallabckArg.substring(lastFileSepIndex + 1);
         }
-        return requireCallabckArg;
+        return StringUtils.replaceUnsupportedSymbols(requireCallabckArg);
     }
 
     public static void addArguments(List<String> arguments, String argsStr) {
