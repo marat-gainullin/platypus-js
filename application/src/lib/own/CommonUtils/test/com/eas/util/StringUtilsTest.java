@@ -66,19 +66,19 @@ public class StringUtilsTest {
         System.out.println("replaceUnsupportedFileNamesSymbols");
         String str = "test";
         String expResult = "test";
-        String result = StringUtils.replaceUnsupportedSymbolsinFileNames(str);
+        String result = StringUtils.replaceFileNamesInvalidCharacters(str);
         assertEquals(expResult, result);
         str = " test";
         expResult = "test";
-        result = StringUtils.replaceUnsupportedSymbolsinFileNames(str);
+        result = StringUtils.replaceFileNamesInvalidCharacters(str);
         assertEquals(expResult, result);
         str = "te st";
         expResult = "te st";
-        result = StringUtils.replaceUnsupportedSymbolsinFileNames(str);
+        result = StringUtils.replaceFileNamesInvalidCharacters(str);
         assertEquals(expResult, result);
         str = " test  ";
         expResult = "test__";
-        result = StringUtils.replaceUnsupportedSymbolsinFileNames(str);
+        result = StringUtils.replaceFileNamesInvalidCharacters(str);
         assertEquals(expResult, result);
     }
     

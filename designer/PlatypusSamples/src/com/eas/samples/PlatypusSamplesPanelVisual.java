@@ -18,6 +18,7 @@ import org.openide.filesystems.FileUtil;
 import org.openide.util.NbBundle;
 import com.eas.designer.application.platform.PlatypusPlatform;
 import com.eas.designer.explorer.platform.PlatypusPlatformDialog;
+import com.eas.util.StringUtils;
 import java.awt.EventQueue;
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
@@ -126,10 +127,6 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
         return j2eePlatforms.toArray(new J2eePlatformAdapter[]{});
     }
 
-    public String getProjectName() {
-        return this.projectNameTextField.getText();
-    }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -225,10 +222,10 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(projectNameLabel)
-                    .addComponent(projectNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(projectNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(projectNameLabel))
+                .addGap(5, 5, 5)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(32, 32, 32)
@@ -245,9 +242,9 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
                     .addComponent(cbj2eeServer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnManageServers)
                     .addComponent(lblServer))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
                 .addComponent(btnPickPlatypusHome)
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addContainerGap(15, Short.MAX_VALUE))
         );
 
         projectLocationTextField.getAccessibleContext().setAccessibleDescription(org.openide.util.NbBundle.getMessage(PlatypusSamplesPanelVisual.class, "LBL_ProjectLocation_A11YDesc")); // NOI18N
@@ -393,7 +390,7 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
     }
 
     void store(WizardDescriptor settings) {
-        String name = projectNameTextField.getText().trim();
+        String name = StringUtils.replaceFileNamesInvalidCharacters(projectNameTextField.getText().trim());
         String folder = createdFolderTextField.getText().trim();
 
         settings.putProperty(PlatypusSamples.PROJ_DIR, new File(folder));
@@ -444,7 +441,7 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
      */
     private void updateTexts(DocumentEvent e) {
         if (projectNameTextField.getDocument() == e.getDocument()) {
-            firePropertyChange(PlatypusSamples.NAME, null, projectNameTextField.getText());
+            firePropertyChange(PlatypusSamples.NAME, null, StringUtils.replaceFileNamesInvalidCharacters(projectNameTextField.getText()));
         }
 
         if (projectLocationTextField.getDocument() == e.getDocument()) {
@@ -454,7 +451,7 @@ public class PlatypusSamplesPanelVisual extends JPanel implements DocumentListen
         Document doc = e.getDocument();
 
         if (doc == projectNameTextField.getDocument() || doc == projectLocationTextField.getDocument()) {
-            String projectName = projectNameTextField.getText();
+            String projectName = StringUtils.replaceFileNamesInvalidCharacters(projectNameTextField.getText());
             String projectFolder = projectLocationTextField.getText();
             createdFolderTextField.setText(projectFolder + File.separatorChar + projectName);
         }
