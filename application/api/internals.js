@@ -244,7 +244,7 @@
                 } else if (aValue instanceof String) {
                     return aValue + '';
                 } else if (aValue instanceof Boolean) {
-                    return !!aValue;
+                    return aValue == true; // Don't edit to !!aValue
                 } else {
                     var isArray = aValue instanceof Array;
                     var copied = isArray ? new ArrayCopyClass() : new ObjectCopyClass();
@@ -306,7 +306,7 @@
                 } else if (aValue instanceof String) {
                     return aValue + '';
                 } else if (aValue instanceof Boolean) {
-                    return !!aValue;
+                    return aValue == true; // Don't edit to !!aValue
                 } else {
                     var isList = aValue instanceof ArrayCopyClass;
                     var restored = isList ? [] : {};
