@@ -56,6 +56,10 @@ public abstract class PlatypusProjectWizard implements WizardDescriptor./*Progre
             if (!appDir.exists()) {
                 appDir.mkdir();
             }
+            File markerFile = new File(projSpecDir, PlatypusProjectSettingsImpl.PROJECT_MARKER_FILE);
+            if (!markerFile.exists()) {
+                markerFile.createNewFile();
+            }
             File propertiesFile = new File(projSpecDir, PlatypusProjectSettingsImpl.PROJECT_SETTINGS_FILE);
             if (!propertiesFile.exists()) {
                 PlatypusProjectSettingsImpl settings = new PlatypusProjectSettingsImpl(FileUtil.toFileObject(projSpecDir));
@@ -63,6 +67,7 @@ public abstract class PlatypusProjectWizard implements WizardDescriptor./*Progre
                 settings.setSourcePath(PlatypusProjectSettingsImpl.DEFAULT_APP_FOLDER);
                 settings.save();
             }
+
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
         }

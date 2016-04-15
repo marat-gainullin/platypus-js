@@ -21,9 +21,11 @@ public final class PlatypusProjectFactory implements ProjectFactory {
     public boolean isProject(FileObject fo) {
         if (fo.isFolder()) {
             FileObject appDirectory = fo.getFileObject(PlatypusProjectSettingsImpl.DEFAULT_APP_FOLDER);
-            return appDirectory != null
-                    && appDirectory.isFolder()
-                    && fo.getFileObject(PlatypusProjectSettingsImpl.PROJECT_SETTINGS_FILE) != null;
+            FileObject markerFile = fo.getFileObject(PlatypusProjectSettingsImpl.PROJECT_MARKER_FILE);
+            FileObject settingsFile = fo.getFileObject(PlatypusProjectSettingsImpl.PROJECT_SETTINGS_FILE);
+            return (appDirectory != null
+                    && appDirectory.isFolder() || markerFile != null)
+                    && settingsFile != null;
         } else {
             return false;
         }

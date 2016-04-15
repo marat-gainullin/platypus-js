@@ -28,6 +28,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     public static final int CLIENT_APP_DEFAULT_DEBUG_PORT = 8900;
     public static final int SERVER_APP_DEFAULT_DEBUG_PORT = 8901;
     public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
+    public static final String PROJECT_MARKER_FILE = ".platypus"; //NOI18N
     public static final String PROJECT_SETTINGS_FILE = "project.properties"; //NOI18N
     public static final String PROJECT_PRIVATE_SETTINGS_FILE = "private.properties"; //NOI18N
     public static final String DEFAULT_APP_FOLDER = "app"; //NOI18N
