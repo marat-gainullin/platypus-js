@@ -52,22 +52,26 @@ public abstract class PlatypusProjectWizard implements WizardDescriptor./*Progre
             projSpecDir.mkdirs();
         }
         try {
-            File appDir = new File(projSpecDir, PlatypusProjectSettingsImpl.DEFAULT_APP_FOLDER);
-            if (!appDir.exists()) {
-                appDir.mkdir();
+            PlatypusProjectSettingsImpl settings;
+            File propertiesFile = new File(projSpecDir, PlatypusProjectSettingsImpl.PROJECT_SETTINGS_FILE);
+            if (!propertiesFile.exists()) {
+                settings = new PlatypusProjectSettingsImpl(FileUtil.toFileObject(projSpecDir));
+                settings.setDisplayName(projTitle);
+                settings.setSourcePath(PlatypusProjectSettingsImpl.DEFAULT_APP_FOLDER);
+                settings.save();
+            } else {
+                settings = new PlatypusProjectSettingsImpl(FileUtil.toFileObject(projSpecDir));
+            }
+            if (settings.getSourcePath() != null && !settings.getSourcePath().isEmpty()) {
+                File srcDir = new File(projSpecDir, settings.getSourcePath());
+                if (!srcDir.exists()) {
+                    srcDir.mkdirs();
+                }
             }
             File markerFile = new File(projSpecDir, PlatypusProjectSettingsImpl.PROJECT_MARKER_FILE);
             if (!markerFile.exists()) {
                 markerFile.createNewFile();
             }
-            File propertiesFile = new File(projSpecDir, PlatypusProjectSettingsImpl.PROJECT_SETTINGS_FILE);
-            if (!propertiesFile.exists()) {
-                PlatypusProjectSettingsImpl settings = new PlatypusProjectSettingsImpl(FileUtil.toFileObject(projSpecDir));
-                settings.setDisplayName(projTitle);
-                settings.setSourcePath(PlatypusProjectSettingsImpl.DEFAULT_APP_FOLDER);
-                settings.save();
-            }
-
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
         }
