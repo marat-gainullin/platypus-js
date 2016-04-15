@@ -339,6 +339,10 @@ public class Scripts {
             }
         }
 
+        public Object getGlobal() {
+            return global;
+        }
+
         public Object getUndefined() {
             return Undefined.getUndefined();
         }

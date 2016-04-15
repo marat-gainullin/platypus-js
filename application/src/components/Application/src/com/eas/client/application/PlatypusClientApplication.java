@@ -73,22 +73,52 @@ public class PlatypusClientApplication {
     public static final String APPLICATION_ELEMENTS_LOCATION_MSG = "Application is located at: {0}";
     //
 
-    protected static class Config {
+    public static class Config {
 
-        protected String startScriptPath;
-        protected String userName;
-        protected char[] password;
-        protected int maximumAuthenticateAttempts = Integer.MAX_VALUE;
-        protected URL url;
-        protected String defDatasource;
-        protected String sourcePath;
-        protected DatasourcesArgsConsumer datasourcesArgs;
-        protected ThreadsArgsConsumer threadsArgs = new ThreadsArgsConsumer();
+        private String startScriptPath;
+        private String userName;
+        private char[] password;
+        private int maximumAuthenticateAttempts = Integer.MAX_VALUE;
+        private URL url;
+        private String defDatasource;
+        private String sourcePath;
+        private final DatasourcesArgsConsumer datasourcesArgs = new DatasourcesArgsConsumer();
+        private final ThreadsArgsConsumer threadsArgs = new ThreadsArgsConsumer();
 
-        private static Config parse(String[] args) throws Exception {
+        public String getStartScriptPath() {
+            return startScriptPath;
+        }
+
+        public String getUserName() {
+            return userName;
+        }
+
+        public URL getUrl() {
+            return url;
+        }
+
+        public String getSourcePath() {
+            return sourcePath;
+        }
+
+        public ThreadsArgsConsumer getThreadsArgs() {
+            return threadsArgs;
+        }
+
+        public DatasourcesArgsConsumer getDatasourcesArgs() {
+            return datasourcesArgs;
+        }
+
+        public String getDefDatasource() {
+            return defDatasource;
+        }
+
+        public int getMaximumAuthenticateAttempts() {
+            return maximumAuthenticateAttempts;
+        }
+
+        public static Config parse(String[] args) throws Exception {
             Config commonArgs = new Config();
-            DatasourcesArgsConsumer dsArgs = new DatasourcesArgsConsumer();
-            ThreadsArgsConsumer threadsArgs = new ThreadsArgsConsumer();
             int i = 0;
             while (i < args.length) {
                 if ((CMD_SWITCHS_PREFIX + URL_CMD_SWITCH).equalsIgnoreCase(args[i])) {
@@ -147,11 +177,11 @@ public class PlatypusClientApplication {
                         throw new IllegalArgumentException("syntax: -appElement <application element id>");
                     }
                 } else {
-                    int consumed = dsArgs.consume(args, i);
+                    int consumed = commonArgs.datasourcesArgs.consume(args, i);
                     if (consumed > 0) {
                         i += consumed;
                     } else {
-                        consumed = threadsArgs.consume(args, i);
+                        consumed = commonArgs.threadsArgs.consume(args, i);
                         if (consumed > 0) {
                             i += consumed;
                         } else {
@@ -160,13 +190,11 @@ public class PlatypusClientApplication {
                     }
                 }
             }
-            commonArgs.datasourcesArgs = dsArgs;
-            commonArgs.threadsArgs = threadsArgs;
             return commonArgs;
         }
     }
 
-    protected static class UIOnCredentials implements Callable<Credentials> {
+    public static class UIOnCredentials implements Callable<Credentials> {
 
         protected Config config;
 
@@ -225,117 +253,119 @@ public class PlatypusClientApplication {
             System.setProperty("java.awt.Window.locationByPlatform", "true");
             Config config = Config.parse(args);
             checkUrl(config);
-            if (config.url != null) {
-                checkUserHome();
-                GeneralResourceProvider.registerDrivers();
-                config.datasourcesArgs.registerDatasources();
-                Scripts.initBIO(config.threadsArgs.getMaxServicesTreads());
-                Scripts.initTasks((Runnable aTask) -> {
-                    EventQueue.invokeLater(aTask);
-                });
-                Application app;
-                PlatypusPrincipal.setClientSpacePrincipal(new AnonymousPlatypusPrincipal());
-                Path apiFolder = ScriptedResource.lookupPlatypusJs();
-                if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTP)) {
-                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, config.sourcePath, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
-                } else if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTPS)) {
-                    app = new PlatypusClient(new PlatypusHttpConnection(config.url, config.sourcePath, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
-                } else if (config.url.getProtocol().equalsIgnoreCase("platypus")) {
-                    app = new PlatypusClient(new PlatypusPlatypusConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, (Runnable aTask) -> {
-                        EventQueue.invokeLater(aTask);
-                    }, config.threadsArgs.getMaxPlatypusConnections(), true));
-                } else if (config.url.getProtocol().equalsIgnoreCase("file")) {
-                    File f = new File(config.url.toURI());
-                    if (f.exists() && f.isDirectory()) {
-                        ModelsDocuments models = new ModelsDocuments();
-                        ScriptsConfigs scriptsConfigs = new ScriptsConfigs();
-                        ValidatorsScanner validatorsScanner = new ValidatorsScanner();
-                        Path projectRoot = Paths.get(f.toURI());
-                        Path appFolder = config.sourcePath != null ? projectRoot.resolve(config.sourcePath) : projectRoot;
-                        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(appFolder, apiFolder, scriptsConfigs, validatorsScanner);
-                        // TODO: add command line argument "watch" after watcher refactoring
-                        //indexer.watch();
-                        ScriptedDatabasesClient twoTierCore = new ScriptedDatabasesClient(config.defDatasource, indexer, true, validatorsScanner.getValidators(), config.threadsArgs.getMaxJdbcTreads());
-                        QueriesProxy qp = new LocalQueriesProxy(twoTierCore, indexer);
-                        ModulesProxy mp = new LocalModulesProxy(indexer, models, config.startScriptPath);
-                        twoTierCore.setQueries(qp);
-                        app = new Application() {
-
-                            protected FormsDocuments forms = new FormsDocuments();
-                            protected ReportsConfigs reports = new ReportsConfigs();
-
-                            @Override
-                            public Application.Type getType() {
-                                return Type.CLIENT;
-                            }
-
-                            @Override
-                            public QueriesProxy getQueries() {
-                                return qp;
-                            }
-
-                            @Override
-                            public ModulesProxy getModules() {
-                                return mp;
-                            }
-
-                            @Override
-                            public ServerModulesProxy getServerModules() {
-                                throw new UnsupportedOperationException("Application.getServerModules() is not supported in two-tier architecture.");
-                            }
-
-                            @Override
-                            public ModelsDocuments getModels() {
-                                return models;
-                            }
-
-                            @Override
-                            public FormsDocuments getForms() {
-                                return forms;
-                            }
-
-                            @Override
-                            public ReportsConfigs getReports() {
-                                return reports;
-                            }
-
-                            @Override
-                            public ScriptsConfigs getScriptsConfigs() {
-                                return scriptsConfigs;
-                            }
-
-                        };
-                    } else {
-                        throw new IllegalArgumentException("applicationUrl: " + config.url + " doesn't point to existent directory or JNDI resource.");
-                    }
-                } else {
-                    throw new Exception("Unknown protocol in url: " + config.url);
-                }
-                ScriptedResource.init(app, apiFolder, false);
-                EventQueue.invokeLater(() -> {
-                    try {
-                        Scripts.setOnlySpace(Scripts.createSpace());
-                        Scripts.getSpace().process(() -> {
-                            try {
-                                ScriptedResource._require(new String[]{""}, null, Scripts.getSpace(), new HashSet<>(), (Void v) -> {
-                                    Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.INFO, "Platypus application started.");
-                                }, (Exception ex) -> {
-                                    Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
-                                });
-                            } catch (Exception ex) {
-                                Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        });
-                    } catch (ScriptException ex) {
-                        Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                });
-            } else {
-                throw new IllegalArgumentException("Application url is missing. url is a required parameter.");
-            }
+            init(config);
+            run("");
         } catch (Throwable t) {
             Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, t);
             System.exit(0xff);
+        }
+    }
+
+    public static void run(String aModuleName) {
+        Scripts.getSpace().process(() -> {
+            try {
+                ScriptedResource._require(new String[]{aModuleName}, null, Scripts.getSpace(), new HashSet<>(), (Void v) -> {
+                    Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.INFO, "Platypus application started.");
+                }, (Exception ex) -> {
+                    Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
+                });
+            } catch (Exception ex) {
+                Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+    }
+
+    public static void init(Config config) throws Exception {
+        if (config.url != null) {
+            checkUserHome();
+            GeneralResourceProvider.registerDrivers();
+            config.datasourcesArgs.registerDatasources();
+            Scripts.initBIO(config.threadsArgs.getMaxServicesTreads());
+            Scripts.initTasks((Runnable aTask) -> {
+                EventQueue.invokeLater(aTask);
+            });
+            Application app;
+            PlatypusPrincipal.setClientSpacePrincipal(new AnonymousPlatypusPrincipal());
+            Path apiFolder = ScriptedResource.lookupPlatypusJs();
+            if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTP)) {
+                app = new PlatypusClient(new PlatypusHttpConnection(config.url, config.sourcePath, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
+            } else if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTPS)) {
+                app = new PlatypusClient(new PlatypusHttpConnection(config.url, config.sourcePath, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
+            } else if (config.url.getProtocol().equalsIgnoreCase("platypus")) {
+                app = new PlatypusClient(new PlatypusPlatypusConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, (Runnable aTask) -> {
+                    EventQueue.invokeLater(aTask);
+                }, config.threadsArgs.getMaxPlatypusConnections(), true));
+            } else if (config.url.getProtocol().equalsIgnoreCase("file")) {
+                File f = new File(config.url.toURI());
+                if (f.exists() && f.isDirectory()) {
+                    ModelsDocuments models = new ModelsDocuments();
+                    ScriptsConfigs scriptsConfigs = new ScriptsConfigs();
+                    ValidatorsScanner validatorsScanner = new ValidatorsScanner();
+                    Path projectRoot = Paths.get(f.toURI());
+                    Path appFolder = config.sourcePath != null ? projectRoot.resolve(config.sourcePath) : projectRoot;
+                    ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(appFolder, apiFolder, scriptsConfigs, validatorsScanner);
+                    // TODO: add command line argument "watch" after watcher refactoring
+                    //indexer.watch();
+                    ScriptedDatabasesClient twoTierCore = new ScriptedDatabasesClient(config.defDatasource, indexer, true, validatorsScanner.getValidators(), config.threadsArgs.getMaxJdbcTreads());
+                    QueriesProxy qp = new LocalQueriesProxy(twoTierCore, indexer);
+                    ModulesProxy mp = new LocalModulesProxy(indexer, models, config.startScriptPath);
+                    twoTierCore.setQueries(qp);
+                    app = new Application() {
+
+                        protected FormsDocuments forms = new FormsDocuments();
+                        protected ReportsConfigs reports = new ReportsConfigs();
+
+                        @Override
+                        public Application.Type getType() {
+                            return Type.CLIENT;
+                        }
+
+                        @Override
+                        public QueriesProxy getQueries() {
+                            return qp;
+                        }
+
+                        @Override
+                        public ModulesProxy getModules() {
+                            return mp;
+                        }
+
+                        @Override
+                        public ServerModulesProxy getServerModules() {
+                            throw new UnsupportedOperationException("Application.getServerModules() is not supported in two-tier architecture.");
+                        }
+
+                        @Override
+                        public ModelsDocuments getModels() {
+                            return models;
+                        }
+
+                        @Override
+                        public FormsDocuments getForms() {
+                            return forms;
+                        }
+
+                        @Override
+                        public ReportsConfigs getReports() {
+                            return reports;
+                        }
+
+                        @Override
+                        public ScriptsConfigs getScriptsConfigs() {
+                            return scriptsConfigs;
+                        }
+
+                    };
+                } else {
+                    throw new IllegalArgumentException("applicationUrl: " + config.url + " doesn't point to existent directory or JNDI resource.");
+                }
+            } else {
+                throw new Exception("Unknown protocol in url: " + config.url);
+            }
+            ScriptedResource.init(app, apiFolder, false);
+            Scripts.setOnlySpace(Scripts.createSpace());
+        } else {
+            throw new IllegalArgumentException("Application url is missing. url is a required parameter.");
         }
     }
 
@@ -371,7 +401,7 @@ public class PlatypusClientApplication {
         super();
     }
 
-    private static void checkUserHome() {
+    public static void checkUserHome() {
         String home = System.getProperty(ClientConstants.USER_HOME_PROP_NAME);
         if (home == null || home.isEmpty()) {
             throw new IllegalArgumentException(USER_HOME_MISSING_MSG);
