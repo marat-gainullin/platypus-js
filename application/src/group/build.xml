@@ -250,7 +250,6 @@
         <subant buildpath="${project.Datamodel}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Modules}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.JCalendar}" antfile="build.xml" target="test"/>
-        <subant buildpath="${project.GeoAddon}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Reports}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Forms}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Application}" antfile="build.xml" target="test"/>

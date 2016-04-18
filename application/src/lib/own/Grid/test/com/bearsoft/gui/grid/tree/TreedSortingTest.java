@@ -37,8 +37,8 @@ public class TreedSortingTest extends FacadeBaseTest{
         tbl.setRowSorter(new TreedRowsSorter<>(tModel, null));
         frame.getContentPane().add(new JScrollPane(tbl), BorderLayout.CENTER);
         frame.setSize(800, 700);
-        frame.setVisible(true);
+        //frame.setVisible(true);
         Thread.sleep(100);
-        frame.setVisible(false);
+        //frame.setVisible(false);
     }   
 }

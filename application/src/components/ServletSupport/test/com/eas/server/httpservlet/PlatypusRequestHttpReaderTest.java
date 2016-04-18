@@ -4,21 +4,35 @@
  */
 package com.eas.server.httpservlet;
 
+import com.eas.client.Application;
+import com.eas.client.ModuleStructure;
+import com.eas.client.ModulesProxy;
+import com.eas.client.ServerModulesProxy;
+import com.eas.client.cache.FormsDocuments;
+import com.eas.client.cache.ModelsDocuments;
+import com.eas.client.cache.ReportsConfigs;
+import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.changes.Change;
 import com.eas.client.changes.ChangeValue;
 import com.eas.client.changes.Command;
 import com.eas.client.changes.Delete;
 import com.eas.client.changes.Insert;
 import com.eas.client.changes.Update;
+import com.eas.client.queries.QueriesProxy;
+import com.eas.client.scripts.ScriptedResource;
 import com.eas.client.threetier.json.ChangesJSONReader;
 import com.eas.script.Scripts;
 import com.eas.util.RowsetJsonConstants;
+import java.io.File;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.function.Consumer;
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -27,11 +41,85 @@ import org.junit.Test;
  */
 public class PlatypusRequestHttpReaderTest {
 
-    protected static final String WRITTEN_CHANGES = "[{\"kind\":\"insert\", \"entity\":\"testEntity\", \"data\":{\"data\\\"\\\"1\":56, \"data2\":\"data2Value\", \"da\\\"ta3\":true, \"data4\":false, \"data5\":\"1346067735514\"}},{\"kind\":\"update\", \"entity\":\"testEntity\", \"data\":{\"data\\\"\\\"1\":56, \"data2\":\"data2Value\", \"da\\\"ta3\":true, \"data4\":false, \"data5\":\"2012-08-27T11:42:15.514Z\"}, \"keys\":{\"key1\":78.9000015258789, \"key2\":\"key2Value\"}},{\"kind\":\"delete\", \"entity\":\"testEntity\", \"keys\":{\"key1\":78.9000015258789, \"key2\":\"key2Value\"}},{\"kind\":\"command\", \"entity\":\"testEntity\", \"parameters\":{\"key1\":78.9000015258789, \"key2\":\"key2Value\"}}]";
+    protected static final String WRITTEN_CHANGES = "[{\"kind\":\"insert\", \"entity\":\"testEntity\", \"data\":{\"data\\\"\\\"1\":56, \"data2\":\"data2Value\", \"da\\\"ta3\":true, \"data4\":false, \"data5\":\"2012-08-27T11:42:15.514Z\"}},{\"kind\":\"update\", \"entity\":\"testEntity\", \"data\":{\"data\\\"\\\"1\":56, \"data2\":\"data2Value\", \"da\\\"ta3\":true, \"data4\":false, \"data5\":\"2012-08-27T11:42:15.514Z\"}, \"keys\":{\"key1\":78.9000015258789, \"key2\":\"key2Value\"}},{\"kind\":\"delete\", \"entity\":\"testEntity\", \"keys\":{\"key1\":78.9000015258789, \"key2\":\"key2Value\"}},{\"kind\":\"command\", \"entity\":\"testEntity\", \"parameters\":{\"key1\":78.9000015258789, \"key2\":\"key2Value\"}}]";
 
+    @BeforeClass
+    public static void init() throws Exception{
+        Path platypusJsPath = ScriptedResource.lookupPlatypusJs();
+        Scripts.init(platypusJsPath, false);
+        Scripts.setOnlySpace(Scripts.createSpace());
+        ScriptedResource.init(new Application(){
+            @Override
+            public Application.Type getType() {
+                return Application.Type.CLIENT;
+            }
+
+            @Override
+            public QueriesProxy getQueries() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public ModulesProxy getModules() {
+                return new ModulesProxy(){
+                    @Override
+                    public ModuleStructure getModule(String string, Scripts.Space space, Consumer<ModuleStructure> cnsmr, Consumer<Exception> cnsmr1) throws Exception {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
+
+                    @Override
+                    public File getResource(String string, Scripts.Space space, Consumer<File> cnsmr, Consumer<Exception> cnsmr1) throws Exception {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
+
+                    @Override
+                    public Path getLocalPath() {
+                        return platypusJsPath;
+                    }
+
+                    @Override
+                    public File nameToFile(String string) throws Exception {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
+
+                    @Override
+                    public String getDefaultModuleName(File file) {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
+                };
+            }
+
+            @Override
+            public ServerModulesProxy getServerModules() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public ModelsDocuments getModels() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public FormsDocuments getForms() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public ReportsConfigs getReports() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public ScriptsConfigs getScriptsConfigs() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        }, platypusJsPath, false);
+        Scripts.getSpace().initSpaceGlobal();
+    }
+    
     @Test
     public void timeStampReadTest() throws ParseException {
-        System.out.println("timeStampRedTest with millis");
+        System.out.println("timeStampReadTest with millis");
         SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date dt = sdf.parse("2012-03-05T23:45:02.305Z");
@@ -41,10 +129,9 @@ public class PlatypusRequestHttpReaderTest {
     @Test
     public void changesJsonReadTest() throws Exception {
         System.out.println("changesJsonReadTest");
-        Scripts.Space space = Scripts.createSpace();
-        List<Change> changes = ChangesJSONReader.read(WRITTEN_CHANGES, space);
+        List<Change> changes = ChangesJSONReader.read(WRITTEN_CHANGES, Scripts.getSpace());
 
-        ChangeValue key1 = new ChangeValue("key1", 78.9f);
+        ChangeValue key1 = new ChangeValue("key1", 78.9000015258789D);
         ChangeValue key2 = new ChangeValue("key2", "key2Value");
         ChangeValue[] keys = new ChangeValue[]{key1, key2};
 

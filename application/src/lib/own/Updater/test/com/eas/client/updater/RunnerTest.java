@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
  *
  * @author AB
  */
-public class RunerTest {
+public class RunnerTest {
     
     
     @Test

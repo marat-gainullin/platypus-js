@@ -146,7 +146,7 @@ public class ColumnsStaticTest extends BaseTableTest {
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(gridScroll, BorderLayout.CENTER);
         frame.setSize(800, 700);
-        frame.setVisible(true);
+        //frame.setVisible(true);
         frame.setTitle("configuredTest");
     }
 

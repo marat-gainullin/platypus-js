@@ -191,7 +191,7 @@ public class GridTest extends BaseTableTest {
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(gridScroll, BorderLayout.CENTER);
         frame.setSize(800, 700);
-        frame.setVisible(true);
+        //frame.setVisible(true);
         frame.setTitle("Configured tests frame with constraints configured over general insets");
         return result;
     }
@@ -274,7 +274,7 @@ public class GridTest extends BaseTableTest {
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(gridScroll, BorderLayout.CENTER);
         frame.setSize(800, 700);
-        frame.setVisible(true);
+        //frame.setVisible(true);
         frame.setTitle("Configured tests frame with only constraints configured");
         return result;
     }
@@ -376,13 +376,13 @@ public class GridTest extends BaseTableTest {
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(gridScroll, BorderLayout.CENTER);
         frame.setSize(800, 700);
-        frame.setVisible(true);
+        //frame.setVisible(true);
         frame.setTitle("Configured tests frame with full grid configured over insets, constraints and sorting");
         return result;
     }
 
     protected void endVisual() {
-        frame.setVisible(false);
+        //frame.setVisible(false);
         frame.dispose();
     }
 }

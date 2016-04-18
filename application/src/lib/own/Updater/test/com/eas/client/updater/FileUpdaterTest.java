@@ -20,9 +20,9 @@ public class FileUpdaterTest {
     @Test
     public void testUpdateFile_String() {
         System.out.println("Download and unzip files");
-        String link = "http://research/platypus/updates/5.0/client/NightlyBuild/application.zip";
+        String link = "http://platypus-platform.org/platform/updates/5.4/client/NightlyBuild/application.zip";
         String fname = "app.zip";
-        DownloadFile df=new DownloadFile(link, fname);
+        DownloadFile df = new DownloadFile(link, fname);
         df.setShowReplaceDlg(false);
         df.setShowProgress(false);
         df.downloadFileHttpLink();

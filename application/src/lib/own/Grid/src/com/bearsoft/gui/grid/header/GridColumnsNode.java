@@ -23,7 +23,7 @@ public class GridColumnsNode implements ColumnNodesContainer {
     protected Color foreground;
     protected Font font;
     protected GridColumnsNode parent;
-    protected int minWidth = 0;
+    protected int minWidth;
     protected int maxWidth = Integer.MAX_VALUE / 2;
     protected boolean movable = true;
     protected boolean resizable = true;

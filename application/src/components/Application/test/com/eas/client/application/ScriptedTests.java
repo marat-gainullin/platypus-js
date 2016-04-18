@@ -31,7 +31,7 @@ public class ScriptedTests {
                 ScriptedResource.require(new String[]{aTestModuleName}, null, new AbstractJSObject() {
                     @Override
                     public Object call(final Object thiz, final Object... args) {
-                        JSObject testModule = lookupRequired(aTestModuleName);
+                        JSObject testModule = Scripts.getSpace().lookup(aTestModuleName);
                         JSObject testInstance = (JSObject) testModule.newObject();
                         JSObject execute = (JSObject) testInstance.getMember("execute");
                         try {
@@ -86,14 +86,6 @@ public class ScriptedTests {
         }
     }
 
-    private JSObject lookupRequired(String aModuleName) {
-        JSObject testModule = (JSObject) Scripts.getSpace().getDefined().get(aModuleName);
-        if (testModule == null) {
-            testModule = (JSObject) ((JSObject) Scripts.getSpace().getGlobal()).getMember(aModuleName);
-        }
-        return testModule;
-    }
-
     private void withFacade(AtomicReference<Object> aCompletion, Runnable withFacade) {
         Scripts.getSpace().process(() -> {
             try {
@@ -103,7 +95,7 @@ public class ScriptedTests {
                     ScriptedResource.require(new String[]{"facade"}, null, new AbstractJSObject() {
                         @Override
                         public Object call(final Object thiz, final Object... args) {
-                            JSObject facade = lookupRequired("facade");
+                            JSObject facade = Scripts.getSpace().lookup("facade");
                             JSObject cacheBust = (JSObject) facade.getMember("cacheBust");
                             cacheBust.call(facade, new Object[]{true});
                             JSObject export = (JSObject) facade.getMember("export");

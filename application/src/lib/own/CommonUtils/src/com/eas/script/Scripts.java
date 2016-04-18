@@ -710,7 +710,10 @@ public class Scripts {
             });
         }
 
-        void initSpaceGlobal() {
+        /**
+         * Public only for tests
+         */
+        public void initSpaceGlobal() {
             Bindings bindings = SCRIPT_ENGINE.createBindings();
             scriptContext.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
             try {

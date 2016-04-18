@@ -30,7 +30,7 @@ public class TreedDataChangesTest extends FacadeBaseTest {
         JTable tbl = new JTable(tModel);
         frame.getContentPane().add(new JScrollPane(tbl), BorderLayout.CENTER);
         frame.setSize(800, 700);
-        frame.setVisible(true);
+        //frame.setVisible(true);
         String test1Data = "Changed1";
         String test2Data = "Changed2";
         String test3Data = "Changed3";
@@ -46,7 +46,7 @@ public class TreedDataChangesTest extends FacadeBaseTest {
         int oldRowCount = tbl.getRowCount();
         tModel.expand(tree.get(1), false);
         assertEquals(oldRowCount + 30, tbl.getRowCount());
-        frame.setVisible(false);
+        //frame.setVisible(false);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class TreedDataChangesTest extends FacadeBaseTest {
         JTable tbl = new JTable(tModel);
         frame.getContentPane().add(new JScrollPane(tbl), BorderLayout.CENTER);
         frame.setSize(800, 700);
-        frame.setVisible(true);
+        //frame.setVisible(true);
         int oldRowCount = tbl.getRowCount();
         tModel.expand(tree.get(1), false);
         assertEquals(oldRowCount + 30, tbl.getRowCount());
@@ -73,7 +73,7 @@ public class TreedDataChangesTest extends FacadeBaseTest {
         assertEquals(test1Data, tbl.getValueAt(0, 0));
         assertEquals(test2Data, tbl.getValueAt(1, 1));
         assertEquals(test3Data, tbl.getValueAt(2 + 30, 2));
-        frame.setVisible(false);
+        //frame.setVisible(false);
     }
 
     @Test
@@ -87,7 +87,7 @@ public class TreedDataChangesTest extends FacadeBaseTest {
         JTable tbl = new JTable(tModel);
         frame.getContentPane().add(new JScrollPane(tbl), BorderLayout.CENTER);
         frame.setSize(800, 700);
-        frame.setVisible(true);
+        //frame.setVisible(true);
 
         // fill some node and than try to expand it
         // the right case is children count would double.
@@ -146,7 +146,7 @@ public class TreedDataChangesTest extends FacadeBaseTest {
         JTable tbl = new JTable(tModel);
         frame.getContentPane().add(new JScrollPane(tbl), BorderLayout.CENTER);
         frame.setSize(800, 700);
-        frame.setVisible(true);
+        //frame.setVisible(true);
 
         // fill some node and than try to expand it
         // the right case is children count would double.
@@ -206,7 +206,7 @@ public class TreedDataChangesTest extends FacadeBaseTest {
         JTable tbl = new JTable(tModel);
         frame.getContentPane().add(new JScrollPane(tbl), BorderLayout.CENTER);
         frame.setSize(800, 700);
-        frame.setVisible(true);
+        //frame.setVisible(true);
 
         // clear some node and than try to expand it
         // the right case is nothing changes.

@@ -31,6 +31,10 @@ public class JSDynaList implements Collection {
         }
     }
 
+    public Object get(int aIndex){
+        return JSDynaBean.wrap(delegate.getSlot(aIndex), timezoneOffset);
+    }
+    
     @Override
     public int size() {
         return length;

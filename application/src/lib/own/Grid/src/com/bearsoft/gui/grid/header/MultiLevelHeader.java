@@ -277,18 +277,18 @@ public class MultiLevelHeader extends JPanel {
     }
 
     protected List<GridColumnsNode> wrapColumnsCalculateRoots() {
-        List<GridColumnsNode> res = new ArrayList<>();
-        Set<GridColumnsNode> reviewed = new HashSet<>();
+        List<GridColumnsNode> roots = new ArrayList<>();
+        Set<GridColumnsNode> met = new HashSet<>();
         for (int i = 0; i < columnModel.getColumnCount(); i++) {
             TableColumn col = columnModel.getColumn(i);
             GridColumnsNode group = new GridColumnsNode(col);
-            GridColumnsNode rGroup = getRoot(group);
-            if (!reviewed.contains(rGroup)) {
-                reviewed.add(rGroup);
-                res.add(rGroup);
+            GridColumnsNode rootGroup = getRoot(group);
+            if (!met.contains(rootGroup)) {
+                met.add(rootGroup);
+                roots.add(rootGroup);
             }
         }
-        return res;
+        return roots;
     }
 
     private void fillControl() {
