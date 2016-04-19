@@ -121,15 +121,11 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                     if (requestEnv.ticket == null) {
                         try {
                             Session session = server.getSessionManager().create(String.valueOf(IDGenerator.genID()));
-                            requestEnv.ticket = session.getId();
-                            // It is safe to put SESSION_ID attribute here because of request-response
-                            // protocol nature.
-                            // Another thread needs access to the same ioSession or same ticket to
-                            // get access to partially initialized platypus session.
-                            // So, the following call to DatabaseAuthorizer.authorize and further initialization
-                            // of platypus session in callback body is safe.
-                            ioSession.setAttribute(SESSION_ID, session.getId());
                             DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, session.getSpace(), (PlatypusPrincipal aPrincipal) -> {
+                                requestEnv.ticket = session.getId();
+                                // It is safe to put SESSION_ID attribute here because of request-response protocol nature.
+                                // So, the following call to session.getSpace().process() and further handling of the request is safe.
+                                ioSession.setAttribute(SESSION_ID, session.getId());
                                 session.setPrincipal(aPrincipal);
                                 Scripts.LocalContext context = new Scripts.LocalContext(session.getPrincipal(), session);
                                 session.getSpace().process(context, () -> {
@@ -145,7 +141,9 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                                         }
                                     });
                                 });
-                            }, onError);
+                            }, (Exception ex)->{
+                                onError.accept(ex);
+                            });
                         } catch (ScriptException ex) {
                             Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, null, ex);
                         }
