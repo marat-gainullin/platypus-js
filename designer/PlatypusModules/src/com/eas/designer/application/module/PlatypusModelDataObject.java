@@ -19,7 +19,7 @@ import org.openide.nodes.Node;
  *
  * @author mg
  */
-@MIMEResolver.ExtensionRegistration(displayName = "#LBL_Platypus_Model_file", extension = "model", mimeType = "text/model+xml")
+@MIMEResolver.NamespaceRegistration(checkedExtension = "model", elementName = "datamodel", displayName = "#LBL_Platypus_Model_file", mimeType = "text/model+xml")
 public class PlatypusModelDataObject extends PlatypusDataObject {
 
     private transient ListenerRegistration queriesReg;

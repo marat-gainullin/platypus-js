@@ -10,6 +10,6 @@ package com.eas.util;
  */
 public class RowsetJsonConstants {
 
-    public static final String JSON_CONTENTTYPE = "text/javascript";
+    public static final String JSON_CONTENTTYPE = "application/json";
     public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 }

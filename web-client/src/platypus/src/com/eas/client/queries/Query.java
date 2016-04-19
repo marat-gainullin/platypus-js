@@ -41,7 +41,6 @@ public class Query {
     protected String title;
     protected String entityName;
     protected boolean procedure;
-    protected boolean manual;
     protected Set<String> readRoles = new HashSet<>();
     protected Set<String> writeRoles = new HashSet<>();
 
@@ -69,7 +68,6 @@ public class Query {
     protected Query(Query aSource) {
         if (aSource != null) {
             procedure = aSource.isProcedure();
-            manual = aSource.isManual();
             entityName = aSource.getEntityName();
             String aTitle = aSource.getTitle();
             if (aTitle != null) {
@@ -175,22 +173,6 @@ public class Query {
      */
     public void setProcedure(boolean aValue) {
         procedure = aValue;
-    }
-
-    /**
-     * @return True if model avoid to execute this query automatically.
-     */
-    public boolean isManual() {
-        return manual;
-    }
-
-    /**
-     * Sets dml flag.
-     *
-     * @param aValue
-     */
-    public void setManual(boolean aValue) {
-        manual = aValue;
     }
 
     public Fields getFields() {

@@ -71,11 +71,11 @@ public class SessionManager {
      */
     public Session create(String sessionId) throws ScriptException {
         assert sessionId != null;
-        Session result = new Session(sessionId);
+        Session created = new Session(sessionId);
         Scripts.Space space = Scripts.createSpace();
-        result.setSpace(space);
-        sessions.put(sessionId, result);
-        return result;
+        created.setSpace(space);
+        sessions.put(sessionId, created);
+        return created;
     }
 
     public Session getSystemSession() {

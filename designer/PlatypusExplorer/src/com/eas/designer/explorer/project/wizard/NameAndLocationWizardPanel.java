@@ -17,7 +17,7 @@ import org.openide.util.NbBundle;
 /**
  * Panel just asking for basic info.
  */
-public class NameAndLocationWizardPanel implements WizardDescriptor.Panel<WizardDescriptor>,
+public abstract class NameAndLocationWizardPanel implements WizardDescriptor.Panel<WizardDescriptor>,
         WizardDescriptor.ValidatingPanel<WizardDescriptor> {
 
     private WizardDescriptor wizardDescriptor;
@@ -30,11 +30,13 @@ public class NameAndLocationWizardPanel implements WizardDescriptor.Panel<Wizard
     @Override
     public Component getComponent() {
         if (component == null) {
-            component = new NameAndLocationWizardPanelVisual(this);
+            component = createComponent();
             component.setName(NbBundle.getMessage(NameAndLocationWizardPanel.class, "LBL_CreateProjectStep"));
         }
         return component;
     }
+
+    protected abstract NameAndLocationWizardPanelVisual createComponent();
 
     @Override
     public HelpCtx getHelp() {
@@ -46,7 +48,7 @@ public class NameAndLocationWizardPanel implements WizardDescriptor.Panel<Wizard
         getComponent();
         return component.valid(wizardDescriptor);
     }
-    private final Set<ChangeListener> listeners = new HashSet<>(1); // or can use ChangeSupport in NB 6.0
+    private final Set<ChangeListener> listeners = new HashSet<>(1);
 
     @Override
     public final void addChangeListener(ChangeListener l) {

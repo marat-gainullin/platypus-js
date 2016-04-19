@@ -36,8 +36,8 @@ public class FacadeVisualTest extends FacadeBaseTest {
         JTable tbl = new JTable(tModel);
         frame.getContentPane().add(new JScrollPane(tbl), BorderLayout.CENTER);
         frame.setSize(800, 700);
-        frame.setVisible(true);
-        frame.setVisible(false);
+        //frame.setVisible(true);
+        //frame.setVisible(false);
     }
 
     @Test
@@ -55,8 +55,8 @@ public class FacadeVisualTest extends FacadeBaseTest {
         JTable tbl = new JTable(tModel);
         frame.getContentPane().add(new JScrollPane(tbl), BorderLayout.CENTER);
         frame.setSize(800, 700);
-        frame.setVisible(true);
-        frame.setVisible(false);
+        //frame.setVisible(true);
+        //frame.setVisible(false);
     }
 
     protected class ExpandAction extends AbstractAction {
@@ -116,7 +116,7 @@ public class FacadeVisualTest extends FacadeBaseTest {
             frame.getContentPane().add(tb, BorderLayout.NORTH);
             frame.getContentPane().add(new JScrollPane(tbl), BorderLayout.CENTER);
             frame.setSize(800, 700);
-            frame.setVisible(true);
+            //frame.setVisible(true);
             //
             assertEquals(tree.size(), tbl.getModel().getRowCount());
             tModel.expand(tree.get(37), false);
@@ -144,7 +144,7 @@ public class FacadeVisualTest extends FacadeBaseTest {
             tModel.expand(tree.get(7), false);
             assertEquals(tree.size() + 4 * secondLevelCount + thirdLevelCount, tbl.getModel().getRowCount());
             //
-            frame.setVisible(false);
+            //frame.setVisible(false);
         } finally {
             firstLevelCount = oldFirstLevelCount;
             System.out.println("uugph!  dynamicExpandCollapseVisualTest completed");

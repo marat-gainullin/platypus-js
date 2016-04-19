@@ -14,6 +14,7 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
             var ModelLoaderClass = Java.type('com.eas.client.scripts.ApplicationModelLoader');
             var TwoTierModelClass = Java.type('com.eas.client.model.application.ApplicationDbModel');
             var ThreeTierModelClass = Java.type('com.eas.client.model.application.ApplicationPlatypusModel');
+            var FileUtils = Java.type("com.eas.util.FileUtils");
 
             function fieldsAndParametersPublisher(aDelegate) {
                 var target = {};
@@ -318,8 +319,8 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
             var UpdateClass = Java.type('com.eas.client.changes.Update');
             var ValueClass = Java.type('com.eas.client.changes.ChangeValue');
 
-            function loadModelDocument(aDocument, aTarget) {
-                var model = ModelLoaderClass.load(aDocument, ScriptedResourceClass.getApp());
+            function loadModelDocument(aDocument, aModuleName, aTarget) {
+                var model = ModelLoaderClass.load(aDocument, aModuleName, ScriptedResourceClass.getApp());
                 var modelCTor;
                 if (model instanceof TwoTierModelClass) {
                     modelCTor = ApplicationDbModel;
@@ -578,9 +579,9 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                     if (!pParams.schema)
                         Object.defineProperty(pParams, 'schema', {value: pParamsSchema});
                     Object.defineProperty(published, 'find', {value: function (aCriteria) {
-                            if(typeof aCriteria === 'function' && Array.prototype.find)
+                            if (typeof aCriteria === 'function' && Array.prototype.find)
                                 return Array.prototype.find.call(published, aCriteria);
-                            else{
+                            else {
                                 var keys = Object.keys(aCriteria);
                                 keys = keys.sort();
                                 var ordererKey = keys.join(' | ');
@@ -727,17 +728,17 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
             }
             /**
              * Locates a prefetched resource by module name and reads a model from it.
-             * @param {String} aName Name of module that is the owner of prefetched resource (*.layout file).
+             * @param {String} aModuleName Name of module that is the owner of prefetched resource (*.model file).
              * @param {Object} aTarget Object, the model properties and methods will be defined on. Default value is new Object. (Optional).
              * @returns {Model}
              */
-            function loadModel(aName, aTarget) {
-                var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
-                if (files) {
-                    var modelDocument = ScriptedResourceClass.getApp().getModels().get(aName, files);
-                    return loadModelDocument(modelDocument, aTarget);
+            function loadModel(aModuleName, aTarget) {
+                var file = FileUtils.findBrother(ScriptedResourceClass.getApp().getModules().nameToFile(aModuleName), "model");
+                if (file) {
+                    var modelDocument = ScriptedResourceClass.getApp().getModels().get(file.getAbsolutePath(), file);
+                    return loadModelDocument(modelDocument, aModuleName, aTarget);
                 } else {
-                    throw "Model definition '" + aName + "' missing.";
+                    throw "Model definition for module '" + aModuleName + "' is not found.";
                 }
             }
 
@@ -749,7 +750,7 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
              */
             function readModel(aContent, aTarget) {
                 var modelDocument = Source2XmlDom.transform(aContent);
-                return loadModelDocument(modelDocument, aTarget);
+                return loadModelDocument(modelDocument, null, aTarget);
             }
 
             /**

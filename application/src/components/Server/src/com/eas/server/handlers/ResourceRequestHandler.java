@@ -13,6 +13,7 @@ import com.eas.util.FileUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -30,10 +31,11 @@ public class ResourceRequestHandler extends RequestHandler<ResourceRequest, Reso
 
     @Override
     public void handle(Session aSession, Consumer<ResourceRequest.Response> onSuccess, Consumer<Exception> onFailure) {
-        String fileRelativeName = getRequest().getResourceName();
-        fileRelativeName = fileRelativeName.replace("\\", File.separator);
-        fileRelativeName = fileRelativeName.replace("/", File.separator);
-        File resourceFile = new File(serverCore.getIndexer().calcSrcPath() + File.separator + fileRelativeName);
+        String relativeName = getRequest().getResourceName();
+        relativeName = relativeName.replace("\\", File.separator);
+        relativeName = relativeName.replace("/", File.separator);
+        Path resolved = serverCore.getIndexer().getAppPath().resolve(relativeName);
+        File resourceFile = resolved.toFile();
         if (resourceFile.exists()) {
             try {
                 Date serverResourceTime = new Date(resourceFile.lastModified());
@@ -50,13 +52,13 @@ public class ResourceRequestHandler extends RequestHandler<ResourceRequest, Reso
                 }
             } catch (IOException ex) {
                 if (ex instanceof FileNotFoundException) {
-                    onFailure.accept(new FileNotFoundException(fileRelativeName));
+                    onFailure.accept(new FileNotFoundException(relativeName));
                 } else {
                     onFailure.accept(ex);
                 }
             }
         } else {
-            onFailure.accept(new FileNotFoundException(fileRelativeName));
+            onFailure.accept(new FileNotFoundException(relativeName));
         }
     }
 

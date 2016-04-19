@@ -34,28 +34,18 @@ public class PositioningPacketReciever implements PacketReciever {
     @Override
     public Object received(Packet aPacket) throws Exception {
         Session session = serverCore.getSessionManager().getSystemSession();
-        Scripts.Space space = session.getSpace();
-        Scripts.LocalContext context = Scripts.createContext(space);
-        context.setPrincipal(session.getPrincipal());
-        context.setSession(session);
-        context.setRequest(null);
-        context.setResponse(null);
-        Scripts.setContext(context);
-        try {
-            space.process(() -> {
-                serverCore.executeMethod(moduleName, RECIEVER_METHOD_NAME, new Object[]{aPacket}, true, (Object result) -> {
-                    if (result != null) {
-                        assert result instanceof String;
-                        assert sender != null;
-                        sender.send(aPacket, (String) result);
-                    }
-                }, (Exception ex) -> {
-                    Logger.getLogger(PositioningPacketReciever.class.getName()).log(Level.WARNING, null, ex);
-                });
+        Scripts.LocalContext context = new Scripts.LocalContext(session.getPrincipal(), session);
+        session.getSpace().process(context, () -> {
+            serverCore.executeMethod(moduleName, RECIEVER_METHOD_NAME, new Object[]{aPacket}, true, (Object result) -> {
+                if (result != null) {
+                    assert result instanceof String;
+                    assert sender != null;
+                    sender.send(aPacket, (String) result);
+                }
+            }, (Exception ex) -> {
+                Logger.getLogger(PositioningPacketReciever.class.getName()).log(Level.WARNING, null, ex);
             });
-        } finally {
-            Scripts.setContext(null);
-        }
+        });
         return null;
     }
 }

@@ -5,11 +5,11 @@
  */
 package com.eas.server;
 
-import com.eas.client.AppElementFiles;
 import com.eas.client.ServerModuleInfo;
 import com.eas.client.ServerModulesProxy;
 import com.eas.client.cache.ScriptDocument;
 import com.eas.script.Scripts;
+import com.eas.script.JsObjectException;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,13 +30,12 @@ public class LocalServerModulesProxy implements ServerModulesProxy {
 
     @Override
     public ServerModuleInfo getCachedStructure(String aModuleName) throws Exception {
-        AppElementFiles files = serverCore.getIndexer().nameToFiles(aModuleName);
-        if (files != null && files.isModule()) {
-            ScriptDocument config = serverCore.getScriptsConfigs().get(aModuleName, files);
-            ServerModuleInfo info = new ServerModuleInfo(aModuleName, config.getFunctionProperties(), true);
+        ScriptDocument.ModuleDocument moduleDoc = serverCore.lookupModuleDocument(aModuleName);
+        if (moduleDoc != null) {
+            ServerModuleInfo info = new ServerModuleInfo(aModuleName, moduleDoc.getFunctionProperties(), true);
             return info;
         } else {
-            throw new IllegalArgumentException(String.format("No module: %s, or it is not a module", aModuleName));
+            throw new IllegalArgumentException(String.format("No module %s, or it is not a module", aModuleName));
         }
     }
 
@@ -70,17 +69,20 @@ public class LocalServerModulesProxy implements ServerModulesProxy {
 
     @Override
     public Object callServerModuleMethod(String aModuleName, String aMethodName, Scripts.Space aSpace, JSObject onSuccess, JSObject onFailure, Object... aArguments) throws Exception {
-        Scripts.getContext().incAsyncsCount();
+        if (Scripts.getContext() != null) {
+            Scripts.getContext().incAsyncsCount();
+        }
+        assert Scripts.getSpace() == aSpace;
         serverCore.executeMethod(aModuleName, aMethodName, aArguments, false, onSuccess != null ? (Object aResult) -> {
             onSuccess.call(null, new Object[]{aSpace.toJs(aResult)});
         } : null, (Exception ex) -> {
             if (onFailure != null) {
-                onFailure.call(null, new Object[]{ex.toString()});
+                onFailure.call(null, new Object[]{ex instanceof JsObjectException ? ((JsObjectException) ex).getData() : ex.toString()});
             } else {
                 Logger.getLogger(LocalServerModulesProxy.class.getName()).log(Level.SEVERE, ex.toString());
             }
         });
-        return null;
+        return null;// Only asynchronous form is allowed.
     }
 
 }

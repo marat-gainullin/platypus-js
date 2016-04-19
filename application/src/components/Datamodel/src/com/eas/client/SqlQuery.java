@@ -250,15 +250,18 @@ public class SqlQuery extends Query {
      * @throws Exception
      */
     public SqlCompiledQuery compile() throws UnboundSqlParameterException, Exception {
+        String dialect = basesProxy.getConnectionDialect(datasourceName);
+        boolean postgreSQL = ClientConstants.SERVER_PROPERTY_POSTGRE_DIALECT.equals(dialect);
         Parameters compiledParams = new Parameters();
         if (sqlText == null || sqlText.isEmpty()) {
-            throw new Exception("Empty sql-query strings are not supported");
+            throw new Exception("Empty sql query strings are not supported");
         }
         StringBuilder compiledSb = new StringBuilder();
         Matcher sm = STRINGS_PATTERN.matcher(sqlText);
         String[] withoutStrings = sqlText.split("('[^']*')");
         for (int i = 0; i < withoutStrings.length; i++) {
             Matcher m = PARAMETER_NAME_PATTERN.matcher(withoutStrings[i]);
+            StringBuffer withoutStringsSegment = new StringBuffer();
             while (m.find()) {
                 String paramName = m.group(1);
                 if (params == null) {
@@ -271,8 +274,10 @@ public class SqlQuery extends Query {
                     p.setValue(null);
                 }
                 compiledParams.add(p.copy());
+                m.appendReplacement(withoutStringsSegment, postgreSQL && Scripts.DATE_TYPE_NAME.equals(p.getType()) ? "?::timestamp" : "?");
             }
-            withoutStrings[i] = m.replaceAll("?");
+            m.appendTail(withoutStringsSegment);
+            withoutStrings[i] = withoutStringsSegment.toString();
             compiledSb.append(withoutStrings[i]);
             if (sm.find()) {
                 compiledSb.append(sm.group(0));

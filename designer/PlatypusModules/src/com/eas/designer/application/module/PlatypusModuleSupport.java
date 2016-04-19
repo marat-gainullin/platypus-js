@@ -184,7 +184,6 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
     }
     
     protected void notifyModuleChanged(){
-        dataObject.notifyModuleQueryChanged();
         /*
         try {
             dataObject.notifyChanged();
@@ -236,19 +235,16 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
     @Override
     public void changedUpdate(DocumentEvent e) {
         sourceModified = true;
-        dataObject.invalidateAst();
     }
 
     @Override
     public void insertUpdate(DocumentEvent e) {
         sourceModified = true;
-        dataObject.invalidateAst();
     }
 
     @Override
     public void removeUpdate(DocumentEvent e) {
         sourceModified = true;
-        dataObject.invalidateAst();
     }
 
     @Override

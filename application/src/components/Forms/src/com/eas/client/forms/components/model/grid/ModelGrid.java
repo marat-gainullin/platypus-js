@@ -1424,7 +1424,6 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                 }
                 EventQueue.invokeLater(() -> {
                     try {
-                        Scripts.setContext(Forms.getContext());
                         makeVisible(jsCreated);
                         restoreColumnsSelection(columnSelection);
                     } catch (Exception ex) {
@@ -1521,7 +1520,6 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
         @Override
         public void valueChanged(ListSelectionEvent e) {
-            Scripts.setContext(Forms.getContext());
             if (rowsSelectionModel.getLeadSelectionIndex() != -1) {
                 try {
                     if (!try2StopAnyEditing()) {
@@ -1771,7 +1769,6 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         EventQueue.invokeLater(() -> {
             if (redrawEnqueued) {
                 redrawEnqueued = false;
-                Scripts.setContext(Forms.getContext());
                 redraw();
             }
         });

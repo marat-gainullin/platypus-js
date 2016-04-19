@@ -166,6 +166,11 @@ public class BoxPane extends BoxPanel implements HasJsFacade, HasEnabled, HasCom
 	public void add(Widget child) {
 		super.add(child);
 		AddEvent.fire(this, child);
+		if(orientation == Orientation.HORIZONTAL){
+			ajustWidth();
+		} else{
+			ajustHeight();
+		}
 	}
 
 	public void add(Widget child, int size) {

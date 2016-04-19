@@ -8,6 +8,7 @@ import com.eas.client.DatabasesClient;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.visitors.ModelVisitor;
+import com.eas.xml.dom.XmlDomUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -36,28 +37,28 @@ public class XmlDom2DbSchemeModel extends XmlDom2Model<FieldsEntity, DbSchemeMod
     @Override
     public void visit(DbSchemeModel aModel) {
         readModel(aModel);
-        if (currentNode.hasAttribute(Model2XmlDom.DATAMODEL_DATASOURCE)) {
-            String datasourceAttr = currentNode.getAttribute(Model2XmlDom.DATAMODEL_DATASOURCE);
+        if (XmlDomUtils.hasAttribute(currentNode, "ds", Model2XmlDom.DATAMODEL_DATASOURCE)) {
+            String datasourceAttr = XmlDomUtils.getAttribute(currentNode, "ds", Model2XmlDom.DATAMODEL_DATASOURCE);
             if (datasourceAttr != null && !"null".equals(datasourceAttr)) {
                 aModel.setDatasourceName(datasourceAttr);
             }
         } else {
             // legacy code
-            if (currentNode.hasAttribute(Model2XmlDom.DATAMODEL_DB_ID)) {
-                String dbIdAttr = currentNode.getAttribute(Model2XmlDom.DATAMODEL_DB_ID);
+            if (XmlDomUtils.hasAttribute(currentNode, "ddi", Model2XmlDom.DATAMODEL_DB_ID)) {
+                String dbIdAttr = XmlDomUtils.getAttribute(currentNode, "ddi", Model2XmlDom.DATAMODEL_DB_ID);
                 if (dbIdAttr != null && !"null".equals(dbIdAttr)) {
                     aModel.setDatasourceName(dbIdAttr);
                 }
             }
         }
-        if (currentNode.hasAttribute(Model2XmlDom.DATAMODEL_DATASOURCE_SCHEMA_NAME)) {
-            String schemaAttr = currentNode.getAttribute(Model2XmlDom.DATAMODEL_DATASOURCE_SCHEMA_NAME);
+        if (XmlDomUtils.hasAttribute(currentNode, "s", Model2XmlDom.DATAMODEL_DATASOURCE_SCHEMA_NAME)) {
+            String schemaAttr = XmlDomUtils.getAttribute(currentNode, "s", Model2XmlDom.DATAMODEL_DATASOURCE_SCHEMA_NAME);
             if (schemaAttr != null && !"null".equals(schemaAttr)) {
                 aModel.setSchema(schemaAttr);
             }
-        } else if (currentNode.hasAttribute(Model2XmlDom.DATAMODEL_DB_SCHEMA_NAME)) {
+        } else if (XmlDomUtils.hasAttribute(currentNode, "dsn", Model2XmlDom.DATAMODEL_DB_SCHEMA_NAME)) {
             // legacy code
-            String schemaAttr = currentNode.getAttribute(Model2XmlDom.DATAMODEL_DB_SCHEMA_NAME);
+            String schemaAttr = XmlDomUtils.getAttribute(currentNode, "dsn", Model2XmlDom.DATAMODEL_DB_SCHEMA_NAME);
             if (schemaAttr != null && !"null".equals(schemaAttr)) {
                 aModel.setSchema(schemaAttr);
             }
@@ -69,8 +70,8 @@ public class XmlDom2DbSchemeModel extends XmlDom2Model<FieldsEntity, DbSchemeMod
     @Override
     public void visit(FieldsEntity entity) {
         if (entity != null) {
-            entity.setEntityId(readLongAttribute(Model2XmlDom.ENTITY_ID_ATTR_NAME, null));
-            entity.setTableName(currentNode.getAttribute(Model2XmlDom.TABLE_NAME_ATTR_NAME));
+            entity.setEntityId(readLongAttribute(currentNode, "ei", Model2XmlDom.ENTITY_ID_ATTR_NAME, null));
+            entity.setTableName(XmlDomUtils.getAttribute(currentNode, "tn", Model2XmlDom.TABLE_NAME_ATTR_NAME));
             readEntityDesignAttributes(entity);
             DbSchemeModel model = entity.getModel();
             if (model != null) {

@@ -15,7 +15,10 @@ import com.eas.script.Scripts;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.text.ParseException;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -55,7 +58,7 @@ public class ModelDate extends ModelComponentDecorator<VDateTimeField, Date> imp
         } else if (aValue instanceof Date) {
             setValue((Date) aValue);
         } else {
-            setValue(Scripts.isInitialized() ? new Date(JSType.toLong(aValue)) : null);
+            setValue(new Date(JSType.toLong(aValue)));
         }
     }
 
@@ -152,6 +155,17 @@ public class ModelDate extends ModelComponentDecorator<VDateTimeField, Date> imp
             decorated.requestFocus();
         });
         return super.getTableCellEditorComponent(table, value, isSelected, row, column);
+    }
+
+    @Override
+    public boolean stopCellEditing() {
+        JFormattedTextField ftf = decorated.getEditorComponent();
+        try {
+            ftf.commitEdit();
+        } catch (ParseException ex) {
+            Logger.getLogger(ModelDate.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return super.stopCellEditing();
     }
 
     @Override

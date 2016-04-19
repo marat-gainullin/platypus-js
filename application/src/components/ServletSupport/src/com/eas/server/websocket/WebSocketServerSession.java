@@ -5,33 +5,26 @@
  */
 package com.eas.server.websocket;
 
-import com.eas.script.AlreadyPublishedException;
-import com.eas.script.HasPublished;
-import com.eas.script.NoPublisherException;
-import com.eas.script.ScriptFunction;
-import com.eas.script.Scripts;
+import com.eas.script.LpcTransient;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.websocket.CloseReason;
 import javax.websocket.Session;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class WebSocketServerSession implements HasPublished {
+public class WebSocketServerSession implements LpcTransient {
 
-    protected JSObject published;
-    protected Session session;
+    protected final Session session;
 
     public WebSocketServerSession(Session aSession) {
         super();
         session = aSession;
     }
 
-    @ScriptFunction
     public void close(Double opCode, String aReason) throws Exception {
         if (opCode == null) {
             opCode = Double.valueOf(CloseReason.CloseCodes.NO_STATUS_CODE.getCode());
@@ -44,7 +37,6 @@ public class WebSocketServerSession implements HasPublished {
         }
     }
 
-    @ScriptFunction(params = "data")
     public void send(String aData) {
         if (aData != null && session.isOpen()) {
             try {
@@ -55,43 +47,19 @@ public class WebSocketServerSession implements HasPublished {
         }
     }
 
-    @ScriptFunction
     public String getId() {
         return session.getId();
     }
 
-    @ScriptFunction
     public String getProtocolVersion() {
         return session.getProtocolVersion();
     }
 
-    @ScriptFunction
     public String getQuery() {
         return session.getQueryString();
     }
 
-    @ScriptFunction
     public String getUri() {
         return session.getRequestURI().toString();
-    }
-
-    @Override
-    public void setPublished(JSObject aValue) {
-        if (published != null) {
-            throw new AlreadyPublishedException();
-        }
-        published = aValue;
-    }
-
-    @Override
-    public JSObject getPublished() {
-        if (published == null) {
-            JSObject publisher = Scripts.getSpace().getPublisher(this.getClass().getName());
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject) publisher.call(null, new Object[]{this});
-        }
-        return published;
     }
 }

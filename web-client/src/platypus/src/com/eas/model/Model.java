@@ -1005,9 +1005,7 @@ public class Model implements HasPublished {
 			}
 		}
 		for (Entity entity : toExecute) {
-			if (!entity.getQuery().isManual()) {
-  				entity.internalExecute(null);
-			}
+			entity.internalExecute(null);
 		}
 	}
 

@@ -330,21 +330,14 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
             if (isEnabled()) {
                 Window w = SwingUtilities.getWindowAncestor(ApplicationModelView.this);
                 if (w instanceof JFrame) {
-                    ScalarCollectionView view = new ScalarCollectionView();
-                    SettingsDialog dlg = new SettingsDialog((JFrame) w, view, true, new SettingsDialog.Checker() {
-                        @Override
-                        public boolean check() {
-                            return true;
-                        }
-                    });
-                    Dimension size = new Dimension(400, 170);
+                    ReferenceRelation<ApplicationDbEntity> relation = (ReferenceRelation<ApplicationDbEntity>) getSelectedRelations().iterator().next();
+                    ScalarCollectionView view = new ScalarCollectionView(relation);
+                    SettingsDialog dlg = new SettingsDialog((JFrame) w, view, true, () -> true);
+                    Dimension size = new Dimension(400, 200);
                     dlg.setTitle(getDmActionText());
                     dlg.setSize(size);
                     dlg.setMinimumSize(size);
 
-                    ReferenceRelation<ApplicationDbEntity> relation = (ReferenceRelation<ApplicationDbEntity>) getSelectedRelations().iterator().next();
-                    view.setScalarPropertyName(relation.getScalarPropertyName());
-                    view.setCollectionPropertyName(relation.getCollectionPropertyName());
                     dlg.setVisible(true);
                     if (dlg.isOkClose()) {
                         String oldScalarName = relation.getScalarPropertyName();

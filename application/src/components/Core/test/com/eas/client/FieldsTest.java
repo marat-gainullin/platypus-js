@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.eas.client;
 
 import com.eas.client.metadata.Field;
@@ -81,21 +80,8 @@ public class FieldsTest {
     public void testGenerateNewName_0args() {
         System.out.println("generateNewName");
         Fields instance = new Fields();
-        String expResult = "Field1";
+        String expResult = "Field";
         String result = instance.generateNewName();
-        assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of generateNewName method, of class FieldsMetaDataImpl.
-     */
-    @Test
-    public void testGenerateNewName_String() {
-        System.out.println("generateNewName");
-        String aPrefix = "TF_";
-        Fields instance = new Fields();
-        String expResult = "TF_1";
-        String result = instance.generateNewName(aPrefix);
         assertEquals(expResult, result);
     }
 
@@ -138,13 +124,16 @@ public class FieldsTest {
     @Test
     public void testCreateNewField_String() {
         System.out.println("createNewField");
-        String aName = "sampleName";
-        Fields instance = new Fields();
-        Field unexpResult = null;
-        Field result = new Field(instance.generateNewName(aName));
-        instance.add(result);
-        assertNotSame(unexpResult, result);
-        assertEquals(result.getName(), aName);
+        String newName = "sampleName";
+        Fields fields = new Fields();
+        Field newField = new Field(fields.generateNewName(newName));
+        fields.add(newField);
+        assertNotSame(null, newField);
+        assertEquals(newName, newField.getName());
+        Field newField1 = new Field(fields.generateNewName(newName));
+        fields.add(newField1);
+        assertNotSame(null, newField1);
+        assertEquals(newName + "1", newField1.getName());
     }
 
     /**
@@ -265,8 +254,9 @@ public class FieldsTest {
         Fields expResult = instance;
         Fields result = instance.copy();
         assertEquals(expResult.getFieldsCount(), result.getFieldsCount());
-        for(int i=0;i<expResult.getFieldsCount();i++)
-            assertEquals(expResult.get(i+1), result.get(i+1));
+        for (int i = 0; i < expResult.getFieldsCount(); i++) {
+            assertEquals(expResult.get(i + 1), result.get(i + 1));
+        }
     }
 
     /**
@@ -279,12 +269,14 @@ public class FieldsTest {
         Fields expResult = instance;
         Fields result = instance.copy();
         assertEquals(expResult.getFieldsCount(), result.getFieldsCount());
-        for(int i=0;i<expResult.getFieldsCount();i++)
-            assertEquals(expResult.get(i+1), result.get(i+1));
+        for (int i = 0; i < expResult.getFieldsCount(); i++) {
+            assertEquals(expResult.get(i + 1), result.get(i + 1));
+        }
     }
 
     /**
      * Test of getColumnCount method, of class FieldsMetaDataImpl.
+     *
      * @throws java.sql.SQLException
      */
     @Test
@@ -303,6 +295,7 @@ public class FieldsTest {
 
     /**
      * Test of findColumn method, of class FieldsMetaDataImpl.
+     *
      * @throws java.sql.SQLException
      */
     @Test

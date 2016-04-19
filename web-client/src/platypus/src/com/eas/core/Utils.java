@@ -11,6 +11,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.xml.client.Element;
+import com.google.gwt.xml.client.NamedNodeMap;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
 
@@ -178,34 +179,34 @@ public class Utils {
 		}-*/;
 
 		public static native JavaScriptObject dateReviver()/*-{
-			return function(k, v){
-				if(typeof v === 'string' && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(v)){
-                	return new Date(v);
-				}else{
+			return function(k, v) {
+				if (typeof v === 'string' && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(v)) {
+					return new $wnd.Date(v);
+				} else {
 					return v;
 				}
 			};
 		}-*/;
-		
+
 		public static native JavaScriptObject parseJSON(String aText)/*-{
-			return JSON.parse(aText);
+			return $wnd.JSON.parse(aText);
 		}-*/;
-		
+
 		public static native String stringifyJSON(Object aValue)/*-{
-			return JSON.stringify(aValue);
+			return $wnd.JSON.stringify(aValue);
 		}-*/;
-	
+
 		public static native JavaScriptObject parseJSONDateReviver(String aText)/*-{
-			return JSON.parse(aText, @com.eas.core.Utils.JsObject::dateReviver()());
+			return $wnd.JSON.parse(aText, @com.eas.core.Utils.JsObject::dateReviver()());
 		}-*/;
 
 		public static native String writeJSON(JavaScriptObject changeLog)/*-{
-			return JSON.stringify(changeLog);
+			return $wnd.JSON.stringify(changeLog);
 		}-*/;
 
 		public native final int indexOf(JavaScriptObject anElement)/*-{
-	        return this.indexOf(anElement);
-        }-*/;
+			return this.indexOf(anElement);
+		}-*/;
 	}
 
 	private static final String addListenerName = "-platypus-listener-add-func";
@@ -396,12 +397,12 @@ public class Utils {
 
 	public native static Object jsonParse(String aData) throws Exception /*-{
 		var B = @com.eas.core.Predefine::boxing;
-		return B.boxAsJava(JSON.parse(aData));
+		return B.boxAsJava($wnd.JSON.parse(aData, @com.eas.core.Utils.JsObject::dateReviver()()));
 	}-*/;
 
 	public native static String jsonStringify(Object aToJsedObject) /*-{
 		var B = @com.eas.core.Predefine::boxing;
-		return JSON.stringify(B.boxAsJs(aToJsedObject));
+		return $wnd.JSON.stringify(B.boxAsJs(aToJsedObject));
 	}-*/;
 
 	public native static void invokeJsFunction(JavaScriptObject aHandler) /*-{
@@ -464,70 +465,74 @@ public class Utils {
 			return null;
 	}
 
-	public static Element getElementByTagName(Element aTag, String aName) {
-		NodeList children = aTag.getElementsByTagName(aName);
-		if (children.getLength() == 1) {
-			if (children.item(0) instanceof Element)
-				return (Element) children.item(0);
-			else
-				throw new IllegalStateException("XML node '" + aName + "' must be a tag node");
-		} else if (children.getLength() > 1)
-			throw new IllegalStateException("Tag '" + aName + "' must be only one");
-		return null;
-	}
-
-	public static Element scanForElementByTagName(Element aTag, String aName) {
+	/*
+	 * public static Element getElementByTagName(Element aTag, String aName) {
+	 * NodeList children = aTag.getElementsByTagName(aName); if
+	 * (children.getLength() == 1) { if (children.item(0) instanceof Element)
+	 * return (Element) children.item(0); else throw new
+	 * IllegalStateException("XML node '" + aName + "' must be a tag node"); }
+	 * else if (children.getLength() > 1) throw new
+	 * IllegalStateException("Tag '" + aName + "' must be only one"); return
+	 * null; }
+	 */
+	public static Element scanForElementByTagName(Element aTag, String aShortName, String aLongName) {
 		NodeList nl = aTag.getChildNodes();
 		if (nl != null) {
 			for (int i = 0; i < nl.getLength(); i++) {
 				Node n = nl.item(i);
-				if (n.getNodeName().equals(aName)) {
+				if (n.getNodeName().equals(aShortName) || n.getNodeName().equals(aLongName)) {
 					if (n instanceof Element)
 						return (Element) n;
 					else
-						throw new IllegalStateException(aName + " must be a tag node.");
+						throw new IllegalStateException(n.getNodeName() + " must be a tag node.");
 				}
 			}
 		}
 		return null;
 	}
 
-	public static boolean getBooleanAttribute(Element aTag, String aName, boolean aDefValue) throws Exception {
-		if (aTag.hasAttribute(aName))
-			return Boolean.valueOf(aTag.getAttribute(aName));
-		else
-			return aDefValue;
+	public static Float getFloatAttribute(Element aElement, String aShortName, String aLongName, Float defaultValue) {
+		String attrValue = getAttribute(aElement, aShortName, aLongName, null);
+		return attrValue != null && !"null".equals(attrValue) ? Float.valueOf(attrValue) : defaultValue;
 	}
 
-	public static int getIntegerAttribute(Element aTag, String aName, int aDefValue) throws Exception {
-		if (aTag.hasAttribute(aName))
-			return Integer.valueOf(aTag.getAttribute(aName));
-		else
-			return aDefValue;
+	public static Double getDoubleAttribute(Element aElement, String aShortName, String aLongName, Double defaultValue) {
+		String attrValue = getAttribute(aElement, aShortName, aLongName, null);
+		return attrValue != null && !"null".equals(attrValue) ? Double.valueOf(attrValue) : defaultValue;
 	}
 
-	public static int getPxAttribute(Element aTag, String aName, int aDefValue) throws Exception {
-		if (aTag.hasAttribute(aName)) {
-			String value = aTag.getAttribute(aName);
-			if (value.endsWith("px"))
-				value = value.substring(0, value.length() - 2);
-			return Integer.valueOf(value);
-		} else
-			return aDefValue;
+	public static Integer getIntegerAttribute(Element aElement, String aShortName, String aLongName, Integer defaultValue) {
+		String attrValue = getAttribute(aElement, aShortName, aLongName, null);
+		return attrValue != null && !"null".equals(attrValue) ? Integer.valueOf(attrValue) : defaultValue;
 	}
 
-	public static float getFloatAttribute(Element aTag, String aName, float aDefValue) throws Exception {
-		if (aTag.hasAttribute(aName))
-			return Float.valueOf(aTag.getAttribute(aName));
-		else
-			return aDefValue;
+	public static Boolean getBooleanAttribute(Element aElement, String aShortName, String aLongName, Boolean defaultValue) {
+		String attrValue = getAttribute(aElement, aShortName, aLongName, null);
+		return attrValue != null && !"null".equals(attrValue) ? Boolean.valueOf(attrValue) : defaultValue;
 	}
 
-	public static double getDoubleAttribute(Element aTag, String aName, double aDefValue) throws Exception {
-		if (aTag.hasAttribute(aName))
-			return Double.valueOf(aTag.getAttribute(aName));
-		else
+	public static boolean hasAttribute(Element anElement, String aShortName, String aLongName) {
+		return anElement.hasAttribute(aShortName) ? true : anElement.hasAttribute(aLongName);
+	}
+
+	public static String getAttribute(Element aElement, String aShortName, String aLongName, String defaultValue) {
+		NamedNodeMap attrs = aElement.getAttributes();
+		Node a = attrs.getNamedItem(aShortName);
+		if (a == null) {
+			a = attrs.getNamedItem(aLongName);
+		}
+		return a != null ? a.getNodeValue() : defaultValue;
+	}
+
+	public static int getPxAttribute(Element aElement, String aShortName, String aLongName, int aDefValue) throws Exception {
+		String attrValue = getAttribute(aElement, aShortName, aLongName, null);
+		if (attrValue != null && !"null".equals(attrValue)) {
+			if (attrValue.endsWith("px"))
+				attrValue = attrValue.substring(0, attrValue.length() - 2);
+			return Integer.valueOf(attrValue);
+		} else {
 			return aDefValue;
+		}
 	}
 
 	public static int javaArrayLength(Object[] aValue) {
@@ -549,7 +554,7 @@ public class Utils {
 		var B = @com.eas.core.Predefine::boxing;
 		var res = [];
 		var inLength = @com.eas.core.Utils::javaArrayLength([Ljava/lang/Object;)(aValue);
-		for ( var i = 0; i < inLength; i++){
+		for ( var i = 0; i < inLength; i++) {
 			res[res.length] = B.boxAsJs(@com.eas.core.Utils::javaArrayItem([Ljava/lang/Object;I)(aValue, i));
 		}
 		return res;
@@ -562,7 +567,7 @@ public class Utils {
             if (!(val instanceof Object) || val instanceof Date || 
                 val instanceof Number || val instanceof String || 
                 val instanceof Boolean) {
-                m.@java.util.HashMap::put(Ljava/lang/Object;Ljava/lang/Object;)(key, JSON.stringify(val));  	
+                m.@java.util.HashMap::put(Ljava/lang/Object;Ljava/lang/Object;)(key, $wnd.JSON.stringify(val));  	
             }		
         }	
         return m;
@@ -757,12 +762,21 @@ public class Utils {
 		}
 	}
 
-	public static String lookupCallerJsDir(){
-		String calledFromDir = null;
+	public static String lookupCallerJsDir() {
+		String calledFromFile = lookupCallerJsFile();
+		if (calledFromFile != null) {
+			int lastSlashIndex = calledFromFile.lastIndexOf('/');
+			return calledFromFile.substring(0, lastSlashIndex);
+		} else {
+			return null;
+		}
+	}
+
+	public static String lookupCallerJsFile() {
+		String calledFromFile = null;
 		try {
-			throw new Exception("current file test");
+			throw new Exception("Current file test");
 		} catch (Exception ex) {
-			String calledFromFile = null;
 			StackTraceElement[] stackFrames = ex.getStackTrace();
 			String firstFileName = extractFileName(stackFrames[0]);
 			if (firstFileName != null) {
@@ -770,15 +784,12 @@ public class Utils {
 					String fileName = extractFileName(stackFrames[frameIdx]);
 					if (fileName != null && !fileName.equals(firstFileName)) {
 						calledFromFile = fileName;
-						break;
+						int lastQuestionIndex = calledFromFile.lastIndexOf('?');// case of cache busting
+						return lastQuestionIndex != -1 ? calledFromFile.substring(0, lastQuestionIndex) : calledFromFile;
 					}
 				}
 			}
-			if (calledFromFile != null) {
-				int lastSlashIndex = calledFromFile.lastIndexOf('/');
-				calledFromDir = calledFromFile.substring(0, lastSlashIndex);
-			}
 		}
-		return calledFromDir;
+		return calledFromFile;
 	}
 }

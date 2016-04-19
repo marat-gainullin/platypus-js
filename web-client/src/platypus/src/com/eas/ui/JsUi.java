@@ -16,6 +16,8 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.xml.client.Element;
+import com.google.gwt.xml.client.Node;
 
 public class JsUi {
 	
@@ -106,35 +108,37 @@ public class JsUi {
 	}
 
 	public static void selectColor(String aOldValue, final Callback<String, String> aCallback) {
-		final TextBox tmpField = new TextBox();
-		tmpField.getElement().setAttribute("type", "color");
-		tmpField.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
-		tmpField.setWidth("10px");
-		tmpField.setHeight("10px");
-		tmpField.setValue(aOldValue);
+		final TextBox tb = new TextBox();
+		tb.getElement().setAttribute("type", "color");
+		tb.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+		tb.setWidth("10px");
+		tb.setHeight("10px");
+		tb.setValue(aOldValue);
+		tb.getElement().getStyle().setLeft(-100, Style.Unit.PX);
+		tb.getElement().getStyle().setTop(-100, Style.Unit.PX);
 
-		tmpField.addChangeHandler(new ChangeHandler() {
+		tb.addChangeHandler(new ChangeHandler() {
 
 			@Override
 			public void onChange(ChangeEvent event) {
 				try {
-					aCallback.onSuccess(tmpField.getValue());
+					aCallback.onSuccess(tb.getValue());
 				} finally {
-					tmpField.removeFromParent();
+					tb.removeFromParent();
 				}
 			}
 
 		});
-		RootPanel.get().add(tmpField, 100, 100);
+		RootPanel.get().add(tb, -100, -100);
 		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 			@Override
 			public void execute() {
-				tmpField.setFocus(true);
-				tmpField.getElement().<XElement>cast().click();
+				tb.setFocus(true);
+				tb.getElement().<XElement>cast().click();
 				Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
 					@Override
 					public boolean execute() {
-						tmpField.removeFromParent();
+						tb.removeFromParent();
 						return false;
 					}
 				}, 1000 * 60 * 1);// 1 min
@@ -644,7 +648,48 @@ public class JsUi {
 				} 
 			});
 			
+			function readWidgetElement(widgetRootElement, aModel){
+				var uiReader = @com.eas.ui.DefaultUiReader::new(Lcom/google/gwt/xml/client/Element;Lcom/google/gwt/core/client/JavaScriptObject;)(widgetRootElement, aModel);
+				uiReader.@com.eas.ui.DefaultUiReader::parse()();
+				var nwList = uiReader.@com.eas.ui.DefaultUiReader::getWidgetsList()();
+				var target = {};
+				for(var i = 0; i < nwList.@java.util.List::size()(); i++){
+					var nWidget = nwList.@java.util.List::get(I)(i);
+					var pWidget = nWidget.@com.eas.core.HasPublished::getPublished()();
+					if(pWidget.name){
+						target[pWidget.name] = pWidget;
+					}
+				}
+				return target;
+			}
+			
+			function loadWidgets(aModuleName, aModel){
+				var aClient = @com.eas.client.AppClient::getInstance()();
+				var layoutDoc = aClient.@com.eas.client.AppClient::getFormDocument(Ljava/lang/String;)(aModuleName);
+				if(layoutDoc){
+					var rootElement = layoutDoc.@com.google.gwt.xml.client.Document::getDocumentElement()();
+					var widgetRootElement = aModuleName ? @com.eas.ui.JsUi::findLayoutElementByBundleName(Lcom/google/gwt/xml/client/Element;Ljava/lang/String;)(rootElement, aModuleName) : rootElement;
+					return readWidgetElement(widgetRootElement, aModel);
+				} else {
+					throw 'Layout definition for module "' + aModuleName + '" is not found';
+				}
+			}
+			
+			function readWidgets(aContent, aModel){
+				var layoutDoc = @com.google.gwt.xml.client.XMLParser::parse(Ljava/lang/String;)(aContent + "");
+				var rootElement = layoutDoc.@com.google.gwt.xml.client.Document::getDocumentElement()();
+				return readWidgetElement(rootElement, aModel);
+			}
+			
 			var module = {};
+		    Object.defineProperty(module, 'loadWidgets', {
+		        enumerable: true,
+		        value: loadWidgets
+		    });
+		    Object.defineProperty(module, 'readWidgets', {
+		        enumerable: true,
+		        value: readWidgets
+		    });
 		    Object.defineProperty(module, 'Colors', {
 		        enumerable: true,
 		        value: Color
@@ -776,4 +821,25 @@ public class JsUi {
 		    return module;
 		});
 	}-*/;
+	
+    public static Element findLayoutElementByBundleName(Element aElement, String aBundleName) {
+        if (aElement.getTagName().equals("layout")) {
+            return aElement;// the high level code had to do everything in the right way
+        } else {
+            Node child = aElement.getFirstChild();
+            while (child != null) {
+                if (child instanceof Element) {
+                    Element el = (Element) child;
+                    if (el.hasAttribute("bundle-name")) {
+                        String bundleName = el.getAttribute("bundle-name");
+                        if (bundleName.equals(aBundleName)) {
+                            return el;
+                        }
+                    }
+                }
+                child = child.getNextSibling();
+            }
+        }
+        return null;
+    }
 }

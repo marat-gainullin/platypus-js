@@ -129,14 +129,14 @@ public final class GotoAction implements ActionListener {
         }
     }
 
-    private boolean selectNode(PlatypusProjectImpl project, String appElementId) throws NodeNotFoundException {
-        FileObject fo = IndexerQuery.appElementId2File(project, appElementId);
+    private boolean selectNode(PlatypusProjectImpl project, String appElementName) throws NodeNotFoundException {
+        FileObject fo = IndexerQuery.appElementId2File(project, appElementName);
         if (fo != null) {
             TopComponent tc = WindowManager.getDefault().findTopComponent(PROJECT_TAB_TC_ID);
             if (tc instanceof ExplorerManager.Provider) {
                 ExplorerManager.Provider expl = (ExplorerManager.Provider) tc;
-                String foPath = FileUtil.getRelativePath(project.getProjectDirectory(), fo).substring(PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT.length());
-                String[] spath = (project.getDisplayName() + "/" + PlatypusUtils.ELEMENTS_SOURCES_GROUP + foPath).split("/");
+                String foPath = FileUtil.getRelativePath(project.getSrcRoot(), fo);
+                String[] spath = (project.getDisplayName() + "/" + PlatypusUtils.ELEMENTS_SOURCES_GROUP + "/" + foPath).split("/");
                 Node nToSelect = null;
                 try {
                     nToSelect = NodeOp.findPath(expl.getExplorerManager().getRootContext(), spath);

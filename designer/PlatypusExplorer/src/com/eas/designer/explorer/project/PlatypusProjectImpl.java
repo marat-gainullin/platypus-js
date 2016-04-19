@@ -4,13 +4,11 @@
  */
 package com.eas.designer.explorer.project;
 
-import com.eas.client.AppElementFiles;
 import com.eas.client.MetadataCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusIndexer;
-import com.eas.client.forms.Forms;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.resourcepool.BearResourcePool;
 import com.eas.client.resourcepool.GeneralResourceProvider;
@@ -77,7 +75,6 @@ import org.openide.awt.StatusDisplayer;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataNode;
-import org.openide.loaders.DataObject;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
@@ -105,7 +102,10 @@ public class PlatypusProjectImpl implements PlatypusProject {
             return Charset.forName(PlatypusFiles.DEFAULT_ENCODING);
         }
     }
-    protected static final Scripts.Space jsSpace = initScriptSpace();
+
+    static {
+        Scripts.setOnlySpace(initScriptSpace());
+    }
 
     static Scripts.Space initScriptSpace() {
         try {
@@ -119,11 +119,6 @@ public class PlatypusProjectImpl implements PlatypusProject {
             Object global = jsEngine.eval("load('classpath:com/eas/designer/explorer/designer-js.js', space);", jsContext);
 
             space.setGlobal(global);
-            Scripts.LocalContext context = Scripts.createContext(space);
-            EventQueue.invokeLater(() -> {
-                Scripts.setContext(context);
-                Forms.initContext(context);
-            });
             return space;
         } catch (ScriptException ex) {
             throw new IllegalStateException(ex);
@@ -131,7 +126,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
     }
 
     public static Scripts.Space getJsSpace() {
-        return jsSpace;
+        return Scripts.getSpace();
     }
 
     protected Lookup pLookup;
@@ -192,21 +187,22 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 new PlatypusWebModule(this),
                 new PlatypusWebModuleManager(this),
                 getSearchInfoDescription());
-        indexer = (String aAppElementName) -> {
-            if (aAppElementName != null && !aAppElementName.isEmpty()) {
-                FileObject fo = IndexerQuery.appElementId2File(PlatypusProjectImpl.this, aAppElementName);
-                if (fo != null) {
-                    DataObject dObject = DataObject.find(fo);
-                    if (dObject != null) {
-                        AppElementFiles files = new AppElementFiles();
-                        dObject.files().stream().forEach((dofo) -> {
-                            files.addFile(FileUtil.toFile(dofo));
-                        });
-                        return files;
+        indexer = new PlatypusIndexer() {
+            @Override
+            public File nameToFile(String aAppElementName) throws Exception {
+                if (aAppElementName != null && !aAppElementName.isEmpty()) {
+                    FileObject fo = IndexerQuery.appElementId2File(PlatypusProjectImpl.this, aAppElementName);
+                    if (fo != null) {
+                        return FileUtil.toFile(fo);
                     }
                 }
+                return null;
             }
-            return null;
+
+            @Override
+            public String getDefaultModuleName(File file) {
+                return null;
+            }
         };
         basesProxy = new ScriptedDatabasesClient(settings.getDefaultDataSourceName(), indexer, false, BearResourcePool.DEFAULT_MAXIMUM_SIZE) {
 
@@ -234,22 +230,15 @@ public class PlatypusProjectImpl implements PlatypusProject {
             }
 
         };
-        queries = new LocalQueriesProxy(basesProxy, indexer) {
-
-            @Override
-            protected JSObject createModule(String aModuleName, Scripts.Space aSpace) throws Exception {
-                return createLocalEngineModule(aModuleName);
-            }
-
-        };
+        queries = new LocalQueriesProxy(basesProxy, indexer);
         basesProxy.setQueries(queries);
     }
 
     protected JSObject createLocalEngineModule(String aModuleName) throws Exception {
         FileObject jsFo = IndexerQuery.appElementId2File(PlatypusProjectImpl.this, aModuleName);
         if (jsFo != null) {
-            jsSpace.exec(aModuleName, jsFo.toURL());
-            return jsSpace.createModule(aModuleName);
+            Scripts.getSpace().exec(aModuleName, jsFo.toURL());
+            return Scripts.getSpace().createModule(aModuleName);
         } else {
             return null;
         }
@@ -331,9 +320,9 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
     private synchronized void fireClientConnected(final String aDatasourceName) {
         EventQueue.invokeLater(() -> {
-            clientListeners.stream().forEach((onChange) -> {
-                onChange.connected(aDatasourceName);
-            });
+            for (ClientChangeListener l : clientListeners.toArray(new ClientChangeListener[]{})) {
+                l.connected(aDatasourceName);
+            }
             fireQueriesChanged();
         });
     }
@@ -356,9 +345,9 @@ public class PlatypusProjectImpl implements PlatypusProject {
                         mdCache.clear();
                     }
                 }
-                clientListeners.stream().forEach((onChange) -> {
-                    onChange.disconnected(aDatasourceName);
-                });
+                for (ClientChangeListener l : clientListeners.toArray(new ClientChangeListener[]{})) {
+                    l.disconnected(aDatasourceName);
+                }
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }
@@ -368,9 +357,9 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
     private synchronized void fireClientDefaultDatasourceChanged(final String aOldDatasourceName, final String aNewDatasourceName) {
         EventQueue.invokeLater(() -> {
-            clientListeners.stream().forEach((onChange) -> {
-                onChange.defaultDatasourceNameChanged(aOldDatasourceName, aNewDatasourceName);
-            });
+            for (ClientChangeListener l : clientListeners.toArray(new ClientChangeListener[]{})) {
+                l.defaultDatasourceNameChanged(aOldDatasourceName, aNewDatasourceName);
+            }
             fireQueriesChanged();
         });
     }
@@ -378,17 +367,17 @@ public class PlatypusProjectImpl implements PlatypusProject {
     @Override
     public synchronized void fireQueriesChanged() {
         queries.clearCachedQueries();
-        queriesListeners.stream().forEach((onChange) -> {
-            onChange.changed();
-        });
+        for (QueriesChangeListener l : queriesListeners.toArray(new QueriesChangeListener[]{})) {
+            l.changed();
+        }
     }
 
     @Override
     public synchronized void fireQueryChanged(String aQueryName) {
         queries.clearCachedQuery(aQueryName);
-        queriesListeners.stream().forEach((onChange) -> {
-            onChange.changed();
-        });
+        for (QueriesChangeListener l : queriesListeners.toArray(new QueriesChangeListener[]{})) {
+            l.changed();
+        }
     }
 
     @Override
@@ -541,21 +530,35 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
     @Override
     public final FileObject getSrcRoot() {
-        return getDirectory(PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT);
+        return settings.getSourcePath() != null ? getDirectory(settings.getSourcePath()) : getProjectDirectory();
     }
 
     @Override
     public final FileObject getApiRoot() throws IllegalStateException {
-        FileObject webInf = getDirectory(WEB_INF_DIRECTORY);
-        FileObject classes = webInf.getFileObject(CLASSES_DIRECTORY_NAME);
+        FileObject webInfDir = getDirectory(WEB_INF_DIRECTORY);
+        FileObject classes = webInfDir.getFileObject(CLASSES_DIRECTORY_NAME);
         if (classes == null) {
             try {
-                classes = webInf.createFolder(CLASSES_DIRECTORY_NAME);
+                classes = webInfDir.createFolder(CLASSES_DIRECTORY_NAME);
             } catch (IOException ex) {
                 throw new IllegalStateException(ex);
             }
         }
         return classes;
+    }
+
+    @Override
+    public final FileObject getLibRoot() throws IllegalStateException {
+        FileObject webInfDir = getDirectory(WEB_INF_DIRECTORY);
+        FileObject libDir = webInfDir.getFileObject(LIB_DIRECTORY_NAME);
+        if (libDir == null) {
+            try {
+                libDir = webInfDir.createFolder(LIB_DIRECTORY_NAME);
+            } catch (IOException ex) {
+                throw new IllegalStateException(ex);
+            }
+        }
+        return libDir;
     }
 
     private FileObject getDirectory(String name) {
@@ -683,39 +686,46 @@ public class PlatypusProjectImpl implements PlatypusProject {
     }
 
     private void prepareJarsJSes(boolean forceOverwrite) throws IOException {
-        FileObject webInfDir = getDirectory(WEB_INF_DIRECTORY);
-        FileObject libsDir = webInfDir.getFileObject(LIB_DIRECTORY_NAME);
-        if (libsDir == null) {
-            libsDir = webInfDir.createFolder(LIB_DIRECTORY_NAME);
-        }
+        FileObject libsDir = getLibRoot();
         if (libsDir.getChildren().length == 0 || forceOverwrite) {
             copyBinJars(libsDir);
             copyLibJars(libsDir);
+            copyExtJars(libsDir);
         }
-        FileObject classesDir = webInfDir.getFileObject(CLASSES_DIRECTORY_NAME);
-        if (classesDir == null) {
-            classesDir = webInfDir.createFolder(CLASSES_DIRECTORY_NAME);
-        }
+        FileObject classesDir = getApiRoot();
         if (classesDir.getChildren().length == 0 || forceOverwrite) {
             copyApiJs(classesDir);
+        }
+    }
+
+    private void copyJars(FileObject libsDir, FileObject sourceDir) throws IOException {
+        for (FileObject fo : sourceDir.getChildren()) {
+            if (fo.isData() && PlatypusPlatform.JAR_FILE_EXTENSION.equalsIgnoreCase(fo.getExt())) {
+                FileObject alreadyFO = libsDir.getFileObject(fo.getName(), fo.getExt());
+                if (alreadyFO != null) {// overwrite file
+                    try (OutputStream out = alreadyFO.getOutputStream()) {
+                        Files.copy(FileUtil.toFile(fo).toPath(), out);
+                    }
+                } else {// copy file
+                    FileUtil.copyFile(fo, libsDir, fo.getName());
+                }
+            }
         }
     }
 
     private void copyBinJars(FileObject libsDir) throws IOException {
         try {
             FileObject platformBinDir = FileUtil.toFileObject(PlatypusPlatform.getPlatformBinDirectory());
-            for (FileObject fo : platformBinDir.getChildren()) {
-                if (fo.isData() && PlatypusPlatform.JAR_FILE_EXTENSION.equalsIgnoreCase(fo.getExt())) {
-                    FileObject alreadyFO = libsDir.getFileObject(fo.getName(), fo.getExt());
-                    if (alreadyFO != null) {// overwrite file
-                        try (OutputStream out = alreadyFO.getOutputStream()) {
-                            Files.copy(FileUtil.toFile(fo).toPath(), out);
-                        }
-                    } else {// copy file
-                        FileUtil.copyFile(fo, libsDir, fo.getName());
-                    }
-                }
-            }
+            copyJars(libsDir, platformBinDir);
+        } catch (PlatformHomePathException ex) {
+            throw new IOException(ex);//Should not happen
+        }
+    }
+
+    private void copyExtJars(FileObject libsDir) throws IOException {
+        try {
+            FileObject platformBinDir = FileUtil.toFileObject(PlatypusPlatform.getPlatformExtDirectory());
+            copyJars(libsDir, platformBinDir);
         } catch (PlatformHomePathException ex) {
             throw new IOException(ex);//Should not happen
         }
@@ -819,17 +829,10 @@ public class PlatypusProjectImpl implements PlatypusProject {
     }
 
     public void clearPlatypusRuntime() throws IOException {
-        FileObject webInfDir = projectDir.getFileObject(WEB_INF_DIRECTORY);
-        if (webInfDir != null && webInfDir.isFolder()) {
-            FileObject libsDir = webInfDir.getFileObject(LIB_DIRECTORY_NAME);
-            if (libsDir != null && libsDir.isFolder()) {
-                FileUtils.clearDirectory(FileUtil.toFile(libsDir), true);// servlet files
-            }
-            FileObject classesDir = webInfDir.getFileObject(CLASSES_DIRECTORY_NAME);
-            if (classesDir != null && classesDir.isFolder()) {
-                FileUtils.clearDirectory(FileUtil.toFile(classesDir), true);// js api files
-            }
-        }
+        FileObject libsDir = getLibRoot();
+        FileUtils.clearDirectory(FileUtil.toFile(libsDir), true);// servlet files
+        FileObject classesDir = getApiRoot();
+        FileUtils.clearDirectory(FileUtil.toFile(classesDir), true);// js api files
         FileObject webContentDir = projectDir.getFileObject(WEB_DIRECTORY);
         if (webContentDir != null && webContentDir.isFolder()) {
             FileObject pwcDir = webContentDir.getFileObject(PLATYPUS_WEB_CLIENT_DIR_NAME);

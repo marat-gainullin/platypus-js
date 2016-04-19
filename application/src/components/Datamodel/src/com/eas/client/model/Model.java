@@ -26,8 +26,6 @@ import java.util.*;
 public abstract class Model<E extends Entity<?, Q, E>, Q extends Query> {
 
     public static final String DATASOURCE_METADATA_SCRIPT_NAME = "schema";
-    public static final String DATASOURCE_NAME_TAG_NAME = "Name";
-    public static final String DATASOURCE_TITLE_TAG_NAME = "Title";
     protected Set<Relation<E>> relations = new HashSet<>();
     protected Map<Long, E> entities = new HashMap<>();
     protected ModelEditingSupport<E> editingSupport = new ModelEditingSupport<>();

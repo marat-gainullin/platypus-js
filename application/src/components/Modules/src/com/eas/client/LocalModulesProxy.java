@@ -5,6 +5,7 @@
  */
 package com.eas.client;
 
+import com.eas.client.cache.ActualCache;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
@@ -14,6 +15,8 @@ import com.eas.client.settings.SettingsConstants;
 import com.eas.script.Scripts;
 import com.eas.util.FileUtils;
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -29,24 +32,74 @@ import org.w3c.dom.NodeList;
  */
 public class LocalModulesProxy implements ModulesProxy {
 
-    protected ApplicationSourceIndexer indexer;
-    protected ModelsDocuments modelsDocs;
-    protected final String defaultModuleName;
+    protected final ApplicationSourceIndexer indexer;
+    protected final ModelsDocuments modelsDocs;
+    protected final ActualCache<ModuleStructure> structures = new ActualCache<ModuleStructure>() {
+        @Override
+        protected ModuleStructure parse(String name, File file) throws Exception {
+            ModuleStructure structure = new ModuleStructure();
+            structure.getParts().addFile(file);
+            String jsSource = FileUtils.readString(file, SettingsConstants.COMMON_ENCODING);
+            DependenciesWalker walker = new DependenciesWalker(jsSource, (String aModuleCandidate) -> {
+                File depFile = indexer.nameToFile(aModuleCandidate);
+                if (depFile != null && depFile.exists()) {
+                    if (depFile.getName().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
+                        return true;
+                    } else {
+                        Logger.getLogger(LocalModulesProxy.class.getName()).log(Level.WARNING, "JavaScript identifier: {0} found that is the same with non-module application element.", aModuleCandidate);
+                    }
+                }// ordinary script class
+                return false;
+            });
+            walker.walk();
+            structure.getClientDependencies().addAll(walker.getDependencies());
+            structure.getServerDependencies().addAll(walker.getServerDependencies());
+            //Query dependencies from loadEntity() calls
+            structure.getQueryDependencies().addAll(walker.getQueryDependencies());
+            Path jsPath = Paths.get(file.toURI());
+            String jsedName = jsPath.getFileName().toString();
+            String woExtension = jsedName.substring(0, jsedName.length() - PlatypusFiles.JAVASCRIPT_EXTENSION.length());
+            File modelFile = jsPath.resolveSibling(woExtension + PlatypusFiles.MODEL_EXTENSION).toFile();
+            if (modelFile.exists()) {
+                structure.getParts().addFile(modelFile);
+                //Query dependencies from model's xml
+                Document modelDoc = modelsDocs.get(jsPath.toString(), modelFile);// cache documents by file of bundle (not by module name)
+                if (modelDoc != null) {
+                    Element rootNode = modelDoc.getDocumentElement();
+                    NodeList docNodes = rootNode.getElementsByTagName(Model2XmlDom.ENTITY_TAG_NAME);
+                    for (int i = docNodes.getLength() - 1; i >= 0; i--) {
+                        Node entityNode = docNodes.item(i);
+                        Node queryIdAttribute = entityNode.getAttributes().getNamedItem(Model2XmlDom.QUERY_ID_ATTR_NAME);
+                        if (queryIdAttribute != null) {
+                            String sQueryName = queryIdAttribute.getNodeValue();
+                            structure.getQueryDependencies().add(sQueryName);
+                        }
+                    }
+                }
+            }
+            File layoutFile = jsPath.resolveSibling(woExtension + PlatypusFiles.FORM_EXTENSION).toFile();
+            if (layoutFile.exists()) {
+                structure.getParts().addFile(layoutFile);
+            }
+            return structure;
+        }
+    };
+    protected final String startModuleName;
 
-    public LocalModulesProxy(ApplicationSourceIndexer aIndexer, ModelsDocuments aModelsDocs, String aDefaultModuleName) throws Exception {
+    public LocalModulesProxy(ApplicationSourceIndexer aIndexer, ModelsDocuments aModelsDocs, String aStartModuleName) throws Exception {
         super();
         indexer = aIndexer;
         modelsDocs = aModelsDocs;
-        if (aDefaultModuleName.toLowerCase().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
-            defaultModuleName = aDefaultModuleName.substring(0, aDefaultModuleName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
+        if (aStartModuleName != null && aStartModuleName.toLowerCase().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
+            startModuleName = aStartModuleName.substring(0, aStartModuleName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
         } else {
-            defaultModuleName = aDefaultModuleName;
+            startModuleName = aStartModuleName;
         }
     }
 
     @Override
-    public String getLocalPath() {
-        return indexer.calcSrcPath();
+    public Path getLocalPath() {
+        return indexer.getAppPath();
     }
 
     @Override
@@ -54,55 +107,15 @@ public class LocalModulesProxy implements ModulesProxy {
         Callable<ModuleStructure> doWork = () -> {
             String name = aName;
             if (name == null || name.isEmpty()) {
-                if (defaultModuleName == null || defaultModuleName.isEmpty()) {
+                if (startModuleName == null || startModuleName.isEmpty()) {
                     throw new IllegalStateException("Default application element must present if you whant to resolve empty string names.");
                 }
-                name = defaultModuleName;
+                name = startModuleName;
             }
             if (name != null) {
-                AppElementFiles files = indexer.nameToFiles(name);
-                if (files != null) {
-                    ModuleStructure structure = new ModuleStructure();
-                    files.getFiles().stream().forEach((file) -> {
-                        structure.getParts().addFile(file);
-                    });
-                    File jsFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
-                    if (jsFile != null) {
-                        String jsSource = FileUtils.readString(jsFile, SettingsConstants.COMMON_ENCODING);
-                        DependenciesWalker walker = new DependenciesWalker(jsSource, (String aModuleCandidate) -> {
-                            AppElementFiles depFiles = indexer.nameToFiles(aModuleCandidate);
-                            if (depFiles != null) {
-                                if (depFiles.isModule()) {
-                                    return true;
-                                } else {
-                                    Logger.getLogger(LocalModulesProxy.class.getName()).log(Level.WARNING, "Possible name duplication (JavaScript identifier {0} found that is the same with non-module application element).", aModuleCandidate);
-                                }
-                            }// ordinary script class
-                            return false;
-                        });
-                        walker.walk();
-                        structure.getClientDependencies().addAll(walker.getDependencies());
-                        structure.getServerDependencies().addAll(walker.getServerDependencies());
-                        if (files.isModule()) {
-                            //Query dependencies from loadEntity() calls
-                            structure.getQueryDependencies().addAll(walker.getQueryDependencies());
-                            //Query dependencies from model's xml
-                            Document modelDoc = modelsDocs.get(name, structure.getParts());
-                            if (modelDoc != null) {
-                                Element rootNode = modelDoc.getDocumentElement();
-                                NodeList docNodes = rootNode.getElementsByTagName(Model2XmlDom.ENTITY_TAG_NAME);
-                                for (int i = docNodes.getLength() - 1; i >= 0; i--) {
-                                    Node entityNode = docNodes.item(i);
-                                    Node queryIdAttribute = entityNode.getAttributes().getNamedItem(Model2XmlDom.QUERY_ID_ATTR_NAME);
-                                    if (queryIdAttribute != null) {
-                                        String sQueryName = queryIdAttribute.getNodeValue();
-                                        structure.getQueryDependencies().add(sQueryName);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    return structure;
+                File file = indexer.nameToFile(name);
+                if (file != null && file.getName().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
+                    return structures.get(file.getAbsolutePath(), file);
                 } else {
                     return null;
                 }
@@ -130,8 +143,39 @@ public class LocalModulesProxy implements ModulesProxy {
     }
 
     @Override
-    public AppElementFiles nameToFiles(String aName) throws Exception {
-        return indexer.nameToFiles(aName);
+    public File getResource(String aResourceName, Scripts.Space aSpace, Consumer<File> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        Callable<File> doWork = () -> {
+            String relativePath = aResourceName.replace("/", File.separator);
+            Path resolved = indexer.getAppPath().resolve(relativePath);
+            return resolved.toFile();
+        };
+        if (onSuccess != null) {
+            try {
+                File structure = doWork.call();
+                aSpace.process(() -> {
+                    onSuccess.accept(structure);
+                });
+            } catch (Exception ex) {
+                if (onFailure != null) {
+                    aSpace.process(() -> {
+                        onFailure.accept(ex);
+                    });
+                }
+            }
+            return null;
+        } else {
+            return doWork.call();
+        }
+    }
+
+    @Override
+    public File nameToFile(String aName) throws Exception {
+        return indexer.nameToFile(aName);
+    }
+
+    @Override
+    public String getDefaultModuleName(File aFile) {
+        return indexer.getDefaultModuleName(aFile);
     }
 
 }

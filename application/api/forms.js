@@ -4,11 +4,12 @@ define(['boxing', 'forms/form', 'forms/index', 'grid/index'], function (B, Form)
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
     var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
     var Source2XmlDom = Java.type('com.eas.xml.dom.Source2XmlDom');
+    var FileUtils = Java.type("com.eas.util.FileUtils");
     // gui imports
     var FormLoaderClass = Java.type('com.eas.client.scripts.ModelFormLoader');
 
-    function loadFormDocument(aDocument, aModel, aTarget) {
-        var formFactory = FormLoaderClass.load(aDocument, ScriptedResourceClass.getApp(), arguments[1] ? aModel : null);
+    function loadFormDocument(aDocument, aModuleName, aModel, aTarget) {
+        var formFactory = FormLoaderClass.load(aDocument, aModuleName, aModel ? aModel : null);
         var form = formFactory.form;
         if (aTarget) {
             Form.call(aTarget, null, null, form);
@@ -31,19 +32,24 @@ define(['boxing', 'forms/form', 'forms/index', 'grid/index'], function (B, Form)
         }
         return aTarget;
     }
-    function loadForm(aName, aModel, aTarget) {
-        var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
-        var document = ScriptedResourceClass.getApp().getForms().get(aName, files);
-        var form = loadFormDocument(document, aModel, aTarget);
-        if (!form.title)
-            form.title = aName;
-        form.formKey = aName;
-        return form;
+    function loadForm(aModuleName, aModel, aTarget) {
+        var file = FileUtils.findBrother(ScriptedResourceClass.getApp().getModules().nameToFile(aModuleName), "layout");
+        if(file){
+            var document = ScriptedResourceClass.getApp().getForms().get(file.getAbsolutePath(), file);
+            var form = loadFormDocument(document, aModuleName, aModel, aTarget);
+            if (!form.title) {
+                form.title = aModuleName;
+            }
+            form.formKey = aModuleName;
+            return form;
+        }else{
+            throw 'Layout definition for module "' + aModuleName + '" is not found';
+        }
     }
 
     function readForm(aContent, aModel, aTarget) {
         var document = Source2XmlDom.transform(aContent);
-        return loadFormDocument(document, aModel, aTarget);
+        return loadFormDocument(document, null, aModel, aTarget);
     }
 
     var module = {
@@ -53,14 +59,14 @@ define(['boxing', 'forms/form', 'forms/index', 'grid/index'], function (B, Form)
          * @param {Object} aModel JavaScript object to use while widgets binding. (Optional)
          * @returns {Form}
          */
-        loadForm: function(aName, aModel){},
+        loadForm: function (aName, aModel) {},
         /**
          * Reads widgets and form (window) definition from aContent.
          * @param {String} aContent String, all widgets and form itself should be read from.
          * @param {Object} aModel JavaScript object to use while widgets binding. (Optional)
          * @returns {Form}
          */
-        readForm: function(aContent, aModel){}
+        readForm: function (aContent, aModel) {}
     };
     Object.defineProperty(module, 'loadForm', {
         enumerable: true,

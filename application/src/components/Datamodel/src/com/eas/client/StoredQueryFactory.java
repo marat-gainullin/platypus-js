@@ -11,14 +11,20 @@ import com.eas.client.metadata.JdbcField;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.model.QueryDocument;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
+import com.eas.client.model.Relation;
+import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryModel;
+import com.eas.client.model.query.QueryParametersEntity;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.script.JsDoc;
+import java.io.File;
 import java.io.StringReader;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.ResultsFinder;
 import net.sf.jsqlparser.SourcesFinder;
@@ -113,12 +119,12 @@ public class StoredQueryFactory {
             throw new NullPointerException(CANT_LOAD_NULL_MSG);
         }
         Logger.getLogger(this.getClass().getName()).finer(String.format(LOADING_QUERY_MSG, aAppElementName));
-        AppElementFiles queryFiles = indexer.nameToFiles(aAppElementName);
-        return queryFiles != null ? filesToSqlQuery(aAppElementName, queryFiles) : null;
+        File mainQueryFile = indexer.nameToFile(aAppElementName);
+        return mainQueryFile != null ? fileToSqlQuery(aAppElementName, mainQueryFile) : null;
     }
 
-    protected SqlQuery filesToSqlQuery(String aName, AppElementFiles aFiles) throws Exception {
-        QueryDocument queryDoc = QueryDocument.parse(aName, aFiles, basesProxy, subQueriesProxy);
+    protected SqlQuery fileToSqlQuery(String aName, File aFile) throws Exception {
+        QueryDocument queryDoc = QueryDocument.parse(aName, aFile, basesProxy, subQueriesProxy);
         QueryModel model = queryDoc.getModel();
         SqlQuery query = queryDoc.getQuery();
         putRolesMutatables(query);
@@ -165,7 +171,77 @@ public class StoredQueryFactory {
         indexer = aIndexer;
     }
 
+    /**
+     * Заменяет в запросе ссылки на подзапросы на их содержимое. Подставляет
+     * параметры запроса в соответствии со связями в параметры подзапросов.
+     *
+     * @param aSqlText
+     * @param aModel
+     * @return Запрос без ссылок на подзапросы.
+     * @throws java.lang.Exception
+     */
     public String compileSubqueries(String aSqlText, QueryModel aModel) throws Exception {
+        /**
+         * Старая реализация заменяла текст всех подзапросов с одним и тем же
+         * идентификатором, не обращая внимания на алиасы. Поэтому запросы
+         * содержащие в себе один и тот же подзапрос несколько раз,
+         * компилировались неправильно. Неправильно подставлялись и параметры.
+         */
+        assert aModel != null;
+        if (aModel.getEntities() != null) {
+            String processedSql = aSqlText;
+            for (QueryEntity entity : aModel.getEntities().values()) {
+                assert entity != null;
+                if (entity.getQueryName() != null) {
+                    String queryTablyName = entity.getQueryName();
+                    Pattern subQueryPattern = Pattern.compile(_Q + queryTablyName, Pattern.CASE_INSENSITIVE);
+                    String tAlias = entity.getAlias();
+                    if (tAlias != null && !tAlias.isEmpty()) {
+                        subQueryPattern = Pattern.compile(_Q + queryTablyName + "[\\s]+" + tAlias, Pattern.CASE_INSENSITIVE);
+                        if (tAlias.equalsIgnoreCase(queryTablyName)
+                                && !subQueryPattern.matcher(processedSql).find()) {
+                            /**
+                             * Эта проверка с финтом ушами нужна, т.к. даже в
+                             * отсутствии алиаса, он все равно есть и равен
+                             * queryTablyName. А так как алиас может в SQL
+                             * совпадать с именем таблицы, то эти ситуации никак
+                             * не различить, кроме как явной проверкой на
+                             * нахождение такого алиаса и имени таблицы
+                             * (подзапроса).
+                             */
+                            subQueryPattern = Pattern.compile(_Q + queryTablyName, Pattern.CASE_INSENSITIVE);
+                        }
+                    }
+                    Matcher subQueryMatcher = subQueryPattern.matcher(processedSql);
+                    if (subQueryMatcher.find()) {
+                        SqlQuery subQuery = subQueriesProxy.getQuery(entity.getQueryName(), null, null, null);
+                        if (subQuery != null && subQuery.getSqlText() != null) {
+                            String subQueryText = subQuery.getSqlText();
+                            subQueryText = replaceLinkedParameters(subQueryText, entity.getInRelations());
+
+                            String sqlBegin = processedSql.substring(0, subQueryMatcher.start());
+                            String sqlToInsert = " (" + subQueryText + ") ";
+                            String sqlTail = processedSql.substring(subQueryMatcher.end());
+                            if (tAlias != null && !tAlias.isEmpty()) {
+                                processedSql = sqlBegin + sqlToInsert + " " + tAlias + " " + sqlTail;
+                            } else {
+                                processedSql = sqlBegin + sqlToInsert + " " + queryTablyName + " " + sqlTail;
+                            }
+                        }
+                    }
+                }
+            }
+            return processedSql;
+        }
+        return aSqlText;
+    }
+
+    private String replaceLinkedParameters(String aSqlText, Set<Relation<QueryEntity>> parametersRelations) {
+        for (Relation<QueryEntity> rel : parametersRelations) {
+            if (rel.getLeftEntity() instanceof QueryParametersEntity && rel.getLeftField() != null && rel.getRightParameter() != null) {
+                aSqlText = Pattern.compile(COLON + rel.getRightParameter().getName() + "\\b", Pattern.CASE_INSENSITIVE).matcher(aSqlText).replaceAll(COLON + rel.getLeftField().getName());
+            }
+        }
         return aSqlText;
     }
 

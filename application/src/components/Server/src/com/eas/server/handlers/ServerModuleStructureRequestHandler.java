@@ -4,7 +4,6 @@
  */
 package com.eas.server.handlers;
 
-import com.eas.client.AppElementFiles;
 import com.eas.client.RemoteServerModulesProxy;
 import com.eas.server.RequestHandler;
 import com.eas.client.cache.ScriptDocument;
@@ -14,6 +13,7 @@ import com.eas.client.threetier.requests.ServerModuleStructureRequest;
 import com.eas.script.Scripts;
 import com.eas.server.*;
 import com.eas.util.JSONUtils;
+import java.io.File;
 import java.security.AccessControlException;
 import java.util.Collections;
 import java.util.Date;
@@ -39,15 +39,15 @@ public class ServerModuleStructureRequestHandler extends RequestHandler<ServerMo
         } else {
             Date clientModuleTime = getRequest().getTimeStamp();
             try {
-                AppElementFiles files = serverCore.getIndexer().nameToFiles(moduleName);
-                if (files != null && files.isModule()) {
+                File file = serverCore.getIndexer().nameToFile(moduleName);
+                ScriptDocument.ModuleDocument moduleDoc = serverCore.lookupModuleDocument(moduleName);
+                if (file != null && moduleDoc != null) {
                     ServerModuleStructureRequest.Response response = new ServerModuleStructureRequest.Response(null);
-                    Date serverModuleTime = files.getLastModified();
+                    Date serverModuleTime = new Date(file.lastModified());
                     if (clientModuleTime == null || serverModuleTime.after(clientModuleTime)) {
-                        ScriptDocument config = serverCore.getScriptsConfigs().get(moduleName, files);
-                        checkPrincipalPermission(config.getModuleAllowedRoles(), moduleName);
+                        checkPrincipalPermission(moduleDoc.getAllowedRoles(), moduleName);
                         StringBuilder json = JSONUtils.o(
-                                RemoteServerModulesProxy.CREATE_MODULE_RESPONSE_FUNCTIONS_PROP, JSONUtils.as(config.getFunctionProperties().toArray(new String[]{})).toString(),
+                                RemoteServerModulesProxy.CREATE_MODULE_RESPONSE_FUNCTIONS_PROP, JSONUtils.as(moduleDoc.getFunctionProperties().toArray(new String[]{})).toString(),
                                 RemoteServerModulesProxy.CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP, String.valueOf(true)
                         );
                         response.setInfoJson(json.toString());
@@ -55,7 +55,7 @@ public class ServerModuleStructureRequestHandler extends RequestHandler<ServerMo
                     }
                     onSuccess.accept(response);
                 } else {
-                    onFailure.accept(new IllegalArgumentException(String.format("No module: %s, or it is not a module", moduleName)));
+                    onFailure.accept(new IllegalArgumentException(String.format("No module %s, or it is not a module", moduleName)));
                 }
             } catch (AccessControlException ex) {
                 if (ex.getPermission() instanceof AuthPermission) {

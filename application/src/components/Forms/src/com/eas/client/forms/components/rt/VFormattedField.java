@@ -6,6 +6,7 @@
 package com.eas.client.forms.components.rt;
 
 import com.eas.script.Scripts;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -155,6 +156,10 @@ public abstract class VFormattedField extends JFormattedTextField implements Has
     protected int valueType = REGEXP;
     protected JSObject onFormat;
     protected JSObject onParse;
+    protected boolean valueIsNull = true;
+    protected PropertyChangeListener valueIsNullClearer = (PropertyChangeEvent pce) -> {
+        valueIsNull = false;
+    };
 
     public VFormattedField(Object aValue) {
         super();
@@ -219,7 +224,7 @@ public abstract class VFormattedField extends JFormattedTextField implements Has
 
     @Override
     public Object getValue() {
-        return super.getValue();
+        return valueIsNull ? null : super.getValue();
     }
 
     @Override
@@ -227,7 +232,13 @@ public abstract class VFormattedField extends JFormattedTextField implements Has
         if (aValue instanceof Number) {
             aValue = ((Number) aValue).doubleValue();
         }
-        super.setValue(aValue);
+        removeValueChangeListener(valueIsNullClearer);
+        try {
+            valueIsNull = aValue == null;
+            super.setValue(aValue);
+        } finally {
+            addValueChangeListener(valueIsNullClearer);
+        }
     }
 
     @Override

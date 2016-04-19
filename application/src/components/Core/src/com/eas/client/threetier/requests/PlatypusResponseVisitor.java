@@ -10,8 +10,14 @@ package com.eas.client.threetier.requests;
  */
 public interface PlatypusResponseVisitor {
 
-    public void visit(ErrorResponse rsp) throws Exception;
+    public void visit(ExceptionResponse rsp) throws Exception;
 
+    public void visit(SqlExceptionResponse rsp) throws Exception;
+
+    public void visit(AccessControlExceptionResponse rsp) throws Exception;
+
+    public void visit(JsonExceptionResponse rsp) throws Exception;
+    
     public void visit(CredentialRequest.Response rsp) throws Exception;
 
     public void visit(ExecuteQueryRequest.Response rsp) throws Exception;

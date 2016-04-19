@@ -264,26 +264,12 @@ public class Fields implements HasPublished {
         if (aPrefix == null || aPrefix.isEmpty()) {
             aPrefix = getDefaultNamePrefix();
         }
-        int paramNumber = 0;
-        for (int i = 0; i < getFieldsCount(); i++) {
-            Field param = fields.get(i);
-            String paramName = param.getName();
-            if (paramName != null && paramName.toLowerCase().startsWith(aPrefix.toLowerCase())) {
-                int existingNumber;
-                String maybeNumber = paramName.substring(aPrefix.length());
-                if (maybeNumber != null && !maybeNumber.isEmpty()) {
-                    try {
-                        existingNumber = Integer.valueOf(maybeNumber);
-                        if (existingNumber > paramNumber) {
-                            paramNumber = existingNumber;
-                        }
-                    } catch (NumberFormatException fe) {
-                        // no op
-                    }
-                }
-            }
+        int counter = 0;
+        String currentName = aPrefix;
+        while(contains(currentName)){
+            currentName += ++counter;
         }
-        return aPrefix + String.valueOf(paramNumber + 1);
+        return currentName;
     }
 
     /**

@@ -28,7 +28,6 @@ import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.LocalQueriesProxy;
-import com.eas.client.queries.ScriptedQueryFactory;
 import com.eas.client.scripts.JSObjectFacade;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
@@ -55,6 +54,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -141,7 +141,7 @@ public class QueryResultsView extends javax.swing.JPanel {
     }
 
     protected static String extractText(PlatypusQueryDataObject aQueryDataObject) throws Exception {
-        StoredQueryFactory factory = new ScriptedQueryFactory(aQueryDataObject.getBasesProxy(), aQueryDataObject.getProject().getQueries(), aQueryDataObject.getProject().getIndexer());
+        StoredQueryFactory factory = new StoredQueryFactory(aQueryDataObject.getBasesProxy(), aQueryDataObject.getProject().getQueries(), aQueryDataObject.getProject().getIndexer());
         String queryText = aQueryDataObject.getSqlTextDocument().getText(0, aQueryDataObject.getSqlTextDocument().getLength());
         String dialectQueryText = aQueryDataObject.getSqlFullTextDocument().getText(0, aQueryDataObject.getSqlFullTextDocument().getLength());
         if (dialectQueryText != null && !dialectQueryText.isEmpty() && !dialectQueryText.replaceAll("\\s", "").isEmpty()) {
@@ -774,6 +774,7 @@ public class QueryResultsView extends javax.swing.JPanel {
 
     private void initModelGrid() throws Exception {
         grid = new ModelGrid();
+        grid.setRowsHeight(20);
         grid.setAutoRefreshHeader(false);
         gridPanel.add(grid);
         Fields fields = query.getFields();
@@ -866,7 +867,7 @@ public class QueryResultsView extends javax.swing.JPanel {
             Parameter newParameter = new Parameter(parsedParameter.getName());
             newParameter.setMode(1);
             newParameter.setType(Scripts.STRING_TYPE_NAME);
-            newParameter.setValue("");
+            newParameter.setValue(null);
             parameters.add(newParameter);
         });
     }
@@ -905,36 +906,50 @@ public class QueryResultsView extends javax.swing.JPanel {
         });
     }
 
-    private void loadParametersValues() {
+    private void loadParametersValues() throws BackingStoreException {
         Preferences modulePreferences = NbPreferences.forModule(QueryResultsView.class);
         Preferences paramsPreferences = modulePreferences.node(queryName);
-        for (Field pField : parameters.toCollection()) {
-            Parameter parameter = (Parameter) pField;
-            Preferences paramNode = paramsPreferences.node(parameter.getName());
-            try {
-                String paramType = parameter.getType();
-                if (Scripts.DATE_TYPE_NAME.equals(paramType)) {
-                    long lValue = paramNode.getLong(VALUE_PREF_KEY, -1);
-                    if (lValue != -1) {
-                        parameter.setValue(new Date(lValue));
+        for (String paramPrefNodeName : paramsPreferences.childrenNames()) {
+            Parameter parameter = parameters.get(paramPrefNodeName);
+            if (parameter != null) {
+                Preferences paramNode = paramsPreferences.node(parameter.getName());
+                try {
+                    String paramType = parameter.getType();
+                    if (null != paramType) {
+                        switch (paramType) {
+                            case Scripts.DATE_TYPE_NAME:
+                                long lValue = paramNode.getLong(VALUE_PREF_KEY, -1);
+                                if (lValue != -1) {
+                                    parameter.setValue(new Date(lValue));
+                                } else {
+                                    parameter.setValue(null);
+                                }
+                                break;
+                            case Scripts.BOOLEAN_TYPE_NAME: {
+                                Object val = paramNode.getBoolean(VALUE_PREF_KEY, false);
+                                parameter.setValue(val);
+                                break;
+                            }
+                            case Scripts.NUMBER_TYPE_NAME: {
+                                Object val = paramNode.getDouble(VALUE_PREF_KEY, 0d);
+                                parameter.setValue(val);
+                                break;
+                            }
+                            default: {
+                                Object val = paramNode.get(VALUE_PREF_KEY, ""); //NOI18N
+                                parameter.setValue(val);
+                                break;
+                            }
+                        }
                     }
-                } else if (Scripts.BOOLEAN_TYPE_NAME.equals(paramType)) {
-                    paramNode.getBoolean(VALUE_PREF_KEY, false);
-                } else if (Scripts.NUMBER_TYPE_NAME.equals(paramType)) {
-                    paramNode.getDouble(VALUE_PREF_KEY, 0d);
-                } else {
-                    Object val = paramNode.get(VALUE_PREF_KEY, ""); //NOI18N
-                    if (val != null) {
-                        ((Parameter) parameter).setValue(val);
-                    }
+                } catch (Exception ex) {
+                    //no-op
                 }
-            } catch (Exception ex) {
-                //no-op
             }
         }
     }
 
-    private void saveParametersValues() {
+    private void saveParametersValues() throws BackingStoreException {
         Preferences modulePreferences = NbPreferences.forModule(QueryResultsView.class);
         Preferences paramsPreferences = modulePreferences.node(queryName);
         parameters.toCollection().stream().forEach((pField) -> {
@@ -951,14 +966,17 @@ public class QueryResultsView extends javax.swing.JPanel {
                     } else if (parameter.getValue() instanceof String) {
                         String sVal = (String) parameter.getValue();
                         paramNode.put(VALUE_PREF_KEY, sVal);
+                    } else {
+                        paramNode.remove(VALUE_PREF_KEY);
                     }
                 } else {
-                    paramNode.remove(VALUE_PREF_KEY);
+                    paramNode.removeNode();
                 }
             } catch (Exception ex) {
                 //no-op
             }
         });
+        paramsPreferences.flush();
     }
 
     public void close() throws Exception {

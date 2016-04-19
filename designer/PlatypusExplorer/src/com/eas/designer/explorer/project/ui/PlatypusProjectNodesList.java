@@ -7,13 +7,17 @@ package com.eas.designer.explorer.project.ui;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.PlatypusDataObject;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
-import java.util.ArrayList;
+import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
+import java.beans.PropertyChangeEvent;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.swing.ImageIcon;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.netbeans.spi.project.ui.support.NodeList;
+import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataFilter;
 import org.openide.loaders.DataFolder;
 import org.openide.loaders.DataObject;
@@ -26,33 +30,30 @@ import org.openide.util.NbBundle;
  *
  * @author Gala
  */
-public class PlatypusProjectNodesList implements NodeList<String> {
+public class PlatypusProjectNodesList implements NodeList<FileObject> {
 
     private static final String JAVASCRIPT_FILE_EXTENSION = "js";
     private static final String PACKAGE_PREFIX = "com/eas/designer/explorer/project/ui/";
-    public static final ImageIcon sourceIcon = ImageUtilities.loadImageIcon(PACKAGE_PREFIX + "elements.png", true);
+    public static final ImageIcon sourceIcon = ImageUtilities.loadImageIcon(PACKAGE_PREFIX + "package.gif", true);
+    public static final ImageIcon apiIcon = ImageUtilities.loadImageIcon(PACKAGE_PREFIX + "interface.png", true);
+    public static final ImageIcon libIcon = ImageUtilities.loadImageIcon(PACKAGE_PREFIX + "libraries.gif", true);
     public static final DataFilter APPLICATION_TYPES_FILTER = new ApplicationTypesFilter();
-    protected List<String> keys = new ArrayList<>();
-    protected List<Node> nodes = new ArrayList<>();
     protected PlatypusProjectImpl project;
     protected Set<ChangeListener> listeners = new HashSet<>();
 
     public PlatypusProjectNodesList(PlatypusProjectImpl aProject) throws Exception {
         super();
         project = aProject;
-        keys.add(PlatypusUtils.ELEMENTS_SOURCES_GROUP);
-        DataFolder appRootDataFolder = DataFolder.findFolder(project.getSrcRoot());
-        nodes.add(new CategoryNode(project,
-                appRootDataFolder,
-                sourceIcon,
-                sourceIcon,
-                PlatypusUtils.ELEMENTS_SOURCES_GROUP,
-                NbBundle.getMessage(PlatypusProjectImpl.class, PlatypusUtils.ELEMENTS_SOURCES_GROUP)));
+        project.getSettings().getChangeSupport().addPropertyChangeListener(PlatypusProjectSettingsImpl.SOURCE_PATH_KEY, (PropertyChangeEvent evt) -> {
+            for (ChangeListener cl : listeners.toArray(new ChangeListener[]{})) {
+                cl.stateChanged(new ChangeEvent(PlatypusProjectNodesList.this));
+            }
+        });
     }
 
     @Override
-    public List<String> keys() {
-        return keys;
+    public List<FileObject> keys() {
+        return Arrays.asList(new FileObject[]{project.getSrcRoot(), project.getApiRoot(), project.getLibRoot()});
     }
 
     @Override
@@ -66,12 +67,29 @@ public class PlatypusProjectNodesList implements NodeList<String> {
     }
 
     @Override
-    public Node node(String aName) {
-        int nodeIndex = keys.indexOf(aName);
-        if (nodeIndex != -1) {
-            return nodes.get(nodeIndex);
+    public Node node(FileObject aFilePoint) {
+        if (project.getSrcRoot() == aFilePoint) {
+            return new CategoryNode(project,
+                    DataFolder.findFolder(aFilePoint),
+                    sourceIcon,
+                    sourceIcon,
+                    PlatypusUtils.ELEMENTS_SOURCES_GROUP,
+                    NbBundle.getMessage(PlatypusProjectImpl.class, PlatypusUtils.ELEMENTS_SOURCES_GROUP));
+        } else if (project.getApiRoot() == aFilePoint) {
+            return new CategoryNode(project,
+                    DataFolder.findFolder(aFilePoint),
+                    apiIcon,
+                    apiIcon,
+                    PlatypusUtils.ELEMENTS_API_GROUP,
+                    NbBundle.getMessage(PlatypusProjectImpl.class, PlatypusUtils.ELEMENTS_API_GROUP));
+        } else {
+            return new CategoryNode(project,
+                    DataFolder.findFolder(aFilePoint),
+                    libIcon,
+                    libIcon,
+                    PlatypusUtils.ELEMENTS_LIB_GROUP,
+                    NbBundle.getMessage(PlatypusProjectImpl.class, PlatypusUtils.ELEMENTS_LIB_GROUP));
         }
-        return null;
     }
 
     @Override

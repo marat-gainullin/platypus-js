@@ -23,7 +23,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
@@ -39,6 +38,7 @@ import org.openide.awt.NotificationDisplayer;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.ImageUtilities;
+import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
 
 /**
@@ -48,13 +48,13 @@ import org.openide.util.Utilities;
  */
 public class PlatypusPlatform {
 
-    public static final ResourceBundle res = ResourceBundle.getBundle(PlatypusPlatform.class.getPackage().getName() + ".updatermessages");
     private static final ImageIcon icon = ImageUtilities.loadImageIcon("com/eas/designer/application/utils/restart.png", false);
     public static final String PLATYPUS_DIR_NAME = "Platypus"; //NOI18N
     public static final String PLATYPUS_FILE_NAME = "platform"; //NOI18N
     public static final String PLATFORM_HOME_PATH_ATTR_NAME = "path"; //NOI18N
     public static final String BIN_DIRECTORY_NAME = "bin"; //NOI18N
     public static final String LIB_DIRECTORY_NAME = "lib"; //NOI18N
+    public static final String EXT_DIRECTORY_NAME = "ext"; //NOI18N
     public static final String UPDATES_DIRECTORY_NAME = "updates"; //NOI18N
     public static final String JS_API_DIRECTORY_NAME = "api"; //NOI18N
     public static final String VERSION_FILE_NAME = "version.xml"; //NOI18N
@@ -102,10 +102,10 @@ public class PlatypusPlatform {
                 Process updaterProcess = Runtime.getRuntime().exec(command);
                 int updateStatus = updaterProcess.waitFor();
                 ActionListener updateAction = null;
-                String detailsText = res.getString("confirmUpdate");
+                String detailsText = NbBundle.getMessage(PlatypusPlatform.class, "confirmUpdate");
                 switch (updateStatus) {
                     case NEW_VERSION_CODE: {
-                        detailsText = res.getString("confirmUpdate");
+                        detailsText = NbBundle.getMessage(PlatypusPlatform.class, "confirmUpdate");
                         updateAction = (ActionEvent e) -> {
                             String[] command1 = createUpdaterCommand(UPDATER_EXECUTABLE, new String[]{"update", "-silent", "false", "-java-home", javaHome});
                             try {
@@ -120,7 +120,7 @@ public class PlatypusPlatform {
                         break;
                     }
                     case UPGRADE_VERSION_CODE: {
-                        detailsText = res.getString("mesDownloadNew");
+                        detailsText = NbBundle.getMessage(PlatypusPlatform.class, "mesDownloadNew");
                         updateAction = (ActionEvent e) -> {
                             try {
                                 HtmlBrowser.URLDisplayer.getDefault().showURL(new URL(URL_PLATYPUS_HOME));
@@ -139,7 +139,7 @@ public class PlatypusPlatform {
 
                 if (updateStatus == NEW_VERSION_CODE || updateStatus == UPGRADE_VERSION_CODE) {
                     try {
-                        notification = NotificationDisplayer.getDefault().notify(res.getString("title"),
+                        notification = NotificationDisplayer.getDefault().notify(NbBundle.getMessage(PlatypusPlatform.class, "title"),
                                 icon,
                                 detailsText,
                                 updateAction,
@@ -237,7 +237,22 @@ public class PlatypusPlatform {
     }
 
     /**
-     * The platform's main jars directory.
+     * The platform's ext jars directory.
+     *
+     * @return bin directory path
+     * @throws PlatformHomePathException if the platform isn't properly
+     * configured
+     */
+    public static File getPlatformExtDirectory() throws PlatformHomePathException {
+        File platformBinDir = new File(getPlatformHomeDir(), EXT_DIRECTORY_NAME);
+        if (!platformBinDir.exists() || !platformBinDir.isDirectory()) {
+            throw new PlatformHomePathException(PLATFORM_ERROR_MSG);
+        }
+        return platformBinDir;
+    }
+
+    /**
+     * The platform's lib jars directory.
      *
      * @return bin directory path
      * @throws PlatformHomePathException if the platform isn't properly
@@ -464,7 +479,7 @@ public class PlatypusPlatform {
 
     private static File getPlatformHomeDir() throws PlatformHomePathException {
         if (PlatypusPlatform.getPlatformHomePath() == null || PlatypusPlatform.getPlatformHomePath().isEmpty()) {
-            throw new PlatformHomePathException("Platform home directory is not set.");
+            throw new PlatformHomePathException(NbBundle.getMessage(PlatypusPlatform.class, "LBL_Platform_Home_Not_Set"));
         }
         File platformHomeDir = new File(PlatypusPlatform.getPlatformHomePath());
         if (!platformHomeDir.exists() || !platformHomeDir.isDirectory()) {

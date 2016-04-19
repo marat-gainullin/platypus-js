@@ -777,32 +777,32 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
             jdbcType = aStatement.getParameterMetaData().getParameterType(aParameterIndex);
             sqlTypeName = aStatement.getParameterMetaData().getParameterTypeName(aParameterIndex);
         } catch (SQLException ex) {
-        */
-            if (paramValue != null || aParameter.getType() == null) {
-                jdbcType = assumeJdbcType(paramValue);
-                sqlTypeName = null;
-            } else {
-                sqlTypeName = null;
-                switch (aParameter.getType()) {
-                    case Scripts.STRING_TYPE_NAME:
-                        jdbcType = java.sql.Types.VARCHAR;
-                        break;
-                    case Scripts.NUMBER_TYPE_NAME:
-                        jdbcType = java.sql.Types.DOUBLE;
-                        break;
-                    case Scripts.DATE_TYPE_NAME:
-                        jdbcType = java.sql.Types.TIMESTAMP;
-                        break;
-                    case Scripts.BOOLEAN_TYPE_NAME:
-                        jdbcType = java.sql.Types.BOOLEAN;
-                        break;
-                    default:
-                        jdbcType = assumeJdbcType(paramValue);
-                }
+         */
+        if (paramValue != null || aParameter.getType() == null) {
+            jdbcType = assumeJdbcType(paramValue);
+            sqlTypeName = null;
+        } else {
+            sqlTypeName = null;
+            switch (aParameter.getType()) {
+                case Scripts.STRING_TYPE_NAME:
+                    jdbcType = java.sql.Types.VARCHAR;
+                    break;
+                case Scripts.NUMBER_TYPE_NAME:
+                    jdbcType = java.sql.Types.DOUBLE;
+                    break;
+                case Scripts.DATE_TYPE_NAME:
+                    jdbcType = java.sql.Types.TIMESTAMP;
+                    break;
+                case Scripts.BOOLEAN_TYPE_NAME:
+                    jdbcType = java.sql.Types.BOOLEAN;
+                    break;
+                default:
+                    jdbcType = assumeJdbcType(paramValue);
             }
-            /*
         }
-            */
+        /*
+        }
+         */
         int assignedJdbcType = assign(paramValue, aParameterIndex, aStatement, jdbcType, sqlTypeName);
         checkOutParameter(aParameter, aStatement, aParameterIndex, jdbcType);
         return assignedJdbcType;

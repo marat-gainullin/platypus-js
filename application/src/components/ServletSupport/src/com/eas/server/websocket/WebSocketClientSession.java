@@ -31,7 +31,7 @@ public class WebSocketClientSession implements HasPublished {
     protected JSObject published;
     protected Session webSocketSession;
     //
-    protected JsClientEndPoint endPoint = new JsClientEndPoint(this, Scripts.getContext());
+    protected JsClientEndPoint endPoint = new JsClientEndPoint(this, Scripts.getContext(), Scripts.getSpace());
 
     @ScriptFunction(params = {"uri"})
     public WebSocketClientSession(String aUri) throws Exception {

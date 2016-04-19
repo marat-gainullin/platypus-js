@@ -16,9 +16,12 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.text.ParseException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
@@ -54,7 +57,7 @@ public class ModelFormattedField extends ModelComponentDecorator<VFormattedField
     @ScriptFunction
     @Override
     public void setJsValue(Object aValue) {
-        setValue(Scripts.getSpace().toJava(aValue));
+        setValue(aValue != null ? JSType.toString(aValue) : null);
     }
 
     @Override
@@ -171,6 +174,16 @@ public class ModelFormattedField extends ModelComponentDecorator<VFormattedField
             decorated.requestFocus();
         });
         return super.getTableCellEditorComponent(table, value, isSelected, row, column);
+    }
+
+    @Override
+    public boolean stopCellEditing() {
+        try {
+            decorated.commitEdit();
+        } catch (ParseException ex) {
+            Logger.getLogger(ModelDate.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return super.stopCellEditing();
     }
 
     @Override

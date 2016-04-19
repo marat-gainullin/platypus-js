@@ -5,7 +5,7 @@
  */
 package com.eas.client.cache;
 
-import com.eas.client.AppElementFiles;
+import java.io.File;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,20 +20,20 @@ public abstract class ActualCache<E> {
 
     protected Map<String, ActualCacheEntry<E>> entries = new ConcurrentHashMap<>();
 
-    public E get(String aName, AppElementFiles aFiles) throws Exception {
+    public E get(String aName, File aFile) throws Exception {
         ActualCacheEntry<E> cached = entries.get(aName);
         Date cachedTime = null;
         if (cached != null) {
             cachedTime = cached.getTimeStamp();
         }
-        Date filesModified = aFiles.getLastModified();
-        if (filesModified != null && (cachedTime == null || filesModified.after(cachedTime))) {
-            E parsed = parse(aName, aFiles);
+        Date filesModified = new Date(aFile.lastModified());
+        if (cachedTime == null || filesModified.after(cachedTime)) {
+            E parsed = parse(aName, aFile);
             cached = new ActualCacheEntry<>(parsed, filesModified);
             entries.put(aName, cached);
         }
         return cached != null ? cached.getValue() : null;
     }
 
-    protected abstract E parse(String aName, AppElementFiles aFiles) throws Exception;
+    protected abstract E parse(String aName, File aFile) throws Exception;
 }

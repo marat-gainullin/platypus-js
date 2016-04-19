@@ -148,6 +148,11 @@ public class JsWidgets {
 		    }
 		    });
 		    var _width = null;
+	    Object.defineProperty(aPublished, "widthSet", {
+	    	get: function(){
+	    		return _width != null;
+	    	}
+	    });
 	    Object.defineProperty(aPublished, "width", {
 		    get : function() {
 		    	if(_width == null)
@@ -174,6 +179,11 @@ public class JsWidgets {
 		    }
 		    });
 		    var _height = null;
+	    Object.defineProperty(aPublished, "heightSet", {
+	    	get: function(){
+	    		return _height != null;
+	    	}
+	    });
 	    Object.defineProperty(aPublished, "height", {
 		    get : function() {
 		    	if(_height == null)
@@ -1035,7 +1045,19 @@ public class JsWidgets {
 					if(toAdd && toAdd.unwrap){
 						if(toAdd.parent == published)
 							throw 'A widget already added to this container';
-						aComponent.@com.eas.widgets.BoxPane::add(Lcom/google/gwt/user/client/ui/Widget;I)(toAdd.unwrap(), published.orientation == Orientation.VERTICAL ? toAdd.height : toAdd.width);
+						if(published.orientation == Orientation.VERTICAL){
+							if(toAdd.heightSet){
+								aComponent.@com.eas.widgets.BoxPane::add(Lcom/google/gwt/user/client/ui/Widget;I)(toAdd.unwrap(), toAdd.height);
+							} else{
+								aComponent.@com.eas.widgets.BoxPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
+							}
+						}else{
+							if(toAdd.widthSet){
+								aComponent.@com.eas.widgets.BoxPane::add(Lcom/google/gwt/user/client/ui/Widget;I)(toAdd.unwrap(), toAdd.width);
+							} else {
+								aComponent.@com.eas.widgets.BoxPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
+							}
+						}
 					}
 				}
 				

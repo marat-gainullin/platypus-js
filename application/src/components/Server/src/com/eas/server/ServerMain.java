@@ -10,6 +10,7 @@ import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.ModelsDocuments;
+import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.QueriesProxy;
@@ -17,7 +18,7 @@ import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.client.threetier.PlatypusConnection;
-import com.eas.concurrent.DeamonThreadFactory;
+import com.eas.concurrent.PlatypusThreadFactory;
 import com.eas.script.Scripts;
 import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
@@ -25,6 +26,8 @@ import com.eas.util.args.ThreadsArgsConsumer;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -45,6 +48,7 @@ public class ServerMain {
     public static final String APP_URL_CONF_PARAM = "url";
     public static final String DEF_DATASOURCE_CONF_PARAM = "default-datasource";
     public static final String GLOBAL_API_CONF_PARAM = "global-api";
+    public static final String SOURCE_PATH_CONF_PARAM = "source-path";
 
     public static final String IFACE_CONF_PARAM = "iface";
     public static final String PROTOCOLS_CONF_PARAM = "protocols";
@@ -63,6 +67,7 @@ public class ServerMain {
     public static final String BACKGROUND_TASK_WITHOUT_VALUE_MSG = "Background task not specified";
     public static final String BAD_APP_URL_MSG = "url not specified";
     public static final String BAD_DEF_DATASOURCE_MSG = "default-datasource value not specified";
+    public static final String BAD_SOURCE_PATH_MSG = "source-path value not specified";
 
     public static final String BAD_TASK_MSG = "Background task is specified with '-backgroundTask <moduleName>:<moduleId>'";
     public static final String LOG_FILE_WITHOUT_VALUE_MSG = "Log file is not specified.";
@@ -79,6 +84,7 @@ public class ServerMain {
 
     private static String url;
     private static String defDatasource;
+    private static String sourcePath;
     private static String iface;
     private static String protocols;
     private static String numWorkerThreads;
@@ -126,6 +132,13 @@ public class ServerMain {
             } else if ((CMD_SWITCHS_PREFIX + GLOBAL_API_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 globalAPI = true;
                 i += 1;
+            } else if ((CMD_SWITCHS_PREFIX + SOURCE_PATH_CONF_PARAM).equalsIgnoreCase(args[i])) {
+                if (i + 1 < args.length) {
+                    sourcePath = args[i + 1];
+                    i += 2;
+                } else {
+                    printHelp(BAD_SOURCE_PATH_MSG);
+                }
             } else if ((CMD_SWITCHS_PREFIX + IFACE_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     iface = args[i + 1];
@@ -210,8 +223,11 @@ public class ServerMain {
                 Logger.getLogger(ServerMain.class.getName()).log(Level.INFO, "Application is located at: {0}", f.getPath());
                 GeneralResourceProvider.registerDrivers();
                 ScriptsConfigs scriptsConfigs = new ScriptsConfigs();
-                ServerTasksScanner tasksScanner = new ServerTasksScanner(scriptsConfigs);
-                ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
+                ServerTasksScanner tasksScanner = new ServerTasksScanner();
+                Path projectRoot = Paths.get(f.toURI());
+                Path appFolder = sourcePath != null ? projectRoot.resolve(sourcePath) : projectRoot;
+                Path apiFolder = ScriptedResource.lookupPlatypusJs();
+                ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(appFolder, apiFolder, scriptsConfigs, tasksScanner);
                 // TODO: add command line argument "watch" after watcher refactoring
                 //indexer.watch();
                 Scripts.initBIO(threadsConfig.getMaxServicesTreads());
@@ -220,7 +236,7 @@ public class ServerMain {
                 ThreadPoolExecutor serverProcessor = new ThreadPoolExecutor(maxWorkerThreads, maxWorkerThreads,
                         3L, TimeUnit.SECONDS,
                         new LinkedBlockingQueue<>(),
-                        new DeamonThreadFactory("TSA-", false));
+                        new PlatypusThreadFactory("TSA-", false));
                 serverProcessor.allowCoreThreadTimeOut(true);
 
                 Scripts.initTasks((Runnable aTask) -> {
@@ -231,7 +247,7 @@ public class ServerMain {
                 serverCoreDbClient.setQueries(queries);
                 PlatypusServer server = new PlatypusServer(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), appElement), queries, serverCoreDbClient, sslContext, parseListenAddresses(), parsePortsProtocols(), parsePortsSessionIdleTimeouts(), parsePortsSessionIdleCheckIntervals(), serverProcessor, scriptsConfigs, appElement);
                 serverCoreDbClient.setContextHost(server);
-                ScriptedResource.init(server, ScriptedResource.lookupPlatypusJs(), globalAPI);
+                ScriptedResource.init(server, apiFolder, globalAPI);
                 SensorsFactory.init(server.getAcceptorsFactory());
                 RetranslateFactory.init(server.getRetranslateFactory());
                 //

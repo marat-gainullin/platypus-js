@@ -41,7 +41,10 @@ public class ResponseDecoder extends CumulativeProtocolDecoder {
                 return false;
             } else if (tag == RequestsTags.TAG_RESPONSE) {
                 ordinaryResponse = true;
-            } else if (tag == RequestsTags.TAG_ERROR_RESPONSE) {
+            } else if (tag == RequestsTags.TAG_ERROR_RESPONSE
+                    || tag == RequestsTags.TAG_SQL_ERROR_RESPONSE
+                    || tag == RequestsTags.TAG_JSON_ERROR_RESPONSE
+                    || tag == RequestsTags.TAG_ACCESS_CONTROL_ERROR_RESPONSE) {
                 errorResponse = true;
             } else if (tag == CoreTags.TAG_SESSION_TICKET) {
                 byte[] ticketBuf = new byte[tagSize];
@@ -55,7 +58,7 @@ public class ResponseDecoder extends CumulativeProtocolDecoder {
         } while (tag != RequestsTags.TAG_RESPONSE_END);
 
         if (!ordinaryResponse && !errorResponse) {
-            throw new IllegalStateException("Responses should contain ordinary response marker or error response marker tag");
+            throw new IllegalStateException("Responses should contain ordinary response marker or some error response marker tag");
         }
         if (!data) {
             throw new IllegalStateException("Responses should contain response data tag");

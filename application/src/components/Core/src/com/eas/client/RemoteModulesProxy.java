@@ -5,6 +5,7 @@
  */
 package com.eas.client;
 
+import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.ResourceRequest;
@@ -15,6 +16,8 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,8 +40,8 @@ public class RemoteModulesProxy implements ModulesProxy {
     public static final String LENGTH_PROP_NAME = "length";
 
     protected PlatypusConnection conn;
-    protected String basePath;
-    protected Map<String, AppElementFiles> id2files = new ConcurrentHashMap<>();
+    protected Path basePath;
+    protected Map<String, File> id2files = new ConcurrentHashMap<>();
 
     public RemoteModulesProxy(PlatypusConnection aConn) {
         super();
@@ -47,7 +50,7 @@ public class RemoteModulesProxy implements ModulesProxy {
     }
 
     @Override
-    public String getLocalPath() {
+    public Path getLocalPath() {
         return basePath;
     }
 
@@ -63,12 +66,10 @@ public class RemoteModulesProxy implements ModulesProxy {
                     int partsLength = JSType.toInteger(jsParts.getMember(LENGTH_PROP_NAME));
                     for (int i = 0; i < partsLength; i++) {
                         String resourceName = JSType.toString(jsParts.getSlot(i));
-                        String cachePathName = constructResourcePath(resourceName);
-                        File cachePath = new File(cachePathName);
-                        syncResource(cachePath, resourceName, aSpace, (Void aVoid) -> {
-                            structure.getParts().addFile(cachePath);
+                        getResource(resourceName, aSpace, (File aSynced) -> {
+                            structure.getParts().addFile(aSynced);
                             if (structure.getParts().getFiles().size() == partsLength) {
-                                id2files.put(aName, structure.getParts());
+                                id2files.put(aName, structure.getParts().findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION));
                                 onSuccess.accept(structure);
                             }
                         }, onFailure);
@@ -89,13 +90,28 @@ public class RemoteModulesProxy implements ModulesProxy {
             int partsLength = JSType.toInteger(jsParts.getMember(LENGTH_PROP_NAME));
             for (int i = 0; i < partsLength; i++) {
                 String resourceName = JSType.toString(jsParts.getSlot(i));
-                String cachePathName = constructResourcePath(resourceName);
-                File cachePath = new File(cachePathName);
-                syncResource(cachePath, resourceName, null, null, null);
-                structure.getParts().addFile(cachePath);
+                File synced = getResource(resourceName, aSpace, null, null);
+                structure.getParts().addFile(synced);
             }
-            id2files.put(aName, structure.getParts());
+            id2files.put(aName, structure.getParts().findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION));
             return structure;
+        }
+    }
+
+    @Override
+    public File getResource(String aResourceName, Scripts.Space aSpace, Consumer<File> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        if (onSuccess != null) {
+            String cachePathName = constructResourcePath(aResourceName);
+            File cachePath = new File(cachePathName);
+            syncResource(cachePath, aResourceName, aSpace, (Void aVoid) -> {
+                onSuccess.accept(cachePath);
+            }, onFailure);
+            return null;
+        } else {
+            String cachePathName = constructResourcePath(aResourceName);
+            File cachePath = new File(cachePathName);
+            syncResource(cachePath, aResourceName, null, null, null);
+            return cachePath;
         }
     }
 
@@ -185,7 +201,7 @@ public class RemoteModulesProxy implements ModulesProxy {
         }
     }
 
-    private String makePathInUserProfile(String aAppNameHash) {
+    private Path makePathInUserProfile(String aAppNameHash) {
         //Make file cache directories
         String path = System.getProperty(ClientConstants.USER_HOME_PROP_NAME);
         if (!path.endsWith(File.separator)) {
@@ -206,7 +222,7 @@ public class RemoteModulesProxy implements ModulesProxy {
         if (!newDir.exists()) {
             newDir.mkdir();
         }
-        return path;
+        return Paths.get(newDir.toURI());
     }
 
     /**
@@ -221,7 +237,15 @@ public class RemoteModulesProxy implements ModulesProxy {
     }
 
     @Override
-    public AppElementFiles nameToFiles(String aName) throws Exception {
+    public File nameToFile(String aName) throws Exception {
         return id2files.get(aName);
     }
+
+    @Override
+    public String getDefaultModuleName(File aFile) {
+        String defaultModuleName = basePath.relativize(Paths.get(aFile.toURI())).toString().replace(File.separator, "/");
+        defaultModuleName = defaultModuleName.substring(0, defaultModuleName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
+        return defaultModuleName;
+    }
+
 }

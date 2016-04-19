@@ -28,36 +28,25 @@ public class JsClientEndPoint {
     protected JSObject onerror;
     protected JSObject onmessage;
     protected Scripts.LocalContext context;
-
-    public JsClientEndPoint(){
+    protected Scripts.Space space;
+/*
+    public JsClientEndPoint() {
         super();
     }
-    
-    public JsClientEndPoint(WebSocketClientSession aSession, Scripts.LocalContext aContext) {
-        this();
+*/
+    public JsClientEndPoint(WebSocketClientSession aSession, Scripts.LocalContext aContext, Scripts.Space aSpace) {
+        super();
         session = aSession;
         context = aContext;
-    }
-
-    private void inContext(Runnable aTask) {
-        Scripts.LocalContext oldContext = Scripts.getContext();
-        Scripts.setContext(context);
-        try {
-            aTask.run();
-        } finally {
-            Scripts.setContext(oldContext);
-        }
     }
 
     @OnMessage
     public void onMessage(Session websocketSession, String aData) {
         if (onmessage != null) {
-            inContext(() -> {
-                Scripts.getSpace().process(() -> {
-                    JSObject messageEvent = Scripts.getSpace().makeObj();
-                    messageEvent.setMember("data", aData);
-                    onmessage.call(session.getPublished(), new Object[]{messageEvent});
-                });
+            space.process(context, () -> {
+                JSObject messageEvent = Scripts.getSpace().makeObj();
+                messageEvent.setMember("data", aData);
+                onmessage.call(session.getPublished(), new Object[]{messageEvent});
             });
         }
     }
@@ -65,10 +54,8 @@ public class JsClientEndPoint {
     @OnOpen
     public void onOpen(Session aSession) {
         if (onopen != null) {
-            inContext(() -> {
-                Scripts.getSpace().process(() -> {
-                    onopen.call(session.getPublished(), new Object[]{});
-                });
+            space.process(context, () -> {
+                onopen.call(session.getPublished(), new Object[]{});
             });
         }
     }
@@ -76,14 +63,12 @@ public class JsClientEndPoint {
     @OnClose
     public void onClose(Session websocketSession, CloseReason aReason) {
         if (onclose != null) {
-            inContext(() -> {
-                Scripts.getSpace().process(() -> {
-                    JSObject closeEvent = Scripts.getSpace().makeObj();
-                    closeEvent.setMember("wasClean", aReason.getCloseCode() == CloseReason.CloseCodes.NORMAL_CLOSURE);
-                    closeEvent.setMember("code", aReason.getCloseCode().getCode());
-                    closeEvent.setMember("reason", aReason.getReasonPhrase());
-                    onclose.call(session.getPublished(), new Object[]{closeEvent});
-                });
+            space.process(context, () -> {
+                JSObject closeEvent = Scripts.getSpace().makeObj();
+                closeEvent.setMember("wasClean", aReason.getCloseCode() == CloseReason.CloseCodes.NORMAL_CLOSURE);
+                closeEvent.setMember("code", aReason.getCloseCode().getCode());
+                closeEvent.setMember("reason", aReason.getReasonPhrase());
+                onclose.call(session.getPublished(), new Object[]{closeEvent});
             });
         }
     }
@@ -91,12 +76,10 @@ public class JsClientEndPoint {
     @OnError
     public void onError(Session websocketSession, Throwable aError) {
         if (onerror != null) {
-            inContext(() -> {
-                Scripts.getSpace().process(() -> {
-                    JSObject errorEvent = Scripts.getSpace().makeObj();
-                    errorEvent.setMember("message", aError.getMessage());
-                    onerror.call(session.getPublished(), new Object[]{errorEvent});
-                });
+            space.process(context, () -> {
+                JSObject errorEvent = Scripts.getSpace().makeObj();
+                errorEvent.setMember("message", aError.getMessage());
+                onerror.call(session.getPublished(), new Object[]{errorEvent});
             });
         }
     }

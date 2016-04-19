@@ -6,11 +6,12 @@ package com.eas.client.threetier.platypus;
 
 import com.eas.client.report.Report;
 import com.eas.client.threetier.Response;
+import com.eas.client.threetier.requests.AccessControlExceptionResponse;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.client.threetier.requests.ServerModuleStructureRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
-import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.client.threetier.requests.ExceptionResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
@@ -18,6 +19,8 @@ import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
 import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.client.threetier.requests.CredentialRequest;
+import com.eas.client.threetier.requests.JsonExceptionResponse;
+import com.eas.client.threetier.requests.SqlExceptionResponse;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoWriter;
 import java.io.ByteArrayOutputStream;
@@ -41,7 +44,13 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     }
 
     public static void write(Response response, ProtoWriter writer) throws Exception {
-        if (response instanceof ErrorResponse) {
+        if (response instanceof SqlExceptionResponse) {
+            writer.put(RequestsTags.TAG_SQL_ERROR_RESPONSE);
+        } else if (response instanceof JsonExceptionResponse) {
+            writer.put(RequestsTags.TAG_JSON_ERROR_RESPONSE);
+        } else if (response instanceof AccessControlExceptionResponse) {
+            writer.put(RequestsTags.TAG_ACCESS_CONTROL_ERROR_RESPONSE);
+        } else if (response instanceof ExceptionResponse) {
             writer.put(RequestsTags.TAG_ERROR_RESPONSE);
         } else {
             writer.put(RequestsTags.TAG_RESPONSE);
@@ -68,23 +77,42 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(ErrorResponse rsp) throws Exception {
+    public void visit(ExceptionResponse rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
-        if (rsp.getErrorMessage() != null) {
-            writer.put(RequestsTags.TAG_RESPONSE_ERROR, rsp.getErrorMessage());
-        }
+        writer.put(RequestsTags.TAG_RESPONSE_ERROR, rsp.getErrorMessage());
+        writer.flush();
+    }
+
+    @Override
+    public void visit(SqlExceptionResponse rsp) throws Exception {
+        ProtoWriter writer = new ProtoWriter(out);
+        writer.put(RequestsTags.TAG_RESPONSE_ERROR, rsp.getErrorMessage());
+        assert rsp.getSqlErrorCode() != null || rsp.getSqlState() != null : "SqlExceptionResponse without sqlCode and sqlState detected";
         if (rsp.getSqlErrorCode() != null) {
             writer.put(RequestsTags.TAG_RESPONSE_SQL_ERROR_CODE, rsp.getSqlErrorCode());
         }
         if (rsp.getSqlState() != null) {
             writer.put(RequestsTags.TAG_RESPONSE_SQL_ERROR_STATE, rsp.getSqlState());
         }
-        if (rsp.isAccessControl()) {
-            writer.put(RequestsTags.TAG_RESPONSE_ACCESS_CONTROL);
-            if(rsp.isNotLoggedIn()){
-                writer.put(RequestsTags.TAG_RESPONSE_ACCESS_CONTROL_NOT_LOGGED_IN);
-            }
+        writer.flush();
+    }
+
+    @Override
+    public void visit(AccessControlExceptionResponse rsp) throws Exception {
+        ProtoWriter writer = new ProtoWriter(out);
+        writer.put(RequestsTags.TAG_RESPONSE_ERROR, rsp.getErrorMessage());
+        writer.put(RequestsTags.TAG_RESPONSE_ACCESS_CONTROL);
+        if (rsp.isNotLoggedIn()) {
+            writer.put(RequestsTags.TAG_RESPONSE_ACCESS_CONTROL_NOT_LOGGED_IN);
         }
+        writer.flush();
+    }
+
+    @Override
+    public void visit(JsonExceptionResponse rsp) throws Exception {
+        ProtoWriter writer = new ProtoWriter(out);
+        writer.put(RequestsTags.TAG_RESPONSE_ERROR, rsp.getErrorMessage());
+        writer.put(RequestsTags.TAG_RESPONSE_JSON, rsp.getJsonContent());
         writer.flush();
     }
 
@@ -118,7 +146,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
             writer.put(RequestsTags.TAG_FORMAT, report.getFormat());
             writer.put(RequestsTags.TAG_RESULT_VALUE, report.getBody());
         } else {
-            writer.put(RequestsTags.TAG_RESULT_VALUE, (String)rsp.getResult());
+            writer.put(RequestsTags.TAG_RESULT_VALUE, (String) rsp.getResult());
         }
         writer.flush();
     }

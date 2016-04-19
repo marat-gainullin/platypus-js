@@ -5,7 +5,7 @@
 package com.eas.client.controls.geopane.cache;
 
 import com.eas.client.controls.geopane.TilesBoundaries;
-import com.eas.concurrent.DeamonThreadFactory;
+import com.eas.concurrent.PlatypusThreadFactory;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.geom.AffineTransform;
@@ -95,7 +95,7 @@ public class AsyncMapTilesCache extends MapTilesCache {
     protected Map<Point, AsyncRenderingTask> offeredTasks = new ConcurrentHashMap<>();
     protected ExecutorService executor = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), Runtime.getRuntime().availableProcessors(),
             0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<Runnable>(), new DeamonThreadFactory());
+            new LinkedBlockingQueue<Runnable>(), new PlatypusThreadFactory());
     protected Set<RenderingTaskListener> listeners = new HashSet<>();
     protected ReadWriteLock mapContextLock;
 

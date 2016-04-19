@@ -58,132 +58,153 @@ public class Toolbar extends SimplePanel implements IndexedPanel, ProvidesResize
 
 			@Override
 			public void onClick(ClickEvent event) {
-				final Map<Widget, String> lefts = new HashMap<>();
-				final Map<Widget, String> rights = new HashMap<>();
-				final Map<Widget, String> widths = new HashMap<>();
-				final Map<Widget, String> positions = new HashMap<>();
-				final Map<Widget, String> margins = new HashMap<>();
-				final VerticalPanel vp = new VerticalPanel();
-				vp.getElement().addClassName("toolbar-chevron-menu");
-				Widget[] widgets = new Widget[content.getWidgetCount()];
-				for (int i = 0; i < widgets.length; i++) {
-					widgets[i] = content.getWidget(i);
-				}
-				for (int i = 0; i < widgets.length; i++) {
-					Widget iw = widgets[i];
-					int rightMost = iw.getElement().getOffsetLeft() + iw.getElement().getOffsetWidth();
-					int bottomMost = iw.getElement().getOffsetTop() + iw.getElement().getOffsetHeight();
-					int parentWidth = iw.getElement().getParentElement().getClientWidth();
-					int parentHeight = iw.getElement().getParentElement().getClientHeight();
-					if (rightMost <= 0 || iw.getElement().getOffsetLeft() >= parentWidth || bottomMost <= 0 || iw.getElement().getOffsetTop() >= parentHeight) {
-						lefts.put(iw, iw.getElement().getStyle().getLeft());
-						rights.put(iw, iw.getElement().getStyle().getRight());
-						widths.put(iw, iw.getElement().getStyle().getWidth());
-						positions.put(iw, iw.getElement().getStyle().getPosition());
-						margins.put(iw, iw.getElement().getStyle().getMarginLeft());
-						iw.getElement().getStyle().setHeight(parentHeight, Style.Unit.PX);
-
-						SimplePanel sp = new SimplePanel();
-						sp.getElement().addClassName("toolbar-chevron-menu-item");
-						sp.getElement().getStyle().setPadding(0, Style.Unit.PX);
-						sp.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
-						sp.getElement().getStyle().setPosition(Style.Position.RELATIVE);
-						sp.setWidget(iw);
-						vp.add(sp);
-					}
-				}
-				if (vp.getWidgetCount() > 0) {
-					PopupPanel pp = new PopupPanel(true);
-					pp.setStyleName("toolbar-chevron-popup");
-					pp.setWidget(vp);
-					pp.setAnimationEnabled(false);
-					pp.addCloseHandler(new CloseHandler<PopupPanel>() {
-
-						@Override
-						public void onClose(CloseEvent<PopupPanel> event) {
-							Widget[] widgets = new Widget[vp.getWidgetCount()];
-							for (int i = 0; i < widgets.length; i++) {
-								widgets[i] = vp.getWidget(i);
-							}
-							for (int i = 0; i < widgets.length; i++) {
-								Widget w = widgets[i];
-								assert w instanceof SimplePanel;
-								Widget iw = ((SimplePanel) w).getWidget();
-								String oldLeft = lefts.remove(iw);
-								if (oldLeft != null && !oldLeft.isEmpty()) {
-									iw.getElement().getStyle().setProperty("left", oldLeft);
-								} else {
-									iw.getElement().getStyle().clearLeft();
-								}
-								String oldRight = rights.remove(iw);
-								if (oldRight != null && !oldRight.isEmpty()) {
-									iw.getElement().getStyle().setProperty("right", oldRight);
-								} else {
-									iw.getElement().getStyle().clearRight();
-								}
-								String oldPosition = positions.remove(iw);
-								if (oldPosition != null && !oldPosition.isEmpty()) {
-									iw.getElement().getStyle().setProperty("position", oldPosition);
-								} else {
-									iw.getElement().getStyle().clearPosition();
-								}
-								String oldWidth = widths.remove(iw);
-								if (oldWidth != null && !oldWidth.isEmpty()) {
-									iw.getElement().getStyle().setProperty("width", oldWidth);
-								} else {
-									iw.getElement().getStyle().clearWidth();
-								}
-								String oldMargin = margins.remove(iw);
-								if (oldMargin != null && !oldMargin.isEmpty()) {
-									iw.getElement().getStyle().setProperty("marginLeft", oldMargin);
-								} else {
-									iw.getElement().getStyle().clearMarginLeft();
-								}
-								iw.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-								content.add(iw);
-							}
-							content.onResize();
-						}
-
-					});
-					pp.setPopupPosition(chevron.getAbsoluteLeft(), chevron.getAbsoluteTop());
-					pp.showRelativeTo(chevron);
-					Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-						@Override
-						public void execute() {
-							for (int i = 0; i < vp.getWidgetCount(); i++) {
-								Widget w = vp.getWidget(i);
-								assert w instanceof SimplePanel;
-								SimplePanel sp = (SimplePanel) w;
-								Widget iw = sp.getWidget();
-								int width = sp.getElement().getOffsetWidth();
-								int height = iw.getElement().getOffsetHeight();
-								sp.getElement().getStyle().setWidth(width, Style.Unit.PX);
-								sp.getElement().getStyle().setHeight(height, Style.Unit.PX);
-								iw.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
-								iw.getElement().getStyle().setLeft(0, Style.Unit.PX);
-								iw.getElement().getStyle().setRight(0, Style.Unit.PX);
-								iw.getElement().getStyle().clearWidth();
-								iw.getElement().getStyle().clearMarginLeft();
-								// if (iw instanceof FocusWidget) {
-								iw.getElement().getStyle().clearRight();
-								iw.getElement().getStyle().setWidth(100, Style.Unit.PCT);
-								com.eas.ui.CommonResources.INSTANCE.commons().ensureInjected();
-								iw.getElement().addClassName(com.eas.ui.CommonResources.INSTANCE.commons().borderSized());
-								// }
-								if (iw instanceof RequiresResize) {
-									((RequiresResize) iw).onResize();
-								}
-							}
-						}
-					});
-				}
+				toogleOverflowPopup();
 			}
 		}, ClickEvent.getType());
 		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
+	
+	private PopupPanel overflowPopup;
+	
+	public void toogleOverflowPopup(){
+		if(overflowPopup != null)
+			hideOverflowPopup();
+		else{
+			showOverflowPopup();
+		}
+	}
+	
+	public void hideOverflowPopup(){
+		if(overflowPopup != null){
+			overflowPopup.hide();
+		}
+	}
+	
+	public void showOverflowPopup(){
+		final Map<Widget, String> lefts = new HashMap<>();
+		final Map<Widget, String> rights = new HashMap<>();
+		final Map<Widget, String> widths = new HashMap<>();
+		final Map<Widget, String> positions = new HashMap<>();
+		final Map<Widget, String> margins = new HashMap<>();
+		final VerticalPanel vp = new VerticalPanel();
+		vp.getElement().addClassName("toolbar-chevron-menu");
+		Widget[] widgets = new Widget[content.getWidgetCount()];
+		for (int i = 0; i < widgets.length; i++) {
+			widgets[i] = content.getWidget(i);
+		}
+		for (int i = 0; i < widgets.length; i++) {
+			Widget iw = widgets[i];
+			int rightMost = iw.getElement().getOffsetLeft() + iw.getElement().getOffsetWidth();
+			int bottomMost = iw.getElement().getOffsetTop() + iw.getElement().getOffsetHeight();
+			int parentWidth = iw.getElement().getParentElement().getClientWidth();
+			int parentHeight = iw.getElement().getParentElement().getClientHeight();
+			if (rightMost <= 0 || iw.getElement().getOffsetLeft() >= parentWidth || bottomMost <= 0 || iw.getElement().getOffsetTop() >= parentHeight) {
+				lefts.put(iw, iw.getElement().getStyle().getLeft());
+				rights.put(iw, iw.getElement().getStyle().getRight());
+				widths.put(iw, iw.getElement().getStyle().getWidth());
+				positions.put(iw, iw.getElement().getStyle().getPosition());
+				margins.put(iw, iw.getElement().getStyle().getMarginLeft());
+				iw.getElement().getStyle().setHeight(parentHeight, Style.Unit.PX);
 
+				SimplePanel sp = new SimplePanel();
+				sp.getElement().addClassName("toolbar-chevron-menu-item");
+				sp.getElement().getStyle().setPadding(0, Style.Unit.PX);
+				sp.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
+				sp.getElement().getStyle().setPosition(Style.Position.RELATIVE);
+				sp.setWidget(iw);
+				vp.add(sp);
+			}
+		}
+		if (vp.getWidgetCount() > 0) {
+			overflowPopup = new PopupPanel(true);
+			overflowPopup.setStyleName("toolbar-chevron-popup");
+			overflowPopup.setWidget(vp);
+			overflowPopup.setAnimationEnabled(false);
+			overflowPopup.addCloseHandler(new CloseHandler<PopupPanel>() {
+
+				@Override
+				public void onClose(CloseEvent<PopupPanel> event) {
+					overflowPopup = null;
+					Widget[] widgets = new Widget[vp.getWidgetCount()];
+					for (int i = 0; i < widgets.length; i++) {
+						widgets[i] = vp.getWidget(i);
+					}
+					for (int i = 0; i < widgets.length; i++) {
+						Widget w = widgets[i];
+						assert w instanceof SimplePanel;
+						Widget iw = ((SimplePanel) w).getWidget();
+						String oldLeft = lefts.remove(iw);
+						if (oldLeft != null && !oldLeft.isEmpty()) {
+							iw.getElement().getStyle().setProperty("left", oldLeft);
+						} else {
+							iw.getElement().getStyle().clearLeft();
+						}
+						String oldRight = rights.remove(iw);
+						if (oldRight != null && !oldRight.isEmpty()) {
+							iw.getElement().getStyle().setProperty("right", oldRight);
+						} else {
+							iw.getElement().getStyle().clearRight();
+						}
+						String oldPosition = positions.remove(iw);
+						if (oldPosition != null && !oldPosition.isEmpty()) {
+							iw.getElement().getStyle().setProperty("position", oldPosition);
+						} else {
+							iw.getElement().getStyle().clearPosition();
+						}
+						String oldWidth = widths.remove(iw);
+						if (oldWidth != null && !oldWidth.isEmpty()) {
+							iw.getElement().getStyle().setProperty("width", oldWidth);
+						} else {
+							iw.getElement().getStyle().clearWidth();
+						}
+						String oldMargin = margins.remove(iw);
+						if (oldMargin != null && !oldMargin.isEmpty()) {
+							iw.getElement().getStyle().setProperty("marginLeft", oldMargin);
+						} else {
+							iw.getElement().getStyle().clearMarginLeft();
+						}
+						iw.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+						content.add(iw);
+					}
+					content.onResize();
+				}
+
+			});
+			overflowPopup.setPopupPosition(chevron.getAbsoluteLeft(), chevron.getAbsoluteTop());
+			overflowPopup.showRelativeTo(chevron);
+			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+				@Override
+				public void execute() {
+					for (int i = 0; i < vp.getWidgetCount(); i++) {
+						Widget w = vp.getWidget(i);
+						assert w instanceof SimplePanel;
+						SimplePanel sp = (SimplePanel) w;
+						Widget iw = sp.getWidget();
+						int width = sp.getElement().getOffsetWidth();
+						int height = iw.getElement().getOffsetHeight();
+						sp.getElement().getStyle().setWidth(width, Style.Unit.PX);
+						sp.getElement().getStyle().setHeight(height, Style.Unit.PX);
+						iw.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+						iw.getElement().getStyle().setLeft(0, Style.Unit.PX);
+						iw.getElement().getStyle().setRight(0, Style.Unit.PX);
+						iw.getElement().getStyle().clearWidth();
+						iw.getElement().getStyle().clearMarginLeft();
+						// if (iw instanceof FocusWidget) {
+						iw.getElement().getStyle().clearRight();
+						iw.getElement().getStyle().setWidth(100, Style.Unit.PCT);
+						com.eas.ui.CommonResources.INSTANCE.commons().ensureInjected();
+						iw.getElement().addClassName(com.eas.ui.CommonResources.INSTANCE.commons().borderSized());
+						// }
+						if (iw instanceof RequiresResize) {
+							((RequiresResize) iw).onResize();
+						}
+					}
+				}
+			});
+		}
+	}
+	
 	public void updateChevronVisibility() {
 		if (isAttached()) {
 			int contentOffsetHeight = content.getElement().getOffsetHeight();

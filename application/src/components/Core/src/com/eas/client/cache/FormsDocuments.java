@@ -5,12 +5,10 @@
  */
 package com.eas.client.cache;
 
-import com.eas.client.AppElementFiles;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.util.FileUtils;
 import com.eas.xml.dom.Source2XmlDom;
 import java.io.File;
-import java.util.Set;
 import org.w3c.dom.Document;
 
 /**
@@ -24,21 +22,8 @@ public class FormsDocuments extends ActualCache<Document> {
     }
 
     @Override
-    public Document get(String aName, AppElementFiles aFiles) throws Exception {
-        AppElementFiles files = new AppElementFiles();
-        if (aFiles.hasExtension(PlatypusFiles.FORM_EXTENSION)) {
-            files.addFile(aFiles.findFileByExtension(PlatypusFiles.FORM_EXTENSION));
-        } else {
-            throw new IllegalStateException("Application element " + aName + " has no form layout file (*." + PlatypusFiles.FORM_EXTENSION + ")");
-        }
-        return super.get(aName, files);
-    }
-
-    @Override
-    protected Document parse(String aName, AppElementFiles aFiles) throws Exception {
-        Set<File> files = aFiles.getFiles();
-        assert files.size() == 1;
-        String modelContent = FileUtils.readString(files.iterator().next(), SettingsConstants.COMMON_ENCODING);
+    protected Document parse(String aName, File aFile) throws Exception {
+        String modelContent = FileUtils.readString(aFile, SettingsConstants.COMMON_ENCODING);
         return Source2XmlDom.transform(modelContent);
     }
 

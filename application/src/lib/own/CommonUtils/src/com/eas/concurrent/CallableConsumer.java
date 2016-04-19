@@ -9,6 +9,7 @@ package com.eas.concurrent;
  *
  * @author mg
  */
+@FunctionalInterface
 public interface CallableConsumer<R, A> {
 
     public R call(A aArgument) throws Exception;

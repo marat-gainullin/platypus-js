@@ -5,22 +5,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.StringReader;
 
-import junit.framework.TestCase;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.test.TestException;
+import org.junit.Test;
 
-public class CCJSqlParserManagerTest extends TestCase {
+public class CCJSqlParserManagerTest {
 
-    public CCJSqlParserManagerTest(String arg0) {
-        super(arg0);
-    }
-
-    public static void main(String[] args) {
-        junit.swingui.TestRunner.run(CCJSqlParserManagerTest.class);
-    }
-
+    @Test
     public void testParse() throws Exception {
         CCJSqlParserManager parserManager = new CCJSqlParserManager();
         BufferedReader in = new BufferedReader(new FileReader("testfiles" + File.separator + "simple_parsing.txt"));

@@ -7,11 +7,12 @@ package com.eas.client.threetier.http;
 
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.Request;
+import com.eas.client.threetier.requests.AccessControlExceptionResponse;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.client.threetier.requests.ServerModuleStructureRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
-import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.client.threetier.requests.ExceptionResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
@@ -19,6 +20,8 @@ import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
 import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.client.threetier.requests.CredentialRequest;
+import com.eas.client.threetier.requests.JsonExceptionResponse;
+import com.eas.client.threetier.requests.SqlExceptionResponse;
 import com.eas.util.BinaryUtils;
 import com.eas.util.JSONUtils;
 import java.io.IOException;
@@ -57,8 +60,8 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
             if (contentTypeCharset == null || contentTypeCharset.length == 0) {
                 throw new IOException("Response must contain ContentType header with charset");
             }
-            if (!contentTypeCharset[0].toLowerCase().startsWith("text/")) {
-                throw new IOException("Response ContentType must be text/...");
+            if (!contentTypeCharset[0].toLowerCase().startsWith("text/") && !contentTypeCharset[0].toLowerCase().startsWith("application/json")) {
+                throw new IOException("Response header 'ContentType' must be text/... or application/json");
             }
             if (contentTypeCharset.length > 1) {
                 String[] charsetNameValue = contentTypeCharset[1].split("=");
@@ -78,7 +81,23 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(ErrorResponse rsp) throws Exception {
+    public void visit(ExceptionResponse rsp) throws Exception {
+        // Error response has no body
+    }
+
+    @Override
+    public void visit(AccessControlExceptionResponse rsp) throws Exception {
+        // Error response has no body
+    }
+
+    @Override
+    public void visit(JsonExceptionResponse rsp) throws Exception {
+        String json = extractText();
+        rsp.setJsonContent(json);
+    }
+
+    @Override
+    public void visit(SqlExceptionResponse rsp) throws Exception {
         // Error response has no body
     }
 
@@ -97,15 +116,6 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
     public void visit(ExecuteQueryRequest.Response rsp) throws Exception {
         String json = extractText();
         rsp.setJson(json);
-        /*
-         Object oData = extractJSONWithDates();
-         if (oData instanceof JSObject && ((JSObject) oData).isArray()) {
-         rsp.setRowsetJson((JSObject) oData);
-         } else {
-         int updated = JSType.toInteger(oData);
-         rsp.setUpdateCount(updated);
-         }
-         */
     }
 
     @Override

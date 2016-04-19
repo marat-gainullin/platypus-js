@@ -43,11 +43,8 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import com.bearsoft.org.netbeans.modules.form.completion.FormModuleCompletionContext;
 import com.eas.client.cache.PlatypusFiles;
-import com.eas.client.forms.Form;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
-import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import java.io.IOException;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -62,7 +59,7 @@ import org.openide.nodes.Node.Cookie;
 /**
  * The DataObject for forms.
  *
- * @author Ian Formanek, Petr Hamernik, mg
+ * @author mg
  */
 public class PlatypusFormDataObject extends PlatypusModuleDataObject {
 
@@ -79,11 +76,6 @@ public class PlatypusFormDataObject extends PlatypusModuleDataObject {
 
     public FileObject getFormFile() {
         return formEntry.getFile();
-    }
-
-    @Override
-    public ModuleCompletionContext getCompletionContext() {
-        return new FormModuleCompletionContext(this, Form.class);
     }
 
     @Override
@@ -124,11 +116,5 @@ public class PlatypusFormDataObject extends PlatypusModuleDataObject {
     private void readObject(java.io.ObjectInputStream is)
             throws java.io.IOException, ClassNotFoundException {
         is.defaultReadObject();
-    }
-
-    @Override
-    protected DataObject handleCopyRename(DataFolder df, String name, String ext) throws IOException {
-        FileObject fo = getPrimaryEntry().copyRename(df.getPrimaryFile(), name, ext);
-        return DataObject.find(fo);
     }
 }

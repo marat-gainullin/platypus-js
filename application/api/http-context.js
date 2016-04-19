@@ -6,7 +6,7 @@ define(['logger', 'boxing'], function (Logger, B) {
     var HttpCookie = Java.type("javax.servlet.http.Cookie");
     var CharsetClass = Java.type("java.nio.charset.Charset");
     var ByteArray = Java.type("byte[]");
-    
+
     function Request(aHttpRequest) {
 
         var self = this;
@@ -583,9 +583,7 @@ define(['logger', 'boxing'], function (Logger, B) {
          */
         this.request = new Object();
         Object.defineProperty(this, "request", {
-            get: function () {
-                return ScriptsClass.getContext().getRequest() ? new Request(ScriptsClass.getContext().getRequest()) : null;
-            }
+            value: ScriptsClass.getContext().getRequest() ? new Request(ScriptsClass.getContext().getRequest()) : null
         });
 
         /**
@@ -594,9 +592,7 @@ define(['logger', 'boxing'], function (Logger, B) {
          */
         this.response = new Object();
         Object.defineProperty(this, "response", {
-            get: function () {
-                return ScriptsClass.getContext().getResponse() ? new Response(ScriptsClass.getContext().getResponse()) : null;
-            }
+            value: ScriptsClass.getContext().getResponse() ? new Response(ScriptsClass.getContext().getResponse()) : null
         });
     }
     return HttpContext;

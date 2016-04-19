@@ -5,13 +5,10 @@
  */
 package com.eas.server.httpservlet;
 
-import com.eas.client.AppElementFiles;
 import com.eas.client.cache.ApplicationSourceIndexer;
-import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.ScriptDocument;
 import com.eas.client.cache.ScriptsConfigs;
 import com.eas.script.JsDoc;
-import com.eas.util.FileUtils;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,16 +28,14 @@ public class RestPointsScanner implements ApplicationSourceIndexer.ScanCallback 
     private final static String POST_ANNOTATION = "@post";
     private final static String DELETE_ANNOTATION = "@delete";
 
-    private final ScriptsConfigs scriptsConfigs;
     private final Map<String, RPCPoint> gets = new HashMap<>();
     private final Map<String, RPCPoint> puts = new HashMap<>();
     private final Map<String, RPCPoint> posts = new HashMap<>();
     private final Map<String, RPCPoint> deletes = new HashMap<>();
     private final Map<String, Map<String, RPCPoint>> methoded = new HashMap<>();
 
-    public RestPointsScanner(ScriptsConfigs aSecurityConfigs) {
+    public RestPointsScanner() {
         super();
-        scriptsConfigs = aSecurityConfigs;
         methoded.put("get", gets);
         methoded.put("put", puts);
         methoded.put("post", posts);
@@ -68,45 +63,36 @@ public class RestPointsScanner implements ApplicationSourceIndexer.ScanCallback 
     }
 
     @Override
-    public void fileScanned(String aAppElementName, File file) {
-        if (PlatypusFiles.JAVASCRIPT_EXTENSION.equalsIgnoreCase(FileUtils.getFileExtension(file))) {
-            try {
-                AppElementFiles files = new AppElementFiles();
-                files.addFile(file);
-                ScriptDocument doc = scriptsConfigs.get(aAppElementName, files);
-                Map<String, Set<JsDoc.Tag>> annotations = doc.getPropertyAnnotations();
-                if (annotations != null) {
-                    annotations.entrySet().stream().forEach((Map.Entry<String, Set<JsDoc.Tag>> tagsEntry) -> {
-                        String propName = tagsEntry.getKey();
-                        RPCPoint rpcPoint = new RPCPoint(aAppElementName, propName);
-                        Set<JsDoc.Tag> tags = tagsEntry.getValue();
-                        tags.stream().forEach((JsDoc.Tag aTag) -> {
-                            if (GET_ANNOTATION.equalsIgnoreCase(aTag.getName())) {
-                                extractUri(rpcPoint, aTag, (String aUri) -> {
-                                    gets.put(aUri, rpcPoint);
-                                });
-                            }
-                            if (PUT_ANNOTATION.equalsIgnoreCase(aTag.getName())) {
-                                extractUri(rpcPoint, aTag, (String aUri) -> {
-                                    puts.put(aUri, rpcPoint);
-                                });
-                            }
-                            if (POST_ANNOTATION.equalsIgnoreCase(aTag.getName())) {
-                                extractUri(rpcPoint, aTag, (String aUri) -> {
-                                    posts.put(aUri, rpcPoint);
-                                });
-                            }
-                            if (DELETE_ANNOTATION.equalsIgnoreCase(aTag.getName())) {
-                                extractUri(rpcPoint, aTag, (String aUri) -> {
-                                    deletes.put(aUri, rpcPoint);
-                                });
-                            }
+    public void moduleScanned(String aModuleName, ScriptDocument.ModuleDocument aModuleDocument, File aFile) {
+        Map<String, Set<JsDoc.Tag>> annotations = aModuleDocument.getPropertyAnnotations();
+        if (annotations != null) {
+            annotations.entrySet().stream().forEach((Map.Entry<String, Set<JsDoc.Tag>> tagsEntry) -> {
+                String propName = tagsEntry.getKey();
+                RPCPoint rpcPoint = new RPCPoint(aModuleName, propName);
+                Set<JsDoc.Tag> tags = tagsEntry.getValue();
+                tags.stream().forEach((JsDoc.Tag aTag) -> {
+                    if (GET_ANNOTATION.equalsIgnoreCase(aTag.getName())) {
+                        extractUri(rpcPoint, aTag, (String aUri) -> {
+                            gets.put(aUri, rpcPoint);
                         });
-                    });
-                }
-            } catch (Exception ex) {
-                Logger.getLogger(RestPointsScanner.class.getName()).log(Level.SEVERE, null, ex);
-            }
+                    }
+                    if (PUT_ANNOTATION.equalsIgnoreCase(aTag.getName())) {
+                        extractUri(rpcPoint, aTag, (String aUri) -> {
+                            puts.put(aUri, rpcPoint);
+                        });
+                    }
+                    if (POST_ANNOTATION.equalsIgnoreCase(aTag.getName())) {
+                        extractUri(rpcPoint, aTag, (String aUri) -> {
+                            posts.put(aUri, rpcPoint);
+                        });
+                    }
+                    if (DELETE_ANNOTATION.equalsIgnoreCase(aTag.getName())) {
+                        extractUri(rpcPoint, aTag, (String aUri) -> {
+                            deletes.put(aUri, rpcPoint);
+                        });
+                    }
+                });
+            });
         }
     }
 

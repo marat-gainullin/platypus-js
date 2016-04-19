@@ -10,7 +10,7 @@ import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.queries.QueriesProxy;
-import com.eas.concurrent.DeamonThreadFactory;
+import com.eas.concurrent.PlatypusThreadFactory;
 import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
 import com.eas.server.mina.platypus.PlatypusRequestsHandler;
@@ -71,6 +71,11 @@ public class PlatypusServer extends PlatypusServerCore {
         retranslateFactory = obtainRetranslateFactory();
     }
 
+    @Override
+    public Type getType() {
+        return Type.TSA;
+    }
+
     public void start(Set<String> aResidents, Map<String, String> aAcceptors) throws Exception {
         //instance = this;// Hack, but server is natural singleton and so it is ok.
         for (InetSocketAddress s : listenAddresses) {
@@ -128,14 +133,14 @@ public class PlatypusServer extends PlatypusServerCore {
         ThreadPoolExecutor connectionsPollerExecutor = new ThreadPoolExecutor(1, 1,
                 3L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
-                new DeamonThreadFactory("nio-polling-", false));
+                new PlatypusThreadFactory("nio-polling-", false));
         final IoAcceptor acceptor = new NioSocketAcceptor(connectionsPollerExecutor, new NioProcessor(executor));
         //acceptor.getFilterChain().addLast("encryption", sslFilter); commented out until MINA Sslfilter bugs will be fixed
         acceptor.getFilterChain().addLast("platypusCodec", new ProtocolCodecFilter(new ResponseEncoder(), new RequestDecoder()));
         /*
         acceptor.getFilterChain().addLast("executor", new ExecutorFilter(executor, IoEventType.EXCEPTION_CAUGHT,
                 IoEventType.MESSAGE_RECEIVED, IoEventType.MESSAGE_SENT, IoEventType.SESSION_CLOSED, IoEventType.SESSION_IDLE, IoEventType.CLOSE, IoEventType.WRITE));
-        */
+         */
         PlatypusRequestsHandler handler = new PlatypusRequestsHandler(this);
         acceptor.setHandler(handler);
 

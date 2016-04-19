@@ -329,7 +329,7 @@ public class StatementsGenerator implements ChangeVisitor {
                     if (delete == null) {
                         delete = new StatementsLogEntry(gConverter);
                         deletes.put(field.getTableName(), delete);
-                        // Adding here is strongly needed. Because of order in with other and this statememts are added
+                        // Adding here is strongly needed. Because of order in wich other and this statememts are added
                         // to the log and therefore applied into a database during a transaction.
                         logEntries.add(delete);
                     }

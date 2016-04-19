@@ -10,13 +10,13 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.report.Report;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.PlatypusClient;
-import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.client.threetier.requests.ExceptionResponse;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.RPCRequest;
-import com.eas.concurrent.DeamonThreadFactory;
+import com.eas.concurrent.PlatypusThreadFactory;
 import com.eas.script.Scripts;
 import com.eas.util.BinaryUtils;
 import java.io.IOException;
@@ -65,12 +65,12 @@ public class PlatypusHttpConnection extends PlatypusConnection {
     private final ThreadPoolExecutor bioExecutor;
     protected boolean basicSchemeMet = false;
 
-    public PlatypusHttpConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, int aMaximumBIOThreads) throws Exception {
-        super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
+    public PlatypusHttpConnection(URL aUrl, String aSourcePath, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, int aMaximumBIOThreads) throws Exception {
+        super(aUrl, aSourcePath, aOnCredentials, aMaximumAuthenticateAttempts);
         bioExecutor = new ThreadPoolExecutor(aMaximumBIOThreads, aMaximumBIOThreads,
                 1L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
-                new DeamonThreadFactory("http-client-", false));
+                new PlatypusThreadFactory("http-client-", false));
         bioExecutor.allowCoreThreadTimeOut(true);
     }
 
@@ -91,12 +91,20 @@ public class PlatypusHttpConnection extends PlatypusConnection {
 
     @Override
     public <R extends Response> void enqueueRequest(Request aRequest, Scripts.Space aSpace, Consumer<R> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        Scripts.getContext().incAsyncsCount();
+        if (Scripts.getContext() != null) {
+            Scripts.getContext().incAsyncsCount();
+        }
         Consumer<PlatypusHttpRequestWriter> responseHandler = (PlatypusHttpRequestWriter aHttpSender) -> {
-            if (aHttpSender.response instanceof ErrorResponse) {
+            if (aHttpSender.response instanceof ExceptionResponse) {
                 if (onFailure != null) {
-                    Exception cause = handleErrorResponse((ErrorResponse) aHttpSender.response);
-                    onFailure.accept(cause);
+                    try {
+                        PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, aHttpSender.conn, aHttpSender.responseBody);
+                        aHttpSender.response.accept(reader);
+                        Exception cause = handleErrorResponse((ExceptionResponse) aHttpSender.response, aSpace);
+                        onFailure.accept(cause);
+                    } catch (Exception ex) {
+                        Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             } else {
                 if (aRequest instanceof LogoutRequest) {
@@ -127,7 +135,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
             bioExecutor.submit(() -> {
                 Scripts.setContext(context);
                 try {
-                    PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, localCookies, basicSchemeMet ? new Credentials(credentials.userName, credentials.password) : null);
+                    PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, sourcePath, localCookies, basicSchemeMet ? new Credentials(credentials.userName, credentials.password) : null);
                     aRequest.accept(httpSender);// bio in a background thread
                     aSpace.process(() -> {
                         try {
@@ -273,7 +281,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
 
     @Override
     public <R extends Response> R executeRequest(Request aRequest) throws Exception {
-        PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, cookies, basicSchemeMet ? credentials : null);
+        PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, sourcePath, cookies, basicSchemeMet ? credentials : null);
         aRequest.accept(httpSender);// bio
         acceptCookies(httpSender.conn);
         int authenticationAttempts = 0;
@@ -282,7 +290,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
             credentials = onCredentials.call();
             if (res.authScheme.toLowerCase().contains(PlatypusHttpConstants.BASIC_AUTH_NAME.toLowerCase())) {
                 basicSchemeMet = true;
-                httpSender = new PlatypusHttpRequestWriter(url, cookies, credentials);
+                httpSender = new PlatypusHttpRequestWriter(url, sourcePath, cookies, credentials);
                 aRequest.accept(httpSender);// bio
                 acceptCookies(httpSender.conn);
             } else if (PlatypusHttpConstants.FORM_AUTH_NAME.equalsIgnoreCase(res.authScheme)) {
@@ -302,15 +310,15 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                 }
                 int responseCode = securityFormConn.getResponseCode();
                 acceptCookies(securityFormConn);
-                httpSender = new PlatypusHttpRequestWriter(url, cookies, null);
+                httpSender = new PlatypusHttpRequestWriter(url, sourcePath, cookies, null);
                 aRequest.accept(httpSender);// bio
                 acceptCookies(httpSender.conn);
             } else {
                 Logger.getLogger(PlatypusHttpRequestWriter.class.getName()).log(Level.SEVERE, "Unsupported authorization scheme: {0}", res.authScheme);
             }
         }
-        if (httpSender.response instanceof ErrorResponse) {
-            throw handleErrorResponse((ErrorResponse) httpSender.response);
+        if (httpSender.response instanceof ExceptionResponse) {
+            throw handleErrorResponse((ExceptionResponse) httpSender.response, Scripts.getSpace());
         } else {
             PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, httpSender.conn, httpSender.responseBody);
             httpSender.response.accept(reader);

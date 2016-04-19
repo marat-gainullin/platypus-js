@@ -240,7 +240,7 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
         CallableConsumer<Map<String, String>, String> tablesReader = (aSchema4Sql) -> {
             DataSource ds = client.obtainDataSource(datasourceName);
             try (Connection conn = ds.getConnection()) {
-                try (ResultSet r = conn.getMetaData().getTables(null, aSchema4Sql, null, new String[]{"TABLE", "VIEW"})) {
+                try (ResultSet r = conn.getMetaData().getTables(null, aSchema4Sql, null, new String[]{ClientConstants.JDBCPKS_TABLE_TYPE_TABLE, ClientConstants.JDBCPKS_TABLE_TYPE_VIEW})) {
                     ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
                     int colIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_NAME);
                     int colRemarks = idxs.find(ClientConstants.JDBCCOLS_REMARKS);

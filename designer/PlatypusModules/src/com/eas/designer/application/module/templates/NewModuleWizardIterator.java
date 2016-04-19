@@ -36,13 +36,6 @@ public class NewModuleWizardIterator extends NewApplicationElementWizardIterator
         @TemplateRegistration(
                 folder = "Platypus/Specific",
                 position = 300,
-                content = {"PlatypusAMDModuleDatasourceTemplate.js", "PlatypusAMDModuleDatasourceTemplate.model"},
-                displayName = "#Templates/Other/PlatypusAMDModuleDatasourceTemplate",
-                description = "ModuleDatasource.html",
-                scriptEngine = "freemarker"),
-        @TemplateRegistration(
-                folder = "Platypus/Specific",
-                position = 300,
                 content = {"PlatypusAMDModuleValidatorTemplate.js", "PlatypusAMDModuleValidatorTemplate.model"},
                 displayName = "#Templates/Other/PlatypusAMDModuleValidatorTemplate",
                 description = "ModuleValidator.html",
@@ -74,13 +67,6 @@ public class NewModuleWizardIterator extends NewApplicationElementWizardIterator
                 content = {"PlatypusModuleTemplate.js", "PlatypusModuleTemplate.model"},
                 displayName = "#Templates/Other/PlatypusModuleTemplate",
                 description = "Module.html",
-                scriptEngine = "freemarker"),
-        @TemplateRegistration(
-                folder = "Platypus/Global modules/Specific",
-                position = 300,
-                content = {"PlatypusModuleDatasourceTemplate.js", "PlatypusModuleDatasourceTemplate.model"},
-                displayName = "#Templates/Other/PlatypusModuleDatasourceTemplate",
-                description = "ModuleDatasource.html",
                 scriptEngine = "freemarker"),
         @TemplateRegistration(
                 folder = "Platypus/Global modules/Specific",

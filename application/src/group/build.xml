@@ -209,6 +209,13 @@
             <param name="call.target" value="jar"/>
             <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
         </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.Tools}" name="call.subproject"/>
+            <param location="${project.Tools}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
 
 <!--
         <antcall target="-maybe-call-dep">
@@ -221,8 +228,8 @@
 -->
         <antcall target="-maybe-call-dep">
             <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.Deploy}" name="call.subproject"/>
-            <param location="${project.Deploy}/build.xml" name="call.script"/>
+            <param location="${project.Tools}" name="call.subproject"/>
+            <param location="${project.Tools}/build.xml" name="call.script"/>
             <param name="call.target" value="jar"/>
             <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
         </antcall>
@@ -243,13 +250,12 @@
         <subant buildpath="${project.Datamodel}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Modules}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.JCalendar}" antfile="build.xml" target="test"/>
-        <subant buildpath="${project.GeoAddon}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Reports}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Forms}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Application}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Server}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.ServletSupport}" antfile="build.xml" target="test"/>
-        <subant buildpath="${project.Deploy}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.Tools}" antfile="build.xml" target="test"/>
     </target>
                                 <!--
                                     Clean section

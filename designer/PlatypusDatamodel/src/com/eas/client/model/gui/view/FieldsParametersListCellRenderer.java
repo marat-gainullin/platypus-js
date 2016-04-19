@@ -55,15 +55,6 @@ public class FieldsParametersListCellRenderer<E extends Entity<?, ?, E>> impleme
             if (entity.getModel().isFieldInRelations(entity, lrelations, field)) {
                 fieldsFont = bindedFieldFont;
             }
-//             if (field instanceof Parameter && !(entity instanceof ApplicationParametersEntity) && !(entity instanceof QueryParametersEntity)) {
-//             if (entity.getModel().isParameterInRelations(entity, lrelations, (Parameter)field)) {
-//             fieldsFont = bindedFieldFont;
-//             }
-//             } else {
-//             if (entity.getModel().isFieldInRelations(entity, lrelations, field)) {
-//             fieldsFont = bindedFieldFont;
-//             }
-//             }
             String fieldDescription = field.getDescription();
             if (StoredQueryFactory.ABSENT_QUERY_MSG.equals(fieldDescription)) {
                 fieldDescription = String.format(DatamodelDesignUtils.localizeString(StoredQueryFactory.ABSENT_QUERY_MSG), entity.getQueryName());
@@ -81,30 +72,33 @@ public class FieldsParametersListCellRenderer<E extends Entity<?, ?, E>> impleme
             if (lisPk) {
                 typeName = typeName + "." + SQLUtils.getLocalizedPkName();
                 pkIcon = FieldsTypeIconsCache.getPkIcon16();
-                //iconTextGap += pkIcon.getIconWidth() + 2;
             }
             if (lisFk) {
                 typeName = typeName + "." + SQLUtils.getLocalizedFkName();
                 fkIcon = FieldsTypeIconsCache.getFkIcon16();
-                //iconTextGap += fkIcon.getIconWidth() + 2;
             }
             iconsRenderer = new IconsListCellRenderer();
             iconsRenderer.getListCellRendererComponent(list, "fff", index, isSelected, cellHasFocus);
-            String fieldName = field.getName();
-            if (fieldName == null) {
-                fieldName = "";
-            }
+            String fieldName = calcFieldName(field);
             prepareIconsRenderer(pkIcon, fkIcon, typeIcon, fieldDescription, fieldName, typeName, iconTextGap, fieldsFont);//, list);
             return iconsRenderer;
         }
         return null;
     }
 
+    protected String calcFieldName(Field field) {
+        String fieldName = field.getName();
+        if (fieldName == null) {
+            fieldName = "";
+        }
+        return fieldName;
+    }
+
     protected Icon calcIcon(int aJdbcType, String typeName) {
         return FieldsTypeIconsCache.getIcon16(typeName);
     }
 
-    protected void prepareIconsRenderer(Icon aPkIcon, Icon aFkIcon, Icon aTypeIcon, String aDescription, String aName, String aTypeName, int aIconTextGap, Font aFont) {//, JList aList) {
+    protected void prepareIconsRenderer(Icon aPkIcon, Icon aFkIcon, Icon aTypeIcon, String aDescription, String aName, String aTypeName, int aIconTextGap, Font aFont) {
         if (aPkIcon != null && aFkIcon == null) {
             iconsRenderer.setIcon(aTypeIcon);
             iconsRenderer.addIcon(aPkIcon);

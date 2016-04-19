@@ -19,17 +19,25 @@ import com.eas.client.queries.Query;
  */
 public interface Application<Q extends Query> {
 
+    public static enum Type {
+        CLIENT,
+        TSA,
+        SERVLET
+    }
+
+    public Type getType();
+
     public QueriesProxy<Q> getQueries();
 
     public ModulesProxy getModules();
 
     public ServerModulesProxy getServerModules();
-    
+
     public ModelsDocuments getModels();
-    
+
     public FormsDocuments getForms();
-    
+
     public ReportsConfigs getReports();
-    
+
     public ScriptsConfigs getScriptsConfigs();
 }

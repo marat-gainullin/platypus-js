@@ -236,6 +236,7 @@ public class SelectLayoutAction extends CallableSystemAction {
                     // set the selected layout on the container
                     container.getFormModel().getComponentCreator().createComponent(
                             paletteItem.getComponentClassSource(), container, null);
+                    container.getNodeReference().updateName();
                 }
             }
         }

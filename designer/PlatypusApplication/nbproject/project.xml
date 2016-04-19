@@ -255,6 +255,8 @@
                 <package>org.jfree.ui</package>
                 <package>org.jinterop.dcom.common</package>
                 <package>org.opengis.filter.temporal</package>
+                <package>org.postgis</package>
+                <package>org.postgis.binary</package>
                 <package>rpc</package>
             </public-packages>
             <class-path-extension>

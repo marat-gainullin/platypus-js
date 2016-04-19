@@ -5,17 +5,24 @@
  */
 package com.eas.client.reports;
 
+import com.eas.client.Application;
 import com.eas.client.DatabasesClientWithResource;
-import com.eas.client.model.application.ApplicationDbEntity;
-import com.eas.client.model.application.ApplicationDbModel;
+import com.eas.client.ModuleStructure;
+import com.eas.client.ModulesProxy;
+import com.eas.client.ServerModulesProxy;
+import com.eas.client.cache.FormsDocuments;
+import com.eas.client.cache.ModelsDocuments;
+import com.eas.client.cache.ReportsConfigs;
+import com.eas.client.cache.ScriptsConfigs;
+import com.eas.client.queries.QueriesProxy;
+import com.eas.client.scripts.ScriptedResource;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.script.Scripts;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
+import java.io.File;
+import java.nio.file.Path;
+import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 import net.sf.jxls.transformer.XLSTransformer;
-import org.apache.commons.beanutils.BasicDynaBean;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.*;
@@ -33,7 +40,77 @@ public class ExelTemplateTest {
     }
 
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass() throws Exception {
+        Path platypusJsPath = ScriptedResource.lookupPlatypusJs();
+        Scripts.init(platypusJsPath, false);
+        Scripts.setOnlySpace(Scripts.createSpace());
+        ScriptedResource.init(new Application() {
+            @Override
+            public Application.Type getType() {
+                return Application.Type.CLIENT;
+            }
+
+            @Override
+            public QueriesProxy getQueries() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public ModulesProxy getModules() {
+                return new ModulesProxy() {
+                    @Override
+                    public ModuleStructure getModule(String string, Scripts.Space space, Consumer<ModuleStructure> cnsmr, Consumer<Exception> cnsmr1) throws Exception {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
+
+                    @Override
+                    public File getResource(String string, Scripts.Space space, Consumer<File> cnsmr, Consumer<Exception> cnsmr1) throws Exception {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
+
+                    @Override
+                    public Path getLocalPath() {
+                        return platypusJsPath;
+                    }
+
+                    @Override
+                    public File nameToFile(String string) throws Exception {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
+
+                    @Override
+                    public String getDefaultModuleName(File file) {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
+                };
+            }
+
+            @Override
+            public ServerModulesProxy getServerModules() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public ModelsDocuments getModels() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public FormsDocuments getForms() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public ReportsConfigs getReports() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public ScriptsConfigs getScriptsConfigs() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        }, platypusJsPath, false);
+        Scripts.getSpace().initSpaceGlobal();
     }
 
     @AfterClass
@@ -66,41 +143,21 @@ public class ExelTemplateTest {
     @Test
     public void testGenerateDataNamedMap() throws Exception {
         System.out.println("GenerateDataNamedMap jsObject");
-        //Scripts.init();
-        Scripts.Space space = Scripts.createSpace();
-        JSObject data = (JSObject) space.exec("({name : 'test', count : 5, time : new Date(2014, 05, 11, 11, 11, 11, 0), elems : [1, 'Hi', true, {text:'Hello!'}, new Date(2014, 05, 22, 22, 22, 22, 0)]})");
-        ExelTemplate template = new ExelTemplate();
-        template.setScriptData(data);
+        JSObject data = (JSObject) Scripts.getSpace().exec("({name : 'test', count : 5, time : new Date(2014, 05, 11, 11, 11, 11, 0), elems : [1, 'Hi', true, {text:'Hello!'}, new Date(2014, 05, 22, 22, 22, 22, 0)]})");
+        ExelTemplate template = new ExelTemplate(data, "xlsx", new ReportTemplate(null, null, null, data));
         XLSTransformer transformer = new XLSTransformer();
         transformer.registerRowProcessor(new ExcelRowProcessor());
         template.generateDataNamedMap(transformer);
         assertEquals(template.generated.size(), 4);
         assertEquals(template.generated.get("count"), 5);
         assertEquals(template.generated.get("name"), "test");
-        assertEquals(((Date) template.generated.get("time")).getTime(), (new Date(114, 5, 11, 11, 11, 11)).getTime());
-        ArrayList list = (ArrayList) template.generated.get("elems");
+        assertEquals(template.generated.get("time"), 1402474271000d / 86400000 + 25569);
+        JSDynaList list = (JSDynaList) template.generated.get("elems");
         assertEquals(list.get(0), 1);
         assertEquals(list.get(1), "Hi");
         assertEquals(list.get(2), Boolean.TRUE);
-        assertEquals(((BasicDynaBean) list.get(3)).get("text"), "Hello!");
-        assertEquals(list.get(4), new Date(114, 5, 22, 22, 22, 22));
-        
-        System.out.println("GenerateDataNamedMap DataModel");
-        try (DatabasesClientWithResource resource = getDBClient()) {
-            ApplicationDbModel model = new ApplicationDbModel(resource.getClient(), null);
-            ApplicationDbEntity entity41 = model.loadEntity("reportQuery");
-            model.addEntity(entity41);
-            ((JSObject)model.getPublished()).setMember("dsEnt", entity41.getPublished());
-            model.requery();
-            ExelTemplate templateWithModel = new ExelTemplate();
-            templateWithModel.setScriptData((JSObject)model.getPublished());
-            templateWithModel.generateDataNamedMap(transformer);
-            assertEquals(templateWithModel.generated.size(), 1);
-            ArrayList rows = (ArrayList)templateWithModel.generated.get("dsEnt");
-            assertEquals(rows.size(), 13);
-            assertEquals(((BasicDynaBean)rows.get(2)).get("name"), "Сила света");
-            assertEquals(((BasicDynaBean)rows.get(2)).get("id"), new BigDecimal(124772784578140l));
-        }
+        assertEquals(((JSDynaBean) list.get(3)).get("text"), "Hello!");
+        assertEquals(list.get(4), 1403464942000d / 86400000 + 25569);
     }
-        
+
 }

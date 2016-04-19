@@ -5,20 +5,10 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import com.bearsoft.org.netbeans.modules.form.completion.FormModuleCompletionContext;
 import com.eas.designer.application.module.ModuleUtils;
 import java.io.IOException;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import jdk.nashorn.internal.ir.AccessNode;
-import jdk.nashorn.internal.ir.BinaryNode;
-import jdk.nashorn.internal.ir.CallNode;
-import jdk.nashorn.internal.ir.ExpressionStatement;
-import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.IdentNode;
-import jdk.nashorn.internal.ir.Statement;
-import jdk.nashorn.internal.ir.VarNode;
-import org.openide.ErrorManager;
 import org.openide.cookies.EditorCookie;
 
 /**
@@ -38,6 +28,7 @@ public class JsCodeGenerator {
     }
 
     public void generateEventHandler(String componentName, Class<?> scriptClass, PlatypusFormDataObject aDataObject) {
+        /*
         if (isFormObjectExistsInJs(aDataObject.getConstructor())) {
             String handlerName = getDefaultEventPropertyName(scriptClass);
             int handlerPosition;
@@ -65,6 +56,7 @@ public class JsCodeGenerator {
                 }
             }
         }
+*/
     }
 
     public boolean hasDefaultEventHandler(Class<?> scriptClass) {
@@ -74,7 +66,7 @@ public class JsCodeGenerator {
     private String getDefaultEventPropertyName(Class<?> scriptClass) {
         return FormUtils.getDefaultEventPropertyName(scriptClass);
     }
-
+/*
     private boolean isFormObjectExistsInJs(FunctionNode constructor) {
         if (constructor != null && constructor.getBody() != null) {
             for (Statement st : constructor.getBody().getStatements()) {
@@ -123,7 +115,7 @@ public class JsCodeGenerator {
     private void goToEventHandler(int handlerPosition, PlatypusFormDataObject dataObject) throws IOException, BadLocationException {
         getFormSupport(dataObject).openAt(getDocument(dataObject).createPosition(handlerPosition));
     }
-
+*/
     private Document getDocument(PlatypusFormDataObject dataObject) throws IOException {
         EditorCookie ec = dataObject.getLookup().lookup(EditorCookie.class);
         if (ec == null) {

@@ -16,7 +16,6 @@ import java.util.List;
  */
 public class PlatypusFiles {
 
-    public static final String PLATYPUS_PROJECT_APP_ROOT = "app";
     public static final String JAVASCRIPT_EXTENSION = "js"; // NOI18N
     public static final String JAVASCRIPT_FILE_END = "." + JAVASCRIPT_EXTENSION; // NOI18N
     public static final String FORM_EXTENSION = "layout"; // NOI18N
@@ -26,6 +25,7 @@ public class PlatypusFiles {
             + "<outputFields>\n"
             + "</outputFields>"; // NOI18N
     public static final String SQL_EXTENSION = "sql"; // NOI18N
+    public static final String SQL_FILE_END = "." + SQL_EXTENSION; // NOI18N
     public static final String DIALECT_EXTENSION = "dialect"; // NOI18N
     public static final String REPORT_LAYOUT_EXTENSION = "xls"; // NOI18N
     public static final String REPORT_LAYOUT_EXTENSION_X = "xlsx"; // NOI18N

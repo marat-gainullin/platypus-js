@@ -4,7 +4,6 @@
  */
 package com.eas.client.forms.events.rt;
 
-import com.eas.client.forms.Forms;
 import com.eas.client.forms.components.rt.HasValue;
 import com.eas.client.forms.events.EventsWrapper;
 import com.eas.script.Scripts;
@@ -108,7 +107,6 @@ public class ControlEventsIProxy implements MouseListener,
         try {
             JSObject handler = handlers.get(aEventId);
             if (handler != null) {                
-                Scripts.setContext(Forms.getContext());
                 return Scripts.getSpace().toJava(handler.call(eventThis, new Object[]{Scripts.getSpace().toJs(wrapEvent(anEvent))}));
             } else {
                 return null;

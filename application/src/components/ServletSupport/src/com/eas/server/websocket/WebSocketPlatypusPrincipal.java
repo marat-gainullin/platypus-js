@@ -5,6 +5,7 @@
 package com.eas.server.websocket;
 
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.script.Scripts;
 import java.util.Collections;
 import javax.websocket.server.HandshakeRequest;
 import jdk.nashorn.api.scripting.JSObject;
@@ -31,8 +32,11 @@ public class WebSocketPlatypusPrincipal extends PlatypusPrincipal {
     public void logout(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         if (aOnSuccess != null) {
             // async style
-            aOnSuccess.call(null, new Object[]{});
+            Scripts.getSpace().process(() -> {
+                aOnSuccess.call(null, new Object[]{});
+            });
+        } else {
+            // sync style
         }
-        // sync style
     }
 }

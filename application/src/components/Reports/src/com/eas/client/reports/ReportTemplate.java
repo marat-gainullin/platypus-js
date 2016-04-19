@@ -23,7 +23,7 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class ReportTemplate implements HasPublished {
 
-    protected int timezoneOffset = 0;
+    protected int timezoneOffset;
     protected byte[] content;
     protected String name;
     protected String format;

@@ -10,7 +10,7 @@ import org.openide.filesystems.MIMEResolver;
  *
  * @author mg
  */
-@MIMEResolver.ExtensionRegistration(displayName="#LBL_PlatypusModel", extension="model", mimeType="text/model+xml")
+@MIMEResolver.NamespaceRegistration(checkedExtension = "model", elementName = "datamodel", displayName = "#LBL_PlatypusModel", mimeType = "text/model+xml")
 public class ModelMimeType {
-    
+
 }

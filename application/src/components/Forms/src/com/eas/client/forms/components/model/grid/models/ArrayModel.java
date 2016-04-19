@@ -46,7 +46,6 @@ public abstract class ArrayModel {
         }
         elementsChangedEnqueued = true;
         EventQueue.invokeLater(() -> {
-            Scripts.setContext(Forms.getContext());
             if (elementsChangedEnqueued) {
                 elementsChangedEnqueued = false;
                 if (data != null && Scripts.isInitialized()) {
@@ -70,7 +69,6 @@ public abstract class ArrayModel {
     protected void enqueueElementsDataChanged() {
         elementsDataChangedEnqueued = true;
         EventQueue.invokeLater(() -> {
-            Scripts.setContext(Forms.getContext());
             if (elementsDataChangedEnqueued) {
                 elementsDataChangedEnqueued = false;
                 fireElementsDataChanged();

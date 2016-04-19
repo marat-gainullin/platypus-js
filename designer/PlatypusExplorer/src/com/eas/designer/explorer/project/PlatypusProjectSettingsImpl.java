@@ -28,9 +28,12 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     public static final int CLIENT_APP_DEFAULT_DEBUG_PORT = 8900;
     public static final int SERVER_APP_DEFAULT_DEBUG_PORT = 8901;
     public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
+    public static final String PROJECT_MARKER_FILE = ".platypus"; //NOI18N
     public static final String PROJECT_SETTINGS_FILE = "project.properties"; //NOI18N
     public static final String PROJECT_PRIVATE_SETTINGS_FILE = "private.properties"; //NOI18N
+    public static final String DEFAULT_APP_FOLDER = "app"; //NOI18N
     public static final String PROJECT_DISPLAY_NAME_KEY = "projectDisplayName"; //NOI18N
+    public static final String SOURCE_PATH_KEY = "sourcePath"; //NOI18N
     public static final String RUN_ELEMENT_KEY = "runElement"; //NOI18N
     public static final String DEFAULT_DATA_SOURCE_ELEMENT_KEY = "defaultDataSource"; //NOI18N
     public static final String RUN_USER_KEY = "runUser"; //NOI18N
@@ -157,11 +160,30 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
         if (oldValue == null ? aValue != null : !oldValue.equals(aValue)) {
             if (aValue != null && !aValue.isEmpty()) {
                 projectProperties.setProperty(RUN_ELEMENT_KEY, aValue);
-                projectPropertiesIsDirty = true;
             } else {
                 projectProperties.remove(RUN_ELEMENT_KEY);
             }
+            projectPropertiesIsDirty = true;
             changeSupport.firePropertyChange(RUN_ELEMENT_KEY, oldValue, aValue);
+        }
+    }
+
+    @Override
+    public String getSourcePath() {
+        return projectProperties.get(SOURCE_PATH_KEY);
+    }
+
+    @Override
+    public void setSourcePath(String aValue) {
+        String oldValue = getSourcePath();
+        if (oldValue == null ? aValue != null : !oldValue.equals(aValue)) {
+            if (aValue != null && !aValue.isEmpty()) {
+                projectProperties.setProperty(SOURCE_PATH_KEY, aValue);
+            } else {
+                projectProperties.remove(SOURCE_PATH_KEY);
+            }
+            projectPropertiesIsDirty = true;
+            changeSupport.firePropertyChange(SOURCE_PATH_KEY, oldValue, aValue);
         }
     }
 

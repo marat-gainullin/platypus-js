@@ -4,34 +4,58 @@
  */
 package com.eas.client.model.gui.view;
 
+import com.eas.client.model.application.ApplicationDbEntity;
+import com.eas.client.model.application.ReferenceRelation;
+import com.eas.client.model.gui.DatamodelDesignUtils;
+import org.openide.util.NbBundle;
+
 /**
  *
  * @author mg
  */
 public class ScalarCollectionView extends javax.swing.JPanel {
 
+    private ReferenceRelation<ApplicationDbEntity> refRelation;
+
     /**
      * Creates new form ScalarCollectionView
+     *
+     * @param aRefRelation
      */
-    public ScalarCollectionView() {
+    public ScalarCollectionView(ReferenceRelation<ApplicationDbEntity> aRefRelation) {
         initComponents();
+        refRelation = aRefRelation;
+        String leName = refRelation.getLeftEntity().getName();
+        if (leName == null) {
+            leName = refRelation.getLeftEntity().getTitle();
+            if (leName == null || leName.isEmpty()) {
+                leName = DatamodelDesignUtils.getLocalizedString("noName");
+            }
+        }
+        String lfName = refRelation.getLeftField().getName();
+        String reName = refRelation.getRightEntity().getName();
+        if (reName == null) {
+            reName = refRelation.getRightEntity().getTitle();
+            if (reName == null || reName.isEmpty()) {
+                reName = DatamodelDesignUtils.getLocalizedString("noName");
+            }
+        }
+        String rfName = refRelation.getRightField().getName();
+        lblDescription.setText(NbBundle.getMessage(ScalarCollectionView.class, "ScalarCollectionView.lblDescription.text", leName, lfName, reName, rfName));
+        lblScalar.setText(NbBundle.getMessage(ScalarCollectionView.class, "ScalarCollectionView.lblScalar.text", reName, leName));
+        lblCollection.setText(NbBundle.getMessage(ScalarCollectionView.class, "ScalarCollectionView.lblCollection.text", leName, reName));
+        txtScalar.setText(refRelation.getScalarPropertyName());
+        txtCollection.setText(refRelation.getCollectionPropertyName());
     }
 
-    public String getScalarPropertyName(){
+    public String getScalarPropertyName() {
         return txtScalar.getText();
     }
-    
-    public String getCollectionPropertyName(){
+
+    public String getCollectionPropertyName() {
         return txtCollection.getText();
     }
-    
-    public void setScalarPropertyName(String aValue){
-        txtScalar.setText(aValue);
-    }
-    
-    public void setCollectionPropertyName(String aValue){
-        txtCollection.setText(aValue);
-    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -45,10 +69,13 @@ public class ScalarCollectionView extends javax.swing.JPanel {
         lblCollection = new javax.swing.JLabel();
         txtScalar = new javax.swing.JTextField();
         txtCollection = new javax.swing.JTextField();
+        lblDescription = new javax.swing.JLabel();
 
         org.openide.awt.Mnemonics.setLocalizedText(lblScalar, org.openide.util.NbBundle.getMessage(ScalarCollectionView.class, "ScalarCollectionView.lblScalar.text")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(lblCollection, org.openide.util.NbBundle.getMessage(ScalarCollectionView.class, "ScalarCollectionView.lblCollection.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(lblDescription, org.openide.util.NbBundle.getMessage(ScalarCollectionView.class, "ScalarCollectionView.lblDescription.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -56,19 +83,24 @@ public class ScalarCollectionView extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(lblCollection, javax.swing.GroupLayout.DEFAULT_SIZE, 157, Short.MAX_VALUE)
-                    .addComponent(lblScalar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtScalar, javax.swing.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE)
-                    .addComponent(txtCollection))
+                    .addComponent(lblDescription, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(lblCollection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lblScalar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtScalar, javax.swing.GroupLayout.DEFAULT_SIZE, 202, Short.MAX_VALUE)
+                            .addComponent(txtCollection))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(lblDescription, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 15, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblScalar)
                     .addComponent(txtScalar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -76,11 +108,12 @@ public class ScalarCollectionView extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblCollection)
                     .addComponent(txtCollection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(36, Short.MAX_VALUE))
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel lblCollection;
+    private javax.swing.JLabel lblDescription;
     private javax.swing.JLabel lblScalar;
     private javax.swing.JTextField txtCollection;
     private javax.swing.JTextField txtScalar;

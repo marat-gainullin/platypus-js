@@ -6,6 +6,7 @@ package com.eas.designer.application.query.editing;
 
 import com.eas.designer.application.query.editing.riddle.RiddleTask;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import net.sf.jsqlparser.expression.NamedParameter;
 import net.sf.jsqlparser.schema.Column;
@@ -17,7 +18,7 @@ import net.sf.jsqlparser.schema.Column;
 public class GatherRelationsSubjectsRiddleTask implements RiddleTask {
 
     protected Set<String> parametersNames = new HashSet<>();
-    protected Set<NamedParameter> parameters = new HashSet<>();
+    protected Set<NamedParameter> parameters = new LinkedHashSet<>();
     protected Set<Column> columns = new HashSet<>();
 
     public Set<NamedParameter> getParameters() {

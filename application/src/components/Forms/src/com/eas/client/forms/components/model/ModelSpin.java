@@ -14,6 +14,9 @@ import com.eas.script.Scripts;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.text.ParseException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JSpinner.NumberEditor;
@@ -167,6 +170,19 @@ public class ModelSpin extends ModelComponentDecorator<VSpinner, Double> impleme
             decorated.requestFocus();
         });
         return super.getTableCellEditorComponent(table, value, isSelected, row, column); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean stopCellEditing() {
+        if (decorated.getEditor() instanceof NumberEditor) {
+            JFormattedTextField ftf = ((NumberEditor) decorated.getEditor()).getTextField();
+            try {
+                ftf.commitEdit();
+            } catch (ParseException ex) {
+                Logger.getLogger(ModelDate.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return super.stopCellEditing();
     }
 
     @Override

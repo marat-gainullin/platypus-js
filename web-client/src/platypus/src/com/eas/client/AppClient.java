@@ -62,7 +62,8 @@ public class AppClient {
 	//
 	private static final RegExp httpPrefixPattern = RegExp.compile("https?://.*");
 	public static final String APPLICATION_URI = "/application";
-	public static final String APP_RESOURCE_PREFIX = "/app/";
+	private static String sourcePath = "/";
+	private static boolean simpleModules;
 	public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
 	//
 	private static AppClient appClient;
@@ -81,12 +82,41 @@ public class AppClient {
 		protected Set<String> serverDependencies = new HashSet<>();
 		protected Set<String> queriesDependencies = new HashSet<>();
 
+		public ModuleStructure(String aRelativeFileName) {
+			super();
+			structure.add(aRelativeFileName);
+		}
+
 		public ModuleStructure(Set<String> aStructure, Set<String> aClientDependencies, Set<String> aServerDependencies, Set<String> aQueriesDependencies) {
 			super();
 			structure.addAll(aStructure);
 			clientDependencies.addAll(aClientDependencies);
 			serverDependencies.addAll(aServerDependencies);
 			queriesDependencies.addAll(aQueriesDependencies);
+		}
+
+		public ModuleStructure(String aRelativeFileName, JsArrayString prefetchedResources, JsArrayString autoDependencies, JsArrayString rpcDependencies, JsArrayString entitiesDependencies) {
+			this(aRelativeFileName);
+			if (prefetchedResources != null) {
+				for (int i = 0; i < prefetchedResources.length(); i++) {
+					structure.add(prefetchedResources.get(i));
+				}
+			}
+			if (autoDependencies != null) {
+				for (int i = 0; i < autoDependencies.length(); i++) {
+					clientDependencies.add(autoDependencies.get(i));
+				}
+			}
+			if (rpcDependencies != null) {
+				for (int i = 0; i < rpcDependencies.length(); i++) {
+					serverDependencies.add(rpcDependencies.get(i));
+				}
+			}
+			if (entitiesDependencies != null) {
+				for (int i = 0; i < entitiesDependencies.length(); i++) {
+					queriesDependencies.add(entitiesDependencies.get(i));
+				}
+			}
 		}
 
 		public Set<String> getStructure() {
@@ -139,6 +169,32 @@ public class AppClient {
 		appClient = aClient;
 	}
 
+	public static boolean isSimpleModules() {
+		return simpleModules;
+	}
+
+	public static void setSimpleModules(boolean aValue) {
+		simpleModules = aValue;
+	}
+
+	public static String getSourcePath() {
+		return sourcePath;
+	}
+
+	public static void setSourcePath(String aValue) {
+		if (aValue != null && !aValue.isEmpty()) {
+			sourcePath = aValue;
+			if (!sourcePath.endsWith("/")) {
+				sourcePath = sourcePath + "/";
+			}
+			if (!sourcePath.startsWith("/")) {
+				sourcePath = "/" + sourcePath;
+			}
+		} else {
+			sourcePath = "/";
+		}
+	}
+
 	public SafeUri getResourceUri(final String aResourceName) {
 		return new SafeUri() {
 
@@ -148,17 +204,17 @@ public class AppClient {
 				if (htppMatch != null) {
 					return aResourceName;
 				} else {
-					return relativeUri() + APP_RESOURCE_PREFIX + aResourceName;
+					return relativeUri() + getSourcePath() + aResourceName;
 				}
 			}
 		};
 	}
 
-	public static String toAppModuleId(String aRelative, String aStartPoint) {
+	public static String toFilyAppModuleId(String aRelative, String aStartPoint) {
 		Element div = com.google.gwt.dom.client.Document.get().createDivElement();
 		div.setInnerHTML("<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>");
 		String absolute = div.getFirstChildElement().<AnchorElement> cast().getHref();
-		String hostContextPrefix = AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX;
+		String hostContextPrefix = AppClient.relativeUri() + AppClient.getSourcePath();
 		absolute = URL.decode(absolute);
 		String appModuleId = absolute.substring(hostContextPrefix.length());
 		return appModuleId;
@@ -174,7 +230,7 @@ public class AppClient {
 
 	public static Object _jsLoad(final String aResourceName, boolean aBinary, final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
 		final String callerDir = Utils.lookupCallerJsDir();
-		SafeUri uri = AppClient.getInstance().getResourceUri(aResourceName.startsWith("./") || aResourceName.startsWith("../") ? toAppModuleId(aResourceName, callerDir) : aResourceName);
+		SafeUri uri = AppClient.getInstance().getResourceUri(aResourceName.startsWith("./") || aResourceName.startsWith("../") ? toFilyAppModuleId(aResourceName, callerDir) : aResourceName);
 		if (onSuccess != null) {
 			AppClient.getInstance().startRequest(uri, aBinary ? ResponseType.ArrayBuffer : ResponseType.Default, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
@@ -535,8 +591,7 @@ public class AppClient {
 					 */
 					String errorMsg = XMLHttpRequest2.getBrowserSpecificFailure(xhr);
 					if (errorMsg != null) {
-						Throwable exception = new RuntimeException(errorMsg);
-						Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, exception);
+						Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, errorMsg);
 						try {
 							if (aCallback != null)
 								aCallback.onFailure(xhr);
@@ -668,15 +723,15 @@ public class AppClient {
 
 			@Override
 			protected void doWork(String aResult) throws Exception {
-				if(onSuccess != null){
-					onSuccess.<Utils.JsObject>cast().call(null, Utils.toJs(aResult));
+				if (onSuccess != null) {
+					onSuccess.<Utils.JsObject> cast().call(null, Utils.toJs(aResult));
 				}
 			}
 
 			@Override
 			public void onFailure(String reason) {
-				if(onFailure != null){
-					onFailure.<Utils.JsObject>cast().call(null, Utils.toJs(reason));
+				if (onFailure != null) {
+					onFailure.<Utils.JsObject> cast().call(null, Utils.toJs(reason));
 				}
 			}
 		});
@@ -728,7 +783,33 @@ public class AppClient {
 		return modulesStructures.get(aModuleName);
 	}
 
+	public ModuleStructure putModuleStructure(String aModuleName, ModuleStructure aStructure) {
+		return modulesStructures.put(aModuleName, aStructure);
+	}
+
+	private native static void checkModulesIndex(AppClient aClient)/*-{
+		if ($wnd.define) {
+			var index = $wnd.define['modules-index'];
+			for ( var fileName in index) {
+				var structure = index[fileName];
+				var mstructure = @com.eas.client.AppClient.ModuleStructure::new(Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JsArrayString;)(fileName, structure.prefetched, structure['global-deps'], structure.rpc, structure.entities);
+				var defaultModuleName = fileName;
+				if (defaultModuleName.endsWith('.js')) {
+					defaultModuleName = defaultModuleName.substring(0, defaultModuleName.length - 3);
+				}
+				aClient.@com.eas.client.AppClient::putModuleStructure(Ljava/lang/String;Lcom/eas/client/AppClient$ModuleStructure;)(defaultModuleName, mstructure);
+				if (structure.modules) {
+					for ( var i = 0; i < structure.modules.length; i++) {
+						aClient.@com.eas.client.AppClient::putModuleStructure(Ljava/lang/String;Lcom/eas/client/AppClient$ModuleStructure;)(structure.modules[i], mstructure);
+					}
+				}
+			}
+			$wnd.define['modules-index'] = {};
+		}
+	}-*/;
+
 	public Cancellable requestModuleStructure(final String aModuleName, final Callback<ModuleStructure, XMLHttpRequest> aCallback) throws Exception {
+		checkModulesIndex(this);
 		if (modulesStructures.containsKey(aModuleName)) {
 			if (aCallback != null) {
 				Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -736,6 +817,26 @@ public class AppClient {
 					@Override
 					public void execute() {
 						aCallback.onSuccess(modulesStructures.get(aModuleName));
+					}
+				});
+			}
+			return new Cancellable() {
+				@Override
+				public void cancel() {
+				}
+			};
+		} else if (simpleModules) {
+			if (aCallback != null) {
+				Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+
+					@Override
+					public void execute() {
+						String fakeRelativeFileName = aModuleName;
+						if (!fakeRelativeFileName.toLowerCase().endsWith(".js")) {
+							fakeRelativeFileName = fakeRelativeFileName + ".js";
+						}
+						ModuleStructure s = new ModuleStructure(fakeRelativeFileName);
+						aCallback.onSuccess(s);
 					}
 				});
 			}
@@ -818,7 +919,7 @@ public class AppClient {
 
 				@Override
 				public String asString() {
-					return checkedCacheBust(relativeUri() + APP_RESOURCE_PREFIX + aResourceName);
+					return checkedCacheBust(relativeUri() + getSourcePath() + aResourceName);
 				}
 
 			};
@@ -926,7 +1027,8 @@ public class AppClient {
 					String responseType = aResponse.getResponseHeader("content-type");
 					if (responseType != null) {
 						responseType = responseType.toLowerCase();
-						if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
+						if (responseType.contains("application/json") || responseType.contains("application/javascript") || responseType.contains("text/json")
+						        || responseType.contains("text/javascript")) {
 							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
 						} else if (responseType.contains(REPORT_LOCATION_CONTENT_TYPE)) {
 							Utils.executeScriptEventVoid(onSuccess, onSuccess, createReport(aReportConstructor, aResponse.getResponseText()));
@@ -943,7 +1045,14 @@ public class AppClient {
 					if (onFailure != null) {
 						try {
 							String responseText = aResponse.getResponseText();
-							Utils.executeScriptEventVoid(onSuccess, onFailure, Utils.toJs(responseText != null && !responseText.isEmpty() ? responseText : aResponse.getStatusText()));
+							String responseType = aResponse.getResponseHeader("content-type");
+							if (responseType != null
+							        && (responseType.contains("application/json") || responseType.contains("application/javascript") || responseType.contains("text/json") || responseType
+							                .contains("text/javascript"))) {
+								Utils.executeScriptEventVoid(onFailure, onFailure, Utils.jsonParse(responseText));
+							} else {
+								Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(responseText != null && !responseText.isEmpty() ? responseText : aResponse.getStatusText()));
+							}
 						} catch (Exception ex) {
 							Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
 						}
@@ -1066,4 +1175,5 @@ public class AppClient {
 	public String checkedCacheBust(String aUrl) {
 		return cacheBustEnabled ? aUrl + "?" + PlatypusHttpRequestParams.CACHE_BUSTER + "=" + IDGenerator.genId() : aUrl;
 	}
+
 }

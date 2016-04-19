@@ -2,7 +2,6 @@
  * Validator module checks changes made by application on client or server side.
  * Validator module can validate changes made in context of script and relational datasources.
  * @author ${user}
- * @constructor
  * @validator DataSource1, DataSource2
  */ 
 function ${appElementName}(){

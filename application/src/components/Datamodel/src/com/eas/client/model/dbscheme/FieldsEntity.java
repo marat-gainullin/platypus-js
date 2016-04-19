@@ -11,7 +11,7 @@ import com.eas.client.SqlQuery;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.metadata.DbTableIndexes;
 import com.eas.client.model.Entity;
-import com.eas.client.model.Model;
+import com.eas.client.model.store.Model2XmlDom;
 import com.eas.client.model.visitors.ModelVisitor;
 import java.util.ArrayList;
 import java.util.List;
@@ -120,7 +120,7 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
 
     @Override
     protected boolean isTagValid(String aTagName) {
-        return aTagName != null && !aTagName.equals(Model.DATASOURCE_TITLE_TAG_NAME);
+        return aTagName != null && !aTagName.equals(Model2XmlDom.DATASOURCE_TITLE_ATTR_NAME);
     }
 
     @Override

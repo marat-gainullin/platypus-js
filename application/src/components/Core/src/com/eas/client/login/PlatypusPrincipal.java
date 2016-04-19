@@ -121,7 +121,7 @@ public class PlatypusPrincipal implements Principal {
 
     @Override
     public String toString() {
-        return super.toString() + "{username: \"" + name + "\"}";
+        return getClass().getSimpleName() + " {name: \"" + name + "\"}";
     }
 
     @Override

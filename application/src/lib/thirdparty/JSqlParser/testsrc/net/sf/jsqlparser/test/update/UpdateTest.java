@@ -1,8 +1,8 @@
 package net.sf.jsqlparser.test.update;
 
 import java.io.StringReader;
+import static junit.framework.TestCase.*;
 
-import junit.framework.TestCase;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.JdbcParameter;
 import net.sf.jsqlparser.expression.LongValue;
@@ -11,15 +11,13 @@ import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.update.Update;
+import org.junit.Test;
 
-public class UpdateTest extends TestCase {
+public class UpdateTest {
 
     CCJSqlParserManager parserManager = new CCJSqlParserManager();
 
-    public UpdateTest(String arg0) {
-        super(arg0);
-    }
-
+    @Test
     public void testUpdate() throws JSQLParserException {
         String statement = "UPDATE mytable set col1='as', col2=?, col3=565 Where o >= 3";
         Update update = (Update) parserManager.parse(new StringReader(statement));
@@ -35,6 +33,7 @@ public class UpdateTest extends TestCase {
         assertTrue(update.getWhere() instanceof GreaterThanEquals);
     }
     
+    @Test
     public void testComment() throws Exception {
         String statement =
                 "/*welkjhkas*/ UPDATE /**/ mytable /**/ SET /**/ col1 /**/ = 'as' /**/, /**/ col2 /**/ = ? /**/, /**/ col3 /**/ = 565 /**/ WHERE o >= 3 /*ksjdf*/";
@@ -42,12 +41,9 @@ public class UpdateTest extends TestCase {
         assertEquals(statement, "" + update);
     }
     
+    @Test
     public void testUpdateWAlias() throws JSQLParserException {
         String statement = "UPDATE table1 A SET A.column = 'XXX' WHERE A.cod_table = 'YYY'";
         Update update = (Update) parserManager.parse(new StringReader(statement));
-    }
-
-    public static void main(String[] args) {
-        junit.swingui.TestRunner.run(UpdateTest.class);
     }
 }

@@ -5,7 +5,7 @@
  */
 package com.eas.client.cache;
 
-import com.eas.client.AppElementFiles;
+import java.io.File;
 
 /**
  *
@@ -13,6 +13,7 @@ import com.eas.client.AppElementFiles;
  */
 public interface PlatypusIndexer {
 
-    public AppElementFiles nameToFiles(String aName) throws Exception;
+    public File nameToFile(String aName) throws Exception;
 
+    public String getDefaultModuleName(File aFile);
 }

@@ -133,12 +133,11 @@ public class VDateTimeField extends JCalendarComboBox implements HasValue<Date>,
     public Date getValue() {
         Date value = (Date) getModel().getValue();
         return value;
-        //return NULL_DATE_VALUE.equals(value) ? null : checkTime(value);
     }
 
     @Override
     public void setValue(Date aValue) {
-        getModel().setValue(aValue);// != null ? aValue : NULL_DATE_VALUE);
+        getModel().setValue(aValue);
     }
 
     @Override

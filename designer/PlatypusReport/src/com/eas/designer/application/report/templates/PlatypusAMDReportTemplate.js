@@ -1,9 +1,8 @@
 /**
  * 
  * @author ${user}
- * @module ${appElementName}
  */
-define(['orm', 'template'], function (Orm, loadTemplate, ModuleName) {
+define('${appElementName}', ['orm', 'template'], function (Orm, loadTemplate, ModuleName) {
     function module_constructor() {
         var self = this
                 , model = Orm.loadModel(ModuleName)

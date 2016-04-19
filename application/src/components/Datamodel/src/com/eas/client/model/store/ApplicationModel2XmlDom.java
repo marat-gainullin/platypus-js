@@ -4,7 +4,6 @@
  */
 package com.eas.client.model.store;
 
-import com.eas.client.model.Model;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel; 
 import com.eas.client.model.application.ReferenceRelation;
@@ -54,8 +53,8 @@ public class ApplicationModel2XmlDom<E extends ApplicationEntity<M, ?, E>, M ext
             Element node = doc.createElement(ENTITY_TAG_NAME);
             currentNode.appendChild(node);
 
-            node.setAttribute(Model.DATASOURCE_NAME_TAG_NAME, aEntity.getName());
-            node.setAttribute(Model.DATASOURCE_TITLE_TAG_NAME, aEntity.getTitle());
+            node.setAttribute(DATASOURCE_NAMEE_ATTR_NAME, aEntity.getName());
+            node.setAttribute(DATASOURCE_TITLE_ATTR_NAME, aEntity.getTitle());
             node.setAttribute(ENTITY_ID_ATTR_NAME, String.valueOf(aEntity.getEntityId()));
             if (aEntity.getQueryName() != null) {
                 node.setAttribute(QUERY_ID_ATTR_NAME, String.valueOf(aEntity.getQueryName()));

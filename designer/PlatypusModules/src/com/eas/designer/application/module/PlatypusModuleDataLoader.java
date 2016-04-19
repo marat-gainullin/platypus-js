@@ -36,7 +36,7 @@ public class PlatypusModuleDataLoader extends MultiFileLoader {
     protected String actionsContext() {
         return "Loaders/text/javascript/Actions/"; // NOI18N
     }
-    
+
     /**
      * For a given file finds a primary file.
      *
@@ -47,26 +47,32 @@ public class PlatypusModuleDataLoader extends MultiFileLoader {
      */
     @Override
     protected FileObject findPrimaryFile(FileObject fo) {
-        return findPrimaryFileImpl(fo); 
+        return findPrimaryFileImpl(fo);
     }
 
-    public static FileObject findPrimaryFileImpl(FileObject fo) {
+    private static FileObject findPrimaryFileImpl(FileObject fo) {
         // never recognize folders.
-        if (!fo.isFolder()
-                && FileUtil.findBrother(fo, PlatypusFiles.FORM_EXTENSION) == null
-                && FileUtil.findBrother(fo, PlatypusFiles.REPORT_LAYOUT_EXTENSION_X) == null 
-                && FileUtil.findBrother(fo, PlatypusFiles.REPORT_LAYOUT_EXTENSION) == null) {
-            String ext = fo.getExt();
-            if (ext.equals(PlatypusFiles.MODEL_EXTENSION)) {
-                return FileUtil.findBrother(fo, PlatypusFiles.JAVASCRIPT_EXTENSION);
-            } else if (ext.equals(PlatypusFiles.JAVASCRIPT_EXTENSION)
-                    && FileUtil.findBrother(fo, PlatypusFiles.MODEL_EXTENSION) != null) {
-                return fo;
+        if (!fo.isFolder()) {
+            FileObject jsBrother = FileUtil.findBrother(fo, PlatypusFiles.JAVASCRIPT_EXTENSION);
+            FileObject modelBrother = FileUtil.findBrother(fo, PlatypusFiles.MODEL_EXTENSION);
+            FileObject layoutBrother = FileUtil.findBrother(fo, PlatypusFiles.FORM_EXTENSION);
+            FileObject reportBrother = FileUtil.findBrother(fo, PlatypusFiles.REPORT_LAYOUT_EXTENSION_X);
+            FileObject reportXBrother = FileUtil.findBrother(fo, PlatypusFiles.REPORT_LAYOUT_EXTENSION);
+            if ((layoutBrother == null || !"text/layout+xml".equals(layoutBrother.getMIMEType()))
+                    && reportBrother == null
+                    && reportXBrother == null) {
+                String foMimeType = fo.getMIMEType();
+                if ("text/model+xml".equals(foMimeType)) {
+                    return jsBrother;
+                } else if ("text/javascript".equals(foMimeType)
+                        && modelBrother != null && "text/model+xml".equals(modelBrother.getMIMEType()) ) {
+                    return fo;
+                }
             }
         }
         return null;
     }
-    
+
     /**
      * Creates the right data object for given primary file. It is guaranteed
      * that the provided file is realy primary file returned from the method

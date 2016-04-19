@@ -4,11 +4,16 @@
  */
 package com.eas.client.threetier;
 
-import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.client.threetier.requests.ExceptionResponse;
 import com.eas.client.threetier.platypus.PlatypusPlatypusConnection;
 import com.eas.client.AppConnection;
 import com.eas.client.ClientConstants;
 import com.eas.client.login.Credentials;
+import com.eas.client.threetier.requests.AccessControlExceptionResponse;
+import com.eas.client.threetier.requests.JsonExceptionResponse;
+import com.eas.client.threetier.requests.SqlExceptionResponse;
+import com.eas.script.JsObjectException;
+import com.eas.script.Scripts;
 import com.eas.util.BinaryUtils;
 import com.eas.util.StringUtils;
 import java.awt.EventQueue;
@@ -78,6 +83,7 @@ public abstract class PlatypusConnection implements AppConnection {
     public static final int DEFAULT_MAX_THREADS = 25;
 
     protected final URL url;
+    protected final String sourcePath;
     protected Credentials credentials;
     protected Callable<Credentials> onCredentials;
     protected int maximumAuthenticateAttempts = 1;
@@ -90,9 +96,10 @@ public abstract class PlatypusConnection implements AppConnection {
         public int count;
     }
 
-    public PlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts) {
+    public PlatypusConnection(URL aUrl, String aSourcePath, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts) {
         super();
         url = aUrl;
+        sourcePath = aSourcePath;
         onCredentials = aOnCredentials;
         maximumAuthenticateAttempts = Math.max(1, aMaximumAuthenticateAttempts);
     }
@@ -101,29 +108,26 @@ public abstract class PlatypusConnection implements AppConnection {
         return url;
     }
 
-    public Exception handleErrorResponse(ErrorResponse aResponse) {
-        if (aResponse.getSqlErrorCode() != null || aResponse.getSqlState() != null) {
-            Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.WARNING, SQL_EXCEPTION_LOG_MSG, new Object[]{aResponse.getErrorMessage(), aResponse.getSqlState(), aResponse.getSqlErrorCode()});
-            return new SQLException(aResponse.getErrorMessage(), aResponse.getSqlState(), aResponse.getSqlErrorCode());
-        } else if (aResponse.isAccessControl()) {
-            Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.WARNING, ACCESSCONTROL_EXCEPTION_LOG_MSG, new Object[]{aResponse.getErrorMessage()});
-            ErrorResponse errorResp = (ErrorResponse) aResponse;
-            return new AccessControlException(errorResp.getErrorMessage(), errorResp.isNotLoggedIn() ? new AuthPermission("*") : null);
+    public Exception handleErrorResponse(ExceptionResponse aResponse, Scripts.Space aSpace) {
+        if (aResponse instanceof SqlExceptionResponse) {
+            SqlExceptionResponse errorResponse = (SqlExceptionResponse) aResponse;
+            Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.WARNING, SQL_EXCEPTION_LOG_MSG, new Object[]{aResponse.getErrorMessage(), errorResponse.getSqlState(), errorResponse.getSqlErrorCode()});
+            return new SQLException(aResponse.getErrorMessage(), errorResponse.getSqlState(), errorResponse.getSqlErrorCode());
+        } else if (aResponse instanceof AccessControlExceptionResponse) {
+            AccessControlExceptionResponse errorResponse = (AccessControlExceptionResponse) aResponse;
+            Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.WARNING, ACCESSCONTROL_EXCEPTION_LOG_MSG, new Object[]{errorResponse.getErrorMessage()});
+            return new AccessControlException(errorResponse.getErrorMessage(), errorResponse.isNotLoggedIn() ? new AuthPermission("*") : null);
+        } else if (aResponse instanceof JsonExceptionResponse) {
+            JsonExceptionResponse errorResponse = (JsonExceptionResponse) aResponse;
+            return new JsObjectException(aSpace.parseJsonWithDates(errorResponse.getJsonContent()));
         } else {
-            String msg = "Exception from server. " + ((ErrorResponse) aResponse).getErrorMessage();
+            String msg = "Exception from server. " + aResponse.getErrorMessage();
             Logger.getLogger(PlatypusConnection.class.getName()).log(Level.WARNING, msg);
             return new Exception(msg);
         }
     }
 
     protected static KeyManager[] createKeyManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
-        /*
-         KeyStore ks = KeyStore.getInstance(DEFAULT_CETRS_STORE_TYPE);     
-         ks.load(null, null);
-         final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
-         keyManagerFactory.init(ks, "changeit".toCharArray());
-         return keyManagerFactory.getKeyManagers();
-         */
         KeyStore ks = KeyStore.getInstance(DEFAULT_CETRS_STORE_TYPE);
         // get user password and file input stream
         char[] password = DEFAULT_KEYSTORE_PASSWORD.toCharArray();

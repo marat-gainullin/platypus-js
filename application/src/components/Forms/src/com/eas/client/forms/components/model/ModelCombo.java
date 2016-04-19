@@ -102,7 +102,6 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox<JSObject>, Obj
     protected void enqueueListChanged() {
         listChangedEnqueued = true;
         EventQueue.invokeLater(() -> {
-            Scripts.setContext(Forms.getContext());
             if (listChangedEnqueued) {
                 listChangedEnqueued = false;
                 refill();

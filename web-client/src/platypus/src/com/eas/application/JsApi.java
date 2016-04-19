@@ -27,12 +27,13 @@ public class JsApi {
 		}; 
 		$wnd.define = function () {
 	        if (arguments.length === 1 ||
-	                arguments.length === 2) {
-	            var aDeps = arguments.length > 1 ? arguments[0] : [];
-	            var aModuleDefiner = arguments.length > 1 ? arguments[1] : arguments[0];
+	                arguments.length === 2 || arguments.length === 3) {
+	            var aModuleName = arguments.length === 3 ? arguments[0] : null;
+	            var aDeps = arguments.length === 3 ? arguments[1] : arguments.length === 2 ? arguments[0] : [];
+	            var aModuleDefiner = arguments.length === 3 ? arguments[2] : arguments.length === 2 ? arguments[1] : arguments[0];
 	            if (!Array.isArray(aDeps))
 	                aDeps = [aDeps];
-	            @com.eas.application.Application::define(Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;)(aDeps, function(){
+	            @com.eas.application.Application::define(Ljava/lang/String;Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;)(aModuleName ? aModuleName + '' : null, aDeps, function(){
                 	return typeof aModuleDefiner === 'function' ? aModuleDefiner.apply(null, arguments) : aModuleDefiner;
 	            });
 	        } else {
@@ -538,7 +539,7 @@ public class JsApi {
 					for (var j = 0; j < argsLength; j++) {
 						var to = typeof arguments[j];
 						if(to !== 'undefined' && to !== 'function'){ 
-							params[j] = JSON.stringify(arguments[j]);
+							params[j] = $wnd.JSON.stringify(arguments[j]);
 						}else{
 							break;
 						}
@@ -549,11 +550,11 @@ public class JsApi {
 								if(typeof aResult === 'object' && aResult instanceof Report)
 									onSuccess(aResult);
 								else
-									onSuccess(JSON.parse(aResult, @com.eas.core.Utils.JsObject::dateReviver()()));
+									onSuccess($wnd.JSON.parse(aResult, @com.eas.core.Utils.JsObject::dateReviver()()));
 							}, onFailure, Report);
 					} else {
 						var result = nativeClient.@com.eas.client.AppClient::requestServerMethodExecution(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params, null, null, Report);
-						return typeof result === 'object' && result instanceof Report ? result : JSON.parse(result, @com.eas.core.Utils.JsObject::dateReviver()()); 
+						return typeof result === 'object' && result instanceof Report ? result : $wnd.JSON.parse(result, @com.eas.core.Utils.JsObject::dateReviver()()); 
 					}
 				};
 			}

@@ -4,44 +4,21 @@
  */
 package com.bearsoft.gui.grid.header;
 
-import javax.swing.Action;
-import java.awt.event.ActionEvent;
-import javax.swing.AbstractAction;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import java.awt.BorderLayout;
-import javax.swing.JScrollPane;
-import java.awt.Container;
-import javax.swing.JFrame;
 import java.awt.GridBagConstraints;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
-import javax.swing.table.TableRowSorter;
-import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
  *
- * @author Gala
+ * @author mg
  */
 public class MultiLevelHeaderTest {
 
-    // source column model
-    protected DefaultTableColumnModel columns = new DefaultTableColumnModel();
-    // ethalon roots
-    protected List<GridColumnsNode> roots = new ArrayList<>();
-    // target multi level header
-    protected MultiLevelHeader header;
-
-    @Before
-    public void prepareColumns() {
-
-        header = new MultiLevelHeader();
-
+    private void prepareColumns(DefaultTableColumnModel columns, List roots, MultiLevelHeader header) {
         for (int i = 0; i < 5; i++) {
             TableColumn col = new TableColumn(i);
             col.setHeaderValue(String.valueOf(i) + " col ");
@@ -88,16 +65,12 @@ public class MultiLevelHeaderTest {
     }
 
     @Test
-    public void leafsToRootsTest() {
-        List<GridColumnsNode> lroots = header.wrapColumnsCalculateRoots();
-        assertEquals(roots.size(), lroots.size());
-        for (int i = 0; i < lroots.size(); i++) {
-            assertTrue(lroots.get(i).isEqual(roots.get(i)));
-        }
-    }
-
-    @Test
     public void tree2GridCalculationsTest() {
+        DefaultTableColumnModel columns = new DefaultTableColumnModel();
+        List<GridColumnsNode> roots = new ArrayList<>();
+        MultiLevelHeader header = new MultiLevelHeader();
+        prepareColumns(columns, roots, header);
+
         header.regenerate();
 
         GridColumnsNode g11 = header.roots.get(0);
@@ -161,63 +134,5 @@ public class MultiLevelHeaderTest {
         assertEquals(2, g34Constraints.gridy);
         assertEquals(1, g34Constraints.gridwidth);
         assertEquals(1, g34Constraints.gridheight);
-    }
-
-    protected class CheckHeaderIntegrityAction extends AbstractAction {
-
-        public CheckHeaderIntegrityAction() {
-            super();
-            putValue(Action.NAME, "check header integrity");
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            checkHeaderStructure();
-        }
-
-        public void checkHeaderStructure() {
-            header.checkStructure();
-        }
-    }
-
-    @Test
-    public void headerVisualTest() throws InterruptedException {
-        for (int i = 0; i < 50; i++) {
-            TableColumn col = new TableColumn(i + 5);
-            col.setHeaderValue(String.valueOf(i + 5) + " col ");
-            col.setMinWidth(100);
-            col.setWidth(120);
-            columns.addColumn(col);
-        }
-        header.regenerate();
-        CheckHeaderIntegrityAction checker = new CheckHeaderIntegrityAction();
-        JFrame fr = new JFrame();
-        JPanel pnl = new JPanel();
-        JButton btn = new JButton(checker);
-        pnl.add(btn);
-        Container c = fr.getContentPane();
-        JScrollPane scroll = new JScrollPane();
-        c.add(scroll, BorderLayout.CENTER);
-        c.add(pnl, BorderLayout.NORTH);
-
-        JTable tbl = new JTable(10, columns.getColumnCount());
-        tbl.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        tbl.setColumnModel(columns);
-        tbl.setRowSorter(new TableRowSorter<>(tbl.getModel()));
-        header.setRowSorter(tbl.getRowSorter());
-        scroll.setViewportView(tbl);
-
-        fr.setSize(600, 600);
-        fr.setVisible(true);
-        scroll.setColumnHeaderView(header);
-        // asserts section
-        checker.checkHeaderStructure();
-        //
-        Thread.sleep(10);
-        fr.setVisible(false);
-        for (int i = columns.getColumnCount() - 1; i > 4; i--) {
-            TableColumn col = columns.getColumn(i);
-            columns.removeColumn(col);
-        }
     }
 }

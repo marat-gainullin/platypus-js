@@ -16,7 +16,7 @@ import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.resourcepool.ResourceUnavalableException;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.concurrent.CallableConsumer;
-import com.eas.concurrent.DeamonThreadFactory;
+import com.eas.concurrent.PlatypusThreadFactory;
 import com.eas.script.Scripts;
 import com.eas.util.StringUtils;
 import java.sql.*;
@@ -73,7 +73,7 @@ public class DatabasesClient {
         jdbcProcessor = new ThreadPoolExecutor(aMaxJdbcThreads, aMaxJdbcThreads,
                 3L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
-                new DeamonThreadFactory("jdbc-", false));
+                new PlatypusThreadFactory("jdbc-", false));
         jdbcProcessor.allowCoreThreadTimeOut(true);
         defaultDatasourceName = aDefaultDatasourceName;
         autoFillMetadata = aAutoFillMetadata;
@@ -377,7 +377,9 @@ public class DatabasesClient {
 
     private void startJdbcTask(Runnable aTask) {
         Scripts.LocalContext context = Scripts.getContext();
-        context.incAsyncsCount();
+        if (context != null) {
+            context.incAsyncsCount();
+        }
         jdbcProcessor.submit(() -> {
             Scripts.setContext(context);
             try {

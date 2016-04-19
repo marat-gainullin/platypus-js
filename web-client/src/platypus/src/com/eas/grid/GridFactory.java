@@ -27,21 +27,22 @@ public class GridFactory implements UiWidgetReader{
 	public UIObject readWidget(Element anElement, final UiReader aFactory) throws Exception {
 		String type = anElement.getTagName();
 		switch (type) {
+		case "mg":
 		case "ModelGrid": {
 			ModelGrid grid = new ModelGrid();
 			GridPublisher.publish(grid);
 			aFactory.readGeneralProps(anElement, grid);
-			int frozenColumns = Utils.getIntegerAttribute(anElement, "frozenColumns", 0);
-			int frozenRows = Utils.getIntegerAttribute(anElement, "frozenRows", 0);
-			boolean insertable = Utils.getBooleanAttribute(anElement, "insertable", Boolean.TRUE);
-			boolean deletable = Utils.getBooleanAttribute(anElement, "deletable", Boolean.TRUE);
-			boolean editable = Utils.getBooleanAttribute(anElement, "editable", Boolean.TRUE);
-			boolean headerVisible = Utils.getBooleanAttribute(anElement, "headerVisible", Boolean.TRUE);
-			boolean draggableRows = Utils.getBooleanAttribute(anElement, "draggableRows", Boolean.FALSE);
-			boolean showHorizontalLines = Utils.getBooleanAttribute(anElement, "showHorizontalLines", Boolean.TRUE);
-			boolean showVerticalLines = Utils.getBooleanAttribute(anElement, "showVerticalLines", Boolean.TRUE);
-			boolean showOddRowsInOtherColor = Utils.getBooleanAttribute(anElement, "showOddRowsInOtherColor", Boolean.TRUE);
-			int rowsHeight = Utils.getIntegerAttribute(anElement, "rowsHeight", 30);
+			int frozenColumns = Utils.getIntegerAttribute(anElement, "frc", "frozenColumns", 0);
+			int frozenRows = Utils.getIntegerAttribute(anElement, "frr", "frozenRows", 0);
+			boolean insertable = Utils.getBooleanAttribute(anElement, "ie", "insertable", Boolean.TRUE);
+			boolean deletable = Utils.getBooleanAttribute(anElement, "de", "deletable", Boolean.TRUE);
+			boolean editable = Utils.getBooleanAttribute(anElement, "e", "editable", Boolean.TRUE);
+			boolean headerVisible = Utils.getBooleanAttribute(anElement, "hv", "headerVisible", Boolean.TRUE);
+			boolean draggableRows = Utils.getBooleanAttribute(anElement, "dr", "draggableRows", Boolean.FALSE);
+			boolean showHorizontalLines = Utils.getBooleanAttribute(anElement, "shl", "showHorizontalLines", Boolean.TRUE);
+			boolean showVerticalLines = Utils.getBooleanAttribute(anElement, "svl", "showVerticalLines", Boolean.TRUE);
+			boolean showOddRowsInOtherColor = Utils.getBooleanAttribute(anElement, "soc", "showOddRowsInOtherColor", Boolean.TRUE);
+			int rowsHeight = Utils.getIntegerAttribute(anElement, "rh", "rowsHeight", 30);
 			grid.setHeaderVisible(headerVisible);
 			grid.setDraggableRows(draggableRows);
 			grid.setRowsHeight(rowsHeight);
@@ -53,26 +54,26 @@ public class GridFactory implements UiWidgetReader{
 			grid.setInsertable(insertable);
 			grid.setFrozenColumns(frozenColumns);
 			grid.setFrozenRows(frozenRows);
-			if (anElement.hasAttribute("oddRowsColor")) {
-				String oddRowsColorDesc = anElement.getAttribute("oddRowsColor");
+			if (Utils.hasAttribute(anElement, "orc", "oddRowsColor")) {
+				String oddRowsColorDesc = Utils.getAttribute(anElement, "orc", "oddRowsColor", null);
 				grid.setOddRowsColor(PublishedColor.parse(oddRowsColorDesc));
 			}
-			if (anElement.hasAttribute("gridColor")) {
-				String gridColorDesc = anElement.getAttribute("gridColor");
+			if (Utils.hasAttribute(anElement, "gc", "gridColor")) {
+				String gridColorDesc = Utils.getAttribute(anElement, "gc", "gridColor", null);
 				grid.setGridColor(PublishedColor.parse(gridColorDesc));
 			}
-			if (anElement.hasAttribute("parentField")) {
-				String parentFieldPath = anElement.getAttribute("parentField");
+			if (Utils.hasAttribute(anElement, "pf", "parentField")) {
+				String parentFieldPath = Utils.getAttribute(anElement, "pf", "parentField", null);
 				grid.setParentField(parentFieldPath);
 			}
-			if (anElement.hasAttribute("childrenField")) {
-				String childrenFieldPath = anElement.getAttribute("childrenField");
+			if (Utils.hasAttribute(anElement, "cf", "childrenField")) {
+				String childrenFieldPath = Utils.getAttribute(anElement, "cf", "childrenField", null);
 				grid.setChildrenField(childrenFieldPath);
 			}
 			List<HeaderNode<JavaScriptObject>> roots = readColumns(anElement, aFactory);
 			grid.setHeader(roots);
-			if (anElement.hasAttribute("data")) {
-				String entityName = anElement.getAttribute("data");
+			if (Utils.hasAttribute(anElement, "d", "data")) {
+				String entityName = Utils.getAttribute(anElement, "d", "data", null);
 				try {
 					grid.setData(aFactory.resolveEntity(entityName));
 				} catch (Exception ex) {
@@ -80,8 +81,8 @@ public class GridFactory implements UiWidgetReader{
 					        "While setting data to named model's property " + entityName + " to widget " + grid.getJsName() + " exception occured: " + ex.getMessage());
 				}
 			}
-			if (anElement.hasAttribute("field")) {
-				String dataPropertyPath = anElement.getAttribute("field");
+			if (Utils.hasAttribute(anElement, "f", "field")) {
+				String dataPropertyPath = Utils.getAttribute(anElement, "f", "field", null);
 				grid.setField(dataPropertyPath);
 			}
 			return grid;
@@ -99,6 +100,7 @@ public class GridFactory implements UiWidgetReader{
 				Element childTag = (Element) childNode;
 				String columnType = childTag.getTagName();
 				switch (columnType) {
+				case "cgc":
 				case "CheckGridColumn": {
 					CheckHeaderNode column = new CheckHeaderNode();
 					GridPublisher.publish(column);
@@ -110,6 +112,7 @@ public class GridFactory implements UiWidgetReader{
 					}
 					break;
 				}
+				case "rgc":
 				case "RadioGridColumn": {
 					RadioHeaderNode column = new RadioHeaderNode();
 					GridPublisher.publish(column);
@@ -121,6 +124,7 @@ public class GridFactory implements UiWidgetReader{
 					}
 					break;
 				}
+				case "sgc":
 				case "ServiceGridColumn": {
 					ServiceHeaderNode column = new ServiceHeaderNode();
 					GridPublisher.publish(column);
@@ -132,15 +136,16 @@ public class GridFactory implements UiWidgetReader{
 					}
 					break;
 				}
+				case "mgc":
 				case "ModelGridColumn": {
 					ModelHeaderNode column = new ModelHeaderNode();
 					GridPublisher.publish(column);
 					readColumnNode(column, childTag, aFactory);
-					if (childTag.hasAttribute("field")) {
-						column.setField(childTag.getAttribute("field"));
+					if (Utils.hasAttribute(childTag, "f", "field")) {
+						column.setField(Utils.getAttribute(childTag, "f", "field", null));
 					}
-					if (childTag.hasAttribute("sortField")) {
-						column.setSortField(childTag.getAttribute("sortField"));
+					if (Utils.hasAttribute(childTag, "sf", "sortField")) {
+						column.setSortField(Utils.getAttribute(childTag, "sf", "sortField", null));
 					}
 					Node _childNode = childTag.getFirstChild();
 					while (_childNode != null) {
@@ -173,49 +178,49 @@ public class GridFactory implements UiWidgetReader{
 	}
 
 	private static void readColumnNode(ModelHeaderNode aNode, Element anElement, UiReader aFactory) throws Exception {
-		aNode.setJsName(anElement.getAttribute("name"));
-		if (anElement.hasAttribute("title")) {
-			aNode.setTitle(anElement.getAttribute("title"));
+		aNode.setJsName(Utils.getAttribute(anElement, "n", "name", null));
+		if (Utils.hasAttribute(anElement, "tl", "title")) {
+			aNode.setTitle(Utils.getAttribute(anElement, "tl", "title", null));
 		}
-		if (anElement.hasAttribute("background")) {
-			PublishedColor background = PublishedColor.parse(anElement.getAttribute("background"));
+		if (Utils.hasAttribute(anElement, "bg", "background")) {
+			PublishedColor background = PublishedColor.parse(Utils.getAttribute(anElement, "bg", "background", null));
 			aNode.setBackground(background);
 		}
-		if (anElement.hasAttribute("foreground")) {
-			PublishedColor foreground = PublishedColor.parse(anElement.getAttribute("foreground"));
+		if (Utils.hasAttribute(anElement, "fg", "foreground")) {
+			PublishedColor foreground = PublishedColor.parse(Utils.getAttribute(anElement, "fg", "foreground", null));
 			aNode.setForeground(foreground);
 		}
-		aNode.setReadonly(Utils.getBooleanAttribute(anElement, "readonly", Boolean.FALSE));
-		// aNode.setEnabled(Utils.getBooleanAttribute(anElement, "enabled",
+		aNode.setReadonly(Utils.getBooleanAttribute(anElement, "ro", "readonly", Boolean.FALSE));
+		// aNode.setEnabled(Utils.getBooleanAttribute(anElement, "en", "enabled",
 		// Boolean.TRUE));
 		PublishedFont font = aFactory.readFont(anElement);
 		if (font != null) {
 			aNode.setFont(font);
 		}
-		if (anElement.hasAttribute("minWidth")) {
-			String minWidth = anElement.getAttribute("minWidth");
+		if (Utils.hasAttribute(anElement, "mw", "minWidth")) {
+			String minWidth = Utils.getAttribute(anElement, "mw", "minWidth", null);
 			if (minWidth.length() > 2 && minWidth.endsWith("px")) {
 				aNode.setMinWidth(Integer.parseInt(minWidth.substring(0, minWidth.length() - 2)));
 			}
 		}
-		if (anElement.hasAttribute("maxWidth")) {
-			String maxWidth = anElement.getAttribute("maxWidth");
+		if (Utils.hasAttribute(anElement, "mxw", "maxWidth")) {
+			String maxWidth = Utils.getAttribute(anElement, "mxw", "maxWidth", null);
 			if (maxWidth.length() > 2 && maxWidth.endsWith("px")) {
 				aNode.setMaxWidth(Integer.parseInt(maxWidth.substring(0, maxWidth.length() - 2)));
 			}
 		}
-		if (anElement.hasAttribute("preferredWidth")) {
-			String preferredWidth = anElement.getAttribute("preferredWidth");
+		if (Utils.hasAttribute(anElement, "prw", "preferredWidth")) {
+			String preferredWidth = Utils.getAttribute(anElement, "prw", "preferredWidth", null);
 			if (preferredWidth.length() > 2 && preferredWidth.endsWith("px")) {
 				aNode.setPreferredWidth(Integer.parseInt(preferredWidth.substring(0, preferredWidth.length() - 2)));
 			}
 		}
-		aNode.setMoveable(Utils.getBooleanAttribute(anElement, "movable", Boolean.TRUE));
-		aNode.setResizable(Utils.getBooleanAttribute(anElement, "resizable", aNode instanceof CheckHeaderNode || aNode instanceof RadioHeaderNode || aNode instanceof ServiceHeaderNode ? Boolean.FALSE
+		aNode.setMoveable(Utils.getBooleanAttribute(anElement, "m", "movable", Boolean.TRUE));
+		aNode.setResizable(Utils.getBooleanAttribute(anElement, "rs", "resizable", aNode instanceof CheckHeaderNode || aNode instanceof RadioHeaderNode || aNode instanceof ServiceHeaderNode ? Boolean.FALSE
 		        : Boolean.TRUE));
-		// aNode.setSelectOnly(Utils.getBooleanAttribute(anElement,
+		// aNode.setSelectOnly(Utils.getBooleanAttribute(anElement, "so",
 		// "selectOnly", Boolean.FALSE));
-		aNode.setSortable(Utils.getBooleanAttribute(anElement, "sortable", Boolean.TRUE));
-		aNode.setVisible(Utils.getBooleanAttribute(anElement, "visible", Boolean.TRUE));
+		aNode.setSortable(Utils.getBooleanAttribute(anElement, "s", "sortable", Boolean.TRUE));
+		aNode.setVisible(Utils.getBooleanAttribute(anElement, "v", "visible", Boolean.TRUE));
 	}
 }

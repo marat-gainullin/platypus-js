@@ -33,8 +33,8 @@ public class InsettedRendererTest extends BaseTableTest {
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(tbl1, BorderLayout.CENTER);
         frame.setSize(800, 700);
-        frame.setVisible(true);
+        //frame.setVisible(true);
         Thread.sleep(1000);
-        frame.setVisible(false);
+        //frame.setVisible(false);
     }
 }

@@ -28,7 +28,7 @@ import java.sql.ParameterMetaData;
 public class Parameter extends Field {
 
 	protected int mode = ParameterMetaData.parameterModeIn;
-	protected Double selectionForm;
+	protected String selectionForm;
 	protected Object defaultValue;
 	protected Object value;
 	protected boolean modified;
@@ -243,7 +243,7 @@ public class Parameter extends Field {
 	 * 
 	 * @return Selection form of the parameter.
 	 */
-	public Double getSelectionForm() {
+	public String getSelectionForm() {
 		return selectionForm;
 	}
 
@@ -253,7 +253,7 @@ public class Parameter extends Field {
 	 * @param selectionForm
 	 *            Selection form of the parameter.
 	 */
-	public void setSelectionForm(Double aValue) {
+	public void setSelectionForm(String aValue) {
 		selectionForm = aValue;
 	}
 

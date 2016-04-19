@@ -1,12 +1,15 @@
 package com.eas.script;
 
-import com.eas.concurrent.DeamonThreadFactory;
+import com.eas.concurrent.PlatypusThreadFactory;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,11 +37,8 @@ import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptUtils;
 import jdk.nashorn.api.scripting.URLReader;
 import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.ir.LexicalContext;
 import jdk.nashorn.internal.ir.Node;
-import jdk.nashorn.internal.ir.VarNode;
-import jdk.nashorn.internal.ir.visitor.NodeOperatorVisitor;
 import jdk.nashorn.internal.ir.visitor.NodeVisitor;
 import jdk.nashorn.internal.parser.Lexer;
 import jdk.nashorn.internal.parser.Parser;
@@ -60,13 +60,10 @@ import jdk.nashorn.internal.runtime.options.Options;
  */
 public class Scripts {
 
-    private static final NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-    private static final NashornScriptEngine engine = (NashornScriptEngine) factory.getScriptEngine();
-    
-    protected static final String PLATYPUS_JS_MODULENAME = "facade";
-    public static final String PLATYPUS_JS_FILENAME = PLATYPUS_JS_MODULENAME + ".js";
+    private static final NashornScriptEngineFactory SCRIPT_FACTORY = new NashornScriptEngineFactory();
+    private static final NashornScriptEngine SCRIPT_ENGINE = (NashornScriptEngine) SCRIPT_FACTORY.getScriptEngine();
     protected static final String INTERNALS_MODULENAME = "internals";
-    protected static final String INTERNALS_JS_FILENAME = INTERNALS_MODULENAME + ".js";
+    public static final String INTERNALS_JS_FILENAME = INTERNALS_MODULENAME + ".js";
     public static final String STRING_TYPE_NAME = "String";//NOI18N
     public static final String NUMBER_TYPE_NAME = "Number";//NOI18N
     public static final String DATE_TYPE_NAME = "Date";//NOI18N
@@ -74,22 +71,39 @@ public class Scripts {
     public static final String GEOMETRY_TYPE_NAME = "Geometry";//NOI18N
     public static final String THIS_KEYWORD = "this";//NOI18N
     public static /*final*/ URL internalsUrl;
-    public static /*final*/ URL platypusJsUrl;
     public static /*final*/ boolean globalAPI;
     public static volatile Path absoluteApiPath;
 
     public static NashornScriptEngine getEngine() {
-        return engine;
+        return SCRIPT_ENGINE;
     }
 
     private static final ThreadLocal<LocalContext> contextRef = new ThreadLocal<>();
-
-    public static Space getSpace() {
-        return getContext() != null ? getContext().getSpace() : null;
-    }
+    private static final ThreadLocal<Space> spaceRef = new ThreadLocal<>();
+    private static Space onlySpace; // for single threaded environment
 
     public static boolean isGlobalAPI() {
         return globalAPI;
+    }
+
+    public static Space getSpace() {
+        return onlySpace != null ? onlySpace : spaceRef.get();
+    }
+
+    public static void setSpace(Space aSpace) {
+        if (aSpace != null) {
+            spaceRef.set(aSpace);
+        } else {
+            spaceRef.remove();
+        }
+    }
+
+    /**
+     * Warning! Use it only once and only in single threaded environment
+     * @param aSpace 
+     */
+    public static void setOnlySpace(Space aSpace) {
+        onlySpace = aSpace;
     }
 
     public static LocalContext getContext() {
@@ -106,45 +120,39 @@ public class Scripts {
 
     public static class LocalContext {
 
-        protected Object request;
-        protected Object response;
-        protected Object principal;
-        protected Object session;
+        protected final Object request;
+        protected final Object response;
+        protected final Object principal;
+        protected final Object session;
 
         protected Integer asyncsCount;
 
-        protected Scripts.Space space;
+        public LocalContext(Object aPrincipal, Object aSession) {
+            this(null, null, aPrincipal, aSession);
+        }
+
+        public LocalContext(Object aRequest, Object aResponse, Object aPrincipal, Object aSession) {
+            super();
+            request = aRequest;
+            response = aResponse;
+            principal = aPrincipal;
+            session = aSession;
+        }
 
         public Object getSession() {
             return session;
-        }
-
-        public void setSession(Object aValue) {
-            session = aValue;
         }
 
         public Object getRequest() {
             return request;
         }
 
-        public void setRequest(Object aRequest) {
-            request = aRequest;
-        }
-
         public Object getResponse() {
             return response;
         }
 
-        public void setResponse(Object aResponse) {
-            response = aResponse;
-        }
-
         public Object getPrincipal() {
             return principal;
-        }
-
-        public void setPrincipal(Object aSession) {
-            principal = aSession;
         }
 
         public int getAsyncsCount() {
@@ -160,26 +168,13 @@ public class Scripts {
         public void initAsyncs(Integer aSeed) {
             asyncsCount = aSeed;
         }
-
-        public Space getSpace() {
-            return space;
-        }
-
-        public void setSpace(Space aValue) {
-            space = aValue;
-        }
-    }
-
-    public static LocalContext createContext(Scripts.Space aSpace) {
-        LocalContext res = new LocalContext();
-        res.setSpace(aSpace);
-        return res;
     }
 
     public static class Pending {
 
         protected Consumer<Void> onLoad;
         protected Consumer<Exception> onError;
+        protected LocalContext context = getContext();
 
         public Pending(Consumer<Void> aOnLoad, Consumer<Exception> aOnError) {
             super();
@@ -188,11 +183,49 @@ public class Scripts {
         }
 
         public void loaded() {
-            onLoad.accept(null);
+            LocalContext oldContext = getContext();
+            setContext(context);
+            try {
+                onLoad.accept(null);
+            } finally {
+                setContext(oldContext);
+            }
         }
 
         public void failed(Exception ex) {
-            onError.accept(ex);
+            LocalContext oldContext = getContext();
+            setContext(context);
+            try {
+                onError.accept(ex);
+            } finally {
+                setContext(oldContext);
+            }
+        }
+    }
+
+    public static class AmdDefine {
+
+        protected String moduleName;
+        protected String[] amdDependencies;
+        protected JSObject moduleDefiner;
+
+        public AmdDefine(String aModuleName, String[] aAmdDependencies, JSObject aModuleDefiner) {
+            super();
+            moduleName = aModuleName;
+            amdDependencies = aAmdDependencies;
+            moduleDefiner = aModuleDefiner;
+        }
+
+        public String getModuleName() {
+            return moduleName;
+        }
+
+        public String[] getAmdDependencies() {
+            return amdDependencies;
+        }
+
+        public JSObject getModuleDefiner() {
+            return moduleDefiner;
         }
     }
 
@@ -201,11 +234,10 @@ public class Scripts {
         protected ScriptContext scriptContext;
         protected Object global;
         protected Map<String, JSObject> publishers = new HashMap<>();
-        protected Set<String> required = new HashSet<>();
-        protected Set<String> executed = new HashSet<>();
+        protected Collection<AmdDefine> amdDefines = new ArrayList<>();
+        // script files alredy executed within this script space
+        protected Map<URL, Set<String>> executed = new HashMap<>();
         protected Map<String, List<Pending>> pending = new HashMap<>();
-        protected String[] amdDependencies;
-        protected JSObject amdDefineCallback;
         protected Map<String, JSObject> defined = new HashMap<>();
 
         protected Space() {
@@ -227,12 +259,39 @@ public class Scripts {
             return (String) scriptContext.getAttribute(ScriptEngine.FILENAME);
         }
 
-        public Set<String> getRequired() {
-            return required;
+        public void pendOn(String aModuleName, Scripts.Pending aPending) {
+            List<Scripts.Pending> pends = pending.get(aModuleName);
+            if (pends == null) {
+                pends = new ArrayList<>();
+                pending.put(aModuleName, pends);
+            }
+            pends.add(aPending);
         }
 
-        public Set<String> getExecuted() {
-            return executed;
+        public void notifyLoaded(String aModuleName) {
+            List<Scripts.Pending> pendings = pending.remove(aModuleName);
+            if (pendings != null) {
+                Scripts.Pending[] pend = pendings.toArray(new Scripts.Pending[]{});
+                pendings.clear();
+                for (Scripts.Pending p : pend) {
+                    p.loaded();
+                }
+            }
+        }
+
+        public void notifyFailed(String aModuleName, Exception ex) {
+            List<Scripts.Pending> pendings = pending.remove(aModuleName);
+            if (pendings != null) {
+                Scripts.Pending[] pend = pendings.toArray(new Scripts.Pending[]{});
+                pendings.clear();
+                for (Scripts.Pending p : pend) {
+                    p.failed(ex);
+                }
+            }
+        }
+
+        public Map<URL, Set<String>> getExecuted() {
+            return Collections.unmodifiableMap(executed);
         }
 
         public Map<String, List<Pending>> getPending() {
@@ -243,20 +302,13 @@ public class Scripts {
             return defined;
         }
 
-        public void setAmdDefine(String[] aAmdDependencies, JSObject aModuleDefiner) {
-            amdDependencies = aAmdDependencies;
-            amdDefineCallback = aModuleDefiner;
+        public void addAmdDefine(String aModuleName, String[] aAmdDependencies, JSObject aModuleDefiner) {
+            amdDefines.add(new AmdDefine(aModuleName, aAmdDependencies, aModuleDefiner));
         }
 
-        public String[] consumeAmdDependencies() {
-            String[] res = amdDependencies;
-            amdDependencies = null;
-            return res;
-        }
-
-        public JSObject consumeAmdDefineCallback() {
-            JSObject res = amdDefineCallback;
-            amdDefineCallback = null;
+        public Collection<AmdDefine> consumeAmdDefines() {
+            Collection<AmdDefine> res = amdDefines;
+            amdDefines = new ArrayList<>();
             return res;
         }
 
@@ -285,6 +337,10 @@ public class Scripts {
             } else {
                 throw new IllegalStateException("Scripts space should be initialized only once.");
             }
+        }
+
+        public Object getGlobal() {
+            return global;
         }
 
         public Object getUndefined() {
@@ -524,7 +580,7 @@ public class Scripts {
 
         public JSObject createModule(String aModuleName) {
             assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
-            JSObject jsConstructor = lookupInGlobal(aModuleName);
+            JSObject jsConstructor = lookup(aModuleName);
             if (jsConstructor != null && jsConstructor.isFunction()) {
                 return (JSObject) jsConstructor.newObject(new Object[]{});
             } else {
@@ -532,15 +588,19 @@ public class Scripts {
             }
         }
 
-        public JSObject lookupInGlobal(String aName) {
-            assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
+        public JSObject lookup(String aName) {
             JSObject amd = defined.get(aName);
             if (amd != null) {
                 return amd;
             } else {
-                Object res = lookupInGlobalFunc.call(null, new Object[]{aName});
-                return res instanceof JSObject ? (JSObject) res : null;
+                return lookupInGlobal(aName);
             }
+        }
+
+        public JSObject lookupInGlobal(String aName) {
+            assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
+            Object res = aName != null && !aName.isEmpty() ? lookupInGlobalFunc.call(null, new Object[]{aName}) : null;
+            return res instanceof JSObject ? (JSObject) res : null;
         }
 
         public void putInGlobal(String aName, JSObject aValue) {
@@ -550,12 +610,14 @@ public class Scripts {
 
         public Object exec(String aSourceName, URL aSourcePlace) throws ScriptException, URISyntaxException {
             scriptContext.setAttribute(ScriptEngine.FILENAME, aSourceName.toLowerCase().endsWith(".js") ? aSourceName.substring(0, aSourceName.length() - 3) : aSourceName, ScriptContext.ENGINE_SCOPE);
-            return engine.eval(new URLReader(aSourcePlace), scriptContext);
+            Object result = SCRIPT_ENGINE.eval(new URLReader(aSourcePlace), scriptContext);
+            executed.put(aSourcePlace, new HashSet<>());
+            return result;
         }
 
         public Object exec(String aSource) throws ScriptException, URISyntaxException {
             assert scriptContext != null : SCRIPT_NOT_INITIALIZED;
-            return engine.eval(aSource, scriptContext);
+            return SCRIPT_ENGINE.eval(aSource, scriptContext);
         }
 
         public void schedule(JSObject aJsTask, long aTimeout) {
@@ -589,12 +651,21 @@ public class Scripts {
 
         public void process(Runnable aTask) {
             Scripts.LocalContext context = Scripts.getContext();
+            process(context, aTask);
+        }
+
+        public void process(Scripts.LocalContext context, Runnable aTask) {
             Runnable taskWrapper = () -> {
-                Scripts.setContext(context);
+                setContext(context);
                 try {
-                    aTask.run();
+                    setSpace(Space.this);
+                    try {
+                        aTask.run();
+                    } finally {
+                        setSpace(null);
+                    }
                 } finally {
-                    Scripts.setContext(null);
+                    setContext(null);
                 }
             };
             queue.offer(taskWrapper);
@@ -620,7 +691,7 @@ public class Scripts {
                         try {
                             // already single threaded environment
                             if (global == null) {
-                                Scripts.Space.this.initSpaceGlobal();
+                                Space.this.initSpaceGlobal();
                             }
                             // Zombie processing ...
                             Runnable task = queue.poll();
@@ -639,17 +710,19 @@ public class Scripts {
             });
         }
 
-        void initSpaceGlobal() {
-            Bindings bindings = engine.createBindings();
+        /**
+         * Public only for tests
+         */
+        public void initSpaceGlobal() {
+            Bindings bindings = SCRIPT_ENGINE.createBindings();
             scriptContext.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
             try {
-                Scripts.LocalContext ctx = Scripts.createContext(Scripts.Space.this);
-                Scripts.setContext(ctx);
+                setSpace(Space.this);
                 try {
                     scriptContext.setAttribute(ScriptEngine.FILENAME, INTERNALS_MODULENAME, ScriptContext.ENGINE_SCOPE);
-                    engine.eval(new URLReader(internalsUrl), scriptContext);
+                    SCRIPT_ENGINE.eval(new URLReader(internalsUrl), scriptContext);
                 } finally {
-                    Scripts.setContext(null);
+                    setSpace(null);
                 }
             } catch (ScriptException ex) {
                 Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
@@ -676,7 +749,6 @@ public class Scripts {
 
     public static void init(Path aAbsoluteApiPath, boolean aGlobalAPI) throws MalformedURLException {
         globalAPI = aGlobalAPI;
-        platypusJsUrl = aAbsoluteApiPath.resolve(PLATYPUS_JS_FILENAME).toUri().toURL();
         internalsUrl = aAbsoluteApiPath.resolve(INTERNALS_JS_FILENAME).toUri().toURL();
         absoluteApiPath = aAbsoluteApiPath;
     }
@@ -692,7 +764,9 @@ public class Scripts {
 
     public static void offerTask(Runnable aTask) {
         assert tasks != null : "Scripts tasks are not initialized";
-        Scripts.getContext().incAsyncsCount();
+        if (Scripts.getContext() != null) {
+            Scripts.getContext().incAsyncsCount();
+        }
         tasks.accept(aTask);
     }
 
@@ -700,7 +774,7 @@ public class Scripts {
         bio = new ThreadPoolExecutor(aMaxThreads, aMaxThreads,
                 1L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
-                new DeamonThreadFactory("platypus-abio-", false));
+                new PlatypusThreadFactory("platypus-abio-", false));
         bio.allowCoreThreadTimeOut(true);
     }
 
@@ -712,7 +786,9 @@ public class Scripts {
 
     public static void startBIO(Runnable aBioTask) {
         LocalContext context = getContext();
-        context.incAsyncsCount();
+        if (context != null) {
+            context.incAsyncsCount();
+        }
         bio.submit(() -> {
             setContext(context);
             try {
@@ -733,19 +809,22 @@ public class Scripts {
         return space;
     }
 
+    /**
+     * If scripts are initialized, then Platypua.ja system will work in full manner.
+     * Otherwise it will not perform some actions, such as data binding.
+     * @return True if scripts are fully initialized, false otherwise.
+     */
     public static boolean isInitialized() {
-        Space space = getContext() != null ? getContext().getSpace() : null;
+        Space space = getSpace();
         return space != null
-                && space.listenElementsFunc != null
-                && space.listenFunc != null
-                && space.scalarDefFunc != null
-                && space.collectionDefFunc != null;
+                && space.copyObjectFunc != null
+                && space.restoreObjectFunc != null;
     }
 
     public static boolean isValidJsIdentifier(final String aName) {
         if (aName != null && !aName.trim().isEmpty()) {
             try {
-                FunctionNode astRoot = parseJs(String.format("function %s() {}", aName));
+                FunctionNode astRoot = parseJs(String.format("function %s() {}", aName)).getAst();
                 return astRoot != null && !astRoot.getBody().getStatements().isEmpty();
             } catch (Exception ex) {
                 return false;
@@ -754,13 +833,50 @@ public class Scripts {
         return false;
     }
 
-    public static FunctionNode parseJs(String aJsContent) {
+    public static ParsedJs parseJs(String aJsContent) {
         Source source = Source.sourceFor("", aJsContent);//NOI18N
         Options options = new Options(null);
         ScriptEnvironment env = new ScriptEnvironment(options, null, null);
         ErrorManager errors = new ErrorManager();
-        Parser p = new Parser(env, source, errors);
-        return p.parse();
+        //
+        Map<Long, Long> prevComments = new HashMap<>();
+        Parser p = new Parser(env, source, errors) {
+            @Override
+            public FunctionNode parse(String scriptName, int startPos, int len, boolean allowPropertyFunction) {
+                prevComments.clear();
+                stream = new TokenStream() {
+                    protected long prevToken;
+
+                    @Override
+                    public void put(long token) {
+                        if (Token.descType(token) != TokenType.EOL) {
+                            if (Token.descType(prevToken) == TokenType.COMMENT) {
+                                prevComments.put(token, prevToken);
+                            }
+                            prevToken = token;
+                        }
+                        super.put(token);
+                    }
+
+                };
+                lexer = new Lexer(source, stream, false);
+
+                // Set up first token (skips opening EOL.)
+                k = -1;
+                next();
+                // Begin parse.
+                try {
+                    Method program = Parser.class.getDeclaredMethod("program", new Class[]{String.class, boolean.class});
+                    program.setAccessible(true);
+                    return (FunctionNode) program.invoke(this, new Object[]{scriptName, true});
+                } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                    Logger.getLogger(Scripts.class.getName()).log(Level.WARNING, null, ex);
+                    return null;
+                }
+            }
+        };
+        FunctionNode jsAst = p.parse();
+        return jsAst != null ? new ParsedJs(jsAst, prevComments) : null;
     }
 
     /**
@@ -815,41 +931,13 @@ public class Scripts {
         return sb.toString();
     }
 
-    /**
-     * Searches for all <code>this</code> aliases in a constructor.
-     *
-     * @param moduleConstructor a constructor to search in
-     * @return a set of aliases including <code>this</code> itself
-     */
-    public static Set<String> getThisAliases(final FunctionNode moduleConstructor) {
-        final Set<String> aliases = new HashSet<>();
-        if (moduleConstructor != null && moduleConstructor.getBody() != null) {
-            aliases.add(THIS_KEYWORD);
-            LexicalContext lc = new LexicalContext();
-            moduleConstructor.accept(new NodeOperatorVisitor<LexicalContext>(lc) {
-
-                @Override
-                public boolean enterVarNode(VarNode varNode) {
-                    if (lc.getCurrentFunction() == moduleConstructor) {
-                        if (varNode.getAssignmentSource() instanceof IdentNode) {
-                            IdentNode in = (IdentNode) varNode.getAssignmentSource();
-                            if (THIS_KEYWORD.equals(in.getName())) {
-                                aliases.add(varNode.getAssignmentDest().getName());
-                            }
-                        }
-                    }
-                    return super.enterVarNode(varNode);
-                }
-            });
-        }
-        return aliases;
-    }
-
     protected static final String SCRIPT_NOT_INITIALIZED = "Platypus script functions are not initialized.";
 
     public static void unlisten(JSObject aCookie) {
-        JSObject unlisten = (JSObject) aCookie.getMember("unlisten");
-        unlisten.call(null, new Object[]{});
+        if (aCookie != null) {
+            JSObject unlisten = (JSObject) aCookie.getMember("unlisten");
+            unlisten.call(null, new Object[]{});
+        }
     }
 
     public static boolean isInNode(Node node, int offset) {

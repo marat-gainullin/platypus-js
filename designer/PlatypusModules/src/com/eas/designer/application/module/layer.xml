@@ -10,9 +10,6 @@
         <folder name="text">
             <folder name="javascript">
                 <file name="com-eas-designer-application-indexer-FileIndexerFactory.instance"/>
-                <folder name="CompletionProviders">
-                    <file name="com-eas-designer-application-module-completion-ModuleCompletionProvider.instance"/>
-                </folder>
             </folder>
         </folder>
     </folder>
