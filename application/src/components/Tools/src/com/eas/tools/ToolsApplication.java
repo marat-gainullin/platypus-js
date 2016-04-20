@@ -285,7 +285,7 @@ public class ToolsApplication {
             + "Tools:\n"
             + CMD_SWITCHS_PREFIX + INIT_USERS_SPACE_CMD_SWITCH + " - checks and initializes users database store if it is not initialized\n"
             + CMD_SWITCHS_PREFIX + MINIFY_CMD_SWITCH + " - recursively finds, minifies *.layout and *.model files standalone or as parts of modules and concatenates them in a single file (" + CMD_SWITCHS_PREFIX + APP_FOLDER_CMD_SWITCH + " and " + CMD_SWITCHS_PREFIX + PROCESSED_FOLDER_CMD_SWITCH + " and " + CMD_SWITCHS_PREFIX + MINIFIED_MODEL_CMD_SWITCH + " and " + CMD_SWITCHS_PREFIX + MINIFIED_LAYOUT_CMD_SWITCH + " options).\n"
-            + CMD_SWITCHS_PREFIX + INDEX_CMD_SWITCH + " - finds AMD and global modules in *.js files recursively and writes platypus.js modules structure as jsonin a file (" + CMD_SWITCHS_PREFIX + APP_FOLDER_CMD_SWITCH + " and " + CMD_SWITCHS_PREFIX + PROCESSED_FOLDER_CMD_SWITCH + " and " + CMD_SWITCHS_PREFIX + INDEXED_MODULES_CMD_SWITCH + " options).\n"
+            + CMD_SWITCHS_PREFIX + INDEX_CMD_SWITCH + " - finds AMD and global modules in *.js files recursively and writes platypus.js modules structure as json to a file (" + CMD_SWITCHS_PREFIX + APP_FOLDER_CMD_SWITCH + " and " + CMD_SWITCHS_PREFIX + PROCESSED_FOLDER_CMD_SWITCH + " and " + CMD_SWITCHS_PREFIX + INDEXED_MODULES_CMD_SWITCH + " options).\n"
             + "Options:\n"
             + CMD_SWITCHS_PREFIX + APP_FOLDER_CMD_SWITCH + " <folder-path> - sets application folder. It will bw used to calculate modules ids for modules without annotations.\n"
             + CMD_SWITCHS_PREFIX + PROCESSED_FOLDER_CMD_SWITCH + " <folder-path> - sets folder to be processed by minifier\n"
