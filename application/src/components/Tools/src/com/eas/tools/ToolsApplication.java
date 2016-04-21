@@ -421,14 +421,19 @@ public class ToolsApplication {
                 throw new RuntimeException(ex);
             }
         };
-        Files.walkFileTree(aFolder, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult visitFile(Path aPath, BasicFileAttributes attrs) throws IOException {
-                doWork.accept(aPath);
-                return super.visitFile(aPath, attrs);
-            }
+        if (aFile != null) {
+            doWork.accept(aFile);
+        }
+        if (aFolder != null) {
+            Files.walkFileTree(aFolder, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path aPath, BasicFileAttributes attrs) throws IOException {
+                    doWork.accept(aPath);
+                    return super.visitFile(aPath, attrs);
+                }
 
-        });
+            });
+        }
         if (modelsBundle != null) {
             assert aMinifiedModel != null;
             File file = aMinifiedModel;
