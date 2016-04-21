@@ -428,7 +428,9 @@ public class ToolsApplication {
             Files.walkFileTree(aFolder, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path aPath, BasicFileAttributes attrs) throws IOException {
-                    doWork.accept(aPath);
+                    if (!aPath.toFile().isDirectory()) {
+                        doWork.accept(aPath);
+                    }
                     return super.visitFile(aPath, attrs);
                 }
 
