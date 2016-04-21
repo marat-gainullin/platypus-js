@@ -17,10 +17,13 @@ import com.eas.util.FileUtils;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -31,6 +34,20 @@ import org.w3c.dom.NodeList;
  * @author mg
  */
 public class LocalModulesProxy implements ModulesProxy {
+
+    public static Set<String> extractQueriesRefs(Element aNode, String aEntityTagsName, String aQueryRefAttrName) throws DOMException {
+        Set<String> refs = new HashSet<>();
+        NodeList entitiesNodes = aNode.getElementsByTagName(aEntityTagsName);
+        for (int i = entitiesNodes.getLength() - 1; i >= 0; i--) {
+            Node entityNode = entitiesNodes.item(i);
+            Node queryIdAttribute = entityNode.getAttributes().getNamedItem(aQueryRefAttrName);
+            if (queryIdAttribute != null) {
+                String sQueryName = queryIdAttribute.getNodeValue();
+                refs.add(sQueryName);
+            }
+        }
+        return refs;
+    }
 
     protected final ApplicationSourceIndexer indexer;
     protected final ModelsDocuments modelsDocs;
@@ -66,15 +83,8 @@ public class LocalModulesProxy implements ModulesProxy {
                 Document modelDoc = modelsDocs.get(jsPath.toString(), modelFile);// cache documents by file of bundle (not by module name)
                 if (modelDoc != null) {
                     Element rootNode = modelDoc.getDocumentElement();
-                    NodeList docNodes = rootNode.getElementsByTagName(Model2XmlDom.ENTITY_TAG_NAME);
-                    for (int i = docNodes.getLength() - 1; i >= 0; i--) {
-                        Node entityNode = docNodes.item(i);
-                        Node queryIdAttribute = entityNode.getAttributes().getNamedItem(Model2XmlDom.QUERY_ID_ATTR_NAME);
-                        if (queryIdAttribute != null) {
-                            String sQueryName = queryIdAttribute.getNodeValue();
-                            structure.getQueryDependencies().add(sQueryName);
-                        }
-                    }
+                    structure.getQueryDependencies().addAll(extractQueriesRefs(rootNode, Model2XmlDom.ENTITY_TAG_NAME, Model2XmlDom.QUERY_ID_ATTR_NAME));
+                    structure.getQueryDependencies().addAll(extractQueriesRefs(rootNode, "e", "qi"));
                 }
             }
             File layoutFile = jsPath.resolveSibling(woExtension + PlatypusFiles.FORM_EXTENSION).toFile();
@@ -83,6 +93,7 @@ public class LocalModulesProxy implements ModulesProxy {
             }
             return structure;
         }
+
     };
     protected final String startModuleName;
 

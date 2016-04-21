@@ -5,10 +5,12 @@
 package com.eas.tools;
 
 import com.eas.client.DatabasesClient;
+import com.eas.client.LocalModulesProxy;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.ScriptDocument;
 import com.eas.client.cache.ScriptsConfigs;
+import com.eas.client.model.store.Model2XmlDom;
 import com.eas.client.resourcepool.BearResourcePool;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.scripts.DependenciesWalker;
@@ -28,8 +30,10 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -483,11 +487,15 @@ public class ToolsApplication {
                             return false;
                         });
                         walker.walk();
+                        Set<String> queryDependencies = new HashSet<>(walker.getQueryDependencies());
                         List<String> resources = new ArrayList<>();
                         File modelFile = FileUtils.findBrother(file, PlatypusFiles.MODEL_EXTENSION);
                         if (modelFile != null && modelFile.exists()) {
                             String relativeModelResourceName = appFolder.relativize(Paths.get(modelFile.toURI())).toString().replace(File.separator, "/");
                             resources.add(relativeModelResourceName);
+                            Document modelDoc = Source2XmlDom.transform(new String(Files.readAllBytes(Paths.get(modelFile.toURI())), SettingsConstants.COMMON_ENCODING));
+                            queryDependencies.addAll(LocalModulesProxy.extractQueriesRefs(modelDoc.getDocumentElement(), Model2XmlDom.ENTITY_TAG_NAME, Model2XmlDom.QUERY_ID_ATTR_NAME));
+                            queryDependencies.addAll(LocalModulesProxy.extractQueriesRefs(modelDoc.getDocumentElement(), "e", "qi"));
                         }
                         File layoutFile = FileUtils.findBrother(file, PlatypusFiles.FORM_EXTENSION);
                         if (layoutFile != null && layoutFile.exists()) {
@@ -495,6 +503,10 @@ public class ToolsApplication {
                             resources.add(relativeLayoutResourceName);
                         }
                         List<StringBuilder> moduleNamesAndProps = new ArrayList<>();
+                        if (!queryDependencies.isEmpty()) {
+                            moduleNamesAndProps.add(new StringBuilder("entities"));
+                            moduleNamesAndProps.add(JSONUtils.as(queryDependencies.toArray(new String[]{})));
+                        }
                         if (!scriptDoc.getModules().isEmpty()) {
                             moduleNamesAndProps.add(new StringBuilder("modules"));
                             moduleNamesAndProps.add(JSONUtils.as(scriptDoc.getModules().keySet().toArray(new String[]{})));
@@ -506,10 +518,6 @@ public class ToolsApplication {
                         if (!walker.getDependencies().isEmpty()) {
                             moduleNamesAndProps.add(new StringBuilder("global-deps"));
                             moduleNamesAndProps.add(JSONUtils.as(walker.getDependencies().toArray(new String[]{})));
-                        }
-                        if (!walker.getQueryDependencies().isEmpty()) {
-                            moduleNamesAndProps.add(new StringBuilder("entities"));
-                            moduleNamesAndProps.add(JSONUtils.as(walker.getQueryDependencies().toArray(new String[]{})));
                         }
                         if (!walker.getServerDependencies().isEmpty()) {
                             moduleNamesAndProps.add(new StringBuilder("rpc"));

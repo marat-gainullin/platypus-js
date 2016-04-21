@@ -45,7 +45,7 @@ public class WithoutServerTest extends ScriptedTests {
 
     @Test
     public void append_test() throws InterruptedException {
-        start("append_test", 10000L);
+        start("append_test", 20000L);
     }
 
     @Test

@@ -83,8 +83,8 @@ public class DependenciesWalker {
                                     break;
                                 case LOAD_ENTITY:
                                     if (lastAccess.getBase() instanceof IdentNode) {
-                                        String baseName = ((IdentNode) lastAccess.getBase()).getName();
-                                        if (MODEL.equals(baseName) && LOAD_ENTITY.equals(funcName)) {
+                                        //String baseName = ((IdentNode) lastAccess.getBase()).getName();
+                                        if (LOAD_ENTITY.equals(funcName)) {
                                             queryDependencies.add(value);
                                         }
                                     }
