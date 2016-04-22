@@ -1040,7 +1040,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
                             Fields rFields = lrel.getRightEntity().getFields();
                             assert rFields != null : "Fields are absent while query is present.";
                             Field toField = rFields.get(lrel.getRightField().getName());
-                            if (toField == null || toField != lrel.getRightField()) {
+                            if (toField instanceof Parameter) {
                                 g2d.setColor(aToParameterColor);
                             } else {
                                 g2d.setColor(aToFieldColor);

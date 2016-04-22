@@ -21,6 +21,7 @@ import com.eas.core.Utils.JsObject;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
@@ -522,7 +523,13 @@ public class Entity implements HasPublished {
 		bindQueryParameters();
 		if (isValid()) {
 			if (aCallback != null) {
-				aCallback.onSuccess(null);
+				Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+
+					@Override
+					public void execute() {
+						aCallback.onSuccess(null);
+					}
+				});
 			}
 		} else {
 			// Requery if query parameters values have been changed while
