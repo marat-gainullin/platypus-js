@@ -61,13 +61,13 @@ public class NewApplicationElementWizardIterator implements WizardDescriptor.Ins
      * New name will be generated using the provided initial name, unsupported symbols will be replaced 
      * and it will be ensured that new name is unique.
      * @param project Application's project
-     * @param str Initial name
+     * @param aBaseName Initial name
      * @return New name
      */
-    public static String getNewValidAppElementName(Project project, String str) {
-        assert str != null;
-        assert !str.isEmpty();
-        String appElementName = StringUtils.replaceUnsupportedSymbols(str.trim());
+    public static String getNewValidAppElementName(Project project, String aBaseName) {
+        assert aBaseName != null;
+        assert !aBaseName.isEmpty();
+        String appElementName = StringUtils.replaceUnsupportedSymbols(aBaseName.trim());
         String s = appElementName;
         int i = 0;
         while (IndexerQuery.appElementId2File(project, s) != null) {

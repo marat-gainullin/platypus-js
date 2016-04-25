@@ -45,7 +45,7 @@ public class PlatypusProjectActions implements ActionProvider {
 
     @Override
     public String[] getSupportedActions() {
-        return COMMON_IDE_GLOBAL_ACTIONS.toArray(new String[0]);
+        return COMMON_IDE_GLOBAL_ACTIONS.toArray(new String[]{});
     }
 
     @Override

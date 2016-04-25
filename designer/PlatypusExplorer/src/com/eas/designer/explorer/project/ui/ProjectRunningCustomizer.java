@@ -53,7 +53,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     protected ComboBoxModel<ServerInstance> j2eeServersModel;
     private boolean isInit;
     private final DefaultComboBoxModel serversModel;
-    private final ServerRegistryChangeListener serverRegistryLister = new ServerRegistryChangeListener();
+    private final ServerRegistryChangeListener serverRegistryListener = new ServerRegistryChangeListener();
 
     /**
      * Creates new form ProjectRunningCustomizer
@@ -151,7 +151,9 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         j2eePlatforms.add(J2eePlatformAdapter.UNKNOWN_PLATFORM_ADAPRER);
         for (String serverInstance : serverInstanceIDs) {
             try {
-                j2eePlatforms.add(new J2eePlatformAdapter(Deployment.getDefault().getServerInstance(serverInstance).getJ2eePlatform(), serverInstance));
+                if (serverInstance.contains("tomcat")) {
+                    j2eePlatforms.add(new J2eePlatformAdapter(Deployment.getDefault().getServerInstance(serverInstance).getJ2eePlatform(), serverInstance));
+                }
             } catch (InstanceRemovedException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.WARNING, "Server instance has been removed.", ex); //NOI18N
             }
@@ -1000,11 +1002,11 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     private void btnManageServersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnManageServersActionPerformed
         Lookup.Result<ServerInstanceProvider> result = Lookups.forPath(SERVERS_PATH).lookupResult(ServerInstanceProvider.class);
         result.allInstances().stream().forEach((provider) -> {
-            provider.addChangeListener(serverRegistryLister);
+            provider.addChangeListener(serverRegistryListener);
         });
         CommonServerUIs.showCustomizer(null);
         result.allInstances().stream().forEach((provider) -> {
-            provider.removeChangeListener(serverRegistryLister);
+            provider.removeChangeListener(serverRegistryListener);
         });
     }//GEN-LAST:event_btnManageServersActionPerformed
 
