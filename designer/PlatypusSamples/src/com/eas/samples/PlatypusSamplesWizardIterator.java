@@ -68,7 +68,7 @@ public class PlatypusSamplesWizardIterator implements WizardDescriptor.ProgressI
         Set resultSet = new LinkedHashSet();
         File projectDir = FileUtil.normalizeFile((File) wiz.getProperty(PlatypusSamples.PROJ_DIR));
         projectDir.mkdirs();
-        
+
         FileObject template = Templates.getTemplate(wiz);
         try (InputStream templateStream = template.getInputStream()) {
             unZipFile(templateStream, projectDir);
@@ -82,8 +82,10 @@ public class PlatypusSamplesWizardIterator implements WizardDescriptor.ProgressI
         }
         Path privatePropertiesPath = projectDirPath.resolve(PlatypusProjectSettingsImpl.PROJECT_PRIVATE_SETTINGS_FILE);
         EditableProperties privateProperties = new EditableProperties(true);
-        try (InputStream ppIn = new FileInputStream(privatePropertiesPath.toFile())) {
-            privateProperties.load(ppIn);
+        if (privatePropertiesPath.toFile().exists()) {
+            try (InputStream ppIn = new FileInputStream(privatePropertiesPath.toFile())) {
+                privateProperties.load(ppIn);
+            }
         }
 
         processProjectProperties(generalProperties, privateProperties);
