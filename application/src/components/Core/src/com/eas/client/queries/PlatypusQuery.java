@@ -39,6 +39,11 @@ public class PlatypusQuery extends Query {
     }
 
     @Override
+    public boolean isMetadataAccessible() {
+        return true;
+    }
+
+    @Override
     public JSObject execute(Scripts.Space aSpace, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (serverProxy != null && entityName != null) {
             PlatypusFlowProvider flow = new PlatypusFlowProvider(serverProxy, entityName, fields);

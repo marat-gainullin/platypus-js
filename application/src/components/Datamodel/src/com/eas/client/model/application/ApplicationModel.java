@@ -212,34 +212,6 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     }
 
     @Override
-    public void resolveRelation(Relation<E> aRelation) throws Exception {
-        super.resolveRelation(aRelation);
-        if (aRelation instanceof ReferenceRelation<?>) {
-            if (aRelation.getLeftField() != null && !aRelation.getLeftField().isFk()) {
-                aRelation.setLeftField(null);
-            }
-            if (aRelation.getRightField() != null && !aRelation.getRightField().isPk()) {
-                aRelation.setRightField(null);
-            }
-            if (aRelation.getLeftField() != null
-                    && aRelation.getLeftField().isFk()
-                    && aRelation.getRightField() != null
-                    && aRelation.getRightField().isPk()) {
-                String leftTableName = aRelation.getLeftField().getFk().getReferee().getTable();
-                String leftFieldName = aRelation.getLeftField().getFk().getReferee().getField();
-                String rightTableName = aRelation.getRightField().getTableName();
-                String rightFieldName = aRelation.getRightField().getOriginalName();
-                boolean tablesSame = (leftTableName == null ? rightTableName == null : leftTableName.equalsIgnoreCase(rightTableName));
-                boolean fieldsSame = (leftFieldName == null ? rightFieldName == null : leftFieldName.equalsIgnoreCase(rightFieldName));
-                if (!tablesSame || !fieldsSame) {
-                    aRelation.setLeftField(null);
-                    aRelation.setRightField(null);
-                }
-            }
-        }
-    }
-
-    @Override
     public Model<E, Q> copy() throws Exception {
         Model<E, Q> copied = super.copy();
         for (ReferenceRelation<E> relation : referenceRelations) {

@@ -223,6 +223,8 @@ public abstract class Query {
 
     public abstract JSObject execute(Scripts.Space aSpace, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
+    public abstract boolean isMetadataAccessible();
+    
     /**
      * @return The application element identifier;
      */

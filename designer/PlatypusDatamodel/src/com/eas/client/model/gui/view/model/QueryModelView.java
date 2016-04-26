@@ -40,15 +40,10 @@ public class QueryModelView extends ModelView<QueryEntity, QueryModel> {
 
     protected AppElementSelectorCallback appElementSelector;
 
-    public QueryModelView(TablesSelectorCallback aSelectorCallback, AppElementSelectorCallback aAppElementSelector) {
-        super(aSelectorCallback);
-        appElementSelector = aAppElementSelector;
-        putAddQueryAction();
-    }
-
     public QueryModelView(QueryModel aModel, TablesSelectorCallback aSelectorCallback, AppElementSelectorCallback aAppElementSelector) {
         super(aModel, aSelectorCallback);
         appElementSelector = aAppElementSelector;
+        toParameterConnectorColor = toFieldConnectorColor;
         putAddQueryAction();
     }
 

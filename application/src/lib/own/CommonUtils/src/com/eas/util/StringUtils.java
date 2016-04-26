@@ -21,7 +21,7 @@ public class StringUtils {
 
     private static final String SUBSTITUTE_CHAR = "_";
     private static final String FILENAME_INVALID_CHARACTER_PATTERN = "[\\/:*?\"<>|]";
-    private static final String END_WHITE_SPASE = "\\s(?=\\s*$)";
+    private static final String END_WHITESPACE = "\\s(?=\\s*$)";
 
     public static String join(String separator, String... parts) {
         String delimiter = "";
@@ -95,9 +95,9 @@ public class StringUtils {
         return sb.toString();
     }
 
-    public static String replaceUnsupportedSymbolsinFileNames(String str) {
+    public static String replaceFileNamesInvalidCharacters(String str) {
         if (str != null) {
-            String endWhiteSpase = str.replaceAll(END_WHITE_SPASE, SUBSTITUTE_CHAR);
+            String endWhiteSpase = str.replaceAll(END_WHITESPACE, SUBSTITUTE_CHAR);
             String trimStr = endWhiteSpase.trim();
             return trimStr.replaceAll(FILENAME_INVALID_CHARACTER_PATTERN, SUBSTITUTE_CHAR);
         } else {

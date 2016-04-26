@@ -1,6 +1,6 @@
 var modelMin = {
     tags: {
-        e: "entity",
+        e: "entity",// if edited, LocalModulesPRoxy needs to be checked for consistence
         fe: "fieldsEntity",
         pe: "parametersEntity",
         ps: "parameters",
@@ -10,7 +10,7 @@ var modelMin = {
         rr: "referenceRelation"
     }, attributes: {
         ei: "entityId",
-        qi: "queryId",
+        qi: "queryId",// if edited, LocalModulesPRoxy needs to be checked for consistence
         tbn: "tableDbId",
         tsn: "tableSchemaName",
         tn: "tableName",

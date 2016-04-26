@@ -155,8 +155,8 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
         try {
             E lEntity = aModel.getEntityById(leftEntityId);
             if (lEntity != null) {
+                Query query = lEntity.getQuery();
                 if (leftParameterName != null && !leftParameterName.isEmpty()) {
-                    Query query = lEntity.getQuery();
                     if (query != null) {
                         relation.setLeftField(query.getParameters().get(leftParameterName));
                     } else if (!aModel.isRelationsAgressiveCheck()) {
@@ -164,7 +164,7 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
                     }
                 } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
                     Fields fields = lEntity.getFields();
-                    if (fields != null) {
+                    if (fields != null && query.isMetadataAccessible()) {
                         relation.setLeftField(fields.get(leftFieldName));
                     } else if (!aModel.isRelationsAgressiveCheck()) {
                         relation.setLeftField(new Field(leftFieldName));
@@ -175,8 +175,8 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
             }
             E rEntity = aModel.getEntityById(rightEntityId);
             if (rEntity != null) {
+                Query query = rEntity.getQuery();
                 if (rightParameterName != null && !rightParameterName.isEmpty()) {
-                    Query query = rEntity.getQuery();
                     if (query != null) {
                         relation.setRightField(query.getParameters().get(rightParameterName));
                     } else if (!aModel.isRelationsAgressiveCheck()) {
@@ -184,7 +184,7 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
                     }
                 } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
                     Fields fields = rEntity.getFields();
-                    if (fields != null) {
+                    if (fields != null && query.isMetadataAccessible()) {
                         relation.setRightField(fields.get(rightFieldName));
                     } else if (!aModel.isRelationsAgressiveCheck()) {
                         relation.setRightField(new Field(rightFieldName));

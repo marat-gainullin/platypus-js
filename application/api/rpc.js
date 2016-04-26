@@ -30,9 +30,6 @@ define('logger', function () {
                                 var onSuccess = null;
                                 var onFailure = null;
                                 var argsLength = arguments.length;
-                                while (argsLength > 0 && !arguments[argsLength - 1]) {
-                                    argsLength--;
-                                }
                                 if (argsLength > 1 && typeof arguments[argsLength - 1] === "function" && typeof arguments[argsLength - 2] === "function") {
                                     onSuccess = arguments[argsLength - 2];
                                     onFailure = arguments[argsLength - 1];

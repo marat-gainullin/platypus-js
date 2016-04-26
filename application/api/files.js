@@ -1,3 +1,5 @@
+/* global Java */
+
 define(function () {
     var FileClass = Java.type("java.io.File");
     var FileUtilsClass = Java.type("com.eas.util.FileUtils");
@@ -25,7 +27,7 @@ define(function () {
          * @param {String} aEncoding Encoding name (e.g. "utf-8")
          * @returns String read from file.
          */
-        read: function () {},
+        read: function (aFileName, aEncoding) {},
         /**
          * Writes a string contents of a file.
          * @param {String} aFileName file absolute path.
@@ -33,7 +35,7 @@ define(function () {
          * @param {String} aEncoding Encoding name (e.g. "utf-8")
          * @returns {undefined}.
          */
-        write: function () {}
+        write: function (aFileName, aText, aEncoding) {}
     };
     Object.defineProperty(module, "read", {
         value: readString

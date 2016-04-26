@@ -394,7 +394,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         bindQueryParameters();
         if (isValid()) {
             if (aOnSuccess != null) {
-                aOnSuccess.accept(null);
+                Scripts.getSpace().process(() -> {
+                    aOnSuccess.accept(null);
+                });
             }
         } else {
             // Requery if query parameters values have been changed while bindQueryParameters() call

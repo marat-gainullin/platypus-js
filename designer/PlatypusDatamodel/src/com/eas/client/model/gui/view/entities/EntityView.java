@@ -294,18 +294,9 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         paramsFieldsPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 
         initAbsentLabel();
+        
+        initFieldsComponents();
 
-        Fields entitiyFields = entity.getFields();
-        if (entitiyFields != null) {
-            if (isParameterized()) {
-                parametersModel.setFields(entitiyFields);
-            }
-            fieldsModel.setFields(entitiyFields);
-            add(paramsFieldsScroll, BorderLayout.CENTER);
-        } else {
-            add(absentQueryLabel, BorderLayout.CENTER);
-            add(absentQueryText, BorderLayout.SOUTH);
-        }
         setBorder(ordinaryBorder);
         setOpaque(false);
     }
@@ -341,6 +332,20 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         absentQueryLabel.setHorizontalAlignment(SwingConstants.CENTER);
         absentQueryLabel.setHorizontalTextPosition(SwingConstants.CENTER);
         absentQueryLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
+    }
+    
+    protected void initFieldsComponents(){
+        Fields entitiyFields = entity.getFields();
+        if (entity.isQuery() && entity.getQuery().isMetadataAccessible() && entitiyFields != null) {
+            if (isParameterized()) {
+                parametersModel.setFields(entitiyFields);
+            }
+            fieldsModel.setFields(entitiyFields);
+            add(paramsFieldsScroll, BorderLayout.CENTER);
+        } else {
+            add(absentQueryLabel, BorderLayout.CENTER);
+            add(absentQueryText, BorderLayout.SOUTH);
+        }
     }
 
     protected abstract boolean isEditable();
@@ -839,7 +844,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                     remove(paramsFieldsScroll);
                     remove(absentQueryLabel);
                     remove(absentQueryText);
-                    if (entity.isQuery()) {
+                    if (entity.isQuery() && entity.getQuery().isMetadataAccessible()) {
                         Fields entityFields = entity.getFields();
                         add(paramsFieldsScroll, BorderLayout.CENTER);
                         if (isParameterized()) {

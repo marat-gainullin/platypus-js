@@ -5,10 +5,12 @@
 package com.eas.tools;
 
 import com.eas.client.DatabasesClient;
+import com.eas.client.LocalModulesProxy;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.ScriptDocument;
 import com.eas.client.cache.ScriptsConfigs;
+import com.eas.client.model.store.Model2XmlDom;
 import com.eas.client.resourcepool.BearResourcePool;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.scripts.DependenciesWalker;
@@ -28,8 +30,11 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
@@ -63,6 +68,7 @@ public class ToolsApplication {
     // options
     public static final String APP_FOLDER_CMD_SWITCH = "app-folder";
     public static final String PROCESSED_FOLDER_CMD_SWITCH = "processed-folder";
+    public static final String PROCESSED_FILE_CMD_SWITCH = "processed-file";
     public static final String MINIFIED_MODEL_CMD_SWITCH = "minified-models";
     public static final String MINIFIED_LAYOUT_CMD_SWITCH = "minified-layouts";
     public static final String INDEXED_MODULES_CMD_SWITCH = "indexed-modules";
@@ -283,10 +289,11 @@ public class ToolsApplication {
             + "Tools:\n"
             + CMD_SWITCHS_PREFIX + INIT_USERS_SPACE_CMD_SWITCH + " - checks and initializes users database store if it is not initialized\n"
             + CMD_SWITCHS_PREFIX + MINIFY_CMD_SWITCH + " - recursively finds, minifies *.layout and *.model files standalone or as parts of modules and concatenates them in a single file (" + CMD_SWITCHS_PREFIX + APP_FOLDER_CMD_SWITCH + " and " + CMD_SWITCHS_PREFIX + PROCESSED_FOLDER_CMD_SWITCH + " and " + CMD_SWITCHS_PREFIX + MINIFIED_MODEL_CMD_SWITCH + " and " + CMD_SWITCHS_PREFIX + MINIFIED_LAYOUT_CMD_SWITCH + " options).\n"
-            + CMD_SWITCHS_PREFIX + INDEX_CMD_SWITCH + " - finds AMD and global modules in *.js files recursively and writes platypus.js modules structure as jsonin a file (" + CMD_SWITCHS_PREFIX + APP_FOLDER_CMD_SWITCH + " and " + CMD_SWITCHS_PREFIX + PROCESSED_FOLDER_CMD_SWITCH + " and " + CMD_SWITCHS_PREFIX + INDEXED_MODULES_CMD_SWITCH + " options).\n"
+            + CMD_SWITCHS_PREFIX + INDEX_CMD_SWITCH + " - finds AMD and global modules in *.js files recursively and writes platypus.js modules structure as json to a file (" + CMD_SWITCHS_PREFIX + APP_FOLDER_CMD_SWITCH + " and " + CMD_SWITCHS_PREFIX + PROCESSED_FOLDER_CMD_SWITCH + " and " + CMD_SWITCHS_PREFIX + INDEXED_MODULES_CMD_SWITCH + " options).\n"
             + "Options:\n"
             + CMD_SWITCHS_PREFIX + APP_FOLDER_CMD_SWITCH + " <folder-path> - sets application folder. It will bw used to calculate modules ids for modules without annotations.\n"
             + CMD_SWITCHS_PREFIX + PROCESSED_FOLDER_CMD_SWITCH + " <folder-path> - sets folder to be processed by minifier\n"
+            + CMD_SWITCHS_PREFIX + PROCESSED_FILE_CMD_SWITCH + " <file-path> - sets file to be processed by minifier\n"
             + CMD_SWITCHS_PREFIX + MINIFIED_MODEL_CMD_SWITCH + " <file-path> - sets file to write minified content of *.model files into\n"
             + CMD_SWITCHS_PREFIX + MINIFIED_LAYOUT_CMD_SWITCH + " <file-path> - sets file to write the minified content of *.layout files into\n"
             + CMD_SWITCHS_PREFIX + INDEXED_MODULES_CMD_SWITCH + " <file-path> - sets file to write modules index into\n"
@@ -301,6 +308,7 @@ public class ToolsApplication {
     private String dbpassword;
     private Path appFolder;
     private Path processedFolder;
+    private Path processedFile;
     private File minifiedModel;
     private File minifiedLayout;
     private File indexedModules;
@@ -335,7 +343,9 @@ public class ToolsApplication {
         return processedElement;
     }
 
-    private static void minify(Path appFolder, Path aFolder, File aMinifiedModel, File aMinifiedLayout) throws IOException, ParserConfigurationException {
+    private static final String BUNDLE_NAME_ATTR = "bundle-name";
+
+    private static void minify(Path appFolder, Path aFolder, Path aFile, File aMinifiedModel, File aMinifiedLayout) throws IOException, ParserConfigurationException {
         DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
         Document modelsBundle;
         Element modelsBundleRoot;
@@ -359,14 +369,13 @@ public class ToolsApplication {
             layoutsBundleRoot = null;
             layoutsBundle = null;
         }
-        Files.walkFileTree(aFolder, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult visitFile(Path aPath, BasicFileAttributes attrs) throws IOException {
+        Consumer<Path> doWork = (Path aPath) -> {
+            try {
                 File file = aPath.toFile();
                 String fileName = file.getName();
                 String bundleName = appFolder.relativize(aPath).toString();
                 bundleName = FileUtils.removeExtension(bundleName).replace(File.separator, "/");
-                if (modelsBundle != null && fileName.endsWith("." + PlatypusFiles.MODEL_EXTENSION)) {
+                if (modelsBundle != null && modelsBundleRoot != null && fileName.endsWith("." + PlatypusFiles.MODEL_EXTENSION)) {
                     String fileNameWoExt = fileName.substring(0, fileName.length() - PlatypusFiles.MODEL_EXTENSION.length());
                     Path sqlPath = aPath.resolveSibling(fileNameWoExt + PlatypusFiles.SQL_EXTENSION);
                     if (!sqlPath.toFile().exists()) {
@@ -388,7 +397,7 @@ public class ToolsApplication {
                             Logger.getLogger(ToolsApplication.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
-                } else if (layoutsBundle != null && fileName.endsWith("." + PlatypusFiles.FORM_EXTENSION)) {
+                } else if (layoutsBundle != null && layoutsBundleRoot != null && fileName.endsWith("." + PlatypusFiles.FORM_EXTENSION)) {
                     try {
                         String fileNameWoExt = fileName.substring(0, fileName.length() - PlatypusFiles.FORM_EXTENSION.length());
                         Path jsPath = aPath.resolveSibling(fileNameWoExt + PlatypusFiles.JAVASCRIPT_EXTENSION);
@@ -408,11 +417,25 @@ public class ToolsApplication {
                         Logger.getLogger(ToolsApplication.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-                return super.visitFile(aPath, attrs);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
             }
-            private static final String BUNDLE_NAME_ATTR = "bundle-name";
+        };
+        if (aFile != null) {
+            doWork.accept(aFile);
+        }
+        if (aFolder != null) {
+            Files.walkFileTree(aFolder, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path aPath, BasicFileAttributes attrs) throws IOException {
+                    if (!aPath.toFile().isDirectory()) {
+                        doWork.accept(aPath);
+                    }
+                    return super.visitFile(aPath, attrs);
+                }
 
-        });
+            });
+        }
         if (modelsBundle != null) {
             assert aMinifiedModel != null;
             File file = aMinifiedModel;
@@ -471,11 +494,15 @@ public class ToolsApplication {
                             return false;
                         });
                         walker.walk();
+                        Set<String> queryDependencies = new HashSet<>(walker.getQueryDependencies());
                         List<String> resources = new ArrayList<>();
                         File modelFile = FileUtils.findBrother(file, PlatypusFiles.MODEL_EXTENSION);
                         if (modelFile != null && modelFile.exists()) {
                             String relativeModelResourceName = appFolder.relativize(Paths.get(modelFile.toURI())).toString().replace(File.separator, "/");
                             resources.add(relativeModelResourceName);
+                            Document modelDoc = Source2XmlDom.transform(new String(Files.readAllBytes(Paths.get(modelFile.toURI())), SettingsConstants.COMMON_ENCODING));
+                            queryDependencies.addAll(LocalModulesProxy.extractQueriesRefs(modelDoc.getDocumentElement(), Model2XmlDom.ENTITY_TAG_NAME, Model2XmlDom.QUERY_ID_ATTR_NAME));
+                            queryDependencies.addAll(LocalModulesProxy.extractQueriesRefs(modelDoc.getDocumentElement(), "e", "qi"));
                         }
                         File layoutFile = FileUtils.findBrother(file, PlatypusFiles.FORM_EXTENSION);
                         if (layoutFile != null && layoutFile.exists()) {
@@ -483,6 +510,10 @@ public class ToolsApplication {
                             resources.add(relativeLayoutResourceName);
                         }
                         List<StringBuilder> moduleNamesAndProps = new ArrayList<>();
+                        if (!queryDependencies.isEmpty()) {
+                            moduleNamesAndProps.add(new StringBuilder("entities"));
+                            moduleNamesAndProps.add(JSONUtils.as(queryDependencies.toArray(new String[]{})));
+                        }
                         if (!scriptDoc.getModules().isEmpty()) {
                             moduleNamesAndProps.add(new StringBuilder("modules"));
                             moduleNamesAndProps.add(JSONUtils.as(scriptDoc.getModules().keySet().toArray(new String[]{})));
@@ -494,10 +525,6 @@ public class ToolsApplication {
                         if (!walker.getDependencies().isEmpty()) {
                             moduleNamesAndProps.add(new StringBuilder("global-deps"));
                             moduleNamesAndProps.add(JSONUtils.as(walker.getDependencies().toArray(new String[]{})));
-                        }
-                        if (!walker.getQueryDependencies().isEmpty()) {
-                            moduleNamesAndProps.add(new StringBuilder("entities"));
-                            moduleNamesAndProps.add(JSONUtils.as(walker.getQueryDependencies().toArray(new String[]{})));
                         }
                         if (!walker.getServerDependencies().isEmpty()) {
                             moduleNamesAndProps.add(new StringBuilder("rpc"));
@@ -576,6 +603,20 @@ public class ToolsApplication {
                 } else {
                     throw new IllegalArgumentException("Processed folder syntax: " + CMD_SWITCHS_PREFIX + PROCESSED_FOLDER_CMD_SWITCH + " <value>");
                 }
+            } else if ((CMD_SWITCHS_PREFIX + PROCESSED_FILE_CMD_SWITCH).equalsIgnoreCase(args[i])) {
+                if (i < args.length - 1) {
+                    File pFile = new File(args[i + 1]);
+                    if (!pFile.exists()) {
+                        throw new IllegalArgumentException(pFile.getAbsolutePath() + " does not exist.");
+                    }
+                    if (pFile.isDirectory()) {
+                        throw new IllegalArgumentException(pFile.getAbsolutePath() + " is directory.");
+                    }
+                    processedFile = Paths.get(pFile.toURI());
+                    i += 2;
+                } else {
+                    throw new IllegalArgumentException("Processed file syntax: " + CMD_SWITCHS_PREFIX + PROCESSED_FILE_CMD_SWITCH + " <value>");
+                }
             } else if ((CMD_SWITCHS_PREFIX + MINIFIED_MODEL_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {
                     minifiedModel = new File(args[i + 1]);
@@ -649,8 +690,8 @@ public class ToolsApplication {
                 if (appFolder == null) {
                     throw new IllegalArgumentException("Application folder is not set.");
                 }
-                if (processedFolder == null) {
-                    throw new IllegalArgumentException("Folder to be processed is not set.");
+                if (processedFolder == null && processedFile == null) {
+                    throw new IllegalArgumentException("Neither file nor folder to be processed is not set.");
                 }
                 if (minifiedModel == null && minifiedLayout == null) {
                     throw new IllegalArgumentException("No any file to concatenate minified content into is set.");
@@ -661,7 +702,7 @@ public class ToolsApplication {
                 if (!force && minifiedLayout.exists()) {
                     throw new IllegalArgumentException(minifiedLayout.getAbsolutePath() + " already exists.");
                 }
-                minify(appFolder, processedFolder, minifiedModel, minifiedLayout);
+                minify(appFolder, processedFolder, processedFile, minifiedModel, minifiedLayout);
                 break;
             case INDEX:
                 if (appFolder == null) {

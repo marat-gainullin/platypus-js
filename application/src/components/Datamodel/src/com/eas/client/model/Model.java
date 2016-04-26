@@ -347,8 +347,8 @@ public abstract class Model<E extends Entity<?, Q, E>, Q extends Query> {
         if (aRelation.getLeftField() != null) {
             String targetName = aRelation.getLeftField().getName();
             if (aRelation.getLeftEntity() != null) {
+                Q lQuery = aRelation.getLeftEntity().getQuery();
                 if (aRelation.isLeftParameter() && aRelation.getLeftEntity().getQueryName() != null) {
-                    Q lQuery = aRelation.getLeftEntity().getQuery();
                     if (lQuery != null) {
                         aRelation.setLeftField(lQuery.getParameters().get(targetName));
                     } else if (relationsAgressiveCheck) {
@@ -358,7 +358,7 @@ public abstract class Model<E extends Entity<?, Q, E>, Q extends Query> {
                     }
                 } else {
                     Fields lFields = aRelation.getLeftEntity().getFields();
-                    if (lFields != null) {
+                    if (lFields != null && lQuery.isMetadataAccessible()) {
                         aRelation.setLeftField(lFields.get(targetName));
                     } else if (relationsAgressiveCheck) {
                         aRelation.setLeftField(null);
@@ -375,8 +375,8 @@ public abstract class Model<E extends Entity<?, Q, E>, Q extends Query> {
         if (aRelation.getRightField() != null) {
             String targetName = aRelation.getRightField().getName();
             if (aRelation.getRightEntity() != null) {
+                Q rQuery = aRelation.getRightEntity().getQuery();
                 if (aRelation.isRightParameter() && aRelation.getRightEntity().getQueryName() != null) {
-                    Q rQuery = aRelation.getRightEntity().getQuery();
                     if (rQuery != null) {
                         aRelation.setRightField(rQuery.getParameters().get(targetName));
                     } else if (relationsAgressiveCheck) {
@@ -386,7 +386,7 @@ public abstract class Model<E extends Entity<?, Q, E>, Q extends Query> {
                     }
                 } else {
                     Fields rFields = aRelation.getRightEntity().getFields();
-                    if (rFields != null) {
+                    if (rFields != null && rQuery.isMetadataAccessible()) {
                         aRelation.setRightField(rFields.get(targetName));
                     } else if (relationsAgressiveCheck) {
                         aRelation.setRightField(null);

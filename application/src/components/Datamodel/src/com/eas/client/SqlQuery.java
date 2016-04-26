@@ -131,6 +131,20 @@ public class SqlQuery extends Query {
         changeSupport.firePropertyChange("datasourceName", oldValue, datasourceName);
     }
 
+    /**
+     * Checks if this query's metadata is accessible from its datasource.
+     *
+     * @return True if metadata is accessible and false otherwise.
+     */
+    @Override
+    public boolean isMetadataAccessible() {
+        try {
+            return basesProxy != null && basesProxy.obtainDataSource(datasourceName) != null;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
     public boolean isCommand() {
         return command;
     }

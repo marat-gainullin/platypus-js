@@ -909,6 +909,14 @@ input[type="search"] {
     border-radius: 2px;
 }
 
+.gwt-SplitLayoutPanel-HDragger{
+    cursor: ew-resize;
+}
+
+.gwt-SplitLayoutPanel-VDragger{
+    cursor: ns-resize;
+}
+
 .dropdown-split{
     display: inline-block;
     height: 100%;
