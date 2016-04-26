@@ -6,6 +6,7 @@ define(['logger', 'boxing'], function (Logger, B) {
     var HttpCookie = Java.type("javax.servlet.http.Cookie");
     var CharsetClass = Java.type("java.nio.charset.Charset");
     var ByteArray = Java.type("byte[]");
+    var ScriptsClass = Java.type('com.eas.script.Scripts');
 
     function Request(aHttpRequest) {
 
@@ -575,8 +576,6 @@ define(['logger', 'boxing'], function (Logger, B) {
      * @constructor
      */
     function HttpContext() {
-        var ScriptsClass = Java.type('com.eas.script.Scripts');
-
         /**
          * Servlet conatiner http request.
          * See http-context.Request.
@@ -595,5 +594,22 @@ define(['logger', 'boxing'], function (Logger, B) {
             value: ScriptsClass.getContext().getResponse() ? new Response(ScriptsClass.getContext().getResponse()) : null
         });
     }
+    /**
+     * Returns servlet conatiner http request.
+     * See http-context.Request.
+     * @returns {http-context.Request}
+     */
+    HttpContext.getRequest = function () {
+        return ScriptsClass.getContext().getRequest() ? new Request(ScriptsClass.getContext().getRequest()) : null;
+    };
+    /**
+     * Returns servlet conatiner http response.
+     * See http-context.Response.
+     * @returns {http-context.Response}
+     */
+    HttpContext.getResponse = function () {
+        return ScriptsClass.getContext().getResponse() ? new Response(ScriptsClass.getContext().getResponse()) : null;
+    };
+    Object.seal(HttpContext);
     return HttpContext;
 });
