@@ -137,7 +137,7 @@ public class RelationsFieldsDragHandler<E extends Entity<?, SqlQuery, E>> extend
                                             if (leftEntity != null && rightEntity != null && leftField != null && rightField != null
                                                     && !DatamodelDesignUtils.<E>isRelationAlreadyDefined(leftEntity, leftField, rightEntity, rightField)) {
                                                 if (modelView.getModel() instanceof DbSchemeModel) {
-                                                    return Objects.equals(leftField.getType(), rightField.getType()) && rightField.isPk() && !leftField.isFk();
+                                                    return leftField.getType() != null && leftField.getType().equalsIgnoreCase(rightField.getType()) && rightField.isPk() && !leftField.isFk();
                                                 } else { // dmv.getModel() instanceof DbSchemeModel
                                                     return true;
                                                     /*
