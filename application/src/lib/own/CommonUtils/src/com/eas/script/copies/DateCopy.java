@@ -11,14 +11,14 @@ package com.eas.script.copies;
  */
 public class DateCopy {
 
-    protected long time;
+    protected double time;
 
-    public DateCopy(long aTime) {
+    public DateCopy(double aTime) {
         super();
         time = aTime;
     }
 
-    public long getTime() {
+    public double getTime() {
         return time;
     }
 

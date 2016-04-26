@@ -485,6 +485,8 @@ public class Scripts {
             if (aValue instanceof Date) {// force js boxing of date, because of absence js literal of date value
                 assert toDateFunc != null : SCRIPT_NOT_INITIALIZED;
                 return toDateFunc.call(null, aValue);
+            } else if (aValue instanceof Number) {
+                return ((Number)aValue).doubleValue();
             } else if (aValue instanceof HasPublished) {
                 return ((HasPublished) aValue).getPublished();
             } else {
