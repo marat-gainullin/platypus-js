@@ -179,7 +179,7 @@ public class ModelSpin extends ModelComponentDecorator<VSpinner, Double> impleme
             try {
                 ftf.commitEdit();
             } catch (ParseException ex) {
-                Logger.getLogger(ModelDate.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ModelDate.class.getName()).log(Level.WARNING, null, ex);
             }
         }
         return super.stopCellEditing();
