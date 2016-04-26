@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  * Interface for scalar data-aware widget. Scalar widget views and edits a value
@@ -39,7 +40,15 @@ public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasV
             }
             Object value = null;
             if (propName != null) {
-                value = Scripts.isInitialized()/* Carzy designer :(*/ ? Scripts.getSpace().toJava(target.getMember(propName)) : target.getMember(propName);
+                if (Scripts.isInitialized()/* Carzy designer :(*/) {
+                    value = Scripts.getSpace().toJava(target.getMember(propName));
+                } else {
+                    value = target.getMember(propName);
+                    if (JSType.nullOrUndefined(value)) {
+                        value = null;
+                    }
+                }
+
             } else {
                 Logger.getLogger(ModelWidget.class.getName()).log(Level.FINE, PROPERTY_PATH_MISSING_MSG, aPath);
             }
