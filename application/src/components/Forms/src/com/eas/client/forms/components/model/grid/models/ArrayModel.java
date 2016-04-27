@@ -4,7 +4,6 @@
  */
 package com.eas.client.forms.components.model.grid.models;
 
-import com.eas.client.forms.Forms;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.script.Scripts;
