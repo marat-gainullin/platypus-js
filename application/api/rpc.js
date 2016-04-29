@@ -8,7 +8,7 @@ define('logger', function () {
     var space = ScriptsClass.getSpace();
     
     function isFunction(aValue){
-        return typeof aValue === 'function' && aValue instanceof SystemCallbackClass;
+        return typeof aValue === 'function' || aValue instanceof SystemCallbackClass;
     }
     
     /**
