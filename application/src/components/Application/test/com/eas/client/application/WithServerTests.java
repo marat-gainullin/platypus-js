@@ -145,7 +145,7 @@ public abstract class WithServerTests extends ScriptedTests {
 
     @Test
     public void accounterClient() throws InterruptedException {
-        start("AccounterClient", 10000L);
+        start("AccounterClient", 20000L);
     }
 
     @Test
@@ -163,4 +163,13 @@ public abstract class WithServerTests extends ScriptedTests {
         start("ErrorsTestClient", 10000L);
     }
 
+    @Test
+    public void AMDSelfTest() throws InterruptedException {
+        start("AMDSelfTest", 10000L);
+    }
+
+    @Test
+    public void LPCCallbacksTest() throws InterruptedException {
+        start("LPCCallbacksTest", 10000L);
+    }
 }

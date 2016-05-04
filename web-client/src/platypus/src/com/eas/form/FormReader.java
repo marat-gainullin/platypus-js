@@ -11,10 +11,8 @@ import com.eas.client.CallbackAdapter;
 import com.eas.core.Utils;
 import com.eas.ui.DefaultUiReader;
 import com.eas.ui.PlatypusImageResource;
-import com.eas.widgets.AnchorsPane;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Element;
 
@@ -53,6 +51,7 @@ public class FormReader extends DefaultUiReader {
 			});
 		}
 		form.setTitle(Utils.getAttribute(element, "tl", "title", null));
+		form.setClosable(Utils.getBooleanAttribute(element, "cle", "closable", Boolean.TRUE));
 		form.setMaximizable(Utils.getBooleanAttribute(element, "mxe", "maximizable", Boolean.TRUE));
 		form.setMinimizable(Utils.getBooleanAttribute(element, "mne", "minimizable", Boolean.TRUE));
 		form.setResizable(Utils.getBooleanAttribute(element, "rs", "resizable", Boolean.TRUE));

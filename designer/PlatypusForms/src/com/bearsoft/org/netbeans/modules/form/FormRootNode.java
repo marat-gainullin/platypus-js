@@ -111,8 +111,8 @@ public class FormRootNode extends FormNode {
         if (propSets == null) {
             try {
                 propSets = new ArrayList<>();
-                propsByName = new TreeMap<>();
-                Map<String, List<FormProperty<?>>> propsByCategory = new TreeMap<>();
+                propsByName = new HashMap<>();
+                Map<String, List<FormProperty<?>>> propsByCategory = new HashMap<>();
                 BeanInfo bi = Introspector.getBeanInfo(Form.class, java.beans.Introspector.IGNORE_ALL_BEANINFO);
                 for (PropertyDescriptor descriptor : bi.getPropertyDescriptors()) {
                     if (descriptor.getReadMethod() != null && descriptor.getWriteMethod() != null) {

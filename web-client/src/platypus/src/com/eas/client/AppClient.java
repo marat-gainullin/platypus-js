@@ -1029,7 +1029,7 @@ public class AppClient {
 						responseType = responseType.toLowerCase();
 						if (responseType.contains("application/json") || responseType.contains("application/javascript") || responseType.contains("text/json")
 						        || responseType.contains("text/javascript")) {
-							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
+							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));// WARNING!!! Don't edit to Utils.jsonParse! It is parsed already in high level js code.
 						} else if (responseType.contains(REPORT_LOCATION_CONTENT_TYPE)) {
 							Utils.executeScriptEventVoid(onSuccess, onSuccess, createReport(aReportConstructor, aResponse.getResponseText()));
 						} else {

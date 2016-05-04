@@ -4,7 +4,7 @@ define('logger', function () {
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
     var JavaStringArrayClass = Java.type("java.lang.String[]");
     var JavaArrayClass = Java.type("java.lang.Object[]");
-    var SystemCallbackClass = Java.type("com.eas.server.scripts.SystemJSCallback");
+    var SystemCallbackClass = Java.type("com.eas.script.SystemJSCallback");
     var space = ScriptsClass.getSpace();
     
     function isFunction(aValue){

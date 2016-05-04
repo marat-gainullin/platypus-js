@@ -28,7 +28,7 @@ import com.eas.script.Scripts;
 import com.eas.server.handlers.ServerModuleStructureRequestHandler;
 import com.eas.server.handlers.RPCRequestHandler;
 import com.eas.script.JsObjectException;
-import com.eas.server.scripts.SystemJSCallback;
+import com.eas.script.SystemJSCallback;
 import java.io.File;
 import java.security.AccessControlException;
 import java.util.ArrayList;
@@ -40,7 +40,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.Undefined;
 

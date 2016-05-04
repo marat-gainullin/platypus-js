@@ -231,6 +231,7 @@ public class ToolsApplication {
             put("prefWidth", "pw");
             put("prefHeight", "ph");
             put("defaultCloseOperation", "dco");
+            put("closable", "cle");
             put("maximizable", "mxe");
             put("minimizable", "mne");
             put("undecorated", "udr");

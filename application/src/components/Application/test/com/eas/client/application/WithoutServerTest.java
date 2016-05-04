@@ -143,4 +143,9 @@ public class WithoutServerTest extends ScriptedTests {
         start("InvokeLaterDelayedTest", 10000L);
     }
 
+    @Test
+    public void AMDSelfTest() throws InterruptedException {
+        start("AMDSelfTest", 10000L);
+    }
+
 }
