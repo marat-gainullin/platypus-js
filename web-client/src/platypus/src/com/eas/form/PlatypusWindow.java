@@ -475,6 +475,14 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.form.PlatypusWindow::setMaximizable(Z)(!!aValue);
 	        } 
         });
+        Object.defineProperty(aPublished, "closable", {
+	        get:function() {
+	        	return aForm.@com.eas.form.PlatypusWindow::isClosable()();
+	        },
+	        set:function(aValue) {
+	        	aForm.@com.eas.form.PlatypusWindow::setClosable(Z)(!!aValue);
+	        } 
+        });
         Object.defineProperty(aPublished, "maximized", {
 	        get:function() {
 	        	return aForm.@com.eas.form.PlatypusWindow::isMaximized()();
@@ -807,6 +815,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		}
 	}
 
+	@Override
 	public void setClosable(boolean aValue) {
 		if (closable != aValue) {
 			super.setClosable(aValue);

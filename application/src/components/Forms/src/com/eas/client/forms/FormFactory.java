@@ -179,6 +179,7 @@ public class FormFactory {
         });
 
         form.setTitle(XmlDomUtils.getAttribute(element, "tl", "title"));
+        form.setClosable(readBooleanAttribute(element, "cle", "closable", Boolean.TRUE));
         form.setMaximizable(readBooleanAttribute(element, "mxe", "maximizable", Boolean.TRUE));
         form.setMinimizable(readBooleanAttribute(element, "mne", "minimizable", Boolean.TRUE));
         form.setResizable(readBooleanAttribute(element, "rs", "resizable", Boolean.TRUE));

@@ -7,6 +7,7 @@ package com.eas.client.application;
 
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.Scripts;
+import com.eas.script.SystemJSCallback;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,13 +36,13 @@ public class ScriptedTests {
                         JSObject testInstance = (JSObject) testModule.newObject();
                         JSObject execute = (JSObject) testInstance.getMember("execute");
                         try {
-                            execute.call(testInstance, new Object[]{new AbstractJSObject() {
+                            execute.call(testInstance, new Object[]{new SystemJSCallback() {
                                 @Override
                                 public Object call(final Object thiz, final Object... args) {
                                     completion.set(success);
                                     return null;
                                 }
-                            }, new AbstractJSObject() {
+                            }, new SystemJSCallback() {
                                 @Override
                                 public Object call(final Object thiz, final Object... args) {
                                     completion.set(args.length > 0 ? args[0] : failure);

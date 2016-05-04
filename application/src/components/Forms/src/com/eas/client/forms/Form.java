@@ -136,6 +136,7 @@ public class Form implements HasPublished {
     protected boolean resizable = true;
     protected boolean minimizable = true;
     protected boolean maximizable = true;
+    protected boolean closable = true;
     protected boolean undecorated;
     protected float opacity = 1.0f;
     protected boolean alwaysOnTop;
@@ -984,7 +985,7 @@ public class Form implements HasPublished {
 
     private static final String RESIZABLE_JSDOC = ""
             + "/**\n"
-            + " * <code>true</code> if this form resizable.\n"
+            + " * <code>true</code> if this form is resizable.\n"
             + " */";
 
     @ScriptFunction(jsDoc = RESIZABLE_JSDOC)
@@ -1008,7 +1009,7 @@ public class Form implements HasPublished {
 
     private static final String MAXIMIZABLE_JSDOC = ""
             + "/**\n"
-            + " * <code>true</code> if this form maximizable.\n"
+            + " * <code>true</code> if this form is maximizable.\n"
             + " */";
 
     @ScriptFunction(jsDoc = MAXIMIZABLE_JSDOC)
@@ -1030,9 +1031,33 @@ public class Form implements HasPublished {
         }
     }
 
+    private static final String CLOSABLE_JSDOC = ""
+            + "/**\n"
+            + " * <code>true</code> if this form is closable.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = MAXIMIZABLE_JSDOC)
+    public boolean getClosable() {
+        return closable;
+    }
+
+    @ScriptFunction
+    public void setClosable(boolean aValue) {
+        closable = aValue;
+        if (surface instanceof JDialog) {
+            //((JDialog) surface).setClosable(closable);
+        }
+        if (surface instanceof JInternalFrame) {
+            ((JInternalFrame) surface).setClosable(closable);
+        }
+        if (surface instanceof JFrame) {
+            //((JFrame) surface).setClosable(closable);
+        }
+    }
+
     private static final String MINIMIZABLE_JSDOC = ""
             + "/**\n"
-            + " * <code>true</code> if this form minimizable.\n"
+            + " * <code>true</code> if this form is minimizable.\n"
             + " */";
 
     @ScriptFunction(jsDoc = MINIMIZABLE_JSDOC)

@@ -100,6 +100,7 @@ var layoutMin = {
         "pw": "prefWidth", // web
         "ph": "prefHeight", // web
         "dco": "defaultCloseOperation", // web
+        "cle": "closable", // web
         "mxe": "maximizable", // web
         "mne": "minimizable", // web
         "udr": "undecorated", // web

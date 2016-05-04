@@ -4,7 +4,13 @@ define('logger', function () {
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
     var JavaStringArrayClass = Java.type("java.lang.String[]");
     var JavaArrayClass = Java.type("java.lang.Object[]");
+    var SystemCallbackClass = Java.type("com.eas.script.SystemJSCallback");
     var space = ScriptsClass.getSpace();
+    
+    function isFunction(aValue){
+        return typeof aValue === 'function' || aValue instanceof SystemCallbackClass;
+    }
+    
     /**
      * Server modules remote network or local script spaces proxy.
      * If it is used on client (J2SE, or in Browser) it is remote proxy thransforming methods' stubs calls into
@@ -30,11 +36,11 @@ define('logger', function () {
                                 var onSuccess = null;
                                 var onFailure = null;
                                 var argsLength = arguments.length;
-                                if (argsLength > 1 && typeof arguments[argsLength - 1] === "function" && typeof arguments[argsLength - 2] === "function") {
+                                if (argsLength > 1 && isFunction(arguments[argsLength - 1]) && isFunction(arguments[argsLength - 2])) {
                                     onSuccess = arguments[argsLength - 2];
                                     onFailure = arguments[argsLength - 1];
                                     argsLength -= 2;
-                                } else if (argsLength > 0 && typeof arguments[argsLength - 1] === "function") {
+                                } else if (argsLength > 0 && isFunction(arguments[argsLength - 1])) {
                                     onSuccess = arguments[argsLength - 1];
                                     argsLength -= 1;
                                 }

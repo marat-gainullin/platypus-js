@@ -28,6 +28,7 @@ import com.eas.script.Scripts;
 import com.eas.server.handlers.ServerModuleStructureRequestHandler;
 import com.eas.server.handlers.RPCRequestHandler;
 import com.eas.script.JsObjectException;
+import com.eas.script.SystemJSCallback;
 import java.io.File;
 import java.security.AccessControlException;
 import java.util.ArrayList;
@@ -39,7 +40,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.Undefined;
 
@@ -233,7 +233,7 @@ public abstract class PlatypusServerCore implements ContextHost, Application<Sql
                                                 for (Object argument : copiedArguments) {
                                                     arguments.add(targetSpace.restoreCopy(argument));
                                                 }
-                                                arguments.add(new AbstractJSObject() {
+                                                arguments.add(new SystemJSCallback() {
                                                     @Override
                                                     public Object call(final Object thiz, final Object... largs) {
                                                         if (!aNetworkRPC || !executed.get()) {
@@ -246,17 +246,8 @@ public abstract class PlatypusServerCore implements ContextHost, Application<Sql
                                                         return null;
                                                     }
 
-                                                    @Override
-                                                    public Object getDefaultValue(Class<?> hint) {
-                                                        if (String.class.isAssignableFrom(hint)) {
-                                                            return super.toString();
-                                                        } else {
-                                                            return null;
-                                                        }
-                                                    }
-
                                                 });
-                                                arguments.add(new AbstractJSObject() {
+                                                arguments.add(new SystemJSCallback() {
                                                     @Override
                                                     public Object call(final Object thiz, final Object... largs) {
                                                         if (!aNetworkRPC || !executed.get()) {
@@ -271,15 +262,6 @@ public abstract class PlatypusServerCore implements ContextHost, Application<Sql
                                                             Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
                                                         }
                                                         return null;
-                                                    }
-
-                                                    @Override
-                                                    public Object getDefaultValue(Class<?> hint) {
-                                                        if (String.class.isAssignableFrom(hint)) {
-                                                            return super.toString();
-                                                        } else {
-                                                            return null;
-                                                        }
                                                     }
 
                                                 });
