@@ -23,6 +23,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -100,7 +101,8 @@ public class Scripts {
 
     /**
      * Warning! Use it only once and only in single threaded environment
-     * @param aSpace 
+     *
+     * @param aSpace
      */
     public static void setOnlySpace(Space aSpace) {
         onlySpace = aSpace;
@@ -486,7 +488,7 @@ public class Scripts {
                 assert toDateFunc != null : SCRIPT_NOT_INITIALIZED;
                 return toDateFunc.call(null, aValue);
             } else if (aValue instanceof Number) {
-                return ((Number)aValue).doubleValue();
+                return ((Number) aValue).doubleValue();
             } else if (aValue instanceof HasPublished) {
                 return ((HasPublished) aValue).getPublished();
             } else {
@@ -812,8 +814,9 @@ public class Scripts {
     }
 
     /**
-     * If scripts are initialized, then Platypua.ja system will work in full manner.
-     * Otherwise it will not perform some actions, such as data binding.
+     * If scripts are initialized, then Platypua.ja system will work in full
+     * manner. Otherwise it will not perform some actions, such as data binding.
+     *
      * @return True if scripts are fully initialized, false otherwise.
      */
     public static boolean isInitialized() {
@@ -940,6 +943,23 @@ public class Scripts {
             JSObject unlisten = (JSObject) aCookie.getMember("unlisten");
             unlisten.call(null, new Object[]{});
         }
+    }
+
+    /**
+     * For external API.
+     *
+     * @param aWrapped
+     * @return BiConsumer<Object, Throwable> Object - result instance, Throwable
+     * - exception raised while an operation.
+     */
+    public static BiConsumer<Object, Throwable> inContext(BiConsumer<Object, Throwable> aWrapped) {
+        Space callingSpace = getSpace();
+        LocalContext callingContext = getContext();
+        return (Object aResult, Throwable aReason) -> {
+            callingSpace.process(callingContext, () -> {
+                aWrapped.accept(aResult, aReason);
+            });
+        };
     }
 
     public static boolean isInNode(Node node, int offset) {
