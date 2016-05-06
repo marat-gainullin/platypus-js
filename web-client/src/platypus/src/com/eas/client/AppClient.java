@@ -744,17 +744,23 @@ public class AppClient {
 
 				@Override
 				protected void doWork(XMLHttpRequest aResponse) throws Exception {
-					String respText = aResponse.getResponseText();
-					Object oResult = respText != null && !respText.isEmpty() ? Utils.toJava(Utils.jsonParse(respText)) : null;
-					assert oResult == null || oResult instanceof JavaScriptObject : "Credential request expects null or JavaScriptObject value as a response.";
-					JavaScriptObject jsObject = (JavaScriptObject) oResult;
-					Object oUserName = jsObject.<Utils.JsObject> cast().getJava("userName");
-					assert oUserName == null || oUserName instanceof String : "Credential request expects null or String value as a user name.";
-					principal = (String) oUserName;
-					if (principal == null || principal.isEmpty())
-						principal = "anonymous" + String.valueOf(IDGenerator.genId());
-					if (aCallback != null) {
-						aCallback.onSuccess(principal);
+					if (isJsonResponse(aResponse)) {
+						String respText = aResponse.getResponseText();
+						Object oResult = respText != null && !respText.isEmpty() ? Utils.toJava(Utils.jsonParse(respText)) : null;
+						assert oResult == null || oResult instanceof JavaScriptObject : "Credential request expects null or JavaScriptObject value as a response.";
+						JavaScriptObject jsObject = (JavaScriptObject) oResult;
+						Object oUserName = jsObject.<Utils.JsObject> cast().getJava("userName");
+						assert oUserName == null || oUserName instanceof String : "Credential request expects null or String value as a user name.";
+						principal = (String) oUserName;
+						if (principal == null || principal.isEmpty())
+							principal = "anonymous" + String.valueOf(IDGenerator.genId());
+						if (aCallback != null) {
+							aCallback.onSuccess(principal);
+						}
+					} else {
+						if (aCallback != null) {
+							aCallback.onFailure(aResponse.getResponseText());
+						}
 					}
 				}
 
@@ -852,35 +858,40 @@ public class AppClient {
 
 				@Override
 				public void doWork(XMLHttpRequest aResponse) throws Exception {
-					// Some post processing
-					String text = aResponse.getResponseText();
-					JavaScriptObject _doc = text != null && !text.isEmpty() ? Utils.JsObject.parseJSON(text) : null;
-					Utils.JsObject doc = _doc.cast();
-					//
-					Set<String> structure = new HashSet<String>();
-					Set<String> clientDependencies = new HashSet<String>();
-					Set<String> queryDependencies = new HashSet<String>();
-					Set<String> serverModuleDependencies = new HashSet<String>();
-					Utils.JsObject jsStructure = doc.getJs("structure").cast();
-					Utils.JsObject jsClientDependencies = doc.getJs("clientDependencies").cast();
-					Utils.JsObject jsQueryDependencies = doc.getJs("queryDependencies").cast();
-					Utils.JsObject jsServerDependencies = doc.getJs("serverDependencies").cast();
-					for (int i = 0; i < jsStructure.length(); i++) {
-						structure.add(jsStructure.getStringSlot(i));
-					}
-					for (int i = 0; i < jsClientDependencies.length(); i++) {
-						clientDependencies.add(jsClientDependencies.getStringSlot(i));
-					}
-					for (int i = 0; i < jsQueryDependencies.length(); i++) {
-						queryDependencies.add(jsQueryDependencies.getStringSlot(i));
-					}
-					for (int i = 0; i < jsServerDependencies.length(); i++) {
-						serverModuleDependencies.add(jsServerDependencies.getStringSlot(i));
-					}
-					ModuleStructure moduleStructure = new ModuleStructure(structure, clientDependencies, serverModuleDependencies, queryDependencies);
-					modulesStructures.put(aModuleName, moduleStructure);
-					if (aCallback != null) {
-						aCallback.onSuccess(moduleStructure);
+					if (isJsonResponse(aResponse)) {
+						// Some post processing
+						String text = aResponse.getResponseText();
+						JavaScriptObject _doc = text != null && !text.isEmpty() ? Utils.JsObject.parseJSON(text) : null;
+						Utils.JsObject doc = _doc.cast();
+						//
+						Set<String> structure = new HashSet<String>();
+						Set<String> clientDependencies = new HashSet<String>();
+						Set<String> queryDependencies = new HashSet<String>();
+						Set<String> serverModuleDependencies = new HashSet<String>();
+						Utils.JsObject jsStructure = doc.getJs("structure").cast();
+						Utils.JsObject jsClientDependencies = doc.getJs("clientDependencies").cast();
+						Utils.JsObject jsQueryDependencies = doc.getJs("queryDependencies").cast();
+						Utils.JsObject jsServerDependencies = doc.getJs("serverDependencies").cast();
+						for (int i = 0; i < jsStructure.length(); i++) {
+							structure.add(jsStructure.getStringSlot(i));
+						}
+						for (int i = 0; i < jsClientDependencies.length(); i++) {
+							clientDependencies.add(jsClientDependencies.getStringSlot(i));
+						}
+						for (int i = 0; i < jsQueryDependencies.length(); i++) {
+							queryDependencies.add(jsQueryDependencies.getStringSlot(i));
+						}
+						for (int i = 0; i < jsServerDependencies.length(); i++) {
+							serverModuleDependencies.add(jsServerDependencies.getStringSlot(i));
+						}
+						ModuleStructure moduleStructure = new ModuleStructure(structure, clientDependencies, serverModuleDependencies, queryDependencies);
+						modulesStructures.put(aModuleName, moduleStructure);
+						if (aCallback != null) {
+							aCallback.onSuccess(moduleStructure);
+						}
+					} else {
+						if (aCallback != null)
+							aCallback.onFailure(aResponse);
 					}
 				}
 

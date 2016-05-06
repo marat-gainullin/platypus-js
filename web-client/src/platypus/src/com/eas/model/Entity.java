@@ -640,7 +640,7 @@ public class Entity implements HasPublished {
 							}
 						}
 					} else {
-						Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Relation had no left entity");
+						Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Relation has no left entity");
 					}
 				}
 			}
