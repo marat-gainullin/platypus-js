@@ -365,7 +365,7 @@ public class StatementsGenerator implements ChangeVisitor {
                     GeometryChangeValue g = new GeometryChangeValue(v.name, v.value);
                     logEntry.parameters.add(g);
                 } else {
-                    logEntry.parameters.add(v);
+                    logEntry.parameters.add(/* instead of checkTableCahnge() */new JdbcChangeValue(v.name, v.value, JdbcFlowProvider.calcJdbcType(p.getType(), v.value), null));
                 }
             }
             logEntries.add(logEntry);

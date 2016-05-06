@@ -945,7 +945,7 @@ public class AppClient {
 		}
 	}
 
-	public Cancellable createServerModule(final String aModuleName, final Callback<Void, String> aCallback) throws Exception {
+	public Cancellable requestServerModule(final String aModuleName, final Callback<Void, String> aCallback) throws Exception {
 		if (isServerModule(aModuleName)) {
 			if (aCallback != null) {
 				Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -970,10 +970,14 @@ public class AppClient {
 				@Override
 				public void doWork(XMLHttpRequest aResponse) throws Exception {
 					// Some post processing
-					String appElementName = aModuleName;
-					addServerModule(appElementName, aResponse.getResponseText());
-					if (aCallback != null)
-						aCallback.onSuccess(null);
+					if (isJsonResponse(aResponse)) {
+						addServerModule(aModuleName, aResponse.getResponseText());
+						if (aCallback != null) {
+							aCallback.onSuccess(null);
+						}
+					} else {
+						onFailure(aResponse);
+					}
 				}
 
 				@Override
@@ -1024,17 +1028,12 @@ public class AppClient {
 
 				@Override
 				public void doWork(XMLHttpRequest aResponse) throws Exception {
-					String responseType = aResponse.getResponseHeader("content-type");
-					if (responseType != null) {
-						responseType = responseType.toLowerCase();
-						if (responseType.contains("application/json") || responseType.contains("application/javascript") || responseType.contains("text/json")
-						        || responseType.contains("text/javascript")) {
-							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));// WARNING!!! Don't edit to Utils.jsonParse! It is parsed already in high level js code.
-						} else if (responseType.contains(REPORT_LOCATION_CONTENT_TYPE)) {
-							Utils.executeScriptEventVoid(onSuccess, onSuccess, createReport(aReportConstructor, aResponse.getResponseText()));
-						} else {
-							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
-						}
+					if (isJsonResponse(aResponse)) {
+						Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
+						// WARNING!!!Don't edit to Utils.jsonParse!
+						// It is parsed in high-level js-code.
+					} else if (isReportResponse(aResponse)) {
+						Utils.executeScriptEventVoid(onSuccess, onSuccess, createReport(aReportConstructor, aResponse.getResponseText()));
 					} else {
 						Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
 					}
@@ -1045,10 +1044,7 @@ public class AppClient {
 					if (onFailure != null) {
 						try {
 							String responseText = aResponse.getResponseText();
-							String responseType = aResponse.getResponseHeader("content-type");
-							if (responseType != null
-							        && (responseType.contains("application/json") || responseType.contains("application/javascript") || responseType.contains("text/json") || responseType
-							                .contains("text/javascript"))) {
+							if (isJsonResponse(aResponse)) {
 								Utils.executeScriptEventVoid(onFailure, onFailure, Utils.jsonParse(responseText));
 							} else {
 								Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(responseText != null && !responseText.isEmpty() ? responseText : aResponse.getStatusText()));
@@ -1067,10 +1063,9 @@ public class AppClient {
 				if (executed.getStatus() == Response.SC_OK) {
 					String responseType = executed.getResponseHeader("content-type");
 					if (responseType != null) {
-						responseType = responseType.toLowerCase();
-						if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
+						if (isJsonResponse(executed)) {
 							return Utils.toJs(executed.getResponseText());
-						} else if (responseType.contains(REPORT_LOCATION_CONTENT_TYPE)) {
+						} else if (responseType.toLowerCase().contains(REPORT_LOCATION_CONTENT_TYPE)) {
 							return createReport(aReportConstructor, executed.getResponseText());
 						} else {
 							return Utils.toJs(executed.getResponseText());
@@ -1088,7 +1083,7 @@ public class AppClient {
 		}
 	}
 
-	public Cancellable getAppQuery(final String queryName, final Callback<Query, String> aCallback) throws Exception {
+	public Cancellable requestAppQuery(final String queryName, final Callback<Query, String> aCallback) throws Exception {
 		final Query alreadyQuery = queries.get(queryName);
 		if (alreadyQuery != null) {
 			if (aCallback != null) {
@@ -1113,13 +1108,19 @@ public class AppClient {
 
 				@Override
 				public void doWork(XMLHttpRequest aResponse) throws Exception {
-					// Some post processing
-					Query query = readQuery(aResponse);
-					query.setClient(AppClient.this);
-					//
-					queries.put(queryName, query);
-					if (aCallback != null)
-						aCallback.onSuccess(query);
+					if (isJsonResponse(aResponse)) {
+						// Some post processing
+						Query query = readQuery(aResponse);
+						query.setClient(AppClient.this);
+						//
+						queries.put(queryName, query);
+						if (aCallback != null)
+							aCallback.onSuccess(query);
+					} else {
+						if (aCallback != null) {
+							aCallback.onFailure(aResponse.getResponseText());
+						}
+					}
 				}
 
 				private Query readQuery(XMLHttpRequest aResponse) throws Exception {
@@ -1152,9 +1153,14 @@ public class AppClient {
 
 			@Override
 			public void doWork(XMLHttpRequest aResponse) throws Exception {
-				JavaScriptObject parsed = Utils.JsObject.parseJSONDateReviver(aResponse.getResponseText());
-				if (aCallback != null)
-					aCallback.onSuccess(parsed);
+				if (isJsonResponse(aResponse)) {
+					JavaScriptObject parsed = Utils.JsObject.parseJSONDateReviver(aResponse.getResponseText());
+					if (aCallback != null)
+						aCallback.onSuccess(parsed);
+				} else {
+					if (aCallback != null)
+						aCallback.onFailure(aResponse.getResponseText());
+				}
 			}
 
 			@Override
@@ -1176,4 +1182,23 @@ public class AppClient {
 		return cacheBustEnabled ? aUrl + "?" + PlatypusHttpRequestParams.CACHE_BUSTER + "=" + IDGenerator.genId() : aUrl;
 	}
 
+	private boolean isJsonResponse(XMLHttpRequest aResponse) {
+		String responseType = aResponse.getResponseHeader("content-type");
+		if (responseType != null) {
+			responseType = responseType.toLowerCase();
+			return responseType.contains("application/json") || responseType.contains("application/javascript") || responseType.contains("text/json") || responseType.contains("text/javascript");
+		} else {
+			return false;
+		}
+	}
+
+	private boolean isReportResponse(XMLHttpRequest aResponse) {
+		String responseType = aResponse.getResponseHeader("content-type");
+		if (responseType != null) {
+			responseType = responseType.toLowerCase();
+			return responseType.contains(REPORT_LOCATION_CONTENT_TYPE);
+		} else {
+			return false;
+		}
+	}
 }

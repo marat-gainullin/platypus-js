@@ -765,7 +765,7 @@ public class Loader {
 			};
 			final Collection<Cancellable> startLoadings = new ArrayList<Cancellable>();
 			for (final String appElementName : aServerModulesNames) {
-				startLoadings.add(AppClient.getInstance().createServerModule(appElementName, new CallbackAdapter<Void, String>() {
+				startLoadings.add(AppClient.getInstance().requestServerModule(appElementName, new CallbackAdapter<Void, String>() {
 
 					@Override
 					public void doWork(Void aDoc) throws Exception {
@@ -809,7 +809,7 @@ public class Loader {
 			};
 			final Collection<Cancellable> startLoadings = new ArrayList<Cancellable>();
 			for (final String queryName : aQueriesNames) {
-				startLoadings.add(AppClient.getInstance().getAppQuery(queryName, new CallbackAdapter<Query, String>() {
+				startLoadings.add(AppClient.getInstance().requestAppQuery(queryName, new CallbackAdapter<Query, String>() {
 
 					@Override
 					public void doWork(Query aQuery) throws Exception {
