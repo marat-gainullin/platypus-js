@@ -9,7 +9,6 @@ import com.eas.client.xhr.ProgressEvent;
 import com.eas.core.Cancellable;
 import com.eas.core.HasPublished;
 import com.eas.core.Utils;
-import com.eas.core.Utils.JsObject;
 import com.eas.core.XElement;
 import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusPopupMenu;
@@ -357,15 +356,10 @@ public class PlatypusHtmlEditor extends Composite implements HasJsFacade, HasVal
 											if (!completed) {
 												if (aResult.isComplete() && aResult.getRequest() != null) {
 													completed = true;
-													JsObject image = (JsObject) Utils.JsObject.parseJSON(aResult.getRequest().getResponseText());
-													if (image.isArray()){
-														for (int i=0;i<image.length();i++){
-															textContainer.getFormatter().insertImage(image.getString(i));
-														}
-													}else{
-														textContainer.getFormatter().insertImage(image.getString(0));
+													Utils.JsObject images = (Utils.JsObject) Utils.JsObject.parseJSON(aResult.getRequest().getResponseText());
+													for (int i=0;i<images.length();i++){
+														textContainer.getFormatter().insertImage(images.getString(i));
 													}
-													
 												}
 											}
 										} catch (Exception ex) {
