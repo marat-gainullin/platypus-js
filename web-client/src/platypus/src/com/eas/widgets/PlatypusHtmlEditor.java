@@ -357,7 +357,7 @@ public class PlatypusHtmlEditor extends Composite implements HasJsFacade, HasVal
 												if (aResult.isComplete() && aResult.getRequest() != null) {
 													completed = true;
 													Utils.JsObject images = (Utils.JsObject) Utils.JsObject.parseJSON(aResult.getRequest().getResponseText());
-													for (int i=0;i<images.length();i++){
+													for (int i = 0; i < images.length(); i++){
 														textContainer.getFormatter().insertImage(images.getString(i));
 													}
 												}
