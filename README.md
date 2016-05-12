@@ -26,4 +26,4 @@ The platform offers a set of features, making development process extremely prod
 * Application database schema structure and initial applicaton data migrations tools.
 
 ## Build instructions
-Build instructions may be found at [https://github.com/altsoft/PlatypusJS/blob/master/build-instructions.md]
+Build instructions may be found at https://github.com/altsoft/PlatypusJS/blob/master/build-instructions.md
