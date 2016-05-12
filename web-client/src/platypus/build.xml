@@ -3,13 +3,6 @@
 	<!-- Arguments to gwtc and devmode targets -->
 	<property name="gwt.args" value="" />
 
-	<!-- Configure path to GWT SDK -->
-	<!--property name="gwt.sdk" location="/home/vv/ext/gwt-2.5.1" / -->
-
-	<!-- Destination directory -->
-	<!--property name="destdir" value="/home/vv/Project5/platypus/application/bin" 
-		/ -->
-
 	<path id="project.class.path">
 		<pathelement location="${gwt.sdk}/gwt-user.jar" />
 		<pathelement location="${gwt.sdk}/gwt-dev.jar" />
@@ -21,7 +14,6 @@
 		<delete dir="war/WEB-INF/deploy" failonerror="false" />
 		<delete dir="${destdir}/pwc" failonerror="false" />
 		<delete file="${destdir}/pwa.js" failonerror="false" />
-		<delete dir="${destdir}" failonerror="false" />
 	</target>
 
 	<target name="javac" description="Compile java source to bytecode">
