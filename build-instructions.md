@@ -1,29 +1,43 @@
 How to build all java sources to generate a fresh version of Platypus.js
 -------------------------------
 Clone a git repository: https://github.com/altsoft/PlatypusJS
+
 Checkout branch `master` if needed.
 
-Folders structure:
+Folders structure
 -------------------------------
-application  -> All Platypus.js runtime with source files and target folders structure.
-|   |__bin                  > Empty folder. It is a place for Platypus.js components' *.jar files compiled by Platypus.js build. 
-|   |__lib                  > Libraries used by Platypus.js runtime.
-|   |    |__own             > Empty folder. It is a place for Platypus.js libraries' *.jar files compiled by Platypus.js build.
-|   |    |__thirdparty      > Library jar files used by Platypus.js runtime. They are not compiled by the build.
-|   |__src                  > Java source of all Platypus.js parts, except browser client.
-|   |    |___group          > Contains build.xml - Ant build scripts with subprojects for all Platypus.js runtime. Also it holds a NetBeans ant project and can be built with NetBeans IDE.
-|   |    |___lib	    > Source of Platypus.js libraries, compiled during the build.
-|   |    |___components	    > Source of Platypus.js components, compiled during the build.
-|
-|___designer                > Platypus IDE NetBeans RCP application.
-|___hudsonci                > Hudson continious integration server configuration for building Platypus.js with installation packs.
-|___installer               > NBI(NetBeans installer) project for Platypus.js.
-|___web_client              > Sources and assets of Platypus.js browser client.
-    |___src                 
-    |    |___platypus       > Java Gwt sources.Eclipse project and Ant script (build.xml).
-    |___pwc_external        > Css, images and font assets. 
+- application  -> All Platypus.js runtime with source files and target folders structure.
 
-To build Platypus.js, you need Ant and Java8 and Gwt 2.7.0 for Platypus.js browser client.
+  - bin                  -> Empty folder. It is a place for Platypus.js components' *.jar files compiled by Platypus.js build. 
+  - lib                  -> Libraries used by Platypus.js runtime.
+
+    - own             -> Empty folder. It is a place for Platypus.js libraries' *.jar files compiled by Platypus.js build.
+
+    - thirdparty      -> Library jar files used by Platypus.js runtime. They are not compiled by the build.
+
+  - src                  -> Java source of all Platypus.js parts, except browser client.
+
+    - group          -> Contains build.xml - Ant build scripts with subprojects for all Platypus.js runtime. Also it holds a NetBeans ant project and can be built with NetBeans IDE.
+
+    - lib	    -> Source of Platypus.js libraries, compiled during the build.
+
+    - components	    -> Source of Platypus.js components, compiled during the build.
+
+- designer                -> Platypus IDE NetBeans RCP application.
+
+- hudsonci                -> Hudson continious integration server configuration for building Platypus.js with installation packs.
+
+- installer               -> NBI(NetBeans installer) project for Platypus.js.
+
+- web-client              -> Sources and assets of Platypus.js browser client.
+
+  - src                 
+
+    - platypus       -> Java Gwt sources.Eclipse project and Ant script (build.xml).
+
+    - pwc_external        -> Css, images and font assets. 
+
+To build Platypus.js, you need Ant, Java8 and Gwt 2.7.0 for Platypus.js browser client.
 
 1. Cd to root Platypus.js download directory.
 2. Type `ant "-Dlibs.javaee-web-api-7.0.classpath=/home/your-home-dir/apache-tomcat-8.0.30/lib/servlet-api.jar:/home/your-home-dir/apache-tomcat-8.0.30/lib/websocket-api.jar" -f ./application/src/group/build.xml clean compile` on the command line.
