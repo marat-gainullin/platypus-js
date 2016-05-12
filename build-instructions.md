@@ -33,9 +33,9 @@ Folders structure
 
   - src                 
 
-    - platypus       -> Java Gwt sources.Eclipse project and Ant script (build.xml).
+    - platypus       -> Java Gwt sources. Also it contains Eclipse project and Ant build script (build.xml).
 
-    - pwc_external        -> Css, images and font assets. 
+    - pwc_external        -> Css, images and fonts assets. 
 
 To build Platypus.js, you need Ant, Java8 and Gwt 2.7.0 for Platypus.js browser client.
 
