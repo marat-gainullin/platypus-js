@@ -38,7 +38,7 @@
     });
     aSpace.setToDateFunc(
             function (aJavaDate) {
-                return aJavaDate !== null ? new Date(aJavaDate.time) : null;
+                return aJavaDate !== null ? new Date(+aJavaDate.getTime()) : null;
             });
     aSpace.setMakeObjFunc(function () {
         return {};

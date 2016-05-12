@@ -140,7 +140,7 @@
             });
     space.setToDateFunc(
             function (aJavaDate) {
-                return aJavaDate !== null ? new Date(aJavaDate.time) : null;
+                return aJavaDate !== null ? new Date(+aJavaDate.getTime()) : null;
             });
     space.setParseJsonFunc(
             function (str) {
