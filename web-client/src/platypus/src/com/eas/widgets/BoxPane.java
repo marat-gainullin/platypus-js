@@ -6,8 +6,6 @@ import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusPopupMenu;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
-import com.eas.ui.Orientation;
-import com.eas.ui.PublishedComponent;
 import com.eas.ui.events.AddEvent;
 import com.eas.ui.events.AddHandler;
 import com.eas.ui.events.EventsExecutor;
@@ -166,21 +164,11 @@ public class BoxPane extends BoxPanel implements HasJsFacade, HasEnabled, HasCom
 	public void add(Widget child) {
 		super.add(child);
 		AddEvent.fire(this, child);
-		if(orientation == Orientation.HORIZONTAL){
-			ajustWidth();
-		} else{
-			ajustHeight();
-		}
 	}
 
 	public void add(Widget child, int size) {
 		super.add(child);
 		AddEvent.fire(this, child);
-		if(orientation == Orientation.HORIZONTAL){
-			ajustWidth(child, size);
-		}else{
-			ajustHeight(child, size);
-		}
 	}
 
 	@Override
@@ -190,16 +178,6 @@ public class BoxPane extends BoxPanel implements HasJsFacade, HasEnabled, HasCom
 			RemoveEvent.fire(this, w);
 		}
 		return res;
-	}
-
-	@Override
-	protected void setAjustedWidth(double aValue) {
-		published.<PublishedComponent>cast().setWidth(aValue);
-	}
-
-	@Override
-	protected void setAjustedHeight(double aValue) {
-		published.<PublishedComponent> cast().setHeight(aValue);
 	}
 
 	@Override
