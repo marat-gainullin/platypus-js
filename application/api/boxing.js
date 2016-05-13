@@ -55,7 +55,7 @@ define(function () {
             if (aValue.getPublished) {
                 aValue = aValue.getPublished();
             } else if (aValue instanceof JavaDateClass) {
-                aValue = new Date(aValue.time);
+                aValue = new Date(+aValue.getTime());
             } else if (aValue instanceof JavaStringClass) {
                 aValue += '';
             } else if (aValue instanceof JavaArrayClass) {
