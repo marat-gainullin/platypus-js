@@ -67,7 +67,7 @@ define(function () {
             } else if (aValue instanceof JavaCollectionClass) {
                 var converted = [];
                 for each (var v in aValue) {
-                    converted[converted.length] = boxAsJs(v);
+                    converted.push(boxAsJs(v));
                 }
                 return converted;
             }
