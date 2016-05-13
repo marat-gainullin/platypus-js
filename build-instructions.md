@@ -1,6 +1,6 @@
 How to build all java sources to generate a fresh version of Platypus.js
 -------------------------------
-Clone a git repository: https://github.com/altsoft/PlatypusJS
+Clone a git repository: https://github.com/altsoft/PlatypusJS.git
 
 Checkout branch `master` if needed.
 
