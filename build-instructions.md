@@ -43,11 +43,11 @@ To build Platypus.js, you need Ant, Java8 and Gwt 2.7.0 for Platypus.js browser 
 2. Type `ant "-Dlibs.javaee-web-api-7.0.classpath=/home/your-home-dir/apache-tomcat-8.0.30/lib/servlet-api.jar:/home/your-home-dir/apache-tomcat-8.0.30/lib/websocket-api.jar" -f ./application/src/group/build.xml clean compile` on the command line.
 This will build Platypus.js components and libraries and will put theirs *.jar files to `./application/bin` and `./application/lib/own` folders respectively.
 Note, that `libs.javaee-web-api-7.0.classpath` property points to JavaEE 7 Web profile libraries `servlet-api.jar`, and `websocket-api.jar`. It is not necessary, that they will be from Tomcat server. They may by taken from anywhere else.
-Moreover, these libraries mey be combined into single file (for example `javaee-web-api-7.0.jar` from NetBeans).
+Moreover, these libraries may be combined into single file (for example `javaee-web-api-7.0.jar` from NetBeans).
 3. Type `ant -f ./designer/build.xml clean build` on the command line.
 This will build Platypus IDE and will put it to `./designer/build` folder.
 4. Type `ant -Ddestdir=../../../application/bin -Dgwt.sdk=/home/your-home-dir/gwt-2.7.0 -f ./web-client/src/platypus/build.xml clean build copy-dest` on the command line.
-This will build Platypus.js browser client and will put it to `./application/pwc` folder.
+This will build Platypus.js browser client and will put it to `./application/bin/pwc` folder.
 
 Now you have got a fresh version of Platypus.js without installation packs.
 
