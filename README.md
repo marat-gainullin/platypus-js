@@ -5,7 +5,7 @@ Platypus.js is a server side JavaScript platform designed on top of JavaEE 7+ te
 
 Platypus.js comprises both asynchronous IO model and reasonable use of multithreading with only few intensivly used threads.
 
-Platypus.js provides a developer with libraries needed to develop complete ready for market applications.
+Platypus.js provides a developer with libraries needed to develop complete and ready for market applications.
 
 In general, two programming languages are used while developing Platypus.js applications:
 * JavaScript (ECMA-262-3 standard) for application logic implementation both on server side and client side.
@@ -25,10 +25,10 @@ The Platypus.js IDE includes following development tools:
 The platform offers a set of features, making development process extremely productive:
 * AMD JavaScript modules loader on server side, in browser and in Java SE Platypus.js client.
 * Server side JavaScript modules within IoC paradigm with LPC (Local procedure calls) asynchronous interactions.
-* Parallel execution scheme of JavaScript code within standard Java thread pools.
+* Parallel execution scheme of JavaScript code using standard Java thread pools.
 * JavaScript modules automatic global dependencies resolving as well as AMD dependencies resolving.
 * Sql queries with named parameters and Sql clauses re-use.
-* ORM (Object-Relation Mapping) for JavaScript with automatic inter entities references resolving. 
+* ORM (Object-Relation Mapping) for JavaScript with automatic inter-entities references resolving. 
 * Cross-platform Java SE as well as HTML5 browser UI, sharing the same code and the layout.
 * The UI widgets which directly interact with the data model, allowing implementation of a CRUD (Create-Read-Update-Delete) user interface with visual configuration and without or just a little coding.
 * Built-in security support, including users authentication and authorization, constraints of access to application resources.
