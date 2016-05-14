@@ -1,10 +1,17 @@
 # PlatypusJS
-The Platypus Platform is a JavaScript client and server applications platform for rapid development of enterprise-level information systems.
-The platform uses two application programming languages:
-* JavaScript (compatible with the ECMA-262-3 standard) is used to write program logic.
-* SQL is used to access data.
+The Platypus.js is a JavaScript applications platform for rapid development of enterprise-level applications.
 
-Application creation and editing, deployment, debugging and maintenance are performed using the Platypus.js IDE based on the NetBeans Platform. However, individual files, for example, JavaScript modules, can be edited in any text editor.
+Platypus.js is server side JavaScript platform designed on top of JavaEE technology stack and uses Nashorn JavaScript engine.
+
+Platypus.js comprises both asynchronous IO model and reasonable use of multithreading with only few intensivly used threads.
+
+Platypus.js provides a developer with all libraries needed to develop complete ready for market applications.
+
+In general, two programming languages are used while developing Platypus.js applications:
+* JavaScript (ECMA-262-3 standard) for application logic implementation both on server side and client side.
+* Sql for accessing relational databases.
+
+Application creation and editing, deployment, debugging and maintenance are performed using the Platypus.js IDE based on the NetBeans RCP. However, individual files, for example, JavaScript modules, can be edited in any text editor.
 
 The Platypus.js IDE includes following development tools:
 
