@@ -522,13 +522,13 @@ public class ButtonGroup extends ButtonGroupWrapper implements HasPublished, Has
     @EventMethod(eventClass = MouseEvent.class)
     @Override
     public JSObject getOnMouseWheelMoved() {
-        return eventsProxy.getHandlers().get(ControlEventsIProxy.mouseWheelMoved);
+        return eventsProxy.getOnMouseWheelMoved();
     }
 
     @ScriptFunction
     @Override
     public void setOnMouseWheelMoved(JSObject aValue) {
-        eventsProxy.getHandlers().put(ControlEventsIProxy.mouseWheelMoved, aValue);
+        eventsProxy.setOnMouseWheelMoved(aValue);
     }
 
     @ScriptFunction(jsDoc = ON_ACTION_PERFORMED_JSDOC)
