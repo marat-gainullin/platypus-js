@@ -106,7 +106,7 @@ public class ControlEventsIProxy implements MouseListener,
     protected Object executeEvent(final int aEventId, final Object anEvent) {
         try {
             JSObject handler = handlers.get(aEventId);
-            if (handler != null) {                
+            if (handler != null) {
                 return Scripts.getSpace().toJava(handler.call(eventThis, new Object[]{Scripts.getSpace().toJs(wrapEvent(anEvent))}));
             } else {
                 return null;
@@ -173,7 +173,9 @@ public class ControlEventsIProxy implements MouseListener,
             mHandlee.addKeyListener(this);
             mHandlee.addMouseListener(this);
             mHandlee.addMouseMotionListener(this);
-            mHandlee.addMouseWheelListener(this);
+            if (getOnMouseWheelMoved() != null) {
+                mHandlee.addMouseWheelListener(this);
+            }
             mHandlee.addComponentListener(this);
             mHandlee.addFocusListener(this);
             mHandlee.addPropertyChangeListener(this);
@@ -182,7 +184,7 @@ public class ControlEventsIProxy implements MouseListener,
             }
             reflectionInvokeARListener("addActionListener", ActionListener.class);
             reflectionInvokeARListener("addChangeListener", ChangeListener.class);
-            reflectionInvokeARListener("addItemListener", ItemListener.class);            
+            reflectionInvokeARListener("addItemListener", ItemListener.class);
         }
     }
 
@@ -232,6 +234,22 @@ public class ControlEventsIProxy implements MouseListener,
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         executeEvent(mouseWheelMoved, e);
+    }
+
+    public JSObject getOnMouseWheelMoved() {
+        return handlers.get(mouseWheelMoved);
+    }
+
+    public void setOnMouseWheelMoved(JSObject aValue) {
+        JSObject oldValue = getOnMouseWheelMoved();
+        handlers.put(mouseWheelMoved, aValue);
+        if (mHandlee != null) {
+            if (oldValue == null && aValue != null) {
+                mHandlee.addMouseWheelListener(this);
+            } else if (oldValue != null && aValue == null) {
+                mHandlee.removeMouseWheelListener(this);
+            }
+        }
     }
 
     @Override
