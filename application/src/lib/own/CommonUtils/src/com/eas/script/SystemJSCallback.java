@@ -21,4 +21,10 @@ public abstract class SystemJSCallback extends AbstractJSObject {
             return null;
         }
     }
+
+    @Override
+    public boolean isFunction() {
+        return true;
+    }
+    
 }

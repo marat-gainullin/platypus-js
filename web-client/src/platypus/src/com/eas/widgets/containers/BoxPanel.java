@@ -31,6 +31,8 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 	public BoxPanel() {
 		super();
 		setElement(Document.get().createDivElement());
+		getElement().getStyle().setWhiteSpace(Style.WhiteSpace.NOWRAP);
+		getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
 		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
@@ -63,11 +65,6 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 					}
 				}
 			}
-			if (orientation == Orientation.HORIZONTAL) {
-				ajustWidth();
-			} else {
-				ajustHeight();
-			}
 			onResize();
 		}
 	}
@@ -84,7 +81,6 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 					Widget w = getWidget(i);
 					w.getElement().getStyle().setMarginLeft(aValue, Style.Unit.PX);
 				}
-				ajustWidth();
 			}
 		}
 	}
@@ -101,7 +97,6 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 					Widget w = getWidget(i);
 					w.getElement().getStyle().setMarginTop(aValue, Style.Unit.PX);
 				}
-				ajustHeight();
 			}
 		}
 	}
@@ -116,7 +111,7 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 			es.setPosition(Style.Position.RELATIVE);
 			es.setHeight(100, Style.Unit.PCT);
 			es.setDisplay(visible ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
-			if(direction == Direction.LTR)
+			if (direction == Direction.LTR)
 				es.clearFloat();
 			else
 				es.setFloat(Style.Float.RIGHT);
@@ -159,9 +154,6 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 			super.add(child, getElement().<Element> cast());
 			formatWidget(child);// Don't move this call from here because of
 			                    // crazy GWT. It clears position style property!
-			if (isAttached()) {
-				ajustWidth();
-			}
 		} else {
 			if (getWidgetCount() > 0) {
 				child.getElement().getStyle().setMarginTop(vgap, Style.Unit.PX);
@@ -169,26 +161,6 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 			super.add(child, getElement().<Element> cast());
 			formatWidget(child);// Don't move this call from here because of
 			                    // crazy GWT. It clears position style property!
-			if (isAttached()) {
-				ajustHeight();
-			}
-		}
-	}
-
-	@Override
-	public boolean remove(Widget w) {
-		if (orientation == Orientation.HORIZONTAL) {
-			boolean res = super.remove(w);
-			if (res && isAttached()) {
-				ajustWidth();
-			}
-			return res;
-		} else {
-			boolean res = super.remove(w);
-			if (res && isAttached()) {
-				ajustHeight();
-			}
-			return res;
 		}
 	}
 
@@ -199,12 +171,10 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 			if (getParent() instanceof ScrollPanel) {
 				getElement().getStyle().setHeight(100, Style.Unit.PCT);
 			}
-			ajustWidth();
 		} else {
 			if (getParent() instanceof ScrollPanel) {
 				getElement().getStyle().setWidth(100, Style.Unit.PCT);
 			}
-			ajustHeight();
 		}
 	}
 
@@ -234,37 +204,6 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 		}
 	}
 
-	protected void ajustWidth() {
-		if (isAttached() && (getParent() instanceof ScrollPanel || (getParent() instanceof BoxPanel && ((BoxPanel) getParent()).getOrientation() == Orientation.HORIZONTAL))) {
-			if (getWidgetCount() > 0) {
-				double width = 0;
-				for (Widget child : getChildren()) {
-					String ssChildWidth = child.getElement().getStyle().getWidth();
-					double sChildWidth = ssChildWidth.isEmpty() ? child.getElement().getOffsetWidth() : Double.valueOf(ssChildWidth.substring(0, ssChildWidth.length() - 2));
-					width += sChildWidth;
-				}
-				width += hgap * (getWidgetCount() - 1);
-				setAjustedWidth(width);
-			}
-		}
-	}
-
-	public void ajustWidth(Widget aChild, int aValue) {
-		if (aChild != null) {
-			Element we = aChild.getElement();
-			we.getStyle().setWidth(aValue, Style.Unit.PX);
-			ajustWidth();
-		}
-	}
-
-	protected void setAjustedWidth(double aValue) {
-		setWidth(aValue + "px");
-		if (getParent() instanceof BoxPanel && ((BoxPanel) getParent()).getOrientation() == Orientation.HORIZONTAL) {
-			BoxPanel parentBox = (BoxPanel) getParent();
-			parentBox.ajustWidth();
-		}
-	}
-
 	@Override
 	public void setDirection(Direction aValue) {
 		direction = aValue;
@@ -273,36 +212,5 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 	@Override
 	public Direction getDirection() {
 		return direction;
-	}
-
-	protected void ajustHeight() {
-		if (isAttached() && (getParent() instanceof ScrollPanel || (getParent() instanceof BoxPanel && ((BoxPanel) getParent()).getOrientation() == Orientation.VERTICAL))) {
-			if (getWidgetCount() > 0) {
-				int height = 0;
-				for (Widget child : getChildren()) {
-					String ssChildHeight = child.getElement().getStyle().getHeight();
-					double sChildHeight = ssChildHeight.isEmpty() ? child.getElement().getOffsetHeight() : Double.valueOf(ssChildHeight.substring(0, ssChildHeight.length() - 2));
-					height += sChildHeight;
-				}
-				height += (getWidgetCount() - 1) * vgap;
-				setAjustedHeight(height);
-			}
-		}
-	}
-
-	public void ajustHeight(Widget aChild, int aValue) {
-		if (aChild != null) {
-			Element we = aChild.getElement();
-			we.getStyle().setHeight(aValue, Style.Unit.PX);
-			ajustHeight();
-		}
-	}
-
-	protected void setAjustedHeight(double aValue) {
-		setHeight(aValue + "px");
-		if (getParent() instanceof BoxPanel && ((BoxPanel) getParent()).getOrientation() == Orientation.VERTICAL) {
-			BoxPanel parentBox = (BoxPanel) getParent();
-			parentBox.ajustHeight();
-		}
 	}
 }

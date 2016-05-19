@@ -26,6 +26,10 @@ public class PathComparator implements Comparator<JavaScriptObject> {
 			return 1;
 		else if(od2 == null)
 			return -1;
+		if(typeof od1 == 'string')
+			od1 = od1.toLowerCase();	
+		if(typeof od2 == 'string')
+			od2 = od2.toLowerCase();	
 		if(od1 == od2)
 			return 0;
 		else if(od1 > od2)

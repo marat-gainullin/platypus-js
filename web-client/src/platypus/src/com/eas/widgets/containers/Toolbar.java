@@ -248,11 +248,6 @@ public class Toolbar extends SimplePanel implements IndexedPanel, ProvidesResize
 		content.ajustDisplay(child);
 	}
 
-	public void ajustWidth(Widget child, int aWidth) {
-		content.ajustWidth(child, aWidth);
-		updateChevronVisibility();
-	}
-
 	@Override
 	public void clear() {
 		content.clear();

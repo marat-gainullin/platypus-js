@@ -20,17 +20,17 @@ public abstract class WithServerTests extends ScriptedTests {
 
     @Test
     public void easHRValidatorTest() throws InterruptedException {
-        start("EasHRValidatorTest", 10000L);
+        start("EasHRValidatorTest", 20000L);
     }
 
     @Test
     public void append_test() throws InterruptedException {
-        start("append_test", 10000L);
+        start("append_test", 20000L);
     }
 
     @Test
     public void ambigous_changes_semi_writable() throws InterruptedException {
-        start("ambigous_changes_semi_writable", 10000L);
+        start("ambigous_changes_semi_writable", 20000L);
     }
 
     @Test
@@ -40,17 +40,17 @@ public abstract class WithServerTests extends ScriptedTests {
 
     @Test
     public void extra_fields_insert_update() throws InterruptedException {
-        start("extra_fields_insert_update", 10000L);
+        start("extra_fields_insert_update", 20000L);
     }
 
     @Test
     public void modelModyfiedTestClient() throws InterruptedException {
-        start("ModelModyfiedTestClient", 10000L);
+        start("ModelModyfiedTestClient", 20000L);
     }
 
     @Test
     public void sqlUpdateTestClient() throws InterruptedException {
-        start("SqlUpdateTestClient", 10000L);
+        start("SqlUpdateTestClient", 20000L);
     }
 
     @Test
@@ -60,17 +60,17 @@ public abstract class WithServerTests extends ScriptedTests {
 
     @Test
     public void parallelRequireTest() throws InterruptedException {
-        start("ParallelRequireTest", 10000L);
+        start("ParallelRequireTest", 20000L);
     }
 
     @Test
     public void createEntityTestClient() throws InterruptedException {
-        start("CreateEntityTestClient", 10000L);
+        start("CreateEntityTestClient", 20000L);
     }
 
     @Test
     public void loadEntityTestClient() throws InterruptedException {
-        start("LoadEntityTestClient", 10000L);
+        start("LoadEntityTestClient", 20000L);
     }
 
     @Test
@@ -80,12 +80,12 @@ public abstract class WithServerTests extends ScriptedTests {
 
     @Test
     public void multiSourceTest() throws InterruptedException {
-        start("MultiSourceTest", 10000L);
+        start("MultiSourceTest", 20000L);
     }
 
     @Test
     public void multiSourceWithErrorTest() throws InterruptedException {
-        start("MultiSourceWithErrorTest", 10000L);
+        start("MultiSourceWithErrorTest", 20000L);
     }
 
     @Test
@@ -95,22 +95,22 @@ public abstract class WithServerTests extends ScriptedTests {
 
     @Test
     public void orm_properties_names_calc() throws InterruptedException {
-        start("ORM_properties_names_calc", 10000L);
+        start("ORM_properties_names_calc", 20000L);
     }
 
     @Test
     public void testReportClient() throws InterruptedException {
-        start("TestReportClient", 10000L);
+        start("TestReportClient", 20000L);
     }
 
     @Test
     public void iconLoadTest() throws InterruptedException {
-        start("IconLoadTest", 10000L);
+        start("IconLoadTest", 20000L);
     }
 
     @Test
     public void resourceLoadTest() throws InterruptedException {
-        start("ResourceLoadTest", 10000L);
+        start("ResourceLoadTest", 20000L);
     }
 
     @Test
@@ -120,27 +120,27 @@ public abstract class WithServerTests extends ScriptedTests {
 
     @Test
     public void secureServerModulesClient() throws InterruptedException {
-        start("SecureServerModulesClient", 10000L);
+        start("SecureServerModulesClient", 20000L);
     }
 
     @Test
     public void secureDataSourcesTest() throws InterruptedException {
-        start("SecureDataSourcesTest", 10000L);
+        start("SecureDataSourcesTest", 20000L);
     }
 
     @Test
     public void syncServerModulesTest() throws InterruptedException {
-        start("SyncServerModulesTest", 10000L);
+        start("SyncServerModulesTest", 20000L);
     }
 
     @Test
     public void asyncServerModulesTest() throws InterruptedException {
-        start("AsyncServerModulesTest", 10000L);
+        start("AsyncServerModulesTest", 20000L);
     }
 
     @Test
     public void principalTestClient() throws InterruptedException {
-        start("PrincipalTestClient", 10000L);
+        start("PrincipalTestClient", 20000L);
     }
 
     @Test
@@ -150,26 +150,26 @@ public abstract class WithServerTests extends ScriptedTests {
 
     @Test
     public void invokeLaterDelayedClient() throws InterruptedException {
-        start("InvokeLaterDelayedClient", 10000L);
+        start("InvokeLaterDelayedClient", 20000L);
     }
 
     @Test
     public void invokeLaterDelayedTest() throws InterruptedException {
-        start("InvokeLaterDelayedTest", 10000L);
+        start("InvokeLaterDelayedTest", 20000L);
     }
 
     @Test
     public void errorsTestClient() throws InterruptedException {
-        start("ErrorsTestClient", 10000L);
+        start("ErrorsTestClient", 20000L);
     }
 
     @Test
     public void AMDSelfTest() throws InterruptedException {
-        start("AMDSelfTest", 10000L);
+        start("AMDSelfTest", 20000L);
     }
 
     @Test
     public void LPCCallbacksTest() throws InterruptedException {
-        start("LPCCallbacksTest", 10000L);
+        start("LPCCallbacksTest", 20000L);
     }
 }

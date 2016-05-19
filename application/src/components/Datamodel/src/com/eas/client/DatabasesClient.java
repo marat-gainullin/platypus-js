@@ -313,7 +313,7 @@ public class DatabasesClient {
                             Parameters params = aQuery.getParameters();
                             for (int i = 1; i <= params.getParametersCount(); i++) {
                                 Parameter param = params.get(i);
-                                int jdbcType = JdbcFlowProvider.assumeJdbcType(param.getValue());
+                                int jdbcType = JdbcFlowProvider.calcJdbcType(param.getType(), param.getValue());
                                 JdbcFlowProvider.assign(param.getValue(), i, stmt, jdbcType, null);
                             }
                             try {

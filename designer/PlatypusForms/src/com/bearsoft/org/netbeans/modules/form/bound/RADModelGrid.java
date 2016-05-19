@@ -212,45 +212,47 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
                         getFormModel().addComponent(serviceRadColumn, this, true);
                         for (int i = 1; i <= rowsetColumnsCount; i++) {
                             Field columnField = fields.get(i);
-                            RADModelGridColumn radColumn = new RADModelGridColumn();
-                            radColumn.initialize(getFormModel());
-                            ModelGridColumn column = new ModelGridColumn();
-                            radColumn.setBeanInstance(column);
-                            String colBaseName = (columnField.getName() != null && !columnField.getName().isEmpty()) ? columnField.getName() : "Column";
-                            colBaseName = "col" + StringUtils.capitalize(colBaseName);
-                            radColumn.setStoredName(findFreeColumnName(colBaseName));
+                            if (columnField.getType() != null) {
+                                RADModelGridColumn radColumn = new RADModelGridColumn();
+                                radColumn.initialize(getFormModel());
+                                ModelGridColumn column = new ModelGridColumn();
+                                radColumn.setBeanInstance(column);
+                                String colBaseName = (columnField.getName() != null && !columnField.getName().isEmpty()) ? columnField.getName() : "Column";
+                                colBaseName = "col" + StringUtils.capitalize(colBaseName);
+                                radColumn.setStoredName(findFreeColumnName(colBaseName));
 
-                            int lwidth = 50;
-                            if (lwidth >= column.getWidth()) {
-                                column.setWidth(lwidth);
-                            }
-                            String description = columnField.getDescription();
-                            if (description != null && !description.isEmpty()) {
-                                column.setTitle(description);
-                            }
-                            column.setField(columnField.getName());
-                            switch (columnField.getType()) {
-                                case Scripts.NUMBER_TYPE_NAME: {
-                                    ModelSpin editor = new ModelSpin();
-                                    editor.setMin(-Double.MAX_VALUE);
-                                    editor.setMax(Double.MAX_VALUE);
-                                    radColumn.getViewControl().setInstance(editor);
+                                int lwidth = 50;
+                                if (lwidth >= column.getWidth()) {
+                                    column.setWidth(lwidth);
                                 }
-                                break;
-                                case Scripts.BOOLEAN_TYPE_NAME:
-                                    radColumn.getViewControl().setInstance(new ModelCheckBox());
-                                    break;
-                                case Scripts.DATE_TYPE_NAME: {
-                                    ModelDate editor = new ModelDate();
-                                    editor.setFormat("dd.MM.yyyy HH:mm:ss.SSS");
-                                    radColumn.getViewControl().setInstance(editor);
+                                String description = columnField.getDescription();
+                                if (description != null && !description.isEmpty()) {
+                                    column.setTitle(description);
                                 }
-                                break;
-                                default:
-                                    // ModelFormattedField already installed in the column's view
+                                column.setField(columnField.getName());
+                                switch (columnField.getType()) {
+                                    case Scripts.NUMBER_TYPE_NAME: {
+                                        ModelSpin editor = new ModelSpin();
+                                        editor.setMin(-Double.MAX_VALUE);
+                                        editor.setMax(Double.MAX_VALUE);
+                                        radColumn.getViewControl().setInstance(editor);
+                                    }
                                     break;
+                                    case Scripts.BOOLEAN_TYPE_NAME:
+                                        radColumn.getViewControl().setInstance(new ModelCheckBox());
+                                        break;
+                                    case Scripts.DATE_TYPE_NAME: {
+                                        ModelDate editor = new ModelDate();
+                                        editor.setFormat("dd.MM.yyyy HH:mm:ss.SSS");
+                                        radColumn.getViewControl().setInstance(editor);
+                                    }
+                                    break;
+                                    default:
+                                        // ModelFormattedField already installed in the column's view
+                                        break;
+                                }
+                                getFormModel().addComponent(radColumn, this, true);
                             }
-                            getFormModel().addComponent(radColumn, this, true);
                         }
                     } finally {
                         fireRawColumnsChanges = true;
@@ -262,7 +264,7 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
     }
 
     public void register(RADModelGridColumn aColumn) {
-        if(isInModel() && deepColumns.containsKey(aColumn.getName())){
+        if (isInModel() && deepColumns.containsKey(aColumn.getName())) {
             String newName = findFreeColumnName(aColumn.getName());
             aColumn.setStoredName(newName);
         }

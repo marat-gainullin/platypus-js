@@ -20,6 +20,9 @@ public class DataSourceResource extends Resource {
     public static final String USER_NAME_ATTR_NAME = "username";//NOI18N
     public static final String PASSWORD_ATTR_NAME = "password";//NOI18N
     public static final String SCHEMA_ATTR_NAME = "schema";//NOI18N
+    public static final String VALIDATION_QUERY_ATTR_NAME = "validationQuery";//NOI18N
+    private static final String MSSQL_VALIDATION_QUERY = "select 1";
+    private static final String MSSQL_DRIVER_PATTERN = "net.sourceforge.jtds.jdbc";
 
     private String driverClassName;
     private String url;
@@ -39,10 +42,10 @@ public class DataSourceResource extends Resource {
     /**
      * Sets the fully qualified Java class name of the JDBC driver to be used.
      *
-     * @param driverClassName JDBC driver name
+     * @param aValue JDBC driver name
      */
-    public void setDriverClassName(String driverClassName) {
-        this.driverClassName = driverClassName;
+    public void setDriverClassName(String aValue) {
+        driverClassName = aValue;
     }
 
     /**
@@ -57,10 +60,10 @@ public class DataSourceResource extends Resource {
     /**
      * Sets the database URL
      *
-     * @param url database URL
+     * @param aValue database URL
      */
-    public void setUrl(String url) {
-        this.url = url;
+    public void setUrl(String aValue) {
+        url = aValue;
     }
 
     /**
@@ -77,10 +80,10 @@ public class DataSourceResource extends Resource {
      * Sets the connection username to be passed to our JDBC driver to establish
      * a connection.
      *
-     * @param username connection username
+     * @param aValue connection username
      */
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUsername(String aValue) {
+        username = aValue;
     }
 
     /**
@@ -97,10 +100,10 @@ public class DataSourceResource extends Resource {
      * Sets the connection password to be passed to our JDBC driver to establish
      * a connection.
      *
-     * @param password connection password
+     * @param aValue connection password
      */
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPassword(String aValue) {
+        password = aValue;
     }
 
     public String getSchema() {
@@ -131,6 +134,9 @@ public class DataSourceResource extends Resource {
         Element element = super.getElement(aDoc);
         if (driverClassName != null) {
             element.setAttribute(DRIVER_CLASS_NAME_ATTR_NAME, driverClassName);
+            if(driverClassName.contains(MSSQL_DRIVER_PATTERN)){
+                element.setAttribute(VALIDATION_QUERY_ATTR_NAME, MSSQL_VALIDATION_QUERY);
+            }
         }
         if (url != null) {
             element.setAttribute(URL_ATTR_NAME, url);

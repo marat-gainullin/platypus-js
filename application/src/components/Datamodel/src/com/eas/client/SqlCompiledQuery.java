@@ -197,7 +197,8 @@ public class SqlCompiledQuery {
         command.command = sqlClause;
         for (int i = 0; i < parameters.getParametersCount(); i++) {
             Parameter param = parameters.get(i + 1);
-            command.getParameters().add(new ChangeValue(param.getName(), param.getValue()));
+            // Command couldn't contain JavaScript values, because of multithreading model, ChangesJSONWriter, etc.
+            command.getParameters().add(new ChangeValue(param.getName(), Scripts.getSpace().toJava(param.getValue())));
         }
         return command;
     }
