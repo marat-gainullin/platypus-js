@@ -22,8 +22,7 @@ import jdk.nashorn.api.scripting.JSObject;
 /**
  * A compiled SQL query.
  *
- * <p>
- * An instance of this class contains JDBC-compliant SQL query text with "?"
+ * <p>An instance of this class contains JDBC-compliant SQL query text with "?"
  * placeholders for parameters and all parameters values.</p>
  *
  * @author pk, mg
