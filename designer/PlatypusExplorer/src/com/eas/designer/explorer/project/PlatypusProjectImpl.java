@@ -606,6 +606,11 @@ public class PlatypusProjectImpl implements PlatypusProject {
         return updateTask != null;
     }
 
+    /**
+     * Synchronous platypus.js integrating.
+     * 
+     * @throws IOException 
+     */
     public void forceUpdatePlatypusRuntime() throws IOException {
         if (needUpdatePlatypusRuntime()) {
             getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Platform_Integrating_Progress_Started", getDisplayName()));
@@ -620,6 +625,11 @@ public class PlatypusProjectImpl implements PlatypusProject {
         }
     }
 
+    /**
+     * Asynchronous platypus.js integrating.
+     * Starts a new task of platypus.js integrating.
+     * @throws IOException 
+     */
     protected void updatePlatypusRuntime() throws IOException {
         if (updateTask == null && needUpdatePlatypusRuntime()) {
             updateTask = RP.create(() -> {
@@ -860,7 +870,8 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.INFO, "Project {0} opened", getDisplayName());
                 settings.load();
                 startConnecting2db(getSettings().getDefaultDataSourceName());
-                updatePlatypusRuntime();
+                // WARNING!!! To avoid a peek and hard work of the filsystem, don't call it here
+                //updatePlatypusRuntime();
             } catch (Exception ex) {
                 Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.SEVERE, null, ex);
             }
