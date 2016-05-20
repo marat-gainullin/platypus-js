@@ -53,6 +53,7 @@ Now you have got a fresh version of Platypus.js without installation packs.
 
 To run Platypus IDE, type `ant -f ./designer/run.xml run` on the command line.
 Note, that such version of Platypus IDE uses `./designer/build/testuserdir` folder as temporary user's profile directory and `clean` task of build script will erase it each time.
+
 After starting Platypus IDE you should define path to compiled Platypus.js. Select `Service -> Platypus.js` and set path to `/home/your-home-dir/your-Platypus.js-sources/application` .
 Information about creating and running projects can be found on: http://platypus-platform.org/docs/eng/html/Quick_Start/index.html
     
