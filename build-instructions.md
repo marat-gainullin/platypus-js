@@ -44,12 +44,18 @@ To build Platypus.js, you need Ant, Java8, Gwt 2.7.0 for Platypus.js browser cli
 This will build Platypus.js components and libraries and will put theirs *.jar files to `./application/bin` and `./application/lib/own` folders respectively.
 Note, that `libs.javaee-web-api-7.0.classpath` property points to JavaEE 7 Web profile libraries `servlet-api.jar`, and `websocket-api.jar`. It is not necessary, that they will be from Tomcat server. They may by taken from anywhere else.
 Moreover, these libraries may be combined into single file (for example `javaee-web-api-7.0.jar` from NetBeans).
-3. Type `ant -f ./designer/build.xml clean build` on the command line.
+3. Type `ant -f ./designer/build.xml clean build -Dnbplatform.default.harness.dir=/home/your-home-dir/your-netbeans-dir/harness/ -Dnbplatform.default.netbeans.dest.dir=/home/your-home-dir/your-netbeans-dir/` on the command line.
 This will build Platypus IDE and will put it to `./designer/build` folder.
-4. Type `ant -Ddestdir=../../../application/bin -Dgwt.sdk=/home/your-home-dir/gwt-2.7.0 -f ./web-client/src/platypus/build.xml clean build copy-dest` on the command line.
+4. Type `ant -Ddestdir=../../../application/bin -Dgwt.sdk=/home/your-home-dir/gwt-2.7.0 -f ./web-client/src/platypus/build.xml clean build copy-dest` on the command line. <cite>If you prefer not to have GWT obfuscate its output, then you can use the -Dstyle PRETTY flag. </cite>
 This will build Platypus.js browser client and will put it to `./application/bin/pwc` folder.
 
 Now you have got a fresh version of Platypus.js without installation packs.
 
 To run Platypus IDE, type `ant -f ./designer/run.xml run` on the command line.
 Note, that such version of Platypus IDE uses `./designer/build/testuserdir` folder as temporary user's profile directory and `clean` task of build script will erase it each time.
+
+After starting Platypus IDE you should define path to compiled Platypus.js. Select `Service -> Platypus.js` and set path to `/home/your-home-dir/your-Platypus.js-sources/application` .
+Information about creating and running projects can be found on: http://platypus-platform.org/docs/eng/html/Quick_Start/index.html
+    
+Super Dev Mode offers full java source maps within browser's debugger: http://www.gwtproject.org/articles/superdevmode.html
+Type `GWT_HOME='/home/your-home-dir/gwt-2.7.0/'` `java -classpath $GWT_HOME/gwt-codeserver.jar:$GWT_HOME/gwt-dev.jar:$GWT_HOME/gwt-user.jar com.google.gwt.dev.codeserver.CodeServer -src /your-home-dir/your-Platypus.js-sources/web-client/src/platypus/src com.eas.application.Application` to lauch Super Dev Mode.
