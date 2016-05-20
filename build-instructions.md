@@ -58,4 +58,5 @@ After starting Platypus IDE you should define path to compiled Platypus.js. Sele
 Information about creating and running projects can be found on: http://platypus-platform.org/docs/eng/html/Quick_Start/index.html
     
 Super Dev Mode offers full java source maps within browser's debugger: http://www.gwtproject.org/articles/superdevmode.html
-Type `GWT_HOME='/home/your-home-dir/gwt-2.7.0/'` `java -classpath $GWT_HOME/gwt-codeserver.jar:$GWT_HOME/gwt-dev.jar:$GWT_HOME/gwt-user.jar com.google.gwt.dev.codeserver.CodeServer -src /your-home-dir/your-Platypus.js-sources/web-client/src/platypus/src com.eas.application.Application` to lauch Super Dev Mode.
+
+Type `GWT_HOME='/home/your-home-dir/gwt-2.7.0/'` `java -classpath $GWT_HOME/gwt-codeserver.jar:$GWT_HOME/gwt-dev.jar:$GWT_HOME/gwt-user.jar com.google.gwt.dev.codeserver.CodeServer -src /your-home-dir/your-Platypus.js-sources/web-client/src/platypus/src com.eas.application.Application` to launch Super Dev Mode.
