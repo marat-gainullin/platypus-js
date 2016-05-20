@@ -51,6 +51,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -533,27 +534,29 @@ public class QueryResultsView extends javax.swing.JPanel {
             Field field = query.getFields().get(name);
             if (field != null) {
                 Object oldValue = super.getMember(name);
-                super.setMember(name, value);
-                boolean complemented = false;
-                if (!field.isNullable() && lastInsert != null && lastInserted.equals(this)) {
-                    boolean met = false;
-                    for (int d = 0; d < lastInsert.getData().size(); d++) {
-                        ChangeValue chv = lastInsert.getData().get(d);
-                        if (chv.getName().equalsIgnoreCase(name)) {
-                            met = true;
-                            break;
+                if (!Objects.equals(oldValue, value)) {
+                    super.setMember(name, value);
+                    boolean complemented = false;
+                    if (!field.isNullable() && lastInsert != null && lastInserted.equals(this)) {
+                        boolean met = false;
+                        for (int d = 0; d < lastInsert.getData().size(); d++) {
+                            ChangeValue chv = lastInsert.getData().get(d);
+                            if (chv.getName().equalsIgnoreCase(name)) {
+                                met = true;
+                                break;
+                            }
+                        }
+                        if (!met) {
+                            lastInsert.getData().add(new ChangeValue(name, value));
+                            complemented = true;
                         }
                     }
-                    if (!met) {
-                        lastInsert.getData().add(new ChangeValue(name, value));
-                        complemented = true;
+                    if (!complemented) {
+                        Update update = new Update("");
+                        generateChangeLogKeys(update.getKeys(), getDelegate(), name, oldValue);
+                        update.getData().add(new ChangeValue(name, value));
+                        changeLog.add(update);
                     }
-                }
-                if (!complemented) {
-                    Update update = new Update("");
-                    generateChangeLogKeys(update.getKeys(), getDelegate(), name, oldValue);
-                    update.getData().add(new ChangeValue(name, value));
-                    changeLog.add(update);
                 }
             }
         }

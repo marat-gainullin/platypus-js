@@ -14,6 +14,7 @@ import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.script.ScriptFunction;
+import com.eas.script.Scripts;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,7 +48,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
     @Override
     public int executeUpdate(JSObject onSuccess, JSObject onFailure) throws Exception {
         if (onSuccess != null) {
-            model.getBasesProxy().executeUpdate(getQuery().compile(), (Integer aUpdated) -> {
+            model.getBasesProxy().executeUpdate(getQuery().compile(Scripts.getSpace()), (Integer aUpdated) -> {
                 onSuccess.call(null, new Object[]{aUpdated});
             }, (Exception ex) -> {
                 if (onFailure != null) {
@@ -56,7 +57,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
             });
             return 0;
         } else {
-            return model.getBasesProxy().executeUpdate(getQuery().compile(), null, null);
+            return model.getBasesProxy().executeUpdate(getQuery().compile(Scripts.getSpace()), null, null);
         }
     }
 
@@ -64,7 +65,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
     @Override
     public void enqueueUpdate() throws Exception {
         List<Change> log = getChangeLog();
-        Command command = getQuery().compile().prepareCommand();
+        Command command = getQuery().compile(Scripts.getSpace()).prepareCommand();
         log.add(command);
     }
 

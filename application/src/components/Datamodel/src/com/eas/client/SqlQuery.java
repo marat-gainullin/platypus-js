@@ -246,6 +246,10 @@ public class SqlQuery extends Query {
         }
     }
 
+    public SqlCompiledQuery compile() throws Exception {
+        return compile(null);
+    }
+
     /**
      * Compiles the SQL query.
      *
@@ -259,11 +263,13 @@ public class SqlQuery extends Query {
      * The returned object is able to assign parameters values stored in it to
      * any PreparedStatement object.</p>
      *
+     * @param aSpace Scripts space for js->Java conversion. If null, no
+     * conversion is performed.
      * @return compiled SQL query object.
      * @throws UnboundSqlParameterException
      * @throws Exception
      */
-    public SqlCompiledQuery compile() throws UnboundSqlParameterException, Exception {
+    public SqlCompiledQuery compile(Scripts.Space aSpace) throws Exception {
         String dialect = basesProxy.getConnectionDialect(datasourceName);
         boolean postgreSQL = ClientConstants.SERVER_PROPERTY_POSTGRE_DIALECT.equals(dialect);
         Parameters compiledParams = new Parameters();
@@ -287,7 +293,11 @@ public class SqlQuery extends Query {
                     p = new Parameter(paramName);
                     p.setValue(null);
                 }
-                compiledParams.add(p.copy());
+                Parameter copied = p.copy();
+                if (copied.getValue() != null && aSpace != null) {
+                    copied.setValue(aSpace.toJava(copied.getValue()));
+                }
+                compiledParams.add(copied);
                 m.appendReplacement(withoutStringsSegment, postgreSQL && Scripts.DATE_TYPE_NAME.equals(p.getType()) ? "?::timestamp" : "?");
             }
             m.appendTail(withoutStringsSegment);

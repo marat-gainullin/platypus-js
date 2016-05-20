@@ -22,8 +22,7 @@ import jdk.nashorn.api.scripting.JSObject;
 /**
  * A compiled SQL query.
  *
- * <p>
- * An instance of this class contains JDBC-compliant SQL query text with "?"
+ * <p>An instance of this class contains JDBC-compliant SQL query text with "?"
  * placeholders for parameters and all parameters values.</p>
  *
  * @author pk, mg
@@ -197,8 +196,7 @@ public class SqlCompiledQuery {
         command.command = sqlClause;
         for (int i = 0; i < parameters.getParametersCount(); i++) {
             Parameter param = parameters.get(i + 1);
-            // Command couldn't contain JavaScript values, because of multithreading model, ChangesJSONWriter, etc.
-            command.getParameters().add(new ChangeValue(param.getName(), Scripts.getSpace().toJava(param.getValue())));
+            command.getParameters().add(new ChangeValue(param.getName(), param.getValue()));
         }
         return command;
     }
