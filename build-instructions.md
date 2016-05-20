@@ -37,7 +37,7 @@ Folders structure
 
     - pwc_external        -> Css, images and fonts assets. 
 
-To build Platypus.js, you need Ant, Java8 and Gwt 2.7.0 for Platypus.js browser client.
+To build Platypus.js, you need Ant, Java8, Gwt 2.7.0 for Platypus.js browser client and NetBeans 8.1+ for Platypus.js IDE.
 
 1. Cd to root Platypus.js download directory.
 2. Type `ant "-Dlibs.javaee-web-api-7.0.classpath=/home/your-home-dir/apache-tomcat-8.0.30/lib/servlet-api.jar:/home/your-home-dir/apache-tomcat-8.0.30/lib/websocket-api.jar" -f ./application/src/group/build.xml clean compile` on the command line.
