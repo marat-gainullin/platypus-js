@@ -513,10 +513,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     public void bindQueryParameters() throws Exception {
         Parameters selfParameters = getQuery().getParameters();
-        // Let's correct script evil!!!
         for (int i = 1; i <= selfParameters.getFieldsCount(); i++) {
             Parameter p = selfParameters.get(i);
             boolean oldModified = p.isModified();
+            // Let's correct script evil!!!
             p.setValue(Scripts.getSpace().toJava(p.getValue()));
             p.setModified(oldModified);
         }
