@@ -358,7 +358,7 @@ public abstract class Model<E extends Entity<?, Q, E>, Q extends Query> {
                     }
                 } else {
                     Fields lFields = aRelation.getLeftEntity().getFields();
-                    if (lFields != null && lQuery.isMetadataAccessible()) {
+                    if (lFields != null && lQuery != null && lQuery.isMetadataAccessible()) {
                         aRelation.setLeftField(lFields.get(targetName));
                     } else if (relationsAgressiveCheck) {
                         aRelation.setLeftField(null);
@@ -386,7 +386,7 @@ public abstract class Model<E extends Entity<?, Q, E>, Q extends Query> {
                     }
                 } else {
                     Fields rFields = aRelation.getRightEntity().getFields();
-                    if (rFields != null && rQuery.isMetadataAccessible()) {
+                    if (rFields != null && rQuery != null && rQuery.isMetadataAccessible()) {
                         aRelation.setRightField(rFields.get(targetName));
                     } else if (relationsAgressiveCheck) {
                         aRelation.setRightField(null);

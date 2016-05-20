@@ -6,6 +6,7 @@
 package com.eas.client.forms.components.rt;
 
 import com.eas.script.Scripts;
+import java.awt.event.FocusEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
@@ -238,6 +239,27 @@ public abstract class VFormattedField extends JFormattedTextField implements Has
             super.setValue(aValue);
         } finally {
             addValueChangeListener(valueIsNullClearer);
+        }
+    }
+
+    @Override
+    protected void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
+        // Crazy Swing JFormattedField issues a value change while focus gaining
+        if (!VALUE_PROP_NAME.equals(propertyName) || processedFocusEvent == null || processedFocusEvent.getID() == FocusEvent.FOCUS_LOST) {
+            super.firePropertyChange(propertyName, oldValue, newValue);
+        }
+    }
+
+    private FocusEvent processedFocusEvent;
+
+    @Override
+    protected void processFocusEvent(FocusEvent e) {
+        // Crazy Swing JFormattedField issues a value change while focus gaining
+        processedFocusEvent = e;
+        try {
+            super.processFocusEvent(e);
+        } finally {
+            processedFocusEvent = null;
         }
     }
 
