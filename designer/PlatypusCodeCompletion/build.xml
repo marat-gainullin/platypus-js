@@ -12,8 +12,8 @@
         <property name="public.package.jar.dir" location="${build.dir}/public-package-jars"/>
         <mkdir dir="${public.package.jar.dir}"/>
         <!-- Similar to projectized.xml but does not try to set NBM homepage/distribution, nor is javahelp.excludes predefined. -->
-        <!--Attribute module.classpath have been removed from element parseprojectxml, 
-        and parseprojectxml will not check friends list of modules-->
+        <!--module.classpath property has been removed from parseprojectxml tag. 
+        Parseprojectxml will not check friends list of modules-->
         <parseprojectxml
             project="."
             publicpackagesproperty="public.packages"
@@ -34,9 +34,8 @@
                       compilecp="test.qa-functional.compile.cp"
                       compiledep="test.qa-functional.testdep"/>
         </parseprojectxml>
-        
-        <!--Meanwhile attribute module.classpath must be set, so we populate 
-        its value using calculated module.run.classpath--> 
+        <!--module.classpath property must be set anyway.
+        Its value is substituted with module.run.classpath property value--> 
         <property name="module.classpath" value="${module.run.classpath}"/>     
          
         <condition property="is.regular">
