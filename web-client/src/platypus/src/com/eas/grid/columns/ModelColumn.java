@@ -121,6 +121,9 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 		if (field == null ? aValue != null : !field.equals(aValue)) {
 			field = aValue;
 			comparator = new PathComparator(sortField != null && !sortField.isEmpty() ? sortField : field, true);
+			if (grid != null && grid.getSortHandler() != null) {
+				grid.getSortHandler().setComparator(this, comparator);
+			}
 		}
 	}
 
@@ -132,6 +135,9 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 		if (sortField == null ? aValue != null : !sortField.equals(aValue)) {
 			sortField = aValue;
 			comparator = new PathComparator(sortField != null && !sortField.isEmpty() ? sortField : field, true);
+			if (grid != null && grid.getSortHandler() != null) {
+				grid.getSortHandler().setComparator(this, comparator);
+			}
 		}
 	}
 
@@ -237,7 +243,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	@Override
 	public void setSortable(boolean aValue) {
 		super.setSortable(aValue);
-		if (grid != null) {
+		if (grid != null && grid.getSortHandler() != null) {
 			if (aValue) {
 				grid.getSortHandler().setComparator(this, comparator);
 			} else {
