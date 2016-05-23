@@ -58,6 +58,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.ProvidesResize;
@@ -75,7 +76,7 @@ import com.google.gwt.view.client.SelectionModel;
  * @author mg
  * @param <T>
  */
-public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResize, HasSortList {
+public abstract class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResize, HasSortList, Focusable {
 
 	protected interface DynamicCellStyles extends SafeHtmlTemplates {
 
@@ -138,6 +139,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 	public Grid(ProvidesKey<T> aKeyProvider) {
 		super();
+		getElement().setTabIndex(1);
 		getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		getElement().appendChild(tdsStyleElement);
 		getElement().appendChild(cellsStyleElement);
@@ -208,6 +210,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			protected void replaceAllChildren(List<T> values, SafeHtml html) {
 				super.replaceAllChildren(values, html);
 				footerRight.redrawFooters();
+				scrollableRightRendered();
 			}
 
 			@Override
@@ -605,6 +608,8 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		setStyleName(GRID_SHELL_STYLE);
 	}
 
+	protected abstract void scrollableRightRendered();
+	
 	protected void installCellBuilders() {
 		for (GridSection<?> section : new GridSection<?>[] { frozenLeft, frozenRight, scrollableLeft, scrollableRight }) {
 			GridSection<T> gSection = (GridSection<T>) section;
@@ -842,7 +847,8 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			propagateHeaderWidth();
 			onColumnsResize();
 			propagateHeightButScrollable();
-//			columnsChevron.setHeight(Math.max(headerLeftContainer.getOffsetHeight(), headerRightContainer.getOffsetHeight()) + "px");
+			// columnsChevron.setHeight(Math.max(headerLeftContainer.getOffsetHeight(),
+			// headerRightContainer.getOffsetHeight()) + "px");
 			for (Widget child : new Widget[] { headerLeftContainer, headerRightContainer, frozenLeftContainer, frozenRightContainer, scrollableLeftContainer, scrollableRightContainer }) {
 				if (child instanceof RequiresResize) {
 					((RequiresResize) child).onResize();
@@ -910,7 +916,6 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	}
 
 	/**
-	 * TODO: Check if working with sectioned grid.
 	 * 
 	 * @param sModel
 	 */
@@ -1153,7 +1158,8 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			scrollableRight.setColumnWidth(aColumn, aWidth, aUnit);
 			footerRight.setColumnWidth(aColumn, aWidth, aUnit);
 		} else {
-			//Logger.getLogger(Grid.class.getName()).log(Level.WARNING, "Unknown column is met while setting column width");
+			// Logger.getLogger(Grid.class.getName()).log(Level.WARNING,
+			// "Unknown column is met while setting column width");
 		}
 	}
 
@@ -1327,5 +1333,27 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 				redrawHeaders();
 			}
 		}
+	}
+
+	@Override
+	public int getTabIndex() {
+		return getElement().getTabIndex();
+	}
+
+	@Override
+	public void setAccessKey(char key) {
+	}
+
+	@Override
+	public void setFocus(boolean focused) {
+		if (focused)
+			getElement().focus();
+		else
+			getElement().blur();
+	}
+
+	@Override
+	public void setTabIndex(int index) {
+		getElement().setTabIndex(index);
 	}
 }
