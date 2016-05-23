@@ -155,7 +155,7 @@ public class CardsPanel extends ComplexPanel implements InsertPanel.ForIsWidget,
                 UIObject.setVisible(oldContainer, false);
                 oldWidget.setVisible(false);
             }
-            checkButtonWidth();
+            //checkButtonWidth();
 			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
 				@Override
@@ -168,7 +168,7 @@ public class CardsPanel extends ComplexPanel implements InsertPanel.ForIsWidget,
 			});
         }
     }
-
+/*
     protected void checkButtonWidth() {
         if (visibleWidget != null) {
             Element we = visibleWidget.getElement();
@@ -183,7 +183,7 @@ public class CardsPanel extends ComplexPanel implements InsertPanel.ForIsWidget,
             //}
         }
     }
-
+*/
     /**
      * Setup the container around the widget.
      */
@@ -208,6 +208,8 @@ public class CardsPanel extends ComplexPanel implements InsertPanel.ForIsWidget,
         // Set all anchors by default.
         Element we = w.getElement();
         we.getStyle().setPosition(Style.Position.ABSOLUTE);
+        we.getStyle().clearWidth();
+        we.getStyle().clearHeight();
         we.getStyle().setLeft(0, Style.Unit.PX);
         we.getStyle().setRight(0, Style.Unit.PX);
         we.getStyle().setTop(0, Style.Unit.PX);
@@ -216,6 +218,7 @@ public class CardsPanel extends ComplexPanel implements InsertPanel.ForIsWidget,
         we.getStyle().setMarginRight(hgap, Style.Unit.PX);
         we.getStyle().setMarginTop(vgap, Style.Unit.PX);
         we.getStyle().setMarginBottom(vgap, Style.Unit.PX);
+        
         // Issue 2510 from GWT : Hiding the widget isn't necessary because we hide its
         // wrapper, but it's in here for legacy support.
         w.setVisible(false);
@@ -223,7 +226,7 @@ public class CardsPanel extends ComplexPanel implements InsertPanel.ForIsWidget,
 
     @Override
     public void onResize() {
-        checkButtonWidth();
+        //checkButtonWidth();
         for (Widget child : getChildren()) {
             if (child instanceof RequiresResize) {
                 ((RequiresResize) child).onResize();

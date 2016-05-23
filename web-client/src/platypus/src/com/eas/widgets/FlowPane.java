@@ -176,20 +176,6 @@ public class FlowPane extends FlowGapPanel implements HasJsFacade, HasEnabled, H
 		return res;
 	}
 
-	public static void ajustWidth(Widget aChild, int aValue) {
-		if (aChild != null) {
-			Element we = aChild.getElement();
-			we.getStyle().setWidth(aValue, Style.Unit.PX);
-		}
-	}
-
-	public static void ajustHeight(Widget aChild, int aValue) {
-		if (aChild != null) {
-			Element we = aChild.getElement();
-			we.getStyle().setHeight(aValue, Style.Unit.PX);
-		}
-	}
-
 	@Override
 	public JavaScriptObject getPublished() {
 		return published;

@@ -5,6 +5,9 @@ import com.google.gwt.core.client.JavaScriptObject;
 
 public class JsWidgets {
 	
+	private static JavaScriptObject TabbedPane;
+	private static JavaScriptObject GridPane;
+	private static JavaScriptObject CardPane;
 	private static JavaScriptObject BoxPane;
 	private static JavaScriptObject BorderPane;
 	private static JavaScriptObject ToolBar;
@@ -14,6 +17,9 @@ public class JsWidgets {
 	private static JavaScriptObject ScrollPane;
 	
 	public native static void publishComponentProperties(PublishedComponent aPublished)/*-{
+		var TabbedPane = @com.eas.widgets.JsWidgets::TabbedPane;
+		var GridPane = @com.eas.widgets.JsWidgets::GridPane;
+		var CardPane = @com.eas.widgets.JsWidgets::CardPane;
 		var BoxPane = @com.eas.widgets.JsWidgets::BoxPane;
 		var ToolBar = @com.eas.widgets.JsWidgets::ToolBar;
 		var AnchorsPane = @com.eas.widgets.JsWidgets::AnchorsPane;
@@ -159,21 +165,24 @@ public class JsWidgets {
 		    },
 		    set : function(aValue) {
 		    	_width = aValue;
-        		if(aValue != null){
-			    	if(aPublished.parent instanceof AbsolutePane || aPublished.parent instanceof AnchorsPane){
-			    		aPublished.parent.unwrap().@com.eas.widgets.MarginsPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);		    		
-			    	}else if(aPublished.parent instanceof ScrollPane){
-			    		@com.eas.widgets.ScrollPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
-			    	}else if(aPublished.parent instanceof FlowPane){
-			    		@com.eas.widgets.FlowPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
-			    	}else if(aPublished.parent instanceof BorderPane){
-		    			aPublished.parent.unwrap().@com.eas.widgets.containers.BorderPanel::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
-			    	}else{
-			    		aPublished.element.style.width = aValue + 'px';
-			    	}
-        		} else {
-	    			aPublished.element.style.width = null;
-        		}
+		    	if(aPublished.parent instanceof AbsolutePane || aPublished.parent instanceof AnchorsPane){
+					if(aValue != null)
+		    			aPublished.parent.unwrap().@com.eas.widgets.MarginsPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);		    		
+		    	}else if(aPublished.parent instanceof BorderPane){
+					if(aValue != null)
+	    				aPublished.parent.unwrap().@com.eas.widgets.containers.BorderPanel::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
+		    	}else if(aPublished.parent instanceof CardPane
+		    	      || aPublished.parent instanceof TabbedPane
+		    	      || aPublished.parent instanceof GridPane){
+		    		// no op
+		    	}else if(aPublished.parent instanceof BoxPane && aPublished.parent.orientation != Orientation.HORIZONTAL){
+		    		// no op
+		    	}else{
+					if(aValue != null)
+		    			aPublished.element.style.width = aValue + 'px';
+		    		else
+    					aPublished.element.style.width = null;
+		    	}
 		    }
 		});
 		var _height = null;
@@ -188,23 +197,26 @@ public class JsWidgets {
 		    },
 		    set : function(aValue) {
 		    	_height = aValue;
-	    		if(aValue != null){
-			    	if(aPublished.parent instanceof AbsolutePane || aPublished.parent instanceof AnchorsPane){
-			    		aPublished.parent.unwrap().@com.eas.widgets.MarginsPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
-			    	}else if(aPublished.parent instanceof ScrollPane){
-			    		@com.eas.widgets.ScrollPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
-		    		}else if(aPublished.parent instanceof FlowPane){
-			    		@com.eas.widgets.FlowPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
-			    	}else if(aPublished.parent instanceof ToolBar){
-			    		// no op
-			    	}else if(aPublished.parent instanceof BorderPane){
-		    			aPublished.parent.unwrap().@com.eas.widgets.containers.BorderPanel::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
-			    	}else{
-		    			aPublished.element.style.height = aValue + 'px';
-			    	}
-	    		}else{
-	    			aPublished.element.style.height = null;
-	    		}
+    			if(aPublished.parent instanceof AbsolutePane || aPublished.parent instanceof AnchorsPane){
+					if(aValue != null)
+		    			aPublished.parent.unwrap().@com.eas.widgets.MarginsPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
+		    	}else if(aPublished.parent instanceof BorderPane){
+					if(aValue != null)
+	    				aPublished.parent.unwrap().@com.eas.widgets.containers.BorderPanel::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
+		    	}else if(aPublished.parent instanceof CardPane
+		    	      || aPublished.parent instanceof TabbedPane
+		    	      || aPublished.parent instanceof GridPane){
+		    		// no op
+		    	}else if(aPublished.parent instanceof ToolBar){
+		    		// no op
+		    	}else if(aPublished.parent instanceof BoxPane && aPublished.parent.orientation != Orientation.VERTICAL){
+		    		// no op
+		    	}else{
+					if(aValue != null)
+	    				aPublished.element.style.height = aValue + 'px';
+	    			else
+	    			    aPublished.element.style.height = null;
+		    	}
 		    }
 		});
 	    Object.defineProperty(aPublished, "componentPopupMenu", {
@@ -1011,6 +1023,7 @@ public class JsWidgets {
 				};
 				publishComponentProperties(published);
 			}
+			@com.eas.widgets.JsWidgets::GridPane = GridPane;
 			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('GridPane', GridPane);
 			return GridPane;
 		});
@@ -1092,6 +1105,7 @@ public class JsWidgets {
 				publishComponentProperties(published);
 				publishIndexedPanel(published);
 			}
+			@com.eas.widgets.JsWidgets::CardPane = CardPane;
 			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('CardPane', CardPane);
 			return CardPane;
 		});		
@@ -1111,6 +1125,7 @@ public class JsWidgets {
 				publishComponentProperties(published);
 				publishIndexedPanel(published);
 			}
+			@com.eas.widgets.JsWidgets::TabbedPane = TabbedPane;
 			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('TabbedPane', TabbedPane);
 			return TabbedPane;
 		});
