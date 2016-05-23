@@ -15,6 +15,7 @@ public class JsWidgets {
 	private static JavaScriptObject AbsolutePane;
 	private static JavaScriptObject FlowPane;
 	private static JavaScriptObject ScrollPane;
+	private static JavaScriptObject SplitPane;
 	
 	public native static void publishComponentProperties(PublishedComponent aPublished)/*-{
 		var TabbedPane = @com.eas.widgets.JsWidgets::TabbedPane;
@@ -27,6 +28,7 @@ public class JsWidgets {
 		var FlowPane = @com.eas.widgets.JsWidgets::FlowPane;
 		var ScrollPane = @com.eas.widgets.JsWidgets::ScrollPane;
 		var BorderPane = @com.eas.widgets.JsWidgets::BorderPane;
+		var SplitPane = @com.eas.widgets.JsWidgets::SplitPane;
 		var Orientation = @com.eas.ui.JsUi::Orientation; 
 		var VerticalPosition = @com.eas.ui.JsUi::VerticalPosition; 
 		var HorizontalPosition = @com.eas.ui.JsUi::HorizontalPosition; 
@@ -173,7 +175,8 @@ public class JsWidgets {
 	    				aPublished.parent.unwrap().@com.eas.widgets.containers.BorderPanel::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
 		    	}else if(aPublished.parent instanceof CardPane
 		    	      || aPublished.parent instanceof TabbedPane
-		    	      || aPublished.parent instanceof GridPane){
+		    	      || aPublished.parent instanceof GridPane
+		    	      || aPublished.parent instanceof SplitPane){
 		    		// no op
 		    	}else if(aPublished.parent instanceof BoxPane && aPublished.parent.orientation != Orientation.HORIZONTAL){
 		    		// no op
@@ -205,7 +208,8 @@ public class JsWidgets {
 	    				aPublished.parent.unwrap().@com.eas.widgets.containers.BorderPanel::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
 		    	}else if(aPublished.parent instanceof CardPane
 		    	      || aPublished.parent instanceof TabbedPane
-		    	      || aPublished.parent instanceof GridPane){
+		    	      || aPublished.parent instanceof GridPane
+		    	      || aPublished.parent instanceof SplitPane){
 		    		// no op
 		    	}else if(aPublished.parent instanceof ToolBar){
 		    		// no op
@@ -1175,6 +1179,7 @@ public class JsWidgets {
 				publishComponentProperties(published);
 				publishIndexedPanel(published);
 			}
+			@com.eas.widgets.JsWidgets::SplitPane = SplitPane;
 			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('SplitPane', SplitPane);
 			return SplitPane;
 		});		
