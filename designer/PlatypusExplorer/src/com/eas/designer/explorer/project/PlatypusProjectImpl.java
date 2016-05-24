@@ -137,7 +137,6 @@ public class PlatypusProjectImpl implements PlatypusProject {
     protected PlatypusIndexer indexer;
     protected LocalQueriesProxy queries;
     protected RequestProcessor.Task connecting2Db;
-    protected volatile RequestProcessor.Task updateTask;
     protected PlatypusProjectInformation info;
     protected PlatypusProjectSettingsImpl settings;
     private boolean autoDeployEnabled;
@@ -601,11 +600,6 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 });
     }
 
-    @Override
-    public boolean isPlatypusJsIntegrating() {
-        return updateTask != null;
-    }
-
     /**
      * Synchronous platypus.js integrating.
      * 
@@ -622,34 +616,6 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 getOutputWindowIO().getErr().println(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Platform_Integrating_Progress_Failed", getDisplayName(), ex.toString()));
                 throw ex;
             }
-        }
-    }
-
-    /**
-     * Asynchronous platypus.js integrating.
-     * Starts a new task of platypus.js integrating.
-     * @throws IOException 
-     */
-    protected void updatePlatypusRuntime() throws IOException {
-        if (updateTask == null && needUpdatePlatypusRuntime()) {
-            updateTask = RP.create(() -> {
-                try {
-                    getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Platform_Integrating_Progress_Started", getDisplayName()));
-                    clearPlatypusRuntime();
-                    copyPlatypusRuntime();
-                    getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Platform_Integrating_Progress_Finished", getDisplayName()));
-                } catch (IOException ex) {
-                    getOutputWindowIO().getErr().println(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Platform_Integrating_Progress_Failed", getDisplayName(), ex.toString()));
-                    Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            });
-            final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Platform_Integrating_Progress", getDisplayName()), updateTask); // NOI18N  
-            updateTask.addTaskListener((org.openide.util.Task task) -> {
-                ph.finish();
-                updateTask = null;
-            });
-            ph.start();
-            updateTask.schedule(0);
         }
     }
 

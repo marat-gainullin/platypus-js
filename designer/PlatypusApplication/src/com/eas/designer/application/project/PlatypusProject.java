@@ -55,8 +55,6 @@ public interface PlatypusProject extends Project {
 
     void disconnectFormDb(String aDatasourceId) throws InterruptedException, ExecutionException;
 
-    boolean isPlatypusJsIntegrating();
-    
     InputOutput getOutputWindowIO();
 
     Component generateDbPlaceholder(String aDatasourceId) throws Exception;

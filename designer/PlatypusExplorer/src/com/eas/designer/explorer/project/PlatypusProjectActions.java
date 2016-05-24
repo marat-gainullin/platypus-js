@@ -89,11 +89,7 @@ public class PlatypusProjectActions implements ActionProvider {
         } else if (COMMAND_CONNECT.equals(command)) {
             return !project.isDbConnected(project.getSettings().getDefaultDataSourceName());
         } else if (COMMON_IDE_GLOBAL_ACTIONS.contains(command)) {
-            if (COMMAND_DEBUG.equals(command) || COMMAND_RUN.equals(command)) {
-                return !project.isPlatypusJsIntegrating();
-            } else {
-                return true;
-            }
+            return true;
         }
         return false;
     }
