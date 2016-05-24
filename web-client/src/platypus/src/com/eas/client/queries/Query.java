@@ -139,7 +139,7 @@ public class Query {
         var pCount = nParameters.@com.eas.client.metadata.Parameters::getParametersCount()();
         for (var i = 0; i < pCount; i++) {
             var nParameter = nParameters.@com.eas.client.metadata.Parameters::get(I)(i + 1);
-            command.parameters[p.@com.eas.client.metadata.Parameter::getName()()] = B.boxAsJs(p.@com.eas.client.metadata.Parameter::getJsValue()());
+            command.parameters[nParameter.@com.eas.client.metadata.Parameter::getName()()] = B.boxAsJs(nParameter.@com.eas.client.metadata.Parameter::getJsValue()());
         }
         return command;
     }-*/;

@@ -107,7 +107,7 @@ public class ChangesJSONWriter implements ChangeVisitor {
         written = JSONUtils.o(
                 CHANGE_KIND_NAME, JSONUtils.s("command").toString(),
                 CHANGE_ENTITY_NAME, JSONUtils.s(aChange.entityName).toString(),
-                CHANGE_PARAMETERS_NAME, JSONUtils.as(params.toArray(new String[]{})).toString()
+                CHANGE_PARAMETERS_NAME, JSONUtils.o(params.toArray(new String[]{})).toString()
         ).toString();
     }
 }

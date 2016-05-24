@@ -8,7 +8,6 @@ import com.eas.client.changes.Change;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.PlatypusQuery;
-import com.eas.client.queries.Query;
 import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
 import java.util.ArrayList;
