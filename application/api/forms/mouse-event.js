@@ -79,23 +79,23 @@ define(['boxing'], function(B) {
         });
 
         /**
-         * X cursor coordinate in component's space.
-         */
-        this.x = 0;
-        Object.defineProperty(this, "x", {
-            get: function() {
-                var value = delegate.x;
-                return B.boxAsJs(value);
-            }
-        });
-
-        /**
          * Meta key is down on this event.
          */
         this.metaDown = true;
         Object.defineProperty(this, "metaDown", {
             get: function() {
                 var value = delegate.metaDown;
+                return B.boxAsJs(value);
+            }
+        });
+
+        /**
+         * X cursor coordinate in component's space.
+         */
+        this.x = 0;
+        Object.defineProperty(this, "x", {
+            get: function() {
+                var value = delegate.x;
                 return B.boxAsJs(value);
             }
         });

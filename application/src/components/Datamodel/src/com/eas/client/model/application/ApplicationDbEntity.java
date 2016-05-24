@@ -6,10 +6,12 @@ package com.eas.client.model.application;
 
 import com.eas.client.MetadataCache;
 import com.eas.client.SQLUtils;
+import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
 import com.eas.client.changes.Change;
 import com.eas.client.changes.Command;
 import com.eas.client.metadata.JdbcField;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
@@ -61,6 +63,32 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
         }
     }
 
+    @ScriptFunction(jsDoc = UPDATE_JSDOC, params = {"params", "onSuccess", "onFailure"})
+    @Override
+    public int update(JSObject aParams, JSObject onSuccess, JSObject onFailure) throws Exception {
+        SqlQuery copied = query.copy();
+        aParams.keySet().forEach((String pName) -> {
+            Parameter p = copied.getParameters().get(pName);
+            if (p != null) {
+                Object jsValue = aParams.getMember(pName);
+                p.setValue(Scripts.getSpace().toJava(jsValue));
+            }
+        });
+        SqlCompiledQuery compiled = copied.compile();
+        if (onSuccess != null) {
+            model.getBasesProxy().executeUpdate(compiled, (Integer aUpdated) -> {
+                onSuccess.call(null, new Object[]{aUpdated});
+            }, (Exception ex) -> {
+                if (onFailure != null) {
+                    onFailure.call(null, new Object[]{ex.getMessage()});
+                }
+            });
+            return 0;
+        } else {
+            return model.getBasesProxy().executeUpdate(compiled, null, null);
+        }
+    }
+
     @ScriptFunction(jsDoc = ENQUEUE_UPDATE_JSDOC)
     @Override
     public void enqueueUpdate() throws Exception {
@@ -92,7 +120,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
                     SqlDriver driver = mdCache.getDatasourceSqlDriver();
                     TypesResolver resolver = driver.getTypesResolver();
                     query.getFields().toCollection().stream().forEach((field) -> {
-                        field.setType(resolver.toApplicationType(((JdbcField)field).getJdbcType(), field.getType()));
+                        field.setType(resolver.toApplicationType(((JdbcField) field).getJdbcType(), field.getType()));
                     });
                 } catch (Exception ex) {
                     query = null;

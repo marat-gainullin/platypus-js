@@ -17,6 +17,7 @@ import com.bearsoft.gui.grid.rows.ConstrainedRowSorter;
 import com.bearsoft.gui.grid.rows.TabularRowsSorter;
 import com.bearsoft.gui.grid.rows.TreedRowsSorter;
 import com.bearsoft.gui.grid.selection.ConstrainedListSelectionModel;
+import com.eas.client.events.SourcedEvent;
 import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.HasJsName;
@@ -389,6 +390,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     protected ListenerRegistration collapseExpandListener;
     protected JSObject onCollapse;
     protected JSObject onExpand;
+    protected JSObject onAfterRender;
     // rows and columns
     protected int frozenRows;
     protected int frozenColumns;
@@ -598,7 +600,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     private static final String ON_RENDER_JSDOC = ""
             + "/**\n"
             + " * General render event handler.\n"
-            + " * This hanler be called on each cell's rendering in the case when no render handler is provided for the conrete column.\n"
+            + " * This hanler is called on each cell's rendering in the case when no render handler is provided for the specific column.\n"
             + " */";
 
     @ScriptFunction(jsDoc = ON_RENDER_JSDOC)
@@ -615,6 +617,25 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         if (rowsModel != null) {
             rowsModel.setGeneralOnRender(aValue);
         }
+    }
+
+    private static final String ON_AFTER_RENDER_JSDOC = ""
+            + "/**\n"
+            + " * After render event handler.\n"
+            + " * This handler is called after cells' rendering is complete.\n"
+            + " * It is called in asynchonous manner."
+            + " */";
+
+    @ScriptFunction(jsDoc = ON_AFTER_RENDER_JSDOC)
+    @EventMethod(eventClass = SourcedEvent.class)
+    @Undesignable
+    public JSObject getOnAfterRender() {
+        return onAfterRender;
+    }
+
+    @ScriptFunction
+    public void setOnAfterRender(JSObject aValue) {
+        onAfterRender = aValue;
     }
 
     @ScriptFunction

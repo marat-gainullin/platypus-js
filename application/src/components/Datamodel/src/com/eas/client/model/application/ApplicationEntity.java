@@ -212,12 +212,12 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             + " */";
 
     @ScriptFunction(jsDoc = QUERY_JSDOC, params = {"params", "onSuccess", "onFailure"})
-    public JSObject query(JSObject aJsParams, JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
+    public JSObject query(JSObject aParams, JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         Query copied = query.copy();
-        aJsParams.keySet().forEach((String pName) -> {
+        aParams.keySet().forEach((String pName) -> {
             Parameter p = copied.getParameters().get(pName);
             if (p != null) {
-                Object jsValue = aJsParams.getMember(pName);
+                Object jsValue = aParams.getMember(pName);
                 p.setValue(Scripts.getSpace().toJava(jsValue));
             }
         });
@@ -377,6 +377,16 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             + " */";
 
     public abstract void enqueueUpdate() throws Exception;
+
+    protected static final String UPDATE_JSDOC = ""
+            + "/**\n"
+            + " * Applies the updates into the database and commits the transaction.\n"
+            + " * @param params Params object literal.\n"
+            + " * @param onSuccess Success callback. It has an argument, - updates rows count.\n"
+            + " * @param onFailure Failure callback. It has an argument, - exception occured while applying updates into the database.\n"
+            + " */";
+
+    public abstract int update(JSObject params, JSObject onSuccess, JSObject onFailure) throws Exception;
 
     protected static final String EXECUTE_UPDATE_JSDOC = ""
             + "/**\n"

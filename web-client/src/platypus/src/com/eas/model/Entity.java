@@ -151,6 +151,15 @@ public class Entity implements HasPublished {
 				nEntity.@com.eas.model.Entity::append(Lcom/google/gwt/core/client/JavaScriptObject;)(aData);
 			}
 		});
+		Object
+				.defineProperty(
+						aTarget,
+						'update',
+						{
+							value : function(params, onSuccess, onFailure) {
+								nEntity.@com.eas.model.Entity::update(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(params, onSuccess, onFailure);
+							}
+						});
 	}-*/;
 
 	public Fields getFields() {
@@ -438,6 +447,12 @@ public class Entity implements HasPublished {
 		changeLog.setSlot(changeLog.length(), query.prepareCommand());
 	}
 
+	/**
+	 * Legacy method.
+	 * @param onSuccess
+	 * @param onFailure
+	 * @throws Exception
+	 */
 	public void executeUpdate(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
 		Utils.JsObject changeLog = JavaScriptObject.createArray(1).cast();
 		changeLog.setSlot(0, query.prepareCommand());
@@ -454,6 +469,49 @@ public class Entity implements HasPublished {
 				try {
 					if (onFailure != null)
 						Utils.executeScriptEventVoid(jsPublished, onFailure, aReason);
+				} catch (Exception ex) {
+					Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
+
+		});
+	}
+	
+	/**
+	 * Executes a dml query of the entity. Uses first argument JavaScript object as parameters.
+	 * @param aOnSuccess
+	 * @param aOnFailure
+	 * @throws Exception
+	 */
+	public void update(final JavaScriptObject aParams, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) throws Exception {
+		Query copied = query.copy();
+		if (aParams != null) {
+			Utils.JsObject params = aParams.cast();
+			JsArrayString keys = params.keys();
+			for (int i = 0; i < keys.length(); i++) {
+				String key = keys.get(i);
+				Object pValue = params.getJava(key);
+				Parameter p = copied.getParameters().get(key);
+				if (p != null) {
+					p.setValue(Utils.toJava(pValue));
+				}
+			}
+		}
+		Utils.JsObject changeLog = JavaScriptObject.createArray(1).cast();
+		changeLog.setSlot(0, copied.prepareCommand());
+		model.client.requestCommit(changeLog, new CallbackAdapter<Void, String>() {
+
+			@Override
+			protected void doWork(Void aVoid) throws Exception {
+				if (aOnSuccess != null)
+					Utils.invokeJsFunction(aOnSuccess);
+			}
+
+			@Override
+			public void onFailure(String aReason) {
+				try {
+					if (aOnFailure != null)
+						Utils.executeScriptEventVoid(jsPublished, aOnFailure, aReason);
 				} catch (Exception ex) {
 					Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
 				}

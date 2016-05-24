@@ -27,6 +27,20 @@ define(['boxing'], function(B) {
             Form.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         /**
+         * <code>true</code> if this form is maximizable.
+         */
+        this.closable = true;
+        Object.defineProperty(this, "closable", {
+            get: function() {
+                var value = delegate.closable;
+                return B.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.closable = B.boxAsJava(aValue);
+            }
+        });
+
+        /**
          * The handler function for the form's <i>before open</i> event.
          */
         this.onWindowOpened = new Object();
@@ -151,7 +165,7 @@ define(['boxing'], function(B) {
         });
 
         /**
-         * <code>true</code> if this form minimizable.
+         * <code>true</code> if this form is minimizable.
          */
         this.minimizable = true;
         Object.defineProperty(this, "minimizable", {
@@ -218,7 +232,7 @@ define(['boxing'], function(B) {
         });
 
         /**
-         * <code>true</code> if this form resizable.
+         * <code>true</code> if this form is resizable.
          */
         this.resizable = true;
         Object.defineProperty(this, "resizable", {
@@ -228,20 +242,6 @@ define(['boxing'], function(B) {
             },
             set: function(aValue) {
                 delegate.resizable = B.boxAsJava(aValue);
-            }
-        });
-
-        /**
-         * The handler function for the form's <i>after restore</i> event.
-         */
-        this.onWindowRestored = new Object();
-        Object.defineProperty(this, "onWindowRestored", {
-            get: function() {
-                var value = delegate.onWindowRestored;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onWindowRestored = aValue;
             }
         });
 
@@ -256,6 +256,20 @@ define(['boxing'], function(B) {
             },
             set: function(aValue) {
                 delegate.formKey = B.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * The handler function for the form's <i>after restore</i> event.
+         */
+        this.onWindowRestored = new Object();
+        Object.defineProperty(this, "onWindowRestored", {
+            get: function() {
+                var value = delegate.onWindowRestored;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onWindowRestored = aValue;
             }
         });
 
@@ -285,7 +299,7 @@ define(['boxing'], function(B) {
         });
 
         /**
-         * <code>true</code> if this form maximizable.
+         * <code>true</code> if this form is maximizable.
          */
         this.maximizable = true;
         Object.defineProperty(this, "maximizable", {
@@ -382,6 +396,17 @@ define(['boxing'], function(B) {
     };
 
     /**
+     * Shows the form as an ordinary window.
+     * @method show
+     * @memberOf Form
+     */
+    Form.prototype.show = function() {
+        var delegate = this.unwrap();
+        var value = delegate.show();
+        return B.boxAsJs(value);
+    };
+
+    /**
      * Moves form to the front position.
      * @method toFront
      * @memberOf Form
@@ -401,17 +426,6 @@ define(['boxing'], function(B) {
     Form.prototype.showModal = function(callback) {
         var delegate = this.unwrap();
         var value = delegate.showModal(B.boxAsJava(callback));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Shows the form as an ordinary window.
-     * @method show
-     * @memberOf Form
-     */
-    Form.prototype.show = function() {
-        var delegate = this.unwrap();
-        var value = delegate.show();
         return B.boxAsJs(value);
     };
 

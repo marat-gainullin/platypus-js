@@ -5,8 +5,10 @@
 package com.eas.client.model.application;
 
 import com.eas.client.changes.Change;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.PlatypusQuery;
+import com.eas.client.queries.Query;
 import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
 import java.util.ArrayList;
@@ -47,6 +49,32 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
     public int executeUpdate(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         List<Change> localLog = new ArrayList<>();
         localLog.add(getQuery().prepareCommand());
+        if (aOnSuccess != null) {
+            return model.serverProxy.commit(localLog, Scripts.getSpace(), (Integer aUpdated) -> {
+                aOnSuccess.call(null, new Object[]{aUpdated});
+            }, (Exception ex) -> {
+                if (aOnFailure != null) {
+                    aOnFailure.call(null, new Object[]{ex.getMessage()});
+                }
+            });
+        } else {
+            return model.serverProxy.commit(localLog, Scripts.getSpace(), null, null);
+        }
+    }
+
+    @ScriptFunction(jsDoc = UPDATE_JSDOC, params = {"params", "onSuccess", "onFailure"})
+    @Override
+    public int update(JSObject aParams, JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
+        PlatypusQuery copied = query.copy();
+        aParams.keySet().forEach((String pName) -> {
+            Parameter p = copied.getParameters().get(pName);
+            if (p != null) {
+                Object jsValue = aParams.getMember(pName);
+                p.setValue(Scripts.getSpace().toJava(jsValue));
+            }
+        });
+        List<Change> localLog = new ArrayList<>();
+        localLog.add(copied.prepareCommand());
         if (aOnSuccess != null) {
             return model.serverProxy.commit(localLog, Scripts.getSpace(), (Integer aUpdated) -> {
                 aOnSuccess.call(null, new Object[]{aUpdated});

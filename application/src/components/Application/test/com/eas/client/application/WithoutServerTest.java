@@ -74,6 +74,11 @@ public class WithoutServerTest extends ScriptedTests {
     }
 
     @Test
+    public void sqlExecuteUpdateTest() throws InterruptedException {
+        start("SqlExecuteUpdateTest", 10000L);
+    }
+
+    @Test
     public void dependenciesTest() throws InterruptedException {
         start("DependenciesTest", 10000L);
     }
