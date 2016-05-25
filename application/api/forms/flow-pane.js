@@ -386,16 +386,13 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         });
 
         /**
-         * Key released event handler function.
+         * Gets the number of components in this panel.
          */
-        this.onKeyReleased = new Object();
-        Object.defineProperty(this, "onKeyReleased", {
+        this.count = 0;
+        Object.defineProperty(this, "count", {
             get: function() {
-                var value = delegate.onKeyReleased;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = aValue;
+                var value = delegate.count;
+                return B.boxAsJs(value);
             }
         });
 
@@ -414,13 +411,16 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         });
 
         /**
-         * Gets the number of components in this panel.
+         * Key released event handler function.
          */
-        this.count = 0;
-        Object.defineProperty(this, "count", {
+        this.onKeyReleased = new Object();
+        Object.defineProperty(this, "onKeyReleased", {
             get: function() {
-                var value = delegate.count;
-                return B.boxAsJs(value);
+                var value = delegate.onKeyReleased;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = aValue;
             }
         });
 
@@ -654,17 +654,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
     /**
-     * Gets the container's children components.
-     * @method children
-     * @memberOf FlowPane
-     */
-    FlowPane.prototype.children = function() {
-        var delegate = this.unwrap();
-        var value = delegate.children();
-        return B.boxAsJs(value);
-    };
-
-    /**
      * Tries to acquire focus for this component.
      * @method focus
      * @memberOf FlowPane
@@ -672,6 +661,17 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     FlowPane.prototype.focus = function() {
         var delegate = this.unwrap();
         var value = delegate.focus();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Gets the container's children components.
+     * @method children
+     * @memberOf FlowPane
+     */
+    FlowPane.prototype.children = function() {
+        var delegate = this.unwrap();
+        var value = delegate.children();
         return B.boxAsJs(value);
     };
 

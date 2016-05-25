@@ -294,7 +294,7 @@ public class SqlQuery extends Query {
                     p.setValue(null);
                 }
                 Parameter copied = p.copy();
-                if (copied.getValue() != null && aSpace != null) {
+                if (aSpace != null) {
                     copied.setValue(aSpace.toJava(copied.getValue()));
                 }
                 compiledParams.add(copied);

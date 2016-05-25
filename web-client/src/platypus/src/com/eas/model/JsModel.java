@@ -6,13 +6,7 @@ public class JsModel {
 	
 	public static JavaScriptObject managed;
 	public static JavaScriptObject orderer;
-/*
-	public static JavaScriptObject cursorPositionWillChangeEvent;
-	public static JavaScriptObject cursorPositionChangedEvent;
-	public static JavaScriptObject entityInstanceChangeEvent;
-	public static JavaScriptObject entityInstanceDeleteEvent;
-	public static JavaScriptObject entityInstanceInsertEvent;
-*/		
+
 	public native static void init()/*-{
 		
 		function predefine(aDeps, aName, aDefiner){
@@ -26,6 +20,7 @@ public class JsModel {
 		     // because of asynchonous nature of its events.
 		     // @param anObject An object to be reorganized.
 		     // @param aOnChange a callback called on every change of properties.
+		     // @param aOnChange a callback called on before every change of properties.
 		     // @returns anObject by pass for convinence.
 		    function manageObject(anObject, aOnChange, aOnBeforeChange) {
 		        if (!anObject[releaseName]) {
@@ -260,121 +255,6 @@ public class JsModel {
 			return Orderer;
 		});
 		
-		predefine([], 'datamodel/cursor-position-will-change-event', function(){
-			function CursorPositionWillChangeEvent(aSource, aOldIndex, aNewIndex){
-				Object.defineProperty(this, "source", {
-					get : function(){
-						return aSource;
-					}
-				});
-				Object.defineProperty(this, "oldIndex", {
-					get : function(){
-						return aOldIndex;
-					}
-				});
-				Object.defineProperty(this, "newIndex", {
-					get : function(){
-						return aNewIndex;
-					}
-				});
-			}
-			//@com.eas.model.JsModel::cursorPositionWillChangeEvent = CursorPositionWillChangeEvent;
-			return CursorPositionWillChangeEvent;
-		});
-		
-		predefine([], 'datamodel/cursor-position-changed-event', function(){
-			function CursorPositionChangedEvent(aSource, aOldIndex, aNewIndex){
-				Object.defineProperty(this, "source", {
-					get : function(){
-						return aSource;
-					}
-				});
-				Object.defineProperty(this, "oldIndex", {
-					get : function(){
-						return aOldIndex;
-					}
-				});
-				Object.defineProperty(this, "newIndex", {
-					get : function(){
-						return aNewIndex;
-					}
-				});
-			}
-			//@com.eas.model.JsModel::cursorPositionChangedEvent = CursorPositionChangedEvent;
-			return CursorPositionChangedEvent;
-		});
-		
-		predefine([], 'datamodel/entity-instance-change-event', function(){
-			function EntityInstanceChangeEvent(aSource, aField, aOldValue, aNewValue){
-				Object.defineProperty(this, "source", {
-					get : function(){
-						return aSource;
-					}
-				});
-				Object.defineProperty(this, "object", {
-					get : function(){
-						return aSource;
-					}
-				});
-				Object.defineProperty(this, "field", {
-					get : function(){
-						return aField;
-					}
-				});
-				Object.defineProperty(this, "oldValue", {
-					get : function(){
-						return aOldValue;
-					}
-				});
-				Object.defineProperty(this, "newValue", {
-					get : function(){
-						return aNewValue;
-					}
-				});
-			}
-			//@com.eas.model.JsModel::entityInstanceChangeEvent = EntityInstanceChangeEvent;
-			return EntityInstanceChangeEvent;
-		});
-		
-		predefine([], 'datamodel/entity-instance-delete-event', function(){
-			function EntityInstanceDeleteEvent(aSource, aDeleted){
-				Object.defineProperty(this, "source", {
-					get : function(){
-						return aSource;
-					}
-				});
-				Object.defineProperty(this, "deleted", {
-					get : function(){
-						return aDeleted;
-					}
-				});
-			}
-			//@com.eas.model.JsModel::entityInstanceDeleteEvent = EntityInstanceDeleteEvent;
-			return EntityInstanceDeleteEvent;
-		});
-		
-		predefine([], 'datamodel/entity-instance-insert-event', function(){
-			function EntityInstanceInsertEvent(aSource, aInserted){
-				Object.defineProperty(this, "source", {
-					get : function(){
-						return aSource;
-					}
-				});
-				Object.defineProperty(this, "inserted", {
-					get : function(){
-						return aInserted;
-					}
-				});
-				Object.defineProperty(this, "object", {
-					get : function(){
-						return aInserted;
-					}
-				});
-			}
-			//@com.eas.model.JsModel::entityInstanceInsertEvent = EntityInstanceInsertEvent;
-			return EntityInstanceInsertEvent;
-		});
-		
 		predefine([], 'orm', function(){
 			function requireEntities(aEntities, aOnSuccess, aOnFailure){
 				var entities;
@@ -438,30 +318,4 @@ public class JsModel {
 		});
 		
 	}-*/;
-/*
-	public native static JavaScriptObject publishCursorPositionWillChangeEvent(JavaScriptObject aSource, int aOldIndex, int aNewIndex)/*-{
-		var CursorPositionWillChangeEvent = @com.eas.model.JsModel::cursorPositionWillChangeEvent;
-		return new CursorPositionWillChangeEvent(aSource, aOldIndex, aNewIndex);
-	}-*/;	
-/*
-	public native static JavaScriptObject publishCursorPositionChangedEvent(JavaScriptObject aSource, int aOldIndex, int aNewIndex)/*-{
-		var CursorPositionChangedEvent = @com.eas.model.JsModel::cursorPositionChangedEvent;
-		return new CursorPositionChangedEvent(aSource, aOldIndex, aNewIndex);
-	}-*/;		
-/*
-	public native static JavaScriptObject publishEntityInstanceChangeEvent(JavaScriptObject aSource, JavaScriptObject aField, Object aOldValue, Object aNewValue)/*-{
-		var EntityInstanceChangeEvent = @com.eas.model.JsModel::entityInstanceChangeEvent;
-		return new EntityInstanceChangeEvent(aSource, aField, Ui.boxAsJs(aOldValue), Ui.boxAsJs(aNewValue));
-	}-*/;
-/*	
-	public native static JavaScriptObject publishEntityInstanceDeleteEvent(JavaScriptObject aSource, JavaScriptObject aDeleted)/*-{
-		var EntityInstanceDeleteEvent = @com.eas.model.JsModel::entityInstanceDeleteEvent;
-		return new EntityInstanceDeleteEvent(aSource, aDeleted);
-	}-*/;
-/*	
-	public native static JavaScriptObject publishEntityInstanceInsertEvent(JavaScriptObject aSource, JavaScriptObject aInserted)/*-{
-		var EntityInstanceInsertEvent = @com.eas.model.JsModel::entityInstanceInsertEvent;
-		return new EntityInstanceInsertEvent(aSource, aInserted);
-	}-*/;
-
 }

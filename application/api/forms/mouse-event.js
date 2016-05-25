@@ -23,6 +23,17 @@ define(['boxing'], function(B) {
             MouseEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         /**
+         * Alt key is down on this event.
+         */
+        this.altDown = true;
+        Object.defineProperty(this, "altDown", {
+            get: function() {
+                var value = delegate.altDown;
+                return B.boxAsJs(value);
+            }
+        });
+
+        /**
          * Which, if any, of the mouse buttons has changed state.
          * Values: 0 - no button, 1 - button 1, 2 - button 2, 3 - button 3.
          */
@@ -30,17 +41,6 @@ define(['boxing'], function(B) {
         Object.defineProperty(this, "button", {
             get: function() {
                 var value = delegate.button;
-                return B.boxAsJs(value);
-            }
-        });
-
-        /**
-         * Alt key is down on this event.
-         */
-        this.altDown = true;
-        Object.defineProperty(this, "altDown", {
-            get: function() {
-                var value = delegate.altDown;
                 return B.boxAsJs(value);
             }
         });
@@ -79,23 +79,23 @@ define(['boxing'], function(B) {
         });
 
         /**
-         * Meta key is down on this event.
-         */
-        this.metaDown = true;
-        Object.defineProperty(this, "metaDown", {
-            get: function() {
-                var value = delegate.metaDown;
-                return B.boxAsJs(value);
-            }
-        });
-
-        /**
          * X cursor coordinate in component's space.
          */
         this.x = 0;
         Object.defineProperty(this, "x", {
             get: function() {
                 var value = delegate.x;
+                return B.boxAsJs(value);
+            }
+        });
+
+        /**
+         * Meta key is down on this event.
+         */
+        this.metaDown = true;
+        Object.defineProperty(this, "metaDown", {
+            get: function() {
+                var value = delegate.metaDown;
                 return B.boxAsJs(value);
             }
         });

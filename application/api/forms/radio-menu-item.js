@@ -399,20 +399,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         });
 
         /**
-         * Key released event handler function.
-         */
-        this.onKeyReleased = new Object();
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = aValue;
-            }
-        });
-
-        /**
          * Main action performed event handler function.
          */
         this.onActionPerformed = new Object();
@@ -423,6 +409,20 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.onActionPerformed = aValue;
+            }
+        });
+
+        /**
+         * Key released event handler function.
+         */
+        this.onKeyReleased = new Object();
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = aValue;
             }
         });
 

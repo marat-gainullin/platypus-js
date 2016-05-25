@@ -64,6 +64,11 @@ public abstract class WithServerTests extends ScriptedTests {
     }
 
     @Test
+    public void sqlEnqueueUpdateTest() throws InterruptedException {
+        start("SqlEnqueueUpdateTest", 20000L);
+    }
+
+    @Test
     public void dependenciesTest() throws InterruptedException {
         start("DependenciesTest", 20000L);
     }

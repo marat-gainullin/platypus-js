@@ -246,20 +246,6 @@ define(['boxing'], function(B) {
         });
 
         /**
-         * The form key. Used to identify a form instance. Initialy set to the form's application element name.
-         */
-        this.formKey = '';
-        Object.defineProperty(this, "formKey", {
-            get: function() {
-                var value = delegate.formKey;
-                return B.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.formKey = B.boxAsJava(aValue);
-            }
-        });
-
-        /**
          * The handler function for the form's <i>after restore</i> event.
          */
         this.onWindowRestored = new Object();
@@ -270,6 +256,20 @@ define(['boxing'], function(B) {
             },
             set: function(aValue) {
                 delegate.onWindowRestored = aValue;
+            }
+        });
+
+        /**
+         * The form key. Used to identify a form instance. Initialy set to the form's application element name.
+         */
+        this.formKey = '';
+        Object.defineProperty(this, "formKey", {
+            get: function() {
+                var value = delegate.formKey;
+                return B.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.formKey = B.boxAsJava(aValue);
             }
         });
 
@@ -418,6 +418,39 @@ define(['boxing'], function(B) {
     };
 
     /**
+     * Maximizes this form.
+     * @method maximize
+     * @memberOf Form
+     */
+    Form.prototype.maximize = function() {
+        var delegate = this.unwrap();
+        var value = delegate.maximize();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Minimizes this form.
+     * @method minimize
+     * @memberOf Form
+     */
+    Form.prototype.minimize = function() {
+        var delegate = this.unwrap();
+        var value = delegate.minimize();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Restores this form state.
+     * @method restore
+     * @memberOf Form
+     */
+    Form.prototype.restore = function() {
+        var delegate = this.unwrap();
+        var value = delegate.restore();
+        return B.boxAsJs(value);
+    };
+
+    /**
      * Shows the form as a dialog (modal window).
      * @param callback a callback handler function
      * @method showModal
@@ -438,39 +471,6 @@ define(['boxing'], function(B) {
     Form.prototype.showInternalFrame = function(desktop) {
         var delegate = this.unwrap();
         var value = delegate.showInternalFrame(B.boxAsJava(desktop));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Minimizes this form.
-     * @method minimize
-     * @memberOf Form
-     */
-    Form.prototype.minimize = function() {
-        var delegate = this.unwrap();
-        var value = delegate.minimize();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Maximizes this form.
-     * @method maximize
-     * @memberOf Form
-     */
-    Form.prototype.maximize = function() {
-        var delegate = this.unwrap();
-        var value = delegate.maximize();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Restores this form state.
-     * @method restore
-     * @memberOf Form
-     */
-    Form.prototype.restore = function() {
-        var delegate = this.unwrap();
-        var value = delegate.restore();
         return B.boxAsJs(value);
     };
 

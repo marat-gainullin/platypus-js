@@ -80,12 +80,13 @@ define(['boxing'], function(B) {
 
     /**
      * Adds the updates into the change log as a command.
+     * @param params Params object literal. Optional. If absent, entity's parameters' values will be taken.
      * @method enqueueUpdate
      * @memberOf ApplicationPlatypusEntity
      */
-    ApplicationPlatypusEntity.prototype.enqueueUpdate = function() {
+    ApplicationPlatypusEntity.prototype.enqueueUpdate = function(params) {
         var delegate = this.unwrap();
-        var value = delegate.enqueueUpdate();
+        var value = delegate.enqueueUpdate(B.boxAsJava(params));
         return B.boxAsJs(value);
     };
 

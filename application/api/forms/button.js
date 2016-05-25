@@ -362,20 +362,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         });
 
         /**
-         * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
-         */
-        this.nextFocusableComponent = new Object();
-        Object.defineProperty(this, "nextFocusableComponent", {
-            get: function() {
-                var value = delegate.nextFocusableComponent;
-                return B.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.nextFocusableComponent = B.boxAsJava(aValue);
-            }
-        });
-
-        /**
         * The amount of space between the text and the icon displayed in this button.
         */
         this.iconTextGap = 0;
@@ -390,16 +376,16 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         });
 
         /**
-         * Key released event handler function.
+         * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
          */
-        this.onKeyReleased = new Object();
-        Object.defineProperty(this, "onKeyReleased", {
+        this.nextFocusableComponent = new Object();
+        Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
-                var value = delegate.onKeyReleased;
-                return value;
+                var value = delegate.nextFocusableComponent;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onKeyReleased = aValue;
+                delegate.nextFocusableComponent = B.boxAsJava(aValue);
             }
         });
 
@@ -414,6 +400,20 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.onActionPerformed = aValue;
+            }
+        });
+
+        /**
+         * Key released event handler function.
+         */
+        this.onKeyReleased = new Object();
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = aValue;
             }
         });
 

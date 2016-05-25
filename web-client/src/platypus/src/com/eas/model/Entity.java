@@ -118,8 +118,8 @@ public class Entity implements HasPublished {
 			}
 		});
 		Object.defineProperty(aTarget, 'enqueueUpdate', {
-			value : function() {
-				nEntity.@com.eas.model.Entity::enqueueUpdate()();
+			value : function(aParams) {
+				nEntity.@com.eas.model.Entity::enqueueUpdate(Lcom/google/gwt/core/client/JavaScriptObject;)(aParams);
 			}
 		});
 		Object.defineProperty(aTarget, 'executeUpdate', {
@@ -326,7 +326,9 @@ public class Entity implements HasPublished {
 					model.terminateProcess(Entity.this, null);
 					if (onRequeried != null) {
 						try {
-							onRequeried.<Utils.JsObject> cast().call(jsPublished, new Object[] {});
+							Utils.JsObject event = JavaScriptObject.createObject().cast();
+							event.setJs("source", jsPublished);
+							onRequeried.<Utils.JsObject> cast().call(jsPublished, event);
 						} catch (Exception ex) {
 							Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
 						}
@@ -442,9 +444,22 @@ public class Entity implements HasPublished {
 		}
 	}
 
-	public void enqueueUpdate() throws Exception {
+	public void enqueueUpdate(JavaScriptObject aParams) throws Exception {
 		Utils.JsObject changeLog = model.getChangeLog().<Utils.JsObject> cast();
-		changeLog.setSlot(changeLog.length(), query.prepareCommand());
+		Query copied = query.copy();
+		if (aParams != null) {
+			Utils.JsObject params = aParams.cast();
+			JsArrayString keys = params.keys();
+			for (int i = 0; i < keys.length(); i++) {
+				String key = keys.get(i);
+				Object pValue = params.getJava(key);
+				Parameter p = copied.getParameters().get(key);
+				if (p != null) {
+					p.setValue(Utils.toJava(pValue));
+				}
+			}
+		}
+		changeLog.setSlot(changeLog.length(), copied.prepareCommand());
 	}
 
 	/**

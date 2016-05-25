@@ -74,6 +74,11 @@ public class WithoutServerTest extends ScriptedTests {
     }
 
     @Test
+    public void sqlEnqueueUpdateTest() throws InterruptedException {
+        start("SqlEnqueueUpdateTest", 20000L);
+    }
+
+    @Test
     public void sqlExecuteUpdateTest() throws InterruptedException {
         start("SqlExecuteUpdateTest", 10000L);
     }
