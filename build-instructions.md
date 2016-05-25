@@ -51,7 +51,7 @@ This will build Platypus.js browser client and will put it to `./application/bin
 
 Now you have got a fresh version of Platypus.js without installation packs.
 
-To run Platypus IDE, type `ant -f ./designer/run.xml run` on the command line.
+To run Platypus IDE, type `ant -f ./designer/run.xml run -Dnbplatform.default.harness.dir=/home/your-home-dir/your-netbeans-dir/harness/ -Dnbplatform.default.netbeans.dest.dir=/home/your-home-dir/your-netbeans-dir/` on the command line.
 Note, that such version of Platypus IDE uses `./designer/build/testuserdir` folder as temporary user's profile directory and `clean` task of build script will erase it each time.
 
 After starting Platypus IDE you should define path to compiled Platypus.js. Select `Service -> Platypus.js` and set path to `/home/your-home-dir/your-Platypus.js-sources/application` .
