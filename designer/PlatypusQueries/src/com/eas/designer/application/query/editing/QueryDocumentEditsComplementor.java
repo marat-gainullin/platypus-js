@@ -81,7 +81,7 @@ public class QueryDocumentEditsComplementor {
         return compound;
     }
 
-    public String costructTablyName(QueryEntity qEntity) {
+    private String constructTablyName(QueryEntity qEntity) {
         if (qEntity.getQueryName() != null) {
             return ClientConstants.STORED_QUERY_REF_PREFIX + qEntity.getQueryName();
         } else {
@@ -140,7 +140,7 @@ public class QueryDocumentEditsComplementor {
             String aliasName = (edit.getEntity().getQueryName() != null ? QUERY_ALIAS_PREFIX : TABLE_ALIAS_PREFIX) + "1"; //NOI18N
             assert edit.getEntity() instanceof QueryEntity;
             edit.getEntity().setAlias(aliasName);
-            statement = parserManager.parse(new StringReader(factText + NEW_ENTITY_STATEMENT_SQL + costructTablyName(edit.getEntity()) + " " + aliasName)); //NOI18N
+            statement = parserManager.parse(new StringReader(factText + NEW_ENTITY_STATEMENT_SQL + constructTablyName(edit.getEntity()) + " " + aliasName)); //NOI18N
             anEdit = complementEditWithStatement(statement, edit);
         } else {
             Map<String, Table> tables = TablesFinder.getTablesMap(TablesFinder.TO_CASE.LOWER, statement, true);
@@ -148,7 +148,7 @@ public class QueryDocumentEditsComplementor {
             String aliasName = findFreeAliasName(tables, edit.getEntity().getQueryName() != null ? QUERY_ALIAS_PREFIX : TABLE_ALIAS_PREFIX);
             QueryEntity qEntity = edit.getEntity();
             qEntity.setAlias(aliasName);
-            Table tbl = new Table(qEntity.getQueryName() == null ? qEntity.getTableSchemaName() : null, costructTablyName(qEntity));
+            Table tbl = new Table(qEntity.getQueryName() == null ? qEntity.getTableSchemaName() : null, constructTablyName(qEntity));
             if (tbl.getAlias() != null) {
                 tbl.getAlias().setName(qEntity.getAlias());
             } else {
@@ -244,6 +244,8 @@ public class QueryDocumentEditsComplementor {
         if (factText != null) {
             String authorAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, JsDoc.Tag.AUTHOR_TAG);
             String nameAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, JsDoc.Tag.NAME_TAG);
+            String publicAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, JsDoc.Tag.PUBLIC_TAG);
+            String readonlyAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, JsDoc.Tag.READONLY_TAG);
             String procedureAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, JsDoc.Tag.PROCEDURE_TAG);
             StringBuilder factTextBuilder = new StringBuilder();
             factTextBuilder.append("/**\n");
@@ -253,6 +255,12 @@ public class QueryDocumentEditsComplementor {
             }
             if (nameAnnotationValue != null) {
                 factTextBuilder.append(" * ").append(JsDoc.Tag.NAME_TAG).append(" ").append(nameAnnotationValue).append("\n");
+            }
+            if (publicAnnotationValue != null) {
+                factTextBuilder.append(" * ").append(JsDoc.Tag.PUBLIC_TAG).append(" ").append(publicAnnotationValue).append("\n");
+            }
+            if (readonlyAnnotationValue != null) {
+                factTextBuilder.append(" * ").append(JsDoc.Tag.PUBLIC_TAG).append(" ").append(readonlyAnnotationValue).append("\n");
             }
             if (procedureAnnotationValue != null) {
                 factTextBuilder.append(" * ").append(JsDoc.Tag.PROCEDURE_TAG).append(" ").append(procedureAnnotationValue).append("\n");

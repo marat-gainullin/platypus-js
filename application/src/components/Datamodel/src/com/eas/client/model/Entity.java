@@ -242,13 +242,6 @@ public abstract class Entity<M extends Model<E, Q>, Q extends Query, E extends E
         return fullTableName;
     }
 
-/*
-    public String getFormattedTableNameAndTitle() {
-        String lTableName = getTableName();
-        String lTitle = getTitle();
-        return (lTableName != null ? lTableName : "") + (lTitle != null && !"".equals(lTitle) ? " [" + lTitle + "]" : ""); //NO18IN
-    }
-*/
     public String getQueryName() {
         return queryName;
     }

@@ -343,6 +343,9 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                     } else {
                         throw "Can't determine model's type.";
                     }
+                    var nQuery = nEntity.getQuery();
+                    if(!nQuery)
+                        throw "Missing definition of entity '" + nEntity.getQueryName() + "'";
                     var justInserted = null;
                     var justInsertedChange = null;
                     var orderers = {};

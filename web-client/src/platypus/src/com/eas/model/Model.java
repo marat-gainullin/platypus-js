@@ -654,7 +654,8 @@ public class Model implements HasPublished {
             value: pSchema
         });
         var pkFieldName = '';
-        var nFields = nEntity.@com.eas.model.Entity::getFields()();
+		var nQuery = nEntity.@com.eas.model.Entity::getQuery()();
+        var nFields = nQuery.@com.eas.client.queries.Query::getFields()();
         var nnFields = nFields.@com.eas.client.metadata.Fields::toCollection()();
         var noFields = {};
         // schema
