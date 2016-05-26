@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -148,7 +149,8 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         List<CallPoint> toBeCalled = new ArrayList<>();
         validators.keySet().stream().forEach((validatorName) -> {
             Collection<String> datasourcesUnderControl = validators.get(validatorName);
-            if (((datasourcesUnderControl == null || datasourcesUnderControl.isEmpty()) && aDatasourceName == null) || (datasourcesUnderControl != null && datasourcesUnderControl.contains(aDatasourceName))) {
+            if (((datasourcesUnderControl == null || datasourcesUnderControl.isEmpty()) && (aDatasourceName == null || Objects.equals(aDatasourceName, defaultDatasourceName)))
+                    || (datasourcesUnderControl != null && datasourcesUnderControl.contains(aDatasourceName))) {
                 try {
                     JSObject module = createModule(validatorName, aSpace);
                     if (module != null) {

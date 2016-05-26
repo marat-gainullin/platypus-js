@@ -9,25 +9,28 @@
  */
 package com.eas.client;
 
+import com.google.gwt.user.client.Random;
+
 /**
  *
  * @author mg
  */
 public class IDGenerator {
 
-    public final static Long rndIDPart = 100L;
-    private static double lastValue = 0;
+    private static final int RND_DIGITS = 1000;
+    private static final double MILLIS_BIAS = 1000000000000d;
+    private static double LAST_MILLIS;
 
     public static double genId() {
-        double newValue = genIDImpl();
-        while (lastValue >= newValue) {
-            newValue = lastValue + 1;
-        }
-        lastValue = newValue;
-        return lastValue;
-    }
-
-    private static double genIDImpl() {
-        return System.currentTimeMillis() * rndIDPart + Math.round(Math.random() * rndIDPart);
+        double newValue;
+        double prevTime;
+        double newTime;
+        do {
+            prevTime = LAST_MILLIS;
+            newTime = System.currentTimeMillis() - MILLIS_BIAS;
+        } while (prevTime == newTime);
+        newValue = newTime * RND_DIGITS + Random.nextInt(RND_DIGITS);
+        LAST_MILLIS = newTime;
+        return newValue;
     }
 }

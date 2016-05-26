@@ -9,6 +9,7 @@
  */
 package com.eas.util;
 
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -17,16 +18,18 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class IDGenerator {
 
-    private static final Long rndIDPart = 100L;
-    private static final AtomicLong lastValue = new AtomicLong();
+    private static final int RND_DIGITS = 1000;
+    private static final long MILLIS_BIAS = 1000000000000L;
+    private static final AtomicLong LAST_MILLIS = new AtomicLong();
+    private static final Random RND = new Random();
 
     public static long genID() {
-        long newValue;
-        long last;
+        long prevTime;
+        long newTime;
         do {
-            last = lastValue.get();
-            newValue = System.currentTimeMillis() * rndIDPart + Math.round(Math.random() * rndIDPart);
-        } while (last == newValue || !lastValue.compareAndSet(last, newValue));
-        return newValue;
+            prevTime = LAST_MILLIS.get();
+            newTime = System.currentTimeMillis() - MILLIS_BIAS;
+        } while (prevTime == newTime || !LAST_MILLIS.compareAndSet(prevTime, newTime));
+        return newTime * RND_DIGITS + RND.nextInt(RND_DIGITS);
     }
 }
