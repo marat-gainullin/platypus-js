@@ -27,37 +27,40 @@ import org.junit.Test;
 public class IDGeneratorTest {
 
     private static final ExecutorService GP = Executors.newCachedThreadPool();
-    private static final int NUM_TREADS = Runtime.getRuntime().availableProcessors();
+    private static final int NUM_PARALLEL_TASKS = Runtime.getRuntime().availableProcessors();
 
     @Test
     public void collisionsTest() {
         Callable<long[]> taskBody = () -> {
-            long[] generated = new long[10000];
+            long[] generated = new long[1000000];
             for (int i = 0; i < generated.length; i++) {
                 generated[i] = IDGenerator.genID();
             }
             return generated;
         };
-        List<Future<long[]>> tasks = new ArrayList<>(NUM_TREADS);
-        for (int i = 0; i < NUM_TREADS; i++) {
+        List<Future<long[]>> tasks = new ArrayList<>(NUM_PARALLEL_TASKS);
+        for (int i = 0; i < NUM_PARALLEL_TASKS; i++) {
             tasks.add(GP.submit(taskBody));
         }
 
-        List<Long> generated = new LinkedList<>();
+        tasks.forEach((Future<long[]> aResult) -> {
+            try {
+                aResult.get();
+            } catch (InterruptedException | ExecutionException ex) {
+                Logger.getLogger(IDGeneratorTest.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        
+        Set<Long> collisions = new HashSet<>();
         tasks.forEach((Future<long[]> aResult) -> {
             try {
                 for (long id : aResult.get()) {
-                    generated.add(id);
+                    assertFalse(collisions.contains(id));
+                    collisions.add(id);
                 }
             } catch (InterruptedException | ExecutionException ex) {
                 Logger.getLogger(IDGeneratorTest.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
-
-        Set<Long> collisions = new HashSet<>();
-        for (int i = 0; i < generated.size(); i++) {
-            assertFalse(collisions.contains(generated.get(i)));
-            collisions.add(generated.get(i));
-        }
     }
 }

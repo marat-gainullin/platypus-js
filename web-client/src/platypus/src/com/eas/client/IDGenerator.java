@@ -9,28 +9,37 @@
  */
 package com.eas.client;
 
-import com.google.gwt.user.client.Random;
-
 /**
- *
+ * 
  * @author mg
  */
 public class IDGenerator {
 
-    private static final int RND_DIGITS = 1000;
-    private static final double MILLIS_BIAS = 1000000000000d;
-    private static double LAST_MILLIS;
+	private static final long COUNTER_DIGITS = 1000;
+	private static long ID = System.currentTimeMillis() * COUNTER_DIGITS;
 
-    public static double genId() {
-        double newValue;
-        double prevTime;
-        double newTime;
-        do {
-            prevTime = LAST_MILLIS;
-            newTime = System.currentTimeMillis() - MILLIS_BIAS;
-        } while (prevTime == newTime);
-        newValue = newTime * RND_DIGITS + Random.nextInt(RND_DIGITS);
-        LAST_MILLIS = newTime;
-        return newValue;
-    }
+	public static double genId() {
+		// Note! Truncation of fractional part is here.
+		long idMillis = ID / COUNTER_DIGITS;
+		String sm = "" + idMillis;
+		String si = "" + ID;
+		if (idMillis == System.currentTimeMillis()) {
+			long oldCounter = ID - idMillis * COUNTER_DIGITS;
+			long newCounter = oldCounter + 1;
+			if (newCounter == COUNTER_DIGITS) {
+				// Spin with maximum duration of one millisecond ...
+				long newMillis;
+				do {
+					newMillis = System.currentTimeMillis();
+				} while (newMillis == idMillis);
+				ID = newMillis * COUNTER_DIGITS;
+			} else {
+				ID = idMillis * COUNTER_DIGITS + newCounter;
+				si = "" + ID;
+			}
+		} else {
+			ID = System.currentTimeMillis() * COUNTER_DIGITS;
+		}
+		return ID;
+	}
 }

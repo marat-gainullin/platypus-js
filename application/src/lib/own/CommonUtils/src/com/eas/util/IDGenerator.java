@@ -9,7 +9,6 @@
  */
 package com.eas.util;
 
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -18,18 +17,32 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class IDGenerator {
 
-    private static final int RND_DIGITS = 1000;
-    private static final long MILLIS_BIAS = 1000000000000L;
-    private static final AtomicLong LAST_MILLIS = new AtomicLong();
-    private static final Random RND = new Random();
+    private static final int COUNTER_DIGITS = 100;
+    private static final AtomicLong ID = new AtomicLong(System.currentTimeMillis() * COUNTER_DIGITS);
 
     public static long genID() {
-        long prevTime;
-        long newTime;
+        long newId;
+        long id;
         do {
-            prevTime = LAST_MILLIS.get();
-            newTime = System.currentTimeMillis() - MILLIS_BIAS;
-        } while (prevTime == newTime || !LAST_MILLIS.compareAndSet(prevTime, newTime));
-        return newTime * RND_DIGITS + RND.nextInt(RND_DIGITS);
+            id = ID.get();
+            long idMillis = id / COUNTER_DIGITS;// Note! Truncation of fractional part is here.
+            if (idMillis == System.currentTimeMillis()) {
+                long oldCounter = id - idMillis * COUNTER_DIGITS;
+                long newCounter = oldCounter + 1;
+                if (newCounter == COUNTER_DIGITS) {
+                    // Spin lock with maximum duration of one millisecond ...
+                    long newMillis;
+                    do {
+                        newMillis = System.currentTimeMillis();
+                    } while (newMillis == idMillis);
+                    newId = newMillis * COUNTER_DIGITS;
+                } else {
+                    newId = idMillis * COUNTER_DIGITS + newCounter;
+                }
+            } else {
+                newId = System.currentTimeMillis() * COUNTER_DIGITS;
+            }
+        } while (!ID.compareAndSet(id, newId));
+        return newId;
     }
 }
