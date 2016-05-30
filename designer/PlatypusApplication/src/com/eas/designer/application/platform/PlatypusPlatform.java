@@ -74,7 +74,7 @@ public class PlatypusPlatform {
     private static Notification notification;
     private static String URL_PLATYPUS_HOME = "http://platypus-platform.org/download.html";
 
-    static {
+    public static void checkPlatypusJsUpdates() {
         String platformPath = getPlatformHomePath();
         if (platformPath != null
                 && new File(platformPath).exists()

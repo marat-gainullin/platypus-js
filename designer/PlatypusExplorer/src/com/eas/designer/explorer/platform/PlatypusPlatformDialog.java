@@ -31,6 +31,7 @@ public class PlatypusPlatformDialog {
             try {
                 PlatypusPlatform.setPlatformHomePath(platformDirectorySelectPanel.getDirectoryPath());
                 PlatypusPlatform.registerJdbcDrivers();
+                PlatypusPlatform.checkPlatypusJsUpdates();
                 return true;
             } catch (PlatformHomePathException ex) {
                 Logger.getLogger(PlatypusPlatform.class.getName()).log(Level.WARNING, ex.getMessage());

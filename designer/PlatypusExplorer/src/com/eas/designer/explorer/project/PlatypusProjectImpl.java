@@ -838,6 +838,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 startConnecting2db(getSettings().getDefaultDataSourceName());
                 // WARNING!!! To avoid a peek and hard work of the filsystem, don't call it here
                 //updatePlatypusRuntime();
+                PlatypusPlatform.checkPlatypusJsUpdates();
             } catch (Exception ex) {
                 Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.SEVERE, null, ex);
             }
