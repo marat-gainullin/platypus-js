@@ -1,5 +1,5 @@
 define(function(){
-    var IDGeneratorClass = Java.type("com.eas.util.IDGenerator");
+    var IdGeneratorClass = Java.type("com.eas.util.IdGenerator");
     
     var module = {
         /**
@@ -12,17 +12,17 @@ define(function(){
 
     Object.defineProperty(module, "genID", {
         value: function () {
-            return +IDGeneratorClass.genId();
+            return +IdGeneratorClass.genId();
         }
     });
     Object.defineProperty(module, "generate", {
         value: function () {
-            return +IDGeneratorClass.genId();
+            return +IdGeneratorClass.genId();
         }
     });
     Object.defineProperty(module, "generateLong", {
         value: function () {
-            return IDGeneratorClass.genStringId();
+            return IdGeneratorClass.genStringId();
         }
     });
     return module;

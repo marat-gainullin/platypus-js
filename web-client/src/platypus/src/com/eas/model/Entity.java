@@ -7,7 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.eas.client.CallbackAdapter;
-import com.eas.client.IDGenerator;
+import com.eas.client.IdGenerator;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
@@ -43,7 +43,7 @@ public class Entity implements HasPublished {
 	protected boolean valid;
 	protected String title;
 	protected String name;
-	protected String entityId = String.valueOf((long) IDGenerator.genId());
+	protected String entityId = String.valueOf((long) IdGenerator.genId());
 	protected String queryName;
 	protected Model model;
 	protected Query query;

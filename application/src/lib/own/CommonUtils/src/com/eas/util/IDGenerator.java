@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @author mg
  */
-public class IDGenerator {
+public class IdGenerator {
 
     private static final int COUNTER_DIGITS = 100;
     private static final AtomicLong ID = new AtomicLong(System.currentTimeMillis() * COUNTER_DIGITS);

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.client.IDGenerator;
+import com.eas.client.IdGenerator;
 import com.eas.client.converters.StringValueConverter;
 import com.eas.core.Utils;
 import com.eas.ui.CommonResources;
@@ -31,7 +31,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 
 	protected static final String CUSTOM_DROPDOWN_CLASS = "combo-field-custom-dropdown";
 	protected JavaScriptObjectKeyProvider rowKeyProvider = new JavaScriptObjectKeyProvider();
-	protected String keyForNullValue = String.valueOf(IDGenerator.genId());
+	protected String keyForNullValue = String.valueOf(IdGenerator.genId());
 	protected String emptyText;
 	protected JavaScriptObject injected;
 	protected JavaScriptObject displayList;

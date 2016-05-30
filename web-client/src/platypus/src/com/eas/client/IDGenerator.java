@@ -13,7 +13,7 @@ package com.eas.client;
  * 
  * @author mg
  */
-public class IDGenerator {
+public class IdGenerator {
 
 	private static final long COUNTER_DIGITS = 100;
 	private static long ID = System.currentTimeMillis() * COUNTER_DIGITS;

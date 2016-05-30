@@ -12,7 +12,7 @@ import com.eas.script.Scripts;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.SessionManager;
 import com.eas.server.httpservlet.PlatypusHttpServlet;
-import com.eas.util.IDGenerator;
+import com.eas.util.IdGenerator;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -79,7 +79,7 @@ public class JsServerModuleEndPoint {
                             if (lookedup2 == null) {// Non zombie check
                                 try {
                                     // preserve replicated session id
-                                    com.eas.server.Session created = SessionManager.Singleton.instance.create(platypusSessionId == null ? IDGenerator.genId() + "" : platypusSessionId);
+                                    com.eas.server.Session created = SessionManager.Singleton.instance.create(platypusSessionId == null ? IdGenerator.genId() + "" : platypusSessionId);
                                     if (dataContext == null) {
                                         websocketSession.getUserProperties().remove(PlatypusHttpServlet.PLATYPUS_USER_CONTEXT_ATTR_NAME);
                                     } else {

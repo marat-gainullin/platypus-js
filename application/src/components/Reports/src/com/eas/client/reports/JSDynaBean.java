@@ -6,7 +6,7 @@
 package com.eas.client.reports;
 
 import com.eas.script.Scripts;
-import com.eas.util.IDGenerator;
+import com.eas.util.IdGenerator;
 import java.lang.reflect.Array;
 import java.util.Date;
 import java.util.List;
@@ -115,7 +115,7 @@ public class JSDynaBean implements DynaBean {
     @Override
     public DynaClass getDynaClass() {
         if (dynaClass == null) {
-            dynaClass = new JSDynaClass(delegate, REPORT_DYNA_CLASS_PREFIX + IDGenerator.genStringId());
+            dynaClass = new JSDynaClass(delegate, REPORT_DYNA_CLASS_PREFIX + IdGenerator.genStringId());
         }
         return dynaClass;
     }

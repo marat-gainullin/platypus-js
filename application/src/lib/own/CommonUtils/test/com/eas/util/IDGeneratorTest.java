@@ -23,24 +23,24 @@ import static org.junit.Assert.assertFalse;
  *
  * @author mg
  */
-public class IDGeneratorTest {
+public class IdGeneratorTest {
 
     private static final ExecutorService GP = Executors.newCachedThreadPool();
     private static final int NUM_PARALLEL_TASKS = Runtime.getRuntime().availableProcessors();
 
     @Test
     public void shortCollisionsTest() {
-        perform(IDGenerator::genId);
+        perform(IdGenerator::genId);
     }
 
     @Test
     public void longCollisionsTest() {
-        perform(IDGenerator::genLongId);
+        perform(IdGenerator::genLongId);
     }
 
     @Test
     public void stringCollisionsTest() {
-        perform(IDGenerator::genStringId);
+        perform(IdGenerator::genStringId);
     }
 
     private <T> void perform(Callable<T> aGenerator) {
@@ -60,7 +60,7 @@ public class IDGeneratorTest {
             try {
                 aResult.get();
             } catch (InterruptedException | ExecutionException ex) {
-                Logger.getLogger(IDGeneratorTest.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(IdGeneratorTest.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
 
@@ -72,7 +72,7 @@ public class IDGeneratorTest {
                     collisions.add(id);
                 }
             } catch (InterruptedException | ExecutionException ex) {
-                Logger.getLogger(IDGeneratorTest.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(IdGeneratorTest.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
     }

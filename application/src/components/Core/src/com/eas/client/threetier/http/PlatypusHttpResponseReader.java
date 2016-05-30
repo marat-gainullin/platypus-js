@@ -23,7 +23,7 @@ import com.eas.client.threetier.requests.CredentialRequest;
 import com.eas.client.threetier.requests.JsonExceptionResponse;
 import com.eas.client.threetier.requests.SqlExceptionResponse;
 import com.eas.util.BinaryUtils;
-import com.eas.util.JSONUtils;
+import com.eas.util.JsonUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -108,7 +108,7 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
         Matcher m = userNamePattern.matcher(text);
         if (m.find()) {
             String userName = m.group(1);
-            rsp.setName(JSONUtils.jsonUnescape(userName));
+            rsp.setName(JsonUtils.jsonUnescape(userName));
         }
     }
 

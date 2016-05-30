@@ -12,7 +12,7 @@ import java.util.TimeZone;
  *
  * @author ab, mg
  */
-public class JSONUtils {
+public class JsonUtils {
 
     public static StringBuilder s(String aValue) {
         StringBuilder sb = new StringBuilder();
@@ -126,11 +126,11 @@ public class JSONUtils {
             } else if (aValue instanceof Number) {
                 return StringUtils.formatDouble(((Number) aValue).doubleValue());
             } else if (aValue instanceof String) {
-                return JSONUtils.s((String) aValue).toString();
+                return JsonUtils.s((String) aValue).toString();
             } else if (aValue instanceof Date) {
                 SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
                 sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-                return JSONUtils.s(sdf.format((Date) aValue)).toString();
+                return JsonUtils.s(sdf.format((Date) aValue)).toString();
             } else {
                 throw new Exception("Value of unknown or unsupported type found! It's class is: " + aValue.getClass().getName());
             }

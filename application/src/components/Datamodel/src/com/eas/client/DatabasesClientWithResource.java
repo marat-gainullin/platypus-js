@@ -8,7 +8,7 @@ package com.eas.client;
 import com.eas.client.resourcepool.BearResourcePool;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
-import com.eas.util.IDGenerator;
+import com.eas.util.IdGenerator;
 
 /**
  *
@@ -21,7 +21,7 @@ public class DatabasesClientWithResource implements AutoCloseable {
 
     public DatabasesClientWithResource(DbConnectionSettings aSettings) throws Exception {
         super();
-        resourceName = "TestDb-" + IDGenerator.genStringId();
+        resourceName = "TestDb-" + IdGenerator.genStringId();
         GeneralResourceProvider.getInstance().registerDatasource(resourceName, aSettings);
         client = new DatabasesClient(resourceName, true, BearResourcePool.DEFAULT_MAXIMUM_SIZE);
     }

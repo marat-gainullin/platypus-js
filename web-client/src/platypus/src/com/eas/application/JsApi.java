@@ -380,11 +380,11 @@ public class JsApi {
 	        var module = {};
 	        
 			function generate(){
-				return @com.eas.client.IDGenerator::genId()();
+				return @com.eas.client.IdGenerator::genId()();
 			}
 	        
 			function generateLong(){
-				return @com.eas.client.IDGenerator::genLongId()();
+				return @com.eas.client.IdGenerator::genLongId()();
 			}
 	        
 		    Object.defineProperty(module, 'generate', {

@@ -22,7 +22,7 @@ import com.eas.client.metadata.JdbcField;
 import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.concurrent.CallableConsumer;
-import com.eas.util.IDGenerator;
+import com.eas.util.IdGenerator;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -74,7 +74,7 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
 
     protected class ConcurrentCaseInsesitiveMap<V> extends ConcurrentHashMap<String, V> {
 
-        protected final String nullKey = "null-" + IDGenerator.genId();
+        protected final String nullKey = "null-" + IdGenerator.genId();
 
         protected String transformKey(String aKey) {
             return aKey != null ? aKey.toLowerCase() : nullKey;

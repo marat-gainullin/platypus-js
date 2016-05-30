@@ -14,7 +14,7 @@ import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
-import com.eas.util.IDGenerator;
+import com.eas.util.IdGenerator;
 import java.beans.PropertyChangeSupport;
 import java.util.HashSet;
 import java.util.Set;
@@ -51,7 +51,7 @@ public abstract class Entity<M extends Model<E, Q>, Q extends Query, E extends E
     protected boolean iconified;
     protected String title;
     protected String name;
-    protected Long entityId = IDGenerator.genId();
+    protected Long entityId = IdGenerator.genId();
     protected String queryName;
     protected String tableDatasourceName;
     protected String tableSchemaName;
@@ -133,7 +133,7 @@ public abstract class Entity<M extends Model<E, Q>, Q extends Query, E extends E
     }
 
     public void regenerateId() {
-        entityId = IDGenerator.genId();
+        entityId = IdGenerator.genId();
     }
 
     public void setModel(M aValue) {

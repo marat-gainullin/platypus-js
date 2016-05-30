@@ -13,7 +13,7 @@ import com.eas.client.model.Model;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.script.ScriptFunction;
-import com.eas.util.IDGenerator;
+import com.eas.util.IdGenerator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -143,7 +143,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
         ApplicationDbEntity created = newGenericEntity();
         created.setName(USER_DATASOURCE_NAME);
         SqlQuery query = new SqlQuery(basesProxy, aDatasourceName, aSqlText);
-        query.setEntityName(IDGenerator.genStringId());
+        query.setEntityName(IdGenerator.genStringId());
         StoredQueryFactory factory = new StoredQueryFactory(basesProxy, null, null);
         factory.putTableFieldsMetadata(query);// only select will be filled with output columns
         created.setQuery(query);

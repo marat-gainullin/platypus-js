@@ -37,7 +37,7 @@ import com.eas.designer.explorer.PlatypusDataObject;
 import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
 import com.eas.script.JsDoc;
 import com.eas.util.CollectionListener;
-import com.eas.util.IDGenerator;
+import com.eas.util.IdGenerator;
 import com.eas.util.ListenerRegistration;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
@@ -768,7 +768,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
                 StoredQueryFactory factory = new StoredQueryFactory(basesProxy, getProject().getQueries(), getProject().getIndexer());
                 factory.setAliasesToTableNames(true);
                 SqlQuery outQuery = new SqlQuery(basesProxy, datasourceName, s);
-                outQuery.setEntityName(String.valueOf(IDGenerator.genID()));
+                outQuery.setEntityName(IdGenerator.genStringId());
                 factory.putTableFieldsMetadata(outQuery);
                 outputFields = outQuery.getFields();
             } catch (Exception ex) {

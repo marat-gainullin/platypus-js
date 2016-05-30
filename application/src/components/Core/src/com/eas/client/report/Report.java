@@ -14,7 +14,7 @@ import com.eas.script.LpcTransient;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
-import com.eas.util.IDGenerator;
+import com.eas.util.IdGenerator;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -139,7 +139,7 @@ public class Report implements HasPublished, LpcTransient {
         if (reportName.toLowerCase().endsWith(suffix.toLowerCase())) {
             reportName = reportName.substring(0, reportName.length() - suffix.length());
         }
-        reportName += "-" + IDGenerator.genId() + suffix;
+        reportName += "-" + IdGenerator.genId() + suffix;
         reportPath += File.separator + reportName;
         return reportPath;
     }

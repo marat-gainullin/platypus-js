@@ -8,7 +8,7 @@ import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.script.JsDoc;
 import com.eas.util.FileUtils;
-import com.eas.util.IDGenerator;
+import com.eas.util.IdGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -57,7 +57,7 @@ public class AppElementFiles {
                     return PlatypusFilesSupport.getAnnotationValue(fileContent, JsDoc.Tag.NAME_TAG);
                 }
                 case ClientConstants.ET_DB_SCHEME:
-                    return IDGenerator.genId() + "";
+                    return IdGenerator.genId() + "";
                 default:
                     return null;
             }

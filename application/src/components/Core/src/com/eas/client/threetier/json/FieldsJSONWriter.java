@@ -6,7 +6,7 @@ package com.eas.client.threetier.json;
 
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
-import com.eas.util.JSONUtils;
+import com.eas.util.JsonUtils;
 
 /**
  *
@@ -26,14 +26,13 @@ public class FieldsJSONWriter {
         for (int i = 0; i < aFields.getFieldsCount(); i++) {
             res[i] = writeField(aFields.get(i + 1));
         }
-        return JSONUtils.a(res);
+        return JsonUtils.a(res);
     }
 
     private static StringBuilder writeField(Field aField) {
-        StringBuilder sb = JSONUtils.o(
-                new StringBuilder(NAME_PROP_NAME), JSONUtils.s(aField.getName()),
-                new StringBuilder(DESCRIPTION_PROP_NAME), JSONUtils.s(aField.getDescription()),
-                new StringBuilder(TYPE_PROP_NAME), JSONUtils.s(aField.getType()),
+        StringBuilder sb = JsonUtils.o(new StringBuilder(NAME_PROP_NAME), JsonUtils.s(aField.getName()),
+                new StringBuilder(DESCRIPTION_PROP_NAME), JsonUtils.s(aField.getDescription()),
+                new StringBuilder(TYPE_PROP_NAME), JsonUtils.s(aField.getType()),
                 new StringBuilder(PK_PROP_NAME), new StringBuilder(String.valueOf(aField.isPk())),
                 new StringBuilder(NULLABLE_PROP_NAME), new StringBuilder(String.valueOf(aField.isNullable())));
         return sb;

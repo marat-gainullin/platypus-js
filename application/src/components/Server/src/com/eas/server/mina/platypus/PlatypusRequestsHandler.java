@@ -16,7 +16,7 @@ import com.eas.script.JsObjectException;
 import com.eas.script.Scripts;
 import com.eas.server.*;
 import com.eas.server.DatabaseAuthorizer;
-import com.eas.util.IDGenerator;
+import com.eas.util.IdGenerator;
 import java.net.NetPermission;
 import java.security.AccessControlException;
 import java.sql.SQLException;
@@ -120,7 +120,7 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                 if (handler != null) {
                     if (requestEnv.ticket == null) {
                         try {
-                            Session session = server.getSessionManager().create(IDGenerator.genStringId());
+                            Session session = server.getSessionManager().create(IdGenerator.genStringId());
                             DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, session.getSpace(), (PlatypusPrincipal aPrincipal) -> {
                                 requestEnv.ticket = session.getId();
                                 // It is safe to put SESSION_ID attribute here because of request-response protocol nature.
