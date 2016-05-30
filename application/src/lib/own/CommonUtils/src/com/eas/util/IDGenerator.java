@@ -19,30 +19,44 @@ public class IDGenerator {
 
     private static final int COUNTER_DIGITS = 100;
     private static final AtomicLong ID = new AtomicLong(System.currentTimeMillis() * COUNTER_DIGITS);
+    private static final int LONG_COUNTER_DIGITS = 1000000;
+    private static final AtomicLong LONG_ID = new AtomicLong(System.currentTimeMillis() * LONG_COUNTER_DIGITS);
 
-    public static long genID() {
+    public static long genId() {
+        return generate(ID, COUNTER_DIGITS);
+    }
+
+    public static long genLongId() {
+        return generate(LONG_ID, LONG_COUNTER_DIGITS);
+    }
+
+    public static String genStringId() {
+        return String.valueOf(genLongId());
+    }
+
+    private static long generate(AtomicLong aLastId, int aCounterDigits) {
         long newId;
         long id;
         do {
-            id = ID.get();
-            long idMillis = id / COUNTER_DIGITS;// Note! Truncation of fractional part is here.
+            id = aLastId.get();
+            long idMillis = id / aCounterDigits;// Note! Truncation of fractional part is here.
             if (idMillis == System.currentTimeMillis()) {
-                long oldCounter = id - idMillis * COUNTER_DIGITS;
+                long oldCounter = id - idMillis * aCounterDigits;
                 long newCounter = oldCounter + 1;
-                if (newCounter == COUNTER_DIGITS) {
+                if (newCounter == aCounterDigits) {
                     // Spin lock with maximum duration of one millisecond ...
                     long newMillis;
                     do {
                         newMillis = System.currentTimeMillis();
                     } while (newMillis == idMillis);
-                    newId = newMillis * COUNTER_DIGITS;
+                    newId = newMillis * aCounterDigits;
                 } else {
-                    newId = idMillis * COUNTER_DIGITS + newCounter;
+                    newId = idMillis * aCounterDigits + newCounter;
                 }
             } else {
-                newId = System.currentTimeMillis() * COUNTER_DIGITS;
+                newId = System.currentTimeMillis() * aCounterDigits;
             }
-        } while (!ID.compareAndSet(id, newId));
+        } while (!aLastId.compareAndSet(id, newId));
         return newId;
     }
 }

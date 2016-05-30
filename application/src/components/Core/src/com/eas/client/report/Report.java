@@ -139,7 +139,7 @@ public class Report implements HasPublished, LpcTransient {
         if (reportName.toLowerCase().endsWith(suffix.toLowerCase())) {
             reportName = reportName.substring(0, reportName.length() - suffix.length());
         }
-        reportName += "-" + IDGenerator.genID() + suffix;
+        reportName += "-" + IDGenerator.genId() + suffix;
         reportPath += File.separator + reportName;
         return reportPath;
     }

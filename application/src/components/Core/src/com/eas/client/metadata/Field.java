@@ -362,13 +362,13 @@ public class Field implements HasPublished {
         if (type != null) {
             switch (type) {
                 case Scripts.NUMBER_TYPE_NAME:
-                    value = IDGenerator.genID();
+                    value = IDGenerator.genId();
                     break;
                 case Scripts.STRING_TYPE_NAME:
-                    value = String.valueOf(IDGenerator.genID());
+                    value = IDGenerator.genStringId();
                     break;
                 case Scripts.DATE_TYPE_NAME:
-                    value = new Date(IDGenerator.genID());
+                    value = new Date();
                     break;
                 case Scripts.BOOLEAN_TYPE_NAME:
                     value = false;

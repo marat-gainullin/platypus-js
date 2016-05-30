@@ -157,7 +157,7 @@ public class Form implements HasPublished {
     protected Object closeCallbackParameter;
 
     public Form() throws Exception {
-        this("form-" + IDGenerator.genID());
+        this("form-" + IDGenerator.genId());
     }
 
     public Form(String aFormKey) throws Exception {
@@ -165,7 +165,7 @@ public class Form implements HasPublished {
     }
 
     public Form(JComponent aView) throws Exception {
-        this(aView, "form-" + IDGenerator.genID());
+        this(aView, "form-" + IDGenerator.genId());
     }
 
     @ScriptFunction(jsDoc = ""

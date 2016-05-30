@@ -120,7 +120,7 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                 if (handler != null) {
                     if (requestEnv.ticket == null) {
                         try {
-                            Session session = server.getSessionManager().create(String.valueOf(IDGenerator.genID()));
+                            Session session = server.getSessionManager().create(IDGenerator.genStringId());
                             DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, session.getSpace(), (PlatypusPrincipal aPrincipal) -> {
                                 requestEnv.ticket = session.getId();
                                 // It is safe to put SESSION_ID attribute here because of request-response protocol nature.

@@ -34,6 +34,11 @@ public class WithoutServerTest extends ScriptedTests {
     }
 
     @Test
+    public void id_generator_test() throws InterruptedException {
+        start("IDGeneratorTest", 5*60*1000L);
+    }
+
+    @Test
     public void select_stateless_test() throws InterruptedException {
         start("select_stateless_test", 10000L);
     }

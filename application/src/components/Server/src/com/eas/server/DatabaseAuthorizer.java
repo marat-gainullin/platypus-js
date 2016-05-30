@@ -35,7 +35,7 @@ public class DatabaseAuthorizer {
                     }
                 }, onFailure);
             } else {
-                PlatypusPrincipal principal = new AnonymousPlatypusPrincipal("anonymous-" + String.valueOf(IDGenerator.genID()));
+                PlatypusPrincipal principal = new AnonymousPlatypusPrincipal("anonymous-" + IDGenerator.genStringId());
                 onSuccess.accept(principal);
             }
         } catch (Exception ex) {

@@ -12,12 +12,17 @@ define(function(){
 
     Object.defineProperty(module, "genID", {
         value: function () {
-            return +IDGeneratorClass.genID();
+            return +IDGeneratorClass.genId();
         }
     });
     Object.defineProperty(module, "generate", {
         value: function () {
-            return +IDGeneratorClass.genID();
+            return +IDGeneratorClass.genId();
+        }
+    });
+    Object.defineProperty(module, "generateLong", {
+        value: function () {
+            return IDGeneratorClass.genStringId();
         }
     });
     return module;

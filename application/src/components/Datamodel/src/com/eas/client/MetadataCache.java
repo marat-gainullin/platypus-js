@@ -74,7 +74,7 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
 
     protected class ConcurrentCaseInsesitiveMap<V> extends ConcurrentHashMap<String, V> {
 
-        protected final String nullKey = "null-" + IDGenerator.genID();
+        protected final String nullKey = "null-" + IDGenerator.genId();
 
         protected String transformKey(String aKey) {
             return aKey != null ? aKey.toLowerCase() : nullKey;

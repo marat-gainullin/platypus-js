@@ -79,7 +79,7 @@ public class JsServerModuleEndPoint {
                             if (lookedup2 == null) {// Non zombie check
                                 try {
                                     // preserve replicated session id
-                                    com.eas.server.Session created = SessionManager.Singleton.instance.create(platypusSessionId == null ? IDGenerator.genID() + "" : platypusSessionId);
+                                    com.eas.server.Session created = SessionManager.Singleton.instance.create(platypusSessionId == null ? IDGenerator.genId() + "" : platypusSessionId);
                                     if (dataContext == null) {
                                         websocketSession.getUserProperties().remove(PlatypusHttpServlet.PLATYPUS_USER_CONTEXT_ATTR_NAME);
                                     } else {

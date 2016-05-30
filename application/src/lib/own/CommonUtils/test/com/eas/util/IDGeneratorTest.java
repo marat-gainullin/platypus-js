@@ -7,7 +7,6 @@ package com.eas.util;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -17,8 +16,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static org.junit.Assert.assertFalse;
 import org.junit.Test;
+import static org.junit.Assert.assertFalse;
 
 /**
  *
@@ -30,31 +29,45 @@ public class IDGeneratorTest {
     private static final int NUM_PARALLEL_TASKS = Runtime.getRuntime().availableProcessors();
 
     @Test
-    public void collisionsTest() {
-        Callable<long[]> taskBody = () -> {
-            long[] generated = new long[1000000];
+    public void shortCollisionsTest() {
+        perform(IDGenerator::genId);
+    }
+
+    @Test
+    public void longCollisionsTest() {
+        perform(IDGenerator::genLongId);
+    }
+
+    @Test
+    public void stringCollisionsTest() {
+        perform(IDGenerator::genStringId);
+    }
+
+    private <T> void perform(Callable<T> aGenerator) {
+        Callable<T[]> taskBody = () -> {
+            Object[] generated = new Object[100000];
             for (int i = 0; i < generated.length; i++) {
-                generated[i] = IDGenerator.genID();
+                generated[i] = aGenerator.call();
             }
-            return generated;
+            return (T[]) generated;
         };
-        List<Future<long[]>> tasks = new ArrayList<>(NUM_PARALLEL_TASKS);
+        List<Future<T[]>> tasks = new ArrayList<>(NUM_PARALLEL_TASKS);
         for (int i = 0; i < NUM_PARALLEL_TASKS; i++) {
             tasks.add(GP.submit(taskBody));
         }
 
-        tasks.forEach((Future<long[]> aResult) -> {
+        tasks.forEach((Future<T[]> aResult) -> {
             try {
                 aResult.get();
             } catch (InterruptedException | ExecutionException ex) {
                 Logger.getLogger(IDGeneratorTest.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
-        
-        Set<Long> collisions = new HashSet<>();
-        tasks.forEach((Future<long[]> aResult) -> {
+
+        Set<T> collisions = new HashSet<>();
+        tasks.forEach((Future<T[]> aResult) -> {
             try {
-                for (long id : aResult.get()) {
+                for (T id : aResult.get()) {
                     assertFalse(collisions.contains(id));
                     collisions.add(id);
                 }
@@ -63,4 +76,5 @@ public class IDGeneratorTest {
             }
         });
     }
+
 }

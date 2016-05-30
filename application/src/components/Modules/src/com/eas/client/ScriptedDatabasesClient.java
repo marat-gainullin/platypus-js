@@ -58,9 +58,9 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         indexer = aIndexer;
     }
 
-    protected JSObject createModule(String aModuleName, Scripts.Space aSpace) throws Exception {
+    protected JSObject createModule(String aModuleName) throws Exception {
         ScriptedResource.require(new String[]{aModuleName}, null);
-        return aSpace.createModule(aModuleName);
+        return Scripts.getSpace().createModule(aModuleName);
     }
 
     /**
@@ -152,7 +152,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
             if (((datasourcesUnderControl == null || datasourcesUnderControl.isEmpty()) && (aDatasourceName == null || Objects.equals(aDatasourceName, defaultDatasourceName)))
                     || (datasourcesUnderControl != null && datasourcesUnderControl.contains(aDatasourceName))) {
                 try {
-                    JSObject module = createModule(validatorName, aSpace);
+                    JSObject module = createModule(validatorName);
                     if (module != null) {
                         Object oValidate = module.getMember("validate");
                         if (oValidate instanceof JSObject) {
@@ -209,7 +209,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
             }
         } else {
             toBeCalled.stream().forEach((v) -> {
-                v.function.call(v.module, new Object[]{aSpace.toJs(aLog.toArray()), aDatasourceName});
+                v.function.call(v.module, new Object[]{Scripts.getSpace().toJs(aLog.toArray()), aDatasourceName});
             });
         }
     }

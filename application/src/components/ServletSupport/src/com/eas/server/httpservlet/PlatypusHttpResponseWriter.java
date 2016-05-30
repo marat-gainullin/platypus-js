@@ -155,7 +155,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
         if (reportName.toLowerCase().endsWith(suffix.toLowerCase())) {
             reportName = reportName.substring(0, reportName.length() - suffix.length());
         }
-        reportName += "-" + IDGenerator.genID() + suffix;
+        reportName += "-" + IDGenerator.genId() + suffix;
         File rep = new File(docsRoot + userHomeInApplication + reportName);
         try (FileOutputStream out = new FileOutputStream(rep)) {
             out.write(report.getBody());
