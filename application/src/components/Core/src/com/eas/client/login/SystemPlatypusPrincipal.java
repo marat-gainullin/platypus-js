@@ -15,7 +15,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class SystemPlatypusPrincipal extends PlatypusPrincipal {
 
     public SystemPlatypusPrincipal() {
-        super("system-" + IDGenerator.genID(), null, null, null);
+        super("system-" + IDGenerator.genId(), null, null, null);
     }
 
     @Override

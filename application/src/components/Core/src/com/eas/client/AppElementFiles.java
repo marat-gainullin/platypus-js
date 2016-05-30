@@ -57,7 +57,7 @@ public class AppElementFiles {
                     return PlatypusFilesSupport.getAnnotationValue(fileContent, JsDoc.Tag.NAME_TAG);
                 }
                 case ClientConstants.ET_DB_SCHEME:
-                    return IDGenerator.genID() + "";
+                    return IDGenerator.genId() + "";
                 default:
                     return null;
             }

@@ -115,7 +115,7 @@ public class JSDynaBean implements DynaBean {
     @Override
     public DynaClass getDynaClass() {
         if (dynaClass == null) {
-            dynaClass = new JSDynaClass(delegate, REPORT_DYNA_CLASS_PREFIX + String.valueOf(IDGenerator.genID()));
+            dynaClass = new JSDynaClass(delegate, REPORT_DYNA_CLASS_PREFIX + IDGenerator.genStringId());
         }
         return dynaClass;
     }

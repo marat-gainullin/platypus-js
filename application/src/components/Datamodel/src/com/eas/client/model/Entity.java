@@ -51,7 +51,7 @@ public abstract class Entity<M extends Model<E, Q>, Q extends Query, E extends E
     protected boolean iconified;
     protected String title;
     protected String name;
-    protected Long entityId = IDGenerator.genID();
+    protected Long entityId = IDGenerator.genId();
     protected String queryName;
     protected String tableDatasourceName;
     protected String tableSchemaName;
@@ -133,7 +133,7 @@ public abstract class Entity<M extends Model<E, Q>, Q extends Query, E extends E
     }
 
     public void regenerateId() {
-        entityId = IDGenerator.genID();
+        entityId = IDGenerator.genId();
     }
 
     public void setModel(M aValue) {

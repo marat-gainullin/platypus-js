@@ -202,7 +202,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                     }
                     if (fileName != null && !fileName.isEmpty()) {
                         StringBuilder uploadedFileName = new StringBuilder();
-                        uploadedFileName.append(IDGenerator.genID()).append("-").append(fileName);
+                        uploadedFileName.append(IDGenerator.genId()).append("-").append(fileName);
                         try {
                             try {
                                 part.write(uploadedFileName.toString());
@@ -280,7 +280,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                                         if (lookedup2 == null) {
                                             try {
                                                 // preserve replicated session id
-                                                Session created = SessionManager.Singleton.instance.create(platypusSessionId == null ? IDGenerator.genID() + "" : platypusSessionId);
+                                                Session created = SessionManager.Singleton.instance.create(platypusSessionId == null ? IDGenerator.genId() + "" : platypusSessionId);
                                                 if (dataContext == null) {
                                                     httpSession.removeAttribute(PLATYPUS_USER_CONTEXT_ATTR_NAME);
                                                 } else {

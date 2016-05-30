@@ -21,7 +21,7 @@ public class DatabasesClientWithResource implements AutoCloseable {
 
     public DatabasesClientWithResource(DbConnectionSettings aSettings) throws Exception {
         super();
-        resourceName = "TestDb-" + String.valueOf(IDGenerator.genID());
+        resourceName = "TestDb-" + IDGenerator.genStringId();
         GeneralResourceProvider.getInstance().registerDatasource(resourceName, aSettings);
         client = new DatabasesClient(resourceName, true, BearResourcePool.DEFAULT_MAXIMUM_SIZE);
     }
