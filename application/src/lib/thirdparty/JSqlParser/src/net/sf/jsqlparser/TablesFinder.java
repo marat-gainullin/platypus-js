@@ -78,7 +78,7 @@ public class TablesFinder implements SelectVisitor, FromItemVisitor, ExpressionV
     }
     
     private TO_CASE toCase = null;
-    private Map<String, Table> tables = new HashMap<>();
+    private final Map<String, Table> tables = new HashMap<>();
     private boolean forTables;
 
     private TablesFinder() {

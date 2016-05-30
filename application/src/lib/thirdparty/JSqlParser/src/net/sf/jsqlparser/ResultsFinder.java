@@ -22,7 +22,7 @@ import net.sf.jsqlparser.statement.select.Union;
  */
 public class ResultsFinder implements SelectVisitor, SelectItemVisitor {
 
-    private List<SelectItem> results = new ArrayList<>();
+    private final List<SelectItem> results = new ArrayList<>();
 
     public static List<SelectItem> getResults(SelectBody aSelectBody) {
         ResultsFinder instance = new ResultsFinder();

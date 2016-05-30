@@ -76,7 +76,7 @@ public class SourcesFinder implements SelectVisitor, FromItemVisitor, Expression
         UPPER
     }
     private TO_CASE toCase = null;
-    private Map<String, FromItem> sources = new HashMap<>();
+    private final Map<String, FromItem> sources = new HashMap<>();
 
     private SourcesFinder() {
         super();
