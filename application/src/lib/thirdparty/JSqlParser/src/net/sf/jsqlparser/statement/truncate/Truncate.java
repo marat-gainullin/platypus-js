@@ -12,7 +12,7 @@ public class Truncate implements Statement {
     private Table table;
     private String comment;
     private String commentTable;
-    private String endComment = new String();
+    private String endComment = "";
 
     @Override
     public void accept(StatementVisitor statementVisitor) {

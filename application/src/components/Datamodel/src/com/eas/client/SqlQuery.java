@@ -10,13 +10,20 @@ import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.Query;
 import com.eas.script.Scripts;
+import java.io.StringReader;
 import java.sql.ParameterMetaData;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import jdk.nashorn.api.scripting.JSObject;
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.CCJSqlParserManager;
+import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.Select;
 
 /**
  * A Sql query with name-bound parameters.
@@ -274,9 +281,29 @@ public class SqlQuery extends Query {
         boolean postgreSQL = ClientConstants.SERVER_PROPERTY_POSTGRE_DIALECT.equals(dialect);
         Parameters compiledParams = new Parameters();
         if (sqlText == null || sqlText.isEmpty()) {
-            throw new Exception("Empty sql query strings are not supported");
+            throw new Exception("Empty sql query text is not supported");
         }
+        
         StringBuilder compiledSb = new StringBuilder();
+
+        CCJSqlParserManager parserManager = new CCJSqlParserManager();
+        try {
+            Statement parsedQuery = parserManager.parse(new StringReader(sqlText));
+            parsedQuery.accept(statementVisitor);
+            compiledSb.append(parsedQuery.toString());
+        } catch (JSQLParserException ex) {
+            Logger.getLogger(StoredQueryFactory.class.getName()).log(Level.WARNING, ex.getMessage());
+            substituteParams(aSpace, compiledParams, postgreSQL, compiledSb);
+        }
+
+        SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, datasourceName, compiledSb.toString(), compiledParams, fields);
+        compiled.setEntityName(entityName);
+        compiled.setProcedure(procedure);
+        compiled.setPageSize(pageSize);
+        return compiled;
+    }
+
+    private void substituteParams(Scripts.Space aSpace, Parameters aCompiledParams, boolean isPostgreSQL, StringBuilder aCompiled) throws UnboundSqlParameterException {
         Matcher sm = STRINGS_PATTERN.matcher(sqlText);
         String[] withoutStrings = sqlText.split("('[^']*')");
         for (int i = 0; i < withoutStrings.length; i++) {
@@ -297,21 +324,16 @@ public class SqlQuery extends Query {
                 if (aSpace != null) {
                     copied.setValue(aSpace.toJava(copied.getValue()));
                 }
-                compiledParams.add(copied);
-                m.appendReplacement(withoutStringsSegment, postgreSQL && Scripts.DATE_TYPE_NAME.equals(p.getType()) ? "?::timestamp" : "?");
+                aCompiledParams.add(copied);
+                m.appendReplacement(withoutStringsSegment, isPostgreSQL && Scripts.DATE_TYPE_NAME.equals(p.getType()) ? "?::timestamp" : "?");
             }
             m.appendTail(withoutStringsSegment);
             withoutStrings[i] = withoutStringsSegment.toString();
-            compiledSb.append(withoutStrings[i]);
+            aCompiled.append(withoutStrings[i]);
             if (sm.find()) {
-                compiledSb.append(sm.group(0));
+                aCompiled.append(sm.group(0));
             }
         }
-        SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, datasourceName, compiledSb.toString(), compiledParams, fields);
-        compiled.setEntityName(entityName);
-        compiled.setProcedure(procedure);
-        compiled.setPageSize(pageSize);
-        return compiled;
     }
 
     @Override

@@ -38,7 +38,7 @@ public class Update implements Statement {
     private List<Column> columns;
     private List<Expression> expressions;
     private String comment;
-    private String endComment = new String();
+    private String endComment = "";
     private String commentSet;
     private String commentWhere;
     private List<String> commentsComma;

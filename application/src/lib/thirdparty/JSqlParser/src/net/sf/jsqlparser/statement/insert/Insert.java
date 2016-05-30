@@ -43,7 +43,7 @@ public class Insert implements Statement {
     private List<String> itemsListComments;
     private boolean useValues = true;
     private String comment;
-    private String endComment = new String();
+    private String endComment = "";
     private String commentInto;
     private String commentValues;
     private String commentItemsList;

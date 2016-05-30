@@ -12,7 +12,7 @@ public class Drop implements Statement {
     private List<String> parameters;
     private List<String> parametersComment;
     private String comment;
-    private String endComment = new String();
+    private String endComment = "";
     private String typeComment;
     private String nameComment;
 

@@ -31,7 +31,7 @@ public class Select implements Statement {
     private List<WithItem> withItemsList;
     private String commentWith;
     private List<String> commentsComma;
-    private String endComment = new String();
+    private String endComment = "";
 
     @Override
     public void accept(StatementVisitor statementVisitor) {

@@ -31,7 +31,7 @@ public class Delete implements Statement {
     private Table table;
     private Expression where;
     private String comment;
-    private String endComment = new String();
+    private String endComment = "";
     private String fromComment;
     private String whereComment;
 

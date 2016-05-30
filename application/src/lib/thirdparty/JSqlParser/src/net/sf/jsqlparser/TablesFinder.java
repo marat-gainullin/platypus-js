@@ -149,7 +149,7 @@ public class TablesFinder implements SelectVisitor, FromItemVisitor, ExpressionV
         } else {// Если нет алиаса, то надо ориентироваться по имени таблицы (в имени м.б. и схема).
             // Однако, в списке from может быть указана таблица со схемой, а в списке select без неё.
             // Для того, чтобы соответствующая таблица из from могла быть найдена, если в её
-            // имени присутствует имя схемы, то надо её добавить ещё раз и по имени без схемы.
+            // имени присутствует имя схемы, надо её добавить ещё раз по имени без схемы.
             if (table.getSchemaName() != null && !table.getSchemaName().isEmpty()) {
                 String nameWithoutSchema = table.getName();
                 if (toCase == TO_CASE.LOWER) {

@@ -23,7 +23,7 @@ public class CreateTable implements Statement {
     private List<String> commentCommaIndexes;
     private List<String> commentTableOptions;
     private List<String> commentCreateOptions;
-    private String endComment = new String();
+    private String endComment = "";
 
     @Override
     public void accept(StatementVisitor statementVisitor) {

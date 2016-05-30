@@ -53,7 +53,7 @@ public class Replace implements Statement {
     private List<String> commentCommaItems;
     private String commentBeforeItems;
     private String commentAfterItems;
-    private String endComment = new String();
+    private String endComment = "";
 
     @Override
     public void accept(StatementVisitor statementVisitor) {
