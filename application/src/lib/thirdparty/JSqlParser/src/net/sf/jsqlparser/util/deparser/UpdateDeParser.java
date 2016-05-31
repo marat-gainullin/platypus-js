@@ -43,7 +43,7 @@ public class UpdateDeParser {
         for (int i = 0, s = aUpdate.getColumns().size(); i < s; i++) {
             Column column = (Column) aUpdate.getColumns().get(i);
             buffer.append(column.getComment() != null ? column.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(column.getWholeColumnName())
-                  .append(!aUpdate.getCommentsEqaulas().get(i).toString().isEmpty()?" "+aUpdate.getCommentsEqaulas().get(i)+ExpressionDeParser.LINE_SEPARATOR:"").append(" = ");
+                  .append(!aUpdate.getCommentsEqualas().get(i).toString().isEmpty()?" "+aUpdate.getCommentsEqualas().get(i)+ExpressionDeParser.LINE_SEPARATOR:"").append(" = ");
             Expression expression = (Expression) aUpdate.getExpressions().get(i);
             expression.accept(expressionVisitor);
             if (i < aUpdate.getColumns().size() - 1) {

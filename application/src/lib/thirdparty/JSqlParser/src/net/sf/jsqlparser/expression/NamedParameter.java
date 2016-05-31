@@ -30,6 +30,7 @@ public class NamedParameter implements Expression {
         this.name = name;
     }
 
+    @Override
     public void accept(ExpressionVisitor expressionVisitor) {
         expressionVisitor.visit(this);
     }

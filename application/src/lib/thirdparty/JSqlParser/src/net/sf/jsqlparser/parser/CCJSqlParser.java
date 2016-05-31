@@ -255,7 +255,7 @@ if (tk.specialToken != null) {
 columns.add(tableColumn); expList.add(value);
     }
 update.setCommentsComma(commentsComma);
-         update.setCommentsEqaulas(commentsEqaulas);
+         update.setCommentsEqualas(commentsEqaulas);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case K_WHERE:{
       tk = jj_consume_token(K_WHERE);

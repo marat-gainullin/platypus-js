@@ -39,6 +39,13 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
     }
 
     /**
+     * @param aBuilder the buffer that will be filled with the select
+     */
+    public SelectDeParser(StringBuilder aBuilder) {
+        buffer = aBuilder;
+    }
+
+    /**
      * @param aExpressionVisitor a {@link ExpressionVisitor} to de-parse expressions. It has to share the same<br>
      * StringBuilder (buffer parameter) as this object in order to work
      * @param aBuilder the buffer that will be filled with the select
@@ -48,6 +55,7 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
         expressionVisitor = aExpressionVisitor;
     }
 
+    @Override
     public void visit(PlainSelect plainSelect) {
         buffer.append(plainSelect.getComment() != null ? plainSelect.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("Select ");
         Top top = plainSelect.getTop();

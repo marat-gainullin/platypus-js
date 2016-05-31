@@ -21,9 +21,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import jdk.nashorn.api.scripting.JSObject;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.NamedParameter;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.util.deparser.ExpressionDeParser;
+import net.sf.jsqlparser.util.deparser.SelectDeParser;
+import net.sf.jsqlparser.util.deparser.StatementDeParser;
 
 /**
  * A Sql query with name-bound parameters.
@@ -283,14 +287,26 @@ public class SqlQuery extends Query {
         if (sqlText == null || sqlText.isEmpty()) {
             throw new Exception("Empty sql query text is not supported");
         }
-        
+
         StringBuilder compiledSb = new StringBuilder();
 
         CCJSqlParserManager parserManager = new CCJSqlParserManager();
         try {
             Statement parsedQuery = parserManager.parse(new StringReader(sqlText));
-            parsedQuery.accept(statementVisitor);
-            compiledSb.append(parsedQuery.toString());
+            SelectDeParser selectDeParser = new SelectDeParser(compiledSb);
+            ExpressionDeParser expressionDeParser = new ExpressionDeParser(selectDeParser, compiledSb) {
+
+                @Override
+                public void visit(NamedParameter namedParameter) {
+                    buffer.append(namedParameter.getComment() != null ? namedParameter.getComment() + " " : "")
+                            .append(":")
+                            .append(namedParameter.getName());
+                }
+
+            };
+            selectDeParser.setExpressionVisitor(expressionDeParser);
+            StatementDeParser deparser = new StatementDeParser(compiledSb, selectDeParser, expressionDeParser);
+            parsedQuery.accept(deparser);
         } catch (JSQLParserException ex) {
             Logger.getLogger(StoredQueryFactory.class.getName()).log(Level.WARNING, ex.getMessage());
             substituteParams(aSpace, compiledParams, postgreSQL, compiledSb);

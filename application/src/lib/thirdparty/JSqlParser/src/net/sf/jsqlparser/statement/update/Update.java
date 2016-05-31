@@ -42,7 +42,7 @@ public class Update implements Statement {
     private String commentSet;
     private String commentWhere;
     private List<String> commentsComma;
-    private List<String> commentsEqaulas;
+    private List<String> commentsEqualas;
 
     @Override
     public void accept(StatementVisitor statementVisitor) {
@@ -100,7 +100,7 @@ public class Update implements Statement {
         sql += "UPDATE ";
         sql += getTable() + (getCommentSet() != null ? " " + getCommentSet() : "") + " SET ";
         for (int i = 0; i < getColumns().size(); i++) {
-            sql += getColumns().get(i) + (!commentsEqaulas.get(i).toString().isEmpty() ? " " + commentsEqaulas.get(i) : "")
+            sql += getColumns().get(i) + (!commentsEqualas.get(i).toString().isEmpty() ? " " + commentsEqualas.get(i) : "")
                     + " = " + getExpressions().get(i);
             if (i < getColumns().size() - 1) {
                 sql += (!commentsComma.get(i).toString().isEmpty() ? " " + commentsComma.get(i) : "") + ", ";
@@ -180,16 +180,16 @@ public class Update implements Statement {
     }
 
     /**
-     * @return the commentsEqaulas
+     * @return the commentsEqualas
      */
-    public List<String> getCommentsEqaulas() {
-        return commentsEqaulas;
+    public List<String> getCommentsEqualas() {
+        return commentsEqualas;
     }
 
     /**
-     * @param commentsEqaulas the commentsEqaulas to set
+     * @param commentsEqualas the commentsEqualas to set
      */
-    public void setCommentsEqaulas(List<String> commentsEqaulas) {
-        this.commentsEqaulas = commentsEqaulas;
+    public void setCommentsEqualas(List<String> commentsEqualas) {
+        this.commentsEqualas = commentsEqualas;
     }
 }
