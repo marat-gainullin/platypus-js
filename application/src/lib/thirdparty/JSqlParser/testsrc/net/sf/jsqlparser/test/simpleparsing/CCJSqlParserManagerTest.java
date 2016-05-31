@@ -34,7 +34,7 @@ public class CCJSqlParserManagerTest {
     }
 
     public static String getStatement(BufferedReader in) throws Exception {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         String line = null;
         while ((line = CCJSqlParserManagerTest.getLine(in)) != null) {
 

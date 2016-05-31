@@ -8,17 +8,18 @@ import java.util.List;
 
 /**
  *
- * @author AB
+ * @author ab
  */
 public class Into {
-    private List commentsComma = null;
-    private List tables = null;
+
+    private List commentsComma;
+    private List tables;
     private String commentInto;
-    
-     @Override
+
+    @Override
     public String toString() {
-        return (getCommentInto() != null ? getCommentInto()+" " : "") + "INTO " 
-                + PlainSelect.getStringListWithCommaComment(tables,commentsComma,true,false,null);
+        return (getCommentInto() != null ? getCommentInto() + " " : "") + "INTO "
+                + PlainSelect.getStringListWithCommaComment(tables, commentsComma, true, false, null);
     }
 
     /**

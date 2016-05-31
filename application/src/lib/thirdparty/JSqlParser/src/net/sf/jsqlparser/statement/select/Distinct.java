@@ -1,11 +1,13 @@
 package net.sf.jsqlparser.statement.select;
 
 import java.util.List;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.ExpressionVisitor;
 
 /**
  * A DISTINCT [ON (expression, ...)] clause
  */
-public class Distinct {
+public class Distinct implements Expression {
 
     private List onSelectItems;
     private String comment;
@@ -107,4 +109,10 @@ public class Distinct {
     public void setCommentsComma(List commentsComma) {
         this.commentsComma = commentsComma;
     }
+    
+    @Override
+    public void accept(ExpressionVisitor expressionVisitor) {
+        expressionVisitor.visit(this);
+    }
+    
 }

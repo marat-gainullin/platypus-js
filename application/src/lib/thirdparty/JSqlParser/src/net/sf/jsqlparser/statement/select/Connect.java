@@ -54,6 +54,7 @@ public class Connect implements Expression {
                 + "NOCYCLE " : "") + connectBy.toString();
     }
 
+    @Override
     public void accept(ExpressionVisitor expressionVisitor) {
         expressionVisitor.visit(this);
     }

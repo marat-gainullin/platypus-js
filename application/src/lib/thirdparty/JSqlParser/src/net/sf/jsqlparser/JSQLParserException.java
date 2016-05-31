@@ -26,7 +26,7 @@ package net.sf.jsqlparser;
  */
 public class JSQLParserException extends Exception {
 
-    private Throwable cause = null;
+    private Throwable cause;
 
     public JSQLParserException() {
         super();

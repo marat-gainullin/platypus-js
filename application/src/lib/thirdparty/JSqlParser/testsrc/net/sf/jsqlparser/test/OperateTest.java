@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package net.sf.jsqlparser.test;
 
 import java.io.StringReader;
@@ -18,7 +17,7 @@ import static org.junit.Assert.*;
  *
  * @author mg
  */
-public class OperateTest extends GeneralTest{
+public class OperateTest extends GeneralTest {
 
     @Test
     public void absTest() throws JSQLParserException {
@@ -61,7 +60,7 @@ public class OperateTest extends GeneralTest{
         String statementText = "SELECT * FROM TABLE1 where TABLE1.f1 is null";
         checkParseAndDeparse(statementText);
         Statement statement = parserManager.parse(new StringReader(statementText));
-        Map<String, Table> tbls = TablesFinder.getTablesMap(null, statement,true);
+        Map<String, Table> tbls = TablesFinder.getTablesMap(null, statement, true);
         assertEquals(1, tbls.size());
         assertEquals("TABLE1", tbls.keySet().iterator().next());
         tbls = null;
@@ -80,6 +79,7 @@ public class OperateTest extends GeneralTest{
         String statement = "SELECT t1.f1 FROM TABLE1 as t1 where t1.f1 is null";
         checkParseAndDeparse(statement);
     }
+
     /*
     @Test
     public void singleLineCommentTest() throws JSQLParserException {
@@ -93,10 +93,10 @@ public class OperateTest extends GeneralTest{
                 +"/*\n"
                 + "This is multiline comment.\n"
                 + "This is the second lime of multiline comment.\n"
-                + "*/   /*";
+                + "*/ /*";
         checkParseAndDeparse(statement);
     }
-*/
+     */
     @Test
     public void deleteTest() throws JSQLParserException {
         String statement = "delete from MTD_ENTITIES where MDENT_ID = :id";

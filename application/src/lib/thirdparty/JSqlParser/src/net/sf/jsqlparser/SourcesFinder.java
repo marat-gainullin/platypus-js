@@ -54,6 +54,7 @@ import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.Connect;
+import net.sf.jsqlparser.statement.select.Distinct;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
 import net.sf.jsqlparser.statement.select.Join;
@@ -361,5 +362,9 @@ public class SourcesFinder implements SelectVisitor, FromItemVisitor, Expression
 
     @Override
     public void visit(Connect aConnect) {
+    }
+    
+    @Override
+    public void visit(Distinct aDistinct) {
     }
 }

@@ -47,6 +47,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.Connect;
+import net.sf.jsqlparser.statement.select.Distinct;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
@@ -90,15 +91,18 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
         buffer = aBuffer;
     }
 
+    @Override
     public void visit(Addition addition) {
         visitBinaryExpression(addition, (addition.getComment() != null ? " " + addition.getComment() + ExpressionDeParser.LINE_SEPARATOR : "") + " + ");
     }
 
+    @Override
     public void visit(AndExpression andExpression) {
         visitBinaryExpression(andExpression, (andExpression.getComment() != null ? " " + andExpression.getComment() : "")
                 + ExpressionDeParser.LINE_SEPARATOR + " and ");
     }
 
+    @Override
     public void visit(Between between) {
         between.getLeftExpression().accept(this);
         if (between.isNot()) {
@@ -112,29 +116,35 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
 
     }
 
+    @Override
     public void visit(Division division) {
         visitBinaryExpression(division, (division.getComment() != null ? " " + division.getComment() + ExpressionDeParser.LINE_SEPARATOR : "") + " / ");
 
     }
 
+    @Override
     public void visit(DoubleValue doubleValue) {
         buffer.append(doubleValue.getComment() != null ? doubleValue.getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append(doubleValue.getValue());
 
     }
 
+    @Override
     public void visit(EqualsTo equalsTo) {
         visitBinaryExpression(equalsTo, (equalsTo.getComment() != null ? " " + equalsTo.getComment() + ExpressionDeParser.LINE_SEPARATOR : "") + " = ");
     }
 
+    @Override
     public void visit(GreaterThan greaterThan) {
         visitBinaryExpression(greaterThan, (greaterThan.getComment() != null ? " " + greaterThan.getComment() + ExpressionDeParser.LINE_SEPARATOR : "") + " > ");
     }
 
+    @Override
     public void visit(GreaterThanEquals greaterThanEquals) {
         visitBinaryExpression(greaterThanEquals, (greaterThanEquals.getComment() != null ? " " + greaterThanEquals.getComment() + ExpressionDeParser.LINE_SEPARATOR : "") + " >= ");
 
     }
 
+    @Override
     public void visit(InExpression inExpression) {
         inExpression.getLeftExpression().accept(this);
         if (inExpression.isNot()) {
@@ -144,11 +154,13 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
         inExpression.getItemsList().accept(this);
     }
 
+    @Override
     public void visit(InverseExpression inverseExpression) {
         buffer.append(inverseExpression.getComment() != null ? inverseExpression.getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append("-");
         inverseExpression.getExpression().accept(this);
     }
 
+    @Override
     public void visit(IsNullExpression isNullExpression) {
         isNullExpression.getLeftExpression().accept(this);
         if (isNullExpression.isNot()) {
@@ -158,19 +170,23 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
         }
     }
 
+    @Override
     public void visit(JdbcParameter jdbcParameter) {
         buffer.append(jdbcParameter.getComment() != null ? jdbcParameter.getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append("?");
 
     }
 
+    @Override
     public void visit(NamedParameter namedParameter) {
         buffer.append(namedParameter.toString());
     }
 
+    @Override
     public void visit(LikeExpression likeExpression) {
         visitBinaryExpression(likeExpression, (likeExpression.getCommentLike() != null ? " " + likeExpression.getCommentLike() + ExpressionDeParser.LINE_SEPARATOR : "") + " Like ");
     }
 
+    @Override
     public void visit(ExistsExpression existsExpression) {
         if (existsExpression.isNot()) {
             buffer.append(existsExpression.getCommentNot() != null ? " " + existsExpression.getCommentNot() + ExpressionDeParser.LINE_SEPARATOR : "").append(" not").append(existsExpression.getCommentExists() != null ? " " + existsExpression.getCommentExists() + ExpressionDeParser.LINE_SEPARATOR : "").append(" exists ");
@@ -180,39 +196,47 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
         existsExpression.getRightExpression().accept(this);
     }
 
+    @Override
     public void visit(LongValue longValue) {
         buffer.append(longValue.getComment() != null ? longValue.getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append(longValue.getStringValue());
 
     }
 
+    @Override
     public void visit(MinorThan minorThan) {
         visitBinaryExpression(minorThan, (minorThan.getComment() != null ? " " + minorThan.getComment() + ExpressionDeParser.LINE_SEPARATOR : "") + " < ");
 
     }
 
+    @Override
     public void visit(MinorThanEquals minorThanEquals) {
         visitBinaryExpression(minorThanEquals, (minorThanEquals.getComment() != null ? " " + minorThanEquals.getComment() + ExpressionDeParser.LINE_SEPARATOR : "") + " <= ");
 
     }
 
+    @Override
     public void visit(Multiplication multiplication) {
         visitBinaryExpression(multiplication, (multiplication.getComment() != null ? " " + multiplication.getComment() + ExpressionDeParser.LINE_SEPARATOR : "") + " * ");
 
     }
 
+    @Override
     public void visit(NotEqualsTo notEqualsTo) {
         visitBinaryExpression(notEqualsTo, (notEqualsTo.getComment() != null ? " " + notEqualsTo.getComment() + ExpressionDeParser.LINE_SEPARATOR : "") + " <> ");
 
     }
 
+    @Override
     public void visit(NullValue nullValue) {
         buffer.append(nullValue.getComment() != null ? nullValue.getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append("null");
     }
 
+    @Override
     public void visit(OrExpression orExpression) {
         visitBinaryExpression(orExpression, (orExpression.getComment() != null ? " " + orExpression.getComment() + ExpressionDeParser.LINE_SEPARATOR : "") + " or ");
     }
 
+    @Override
     public void visit(Parenthesis parenthesis) {
         if (parenthesis.isNot()) {
             buffer.append(parenthesis.getCommentNot() != null ? " " + parenthesis.getCommentNot() + ExpressionDeParser.LINE_SEPARATOR : "").append(" not ");
@@ -223,10 +247,12 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
 
     }
 
+    @Override
     public void visit(StringValue stringValue) {
         buffer.append(stringValue.getComment() != null ? stringValue.getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append("'").append(stringValue.getValue()).append("'");
     }
 
+    @Override
     public void visit(Subtraction subtraction) {
         visitBinaryExpression(subtraction, (subtraction.getComment() != null ? subtraction.getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "") + "-");
     }
@@ -240,12 +266,14 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
         binaryExpression.getRightExpression().accept(this);
     }
 
+    @Override
     public void visit(SubSelect subSelect) {
         buffer.append(subSelect.getCommentBeginBracket() != null ? subSelect.getCommentBeginBracket() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append("(");
         subSelect.getSelectBody().accept(selectVisitor);
         buffer.append(subSelect.getCommentEndBracket() != null ? subSelect.getCommentEndBracket() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append(")");
     }
 
+    @Override
     public void visit(Column tableColumn) {
         buffer.append(tableColumn.getComment() != null ? tableColumn.getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "");
         if (tableColumn.getTable().getName() != null) {
@@ -255,6 +283,7 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
         buffer.append(tableColumn.getColumnName());
     }
 
+    @Override
     public void visit(Function function) {
         if (function.isEscaped()) {
             buffer.append(function.getCommentBeginEscaped() != null ? function.getCommentBeginEscaped() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append("{fn ");
@@ -281,6 +310,7 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
         }
     }
 
+    @Override
     public void visit(ExpressionList expressionList) {
         if (useBracketsInExprList) {
             buffer.append("(");
@@ -304,18 +334,22 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
         selectVisitor = visitor;
     }
 
+    @Override
     public void visit(DateValue dateValue) {
         buffer.append(dateValue.getComment() != null ? dateValue.getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append("{d '").append(dateValue.getValue().toString()).append("'}");
     }
 
+    @Override
     public void visit(TimestampValue timestampValue) {
         buffer.append(timestampValue.getComment() != null ? timestampValue.getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append("{ts '").append(timestampValue.getValue().toString()).append("'}");
     }
 
+    @Override
     public void visit(TimeValue timeValue) {
         buffer.append(timeValue.getComment() != null ? timeValue.getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append("{t '").append(timeValue.getValue().toString()).append("'}");
     }
 
+    @Override
     public void visit(CaseExpression caseExpression) {
         buffer.append(caseExpression.getCommentCase() != null ? caseExpression.getCommentElse() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append("Case ");
         Expression switchExp = caseExpression.getSwitchExpression();
@@ -334,6 +368,7 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
         buffer.append(caseExpression.getCommentEnd() != null ? " " + caseExpression.getCommentEnd() + ExpressionDeParser.LINE_SEPARATOR : "").append(" End");
     }
 
+    @Override
     public void visit(WhenClause whenClause) {
         buffer.append(whenClause.getCommentWhen() != null ? " " + whenClause.getCommentWhen() + ExpressionDeParser.LINE_SEPARATOR : "").append(" When ");
         whenClause.getWhenExpression().accept(this);
@@ -341,37 +376,49 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
         whenClause.getThenExpression().accept(this);
     }
 
+    @Override
     public void visit(AllComparisonExpression allComparisonExpression) {
         buffer.append(allComparisonExpression.getComment() != null ? " " + allComparisonExpression.getComment() + ExpressionDeParser.LINE_SEPARATOR : "").append(" all ");
         allComparisonExpression.GetSubSelect().accept((ExpressionVisitor) this);
     }
 
+    @Override
     public void visit(AnyComparisonExpression anyComparisonExpression) {
         buffer.append(anyComparisonExpression.getComment() != null ? " " + anyComparisonExpression.getComment() + ExpressionDeParser.LINE_SEPARATOR : "").append(" any ");
         anyComparisonExpression.GetSubSelect().accept((ExpressionVisitor) this);
     }
 
+    @Override
     public void visit(Concat concat) {
         visitBinaryExpression(concat, (concat.getComment() != null ? " " + concat.getComment() + ExpressionDeParser.LINE_SEPARATOR : "") + " || ");
     }
 
+    @Override
     public void visit(Matches matches) {
         visitBinaryExpression(matches, (matches.getComment() != null ? " " + matches.getComment() + ExpressionDeParser.LINE_SEPARATOR : "") + " @@ ");
     }
 
+    @Override
     public void visit(BitwiseAnd bitwiseAnd) {
         visitBinaryExpression(bitwiseAnd, (bitwiseAnd.getComment() != null ? " " + bitwiseAnd.getComment() + ExpressionDeParser.LINE_SEPARATOR : "") + " & ");
     }
 
+    @Override
     public void visit(BitwiseOr bitwiseOr) {
         visitBinaryExpression(bitwiseOr, (bitwiseOr.getComment() != null ? " " + bitwiseOr.getComment() + ExpressionDeParser.LINE_SEPARATOR : "") + " | ");
     }
 
+    @Override
     public void visit(BitwiseXor bitwiseXor) {
         visitBinaryExpression(bitwiseXor, (bitwiseXor.getComment() != null ? " " + bitwiseXor.getComment() + ExpressionDeParser.LINE_SEPARATOR : "") + " ^ ");
     }
 
+    @Override
     public void visit(Connect aConnect) {
         buffer.append(" ").append(aConnect.toString());
+    }
+    
+    @Override
+    public void visit(Distinct aDistinct) {
     }
 }

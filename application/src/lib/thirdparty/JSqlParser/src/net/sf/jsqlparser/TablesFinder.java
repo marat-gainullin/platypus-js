@@ -57,6 +57,7 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.select.Connect;
+import net.sf.jsqlparser.statement.select.Distinct;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -387,5 +388,9 @@ public class TablesFinder implements SelectVisitor, FromItemVisitor, ExpressionV
 
     @Override
     public void visit(Connect aConnect) {
+    }
+    
+    @Override
+    public void visit(Distinct aDistinct) {
     }
 }

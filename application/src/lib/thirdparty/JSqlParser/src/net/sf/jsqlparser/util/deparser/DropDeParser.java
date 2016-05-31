@@ -1,7 +1,6 @@
 package net.sf.jsqlparser.util.deparser;
 
 import net.sf.jsqlparser.expression.ExpressionVisitor;
-import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.drop.Drop;
 
 /**

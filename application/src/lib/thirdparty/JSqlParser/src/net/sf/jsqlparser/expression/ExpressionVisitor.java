@@ -45,6 +45,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.Connect;
+import net.sf.jsqlparser.statement.select.Distinct;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
 public interface ExpressionVisitor {
@@ -130,4 +131,6 @@ public interface ExpressionVisitor {
     public void visit(BitwiseXor bitwiseXor);
 
     public void visit(Connect connect);
+
+    public void visit(Distinct connect);
 }
