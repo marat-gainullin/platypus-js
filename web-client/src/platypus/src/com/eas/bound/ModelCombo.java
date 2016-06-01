@@ -252,6 +252,9 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 
 	private native static void publish(ModelCombo aWidget, JavaScriptObject aPublished)/*-{
 	    var B = @com.eas.core.Predefine::boxing;
+	    aPublished.redraw = function() {
+          aWidget.@com.eas.bound.ModelCombo::redraw()();
+        };
         Object.defineProperty(aPublished, "emptyText", {
 	        get : function() {
 	            return aWidget.@com.eas.ui.HasEmptyText::getEmptyText()();
