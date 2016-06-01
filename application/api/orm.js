@@ -343,10 +343,15 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                     } else {
                         throw "Can't determine model's type.";
                     }
+                    var nQuery = nEntity.getQuery();
+                    if(!nQuery)
+                        throw "Missing definition of entity '" + nEntity.getQueryName() + "'";
                     var justInserted = null;
                     var justInsertedChange = null;
                     var orderers = {};
                     var published = [];
+                    
+                    var _onChange = null;
 
                     function managedOnChange(aSubject, aChange) {
                         if (!tryToComplementInsert(aSubject, aChange)) {
@@ -366,6 +371,13 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                         var field = noFields[aChange.propertyName];
                         if (field && field.pk) {
                             fireOppositeScalarsSelfCollectionsChanges(aSubject, aChange, nFields);
+                        }
+                        if(_onChange){
+                            try{
+                                _onChange(aChange);
+                            }catch(e){
+                                    Logger.severe(e);
+                            }
                         }
                     }
                     function managedBeforeChange(aSubject, aChange) {
@@ -622,7 +634,7 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                                 delete anInstance[toBeDeletedMark];
                             });
                         }});
-                    Object.defineProperty(published, 'onScrolled', {
+                    Object.defineProperty(published, 'onScroll', {
                         get: function () {
                             return _onScrolled;
                         },
@@ -630,7 +642,7 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                             _onScrolled = aValue;
                         }
                     });
-                    Object.defineProperty(published, 'onInserted', {
+                    Object.defineProperty(published, 'onInsert', {
                         get: function () {
                             return _onInserted;
                         },
@@ -638,12 +650,20 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                             _onInserted = aValue;
                         }
                     });
-                    Object.defineProperty(published, 'onDeleted', {
+                    Object.defineProperty(published, 'onDelete', {
                         get: function () {
                             return _onDeleted;
                         },
                         set: function (aValue) {
                             _onDeleted = aValue;
+                        }
+                    });
+                    Object.defineProperty(published, 'onChange', {
+                        get: function () {
+                            return _onChange;
+                        },
+                        set: function (aValue) {
+                            _onChange = aValue;
                         }
                     });
                     nEntity.setSnapshotConsumer(function (aSnapshot, aFreshData) {

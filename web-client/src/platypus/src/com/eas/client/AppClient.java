@@ -753,7 +753,7 @@ public class AppClient {
 						assert oUserName == null || oUserName instanceof String : "Credential request expects null or String value as a user name.";
 						principal = (String) oUserName;
 						if (principal == null || principal.isEmpty())
-							principal = "anonymous" + String.valueOf(IDGenerator.genId());
+							principal = "anonymous" + String.valueOf(IdGenerator.genId());
 						if (aCallback != null) {
 							aCallback.onSuccess(principal);
 						}
@@ -766,7 +766,7 @@ public class AppClient {
 
 				@Override
 				public void onFailure(XMLHttpRequest reason) {
-					principal = "anonymous" + String.valueOf(IDGenerator.genId());
+					principal = "anonymous" + String.valueOf(IdGenerator.genId());
 					if (aCallback != null)
 						aCallback.onFailure(reason.getStatus() + " : " + reason.getStatusText());
 				}
@@ -1190,7 +1190,7 @@ public class AppClient {
 	}
 
 	public String checkedCacheBust(String aUrl) {
-		return cacheBustEnabled ? aUrl + "?" + PlatypusHttpRequestParams.CACHE_BUSTER + "=" + IDGenerator.genId() : aUrl;
+		return cacheBustEnabled ? aUrl + "?" + PlatypusHttpRequestParams.CACHE_BUSTER + "=" + IdGenerator.genId() : aUrl;
 	}
 
 	private boolean isJsonResponse(XMLHttpRequest aResponse) {

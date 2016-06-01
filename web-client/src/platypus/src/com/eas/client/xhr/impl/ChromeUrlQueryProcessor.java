@@ -1,6 +1,6 @@
 package com.eas.client.xhr.impl;
 
-import com.eas.client.IDGenerator;
+import com.eas.client.IdGenerator;
 import com.eas.client.PlatypusHttpRequestParams;
 import com.eas.client.xhr.UrlQueryProcessor;
 
@@ -14,7 +14,7 @@ public class ChromeUrlQueryProcessor implements UrlQueryProcessor{
 
 	@Override
     public String process(String aQuery) {
-		return aQuery + (aQuery.isEmpty() ? "?" : "&") + PlatypusHttpRequestParams.CACHE_BUSTER + "=" + IDGenerator.genId();
+		return aQuery + (aQuery.isEmpty() ? "?" : "&") + PlatypusHttpRequestParams.CACHE_BUSTER + "=" + IdGenerator.genId();
     }
 	
 }

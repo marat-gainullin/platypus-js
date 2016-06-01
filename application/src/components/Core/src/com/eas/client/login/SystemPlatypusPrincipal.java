@@ -5,7 +5,7 @@
 package com.eas.client.login;
 
 import com.eas.script.Scripts;
-import com.eas.util.IDGenerator;
+import com.eas.util.IdGenerator;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -15,7 +15,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class SystemPlatypusPrincipal extends PlatypusPrincipal {
 
     public SystemPlatypusPrincipal() {
-        super("system-" + IDGenerator.genID(), null, null, null);
+        super("system-" + IdGenerator.genId(), null, null, null);
     }
 
     @Override

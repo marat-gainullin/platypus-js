@@ -25,9 +25,11 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.StyleElement;
 import com.google.gwt.dom.client.TableCellElement;
+import com.google.gwt.dom.client.TableElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DragEndEvent;
@@ -42,6 +44,7 @@ import com.google.gwt.event.dom.client.DragOverEvent;
 import com.google.gwt.event.dom.client.DragOverHandler;
 import com.google.gwt.event.dom.client.DropEvent;
 import com.google.gwt.event.dom.client.DropHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -139,7 +142,6 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 
 	public Grid(ProvidesKey<T> aKeyProvider) {
 		super();
-		getElement().setTabIndex(1);
 		getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		getElement().appendChild(tdsStyleElement);
 		getElement().appendChild(cellsStyleElement);
@@ -161,14 +163,30 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 			protected void replaceAllChildren(List<T> values, SafeHtml html) {
 				super.replaceAllChildren(values, html);
 				footerLeft.redrawFooters();
+				frozenLeftRendered();
 			}
 
 			@Override
 			protected void replaceChildren(List<T> values, int start, SafeHtml html) {
 				super.replaceChildren(values, start, html);
 				footerLeft.redrawFooters();
+				frozenLeftRendered();
 			}
 
+			@Override
+			protected void onFocus() {
+				super.onFocus();
+				Element focused = getKeyboardSelectedElement();
+				if (focused != null)
+					focused.setTabIndex(tabIndex);
+				FocusEvent.fireNativeEvent(Document.get().createFocusEvent(), Grid.this);
+			}
+
+			@Override
+			protected void onBlur() {
+				super.onBlur();
+				FocusEvent.fireNativeEvent(Document.get().createBlurEvent(), Grid.this);
+			}
 		};
 
 		frozenLeftContainer = new ScrollPanel(frozenLeft);
@@ -178,14 +196,30 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 			protected void replaceAllChildren(List<T> values, SafeHtml html) {
 				super.replaceAllChildren(values, html);
 				footerRight.redrawFooters();
+				frozenRightRendered();
 			}
 
 			@Override
 			protected void replaceChildren(List<T> values, int start, SafeHtml html) {
 				super.replaceChildren(values, start, html);
 				footerRight.redrawFooters();
+				frozenRightRendered();
 			}
 
+			@Override
+			protected void onFocus() {
+				super.onFocus();
+				Element focused = getKeyboardSelectedElement();
+				if (focused != null)
+					focused.setTabIndex(tabIndex);
+				FocusEvent.fireNativeEvent(Document.get().createFocusEvent(), Grid.this);
+			}
+
+			@Override
+			protected void onBlur() {
+				super.onBlur();
+				FocusEvent.fireNativeEvent(Document.get().createBlurEvent(), Grid.this);
+			}
 		};
 		frozenRightContainer = new ScrollPanel(frozenRight);
 		scrollableLeft = new GridSection<T>(aKeyProvider) {
@@ -194,14 +228,30 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 			protected void replaceAllChildren(List<T> values, SafeHtml html) {
 				super.replaceAllChildren(values, html);
 				footerLeft.redrawFooters();
+				scrollableLeftRendered();
 			}
 
 			@Override
 			protected void replaceChildren(List<T> values, int start, SafeHtml html) {
 				super.replaceChildren(values, start, html);
 				footerLeft.redrawFooters();
+				scrollableLeftRendered();
 			}
 
+			@Override
+			protected void onFocus() {
+				super.onFocus();
+				Element focused = getKeyboardSelectedElement();
+				if (focused != null)
+					focused.setTabIndex(tabIndex);
+				FocusEvent.fireNativeEvent(Document.get().createFocusEvent(), Grid.this);
+			}
+
+			@Override
+			protected void onBlur() {
+				super.onBlur();
+				FocusEvent.fireNativeEvent(Document.get().createBlurEvent(), Grid.this);
+			}
 		};
 		scrollableLeftContainer = new ScrollPanel(scrollableLeft);
 		scrollableRight = new GridSection<T>(aKeyProvider) {
@@ -217,6 +267,22 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 			protected void replaceChildren(List<T> values, int start, SafeHtml html) {
 				super.replaceChildren(values, start, html);
 				footerRight.redrawFooters();
+				scrollableRightRendered();
+			}
+
+			@Override
+			protected void onFocus() {
+				super.onFocus();
+				Element focused = getKeyboardSelectedElement();
+				if (focused != null)
+					focused.setTabIndex(tabIndex);
+				FocusEvent.fireNativeEvent(Document.get().createFocusEvent(), Grid.this);
+			}
+
+			@Override
+			protected void onBlur() {
+				super.onBlur();
+				FocusEvent.fireNativeEvent(Document.get().createBlurEvent(), Grid.this);
 			}
 		};
 		scrollableRightContainer = new ScrollPanel(scrollableRight);
@@ -608,8 +674,6 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 		setStyleName(GRID_SHELL_STYLE);
 	}
 
-	protected abstract void scrollableRightRendered();
-	
 	protected void installCellBuilders() {
 		for (GridSection<?> section : new GridSection<?>[] { frozenLeft, frozenRight, scrollableLeft, scrollableRight }) {
 			GridSection<T> gSection = (GridSection<T>) section;
@@ -1335,9 +1399,46 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 		}
 	}
 
+	protected int tabIndex;
+
+	protected Element calcFocusedElement() {
+		Element focusedEelement = scrollableRight.getKeyboardSelectedElement();
+		if (focusedEelement == null)
+			focusedEelement = scrollableLeft.getKeyboardSelectedElement();
+		if (focusedEelement == null)
+			focusedEelement = frozenLeft.getKeyboardSelectedElement();
+		if (focusedEelement == null)
+			focusedEelement = frozenRight.getKeyboardSelectedElement();
+		if (focusedEelement == null)
+			focusedEelement = getElement();
+		return focusedEelement;
+	}
+
+	protected void frozenLeftRendered() {
+		checkShellTabIndex();
+	}
+
+	protected void frozenRightRendered() {
+		checkShellTabIndex();
+	}
+
+	protected void scrollableLeftRendered() {
+		checkShellTabIndex();
+	}
+
+	protected void scrollableRightRendered() {
+		checkShellTabIndex();
+	}
+
+	private void checkShellTabIndex() {
+		Element focusedElement = calcFocusedElement();
+		if (focusedElement != getElement())
+			getElement().removeAttribute("tabindex");
+	}
+
 	@Override
 	public int getTabIndex() {
-		return getElement().getTabIndex();
+		return tabIndex;
 	}
 
 	@Override
@@ -1346,14 +1447,18 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 
 	@Override
 	public void setFocus(boolean focused) {
+		Element focusedElement = calcFocusedElement();
+		focusedElement.setTabIndex(tabIndex);
 		if (focused)
-			getElement().focus();
+			focusedElement.focus();
 		else
-			getElement().blur();
+			focusedElement.blur();
 	}
 
 	@Override
 	public void setTabIndex(int index) {
-		getElement().setTabIndex(index);
+		tabIndex = index;
+		Element focusedElement = calcFocusedElement();
+		focusedElement.setTabIndex(tabIndex);
 	}
 }

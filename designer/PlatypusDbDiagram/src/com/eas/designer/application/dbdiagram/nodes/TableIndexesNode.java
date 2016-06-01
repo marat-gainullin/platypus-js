@@ -16,7 +16,7 @@ import com.eas.client.model.ModelEditingListener;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.designer.datamodel.ModelUndoProvider;
-import com.eas.util.IDGenerator;
+import com.eas.util.IdGenerator;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
@@ -120,7 +120,7 @@ public class TableIndexesNode extends AbstractNode {
                         column.setOrdinalPosition(i++);
                         newIndex.addColumn(column);
                     }
-                    newIndex.setName(INDEX_DEFAULT_PREFIX + String.valueOf(IDGenerator.genID()));
+                    newIndex.setName(INDEX_DEFAULT_PREFIX + IdGenerator.genStringId());
                     List<DbTableIndexSpec> idxes = entity.getIndexes();
                     CreateIndexEdit edit = new CreateIndexEdit(sqlController, entity, newIndex, idxes != null ? idxes.size() : 0);
                     try {

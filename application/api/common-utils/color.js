@@ -86,18 +86,18 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.MAGENTA = new Object();
-        Object.defineProperty(this, "MAGENTA", {
-            get: function() {
-                var value = delegate.MAGENTA;
-                return B.boxAsJs(value);
-            }
-        });
-
         this.BLACK = new Object();
         Object.defineProperty(this, "BLACK", {
             get: function() {
                 var value = delegate.BLACK;
+                return B.boxAsJs(value);
+            }
+        });
+
+        this.MAGENTA = new Object();
+        Object.defineProperty(this, "MAGENTA", {
+            get: function() {
+                var value = delegate.MAGENTA;
                 return B.boxAsJs(value);
             }
         });
@@ -110,18 +110,18 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.DARK_GRAY = new Object();
-        Object.defineProperty(this, "DARK_GRAY", {
-            get: function() {
-                var value = delegate.DARK_GRAY;
-                return B.boxAsJs(value);
-            }
-        });
-
         this.CYAN = new Object();
         Object.defineProperty(this, "CYAN", {
             get: function() {
                 var value = delegate.CYAN;
+                return B.boxAsJs(value);
+            }
+        });
+
+        this.DARK_GRAY = new Object();
+        Object.defineProperty(this, "DARK_GRAY", {
+            get: function() {
+                var value = delegate.DARK_GRAY;
                 return B.boxAsJs(value);
             }
         });

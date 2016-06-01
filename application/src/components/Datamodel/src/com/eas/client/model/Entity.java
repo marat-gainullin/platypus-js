@@ -14,7 +14,7 @@ import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
-import com.eas.util.IDGenerator;
+import com.eas.util.IdGenerator;
 import java.beans.PropertyChangeSupport;
 import java.util.HashSet;
 import java.util.Set;
@@ -51,7 +51,7 @@ public abstract class Entity<M extends Model<E, Q>, Q extends Query, E extends E
     protected boolean iconified;
     protected String title;
     protected String name;
-    protected Long entityId = IDGenerator.genID();
+    protected Long entityId = IdGenerator.genId();
     protected String queryName;
     protected String tableDatasourceName;
     protected String tableSchemaName;
@@ -133,7 +133,7 @@ public abstract class Entity<M extends Model<E, Q>, Q extends Query, E extends E
     }
 
     public void regenerateId() {
-        entityId = IDGenerator.genID();
+        entityId = IdGenerator.genId();
     }
 
     public void setModel(M aValue) {
@@ -242,13 +242,6 @@ public abstract class Entity<M extends Model<E, Q>, Q extends Query, E extends E
         return fullTableName;
     }
 
-/*
-    public String getFormattedTableNameAndTitle() {
-        String lTableName = getTableName();
-        String lTitle = getTitle();
-        return (lTableName != null ? lTableName : "") + (lTitle != null && !"".equals(lTitle) ? " [" + lTitle + "]" : ""); //NO18IN
-    }
-*/
     public String getQueryName() {
         return queryName;
     }

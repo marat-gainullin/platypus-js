@@ -89,11 +89,26 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
         }
     }
 
-    @ScriptFunction(jsDoc = ENQUEUE_UPDATE_JSDOC)
+    @ScriptFunction(jsDoc = ENQUEUE_UPDATE_JSDOC, params = {"params"})
     @Override
-    public void enqueueUpdate() throws Exception {
+    public void enqueueUpdate(JSObject aParams) throws Exception {
+        SqlQuery copied = query.copy();
+        if (aParams != null) {
+            aParams.keySet().forEach((String pName) -> {
+                Parameter p = copied.getParameters().get(pName);
+                if (p != null) {
+                    Object jsValue = aParams.getMember(pName);
+                    // .toJava() call is inside compile().
+                    p.setValue(jsValue);
+                }
+            });
+        }
+        // WARNING! Don't change copied.compile(Scripts.getSpace()) to copied.compile().
+        // Not all parameters may be metioned in aParams object, so entity.params will be taken partially.
+        // aParams argument may be omitted, and so, all parameters will be taken from entity.params.
+        SqlCompiledQuery compiled = copied.compile(Scripts.getSpace());
+        Command command = compiled.prepareCommand();
         List<Change> log = getChangeLog();
-        Command command = getQuery().compile(Scripts.getSpace()).prepareCommand();
         log.add(command);
     }
 

@@ -9,7 +9,7 @@ import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.metadata.ForeignKeySpec.ForeignKeyRule;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.FieldsEntity;
-import com.eas.util.IDGenerator;
+import com.eas.util.IdGenerator;
 import java.sql.ResultSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,7 +25,7 @@ public class DbStructureUtils {
         FieldsEntity rEntity = aRel.getRightEntity();
         String fkName = aRel.getFkName();
         if (fkName == null) {
-            fkName = "FK_" + String.valueOf(IDGenerator.genID());
+            fkName = "FK_" + IdGenerator.genStringId();
         }
         ForeignKeyRule fkUpdateRule = aRel.getFkUpdateRule();
         if (fkUpdateRule == null) {

@@ -14,7 +14,7 @@ import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
-import com.eas.util.IDGenerator;
+import com.eas.util.IdGenerator;
 import java.beans.PropertyChangeSupport;
 import java.util.Date;
 import jdk.nashorn.api.scripting.JSObject;
@@ -362,13 +362,13 @@ public class Field implements HasPublished {
         if (type != null) {
             switch (type) {
                 case Scripts.NUMBER_TYPE_NAME:
-                    value = IDGenerator.genID();
+                    value = IdGenerator.genId();
                     break;
                 case Scripts.STRING_TYPE_NAME:
-                    value = String.valueOf(IDGenerator.genID());
+                    value = IdGenerator.genStringId();
                     break;
                 case Scripts.DATE_TYPE_NAME:
-                    value = new Date(IDGenerator.genID());
+                    value = new Date();
                     break;
                 case Scripts.BOOLEAN_TYPE_NAME:
                     value = false;

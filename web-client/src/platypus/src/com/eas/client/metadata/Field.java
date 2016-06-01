@@ -11,7 +11,7 @@ package com.eas.client.metadata;
 
 import java.util.Date;
 
-import com.eas.client.IDGenerator;
+import com.eas.client.IdGenerator;
 import com.eas.core.Utils;
 import com.google.gwt.core.client.JavaScriptObject;
 
@@ -267,13 +267,13 @@ public class Field {
         if (type != null) {
             switch (type) {
                 case "Number":
-                    value = IDGenerator.genId();
+                    value = IdGenerator.genId();
                     break;
                 case "String":
-                    value = String.valueOf(IDGenerator.genId());
+                    value = String.valueOf(IdGenerator.genId());
                     break;
                 case "Date":
-                    value = new Date((long)IDGenerator.genId());
+                    value = new Date((long)IdGenerator.genId());
                     break;
                 case "Boolean":
                     value = false;

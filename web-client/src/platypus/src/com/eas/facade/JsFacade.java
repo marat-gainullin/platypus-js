@@ -46,7 +46,7 @@ public class JsFacade {
 				enumerable : true,
 				value : Id
 			});
-			Object.defineProperty(module, 'IDGenerator', {
+			Object.defineProperty(module, 'IdGenerator', {
 				enumerable : true,
 				value : Id
 			});

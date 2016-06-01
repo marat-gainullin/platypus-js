@@ -374,9 +374,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     protected static final String ENQUEUE_UPDATE_JSDOC = ""
             + "/**\n"
             + " * Adds the updates into the change log as a command.\n"
+            + " * @param params Params object literal. Optional. If absent, entity's parameters' values will be taken.\n"
             + " */";
 
-    public abstract void enqueueUpdate() throws Exception;
+    public abstract void enqueueUpdate(JSObject params) throws Exception;
 
     protected static final String UPDATE_JSDOC = ""
             + "/**\n"
@@ -510,7 +511,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     protected void fireRequeried() {
         if (onRequeried != null) {
             try {
-                onRequeried.call(published, new Object[]{});
+                JSObject event = Scripts.getSpace().makeObj();
+                event.setMember("source", published);
+                onRequeried.call(published, new Object[]{event});
             } catch (Exception ex) {
                 Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
             }

@@ -12,7 +12,7 @@ import com.eas.client.changes.Command;
 import com.eas.client.changes.Delete;
 import com.eas.client.changes.Insert;
 import com.eas.client.changes.Update;
-import com.eas.util.JSONUtils;
+import com.eas.util.JsonUtils;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +41,7 @@ public class ChangesJSONWriter implements ChangeVisitor {
             change.accept(changeWriter);
             changes.add(changeWriter.getWritten());
         }
-        String changesJson = JSONUtils.a(changes.toArray(new String[]{})).toString();
+        String changesJson = JsonUtils.a(changes.toArray(new String[]{})).toString();
         return changesJson;
     }
 
@@ -54,12 +54,11 @@ public class ChangesJSONWriter implements ChangeVisitor {
         List<String> data = new ArrayList<>();
         for (ChangeValue datum : aChange.getData()) {
             data.add(datum.name);
-            data.add(JSONUtils.v(datum.value));
+            data.add(JsonUtils.v(datum.value));
         }
-        written = JSONUtils.o(
-                CHANGE_KIND_NAME, JSONUtils.s("insert").toString(),
-                CHANGE_ENTITY_NAME, JSONUtils.s(aChange.entityName).toString(),
-                CHANGE_DATA_NAME, JSONUtils.o(data.toArray(new String[]{})).toString()
+        written = JsonUtils.o(CHANGE_KIND_NAME, JsonUtils.s("insert").toString(),
+                CHANGE_ENTITY_NAME, JsonUtils.s(aChange.entityName).toString(),
+                CHANGE_DATA_NAME, JsonUtils.o(data.toArray(new String[]{})).toString()
         ).toString();
     }
 
@@ -68,18 +67,17 @@ public class ChangesJSONWriter implements ChangeVisitor {
         List<String> data = new ArrayList<>();
         for (ChangeValue datum : aChange.getData()) {
             data.add(datum.name);
-            data.add(JSONUtils.v(datum.value));
+            data.add(JsonUtils.v(datum.value));
         }
         List<String> keys = new ArrayList<>();
         for (ChangeValue key : aChange.getKeys()) {
             keys.add(key.name);
-            keys.add(JSONUtils.v(key.value));
+            keys.add(JsonUtils.v(key.value));
         }
-        written = JSONUtils.o(
-                CHANGE_KIND_NAME, JSONUtils.s("update").toString(),
-                CHANGE_ENTITY_NAME, JSONUtils.s(aChange.entityName).toString(),
-                CHANGE_DATA_NAME, JSONUtils.o(data.toArray(new String[]{})).toString(),
-                CHANGE_KEYS_NAME, JSONUtils.o(keys.toArray(new String[]{})).toString()
+        written = JsonUtils.o(CHANGE_KIND_NAME, JsonUtils.s("update").toString(),
+                CHANGE_ENTITY_NAME, JsonUtils.s(aChange.entityName).toString(),
+                CHANGE_DATA_NAME, JsonUtils.o(data.toArray(new String[]{})).toString(),
+                CHANGE_KEYS_NAME, JsonUtils.o(keys.toArray(new String[]{})).toString()
         ).toString();
     }
 
@@ -88,12 +86,11 @@ public class ChangesJSONWriter implements ChangeVisitor {
         List<String> keys = new ArrayList<>();
         for (ChangeValue key : aChange.getKeys()) {
             keys.add(key.name);
-            keys.add(JSONUtils.v(key.value));
+            keys.add(JsonUtils.v(key.value));
         }
-        written = JSONUtils.o(
-                CHANGE_KIND_NAME, JSONUtils.s("delete").toString(),
-                CHANGE_ENTITY_NAME, JSONUtils.s(aChange.entityName).toString(),
-                CHANGE_KEYS_NAME, JSONUtils.o(keys.toArray(new String[]{})).toString()
+        written = JsonUtils.o(CHANGE_KIND_NAME, JsonUtils.s("delete").toString(),
+                CHANGE_ENTITY_NAME, JsonUtils.s(aChange.entityName).toString(),
+                CHANGE_KEYS_NAME, JsonUtils.o(keys.toArray(new String[]{})).toString()
         ).toString();
     }
 
@@ -102,12 +99,11 @@ public class ChangesJSONWriter implements ChangeVisitor {
         List<String> params = new ArrayList<>();
         for (ChangeValue parameter : aChange.getParameters()) {
             params.add(parameter.name);
-            params.add(JSONUtils.v(parameter.value));
+            params.add(JsonUtils.v(parameter.value));
         }
-        written = JSONUtils.o(
-                CHANGE_KIND_NAME, JSONUtils.s("command").toString(),
-                CHANGE_ENTITY_NAME, JSONUtils.s(aChange.entityName).toString(),
-                CHANGE_PARAMETERS_NAME, JSONUtils.o(params.toArray(new String[]{})).toString()
+        written = JsonUtils.o(CHANGE_KIND_NAME, JsonUtils.s("command").toString(),
+                CHANGE_ENTITY_NAME, JsonUtils.s(aChange.entityName).toString(),
+                CHANGE_PARAMETERS_NAME, JsonUtils.o(params.toArray(new String[]{})).toString()
         ).toString();
     }
 }

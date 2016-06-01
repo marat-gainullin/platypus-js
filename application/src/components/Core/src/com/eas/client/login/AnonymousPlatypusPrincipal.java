@@ -5,7 +5,7 @@
 package com.eas.client.login;
 
 import com.eas.script.Scripts;
-import com.eas.util.IDGenerator;
+import com.eas.util.IdGenerator;
 import java.util.Collections;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -16,7 +16,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class AnonymousPlatypusPrincipal extends PlatypusPrincipal {
 
     public AnonymousPlatypusPrincipal() {
-        this("anonymous-" + IDGenerator.genID());
+        this("anonymous-" + IdGenerator.genId());
     }
 
     public AnonymousPlatypusPrincipal(String aName) {

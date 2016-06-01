@@ -15,7 +15,7 @@ import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.script.Scripts;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
-import com.eas.util.JSONUtils;
+import com.eas.util.JsonUtils;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -59,10 +59,10 @@ public class ModuleStructureRequestHandler extends RequestHandler<ModuleStructur
                     }
                     structure.add(resourceName);
                 });
-                StringBuilder json = JSONUtils.o(new StringBuilder(RemoteModulesProxy.STRUCTURE_PROP_NAME), JSONUtils.as(structure.toArray(new String[]{})),
-                        new StringBuilder(RemoteModulesProxy.CLIENT_DEPENDENCIES_PROP_NAME), JSONUtils.as(aStructure.getClientDependencies().toArray(new String[]{})),
-                        new StringBuilder(RemoteModulesProxy.QUERY_DEPENDENCIES_PROP_NAME), JSONUtils.as(aStructure.getQueryDependencies().toArray(new String[]{})),
-                        new StringBuilder(RemoteModulesProxy.SERVER_DEPENDENCIES_PROP_NAME), JSONUtils.as(aStructure.getServerDependencies().toArray(new String[]{}))
+                StringBuilder json = JsonUtils.o(new StringBuilder(RemoteModulesProxy.STRUCTURE_PROP_NAME), JsonUtils.as(structure.toArray(new String[]{})),
+                        new StringBuilder(RemoteModulesProxy.CLIENT_DEPENDENCIES_PROP_NAME), JsonUtils.as(aStructure.getClientDependencies().toArray(new String[]{})),
+                        new StringBuilder(RemoteModulesProxy.QUERY_DEPENDENCIES_PROP_NAME), JsonUtils.as(aStructure.getQueryDependencies().toArray(new String[]{})),
+                        new StringBuilder(RemoteModulesProxy.SERVER_DEPENDENCIES_PROP_NAME), JsonUtils.as(aStructure.getServerDependencies().toArray(new String[]{}))
                 );
                 ModuleStructureRequest.Response resp = new ModuleStructureRequest.Response(json.toString());
                 onSuccess.accept(resp);

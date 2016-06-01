@@ -17,7 +17,7 @@ import com.eas.client.scripts.DependenciesWalker;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.util.FileUtils;
-import com.eas.util.JSONUtils;
+import com.eas.util.JsonUtils;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.File;
@@ -513,25 +513,25 @@ public class ToolsApplication {
                         List<StringBuilder> moduleNamesAndProps = new ArrayList<>();
                         if (!queryDependencies.isEmpty()) {
                             moduleNamesAndProps.add(new StringBuilder("entities"));
-                            moduleNamesAndProps.add(JSONUtils.as(queryDependencies.toArray(new String[]{})));
+                            moduleNamesAndProps.add(JsonUtils.as(queryDependencies.toArray(new String[]{})));
                         }
                         if (!scriptDoc.getModules().isEmpty()) {
                             moduleNamesAndProps.add(new StringBuilder("modules"));
-                            moduleNamesAndProps.add(JSONUtils.as(scriptDoc.getModules().keySet().toArray(new String[]{})));
+                            moduleNamesAndProps.add(JsonUtils.as(scriptDoc.getModules().keySet().toArray(new String[]{})));
                         }
                         if (!resources.isEmpty()) {
                             moduleNamesAndProps.add(new StringBuilder("prefetched"));
-                            moduleNamesAndProps.add(JSONUtils.as(resources.toArray(new String[]{})));
+                            moduleNamesAndProps.add(JsonUtils.as(resources.toArray(new String[]{})));
                         }
                         if (!walker.getDependencies().isEmpty()) {
                             moduleNamesAndProps.add(new StringBuilder("global-deps"));
-                            moduleNamesAndProps.add(JSONUtils.as(walker.getDependencies().toArray(new String[]{})));
+                            moduleNamesAndProps.add(JsonUtils.as(walker.getDependencies().toArray(new String[]{})));
                         }
                         if (!walker.getServerDependencies().isEmpty()) {
                             moduleNamesAndProps.add(new StringBuilder("rpc"));
-                            moduleNamesAndProps.add(JSONUtils.as(walker.getServerDependencies().toArray(new String[]{})));
+                            moduleNamesAndProps.add(JsonUtils.as(walker.getServerDependencies().toArray(new String[]{})));
                         }
-                        StringBuilder module = JSONUtils.o(moduleNamesAndProps.toArray(new StringBuilder[]{}));
+                        StringBuilder module = JsonUtils.o(moduleNamesAndProps.toArray(new StringBuilder[]{}));
                         modules.add(new StringBuilder(relativeResourceName));
                         modules.add(module);
                     } catch (Exception ex) {
@@ -541,7 +541,7 @@ public class ToolsApplication {
                 return FileVisitResult.CONTINUE;
             }
         });
-        StringBuilder jsonModules = JSONUtils.o(modules.toArray(new StringBuilder[]{}));
+        StringBuilder jsonModules = JsonUtils.o(modules.toArray(new StringBuilder[]{}));
         StringBuilder js = new StringBuilder();
         js.append("define[\"modules-index\"] = ");
         js.append(jsonModules);

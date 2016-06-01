@@ -34,7 +34,7 @@ import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.script.Scripts;
-import com.eas.util.IDGenerator;
+import com.eas.util.IdGenerator;
 import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.EventQueue;
@@ -634,7 +634,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         try {
             if (query != null && !changeLog.isEmpty()) {
                 final Runnable reEnableButtons = disableButtons();
-                final String entityName = IDGenerator.genID() + "";
+                final String entityName = IdGenerator.genStringId();
                 query.setEntityName(entityName);
                 changeLog.forEach((Change aChange) -> {
                     aChange.entityName = entityName;

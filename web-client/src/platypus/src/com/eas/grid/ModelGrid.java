@@ -213,7 +213,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 														vIndex = viewElements.size() - 1;
 													JavaScriptObject toSelect = viewElements.get(vIndex);
 													makeVisible(toSelect, true);
-												}else{
+												} else {
 													ModelGrid.this.setFocus(true);
 												}
 											}
@@ -571,22 +571,23 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	public final boolean isTreeConfigured() {
 		return parentField != null && !parentField.isEmpty() && childrenField != null && !childrenField.isEmpty();
 	}
-	
+
 	@Override
 	protected void scrollableRightRendered() {
-		if(onAfterRender != null){
+		super.scrollableRightRendered();
+		if (onAfterRender != null) {
 			final Utils.JsObject event = JavaScriptObject.createObject().cast();
 			event.setJs("source", published);
 			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-				
+
 				@Override
 				public void execute() {
-					onAfterRender.<Utils.JsObject>cast().call(published, event);
+					onAfterRender.<Utils.JsObject> cast().call(published, event);
 				}
 			});
 		}
 	}
-	
+
 	public ListHandler<JavaScriptObject> getSortHandler() {
 		return sortHandler;
 	}

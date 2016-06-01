@@ -152,20 +152,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         });
 
         /**
-         * Component added event hanler function.
-         */
-        this.onComponentAdded = new Object();
-        Object.defineProperty(this, "onComponentAdded", {
-            get: function() {
-                var value = delegate.onComponentAdded;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onComponentAdded = aValue;
-            }
-        });
-
-        /**
          * The split pane divider's location in pixels.
          */
         this.dividerLocation = 0;
@@ -176,6 +162,20 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.dividerLocation = B.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Component added event hanler function.
+         */
+        this.onComponentAdded = new Object();
+        Object.defineProperty(this, "onComponentAdded", {
+            get: function() {
+                var value = delegate.onComponentAdded;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onComponentAdded = aValue;
             }
         });
 
@@ -412,16 +412,13 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         });
 
         /**
-         * Key released event handler function.
+         * Gets the number of components in this panel.
          */
-        this.onKeyReleased = new Object();
-        Object.defineProperty(this, "onKeyReleased", {
+        this.count = 0;
+        Object.defineProperty(this, "count", {
             get: function() {
-                var value = delegate.onKeyReleased;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = aValue;
+                var value = delegate.count;
+                return B.boxAsJs(value);
             }
         });
 
@@ -440,13 +437,16 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         });
 
         /**
-         * Gets the number of components in this panel.
+         * Key released event handler function.
          */
-        this.count = 0;
-        Object.defineProperty(this, "count", {
+        this.onKeyReleased = new Object();
+        Object.defineProperty(this, "onKeyReleased", {
             get: function() {
-                var value = delegate.count;
-                return B.boxAsJs(value);
+                var value = delegate.onKeyReleased;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = aValue;
             }
         });
 
@@ -659,17 +659,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
 
     }
     /**
-     * Gets the container's children components.
-     * @method children
-     * @memberOf SplitPane
-     */
-    SplitPane.prototype.children = function() {
-        var delegate = this.unwrap();
-        var value = delegate.children();
-        return B.boxAsJs(value);
-    };
-
-    /**
      * Tries to acquire focus for this component.
      * @method focus
      * @memberOf SplitPane
@@ -677,6 +666,17 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     SplitPane.prototype.focus = function() {
         var delegate = this.unwrap();
         var value = delegate.focus();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Gets the container's children components.
+     * @method children
+     * @memberOf SplitPane
+     */
+    SplitPane.prototype.children = function() {
+        var delegate = this.unwrap();
+        var value = delegate.children();
         return B.boxAsJs(value);
     };
 

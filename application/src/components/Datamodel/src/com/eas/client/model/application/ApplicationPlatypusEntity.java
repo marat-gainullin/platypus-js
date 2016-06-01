@@ -37,10 +37,22 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
         visitor.visit(this);
     }
 
-    @ScriptFunction(jsDoc = ENQUEUE_UPDATE_JSDOC)
+    @ScriptFunction(jsDoc = ENQUEUE_UPDATE_JSDOC, params = {"params"})
     @Override
-    public void enqueueUpdate() throws Exception {
-        model.getChangeLog().add(getQuery().prepareCommand());
+    public void enqueueUpdate(JSObject aParams) throws Exception {
+        if (aParams != null) {
+            PlatypusQuery copied = query.copy();
+            aParams.keySet().forEach((String pName) -> {
+                Parameter p = copied.getParameters().get(pName);
+                if (p != null) {
+                    Object jsValue = aParams.getMember(pName);
+                    p.setValue(jsValue);// .toJava is inside prepreCommand()
+                }
+            });
+            model.getChangeLog().add(copied.prepareCommand());
+        } else {
+            model.getChangeLog().add(query.prepareCommand());
+        }
     }
 
     @ScriptFunction(jsDoc = EXECUTE_UPDATE_JSDOC, params = {"onSuccess", "onFailure"})

@@ -24,8 +24,8 @@ import com.eas.concurrent.PlatypusThreadFactory;
 import com.eas.script.JsObjectException;
 import com.eas.script.Scripts;
 import com.eas.server.*;
-import com.eas.util.IDGenerator;
-import com.eas.util.JSONUtils;
+import com.eas.util.IdGenerator;
+import com.eas.util.JsonUtils;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -202,7 +202,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                     }
                     if (fileName != null && !fileName.isEmpty()) {
                         StringBuilder uploadedFileName = new StringBuilder();
-                        uploadedFileName.append(IDGenerator.genID()).append("-").append(fileName);
+                        uploadedFileName.append(IdGenerator.genId()).append("-").append(fileName);
                         try {
                             try {
                                 part.write(uploadedFileName.toString());
@@ -227,7 +227,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                     }
                 }
             }
-            PlatypusHttpResponseWriter.writeJsonResponse(JSONUtils.as(uploadedLocations.toArray(new StringBuilder[]{})).toString(), response, null);
+            PlatypusHttpResponseWriter.writeJsonResponse(JsonUtils.as(uploadedLocations.toArray(new StringBuilder[]{})).toString(), response, null);
             return true;
         } else {
             return false;
@@ -280,7 +280,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                                         if (lookedup2 == null) {
                                             try {
                                                 // preserve replicated session id
-                                                Session created = SessionManager.Singleton.instance.create(platypusSessionId == null ? IDGenerator.genID() + "" : platypusSessionId);
+                                                Session created = SessionManager.Singleton.instance.create(platypusSessionId == null ? IdGenerator.genId() + "" : platypusSessionId);
                                                 if (dataContext == null) {
                                                     httpSession.removeAttribute(PLATYPUS_USER_CONTEXT_ATTR_NAME);
                                                 } else {
@@ -511,7 +511,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                         if (tail.endsWith("/")) {
                             tail = tail.substring(0, tail.length() - 1);
                         }
-                        return new RPCRequest(rpcPoint.getModuleName(), rpcPoint.getMethodName(), new String[]{JSONUtils.s(!tail.isEmpty() ? tail : "").toString()});
+                        return new RPCRequest(rpcPoint.getModuleName(), rpcPoint.getMethodName(), new String[]{JsonUtils.s(!tail.isEmpty() ? tail : "").toString()});
                     }
                 }
             }

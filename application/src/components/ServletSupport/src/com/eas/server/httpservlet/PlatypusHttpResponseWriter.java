@@ -25,8 +25,8 @@ import com.eas.client.threetier.requests.PlatypusResponseVisitor;
 import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.client.threetier.requests.SqlExceptionResponse;
 import com.eas.script.Scripts;
-import com.eas.util.IDGenerator;
-import com.eas.util.JSONUtils;
+import com.eas.util.IdGenerator;
+import com.eas.util.JsonUtils;
 import com.eas.util.RowsetJsonConstants;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -97,7 +97,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(CredentialRequest.Response resp) throws Exception {
         String name = ((CredentialRequest.Response) resp).getName();
-        StringBuilder content = JSONUtils.o(new StringBuilder("userName"), JSONUtils.s(name));
+        StringBuilder content = JsonUtils.o(new StringBuilder("userName"), JsonUtils.s(name));
         writeJsonResponse(content.toString(), servletResponse, async);
     }
 
@@ -155,7 +155,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
         if (reportName.toLowerCase().endsWith(suffix.toLowerCase())) {
             reportName = reportName.substring(0, reportName.length() - suffix.length());
         }
-        reportName += "-" + IDGenerator.genID() + suffix;
+        reportName += "-" + IdGenerator.genId() + suffix;
         File rep = new File(docsRoot + userHomeInApplication + reportName);
         try (FileOutputStream out = new FileOutputStream(rep)) {
             out.write(report.getBody());

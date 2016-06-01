@@ -9,7 +9,7 @@ import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.MD5Generator;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.script.Scripts;
-import com.eas.util.IDGenerator;
+import com.eas.util.IdGenerator;
 import java.security.AccessControlException;
 import java.util.function.Consumer;
 import javax.security.auth.AuthPermission;
@@ -35,7 +35,7 @@ public class DatabaseAuthorizer {
                     }
                 }, onFailure);
             } else {
-                PlatypusPrincipal principal = new AnonymousPlatypusPrincipal("anonymous-" + String.valueOf(IDGenerator.genID()));
+                PlatypusPrincipal principal = new AnonymousPlatypusPrincipal("anonymous-" + IdGenerator.genStringId());
                 onSuccess.accept(principal);
             }
         } catch (Exception ex) {

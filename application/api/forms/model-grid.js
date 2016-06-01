@@ -235,20 +235,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         });
 
         /**
-         * Key released event handler function.
-         */
-        this.onKeyReleased = new Object();
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = aValue;
-            }
-        });
-
-        /**
          * Main action performed event handler function.
          */
         this.onActionPerformed = new Object();
@@ -259,6 +245,20 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.onActionPerformed = aValue;
+            }
+        });
+
+        /**
+         * Key released event handler function.
+         */
+        this.onKeyReleased = new Object();
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = aValue;
             }
         });
 
@@ -748,20 +748,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         });
 
         /**
-         * Determines if grid shows horizontal lines.
-         */
-        this.showHorizontalLines = true;
-        Object.defineProperty(this, "showHorizontalLines", {
-            get: function() {
-                var value = delegate.showHorizontalLines;
-                return B.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.showHorizontalLines = B.boxAsJava(aValue);
-            }
-        });
-
-        /**
          * The color of the grid.
          */
         this.gridColor = new Object();
@@ -772,6 +758,20 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.gridColor = B.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Determines if grid shows horizontal lines.
+         */
+        this.showHorizontalLines = true;
+        Object.defineProperty(this, "showHorizontalLines", {
+            get: function() {
+                var value = delegate.showHorizontalLines;
+                return B.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.showHorizontalLines = B.boxAsJava(aValue);
             }
         });
 
@@ -851,14 +851,13 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
     /**
-     * Selects the specified element.
-     * @param instance Entity's instance to be selected.
-     * @method select
+     * Tries to acquire focus for this component.
+     * @method focus
      * @memberOf ModelGrid
      */
-    ModelGrid.prototype.select = function(instance) {
+    ModelGrid.prototype.focus = function() {
         var delegate = this.unwrap();
-        var value = delegate.select(B.boxAsJava(instance));
+        var value = delegate.focus();
         return B.boxAsJs(value);
     };
 
@@ -874,6 +873,79 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
     /**
+     * Makes node of specified .data array element collapsed.
+     * @param instance .data array element to collapsed.
+     * @method collapse
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.collapse = function(instance) {
+        var delegate = this.unwrap();
+        var value = delegate.collapse(B.boxAsJava(instance));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Unselects the specified element.
+     * @param instance Entity's instance to be unselected
+     * @method unselect
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.unselect = function(instance) {
+        var delegate = this.unwrap();
+        var value = delegate.unselect(B.boxAsJava(instance));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Selects the specified element.
+     * @param instance Entity's instance to be selected.
+     * @method select
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.select = function(instance) {
+        var delegate = this.unwrap();
+        var value = delegate.select(B.boxAsJava(instance));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Makes specified instance visible.
+     * @param instance Entity's instance to make visible.
+     * @param need2select true to select the instance (optional).
+     * @method makeVisible
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.makeVisible = function(instance, need2select) {
+        var delegate = this.unwrap();
+        var value = delegate.makeVisible(B.boxAsJava(instance), B.boxAsJava(need2select));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Makes node of specified .data array element expanded if it was already collapsed and collapsed otherwise.
+     * @param instance .data array element to expand or collpase.
+     * @method toggle
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.toggle = function(instance) {
+        var delegate = this.unwrap();
+        var value = delegate.toggle(B.boxAsJava(instance));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Tests if node of specified .data array element is expanded.
+     * @param instance .data array element to test.
+     * @method expanded
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.expanded = function(instance) {
+        var delegate = this.unwrap();
+        var value = delegate.expanded(B.boxAsJava(instance));
+        return B.boxAsJs(value);
+    };
+
+    /**
      *
      * @method elementByModelIndex
      * @memberOf ModelGrid
@@ -881,6 +953,49 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     ModelGrid.prototype.elementByModelIndex = function(arg0) {
         var delegate = this.unwrap();
         var value = delegate.elementByModelIndex(B.boxAsJava(arg0));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     *
+     * @method try2StopAnyEditing
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.try2StopAnyEditing = function() {
+        var delegate = this.unwrap();
+        var value = delegate.try2StopAnyEditing();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     *
+     * @method try2CancelAnyEditing
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.try2CancelAnyEditing = function() {
+        var delegate = this.unwrap();
+        var value = delegate.try2CancelAnyEditing();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Redraw the component.
+     * @method redraw
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.redraw = function() {
+        var delegate = this.unwrap();
+        var value = delegate.redraw();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * @method unsort
+     * @memberOf ModelGrid
+     * Clears sort on all columns, works only in HTML5 */
+    ModelGrid.prototype.unsort = function() {
+        var delegate = this.unwrap();
+        var value = delegate.unsort();
         return B.boxAsJs(value);
     };
 
@@ -925,121 +1040,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
         var delegate = this.unwrap();
         var value = delegate.insertColumnNode(B.boxAsJava(arg0), B.boxAsJava(arg1));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Makes specified instance visible.
-     * @param instance Entity's instance to make visible.
-     * @param need2select true to select the instance (optional).
-     * @method makeVisible
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.makeVisible = function(instance, need2select) {
-        var delegate = this.unwrap();
-        var value = delegate.makeVisible(B.boxAsJava(instance), B.boxAsJava(need2select));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Tries to acquire focus for this component.
-     * @method focus
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.focus = function() {
-        var delegate = this.unwrap();
-        var value = delegate.focus();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Redraw the component.
-     * @method redraw
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.redraw = function() {
-        var delegate = this.unwrap();
-        var value = delegate.redraw();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Unselects the specified element.
-     * @param instance Entity's instance to be unselected
-     * @method unselect
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.unselect = function(instance) {
-        var delegate = this.unwrap();
-        var value = delegate.unselect(B.boxAsJava(instance));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     *
-     * @method try2StopAnyEditing
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.try2StopAnyEditing = function() {
-        var delegate = this.unwrap();
-        var value = delegate.try2StopAnyEditing();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     *
-     * @method try2CancelAnyEditing
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.try2CancelAnyEditing = function() {
-        var delegate = this.unwrap();
-        var value = delegate.try2CancelAnyEditing();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Tests if node of specified .data array element is expanded.
-     * @param instance .data array element to test.
-     * @method expanded
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.expanded = function(instance) {
-        var delegate = this.unwrap();
-        var value = delegate.expanded(B.boxAsJava(instance));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Makes node of specified .data array element collapsed.
-     * @param instance .data array element to collapsed.
-     * @method collapse
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.collapse = function(instance) {
-        var delegate = this.unwrap();
-        var value = delegate.collapse(B.boxAsJava(instance));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Makes node of specified .data array element expanded if it was already collapsed and collapsed otherwise.
-     * @param instance .data array element to expand or collpase.
-     * @method toggle
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.toggle = function(instance) {
-        var delegate = this.unwrap();
-        var value = delegate.toggle(B.boxAsJava(instance));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * @method unsort
-     * @memberOf ModelGrid
-     * Clears sort on all columns, works only in HTML5 */
-    ModelGrid.prototype.unsort = function() {
-        var delegate = this.unwrap();
-        var value = delegate.unsort();
         return B.boxAsJs(value);
     };
 

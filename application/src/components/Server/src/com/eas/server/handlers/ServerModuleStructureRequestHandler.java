@@ -12,7 +12,7 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.requests.ServerModuleStructureRequest;
 import com.eas.script.Scripts;
 import com.eas.server.*;
-import com.eas.util.JSONUtils;
+import com.eas.util.JsonUtils;
 import java.io.File;
 import java.security.AccessControlException;
 import java.util.Collections;
@@ -46,8 +46,7 @@ public class ServerModuleStructureRequestHandler extends RequestHandler<ServerMo
                     Date serverModuleTime = new Date(file.lastModified());
                     if (clientModuleTime == null || serverModuleTime.after(clientModuleTime)) {
                         checkPrincipalPermission(moduleDoc.getAllowedRoles(), moduleName);
-                        StringBuilder json = JSONUtils.o(
-                                RemoteServerModulesProxy.CREATE_MODULE_RESPONSE_FUNCTIONS_PROP, JSONUtils.as(moduleDoc.getFunctionProperties().toArray(new String[]{})).toString(),
+                        StringBuilder json = JsonUtils.o(RemoteServerModulesProxy.CREATE_MODULE_RESPONSE_FUNCTIONS_PROP, JsonUtils.as(moduleDoc.getFunctionProperties().toArray(new String[]{})).toString(),
                                 RemoteServerModulesProxy.CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP, String.valueOf(true)
                         );
                         response.setInfoJson(json.toString());
@@ -61,8 +60,7 @@ public class ServerModuleStructureRequestHandler extends RequestHandler<ServerMo
                 if (ex.getPermission() instanceof AuthPermission) {
                     onFailure.accept(ex);
                 } else {
-                    StringBuilder json = JSONUtils.o(
-                            RemoteServerModulesProxy.CREATE_MODULE_RESPONSE_FUNCTIONS_PROP, JSONUtils.a(Collections.emptySet().toArray(new String[]{})).toString(),
+                    StringBuilder json = JsonUtils.o(RemoteServerModulesProxy.CREATE_MODULE_RESPONSE_FUNCTIONS_PROP, JsonUtils.a(Collections.emptySet().toArray(new String[]{})).toString(),
                             RemoteServerModulesProxy.CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP, String.valueOf(false)
                     );
                     ServerModuleStructureRequest.Response response = new ServerModuleStructureRequest.Response(json.toString());

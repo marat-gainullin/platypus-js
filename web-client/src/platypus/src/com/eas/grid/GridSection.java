@@ -95,9 +95,9 @@ public class GridSection<T> extends CellTable<T> {
 	}
 
 	public void setDraggableRows(boolean aValue) {
-		if(draggableRows != aValue){
+		if (draggableRows != aValue) {
 			draggableRows = aValue;
-			if(isAttached())
+			if (isAttached())
 				redraw();
 		}
 	}
@@ -275,6 +275,11 @@ public class GridSection<T> extends CellTable<T> {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public Element getKeyboardSelectedElement() {
+		return super.getKeyboardSelectedElement();
 	}
 
 	public void focusCell(int aRow, int aCol) {

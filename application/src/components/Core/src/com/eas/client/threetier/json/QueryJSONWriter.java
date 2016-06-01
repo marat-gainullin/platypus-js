@@ -5,7 +5,7 @@
 package com.eas.client.threetier.json;
 
 import com.eas.client.queries.Query;
-import com.eas.util.JSONUtils;
+import com.eas.util.JsonUtils;
 
 /**
  *
@@ -30,9 +30,8 @@ public class QueryJSONWriter extends FieldsJSONWriter{
     }
     
     public String write() {
-        StringBuilder sb = JSONUtils.o(
-                TITLE_PROP_NAME, JSONUtils.s(query.getTitle()).toString(),
-                APP_ELEMENT_PROP_NAME, JSONUtils.s(query.getEntityName()).toString(),
+        StringBuilder sb = JsonUtils.o(TITLE_PROP_NAME, JsonUtils.s(query.getTitle()).toString(),
+                APP_ELEMENT_PROP_NAME, JsonUtils.s(query.getEntityName()).toString(),
                 PARAMETERS_PROP_NAME, fields2a(query.getParameters()).toString(),
                 FIELDS_PROP_NAME, fields2a(query.getFields()).toString()
                 );
