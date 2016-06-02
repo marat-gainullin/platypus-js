@@ -1495,7 +1495,9 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 			public void execute() {
 				if (tabIndexChecking) {
 					Element focusedElement = calcFocusedElement();
-					if (focusedElement != getElement())
+					if (focusedElement == getElement())
+						getElement().setTabIndex(tabIndex);
+					else
 						getElement().removeAttribute("tabindex");
 					tabIndexChecking = false;
 				}
