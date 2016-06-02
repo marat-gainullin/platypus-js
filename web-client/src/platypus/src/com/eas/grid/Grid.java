@@ -1471,41 +1471,45 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 	}
 
 	protected void frozenLeftRendered() {
-		checkShellTabIndex();
+		checkRenderingCompleted();
 	}
 
 	protected void frozenRightRendered() {
-		checkShellTabIndex();
+		checkRenderingCompleted();
 	}
 
 	protected void scrollableLeftRendered() {
-		checkShellTabIndex();
+		checkRenderingCompleted();
 	}
 
 	protected void scrollableRightRendered() {
-		checkShellTabIndex();
+		checkRenderingCompleted();
 	}
-
-	private boolean tabIndexChecking;
-
-	private void checkShellTabIndex() {
+	
+	private boolean renderingCompletedChecking;
+	
+	private void checkRenderingCompleted(){
 		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
 			@Override
 			public void execute() {
-				if (tabIndexChecking) {
-					Element focusedElement = calcFocusedElement();
-					if (focusedElement == getElement())
-						getElement().setTabIndex(tabIndex);
-					else
-						getElement().removeAttribute("tabindex");
-					tabIndexChecking = false;
+				if (renderingCompletedChecking) {
+					renderingCompleted();
+					renderingCompletedChecking = false;
 				}
 			}
 		});
-		tabIndexChecking = true;
+		renderingCompletedChecking = true;
 	}
 
+	protected void renderingCompleted(){
+		Element focusedElement = calcFocusedElement();
+		if (focusedElement == getElement())
+			getElement().setTabIndex(tabIndex);
+		else
+			getElement().removeAttribute("tabindex");
+	}
+	
 	@Override
 	public int getTabIndex() {
 		return tabIndex;

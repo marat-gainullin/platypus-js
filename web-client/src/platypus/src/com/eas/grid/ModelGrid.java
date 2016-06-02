@@ -471,7 +471,7 @@ public class ModelGrid extends Grid<JavaScriptObject>
 		pingGWTFinallyCommands();
 	}
 
-	public void rebind(){
+	public void rebind() {
 		unbind();
 		bind();
 		pingGWTFinallyCommands();
@@ -588,18 +588,12 @@ public class ModelGrid extends Grid<JavaScriptObject>
 	}
 
 	@Override
-	protected void scrollableRightRendered() {
-		super.scrollableRightRendered();
+	protected void renderingCompleted() {
+		super.renderingCompleted();
 		if (onAfterRender != null) {
 			final Utils.JsObject event = JavaScriptObject.createObject().cast();
 			event.setJs("source", published);
-			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-				@Override
-				public void execute() {
-					onAfterRender.<Utils.JsObject> cast().call(published, event);
-				}
-			});
+			onAfterRender.<Utils.JsObject> cast().call(published, event);
 		}
 	}
 
