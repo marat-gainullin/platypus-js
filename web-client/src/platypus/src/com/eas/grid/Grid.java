@@ -1,4 +1,5 @@
 /*
+
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -25,11 +26,9 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.StyleElement;
 import com.google.gwt.dom.client.TableCellElement;
-import com.google.gwt.dom.client.TableElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DragEndEvent;
@@ -85,7 +84,8 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 
 		public static DynamicCellStyles INSTANCE = GWT.create(DynamicCellStyles.class);
 
-		@Template(".{0}{" + "border-style: solid;" + "border-top-width: {1}px;" + "border-bottom-width: {1}px;" + "border-left-width: {2}px;" + "border-right-width: {2}px;" + "border-color: {3};}")
+		@Template(".{0}{" + "border-style: solid;" + "border-top-width: {1}px;" + "border-bottom-width: {1}px;"
+				+ "border-left-width: {2}px;" + "border-right-width: {2}px;" + "border-color: {3};}")
 		public SafeHtml td(String aCssRuleName, double hBorderWidth, double vBorderWidth, String aLinesColor);
 
 		@Template(".{0}{" + "position: relative; white-space: nowrap; height: {1}px;}")
@@ -292,14 +292,16 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 		footerRightContainer = new ScrollPanel(footerRight);
 		// positioning context / overflow setup
 		// overflow
-		for (Widget w : new Widget[] { headerLeftContainer, headerRightContainer, frozenLeftContainer, frozenRightContainer, scrollableLeftContainer, footerLeftContainer, footerRightContainer }) {
+		for (Widget w : new Widget[] { headerLeftContainer, headerRightContainer, frozenLeftContainer,
+				frozenRightContainer, scrollableLeftContainer, footerLeftContainer, footerRightContainer }) {
 			w.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
 		}
 		// scrollableRightContainer.getElement().getStyle().setOverflow(Style.Overflow.AUTO);
 		// default value
 		// context
-		for (Widget w : new Widget[] { headerLeftContainer, headerRightContainer, frozenLeftContainer, frozenRightContainer, scrollableLeftContainer, scrollableRightContainer, footerLeftContainer,
-		        footerRightContainer }) {
+		for (Widget w : new Widget[] { headerLeftContainer, headerRightContainer, frozenLeftContainer,
+				frozenRightContainer, scrollableLeftContainer, scrollableRightContainer, footerLeftContainer,
+				footerRightContainer }) {
 			w.getElement().getFirstChildElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		}
 		// propagation of some widths
@@ -312,29 +314,38 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 			}
 
 		});
-		for (GridSection<T> section : (GridSection<T>[]) new GridSection<?>[] { headerRight, frozenLeft, frozenRight, scrollableLeft, scrollableRight, footerLeft, footerRight }) {
+		for (GridSection<T> section : (GridSection<T>[]) new GridSection<?>[] { headerRight, frozenLeft, frozenRight,
+				scrollableLeft, scrollableRight, footerLeft, footerRight }) {
 			section.setWidthPropagator(new GridWidthPropagator<>(section));
 		}
 		headerLeft.setColumnsPartners(new AbstractCellTable[] { frozenLeft, scrollableLeft, footerLeft });
 		headerRight.setColumnsPartners(new AbstractCellTable[] { frozenRight, scrollableRight, footerRight });
-		ColumnsRemover leftColumnsRemover = new ColumnsRemoverAdapter<T>(headerLeft, frozenLeft, scrollableLeft, footerLeft);
-		ColumnsRemover rightColumnsRemover = new ColumnsRemoverAdapter<T>(headerRight, frozenRight, scrollableRight, footerRight);
-		for (GridSection<T> section : (GridSection<T>[]) new GridSection<?>[] { headerLeft, frozenLeft, scrollableLeft, footerLeft }) {
+		ColumnsRemover leftColumnsRemover = new ColumnsRemoverAdapter<T>(headerLeft, frozenLeft, scrollableLeft,
+				footerLeft);
+		ColumnsRemover rightColumnsRemover = new ColumnsRemoverAdapter<T>(headerRight, frozenRight, scrollableRight,
+				footerRight);
+		for (GridSection<T> section : (GridSection<T>[]) new GridSection<?>[] { headerLeft, frozenLeft, scrollableLeft,
+				footerLeft }) {
 			section.setColumnsRemover(leftColumnsRemover);
 		}
-		for (GridSection<T> section : (GridSection<T>[]) new GridSection<?>[] { headerRight, frozenRight, scrollableRight, footerRight }) {
+		for (GridSection<T> section : (GridSection<T>[]) new GridSection<?>[] { headerRight, frozenRight,
+				scrollableRight, footerRight }) {
 			section.setColumnsRemover(rightColumnsRemover);
 		}
-		for (GridSection<T> section : (GridSection<T>[]) new GridSection<?>[] { frozenLeft, scrollableLeft, footerLeft }) {
+		for (GridSection<T> section : (GridSection<T>[]) new GridSection<?>[] { frozenLeft, scrollableLeft,
+				footerLeft }) {
 			section.setHeaderSource(headerLeft);
 		}
-		for (GridSection<T> section : (GridSection<T>[]) new GridSection<?>[] { frozenRight, scrollableRight, footerRight }) {
+		for (GridSection<T> section : (GridSection<T>[]) new GridSection<?>[] { frozenRight, scrollableRight,
+				footerRight }) {
 			section.setHeaderSource(headerRight);
 		}
-		for (GridSection<T> section : (GridSection<T>[]) new GridSection<?>[] { headerLeft, frozenLeft, scrollableLeft }) {
+		for (GridSection<T> section : (GridSection<T>[]) new GridSection<?>[] { headerLeft, frozenLeft,
+				scrollableLeft }) {
 			section.setFooterSource(footerLeft);
 		}
-		for (GridSection<T> section : (GridSection<T>[]) new GridSection<?>[] { headerRight, frozenRight, scrollableRight }) {
+		for (GridSection<T> section : (GridSection<T>[]) new GridSection<?>[] { headerRight, frozenRight,
+				scrollableRight }) {
 			section.setFooterSource(footerRight);
 		}
 
@@ -348,18 +359,21 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 		hive.setWidget(3, 0, footerLeftContainer);
 		hive.setWidget(3, 1, footerRightContainer);
 
-		for (Widget w : new Widget[] { headerLeftContainer, headerRightContainer, frozenLeftContainer, frozenRightContainer, scrollableLeftContainer, scrollableRightContainer, footerLeftContainer,
-		        footerRightContainer }) {
+		for (Widget w : new Widget[] { headerLeftContainer, headerRightContainer, frozenLeftContainer,
+				frozenRightContainer, scrollableLeftContainer, scrollableRightContainer, footerLeftContainer,
+				footerRightContainer }) {
 			w.setWidth("100%");
 			w.setHeight("100%");
 		}
 		// misc
-		for (Widget w : new Widget[] { headerRightContainer, frozenRightContainer, footerRightContainer, scrollableLeftContainer }) {
+		for (Widget w : new Widget[] { headerRightContainer, frozenRightContainer, footerRightContainer,
+				scrollableLeftContainer }) {
 			w.getElement().getParentElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
 		}
 		hive.getElement().getStyle().setTableLayout(Style.TableLayout.FIXED);
 		hive.getElement().getStyle().setPosition(Style.Position.RELATIVE);
-		for (CellTable<?> tbl : new CellTable<?>[] { headerLeft, headerRight, frozenLeft, frozenRight, scrollableLeft, scrollableRight, footerLeft, footerRight }) {
+		for (CellTable<?> tbl : new CellTable<?>[] { headerLeft, headerRight, frozenLeft, frozenRight, scrollableLeft,
+				scrollableRight, footerLeft, footerRight }) {
 			tbl.setTableLayoutFixed(true);
 		}
 		// header
@@ -373,12 +387,14 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 		footerRight.setHeaderBuilder(new NullHeaderOrFooterBuilder<T>(footerRight, false));
 		footerRight.setFooterBuilder(new ThemedHeaderOrFooterBuilder<T>(footerRight, true));
 		// data bodies
-		for (GridSection<?> section : new GridSection<?>[] { frozenLeft, frozenRight, scrollableLeft, scrollableRight }) {
+		for (GridSection<?> section : new GridSection<?>[] { frozenLeft, frozenRight, scrollableLeft,
+				scrollableRight }) {
 			GridSection<T> gSection = (GridSection<T>) section;
 			gSection.setHeaderBuilder(new NullHeaderOrFooterBuilder<T>(gSection, false));
 			gSection.setFooterBuilder(new NullHeaderOrFooterBuilder<T>(gSection, true));
 		}
-		for (GridSection<?> section : new GridSection<?>[] { headerLeft, headerRight, frozenLeft, frozenRight, scrollableLeft, scrollableRight, footerLeft, footerRight }) {
+		for (GridSection<?> section : new GridSection<?>[] { headerLeft, headerRight, frozenLeft, frozenRight,
+				scrollableLeft, scrollableRight, footerLeft, footerRight }) {
 			section.setAutoHeaderRefreshDisabled(true);
 		}
 		for (GridSection<?> section : new GridSection<?>[] { headerLeft, headerRight, footerLeft, footerRight }) {
@@ -418,7 +434,8 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 					} else {
 						frozenRightContainer.getElement().getStyle().clearRight();
 					}
-					footerRightContainer.getElement().setScrollLeft(scrollableRightContainer.getElement().getScrollLeft());
+					footerRightContainer.getElement()
+							.setScrollLeft(scrollableRightContainer.getElement().getScrollLeft());
 					int factLeftDelta2 = aimLeft - footerRightContainer.getElement().getScrollLeft();
 					if (factLeftDelta2 > 0) {
 						footerRightContainer.getElement().getStyle().setRight(factLeftDelta2, Style.Unit.PX);
@@ -539,7 +556,8 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 						if (target != null) {
 							Header<?> sourceHeader = source.getHeader();
 							Header<?> targetHeader = target.getHeader();
-							if (sourceHeader instanceof DraggableHeader<?> && targetHeader instanceof DraggableHeader<?>) {
+							if (sourceHeader instanceof DraggableHeader<?>
+									&& targetHeader instanceof DraggableHeader<?>) {
 								DraggableHeader<T> sourceDH = (DraggableHeader<T>) sourceHeader;
 								DraggableHeader<T> targetDH = (DraggableHeader<T>) targetHeader;
 								moveColumnNode(sourceDH.getHeaderNode(), targetDH.getHeaderNode());
@@ -548,8 +566,10 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 								int targetIndex = target.getColumnIndex();
 								GridSection<T> targetSection = (GridSection<T>) target.getTable();
 
-								boolean isSourceLeft = sourceSection == headerLeft || sourceSection == frozenLeft || sourceSection == scrollableLeft || sourceSection == footerLeft;
-								boolean isTargetLeft = targetSection == headerLeft || targetSection == frozenLeft || targetSection == scrollableLeft || targetSection == footerLeft;
+								boolean isSourceLeft = sourceSection == headerLeft || sourceSection == frozenLeft
+										|| sourceSection == scrollableLeft || sourceSection == footerLeft;
+								boolean isTargetLeft = targetSection == headerLeft || targetSection == frozenLeft
+										|| targetSection == scrollableLeft || targetSection == footerLeft;
 								sourceSection = isSourceLeft ? headerLeft : headerRight;
 								targetSection = isTargetLeft ? headerLeft : headerRight;
 								int generalSourceIndex = isSourceLeft ? sourceIndex : sourceIndex + frozenColumns;
@@ -560,7 +580,8 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 								}
 								if (generalSourceIndex != generalTargetIndex) {
 									Column<T, ?> column = (Column<T, ?>) source.getColumn();
-									if (!(header instanceof DraggableHeader) || ((DraggableHeader) header).isMoveable()) {
+									if (!(header instanceof DraggableHeader)
+											|| ((DraggableHeader) header).isMoveable()) {
 										moveColumn(generalSourceIndex, generalTargetIndex);
 									}
 								}
@@ -569,10 +590,13 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 					} else {
 						Header<?> header = source.getHeader();
 						if (!(header instanceof DraggableHeader) || ((DraggableHeader) header).isResizable()) {
-							int newWidth = Math.max(event.getNativeEvent().getClientX() - source.getCellElement().getAbsoluteLeft(), MINIMUM_COLUMN_WIDTH);
+							int newWidth = Math.max(
+									event.getNativeEvent().getClientX() - source.getCellElement().getAbsoluteLeft(),
+									MINIMUM_COLUMN_WIDTH);
 							// Source and target tables are the same, so we can
 							// cast to DraggedColumn<T> with no care
-							setColumnWidthFromHeaderDrag(((DraggedColumn<T>) source).getColumn(), newWidth, Style.Unit.PX);
+							setColumnWidthFromHeaderDrag(((DraggedColumn<T>) source).getColumn(), newWidth,
+									Style.Unit.PX);
 						}
 					}
 				}
@@ -600,14 +624,16 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 					SafeHtml rendered;
 					if (h.getValue() instanceof String) {
 						String hVal = (String) h.getValue();
-						rendered = hVal.startsWith("<html>") ? SafeHtmlUtils.fromTrustedString(hVal.substring(6)) : SafeHtmlUtils.fromString(hVal);
+						rendered = hVal.startsWith("<html>") ? SafeHtmlUtils.fromTrustedString(hVal.substring(6))
+								: SafeHtmlUtils.fromString(hVal);
 					} else {
 						Cell.Context context = new Cell.Context(0, i, h.getKey());
 						SafeHtmlBuilder sb = new SafeHtmlBuilder();
 						h.render(context, sb);
 						rendered = sb.toSafeHtml();
 					}
-					MenuItemCheckBox miCheck = new MenuItemCheckBox(!aSection.isColumnHidden(column), rendered.asString(), true);
+					MenuItemCheckBox miCheck = new MenuItemCheckBox(!aSection.isColumnHidden(column),
+							rendered.asString(), true);
 					miCheck.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
 						@Override
@@ -675,9 +701,11 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 	}
 
 	protected void installCellBuilders() {
-		for (GridSection<?> section : new GridSection<?>[] { frozenLeft, frozenRight, scrollableLeft, scrollableRight }) {
+		for (GridSection<?> section : new GridSection<?>[] { frozenLeft, frozenRight, scrollableLeft,
+				scrollableRight }) {
 			GridSection<T> gSection = (GridSection<T>) section;
-			gSection.setTableBuilder(new ThemedCellTableBuilder<>(gSection, dynamicTDClassName, dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName));
+			gSection.setTableBuilder(new ThemedCellTableBuilder<>(gSection, dynamicTDClassName, dynamicCellClassName,
+					dynamicOddRowsClassName, dynamicEvenRowsClassName));
 		}
 	}
 
@@ -706,12 +734,15 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 			GridSection<T> targetSection = null;
 			Element targetCell = null;
 			Element currentTarget = Element.as(aEventTarget);
-			if (COLUMN_PHANTOM_STYLE.equals(currentTarget.getClassName()) || RULER_STYLE.equals(currentTarget.getClassName())) {
+			if (COLUMN_PHANTOM_STYLE.equals(currentTarget.getClassName())
+					|| RULER_STYLE.equals(currentTarget.getClassName())) {
 				return targetDraggedColumn;
 			}
-			while ((targetCell == null || targetSection == null) && currentTarget != null && currentTarget != Grid.this.getElement()) {
+			while ((targetCell == null || targetSection == null) && currentTarget != null
+					&& currentTarget != Grid.this.getElement()) {
 				if (targetCell == null) {
-					if ("td".equalsIgnoreCase(currentTarget.getTagName()) || "th".equalsIgnoreCase(currentTarget.getTagName())) {
+					if ("td".equalsIgnoreCase(currentTarget.getTagName())
+							|| "th".equalsIgnoreCase(currentTarget.getTagName())) {
 						targetCell = currentTarget;
 					}
 				}
@@ -808,12 +839,14 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 	}
 
 	protected void regenerateDynamicTDStyles() {
-		tdsStyleElement.setInnerSafeHtml(DynamicCellStyles.INSTANCE.td(dynamicTDClassName, showHorizontalLines ? 1 : 0, showVerticalLines ? 1 : 0, gridColor != null ? gridColor.toStyled() : ""));
+		tdsStyleElement.setInnerSafeHtml(DynamicCellStyles.INSTANCE.td(dynamicTDClassName, showHorizontalLines ? 1 : 0,
+				showVerticalLines ? 1 : 0, gridColor != null ? gridColor.toStyled() : ""));
 	}
 
 	protected void regenerateDynamicOddRowsStyles() {
 		if (showOddRowsInOtherColor && oddRowsColor != null) {
-			oddRowsStyleElement.setInnerHTML("." + dynamicOddRowsClassName + "{background-color: " + oddRowsColor.toStyled() + "}");
+			oddRowsStyleElement.setInnerHTML(
+					"." + dynamicOddRowsClassName + "{background-color: " + oddRowsColor.toStyled() + "}");
 		} else {
 			oddRowsStyleElement.setInnerHTML("");
 		}
@@ -884,8 +917,10 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 		scrollableRightContainer.getElement().getStyle().clearHeight();
 		// it seems that after clearing the height, hive offsetHeight is changed
 		// ...
-		scrollableLeftContainer.getElement().getStyle().setHeight(hive.getElement().getOffsetHeight() - r0Height - r1Height - r3Height, Style.Unit.PX);
-		scrollableRightContainer.getElement().getStyle().setHeight(hive.getElement().getOffsetHeight() - r0Height - r1Height - r3Height, Style.Unit.PX);
+		scrollableLeftContainer.getElement().getStyle()
+				.setHeight(hive.getElement().getOffsetHeight() - r0Height - r1Height - r3Height, Style.Unit.PX);
+		scrollableRightContainer.getElement().getStyle()
+				.setHeight(hive.getElement().getOffsetHeight() - r0Height - r1Height - r3Height, Style.Unit.PX);
 	}
 
 	@Override
@@ -913,7 +948,8 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 			propagateHeightButScrollable();
 			// columnsChevron.setHeight(Math.max(headerLeftContainer.getOffsetHeight(),
 			// headerRightContainer.getOffsetHeight()) + "px");
-			for (Widget child : new Widget[] { headerLeftContainer, headerRightContainer, frozenLeftContainer, frozenRightContainer, scrollableLeftContainer, scrollableRightContainer }) {
+			for (Widget child : new Widget[] { headerLeftContainer, headerRightContainer, frozenLeftContainer,
+					frozenRightContainer, scrollableLeftContainer, scrollableRightContainer }) {
 				if (child instanceof RequiresResize) {
 					((RequiresResize) child).onResize();
 				}
@@ -922,7 +958,8 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 	}
 
 	public boolean isHeaderVisible() {
-		return !Style.Display.NONE.equals(headerLeft.getElement().getStyle().getDisplay()) && !Style.Display.NONE.equals(headerRight.getElement().getStyle().getDisplay());
+		return !Style.Display.NONE.equals(headerLeft.getElement().getStyle().getDisplay())
+				&& !Style.Display.NONE.equals(headerRight.getElement().getStyle().getDisplay());
 	}
 
 	public void setHeaderVisible(boolean aValue) {
@@ -1000,6 +1037,15 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 	 * @param aDataProvider
 	 */
 	public void setDataProvider(ListDataProvider<T> aDataProvider) {
+		if (dataProvider != aDataProvider) {
+			unbindDataProvider();
+			dataProvider = aDataProvider;
+			bindDataProvider();
+			setupVisibleRanges();
+		}
+	}
+
+	protected void unbindDataProvider() {
 		if (dataProvider != null) {
 			dataProvider.removeDataDisplay(headerLeft);
 			dataProvider.removeDataDisplay(headerRight);
@@ -1010,7 +1056,9 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 			dataProvider.removeDataDisplay(footerLeft);
 			dataProvider.removeDataDisplay(footerRight);
 		}
-		dataProvider = aDataProvider;
+	}
+
+	protected void bindDataProvider() {
 		if (dataProvider != null) {
 			dataProvider.addDataDisplay(headerLeft);
 			dataProvider.addDataDisplay(headerRight);
@@ -1021,7 +1069,6 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 			dataProvider.addDataDisplay(footerLeft);
 			dataProvider.addDataDisplay(footerRight);
 		}
-		setupVisibleRanges();
 	}
 
 	public void setupVisibleRanges() {
@@ -1052,11 +1099,13 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 		addColumn(false, getDataColumnCount(), aColumn, aWidth, aHeader, aFooter, hidden);
 	}
 
-	public void addColumn(int aIndex, Column<T, ?> aColumn, String aWidth, Header<?> aHeader, Header<?> aFooter, boolean hidden) {
+	public void addColumn(int aIndex, Column<T, ?> aColumn, String aWidth, Header<?> aHeader, Header<?> aFooter,
+			boolean hidden) {
 		addColumn(true, aIndex, aColumn, aWidth, aHeader, aFooter, hidden);
 	}
 
-	public void addColumn(boolean forceRefreshColumns, int aIndex, Column<T, ?> aColumn, String aWidth, Header<?> aHeader, Header<?> aFooter, boolean hidden) {
+	public void addColumn(boolean forceRefreshColumns, int aIndex, Column<T, ?> aColumn, String aWidth,
+			Header<?> aHeader, Header<?> aFooter, boolean hidden) {
 		/*
 		 * if (aHeader instanceof DraggableHeader<?>) { DraggableHeader<T> h =
 		 * (DraggableHeader<T>) aHeader; h.setColumn(aColumn); } WARNING! Before
@@ -1073,9 +1122,9 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 			scrollableLeft.insertColumn(aIndex, aColumn);
 			footerLeft.insertColumn(aIndex, aColumn, null, aFooter);
 			headerLeft.setColumnWidth(aColumn, aWidth);// column partners will
-			                                           // take care of width
-			                                           // seetings in other
-			                                           // sections
+														// take care of width
+														// seetings in other
+														// sections
 			//
 			if (forceRefreshColumns)
 				refreshColumns();
@@ -1089,9 +1138,9 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 			scrollableRight.insertColumn(aIndex - frozenColumns, aColumn);
 			footerRight.insertColumn(aIndex - frozenColumns, aColumn, null, aFooter);
 			headerRight.setColumnWidth(aColumn, aWidth);// column partners will
-			                                            // take care of width
-			                                            // seetings in other
-			                                            // sections
+														// take care of width
+														// seetings in other
+														// sections
 			//
 		}
 		if (hidden) {
@@ -1114,14 +1163,16 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 	}
 
 	public void hideColumn(Column<T, ?> aColumn) {
-		for (GridSection<?> section : new GridSection<?>[] { headerLeft, frozenLeft, scrollableLeft, footerLeft, headerRight, frozenRight, scrollableRight, footerRight }) {
+		for (GridSection<?> section : new GridSection<?>[] { headerLeft, frozenLeft, scrollableLeft, footerLeft,
+				headerRight, frozenRight, scrollableRight, footerRight }) {
 			GridSection<T> gSection = (GridSection<T>) section;
 			gSection.hideColumn(aColumn);
 		}
 	}
 
 	public void showColumn(Column<T, ?> aColumn) {
-		for (GridSection<?> section : new GridSection<?>[] { headerLeft, frozenLeft, scrollableLeft, footerLeft, headerRight, frozenRight, scrollableRight, footerRight }) {
+		for (GridSection<?> section : new GridSection<?>[] { headerLeft, frozenLeft, scrollableLeft, footerLeft,
+				headerRight, frozenRight, scrollableRight, footerRight }) {
 			GridSection<T> gSection = (GridSection<T>) section;
 			gSection.showColumn(aColumn);
 		}
@@ -1144,11 +1195,11 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 	public void removeColumn(int aIndex) {
 		if (aIndex < frozenColumns) {
 			headerLeft.removeColumn(aIndex);// ColumnsRemover will care
-			                                // about columns sharing
+											// about columns sharing
 			refreshColumns();
 		} else {
 			headerRight.removeColumn(aIndex - frozenColumns);// ColumnsRemover
-			                                                 // will care
+																// will care
 			// about columns sharing
 		}
 	}
@@ -1167,7 +1218,7 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 			footers.add(0, footerRight.getFooter(i));
 			hidden.add(0, headerRight.isColumnHidden(col));
 			headerRight.removeColumn(i);// ColumnsRemover will care about
-			                            // columns sharing
+										// columns sharing
 		}
 		for (int i = headerLeft.getColumnCount() - 1; i >= 0; i--) {
 			Column<T, ?> col = headerLeft.getColumn(i);
@@ -1177,7 +1228,7 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 			footers.add(0, footerLeft.getFooter(i));
 			hidden.add(0, headerLeft.isColumnHidden(col));
 			headerLeft.removeColumn(i);// ColumnsRemover will care about
-			                           // columns sharing
+										// columns sharing
 		}
 		headerLeft.setWidth("0px", true);
 		frozenLeft.setWidth("0px", true);
@@ -1235,7 +1286,6 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 	}
 
 	public void redraw() {
-		headerLeft.redraw();
 		headerRight.redraw();
 		frozenLeft.redraw();
 		frozenRight.redraw();
@@ -1256,26 +1306,30 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 	}
 
 	public int getDataColumnCount() {
-		return (headerLeft != null ? headerLeft.getColumnCount() : 0) + (headerRight != null ? headerRight.getColumnCount() : 0);
+		return (headerLeft != null ? headerLeft.getColumnCount() : 0)
+				+ (headerRight != null ? headerRight.getColumnCount() : 0);
 	}
 
 	public Column<T, ?> getDataColumn(int aIndex) {
 		if (aIndex >= 0 && aIndex < getDataColumnCount()) {
-			return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getColumn(aIndex) : headerRight.getColumn(aIndex - headerLeft.getColumnCount());
+			return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getColumn(aIndex)
+					: headerRight.getColumn(aIndex - headerLeft.getColumnCount());
 		} else
 			return null;
 	}
 
 	public Header<?> getColumnHeader(int aIndex) {
 		if (aIndex >= 0 && aIndex < getDataColumnCount()) {
-			return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getHeader(aIndex) : headerRight.getHeader(aIndex - headerLeft.getColumnCount());
+			return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getHeader(aIndex)
+					: headerRight.getHeader(aIndex - headerLeft.getColumnCount());
 		} else
 			return null;
 	}
 
 	public Column<T, ?> getColumn(int aIndex) {
 		if (aIndex >= 0 && aIndex < getDataColumnCount()) {
-			return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getColumn(aIndex) : headerRight.getColumn(aIndex - headerLeft.getColumnCount());
+			return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getColumn(aIndex)
+					: headerRight.getColumn(aIndex - headerLeft.getColumnCount());
 		} else
 			return null;
 	}
@@ -1283,14 +1337,16 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 	public String getColumnWidth(int aIndex) {
 		if (aIndex >= 0 && aIndex < getDataColumnCount()) {
 			Column<T, ?> col = getColumn(aIndex);
-			return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getColumnWidth(col) : headerRight.getColumnWidth(col);
+			return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getColumnWidth(col)
+					: headerRight.getColumnWidth(col);
 		} else
 			return null;
 	}
 
 	public Header<?> getColumnFooter(int aIndex) {
 		if (aIndex >= 0 && aIndex < getDataColumnCount()) {
-			return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getFooter(aIndex) : headerRight.getFooter(aIndex - headerLeft.getColumnCount());
+			return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getFooter(aIndex)
+					: headerRight.getFooter(aIndex - headerLeft.getColumnCount());
 		} else
 			return null;
 	}
@@ -1430,10 +1486,22 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 		checkShellTabIndex();
 	}
 
+	private boolean tabIndexChecking;
+
 	private void checkShellTabIndex() {
-		Element focusedElement = calcFocusedElement();
-		if (focusedElement != getElement())
-			getElement().removeAttribute("tabindex");
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+			@Override
+			public void execute() {
+				if (tabIndexChecking) {
+					Element focusedElement = calcFocusedElement();
+					if (focusedElement != getElement())
+						getElement().removeAttribute("tabindex");
+					tabIndexChecking = false;
+				}
+			}
+		});
+		tabIndexChecking = true;
 	}
 
 	@Override

@@ -105,8 +105,10 @@ import com.google.gwt.view.client.SetSelectionModel;
  * @author mg
  * 
  */
-public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, HasOnRender, HasComponentPopupMenu, HasEventsExecutor, HasEnabled, HasShowHandlers, HasHideHandlers, HasResizeHandlers,
-        HasBinding, HasSelectionHandlers<JavaScriptObject>, HasFocusHandlers, HasBlurHandlers, Focusable, HasKeyDownHandlers, HasKeyPressHandlers, HasKeyUpHandlers {
+public class ModelGrid extends Grid<JavaScriptObject>
+		implements HasJsFacade, HasOnRender, HasComponentPopupMenu, HasEventsExecutor, HasEnabled, HasShowHandlers,
+		HasHideHandlers, HasResizeHandlers, HasBinding, HasSelectionHandlers<JavaScriptObject>, HasFocusHandlers,
+		HasBlurHandlers, Focusable, HasKeyDownHandlers, HasKeyPressHandlers, HasKeyUpHandlers {
 
 	protected boolean enabled = true;
 	protected EventsExecutor eventsExecutor;
@@ -159,7 +161,8 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 								if (ModelGrid.this.data != null) {
 									Utils.JsObject dataArray = ModelGrid.this.data.cast();
 									int dataIndex = dataArray.indexOf(dragged);
-									event.getDataTransfer().setData("text/modelgrid-row", "{\"gridName\":\"" + name + "\", \"dataIndex\": " + dataIndex + "}");
+									event.getDataTransfer().setData("text/modelgrid-row",
+											"{\"gridName\":\"" + name + "\", \"dataIndex\": " + dataIndex + "}");
 								}
 							}
 						}
@@ -172,14 +175,17 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
-				Object oData = data != null && field != null && !field.isEmpty() ? Utils.getPathData(data, field) : data;
-				JsObject jsData = oData instanceof JavaScriptObject ? ((JavaScriptObject) oData).<JsObject> cast() : null;
+				Object oData = data != null && field != null && !field.isEmpty() ? Utils.getPathData(data, field)
+						: data;
+				JsObject jsData = oData instanceof JavaScriptObject ? ((JavaScriptObject) oData).<JsObject> cast()
+						: null;
 				if (jsData != null) {
 					if (activeEditor == null && getSelectionModel() instanceof SetSelectionModel<?>) {
 						final SetSelectionModel<JavaScriptObject> rowsSelection = (SetSelectionModel<JavaScriptObject>) getSelectionModel();
 						if (event.getNativeKeyCode() == KeyCodes.KEY_DELETE && deletable) {
 							final List<JavaScriptObject> viewElements = dataProvider.getList();
-							if (!viewElements.isEmpty() && rowsSelection.getSelectedSet() != null && !rowsSelection.getSelectedSet().isEmpty()) {
+							if (!viewElements.isEmpty() && rowsSelection.getSelectedSet() != null
+									&& !rowsSelection.getSelectedSet().isEmpty()) {
 								// calculate some view sugar
 								int lastSelectedViewIndex = -1;
 								for (int i = viewElements.size() - 1; i >= 0; i--) {
@@ -224,13 +230,15 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 							}
 						} else if (event.getNativeKeyCode() == KeyCodes.KEY_INSERT && insertable) {
 							int insertAt = -1;
-							if (rowsSelection instanceof HasSelectionLead<?> && dataProvider instanceof IndexOfProvider<?>) {
+							if (rowsSelection instanceof HasSelectionLead<?>
+									&& dataProvider instanceof IndexOfProvider<?>) {
 								JavaScriptObject lead = ((HasSelectionLead<JavaScriptObject>) rowsSelection).getLead();
 								insertAt = ((IndexOfProvider<JavaScriptObject>) dataProvider).indexOf(lead);
 								insertAt++;
 								JavaScriptObject oElementClass = jsData.getJs("elementClass");
 								JsObject elementClass = oElementClass != null ? oElementClass.<JsObject> cast() : null;
-								final JavaScriptObject inserted = elementClass != null ? elementClass.newObject() : JavaScriptObject.createObject();
+								final JavaScriptObject inserted = elementClass != null ? elementClass.newObject()
+										: JavaScriptObject.createObject();
 								jsData.splice(insertAt, 0, inserted);
 								Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
@@ -280,7 +288,8 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	public void setDraggableRows(boolean aValue) {
 		if (draggableRows != aValue) {
 			draggableRows = aValue;
-			for (GridSection<?> section : new GridSection<?>[] { frozenLeft, frozenRight, scrollableLeft, scrollableRight }) {
+			for (GridSection<?> section : new GridSection<?>[] { frozenLeft, frozenRight, scrollableLeft,
+					scrollableRight }) {
 				GridSection<JavaScriptObject> gSection = (GridSection<JavaScriptObject>) section;
 				gSection.setDraggableRows(aValue);
 			}
@@ -300,9 +309,11 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	}
 
 	protected void installCellBuilders() {
-		for (GridSection<?> section : new GridSection<?>[] { frozenLeft, frozenRight, scrollableLeft, scrollableRight }) {
+		for (GridSection<?> section : new GridSection<?>[] { frozenLeft, frozenRight, scrollableLeft,
+				scrollableRight }) {
 			GridSection<JavaScriptObject> gSection = (GridSection<JavaScriptObject>) section;
-			gSection.setTableBuilder(new RenderedTableCellBuilder<>(gSection, dynamicTDClassName, dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName));
+			gSection.setTableBuilder(new RenderedTableCellBuilder<>(gSection, dynamicTDClassName, dynamicCellClassName,
+					dynamicOddRowsClassName, dynamicEvenRowsClassName));
 		}
 	}
 
@@ -388,7 +399,8 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		JavaScriptObject jsData = oData instanceof JavaScriptObject ? (JavaScriptObject) oData : null;
 		if (jsData != null) {
 			if (isTreeConfigured()) {
-				JsArrayTreeDataProvider treeDataProvider = new JsArrayTreeDataProvider(parentField, childrenField, onResize);
+				JsArrayTreeDataProvider treeDataProvider = new JsArrayTreeDataProvider(parentField, childrenField,
+						onResize);
 				setDataProvider(treeDataProvider);
 				sortHandler = new TreeMultiSortHandler<>(treeDataProvider, onSort);
 				treeDataProvider.addExpandedHandler(new ExpandedHandler<JavaScriptObject>() {
@@ -396,7 +408,8 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 					public void expanded(JavaScriptObject anElement) {
 						ColumnSortEvent.fire(ModelGrid.this, sortList);
 						if (onExpand != null) {
-							JavaScriptObject jsEvent = EventsPublisher.publishItemEvent(ModelGrid.this.published, anElement);
+							JavaScriptObject jsEvent = EventsPublisher.publishItemEvent(ModelGrid.this.published,
+									anElement);
 							try {
 								Utils.executeScriptEventVoid(ModelGrid.this.published, onExpand, jsEvent);
 							} catch (Exception e) {
@@ -411,7 +424,8 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 					public void collapsed(JavaScriptObject anElement) {
 						ColumnSortEvent.fire(ModelGrid.this, sortList);
 						if (onCollapse != null) {
-							JavaScriptObject jsEvent = EventsPublisher.publishItemEvent(ModelGrid.this.published, anElement);
+							JavaScriptObject jsEvent = EventsPublisher.publishItemEvent(ModelGrid.this.published,
+									anElement);
 							try {
 								Utils.executeScriptEventVoid(ModelGrid.this.published, onCollapse, jsEvent);
 							} catch (Exception e) {
@@ -453,18 +467,19 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	}
 
 	public void redraw() {
-		headerLeft.redraw();
-		headerRight.redraw();
-		frozenLeft.redraw();
-		frozenRight.redraw();
-		scrollableLeft.redraw();
-		scrollableRight.redraw();
+		super.redraw();
+		pingGWTFinallyCommands();
+	}
+
+	public void rebind(){
+		unbind();
+		bind();
 		pingGWTFinallyCommands();
 	}
 
 	private void pingGWTFinallyCommands() {
 		// Dirty hack of GWT Scgeduler.get().scheduleFinally();
-		// Finally commands ocasionally not been executed without user
+		// Finally commands occasionally not been executed without user
 		// interaction for while.
 		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
@@ -752,7 +767,8 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	@Override
 	public void moveColumnNode(HeaderNode<JavaScriptObject> aSubject, HeaderNode<JavaScriptObject> aInsertBefore) {
 		if (aSubject != null && aInsertBefore != null && aSubject.getParent() == aInsertBefore.getParent()) {
-			List<HeaderNode<JavaScriptObject>> neighbours = aSubject.getParent() != null ? aSubject.getParent().getChildren() : header;
+			List<HeaderNode<JavaScriptObject>> neighbours = aSubject.getParent() != null
+					? aSubject.getParent().getChildren() : header;
 			boolean removed = neighbours.remove(aSubject);
 			assert removed;
 			int insertAt = neighbours.indexOf(aInsertBefore);
@@ -783,7 +799,8 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 
 	@Override
 	public void moveColumn(int aFromIndex, int aToIndex) {
-		if (aFromIndex < frozenColumns && aToIndex < frozenColumns || aFromIndex >= frozenColumns && aToIndex >= frozenColumns) {
+		if (aFromIndex < frozenColumns && aToIndex < frozenColumns
+				|| aFromIndex >= frozenColumns && aToIndex >= frozenColumns) {
 			Column<JavaScriptObject, ?> movedColumn = getColumn(aFromIndex);
 		}
 	}
@@ -791,7 +808,8 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	protected ModelColumn treeIndicatorColumn;
 
 	@Override
-	public void addColumn(int aIndex, Column<JavaScriptObject, ?> aColumn, String aWidth, Header<?> aHeader, Header<?> aFooter, boolean hidden) {
+	public void addColumn(int aIndex, Column<JavaScriptObject, ?> aColumn, String aWidth, Header<?> aHeader,
+			Header<?> aFooter, boolean hidden) {
 		((ModelColumn) aColumn).setGrid(this);
 		super.addColumn(aIndex, aColumn, aWidth, aHeader, aFooter, hidden);
 	}
@@ -802,7 +820,8 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 				int treeIndicatorIndex = 0;
 				while (treeIndicatorIndex < getDataColumnCount()) {
 					Column<JavaScriptObject, ?> indicatorColumn = getDataColumn(treeIndicatorIndex);
-					if (indicatorColumn instanceof UsualServiceColumn || indicatorColumn instanceof RadioServiceColumn || indicatorColumn instanceof CheckServiceColumn) {
+					if (indicatorColumn instanceof UsualServiceColumn || indicatorColumn instanceof RadioServiceColumn
+							|| indicatorColumn instanceof CheckServiceColumn) {
 						treeIndicatorIndex++;
 					} else if (indicatorColumn instanceof ModelColumn) {
 						treeIndicatorColumn = (ModelColumn) indicatorColumn;
@@ -811,12 +830,14 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 				}
 			}
 			if (treeIndicatorColumn != null && treeIndicatorColumn.getCell() instanceof TreeExpandableCell<?, ?>) {
-				TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) treeIndicatorColumn.getCell();
+				TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) treeIndicatorColumn
+						.getCell();
 				treeCell.setDataProvider((TreeDataProvider<JavaScriptObject>) dataProvider);
 			}
 		} else {
 			if (treeIndicatorColumn != null && treeIndicatorColumn.getCell() instanceof TreeExpandableCell<?, ?>) {
-				TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) treeIndicatorColumn.getCell();
+				TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) treeIndicatorColumn
+						.getCell();
 				treeCell.setDataProvider(null);
 			}
 			treeIndicatorColumn = null;
@@ -865,8 +886,8 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		ModelColumn colFacade = (ModelColumn) aColumn;
 		colFacade.updateVisible(true);
 		enqueueRedraw(); // because of AbstractCellTable.isInteractive crazy
-		                 // updating while rendering instead of updating it
-		                 // while show/hide columns
+							// updating while rendering instead of updating it
+							// while show/hide columns
 	}
 
 	public void hideColumn(Column<JavaScriptObject, ?> aColumn) {
@@ -900,7 +921,8 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			Column<JavaScriptObject, ?> toDel = getDataColumn(i);
 			ModelColumn mCol = (ModelColumn) toDel;
 			if (mCol == treeIndicatorColumn) {
-				TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) mCol.getCell();
+				TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) mCol
+						.getCell();
 				treeCell.setDataProvider(null);
 				treeIndicatorColumn = null;
 			}
@@ -924,11 +946,14 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			column.setGrid(this);
 			addColumn(column, column.getWidth() + "px", header, null, !column.isVisible());
 		}
-		ThemedHeaderOrFooterBuilder<JavaScriptObject> leftBuilder = (ThemedHeaderOrFooterBuilder<JavaScriptObject>) headerLeft.getHeaderBuilder();
-		ThemedHeaderOrFooterBuilder<JavaScriptObject> rightBuilder = (ThemedHeaderOrFooterBuilder<JavaScriptObject>) headerRight.getHeaderBuilder();
+		ThemedHeaderOrFooterBuilder<JavaScriptObject> leftBuilder = (ThemedHeaderOrFooterBuilder<JavaScriptObject>) headerLeft
+				.getHeaderBuilder();
+		ThemedHeaderOrFooterBuilder<JavaScriptObject> rightBuilder = (ThemedHeaderOrFooterBuilder<JavaScriptObject>) headerRight
+				.getHeaderBuilder();
 		List<HeaderNode<JavaScriptObject>> leftHeader = HeaderSplitter.split(header, 0, frozenColumns - 1);
 		leftBuilder.setHeaderNodes(leftHeader);
-		List<HeaderNode<JavaScriptObject>> rightHeader = HeaderSplitter.split(header, frozenColumns, getDataColumnCount());
+		List<HeaderNode<JavaScriptObject>> rightHeader = HeaderSplitter.split(header, frozenColumns,
+				getDataColumnCount());
 		rightBuilder.setHeaderNodes(rightHeader);
 		checkTreeIndicatorColumnDataProvider();
 		redrawHeaders();
@@ -942,7 +967,8 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 				positionSelectionHandler.removeHandler();
 			if (onSelectEventSelectionHandler != null)
 				onSelectEventSelectionHandler.removeHandler();
-			CellPreviewEvent.Handler<JavaScriptObject> eventsManager = GridSelectionEventManager.<JavaScriptObject> create(new CheckBoxesEventTranslator<JavaScriptObject>());
+			CellPreviewEvent.Handler<JavaScriptObject> eventsManager = GridSelectionEventManager
+					.<JavaScriptObject> create(new CheckBoxesEventTranslator<JavaScriptObject>());
 			headerLeft.setSelectionModel(aValue, eventsManager);
 			headerRight.setSelectionModel(aValue, eventsManager);
 			frozenLeft.setSelectionModel(aValue, eventsManager);
@@ -952,20 +978,24 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			if (aValue != null) {
 				Object oData = field != null && !field.isEmpty() ? Utils.getPathData(data, field) : data;
 				if (oData instanceof JavaScriptObject) {
-					positionSelectionHandler = aValue.addSelectionChangeHandler(new CursorPropertySelectionReflector((JavaScriptObject) oData, aValue));
-					onSelectEventSelectionHandler = aValue.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-						@Override
-						public void onSelectionChange(SelectionChangeEvent event) {
-							if (aValue instanceof HasSelectionLead<?>) {
-								try {
-									JavaScriptObject lead = ((HasSelectionLead<JavaScriptObject>) aValue).getLead();
-									SelectionEvent.fire(ModelGrid.this, lead);
-								} catch (Exception e) {
-									Logger.getLogger(CursorPropertySelectionReflector.class.getName()).log(Level.SEVERE, e.getMessage());
+					positionSelectionHandler = aValue.addSelectionChangeHandler(
+							new CursorPropertySelectionReflector((JavaScriptObject) oData, aValue));
+					onSelectEventSelectionHandler = aValue
+							.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+								@Override
+								public void onSelectionChange(SelectionChangeEvent event) {
+									if (aValue instanceof HasSelectionLead<?>) {
+										try {
+											JavaScriptObject lead = ((HasSelectionLead<JavaScriptObject>) aValue)
+													.getLead();
+											SelectionEvent.fire(ModelGrid.this, lead);
+										} catch (Exception e) {
+											Logger.getLogger(CursorPropertySelectionReflector.class.getName())
+													.log(Level.SEVERE, e.getMessage());
+										}
+									}
 								}
-							}
-						}
-					});
+							});
 				}
 			}
 		}
@@ -1062,7 +1092,11 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
           };
           
           aPublished.redraw = function() {
-          aWidget.@com.eas.grid.ModelGrid::redraw()();
+          	  // ModelGrid.redraw() is used as substitute for automatic
+          	  // changes handling, e.g. without Object.observe in a browser.
+          	  // So, in the absence of data change events, we can
+          	  // completely redraw grid only through rebind of its data.
+              aWidget.@com.eas.grid.ModelGrid::rebind()();
           };
           aPublished.removeColumnNode = function(aColumnFacade){
           if(aColumnFacade && aColumnFacade.unwrap)
@@ -1488,7 +1522,8 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			}
 		}
 		double widthError = 0;
-		double delta = (scrollableLeftContainer.getElement().getClientWidth() + scrollableRightContainer.getElement().getClientWidth()) - 1 - commonWidth;
+		double delta = (scrollableLeftContainer.getElement().getClientWidth()
+				+ scrollableRightContainer.getElement().getClientWidth()) - 1 - commonWidth;
 		for (ModelColumn mCol : availableColumns) {
 			double coef = mCol.getWidth() / commonWidth;
 			double newWidth = mCol.getWidth() + delta * coef;
