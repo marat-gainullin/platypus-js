@@ -108,7 +108,7 @@ import com.google.gwt.view.client.SetSelectionModel;
 public class ModelGrid extends Grid<JavaScriptObject>
 		implements HasJsFacade, HasOnRender, HasComponentPopupMenu, HasEventsExecutor, HasEnabled, HasShowHandlers,
 		HasHideHandlers, HasResizeHandlers, HasBinding, HasSelectionHandlers<JavaScriptObject>, HasFocusHandlers,
-		HasBlurHandlers, Focusable, HasKeyDownHandlers, HasKeyPressHandlers, HasKeyUpHandlers {
+		HasBlurHandlers, Focusable, HasKeyDownHandlers, HasKeyPressHandlers, HasKeyUpHandlers, JsDataContainer {
 
 	protected boolean enabled = true;
 	protected EventsExecutor eventsExecutor;
@@ -460,12 +460,26 @@ public class ModelGrid extends Grid<JavaScriptObject>
 
 	@Override
 	public void setDataProvider(ListDataProvider<JavaScriptObject> aDataProvider) {
-		if (getDataProvider() instanceof JsDataContainer)
-			((JsDataContainer) getDataProvider()).setData(null);
+		((JsDataContainer) getDataProvider()).setData(null);
 		super.setDataProvider(aDataProvider);
 		checkTreeIndicatorColumnDataProvider();
 	}
 
+	@Override
+	public void changedItems(JavaScriptObject anItems){
+		((JsDataContainer) getDataProvider()).changedItems(anItems);
+	}
+	
+	@Override	
+	public void addedItems(JavaScriptObject anItems){
+		((JsDataContainer) getDataProvider()).addedItems(anItems);
+	}
+	
+	@Override
+	public void removedItems(JavaScriptObject anItems){
+		((JsDataContainer) getDataProvider()).removedItems(anItems);
+	}
+	
 	public void redraw() {
 		super.redraw();
 		pingGWTFinallyCommands();
@@ -1082,7 +1096,7 @@ public class ModelGrid extends Grid<JavaScriptObject>
           };
           
           aPublished.unsort = function() {
-          aWidget.@com.eas.grid.ModelGrid::unsort()();
+              aWidget.@com.eas.grid.ModelGrid::unsort()();
           };
           
           aPublished.redraw = function() {
@@ -1092,6 +1106,22 @@ public class ModelGrid extends Grid<JavaScriptObject>
           	  // completely redraw grid only through rebind of its data.
               aWidget.@com.eas.grid.ModelGrid::rebind()();
           };
+          aPublished.changed = function(aItems){
+              if(!$wnd.Array.isArray(aItems))
+                  aItems = [aItems];
+              aWidget.@com.eas.grid.ModelGrid::changedItems(Lcom/google/gwt/core/client/JavaScriptObject;)(aItems);
+          };
+          aPublished.added = function(aItems){
+              if(!$wnd.Array.isArray(aItems))
+                  aItems = [aItems];
+              aWidget.@com.eas.grid.ModelGrid::addedItems(Lcom/google/gwt/core/client/JavaScriptObject;)(aItems);
+          };
+          aPublished.removed = function(aItems){
+              if(!$wnd.Array.isArray(aItems))
+                  aItems = [aItems];
+              aWidget.@com.eas.grid.ModelGrid::removedItems(Lcom/google/gwt/core/client/JavaScriptObject;)(aItems);
+          };
+          
           aPublished.removeColumnNode = function(aColumnFacade){
           if(aColumnFacade && aColumnFacade.unwrap)
           return aWidget.@com.eas.grid.ModelGrid::removeColumnNode(Lcom/eas/grid/columns/header/HeaderNode;)(aColumnFacade.unwrap());

@@ -144,4 +144,19 @@ public class JsArrayListDataProvider extends ListDataProvider<JavaScriptObject> 
 		invalidate();
 		validate();
 	}
+
+	@Override
+	public void changedItems(JavaScriptObject anArray) {
+		enqueueChanges();
+	}
+
+	@Override
+	public void addedItems(JavaScriptObject anArray) {
+		enqueueReadd();
+	}
+
+	@Override
+	public void removedItems(JavaScriptObject anArray) {
+		enqueueReadd();
+	}
 }

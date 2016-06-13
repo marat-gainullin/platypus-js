@@ -65,7 +65,7 @@ public class JsTree extends TreeAdapter<JavaScriptObject> implements JsDataConta
 					}
 					if (data != null) {
 						boundToDataElements = Utils.listenElements(data, new Utils.OnChangeHandler() {
-							
+
 							@Override
 							public void onChange(JavaScriptObject anEvent) {
 								enqueueChanges();
@@ -77,11 +77,11 @@ public class JsTree extends TreeAdapter<JavaScriptObject> implements JsDataConta
 			}
 		});
 	}
-	
+
 	protected void bind() {
 		if (data != null) {
 			boundToData = Utils.listenPath(data, "length", new Utils.OnChangeHandler() {
-				
+
 				@Override
 				public void onChange(JavaScriptObject anEvent) {
 					enqueueReadd();
@@ -172,4 +172,20 @@ public class JsTree extends TreeAdapter<JavaScriptObject> implements JsDataConta
 	@Override
 	public void remove(JavaScriptObject anElement) {
 	}
+
+	@Override
+	public void changedItems(JavaScriptObject anArray) {
+		enqueueChanges();
+	}
+
+	@Override
+	public void addedItems(JavaScriptObject anArray) {
+		enqueueReadd();
+	}
+
+	@Override
+	public void removedItems(JavaScriptObject anArray) {
+		enqueueReadd();
+	}
+
 }

@@ -18,7 +18,7 @@ public interface Tree<T> {
 
     public interface ChangeHandler<T> {
 
-        public void removed(T aSubject, T aRemovedFrom);
+        public void removed(T aSubject);
 
         public void added(T aSubject);
         
