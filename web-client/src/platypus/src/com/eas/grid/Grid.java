@@ -255,7 +255,7 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 		};
 		scrollableLeftContainer = new ScrollPanel(scrollableLeft);
 		scrollableRight = new GridSection<T>(aKeyProvider) {
-
+		    
 			@Override
 			protected void replaceAllChildren(List<T> values, SafeHtml html) {
 				super.replaceAllChildren(values, html);
@@ -1486,20 +1486,20 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 		checkRenderingCompleted();
 	}
 	
-	private boolean renderingCompletedChecking;
+	private ScheduledCommand renderingCompletedCommand;
 	
 	private void checkRenderingCompleted(){
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+	    renderingCompletedCommand = new ScheduledCommand() {
 
-			@Override
-			public void execute() {
-				if (renderingCompletedChecking) {
-					renderingCompleted();
-					renderingCompletedChecking = false;
-				}
-			}
-		});
-		renderingCompletedChecking = true;
+            @Override
+            public void execute() {
+                if (renderingCompletedCommand == this) {
+                    renderingCompletedCommand = null;
+                    renderingCompleted();
+                }
+            }
+        };
+		Scheduler.get().scheduleDeferred(renderingCompletedCommand);
 	}
 
 	protected void renderingCompleted(){

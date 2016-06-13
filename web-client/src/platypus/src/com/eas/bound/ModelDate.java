@@ -126,6 +126,9 @@ public class ModelDate extends ModelDecoratorBox<Date> implements HasEmptyText, 
 
 	private native static void publish(ModelDate aWidget, JavaScriptObject aPublished)/*-{
 		var B = @com.eas.core.Predefine::boxing;
+        aPublished.redraw = function(){
+            aWidget.@com.eas.bound.ModelDate::rebind()();
+        };
 		Object.defineProperty(aPublished, "emptyText", {
 			get : function() {
 				return aWidget.@com.eas.ui.HasEmptyText::getEmptyText()();
