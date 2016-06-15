@@ -690,6 +690,8 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
                 }
             };
             addValueChangeListener(boundToValue);
+        } else {
+            setJsValue(null);
         }
     }
 
