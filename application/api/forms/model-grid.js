@@ -37,10 +37,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onMouseReleased = aValue;
+                delegate.onMouseReleased = B.boxAsJava(aValue);
             }
         });
 
@@ -84,10 +84,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onComponentMoved", {
             get: function() {
                 var value = delegate.onComponentMoved;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onComponentMoved = aValue;
+                delegate.onComponentMoved = B.boxAsJava(aValue);
             }
         });
 
@@ -149,10 +149,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onMouseEntered = aValue;
+                delegate.onMouseEntered = B.boxAsJava(aValue);
             }
         });
 
@@ -199,10 +199,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onComponentShown = aValue;
+                delegate.onComponentShown = B.boxAsJava(aValue);
             }
         });
 
@@ -227,24 +227,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
                 var value = delegate.onComponentHidden;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onComponentHidden = aValue;
-            }
-        });
-
-        /**
-         * Main action performed event handler function.
-         */
-        this.onActionPerformed = new Object();
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = aValue;
+                delegate.onComponentHidden = B.boxAsJava(aValue);
             }
         });
 
@@ -259,6 +245,20 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.onKeyReleased = aValue;
+            }
+        });
+
+        /**
+         * Main action performed event handler function.
+         */
+        this.onActionPerformed = new Object();
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return B.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = B.boxAsJava(aValue);
             }
         });
 
@@ -283,10 +283,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onKeyTyped", {
             get: function() {
                 var value = delegate.onKeyTyped;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onKeyTyped = aValue;
+                delegate.onKeyTyped = B.boxAsJava(aValue);
             }
         });
 
@@ -297,10 +297,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onMouseWheelMoved", {
             get: function() {
                 var value = delegate.onMouseWheelMoved;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onMouseWheelMoved = aValue;
+                delegate.onMouseWheelMoved = B.boxAsJava(aValue);
             }
         });
 
@@ -390,10 +390,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onAfterRender", {
             get: function() {
                 var value = delegate.onAfterRender;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onAfterRender = aValue;
+                delegate.onAfterRender = B.boxAsJava(aValue);
             }
         });
 
@@ -415,10 +415,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onMouseDragged = aValue;
+                delegate.onMouseDragged = B.boxAsJava(aValue);
             }
         });
 
@@ -429,10 +429,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onCollapse", {
             get: function() {
                 var value = delegate.onCollapse;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onCollapse = aValue;
+                delegate.onCollapse = B.boxAsJava(aValue);
             }
         });
 
@@ -553,10 +553,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onComponentResized = aValue;
+                delegate.onComponentResized = B.boxAsJava(aValue);
             }
         });
 
@@ -712,10 +712,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onMouseClicked = aValue;
+                delegate.onMouseClicked = B.boxAsJava(aValue);
             }
         });
 
@@ -748,20 +748,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         });
 
         /**
-         * The color of the grid.
-         */
-        this.gridColor = new Object();
-        Object.defineProperty(this, "gridColor", {
-            get: function() {
-                var value = delegate.gridColor;
-                return B.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.gridColor = B.boxAsJava(aValue);
-            }
-        });
-
-        /**
          * Determines if grid shows horizontal lines.
          */
         this.showHorizontalLines = true;
@@ -772,6 +758,20 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.showHorizontalLines = B.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * The color of the grid.
+         */
+        this.gridColor = new Object();
+        Object.defineProperty(this, "gridColor", {
+            get: function() {
+                var value = delegate.gridColor;
+                return B.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.gridColor = B.boxAsJava(aValue);
             }
         });
 
@@ -818,10 +818,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onKeyPressed = aValue;
+                delegate.onKeyPressed = B.boxAsJava(aValue);
             }
         });
 
@@ -851,13 +851,14 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
     /**
-     * Tries to acquire focus for this component.
-     * @method focus
+     * Selects the specified element.
+     * @param instance Entity's instance to be selected.
+     * @method select
      * @memberOf ModelGrid
      */
-    ModelGrid.prototype.focus = function() {
+    ModelGrid.prototype.select = function(instance) {
         var delegate = this.unwrap();
-        var value = delegate.focus();
+        var value = delegate.select(B.boxAsJava(instance));
         return B.boxAsJs(value);
     };
 
@@ -873,14 +874,82 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
     /**
-     * Makes node of specified .data array element collapsed.
-     * @param instance .data array element to collapsed.
-     * @method collapse
+     *
+     * @method elementByModelIndex
      * @memberOf ModelGrid
      */
-    ModelGrid.prototype.collapse = function(instance) {
+    ModelGrid.prototype.elementByModelIndex = function(arg0) {
         var delegate = this.unwrap();
-        var value = delegate.collapse(B.boxAsJava(instance));
+        var value = delegate.elementByModelIndex(B.boxAsJava(arg0));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Notifies the grid about some elements have been removed from grid's rows array.
+     * @param aRemoved Array of removed objects.
+     * @method removed
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.removed = function(aRemoved) {
+        var delegate = this.unwrap();
+        var value = delegate.removed(B.boxAsJava(aRemoved));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Notifies the grid about data have been changed.
+     * @param aChanged Array of changed objects.
+     * @method changed
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.changed = function(aChanged) {
+        var delegate = this.unwrap();
+        var value = delegate.changed(B.boxAsJava(aChanged));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Notifies the grid about some elements have been added to grid's rows array.
+     * @param aAdded Array of added objects.
+     * @method added
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.added = function(aAdded) {
+        var delegate = this.unwrap();
+        var value = delegate.added(B.boxAsJava(aAdded));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Redraw the component.
+     * @method redraw
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.redraw = function() {
+        var delegate = this.unwrap();
+        var value = delegate.redraw();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     *
+     * @method columnNodes
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.columnNodes = function() {
+        var delegate = this.unwrap();
+        var value = delegate.columnNodes();
         return B.boxAsJs(value);
     };
 
@@ -893,18 +962,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     ModelGrid.prototype.unselect = function(instance) {
         var delegate = this.unwrap();
         var value = delegate.unselect(B.boxAsJava(instance));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Selects the specified element.
-     * @param instance Entity's instance to be selected.
-     * @method select
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.select = function(instance) {
-        var delegate = this.unwrap();
-        var value = delegate.select(B.boxAsJava(instance));
         return B.boxAsJs(value);
     };
 
@@ -922,14 +979,13 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
     /**
-     * Makes node of specified .data array element expanded if it was already collapsed and collapsed otherwise.
-     * @param instance .data array element to expand or collpase.
-     * @method toggle
+     *
+     * @method addColumnNode
      * @memberOf ModelGrid
      */
-    ModelGrid.prototype.toggle = function(instance) {
+    ModelGrid.prototype.addColumnNode = function(arg0) {
         var delegate = this.unwrap();
-        var value = delegate.toggle(B.boxAsJava(instance));
+        var value = delegate.addColumnNode(B.boxAsJava(arg0));
         return B.boxAsJs(value);
     };
 
@@ -946,78 +1002,25 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
     /**
-     *
-     * @method elementByModelIndex
+     * Makes node of specified .data array element collapsed.
+     * @param instance .data array element to collapsed.
+     * @method collapse
      * @memberOf ModelGrid
      */
-    ModelGrid.prototype.elementByModelIndex = function(arg0) {
+    ModelGrid.prototype.collapse = function(instance) {
         var delegate = this.unwrap();
-        var value = delegate.elementByModelIndex(B.boxAsJava(arg0));
+        var value = delegate.collapse(B.boxAsJava(instance));
         return B.boxAsJs(value);
     };
 
     /**
      *
-     * @method try2StopAnyEditing
+     * @method insertColumnNode
      * @memberOf ModelGrid
      */
-    ModelGrid.prototype.try2StopAnyEditing = function() {
+    ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
         var delegate = this.unwrap();
-        var value = delegate.try2StopAnyEditing();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     *
-     * @method try2CancelAnyEditing
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.try2CancelAnyEditing = function() {
-        var delegate = this.unwrap();
-        var value = delegate.try2CancelAnyEditing();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Redraw the component.
-     * @method redraw
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.redraw = function() {
-        var delegate = this.unwrap();
-        var value = delegate.redraw();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * @method unsort
-     * @memberOf ModelGrid
-     * Clears sort on all columns, works only in HTML5 */
-    ModelGrid.prototype.unsort = function() {
-        var delegate = this.unwrap();
-        var value = delegate.unsort();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     *
-     * @method addColumnNode
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.addColumnNode = function(arg0) {
-        var delegate = this.unwrap();
-        var value = delegate.addColumnNode(B.boxAsJava(arg0));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     *
-     * @method columnNodes
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.columnNodes = function() {
-        var delegate = this.unwrap();
-        var value = delegate.columnNodes();
+        var value = delegate.insertColumnNode(B.boxAsJava(arg0), B.boxAsJava(arg1));
         return B.boxAsJs(value);
     };
 
@@ -1033,13 +1036,46 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
     /**
-     *
-     * @method insertColumnNode
+     * Makes node of specified .data array element expanded if it was already collapsed and collapsed otherwise.
+     * @param instance .data array element to expand or collpase.
+     * @method toggle
      * @memberOf ModelGrid
      */
-    ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
+    ModelGrid.prototype.toggle = function(instance) {
         var delegate = this.unwrap();
-        var value = delegate.insertColumnNode(B.boxAsJava(arg0), B.boxAsJava(arg1));
+        var value = delegate.toggle(B.boxAsJava(instance));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * @method unsort
+     * @memberOf ModelGrid
+     * Clears sort on all columns, works only in HTML5 */
+    ModelGrid.prototype.unsort = function() {
+        var delegate = this.unwrap();
+        var value = delegate.unsort();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     *
+     * @method try2CancelAnyEditing
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.try2CancelAnyEditing = function() {
+        var delegate = this.unwrap();
+        var value = delegate.try2CancelAnyEditing();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     *
+     * @method try2StopAnyEditing
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.try2StopAnyEditing = function() {
+        var delegate = this.unwrap();
+        var value = delegate.try2StopAnyEditing();
         return B.boxAsJs(value);
     };
 

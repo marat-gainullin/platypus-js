@@ -38,10 +38,10 @@ define(['boxing'], function(B) {
         Object.defineProperty(this, "onerror", {
             get: function() {
                 var value = delegate.onerror;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onerror = aValue;
+                delegate.onerror = B.boxAsJava(aValue);
             }
         });
 

@@ -33,6 +33,17 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
+        this.editor = new Object();
+        Object.defineProperty(this, "editor", {
+            get: function() {
+                var value = delegate.editor;
+                return B.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.editor = B.boxAsJava(aValue);
+            }
+        });
+
         this.visible = true;
         Object.defineProperty(this, "visible", {
             get: function() {
@@ -106,10 +117,21 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onSelect", {
             get: function() {
                 var value = delegate.onSelect;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onSelect = aValue;
+                delegate.onSelect = B.boxAsJava(aValue);
+            }
+        });
+
+        this.view = new Object();
+        Object.defineProperty(this, "view", {
+            get: function() {
+                var value = delegate.view;
+                return B.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.view = B.boxAsJava(aValue);
             }
         });
 
@@ -225,13 +247,13 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
     /**
-     * Clears sort column, works only in HTML5
-     * @method unsort
+     *
+     * @method columnNodes
      * @memberOf ModelGridColumn
      */
-    ModelGridColumn.prototype.unsort = function() {
+    ModelGridColumn.prototype.columnNodes = function() {
         var delegate = this.unwrap();
-        var value = delegate.unsort();
+        var value = delegate.columnNodes();
         return B.boxAsJs(value);
     };
 
@@ -248,12 +270,12 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
 
     /**
      *
-     * @method columnNodes
+     * @method insertColumnNode
      * @memberOf ModelGridColumn
      */
-    ModelGridColumn.prototype.columnNodes = function() {
+    ModelGridColumn.prototype.insertColumnNode = function(position, node) {
         var delegate = this.unwrap();
-        var value = delegate.columnNodes();
+        var value = delegate.insertColumnNode(B.boxAsJava(position), B.boxAsJava(node));
         return B.boxAsJs(value);
     };
 
@@ -269,13 +291,13 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
     /**
-     *
-     * @method insertColumnNode
+     * Clears sort column, works only in HTML5
+     * @method unsort
      * @memberOf ModelGridColumn
      */
-    ModelGridColumn.prototype.insertColumnNode = function(position, node) {
+    ModelGridColumn.prototype.unsort = function() {
         var delegate = this.unwrap();
-        var value = delegate.insertColumnNode(B.boxAsJava(position), B.boxAsJava(node));
+        var value = delegate.unsort();
         return B.boxAsJs(value);
     };
 

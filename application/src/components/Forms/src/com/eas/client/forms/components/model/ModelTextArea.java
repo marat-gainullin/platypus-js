@@ -4,7 +4,6 @@
  */
 package com.eas.client.forms.components.model;
 
-import static com.eas.client.forms.HasJsValue.JS_VALUE_JSDOC;
 import com.eas.client.forms.components.rt.HasEditable;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.components.rt.VTextArea;

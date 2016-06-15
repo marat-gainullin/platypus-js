@@ -29,10 +29,10 @@ define(['boxing'], function(B) {
         Object.defineProperty(this, "onRequeried", {
             get: function() {
                 var value = delegate.onRequeried;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onRequeried = aValue;
+                delegate.onRequeried = B.boxAsJava(aValue);
             }
         });
 

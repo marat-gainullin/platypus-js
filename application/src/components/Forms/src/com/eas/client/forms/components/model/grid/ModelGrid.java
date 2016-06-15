@@ -1354,38 +1354,68 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     }
 
     private static final String CHANGED_JS_DOC = ""
-            + "/**"
-            + " * Notifies the grid about data have ben changed."
-            + " * @param aChanged Array of changed objects."
+            + "/**\n"
+            + " * Notifies the grid about data have been changed.\n"
+            + " * @param aChanged Array of changed objects.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = CHANGED_JS_DOC, params = "aChanged")
-    public void changed(JSObject aChangedItems){
-        rowsModel.fireElementsDataChanged();
+    public void changed(JSObject aChangedItems) {
+        if (aChangedItems.hasMember("length") && JSType.toNumber(aChangedItems.getMember("length")) > 0) {
+            rowsModel.fireElementsDataChanged();
+        }
     }
-    
+
     private static final String ADDED_JS_DOC = ""
-            + "/**"
-            + " * Notifies the grid about data have ben changed."
-            + " * @param aAdded Array of added objects."
+            + "/**\n"
+            + " * Notifies the grid about some elements have been added to grid's rows array.\n"
+            + " * @param aAdded Array of added objects.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = ADDED_JS_DOC, params = "aAdded")
-    public void added(JSObject aChangedItems){
-        rowsModel.fireElementsChanged();
+    public void added(JSObject aAddedItems) {
+        if (aAddedItems.hasMember("length")) {
+            int length = (int) Math.round(JSType.toNumber(aAddedItems.getMember("length")));
+            if (length > 0) {
+                Object lastAdded = aAddedItems.getSlot(length - 1);
+                ListSelectionModel columnSelection = saveColumnsSelection();
+                rowsModel.fireElementsChanged();
+                EventQueue.invokeLater(() -> {
+                    try {
+                        if (!JSType.nullOrUndefined(lastAdded) && lastAdded instanceof JSObject) {
+                            makeVisible((JSObject) lastAdded);
+                        }
+                        restoreColumnsSelection(columnSelection);
+                    } catch (Exception ex) {
+                        Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                });
+            }
+        }
     }
-    
+
     private static final String REMOVED_JS_DOC = ""
-            + "/**"
-            + " * Notifies the grid about data have ben changed."
-            + " * @param aRemoved Array of removed objects."
+            + "/**\n"
+            + " * Notifies the grid about some elements have been removed from grid's rows array.\n"
+            + " * @param aRemoved Array of removed objects.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = REMOVED_JS_DOC, params = "aRemoved")
-    public void removed(JSObject aChangedItems){
-        rowsModel.fireElementsChanged();
+    public void removed(JSObject aRemovedItems) {
+        if (aRemovedItems.hasMember("length") && JSType.toNumber(aRemovedItems.getMember("length")) > 0) {
+            ListSelectionModel wasSeletedRows = saveRowsSelection();
+            ListSelectionModel wasSeletedColumns = saveColumnsSelection();
+            try {
+                rowsModel.fireElementsChanged();
+            } finally {
+                EventQueue.invokeLater(() -> {
+                    restoreRowsSelection(wasSeletedRows);
+                    restoreColumnsSelection(wasSeletedColumns);
+                });
+            }
+        }
     }
-    
+
     @Undesignable
     public List<GridColumnsNode> getHeader() {
         return header;
@@ -1448,7 +1478,6 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         try {
             if (insertable && rowsModel.getData() != null && rowsModel.getData().hasMember("splice")) {
                 JSObject ldata = rowsModel.getData();
-                ListSelectionModel columnSelection = saveColumnsSelection();
                 JSObject jsSplice = (JSObject) ldata.getMember("splice");
                 JSObject jsIndexOf = (JSObject) ldata.getMember("indexOf");
                 Object oElementClass = ldata.getMember("elementClass");
@@ -1472,18 +1501,8 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                     }
                 } finally {
                     rowsSelectionModel.addListSelectionListener(generalSelectionChangesReflector);
+
                 }
-                if (isAutoRedraw()) {
-                    redraw();
-                }
-                EventQueue.invokeLater(() -> {
-                    try {
-                        makeVisible(jsCreated);
-                        restoreColumnsSelection(columnSelection);
-                    } catch (Exception ex) {
-                        Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                });
             }
         } catch (Exception ex) {
             Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, null, ex);
@@ -1516,34 +1535,22 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         if (deletable && rowsModel.getData() != null && rowsModel.getData().hasMember("splice")) {
             JSObject ldata = rowsModel.getData();
             JSObject jsSplice = (JSObject) ldata.getMember("splice");
-            ListSelectionModel wasSeletedRows = saveRowsSelection();
-            ListSelectionModel wasSeletedColumns = saveColumnsSelection();
-            try {
-                Set<Object> elements = new HashSet<>();
-                for (int viewRowIndex = rowsSelectionModel.getMinSelectionIndex(); viewRowIndex <= rowsSelectionModel.getMaxSelectionIndex(); viewRowIndex++) {
-                    if (rowsSelectionModel.isSelectedIndex(viewRowIndex)) {
-                        // We have to act upon model coordinates here!
-                        JSObject element = elementByViewIndex(viewRowIndex);
-                        if (element != null) {
-                            elements.add(element);
-                        }
+            Set<Object> elements = new HashSet<>();
+            for (int viewRowIndex = rowsSelectionModel.getMinSelectionIndex(); viewRowIndex <= rowsSelectionModel.getMaxSelectionIndex(); viewRowIndex++) {
+                if (rowsSelectionModel.isSelectedIndex(viewRowIndex)) {
+                    // We have to act upon model coordinates here!
+                    JSObject element = elementByViewIndex(viewRowIndex);
+                    if (element != null) {
+                        elements.add(element);
                     }
                 }
-                int length = JSType.toInteger(ldata.getMember("length"));
-                for (int i = length - 1; i >= 0; i--) {
-                    Object oElement = ldata.getSlot(i);
-                    if (elements.contains(oElement)) {
-                        jsSplice.call(ldata, new Object[]{i, 1});
-                    }
+            }
+            int length = JSType.toInteger(ldata.getMember("length"));
+            for (int i = length - 1; i >= 0; i--) {
+                Object oElement = ldata.getSlot(i);
+                if (elements.contains(oElement)) {
+                    jsSplice.call(ldata, new Object[]{i, 1});
                 }
-                if (isAutoRedraw()) {
-                    redraw();
-                }
-            } finally {
-                EventQueue.invokeLater(() -> {
-                    restoreRowsSelection(wasSeletedRows);
-                    restoreColumnsSelection(wasSeletedColumns);
-                });
             }
         }
     }
@@ -1566,6 +1573,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         for (int viewColumnIndex = aSeleted.getMinSelectionIndex(); viewColumnIndex <= aSeleted.getMaxSelectionIndex(); viewColumnIndex++) {
             if (viewColumnIndex >= 0 && viewColumnIndex < columnModel.getColumnCount()) {
                 columnsSelectionModel.addSelectionInterval(viewColumnIndex, viewColumnIndex);
+
             }
         }
     }
@@ -1574,30 +1582,28 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
         @Override
         public void valueChanged(ListSelectionEvent e) {
-            if (rowsSelectionModel.getLeadSelectionIndex() != -1) {
+            try {
+                if (!try2StopAnyEditing()) {
+                    try2CancelAnyEditing();
+                }
+                Object oModelData = field != null && !field.isEmpty() ? ModelWidget.getPathData(data, field) : data;
+                JSObject modelData = oModelData instanceof JSObject ? (JSObject) oModelData : null;
+                if (modelData != null) {
+                    JSObject jsNewCursor = rowsSelectionModel.getLeadSelectionIndex() != -1 ? elementByViewIndex(rowsSelectionModel.getLeadSelectionIndex()) : null;
+                    if (modelData.hasMember(cursorProperty)) {
+                        modelData.setMember(cursorProperty, jsNewCursor);
+                    }
+                }
+                repaint();
+            } catch (Exception ex) {
+                Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if (onItemSelected != null) {
                 try {
-                    if (!try2StopAnyEditing()) {
-                        try2CancelAnyEditing();
-                    }
-                    Object oModelData = field != null && !field.isEmpty() ? ModelWidget.getPathData(data, field) : data;
-                    JSObject modelData = oModelData instanceof JSObject ? (JSObject) oModelData : null;
-                    if (modelData != null) {
-                        JSObject jsNewCursor = elementByViewIndex(rowsSelectionModel.getLeadSelectionIndex());
-                        if (jsNewCursor != null && modelData.hasMember(cursorProperty)) {
-                            modelData.setMember(cursorProperty, jsNewCursor);
-                        }
-                    }
-                    repaint();
+                    JSObject jsItem = elementByViewIndex(rowsSelectionModel.getLeadSelectionIndex());
+                    onItemSelected.call(getPublished(), new Object[]{new com.eas.client.forms.events.ItemEvent(ModelGrid.this, jsItem).getPublished()});
                 } catch (Exception ex) {
                     Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                if (onItemSelected != null) {
-                    try {
-                        JSObject jsItem = elementByViewIndex(rowsSelectionModel.getLeadSelectionIndex());
-                        onItemSelected.call(getPublished(), new Object[]{new com.eas.client.forms.events.ItemEvent(ModelGrid.this, jsItem).getPublished()});
-                    } catch (Exception ex) {
-                        Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, null, ex);
-                    }
                 }
             }
         }
@@ -2097,7 +2103,9 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
             focusedTable = brTable;
         }
         return focusedTable;
+
     }
+
     /*
      private String transformCellValue(Object aValue, int aCol, boolean isData) {
      if (aValue != null) {
@@ -2201,7 +2209,6 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
      }
      }
      */
-
     protected class TablesMousePropagator implements MouseListener, MouseMotionListener, MouseWheelListener {
 
         @Override
@@ -2485,6 +2492,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
             insertElementAtCursor();
         }
     }
+
     /*
      protected class DbGridInsertChildAction extends AbstractAction {
 
@@ -2641,7 +2649,6 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
      }
      }
      */
-
     protected class ModelGridFindSomethingAction extends AbstractAction {
 
         protected JFrame findFrame;
