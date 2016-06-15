@@ -1353,6 +1353,39 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         configureTreedView();
     }
 
+    private static final String CHANGED_JS_DOC = ""
+            + "/**"
+            + " * Notifies the grid about data have ben changed."
+            + " * @param aChanged Array of changed objects."
+            + " */";
+    
+    @ScriptFunction(jsDoc = CHANGED_JS_DOC, params = "aChanged")
+    public void changed(JSObject aChangedItems){
+        rowsModel.fireElementsDataChanged();
+    }
+    
+    private static final String ADDED_JS_DOC = ""
+            + "/**"
+            + " * Notifies the grid about data have ben changed."
+            + " * @param aAdded Array of added objects."
+            + " */";
+    
+    @ScriptFunction(jsDoc = ADDED_JS_DOC, params = "aAdded")
+    public void added(JSObject aChangedItems){
+        rowsModel.fireElementsChanged();
+    }
+    
+    private static final String REMOVED_JS_DOC = ""
+            + "/**"
+            + " * Notifies the grid about data have ben changed."
+            + " * @param aRemoved Array of removed objects."
+            + " */";
+    
+    @ScriptFunction(jsDoc = REMOVED_JS_DOC, params = "aRemoved")
+    public void removed(JSObject aChangedItems){
+        rowsModel.fireElementsChanged();
+    }
+    
     @Undesignable
     public List<GridColumnsNode> getHeader() {
         return header;
@@ -1782,17 +1815,17 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         return aCandidate.hasMember("onRequeried") && aCandidate.hasMember("append");
     }
 
-    protected boolean redrawEnqueued;
+    protected Runnable redrawEnqueued;
 
     @Override
     public void enqueueRedraw() {
-        redrawEnqueued = true;
-        EventQueue.invokeLater(() -> {
-            if (redrawEnqueued) {
-                redrawEnqueued = false;
+        redrawEnqueued = () -> {
+            if (redrawEnqueued == this) {
+                redrawEnqueued = null;
                 redraw();
             }
-        });
+        };
+        EventQueue.invokeLater(redrawEnqueued);
     }
 
     public TableColumnModel getColumnModel() {
