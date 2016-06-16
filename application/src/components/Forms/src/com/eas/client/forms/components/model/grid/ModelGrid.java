@@ -1374,6 +1374,8 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     @ScriptFunction(jsDoc = ADDED_JS_DOC, params = "aAdded")
     public void added(JSObject aAddedItems) {
+        rowsModel.fireElementsChanged();
+        /*
         if (aAddedItems.hasMember("length")) {
             int length = (int) Math.round(JSType.toNumber(aAddedItems.getMember("length")));
             if (length > 0) {
@@ -1392,6 +1394,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                 });
             }
         }
+        */
     }
 
     private static final String REMOVED_JS_DOC = ""
@@ -1402,6 +1405,8 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     @ScriptFunction(jsDoc = REMOVED_JS_DOC, params = "aRemoved")
     public void removed(JSObject aRemovedItems) {
+        rowsModel.fireElementsChanged();
+        /*
         if (aRemovedItems.hasMember("length") && JSType.toNumber(aRemovedItems.getMember("length")) > 0) {
             ListSelectionModel wasSeletedRows = saveRowsSelection();
             ListSelectionModel wasSeletedColumns = saveColumnsSelection();
@@ -1414,6 +1419,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                 });
             }
         }
+        */
     }
 
     @Undesignable
@@ -1501,7 +1507,6 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                     }
                 } finally {
                     rowsSelectionModel.addListSelectionListener(generalSelectionChangesReflector);
-
                 }
             }
         } catch (Exception ex) {

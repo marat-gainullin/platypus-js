@@ -60,6 +60,20 @@ define(['boxing'], function(B) {
     };
 
     /**
+     * Creates new entity of model, based on passed sql query. This method works only in two tier components of a system.
+     * @param sqlText SQL text for the new entity.
+     * @param datasourceName the concrete database ID (optional).
+     * @return an entity instance.
+     * @method createEntity
+     * @memberOf ApplicationDbModel
+     */
+    ApplicationDbModel.prototype.createEntity = function(sqlText, datasourceName) {
+        var delegate = this.unwrap();
+        var value = delegate.createEntity(B.boxAsJava(sqlText), B.boxAsJava(datasourceName));
+        return B.boxAsJs(value);
+    };
+
+    /**
      * Executes a SQL query against specific datasource. This method works only in two tier components of a system.
      * @param sqlText SQL text for the new entity.
      * @param datasourceName. The specific databsource name (optional).
@@ -72,20 +86,6 @@ define(['boxing'], function(B) {
     ApplicationDbModel.prototype.executeSql = function(sqlText, datasourceName, arg2, arg3) {
         var delegate = this.unwrap();
         var value = delegate.executeSql(B.boxAsJava(sqlText), B.boxAsJava(datasourceName), B.boxAsJava(arg2), B.boxAsJava(arg3));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Creates new entity of model, based on passed sql query. This method works only in two tier components of a system.
-     * @param sqlText SQL text for the new entity.
-     * @param datasourceName the concrete database ID (optional).
-     * @return an entity instance.
-     * @method createEntity
-     * @memberOf ApplicationDbModel
-     */
-    ApplicationDbModel.prototype.createEntity = function(sqlText, datasourceName) {
-        var delegate = this.unwrap();
-        var value = delegate.createEntity(B.boxAsJava(sqlText), B.boxAsJava(datasourceName));
         return B.boxAsJs(value);
     };
 

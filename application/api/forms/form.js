@@ -114,10 +114,10 @@ define(['boxing'], function(B) {
         Object.defineProperty(this, "onWindowMinimized", {
             get: function() {
                 var value = delegate.onWindowMinimized;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onWindowMinimized = aValue;
+                delegate.onWindowMinimized = B.boxAsJava(aValue);
             }
         });
 
@@ -185,10 +185,10 @@ define(['boxing'], function(B) {
         Object.defineProperty(this, "onWindowActivated", {
             get: function() {
                 var value = delegate.onWindowActivated;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onWindowActivated = aValue;
+                delegate.onWindowActivated = B.boxAsJava(aValue);
             }
         });
 
@@ -361,10 +361,10 @@ define(['boxing'], function(B) {
         Object.defineProperty(this, "onWindowClosing", {
             get: function() {
                 var value = delegate.onWindowClosing;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onWindowClosing = aValue;
+                delegate.onWindowClosing = B.boxAsJava(aValue);
             }
         });
 
@@ -441,17 +441,6 @@ define(['boxing'], function(B) {
     };
 
     /**
-     * Restores this form state.
-     * @method restore
-     * @memberOf Form
-     */
-    Form.prototype.restore = function() {
-        var delegate = this.unwrap();
-        var value = delegate.restore();
-        return B.boxAsJs(value);
-    };
-
-    /**
      * Maximizes this form.
      * @method maximize
      * @memberOf Form
@@ -459,6 +448,17 @@ define(['boxing'], function(B) {
     Form.prototype.maximize = function() {
         var delegate = this.unwrap();
         var value = delegate.maximize();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Restores this form state.
+     * @method restore
+     * @memberOf Form
+     */
+    Form.prototype.restore = function() {
+        var delegate = this.unwrap();
+        var value = delegate.restore();
         return B.boxAsJs(value);
     };
 

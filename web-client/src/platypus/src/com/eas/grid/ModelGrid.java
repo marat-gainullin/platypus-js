@@ -183,47 +183,13 @@ public class ModelGrid extends Grid<JavaScriptObject>
 					if (activeEditor == null && getSelectionModel() instanceof SetSelectionModel<?>) {
 						final SetSelectionModel<JavaScriptObject> rowsSelection = (SetSelectionModel<JavaScriptObject>) getSelectionModel();
 						if (event.getNativeKeyCode() == KeyCodes.KEY_DELETE && deletable) {
-							final List<JavaScriptObject> viewElements = dataProvider.getList();
-							if (!viewElements.isEmpty() && rowsSelection.getSelectedSet() != null
-									&& !rowsSelection.getSelectedSet().isEmpty()) {
-								// calculate some view sugar
-								int lastSelectedViewIndex = -1;
-								for (int i = viewElements.size() - 1; i >= 0; i--) {
-									JavaScriptObject element = viewElements.get(i);
-									if (rowsSelection.isSelected(element)) {
-										lastSelectedViewIndex = i;
-										break;
-									}
-								}
-								// actually delete selected elements
-								int deletedAt = -1;
-								for (int i = jsData.length() - 1; i >= 0; i--) {
-									JavaScriptObject element = jsData.getSlot(i);
-									if (rowsSelection.isSelected(element)) {
-										jsData.splice(i, 1);
-										deletedAt = i;
-									}
-								}
-								final int viewIndexToSelect = lastSelectedViewIndex;
-								if(deletedAt > -1){
-									afterRender(new Runnable(){
-	
-										@Override
-										public void run() {
-											int vIndex = viewIndexToSelect;
-											if (vIndex >= 0 && !viewElements.isEmpty()) {
-												if (vIndex >= viewElements.size())
-													vIndex = viewElements.size() - 1;
-												JavaScriptObject toSelect = viewElements.get(vIndex);
-												makeVisible(toSelect, true);
-											} else {
-												ModelGrid.this.setFocus(true);
-											}
-										}
-										
-									});
-								}
-							}
+                            // delete selected elements
+                            for (int i = jsData.length() - 1; i >= 0; i--) {
+                                JavaScriptObject element = jsData.getSlot(i);
+                                if (rowsSelection.isSelected(element)) {
+                                    jsData.splice(i, 1);
+                                }
+                            }
 						} else if (event.getNativeKeyCode() == KeyCodes.KEY_INSERT && insertable) {
 							int insertAt = -1;
 							if (rowsSelection instanceof HasSelectionLead<?>
@@ -236,13 +202,6 @@ public class ModelGrid extends Grid<JavaScriptObject>
 								final JavaScriptObject inserted = elementClass != null ? elementClass.newObject()
 										: JavaScriptObject.createObject();
 								jsData.splice(insertAt, 0, inserted);
-								afterRender(new Runnable(){
-									
-									@Override
-									public void run() {
-										makeVisible(inserted, true);
-									}
-								});								
 							}
 						}
 					}
@@ -335,20 +294,20 @@ public class ModelGrid extends Grid<JavaScriptObject>
 		});
 	}
 
-	protected boolean redrawQueued;
+	protected ScheduledCommand redrawQueued;
 
 	private void enqueueRedraw() {
-		redrawQueued = true;
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+		redrawQueued = new ScheduledCommand() {
 
-			@Override
-			public void execute() {
-				if (redrawQueued) {
-					redrawQueued = false;
-					redraw();
-				}
-			}
-		});
+            @Override
+            public void execute() {
+                if (redrawQueued == this) {
+                    redrawQueued = null;
+                    redraw();
+                }
+            }
+        };
+		Scheduler.get().scheduleDeferred(redrawQueued);
 	}
 
 	protected void applyRows() {
@@ -449,7 +408,9 @@ public class ModelGrid extends Grid<JavaScriptObject>
 
 	@Override
 	public void setDataProvider(ListDataProvider<JavaScriptObject> aDataProvider) {
-		((JsDataContainer) getDataProvider()).setData(null);
+	    if(getDataProvider() != null){
+	        ((JsDataContainer) getDataProvider()).setData(null);
+	    }
 		super.setDataProvider(aDataProvider);
 		checkTreeIndicatorColumnDataProvider();
 	}
@@ -599,7 +560,7 @@ public class ModelGrid extends Grid<JavaScriptObject>
 	@Override
 	protected void renderingCompleted() {
 		super.renderingCompleted();
-		for(Runnable task : onAfterRenderTasks){
+		for(final Runnable task : onAfterRenderTasks){
 			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 				
 				@Override
@@ -1483,7 +1444,7 @@ public class ModelGrid extends Grid<JavaScriptObject>
 		}
 	}
 
-	public void willBeVisible(JavaScriptObject anElement, boolean aNeedToSelect){
+	public void willBeVisible(final JavaScriptObject anElement, final boolean aNeedToSelect){
 	    redraw(); // force rendering request to avoid makeVisible() deferring on an undefined moment in the future. 
 	    afterRender(new Runnable(){
 

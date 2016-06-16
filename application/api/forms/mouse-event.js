@@ -46,6 +46,17 @@ define(['boxing'], function(B) {
         });
 
         /**
+         * The number of mouse clicks associated with this event.
+         */
+        this.clickCount = 0;
+        Object.defineProperty(this, "clickCount", {
+            get: function() {
+                var value = delegate.clickCount;
+                return B.boxAsJs(value);
+            }
+        });
+
+        /**
          * Ctrl key is down on this event.
          */
         this.controlDown = true;
@@ -68,12 +79,12 @@ define(['boxing'], function(B) {
         });
 
         /**
-         * The number of mouse clicks associated with this event.
+         * X cursor coordinate in component's space.
          */
-        this.clickCount = 0;
-        Object.defineProperty(this, "clickCount", {
+        this.x = 0;
+        Object.defineProperty(this, "x", {
             get: function() {
-                var value = delegate.clickCount;
+                var value = delegate.x;
                 return B.boxAsJs(value);
             }
         });
@@ -85,17 +96,6 @@ define(['boxing'], function(B) {
         Object.defineProperty(this, "metaDown", {
             get: function() {
                 var value = delegate.metaDown;
-                return B.boxAsJs(value);
-            }
-        });
-
-        /**
-         * X cursor coordinate in component's space.
-         */
-        this.x = 0;
-        Object.defineProperty(this, "x", {
-            get: function() {
-                var value = delegate.x;
                 return B.boxAsJs(value);
             }
         });

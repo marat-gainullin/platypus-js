@@ -27,10 +27,10 @@ define(['boxing'], function(B) {
         Object.defineProperty(this, "onmessage", {
             get: function() {
                 var value = delegate.onmessage;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onmessage = aValue;
+                delegate.onmessage = B.boxAsJava(aValue);
             }
         });
 
@@ -49,10 +49,10 @@ define(['boxing'], function(B) {
         Object.defineProperty(this, "onopen", {
             get: function() {
                 var value = delegate.onopen;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onopen = aValue;
+                delegate.onopen = B.boxAsJava(aValue);
             }
         });
 
@@ -68,10 +68,10 @@ define(['boxing'], function(B) {
         Object.defineProperty(this, "onclose", {
             get: function() {
                 var value = delegate.onclose;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onclose = aValue;
+                delegate.onclose = B.boxAsJava(aValue);
             }
         });
 

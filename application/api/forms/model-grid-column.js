@@ -117,10 +117,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onSelect", {
             get: function() {
                 var value = delegate.onSelect;
-                return B.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onSelect = B.boxAsJava(aValue);
+                delegate.onSelect = aValue;
             }
         });
 
@@ -248,28 +248,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
 
     /**
      *
-     * @method columnNodes
-     * @memberOf ModelGridColumn
-     */
-    ModelGridColumn.prototype.columnNodes = function() {
-        var delegate = this.unwrap();
-        var value = delegate.columnNodes();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     *
-     * @method addColumnNode
-     * @memberOf ModelGridColumn
-     */
-    ModelGridColumn.prototype.addColumnNode = function(node) {
-        var delegate = this.unwrap();
-        var value = delegate.addColumnNode(B.boxAsJava(node));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     *
      * @method insertColumnNode
      * @memberOf ModelGridColumn
      */
@@ -287,6 +265,28 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     ModelGridColumn.prototype.removeColumnNode = function(node) {
         var delegate = this.unwrap();
         var value = delegate.removeColumnNode(B.boxAsJava(node));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     *
+     * @method addColumnNode
+     * @memberOf ModelGridColumn
+     */
+    ModelGridColumn.prototype.addColumnNode = function(node) {
+        var delegate = this.unwrap();
+        var value = delegate.addColumnNode(B.boxAsJava(node));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     *
+     * @method columnNodes
+     * @memberOf ModelGridColumn
+     */
+    ModelGridColumn.prototype.columnNodes = function() {
+        var delegate = this.unwrap();
+        var value = delegate.columnNodes();
         return B.boxAsJs(value);
     };
 
