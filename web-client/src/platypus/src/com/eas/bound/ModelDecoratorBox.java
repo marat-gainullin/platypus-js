@@ -286,6 +286,12 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 
 			};
 			boundToValue = addValueChangeHandler(valueChangeHandler);
+		}else{
+            try {
+                setJsValue(null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 		}
 	}
 

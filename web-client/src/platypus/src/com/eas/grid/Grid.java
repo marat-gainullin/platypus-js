@@ -72,6 +72,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.SetSelectionModel;
 
 /**
  * 
@@ -1029,8 +1030,8 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 		scrollableRight.setSelectionModel(sModel);
 	}
 
-	public SelectionModel<? super T> getSelectionModel() {
-		return scrollableRight.getSelectionModel();
+	public SetSelectionModel<? super T> getSelectionModel() {
+		return (SetSelectionModel<? super T>)scrollableRight.getSelectionModel();
 	}
 
 	/**

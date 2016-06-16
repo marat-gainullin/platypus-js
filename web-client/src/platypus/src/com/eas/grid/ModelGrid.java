@@ -1,6 +1,7 @@
 package com.eas.grid;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -183,11 +184,45 @@ public class ModelGrid extends Grid<JavaScriptObject>
 					if (activeEditor == null && getSelectionModel() instanceof SetSelectionModel<?>) {
 						final SetSelectionModel<JavaScriptObject> rowsSelection = (SetSelectionModel<JavaScriptObject>) getSelectionModel();
 						if (event.getNativeKeyCode() == KeyCodes.KEY_DELETE && deletable) {
-                            // delete selected elements
-                            for (int i = jsData.length() - 1; i >= 0; i--) {
-                                JavaScriptObject element = jsData.getSlot(i);
-                                if (rowsSelection.isSelected(element)) {
-                                    jsData.splice(i, 1);
+                            final List<JavaScriptObject> viewElements = dataProvider.getList();
+                            if (!viewElements.isEmpty() && rowsSelection.getSelectedSet() != null
+                                    && !rowsSelection.getSelectedSet().isEmpty()) {
+                                // calculate some view sugar
+                                int lastSelectedViewIndex = -1;
+                                for (int i = viewElements.size() - 1; i >= 0; i--) {
+                                    JavaScriptObject element = viewElements.get(i);
+                                    if (rowsSelection.isSelected(element)) {
+                                        lastSelectedViewIndex = i;
+                                        break;
+                                    }
+                                }
+                                // actually delete selected elements
+                                int deletedAt = -1;
+                                for (int i = jsData.length() - 1; i >= 0; i--) {
+                                    JavaScriptObject element = jsData.getSlot(i);
+                                    if (rowsSelection.isSelected(element)) {
+                                        jsData.splice(i, 1);
+                                        deletedAt = i;
+                                    }
+                                }
+                                final int viewIndexToSelect = lastSelectedViewIndex;
+                                if(deletedAt > -1){
+                                    afterRender(new Runnable(){
+    
+                                        @Override
+                                        public void run() {
+                                            int vIndex = viewIndexToSelect;
+                                            if (vIndex >= 0 && !viewElements.isEmpty()) {
+                                                if (vIndex >= viewElements.size())
+                                                    vIndex = viewElements.size() - 1;
+                                                JavaScriptObject toSelect = viewElements.get(vIndex);
+                                                makeVisible(toSelect, true);
+                                            } else {
+                                                ModelGrid.this.setFocus(true);
+                                            }
+                                        }
+                                        
+                                    });
                                 }
                             }
 						} else if (event.getNativeKeyCode() == KeyCodes.KEY_INSERT && insertable) {
@@ -202,7 +237,14 @@ public class ModelGrid extends Grid<JavaScriptObject>
 								final JavaScriptObject inserted = elementClass != null ? elementClass.newObject()
 										: JavaScriptObject.createObject();
 								jsData.splice(insertAt, 0, inserted);
-							}
+                                afterRender(new Runnable(){
+                                    
+                                    @Override
+                                    public void run() {
+                                        makeVisible(inserted, true);
+                                    }
+                                }); 							
+                            }
 						}
 					}
 				}
@@ -324,6 +366,9 @@ public class ModelGrid extends Grid<JavaScriptObject>
 				if (sortList.size() > 0) {
 					sortList.clear();
 					redrawHeaders();
+				}
+				if(dataProvider == null || dataProvider.getList() == null || dataProvider.getList().isEmpty()){
+				    clearSelection();
 				}
 			}
 
@@ -1368,21 +1413,13 @@ public class ModelGrid extends Grid<JavaScriptObject>
 	}
 
 	public List<JavaScriptObject> getJsSelected() throws Exception {
-		List<JavaScriptObject> result = new ArrayList<>();
-		for (JavaScriptObject row : dataProvider.getList()) {
-			if (getSelectionModel().isSelected(row))
-				result.add(row);
-		}
-		return result;
+        SetSelectionModel<? super JavaScriptObject> sm = getSelectionModel();
+        return new ArrayList<JavaScriptObject>((Collection<JavaScriptObject>)sm.getSelectedSet());
 	}
 
 	public void clearSelection() {
-		SelectionModel<? super JavaScriptObject> sm = getSelectionModel();
-		for (JavaScriptObject row : dataProvider.getList()) {
-			if (getSelectionModel().isSelected(row)) {
-				sm.setSelected(row, false);
-			}
-		}
+		SetSelectionModel<? super JavaScriptObject> sm = getSelectionModel();
+		sm.clear();
 		pingGWTFinallyCommands();
 	}
 
