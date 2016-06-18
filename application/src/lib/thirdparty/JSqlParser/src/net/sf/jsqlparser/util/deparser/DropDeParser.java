@@ -34,16 +34,16 @@ public class DropDeParser {
     }
 
     public void deParse(Drop aDrop) {
-        buffer.append(aDrop.getComment() != null ? aDrop.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("Drop")
-              .append(aDrop.getTypeComment() != null ? " "+aDrop.getTypeComment()+ExpressionDeParser.LINE_SEPARATOR : "").append(" ")
+        buffer.append(aDrop.getComment() != null ? aDrop.getComment()+" "+ExpressionDeParser.EOL : "").append("Drop")
+              .append(aDrop.getTypeComment() != null ? " "+aDrop.getTypeComment()+ExpressionDeParser.EOL : "").append(" ")
               .append(aDrop.getType()).append(" ")
-              .append(aDrop.getNameComment() != null ? " "+aDrop.getNameComment()+ExpressionDeParser.LINE_SEPARATOR : "")  
+              .append(aDrop.getNameComment() != null ? " "+aDrop.getNameComment()+ExpressionDeParser.EOL : "")  
               .append(aDrop.getName()).append(" ");
         if (aDrop.getParameters() != null && aDrop.getParameters().size() > 0) {
             for (int i = 0; i < aDrop.getParameters().size(); i++) {
                   buffer.append(aDrop.getParameters().get(i)).append(" ");
                 if (i < aDrop.getParameters().size() - 1) {
-                    buffer.append(!"".equals(aDrop.getParametersComment().get(i)) ? " " + aDrop.getParametersComment().get(i)+ExpressionDeParser.LINE_SEPARATOR : "")
+                    buffer.append(!"".equals(aDrop.getParametersComment().get(i)) ? " " + aDrop.getParametersComment().get(i)+ExpressionDeParser.EOL : "")
                           .append(", ");
                 }
             }

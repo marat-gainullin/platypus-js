@@ -47,26 +47,26 @@ public class ReplaceDeParser implements ItemsListVisitor {
     }
 
     public void deParse(Replace replace) {
-        buffer.append(replace.getComment() != null ? replace.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("Replace ");
+        buffer.append(replace.getComment() != null ? replace.getComment()+" "+ExpressionDeParser.EOL : "").append("Replace ");
         if (replace.isUseInto()){
-            buffer.append(replace.getComment() != null ? replace.getCommentInto()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("Into ");
+            buffer.append(replace.getComment() != null ? replace.getCommentInto()+" "+ExpressionDeParser.EOL : "").append("Into ");
         }
-        buffer.append(replace.getComment() != null ? replace.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(replace.getTable().getWholeTableName());
+        buffer.append(replace.getComment() != null ? replace.getComment()+" "+ExpressionDeParser.EOL : "").append(replace.getTable().getWholeTableName());
         if (replace.getExpressions() != null && replace.getColumns() != null) {
-            buffer.append(replace.getCommentSet() != null ? " "+replace.getCommentSet()+ExpressionDeParser.LINE_SEPARATOR : "").append(" SET ");
+            buffer.append(replace.getCommentSet() != null ? " "+replace.getCommentSet()+ExpressionDeParser.EOL : "").append(" SET ");
             //each element from expressions match up with a column from columns.
             int columnsCounter = 0;
             for (int i = 0, s = replace.getColumns().size(); i < s; i++) {
                 Column column = (Column) replace.getColumns().get(i);
-                buffer.append(column.getComment() != null ? column.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(column.getWholeColumnName())
-                      .append(!replace.getCommentEqlasColums().get(i).toString().isEmpty()?" "+replace.getCommentEqlasColums().get(i)+ExpressionDeParser.LINE_SEPARATOR : "" ).append(" = ");
+                buffer.append(column.getComment() != null ? column.getComment()+" "+ExpressionDeParser.EOL : "").append(column.getWholeColumnName())
+                      .append(!replace.getCommentEqlasColums().get(i).toString().isEmpty()?" "+replace.getCommentEqlasColums().get(i)+ExpressionDeParser.EOL : "" ).append(" = ");
                 Expression expression = (Expression) replace.getExpressions().get(i);
                 expression.accept(expressionVisitor);
                 if (i < replace.getColumns().size() - 1) {
                     buffer.append(!replace.getCommentCommaExpr().get(i).toString().isEmpty()?" "+replace.getCommentCommaExpr().get(i)+" ":"");
                     if (columnsCounter++ == 2) {
                         columnsCounter = 0;
-                        buffer.append(ExpressionDeParser.LINE_SEPARATOR).append(", ");
+                        buffer.append(ExpressionDeParser.EOL).append(", ");
                     } else {
                         buffer.append(", ");
                     }
@@ -74,32 +74,32 @@ public class ReplaceDeParser implements ItemsListVisitor {
             }
         } else {
             if (replace.getColumns() != null) {
-                buffer.append(replace.getCommentBeforeColums() != null ? " "+replace.getCommentBeforeColums()+ExpressionDeParser.LINE_SEPARATOR : "").append(" (");
+                buffer.append(replace.getCommentBeforeColums() != null ? " "+replace.getCommentBeforeColums()+ExpressionDeParser.EOL : "").append(" (");
                 for (int i = 0; i < replace.getColumns().size(); i++) {
                     Column column = (Column) replace.getColumns().get(i);
-                    buffer.append(column.getComment() != null ? column.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(column.getWholeColumnName());
+                    buffer.append(column.getComment() != null ? column.getComment()+" "+ExpressionDeParser.EOL : "").append(column.getWholeColumnName());
                     if (i < replace.getColumns().size() - 1) {
-                        buffer.append(!"".equals(replace.getCommentCommaColums().get(i)) ? " " + replace.getCommentCommaColums().get(i)+ExpressionDeParser.LINE_SEPARATOR : "")
+                        buffer.append(!"".equals(replace.getCommentCommaColums().get(i)) ? " " + replace.getCommentCommaColums().get(i)+ExpressionDeParser.EOL : "")
                               .append(", ");
                     }
                 }
-                buffer.append(replace.getCommentAfterColums() != null ? replace.getCommentAfterColums()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(") ");
+                buffer.append(replace.getCommentAfterColums() != null ? replace.getCommentAfterColums()+" "+ExpressionDeParser.EOL : "").append(") ");
             }
         }
         if (replace.isUseValues()) {
             buffer.append(replace.getCommentValues() != null ? " "+replace.getCommentValues() : "")
-                  .append(ExpressionDeParser.LINE_SEPARATOR).append(" Values ")
-                  .append(replace.getCommentBeforeItems()!= null ? replace.getCommentBeforeItems()+" "+ExpressionDeParser.LINE_SEPARATOR : ""); 
+                  .append(ExpressionDeParser.EOL).append(" Values ")
+                  .append(replace.getCommentBeforeItems()!= null ? replace.getCommentBeforeItems()+" "+ExpressionDeParser.EOL : ""); 
         }
         replace.getItemsList().accept(this);
         if (replace.isUseValues()) {
-            buffer.append(replace.getCommentAfterItems() != null ? replace.getCommentAfterItems()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(")");
+            buffer.append(replace.getCommentAfterItems() != null ? replace.getCommentAfterItems()+" "+ExpressionDeParser.EOL : "").append(")");
         }
         buffer.append(!"".equals(replace.getEndComment()) ? " "+replace.getEndComment() : "");
     }
 
     public void visit(ExpressionList expressionList) {
-        buffer.append(ExpressionDeParser.LINE_SEPARATOR).append("(");
+        buffer.append(ExpressionDeParser.EOL).append("(");
         int valuesCounter = 0;
         for (Iterator iter = expressionList.getExpressions().iterator(); iter.hasNext();) {
             Expression expression = (Expression) iter.next();
@@ -107,7 +107,7 @@ public class ReplaceDeParser implements ItemsListVisitor {
             if (iter.hasNext()) {
                 if (valuesCounter++ == 2) {
                     valuesCounter = 0;
-                    buffer.append(ExpressionDeParser.LINE_SEPARATOR).append(", ");
+                    buffer.append(ExpressionDeParser.EOL).append(", ");
                 } else {
                     buffer.append(", ");
                 }

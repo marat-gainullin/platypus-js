@@ -15,6 +15,7 @@ import java.sql.ParameterMetaData;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -24,7 +25,6 @@ import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.NamedParameter;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.util.deparser.ExpressionDeParser;
 import net.sf.jsqlparser.util.deparser.SelectDeParser;
 import net.sf.jsqlparser.util.deparser.StatementDeParser;
@@ -282,44 +282,77 @@ public class SqlQuery extends Query {
      */
     public SqlCompiledQuery compile(Scripts.Space aSpace) throws Exception {
         String dialect = basesProxy.getConnectionDialect(datasourceName);
-        boolean postgreSQL = ClientConstants.SERVER_PROPERTY_POSTGRE_DIALECT.equals(dialect);
-        Parameters compiledParams = new Parameters();
+        return compile(aSpace, dialect);
+    }
+    
+    public SqlCompiledQuery compile(Scripts.Space aSpace, String aDialect) throws Exception {
+        boolean postgreSQL = ClientConstants.SERVER_PROPERTY_POSTGRE_DIALECT.equals(aDialect);
+        Parameters jdbcParams = new Parameters();
         if (sqlText == null || sqlText.isEmpty()) {
             throw new Exception("Empty sql query text is not supported");
         }
-
+        Function<String, String> substitution = (String aNamedParamName) -> {
+            Parameter p = params.get(aNamedParamName);
+            if (p == null) {
+                // Несвязанные параметры заменяем null-ами.
+                p = new Parameter(aNamedParamName);
+                p.setValue(null);
+            }
+            Parameter copied = p.copy();
+            if (aSpace != null) {
+                copied.setValue(aSpace.toJava(copied.getValue()));
+            }
+            jdbcParams.add(copied);
+            return postgreSQL && Scripts.DATE_TYPE_NAME.equals(p.getType()) ? "?::timestamp" : "?";
+        };
         StringBuilder compiledSb = new StringBuilder();
-
-        CCJSqlParserManager parserManager = new CCJSqlParserManager();
         try {
-            Statement parsedQuery = parserManager.parse(new StringReader(sqlText));
-            SelectDeParser selectDeParser = new SelectDeParser(compiledSb);
-            ExpressionDeParser expressionDeParser = new ExpressionDeParser(selectDeParser, compiledSb) {
-
-                @Override
-                public void visit(NamedParameter namedParameter) {
-                    buffer.append(namedParameter.getComment() != null ? namedParameter.getComment() + " " : "")
-                            .append(":")
-                            .append(namedParameter.getName());
-                }
-
-            };
-            selectDeParser.setExpressionVisitor(expressionDeParser);
-            StatementDeParser deparser = new StatementDeParser(compiledSb, selectDeParser, expressionDeParser);
-            parsedQuery.accept(deparser);
+            reparseNamedParametersToJdbc(compiledSb, substitution);
         } catch (JSQLParserException ex) {
             Logger.getLogger(StoredQueryFactory.class.getName()).log(Level.WARNING, ex.getMessage());
-            substituteParams(aSpace, compiledParams, postgreSQL, compiledSb);
+            substituteNamedParametersWithJdbc(compiledSb, substitution);
         }
-
-        SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, datasourceName, compiledSb.toString(), compiledParams, fields);
+        SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, datasourceName, compiledSb.toString(), jdbcParams, fields);
         compiled.setEntityName(entityName);
         compiled.setProcedure(procedure);
         compiled.setPageSize(pageSize);
         return compiled;
     }
 
-    private void substituteParams(Scripts.Space aSpace, Parameters aCompiledParams, boolean isPostgreSQL, StringBuilder aCompiled) throws UnboundSqlParameterException {
+    /**
+     * Substitutes named parameters with '?' by means of SQL parser.
+     *
+     * @param aTextConsumer
+     * @throws JSQLParserException
+     */
+    private void reparseNamedParametersToJdbc(StringBuilder aTextConsumer, Function<String, String> aSubstitution) throws JSQLParserException {
+        CCJSqlParserManager parserManager = new CCJSqlParserManager();
+        Statement parsedQuery = parserManager.parse(new StringReader(sqlText));
+        SelectDeParser selectDeParser = new SelectDeParser(aTextConsumer);
+        ExpressionDeParser expressionDeParser = new ExpressionDeParser(selectDeParser, aTextConsumer) {
+
+            @Override
+            public void visit(NamedParameter namedParameter) {
+                buffer.append(namedParameter.getComment() != null ? namedParameter.getComment() + " " : "")
+                        .append(aSubstitution.apply(namedParameter.getName()));
+            }
+
+        };
+        selectDeParser.setExpressionVisitor(expressionDeParser);
+        StatementDeParser deparser = new StatementDeParser(aTextConsumer, selectDeParser, expressionDeParser);
+        parsedQuery.accept(deparser);
+    }
+
+    /**
+     * Substitutes named parameters with '?' by means of regexp.
+     *
+     * @param aSpace
+     * @param aJdbcParams
+     * @param isPostgreSQL
+     * @param aCompiled
+     * @throws UnboundSqlParameterException
+     */
+    private void substituteNamedParametersWithJdbc(StringBuilder aCompiled, Function<String, String> aSubstitution) throws UnboundSqlParameterException {
         Matcher sm = STRINGS_PATTERN.matcher(sqlText);
         String[] withoutStrings = sqlText.split("('[^']*')");
         for (int i = 0; i < withoutStrings.length; i++) {
@@ -327,21 +360,7 @@ public class SqlQuery extends Query {
             StringBuffer withoutStringsSegment = new StringBuffer();
             while (m.find()) {
                 String paramName = m.group(1);
-                if (params == null) {
-                    throw new UnboundSqlParameterException(paramName, sqlText);
-                }
-                Parameter p = params.get(paramName);
-                if (p == null) {
-                    // Несвязанные параметры заменяем null-ами.
-                    p = new Parameter(paramName);
-                    p.setValue(null);
-                }
-                Parameter copied = p.copy();
-                if (aSpace != null) {
-                    copied.setValue(aSpace.toJava(copied.getValue()));
-                }
-                aCompiledParams.add(copied);
-                m.appendReplacement(withoutStringsSegment, isPostgreSQL && Scripts.DATE_TYPE_NAME.equals(p.getType()) ? "?::timestamp" : "?");
+                m.appendReplacement(withoutStringsSegment, aSubstitution.apply(paramName));
             }
             m.appendTail(withoutStringsSegment);
             withoutStrings[i] = withoutStringsSegment.toString();

@@ -34,9 +34,9 @@ public class DeleteDeParser {
     }
 
     public void deParse(Delete aDelete) {
-        buffer.append(aDelete.getComment() != null ? aDelete.getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append("Delete").append(aDelete.getFromComment() != null ? " " + aDelete.getFromComment() + ExpressionDeParser.LINE_SEPARATOR : "").append(" From ").append(aDelete.getComment() != null ? aDelete.getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append(aDelete.getTable().getWholeTableName());
+        buffer.append(aDelete.getComment() != null ? aDelete.getComment() + " " + ExpressionDeParser.EOL : "").append("Delete").append(aDelete.getFromComment() != null ? " " + aDelete.getFromComment() + ExpressionDeParser.EOL : "").append(" From ").append(aDelete.getComment() != null ? aDelete.getComment() + " " + ExpressionDeParser.EOL : "").append(aDelete.getTable().getWholeTableName());
         if (aDelete.getWhere() != null) {
-            buffer.append(aDelete.getWhereComment() != null ? " " + aDelete.getWhereComment() : "").append(ExpressionDeParser.LINE_SEPARATOR).append(" Where ");
+            buffer.append(aDelete.getWhereComment() != null ? " " + aDelete.getWhereComment() : "").append(ExpressionDeParser.EOL).append(" Where ");
             aDelete.getWhere().accept(expressionVisitor);
         }
         buffer.append(!"".equals(aDelete.getEndComment()) ? " " + aDelete.getEndComment() : "");

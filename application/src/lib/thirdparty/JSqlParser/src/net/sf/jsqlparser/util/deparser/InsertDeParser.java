@@ -47,36 +47,36 @@ public class InsertDeParser implements ItemsListVisitor {
     }
 
     public void deParse(Insert insert) {
-        buffer.append(insert.getComment() != null ? insert.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("Insert")
-              .append(insert.getCommentInto() != null ? " "+insert.getCommentInto()+ExpressionDeParser.LINE_SEPARATOR : "").append(" into ");
-        buffer.append(insert.getComment() != null ? insert.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(insert.getTable().getWholeTableName());
+        buffer.append(insert.getComment() != null ? insert.getComment()+" "+ExpressionDeParser.EOL : "").append("Insert")
+              .append(insert.getCommentInto() != null ? " "+insert.getCommentInto()+ExpressionDeParser.EOL : "").append(" into ");
+        buffer.append(insert.getComment() != null ? insert.getComment()+" "+ExpressionDeParser.EOL : "").append(insert.getTable().getWholeTableName());
         if (insert.getColumns() != null) {
             buffer.append(insert.getCommentBeforeColums() != null ? insert.getCommentBeforeColums()+" " : "")
-                  .append(ExpressionDeParser.LINE_SEPARATOR).append("(");
+                  .append(ExpressionDeParser.EOL).append("(");
             int columnsCounter = 0;
             for (int i = 0; i < insert.getColumns().size(); i++) {
                 Column column = (Column) insert.getColumns().get(i);
-                buffer.append(column.getComment() != null ? column.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(column.getWholeColumnName());
+                buffer.append(column.getComment() != null ? column.getComment()+" "+ExpressionDeParser.EOL : "").append(column.getWholeColumnName());
                 buffer.append((i < insert.getColumns().size() - 1) ? (!"".equals(insert.getColumsComment().get(i)) ? " " + insert.getColumsComment().get(i) : "") : "");
                 if (i < insert.getColumns().size() - 1) {
                     if (columnsCounter++ == 2) {
                         columnsCounter = 0;
-                        buffer.append(ExpressionDeParser.LINE_SEPARATOR).append(", ");
+                        buffer.append(ExpressionDeParser.EOL).append(", ");
                     } else {
                         buffer.append(", ");
                     }
                 }
             }
-            buffer.append(insert.getCommentAfterColums() != null ? insert.getCommentAfterColums()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(")");
+            buffer.append(insert.getCommentAfterColums() != null ? insert.getCommentAfterColums()+" "+ExpressionDeParser.EOL : "").append(")");
         }
         if (insert.isUseValues()) {
             buffer.append(insert.getCommentValues() != null ? " "+insert.getCommentValues() : "")
-                  .append(ExpressionDeParser.LINE_SEPARATOR).append(" Values ")
-                  .append(insert.getCommentItemsList() != null ? insert.getCommentItemsList()+" "+ExpressionDeParser.LINE_SEPARATOR : ""); 
+                  .append(ExpressionDeParser.EOL).append(" Values ")
+                  .append(insert.getCommentItemsList() != null ? insert.getCommentItemsList()+" "+ExpressionDeParser.EOL : ""); 
         }
         insert.getItemsList().accept(this);
         if (insert.isUseValues()) {
-            buffer.append(insert.getCommentAfterItemsList() != null ? insert.getCommentAfterItemsList()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(")");
+            buffer.append(insert.getCommentAfterItemsList() != null ? insert.getCommentAfterItemsList()+" "+ExpressionDeParser.EOL : "").append(")");
         }
         buffer.append(!"".equals(insert.getEndComment()) ? " "+insert.getEndComment() : "");
     }
@@ -88,11 +88,11 @@ public class InsertDeParser implements ItemsListVisitor {
              Expression expression = (Expression)expressionList.getExpressions().get(i);
              expression.accept(expressionVisitor);
              buffer.append((i < expressionList.getExpressions().size() - 1) ? (!"".equals(expressionList.getCommentsComma().get(i)) ? " " 
-                           + expressionList.getCommentsComma().get(i)+ExpressionDeParser.LINE_SEPARATOR : "" ) : "");
+                           + expressionList.getCommentsComma().get(i)+ExpressionDeParser.EOL : "" ) : "");
              if (i < expressionList.getExpressions().size() - 1) {
                  if (valuesCounter++ == 2) {
                      valuesCounter = 0;
-                     buffer.append(ExpressionDeParser.LINE_SEPARATOR).append(", ");
+                     buffer.append(ExpressionDeParser.EOL).append(", ");
                  } else {
                      buffer.append(", ");
                  }

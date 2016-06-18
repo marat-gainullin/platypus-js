@@ -34,9 +34,9 @@ public class TruncateDeParser {
     }
 
     public void deParse(Truncate truncate) {
-        buffer.append(truncate.getComment() != null ? truncate.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("Truncate")
-              .append(truncate.getCommentTable() != null ? " "+truncate.getCommentTable()+ExpressionDeParser.LINE_SEPARATOR : "").append(" Table ")
-              .append(truncate.getComment() != null ? truncate.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(truncate.getTable().getWholeTableName());
+        buffer.append(truncate.getComment() != null ? truncate.getComment()+" "+ExpressionDeParser.EOL : "").append("Truncate")
+              .append(truncate.getCommentTable() != null ? " "+truncate.getCommentTable()+ExpressionDeParser.EOL : "").append(" Table ")
+              .append(truncate.getComment() != null ? truncate.getComment()+" "+ExpressionDeParser.EOL : "").append(truncate.getTable().getWholeTableName());
         buffer.append(!"".equals(truncate.getEndComment()) ? " "+truncate.getEndComment() : "");
     }
 

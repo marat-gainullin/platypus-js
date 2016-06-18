@@ -36,21 +36,21 @@ public class UpdateDeParser {
     }
 
     public void deParse(Update aUpdate) {
-        buffer.append(aUpdate.getComment() != null ? aUpdate.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("Update ").append(ExpressionDeParser.LINE_SEPARATOR)
-              .append(aUpdate.getComment() != null ? aUpdate.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(aUpdate.getTable().getWholeTableName()).append(ExpressionDeParser.LINE_SEPARATOR)
-              .append(aUpdate.getCommentSet() != null ? " "+aUpdate.getCommentSet()+ExpressionDeParser.LINE_SEPARATOR : "").append(" set ");
+        buffer.append(aUpdate.getComment() != null ? aUpdate.getComment()+" "+ExpressionDeParser.EOL : "").append("Update ").append(ExpressionDeParser.EOL)
+              .append(aUpdate.getComment() != null ? aUpdate.getComment()+" "+ExpressionDeParser.EOL : "").append(aUpdate.getTable().getWholeTableName()).append(ExpressionDeParser.EOL)
+              .append(aUpdate.getCommentSet() != null ? " "+aUpdate.getCommentSet()+ExpressionDeParser.EOL : "").append(" set ");
         int columnsCounter = 0;
         for (int i = 0, s = aUpdate.getColumns().size(); i < s; i++) {
             Column column = (Column) aUpdate.getColumns().get(i);
-            buffer.append(column.getComment() != null ? column.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(column.getWholeColumnName())
-                  .append(!aUpdate.getCommentsEqualas().get(i).toString().isEmpty()?" "+aUpdate.getCommentsEqualas().get(i)+ExpressionDeParser.LINE_SEPARATOR:"").append(" = ");
+            buffer.append(column.getComment() != null ? column.getComment()+" "+ExpressionDeParser.EOL : "").append(column.getWholeColumnName())
+                  .append(!aUpdate.getCommentsEqualas().get(i).toString().isEmpty()?" "+aUpdate.getCommentsEqualas().get(i)+ExpressionDeParser.EOL:"").append(" = ");
             Expression expression = (Expression) aUpdate.getExpressions().get(i);
             expression.accept(expressionVisitor);
             if (i < aUpdate.getColumns().size() - 1) {
                 buffer.append(!aUpdate.getCommentsComma().get(i).toString().isEmpty()?" "+aUpdate.getCommentsComma().get(i)+" ":"");
                 if (columnsCounter++ == 2) {
                     columnsCounter = 0;
-                    buffer.append(ExpressionDeParser.LINE_SEPARATOR).append(", ");
+                    buffer.append(ExpressionDeParser.EOL).append(", ");
                 } else {
                     buffer.append(", ");
                 }
@@ -59,7 +59,7 @@ public class UpdateDeParser {
 
         if (aUpdate.getWhere() != null) {
             buffer.append(aUpdate.getCommentWhere() != null ? " "+aUpdate.getCommentWhere() : "")
-                  .append(ExpressionDeParser.LINE_SEPARATOR).append(" Where ");
+                  .append(ExpressionDeParser.EOL).append(" Where ");
             aUpdate.getWhere().accept(expressionVisitor);
         }
         buffer.append(!"".equals(aUpdate.getEndComment()) ? " "+aUpdate.getEndComment() : "");

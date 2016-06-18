@@ -49,7 +49,7 @@ public class GeneralTest {
         } else {
             throw new JSQLParserException("Unknown type of parsed statement");
         }
-        assertEquals(buffer.toString().toLowerCase().replaceAll(ExpressionDeParser.LINE_SEPARATOR, ""), statementText.toLowerCase().replaceAll(ExpressionDeParser.LINE_SEPARATOR, ""));
+        assertEquals(buffer.toString().toLowerCase().replaceAll(ExpressionDeParser.EOL, ""), statementText.toLowerCase().replaceAll(ExpressionDeParser.EOL, ""));
     }
 
 }

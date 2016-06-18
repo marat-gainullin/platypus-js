@@ -66,13 +66,13 @@ public class StatementDeParser implements StatementVisitor {
     @Override
     public void visit(Select select) {
         if (select.getWithItemsList() != null && !select.getWithItemsList().isEmpty()) {
-            buffer.append(select.getCommentWith() != null ? select.getCommentWith() + " " : "").append(ExpressionDeParser.LINE_SEPARATOR).append("With ");
+            buffer.append(select.getCommentWith() != null ? select.getCommentWith() + " " : "").append(ExpressionDeParser.EOL).append("With ");
 
             for (int i = 0; i < select.getWithItemsList().size(); i++) {
                 WithItem withItem = (WithItem) select.getWithItemsList().get(i);
                 buffer.append(withItem);
-                buffer.append((i < select.getWithItemsList().size() - 1) ? (!"".equals(select.getCommentsComma().get(i)) ? " " + select.getCommentsComma().get(i) + ExpressionDeParser.LINE_SEPARATOR : "") + "," : "")
-                        .append(ExpressionDeParser.LINE_SEPARATOR).append(" ");
+                buffer.append((i < select.getWithItemsList().size() - 1) ? (!"".equals(select.getCommentsComma().get(i)) ? " " + select.getCommentsComma().get(i) + ExpressionDeParser.EOL : "") + "," : "")
+                        .append(ExpressionDeParser.EOL).append(" ");
             }
         }
         select.getSelectBody().accept(selectDeParser);

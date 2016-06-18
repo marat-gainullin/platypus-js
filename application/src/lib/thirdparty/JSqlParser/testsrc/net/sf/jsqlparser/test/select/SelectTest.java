@@ -64,8 +64,8 @@ public class SelectTest {
         assertFalse(((PlainSelect) select.getSelectBody()).getLimit().isLimitAll());
         assertEquals(statement, "" + select);
 
-        statement =
-                "(SELECT * FROM mytable WHERE mytable.col = 9 OFFSET ?) UNION "
+        statement
+                = "(SELECT * FROM mytable WHERE mytable.col = 9 OFFSET ?) UNION "
                 + "(SELECT * FROM mytable2 WHERE mytable2.col = 9 OFFSET ?) LIMIT 3, 4";
         select = (Select) parserManager.parse(new StringReader(statement));
         Union union = (Union) select.getSelectBody();
@@ -75,8 +75,8 @@ public class SelectTest {
         // toString uses standard syntax
         assertEquals(statement, "" + select);
 
-        statement =
-                "(SELECT * FROM mytable WHERE mytable.col = 9 OFFSET ?) UNION ALL "
+        statement
+                = "(SELECT * FROM mytable WHERE mytable.col = 9 OFFSET ?) UNION ALL "
                 + "(SELECT * FROM mytable2 WHERE mytable2.col = 9 OFFSET ?) UNION ALL "
                 + "(SELECT * FROM mytable3 WHERE mytable4.col = 9 OFFSET ?) LIMIT 4 OFFSET 3";
         select = (Select) parserManager.parse(new StringReader(statement));
@@ -95,25 +95,24 @@ public class SelectTest {
         select = (Select) parserManager.parse(new StringReader(statement));
         assertEquals(5, ((PlainSelect) select.getSelectBody()).getTop().getRowCount());
 
-
     }
 
     @Test
     public void testCirilicChars() throws JSQLParserException {
-        String statement =
-                "/*привет*/ SELECT /*sdfsf*/ * FROM /*sdfs*/ моятаблица WHERE моятаблица.col = 9 /*ksjdf*/";
+        String statement
+                = "/*привет*/ SELECT /*sdfsf*/ * FROM /*sdfs*/ моятаблица WHERE моятаблица.col = 9 /*ksjdf*/";
         Select select = (Select) parserManager.parse(new StringReader(statement));
         assertEquals(statement, "" + select);
     }
 
     @Test
     public void testComment() throws JSQLParserException {
-        String statement =
-                "/*welkjhkas*/ SELECT /*sdfsf*/ * FROM /*sdfs*/ mytable WHERE mytable.col = 9 /*ksjdf*/";
+        String statement
+                = "/*welkjhkas*/ SELECT /*sdfsf*/ * FROM /*sdfs*/ mytable WHERE mytable.col = 9 /*ksjdf*/";
         Select select = (Select) parserManager.parse(new StringReader(statement));
         assertEquals(statement, "" + select);
-        statement =
-                "/*welkjhkas*/ SELECT /*0*/ DISTINCT /*1*/ ON /*2*/ (/*6*/ myid /*3*/ ) /*4*/ myid, /*5*/ mycol FROM mytable WHERE mytable.col = 9 /*ksjdf*/";
+        statement
+                = "/*welkjhkas*/ SELECT /*0*/ DISTINCT /*1*/ ON /*2*/ (/*6*/ myid /*3*/ ) /*4*/ myid, /*5*/ mycol FROM mytable WHERE mytable.col = 9 /*ksjdf*/";
         select = (Select) parserManager.parse(new StringReader(statement));
         assertEquals(statement, "" + select);
 
@@ -183,21 +182,21 @@ public class SelectTest {
         select = (Select) parserManager.parse(new StringReader(statement));
         assertEquals(statement, "" + select);
 
-        statement =
-                "/**/ (/**/ SELECT /**/ * FROM /**/ mytable WHERE mytable.col = 9 /**/ OFFSET /**/ ? /**/) /**/ UNION "
+        statement
+                = "/**/ (/**/ SELECT /**/ * FROM /**/ mytable WHERE mytable.col = 9 /**/ OFFSET /**/ ? /**/) /**/ UNION "
                 + "/**/ (/**/ SELECT /**/ * FROM /**/ mytable2 WHERE mytable2.col = 9 /**/ OFFSET /**/ ? /**/) "
                 + "/**/ ORDER /**/ BY mytable.col /**/ DESC /**/ LIMIT /**/ 3 /**/ , /**/ 4 /**/";
         select = (Select) parserManager.parse(new StringReader(statement));
         assertEquals(statement, "" + select);
 
-        statement =
-                "/**/ SELECT /**/ * FROM /**/ mytable WHERE mytable.col = 9 /**/ OFFSET /**/ ? /**/ UNION "
+        statement
+                = "/**/ SELECT /**/ * FROM /**/ mytable WHERE mytable.col = 9 /**/ OFFSET /**/ ? /**/ UNION "
                 + "/**/ SELECT /**/ * FROM /**/ mytable2 WHERE mytable2.col = 9 /**/ OFFSET /**/ ? /**/";
         select = (Select) parserManager.parse(new StringReader(statement));
         assertEquals(statement, "" + select);
 
-        statement =
-                "/**/ SELECT /**/ * FROM /**/ mytable WHERE mytable.col = 9 /**/ ORDER /**/ BY mytable.col /**/ DESC /**/";
+        statement
+                = "/**/ SELECT /**/ * FROM /**/ mytable WHERE mytable.col = 9 /**/ ORDER /**/ BY mytable.col /**/ DESC /**/";
         select = (Select) parserManager.parse(new StringReader(statement));
         assertEquals(statement, "" + select);
 
@@ -265,8 +264,8 @@ public class SelectTest {
 
     @Test
     public void testSelectItems() throws JSQLParserException {
-        String statement =
-                "SELECT myid AS MYID, mycol, tab.*, schema.tab.*, mytab.mycol2, myschema.mytab.mycol, myschema.mytab.* FROM mytable WHERE mytable.col = 9";
+        String statement
+                = "SELECT myid AS MYID, mycol, tab.*, schema.tab.*, mytab.mycol2, myschema.mytab.mycol, myschema.mytab.* FROM mytable WHERE mytable.col = 9";
         PlainSelect plainSelect = (PlainSelect) ((Select) parserManager.parse(new StringReader(statement))).getSelectBody();
 
         assertEquals("MYID", ((SelectExpressionItem) plainSelect.getSelectItems().get(0)).getAlias().getName());
@@ -296,8 +295,8 @@ public class SelectTest {
 
     @Test
     public void testUnion() throws JSQLParserException {
-        String statement =
-                "SELECT * FROM mytable WHERE mytable.col = 9 UNION "
+        String statement
+                = "SELECT * FROM mytable WHERE mytable.col = 9 UNION "
                 + "SELECT * FROM mytable3 WHERE mytable3.col = ? UNION "
                 + "SELECT * FROM mytable2 LIMIT 3, 4";
 
@@ -316,8 +315,8 @@ public class SelectTest {
 
     @Test
     public void testEXCEPT() throws JSQLParserException {
-        String statement =
-                "SELECT /*sdfhjklsdh*/ * FROM mytable WHERE mytable.col = 9 EXCEPT "
+        String statement
+                = "SELECT /*sdfhjklsdh*/ * FROM mytable WHERE mytable.col = 9 EXCEPT "
                 + "SELECT * FROM mytable3 WHERE mytable3.col = ? UNION "
                 + "SELECT * FROM mytable2 LIMIT 3, 4";
 
@@ -332,8 +331,8 @@ public class SelectTest {
         //use standard limit syntax
         assertEquals(statement, "" + union);
 
-        statement =
-                "(SELECT * FROM mytable WHERE mytable.col = 9) INTERSECT "
+        statement
+                = "(SELECT * FROM mytable WHERE mytable.col = 9) INTERSECT "
                 + "(SELECT * FROM mytable3 WHERE mytable3.col = ?) UNION "
                 + "(SELECT * FROM mytable2 LIMIT 3, 4)";
 
@@ -351,21 +350,32 @@ public class SelectTest {
 
     @Test
     public void testDistinct() throws JSQLParserException {
-        String statement = "SELECT DISTINCT ON (myid) myid, mycol FROM mytable WHERE mytable.col = 9";
-        PlainSelect plainSelect = (PlainSelect) ((Select) parserManager.parse(new StringReader(statement))).getSelectBody();
+        String statementText = "SELECT DISTINCT ON (myid) myid, mycol FROM mytable WHERE mytable.col = 9";
+        PlainSelect plainSelect = (PlainSelect) ((Select) parserManager.parse(new StringReader(statementText))).getSelectBody();
         assertEquals(
                 "myid",
                 ((Column) ((SelectExpressionItem) plainSelect.getDistinct().getOnSelectItems().get(0)).getExpression()).getColumnName());
         assertEquals("mycol", ((Column) ((SelectExpressionItem) plainSelect.getSelectItems().get(1)).getExpression()).getColumnName());
-        assertEquals(statement.toUpperCase(), plainSelect.toString().toUpperCase());
+        assertEquals(statementText.toUpperCase(), plainSelect.toString().toUpperCase());
+    }
+
+    @Test
+    public void testDistinctDeparser() throws JSQLParserException {
+        String statementText = "Select Distinct on (myid) myid, mycol " + ExpressionDeParser.EOL + "From mytable" + ExpressionDeParser.EOL + " Where mytable.col = 9";
+        PlainSelect plainSelect = (PlainSelect) ((Select) parserManager.parse(new StringReader(statementText))).getSelectBody();
+
+        StringBuilder deparsed = new StringBuilder();
+        SelectDeParser deParser = new SelectDeParser(deparsed);
+        deParser.setExpressionVisitor(new ExpressionDeParser(deParser, deparsed));
+        deParser.visit(plainSelect);
+        String deparsedStatementText = deParser.getBuffer().toString();
+        assertEquals(statementText, deparsedStatementText);
     }
 
     @Test
     public void testFrom() throws JSQLParserException {
-        String statement =
-                "SELECT * FROM mytable as mytable0, mytable1 alias_tab1, mytable2 as alias_tab2, (SELECT * FROM mytable3) AS mytable4 WHERE mytable.col = 9";
-        String statementToString =
-                "SELECT * FROM mytable as mytable0, mytable1 as alias_tab1, mytable2 as alias_tab2, (SELECT * FROM mytable3) AS mytable4 WHERE mytable.col = 9";
+        String statement
+                = "SELECT * FROM mytable as mytable0, mytable1 alias_tab1, mytable2 as alias_tab2, (SELECT * FROM mytable3) AS mytable4 WHERE mytable.col = 9";
 
         PlainSelect plainSelect = (PlainSelect) ((Select) parserManager.parse(new StringReader(statement))).getSelectBody();
         assertEquals(3, plainSelect.getJoins().size());
@@ -374,7 +384,6 @@ public class SelectTest {
         assertEquals("alias_tab2", ((Join) plainSelect.getJoins().get(1)).getRightItem().getAlias().getName());
         assertEquals("mytable4", ((Join) plainSelect.getJoins().get(2)).getRightItem().getAlias().getName());
         assertEquals(statement.toUpperCase(), plainSelect.toString().toUpperCase());
-
     }
 
     @Test
@@ -600,7 +609,7 @@ public class SelectTest {
         expressionDeParser.setSelectVisitor(deParser);
         expressionDeParser.setBuffer(buffer);
         plainSelect.accept(deParser);
-        assertEquals(statement.toString().toUpperCase(), buffer.toString().toUpperCase().replaceAll(ExpressionDeParser.LINE_SEPARATOR, ""));
+        assertEquals(statement.toString().toUpperCase(), buffer.toString().toUpperCase().replaceAll(ExpressionDeParser.EOL, ""));
 
         statement = "SELECT * FROM tab1 WHERE a > 34 GROUP BY tab1.b ORDER BY tab1.a, 2";
         plainSelect = (PlainSelect) ((Select) parserManager.parse(new StringReader(statement))).getSelectBody();
@@ -640,7 +649,6 @@ public class SelectTest {
         parsed = parserManager.parse(new StringReader(statement));
         assertEquals(statement, "" + parsed);
 
-
         statement = "SELECT a, (CASE b WHEN 1 THEN 2 WHEN 3 THEN 4 ELSE 5 END) FROM tab1";
         parsed = parserManager.parse(new StringReader(statement));
         assertEquals(statement, "" + parsed);
@@ -677,8 +685,6 @@ public class SelectTest {
         statement = "SELECT a FROM tab1 WHERE CASE b WHEN 1 THEN 2 + 3 ELSE 4 END > 34";
         parsed = parserManager.parse(new StringReader(statement));
         assertEquals(statement, "" + parsed);
-
-
 
         statement = "SELECT a, (CASE "
                 + "WHEN (CASE a WHEN 1 THEN 10 ELSE 20 END) > 15 THEN 'BBB' "
@@ -831,8 +837,8 @@ public class SelectTest {
 
     @Test
     public void testGroupByExpression() throws JSQLParserException {
-        String statement =
-                "SELECT col1, col2, col1 + col2, sum(col8)"
+        String statement
+                = "SELECT col1, col2, col1 + col2, sum(col8)"
                 + " FROM table1 "
                 + "GROUP BY col1, col2, col1 + col2";
         Statement parsed = parserManager.parse(new StringReader(statement));
@@ -845,8 +851,8 @@ public class SelectTest {
 
     @Test
     public void testBitwise() throws JSQLParserException {
-        String statement =
-                "SELECT col1 & 32, col2 ^ col1, col1 | col2"
+        String statement
+                = "SELECT col1 & 32, col2 ^ col1, col1 | col2"
                 + " FROM table1";
         Statement parsed = parserManager.parse(new StringReader(statement));
         StatementDeParser deParser = new StatementDeParser(new StringBuilder());

@@ -20,18 +20,18 @@ public class CreateTableDeParser {
     }
 
     public void deParse(CreateTable aCreateTable) {
-        buffer.append(aCreateTable.getComment() != null ? aCreateTable.getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append("Create");
+        buffer.append(aCreateTable.getComment() != null ? aCreateTable.getComment() + " " + ExpressionDeParser.EOL : "").append("Create");
         for (int i = 0; i < aCreateTable.getCreateOptions().size(); i++) {
-            buffer.append(!"".equals(aCreateTable.getCommentCreateOptions().get(i)) ? " " + aCreateTable.getCommentCreateOptions().get(i) + " " + ExpressionDeParser.LINE_SEPARATOR : "");
+            buffer.append(!"".equals(aCreateTable.getCommentCreateOptions().get(i)) ? " " + aCreateTable.getCommentCreateOptions().get(i) + " " + ExpressionDeParser.EOL : "");
             buffer.append(aCreateTable.getCreateOptions().get(i));
         }
-        buffer.append(aCreateTable.getCommentTable() != null ? " " + aCreateTable.getCommentTable() + ExpressionDeParser.LINE_SEPARATOR : "").append(" table ").append(aCreateTable.getComment() != null ? aCreateTable.getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append(aCreateTable.getTable().getWholeTableName());
+        buffer.append(aCreateTable.getCommentTable() != null ? " " + aCreateTable.getCommentTable() + ExpressionDeParser.EOL : "").append(" table ").append(aCreateTable.getComment() != null ? aCreateTable.getComment() + " " + ExpressionDeParser.EOL : "").append(aCreateTable.getTable().getWholeTableName());
         if (aCreateTable.getColumnDefinitions() != null) {
-            buffer.append(aCreateTable.getCommentBeginBracket() != null ? " " + aCreateTable.getCommentBeginBracket() + ExpressionDeParser.LINE_SEPARATOR : "").append(" ( ");
+            buffer.append(aCreateTable.getCommentBeginBracket() != null ? " " + aCreateTable.getCommentBeginBracket() + ExpressionDeParser.EOL : "").append(" ( ");
 
             for (int i = 0; i < aCreateTable.getColumnDefinitions().size(); i++) {
                 ColumnDefinition columnDefinition = (ColumnDefinition) aCreateTable.getColumnDefinitions().get(i);
-                buffer.append(columnDefinition.getCommentName() != null ? columnDefinition.getCommentName() + " " + ExpressionDeParser.LINE_SEPARATOR : "");
+                buffer.append(columnDefinition.getCommentName() != null ? columnDefinition.getCommentName() + " " + ExpressionDeParser.EOL : "");
                 buffer.append(columnDefinition.getColumnName());
                 buffer.append(" ");
                 buffer.append(columnDefinition.getColDataType().toString());
@@ -39,27 +39,27 @@ public class CreateTableDeParser {
                 if (columnDefinition.getColumnSpecStrings() != null) {
                     for (int j = 0; j < columnDefinition.getColumnSpecStrings().size(); j++) {
                         buffer.append(" ");
-                        buffer.append(!"".equals(columnDefinition.getCommentsSpec().get(i)) ? columnDefinition.getCommentsSpec().get(i) + " " + ExpressionDeParser.LINE_SEPARATOR : "");
+                        buffer.append(!"".equals(columnDefinition.getCommentsSpec().get(i)) ? columnDefinition.getCommentsSpec().get(i) + " " + ExpressionDeParser.EOL : "");
                         buffer.append((String) columnDefinition.getColumnSpecStrings().get(i));
                     }
                 }
 
                 if (i < aCreateTable.getColumnDefinitions().size() - 1) {
-                    buffer.append(!"".equals(aCreateTable.getCommentCommaIndexes().get(i)) ? " " + aCreateTable.getCommentCommaIndexes().get(i) + ExpressionDeParser.LINE_SEPARATOR : "").append(", ");
+                    buffer.append(!"".equals(aCreateTable.getCommentCommaIndexes().get(i)) ? " " + aCreateTable.getCommentCommaIndexes().get(i) + ExpressionDeParser.EOL : "").append(", ");
                 }
             }
             int shift = aCreateTable.getColumnDefinitions().size() - 1;
             for (int i = 0; i < aCreateTable.getIndexes().size(); i++) {
-                buffer.append(!"".equals(aCreateTable.getCommentCommaIndexes().get(i + shift)) ? aCreateTable.getCommentCommaIndexes().get(i + shift) + " " + ExpressionDeParser.LINE_SEPARATOR : "");
-                buffer.append(",").append(ExpressionDeParser.LINE_SEPARATOR);
+                buffer.append(!"".equals(aCreateTable.getCommentCommaIndexes().get(i + shift)) ? aCreateTable.getCommentCommaIndexes().get(i + shift) + " " + ExpressionDeParser.EOL : "");
+                buffer.append(",").append(ExpressionDeParser.EOL);
                 Index index = (Index) aCreateTable.getIndexes().get(i);
                 buffer.append(index.toString());
             }
-            buffer.append(" ").append(aCreateTable.getCommentEndBracket() != null ? aCreateTable.getCommentEndBracket() + " " : "").append(ExpressionDeParser.LINE_SEPARATOR).append(") ");
+            buffer.append(" ").append(aCreateTable.getCommentEndBracket() != null ? aCreateTable.getCommentEndBracket() + " " : "").append(ExpressionDeParser.EOL).append(") ");
         }
 
         for (int i = 0; i < aCreateTable.getTableOptionsStrings().size(); i++) {
-            buffer.append(!"".equals(aCreateTable.getCommentTableOptions().get(i)) ? aCreateTable.getCommentTableOptions().get(i) + " " + ExpressionDeParser.LINE_SEPARATOR : "");
+            buffer.append(!"".equals(aCreateTable.getCommentTableOptions().get(i)) ? aCreateTable.getCommentTableOptions().get(i) + " " + ExpressionDeParser.EOL : "");
             buffer.append(aCreateTable.getTableOptionsStrings().get(i));
             buffer.append(" ");
         }

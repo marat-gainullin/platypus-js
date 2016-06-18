@@ -46,6 +46,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.Connect;
+import net.sf.jsqlparser.statement.select.Distinct;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
@@ -528,4 +529,9 @@ public class ExpressionRiddler implements ExpressionVisitor, ItemsListVisitor {
             riddleTask.markAsDeleted(aConnect);
         }
     }
+
+    @Override
+    public void visit(Distinct dstnct) {
+    }
+    
 }

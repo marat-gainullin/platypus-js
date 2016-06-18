@@ -57,25 +57,25 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
 
     @Override
     public void visit(PlainSelect plainSelect) {
-        buffer.append(plainSelect.getComment() != null ? plainSelect.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("Select ");
+        buffer.append(plainSelect.getComment() != null ? plainSelect.getComment()+" "+ExpressionDeParser.EOL : "").append("Select ");
         Top top = plainSelect.getTop();
         if (top != null) {
             top.toString();
         }
         if (plainSelect.getDistinct() != null) {
-            buffer.append(plainSelect.getDistinct().getComment() != null ? plainSelect.getDistinct().getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("Distinct ");
+            buffer.append(plainSelect.getDistinct().getComment() != null ? plainSelect.getDistinct().getComment()+" "+ExpressionDeParser.EOL : "").append("Distinct ");
             if (plainSelect.getDistinct().getOnSelectItems() != null) {
-                buffer.append(plainSelect.getDistinct().getCommentOn() != null ? plainSelect.getDistinct().getCommentOn()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("on")
-                      .append(plainSelect.getDistinct().getCommentBeginBracket() != null ? " "+plainSelect.getDistinct().getCommentBeginBracket()+ExpressionDeParser.LINE_SEPARATOR : "").append(" (");
+                buffer.append(plainSelect.getDistinct().getCommentOn() != null ? plainSelect.getDistinct().getCommentOn()+" "+ExpressionDeParser.EOL : "").append("on")
+                      .append(plainSelect.getDistinct().getCommentBeginBracket() != null ? " "+plainSelect.getDistinct().getCommentBeginBracket()+ExpressionDeParser.EOL : "").append(" (");
                 for (int i = 0; i < plainSelect.getDistinct().getOnSelectItems().size(); i++) {
                     SelectItem selectItem = (SelectItem) plainSelect.getDistinct().getOnSelectItems().get(i);
                     selectItem.accept(this);
                     if (i < plainSelect.getDistinct().getOnSelectItems().size() - 1) {
-                        buffer.append(!"".equals(plainSelect.getDistinct().getCommentsComma().get(i)) ? " " + plainSelect.getDistinct().getCommentsComma().get(i)+ExpressionDeParser.LINE_SEPARATOR : "")
+                        buffer.append(!"".equals(plainSelect.getDistinct().getCommentsComma().get(i)) ? " " + plainSelect.getDistinct().getCommentsComma().get(i)+ExpressionDeParser.EOL : "")
                               .append(", ");
                     }
                 }
-                buffer.append(plainSelect.getDistinct().getCommentEndBracket() != null ? plainSelect.getDistinct().getCommentEndBracket()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(") ");
+                buffer.append(plainSelect.getDistinct().getCommentEndBracket() != null ? plainSelect.getDistinct().getCommentEndBracket()+" "+ExpressionDeParser.EOL : "").append(") ");
             }
 
         }
@@ -88,7 +88,7 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
                 buffer.append(!plainSelect.getCommentCommaItems().get(i).toString().isEmpty()?" "+plainSelect.getCommentCommaItems().get(i)+" ":"");
                 if (selectItemsCounter++ == 2) {
                     selectItemsCounter = 0;
-                    buffer.append(ExpressionDeParser.LINE_SEPARATOR).append(", ");
+                    buffer.append(ExpressionDeParser.EOL).append(", ");
                 } else {
                     buffer.append(", ");
                 }
@@ -98,21 +98,21 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
 
         if (plainSelect.getFromItem() != null) {
             buffer.append(plainSelect.getCommentFrom() != null ? plainSelect.getCommentFrom()+" " : "")
-                  .append(ExpressionDeParser.LINE_SEPARATOR).append("From ");
+                  .append(ExpressionDeParser.EOL).append("From ");
             plainSelect.getFromItem().accept(this);
         }
 
         if (plainSelect.getJoins() != null) {
             for (Iterator iter = plainSelect.getJoins().iterator(); iter.hasNext();) {
                 Join join = (Join) iter.next();
-                buffer.append(ExpressionDeParser.LINE_SEPARATOR);
+                buffer.append(ExpressionDeParser.EOL);
                 deparseJoin(join);
             }
         }
 
         if (plainSelect.getWhere() != null) {
             buffer.append(plainSelect.getCommentWhere() != null ? " "+plainSelect.getCommentWhere() : "")
-                  .append(ExpressionDeParser.LINE_SEPARATOR).append(" Where ");
+                  .append(ExpressionDeParser.EOL).append(" Where ");
             plainSelect.getWhere().accept(expressionVisitor);
         }
 
@@ -122,13 +122,13 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
 
         if (plainSelect.getGroupByColumnReferences() != null) {
             buffer.append(plainSelect.getCommentGroup() != null ? " "+plainSelect.getCommentGroup() : "")
-                  .append(ExpressionDeParser.LINE_SEPARATOR).append(" Group")
-                  .append(plainSelect.getCommentGroupBy() != null ? " "+plainSelect.getCommentGroupBy()+ExpressionDeParser.LINE_SEPARATOR : "").append(" by ");
+                  .append(ExpressionDeParser.EOL).append(" Group")
+                  .append(plainSelect.getCommentGroupBy() != null ? " "+plainSelect.getCommentGroupBy()+ExpressionDeParser.EOL : "").append(" by ");
             for (int i = 0; i < plainSelect.getGroupByColumnReferences().size(); i++) {
                 Expression columnReference = (Expression) plainSelect.getGroupByColumnReferences().get(i);
                 columnReference.accept(expressionVisitor);
                 if (i < plainSelect.getGroupByColumnReferences().size() - 1) {
-                    buffer.append(!"".equals(plainSelect.getCommentCommaGroupBy().get(i)) ? " " + plainSelect.getCommentCommaGroupBy().get(i)+ExpressionDeParser.LINE_SEPARATOR : "")
+                    buffer.append(!"".equals(plainSelect.getCommentCommaGroupBy().get(i)) ? " " + plainSelect.getCommentCommaGroupBy().get(i)+ExpressionDeParser.EOL : "")
                           .append(", ");
                 }
             }
@@ -137,19 +137,19 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
 
         if (plainSelect.getHaving() != null) {
             buffer.append(plainSelect.getCommentHaving() != null ? " "+plainSelect.getCommentHaving() : "")
-                  .append(ExpressionDeParser.LINE_SEPARATOR).append(" Having ");
+                  .append(ExpressionDeParser.EOL).append(" Having ");
             plainSelect.getHaving().accept(expressionVisitor);
         }
 
         if (plainSelect.getOrderByElements() != null) {
             buffer.append(plainSelect.getCommentOrder() != null ? " "+plainSelect.getCommentOrder() : "")
-                  .append(ExpressionDeParser.LINE_SEPARATOR).append(" Order")
-                  .append(plainSelect.getCommentOrderBy() != null ? " "+plainSelect.getCommentOrderBy()+ExpressionDeParser.LINE_SEPARATOR : "").append(" by ");
+                  .append(ExpressionDeParser.EOL).append(" Order")
+                  .append(plainSelect.getCommentOrderBy() != null ? " "+plainSelect.getCommentOrderBy()+ExpressionDeParser.EOL : "").append(" by ");
             for (int i = 0; i < plainSelect.getOrderByElements().size(); i++) {
                 OrderByElement orderByElement = (OrderByElement) plainSelect.getOrderByElements().get(i);
                 orderByElement.accept(this);
                 if (i < plainSelect.getOrderByElements().size() - 1) {
-                    buffer.append(!"".equals(plainSelect.getCommentCommaOrderBy().get(i)) ? " " + plainSelect.getCommentCommaOrderBy().get(i)+ExpressionDeParser.LINE_SEPARATOR : "")
+                    buffer.append(!"".equals(plainSelect.getCommentCommaOrderBy().get(i)) ? " " + plainSelect.getCommentCommaOrderBy().get(i)+ExpressionDeParser.EOL : "")
                           .append(", ");
                 }
             }
@@ -164,29 +164,29 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
         for (int i = 0; i<union.getPlainSelects().size(); i++) {
             assert union.getTypeOperations().size() == union.getPlainSelects().size()-1; 
             if (union.getCommentsBeginBracket() != null) {
-              buffer.append(!union.getCommentsBeginBracket().get(i).toString().isEmpty()?union.getCommentsBeginBracket().get(i)+" "+ExpressionDeParser.LINE_SEPARATOR:"").append("(");
+              buffer.append(!union.getCommentsBeginBracket().get(i).toString().isEmpty()?union.getCommentsBeginBracket().get(i)+" "+ExpressionDeParser.EOL:"").append("(");
             }
             PlainSelect plainSelect = (PlainSelect) union.getPlainSelects().get(i);
             plainSelect.accept(this);
             if (union.getCommentsEndBracket() != null) {
-              buffer.append(!union.getCommentsEndBracket().get(i).toString().isEmpty()?union.getCommentsEndBracket().get(i)+" "+ExpressionDeParser.LINE_SEPARATOR:"").append(")");
+              buffer.append(!union.getCommentsEndBracket().get(i).toString().isEmpty()?union.getCommentsEndBracket().get(i)+" "+ExpressionDeParser.EOL:"").append(")");
             }
             if (i<union.getPlainSelects().size()-1) {
-                buffer.append(ExpressionDeParser.LINE_SEPARATOR).append((UnionTypes) union.getTypeOperations().get(i)).append(ExpressionDeParser.LINE_SEPARATOR);
+                buffer.append(ExpressionDeParser.EOL).append((UnionTypes) union.getTypeOperations().get(i)).append(ExpressionDeParser.EOL);
             } else {
-                buffer.append(ExpressionDeParser.LINE_SEPARATOR);
+                buffer.append(ExpressionDeParser.EOL);
             }
         }
 
         if (union.getOrderByElements() != null) {
             buffer.append(union.getCommentOrder() != null ? " "+union.getCommentOrder() : "")
-                  .append(ExpressionDeParser.LINE_SEPARATOR).append(" Order")
-                  .append(union.getCommentOrderBy() != null ? " "+union.getCommentOrderBy()+ExpressionDeParser.LINE_SEPARATOR : "").append(" by ");
+                  .append(ExpressionDeParser.EOL).append(" Order")
+                  .append(union.getCommentOrderBy() != null ? " "+union.getCommentOrderBy()+ExpressionDeParser.EOL : "").append(" by ");
             for (int i = 0; i < union.getOrderByElements().size(); i++) {
                 OrderByElement orderByElement = (OrderByElement) union.getOrderByElements().get(i);
                 orderByElement.accept(this);
                 if (i < union.getOrderByElements().size() - 1) {
-                    buffer.append(!"".equals(union.getCommentCommaOrderBy().get(i)) ? " " + union.getCommentCommaOrderBy().get(i)+ExpressionDeParser.LINE_SEPARATOR : "")
+                    buffer.append(!"".equals(union.getCommentCommaOrderBy().get(i)) ? " " + union.getCommentCommaOrderBy().get(i)+ExpressionDeParser.EOL : "")
                           .append(", ");
                 }
             }
@@ -200,19 +200,19 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
     public void visit(OrderByElement orderBy) {
         orderBy.getExpression().accept(expressionVisitor);
         if (orderBy.isAsc()) {
-            buffer.append(orderBy.getComment() != null ? " "+orderBy.getComment()+ExpressionDeParser.LINE_SEPARATOR : "").append(" asc");
+            buffer.append(orderBy.getComment() != null ? " "+orderBy.getComment()+ExpressionDeParser.EOL : "").append(" asc");
         } 
         if (orderBy.isDesc()) {
-            buffer.append(orderBy.getComment() != null ? " "+orderBy.getComment()+ExpressionDeParser.LINE_SEPARATOR : "").append(" desc");
+            buffer.append(orderBy.getComment() != null ? " "+orderBy.getComment()+ExpressionDeParser.EOL : "").append(" desc");
         }
     }
 
     public void visit(Column column) {
-        buffer.append(column.getComment() != null ? column.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(column.getWholeColumnName());
+        buffer.append(column.getComment() != null ? column.getComment()+" "+ExpressionDeParser.EOL : "").append(column.getWholeColumnName());
     }
 
     public void visit(AllColumns allColumns) {
-        buffer.append(allColumns.getComment() != null ? allColumns.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("*");
+        buffer.append(allColumns.getComment() != null ? allColumns.getComment()+" "+ExpressionDeParser.EOL : "").append("*");
     }
 
     public void visit(AllTableColumns allTableColumns) {
@@ -228,9 +228,9 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
     }
 
     public void visit(SubSelect subSelect) {
-        buffer.append(subSelect.getCommentBeginBracket() != null ? subSelect.getCommentBeginBracket()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("(");
+        buffer.append(subSelect.getCommentBeginBracket() != null ? subSelect.getCommentBeginBracket()+" "+ExpressionDeParser.EOL : "").append("(");
         subSelect.getSelectBody().accept(this);
-        buffer.append(subSelect.getCommentEndBracket() != null ? subSelect.getCommentEndBracket()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(")");
+        buffer.append(subSelect.getCommentEndBracket() != null ? subSelect.getCommentEndBracket()+" "+ExpressionDeParser.EOL : "").append(")");
         String alias = subSelect.getAlias() != null ? subSelect.getAlias().toString() : "";
         if (alias != null && !alias.isEmpty()) {
             buffer.append(" ").append(alias);// it's very strange, but in fact oracle doesn't permit as key word if form clause
@@ -239,7 +239,7 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
     }
 
     public void visit(Table aTable) {
-        buffer.append(aTable.getComment() != null ? aTable.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(aTable.getWholeTableName());
+        buffer.append(aTable.getComment() != null ? aTable.getComment()+" "+ExpressionDeParser.EOL : "").append(aTable.getWholeTableName());
         String alias =aTable.getAlias() != null ? aTable.getAlias().toString() : "";
         if (alias != null && !alias.isEmpty()) {
             buffer.append(" ").append(alias);// it's very strange, but in fact oracle doesn't permit as key word if form clause
@@ -248,7 +248,7 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
     }
 
     public void deparseOrderBy(List orderByElements) {
-        buffer.append(ExpressionDeParser.LINE_SEPARATOR).append(" Order by ");
+        buffer.append(ExpressionDeParser.EOL).append(" Order by ");
         for (Iterator iter = orderByElements.iterator(); iter.hasNext();) {
             OrderByElement orderByElement = (OrderByElement) iter.next();
             orderByElement.accept(this);
@@ -260,12 +260,12 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
 
     public void deparseLimit(Limit limit) {
         // LIMIT n OFFSET skip
-        buffer.append(ExpressionDeParser.LINE_SEPARATOR)
-              .append(limit.getCommentLimit() != null ? " "+limit.getCommentLimit()+ExpressionDeParser.LINE_SEPARATOR : "").append(" Limit");
+        buffer.append(ExpressionDeParser.EOL)
+              .append(limit.getCommentLimit() != null ? " "+limit.getCommentLimit()+ExpressionDeParser.EOL : "").append(" Limit");
         if (limit.isLimitAll()) {
-           buffer.append(limit.getCommentAll() != null ? " "+limit.getCommentAll()+ExpressionDeParser.LINE_SEPARATOR : "").append(" All ");
+           buffer.append(limit.getCommentAll() != null ? " "+limit.getCommentAll()+ExpressionDeParser.EOL : "").append(" All ");
         }
-        buffer.append(limit.getCommentLimitValue() != null ? limit.getCommentLimitValue()+" "+ExpressionDeParser.LINE_SEPARATOR : "");
+        buffer.append(limit.getCommentLimitValue() != null ? limit.getCommentLimitValue()+" "+ExpressionDeParser.EOL : "");
    
         if (limit.isComma()){
             if (limit.isOffsetJdbcParameter()) {
@@ -274,8 +274,8 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
                 buffer.append(limit.getOffset());
             }
             
-            buffer.append(limit.getCommentComma() != null ? limit.getCommentComma()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(", ")
-                  .append(limit.getCommentAfterCommaValue() != null ? limit.getCommentAfterCommaValue()+" "+ExpressionDeParser.LINE_SEPARATOR : "");
+            buffer.append(limit.getCommentComma() != null ? limit.getCommentComma()+" "+ExpressionDeParser.EOL : "").append(", ")
+                  .append(limit.getCommentAfterCommaValue() != null ? limit.getCommentAfterCommaValue()+" "+ExpressionDeParser.EOL : "");
             if (limit.isRowCountJdbcParameter()) {
                 buffer.append("?");
             } else if (limit.getRowCount() != 0) {
@@ -300,11 +300,11 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
         }
 
         if (limit.isOffsetJdbcParameter()) {
-            buffer.append(limit.getCommentOffset() != null ? " "+limit.getCommentOffset()+ExpressionDeParser.LINE_SEPARATOR : "").append(" Offset")
-                  .append(limit.getCommentOffsetValue() != null ? " "+limit.getCommentOffsetValue()+ExpressionDeParser.LINE_SEPARATOR : "").append(" ?");
+            buffer.append(limit.getCommentOffset() != null ? " "+limit.getCommentOffset()+ExpressionDeParser.EOL : "").append(" Offset")
+                  .append(limit.getCommentOffsetValue() != null ? " "+limit.getCommentOffsetValue()+ExpressionDeParser.EOL : "").append(" ?");
         } else if (limit.getOffset() != 0) {
-            buffer.append(limit.getCommentOffset() != null ? " "+limit.getCommentOffset()+ExpressionDeParser.LINE_SEPARATOR : "").append(" Offset ")
-                  .append(limit.getCommentOffsetValue() != null ? " "+limit.getCommentOffsetValue()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(limit.getOffset());
+            buffer.append(limit.getCommentOffset() != null ? " "+limit.getCommentOffset()+ExpressionDeParser.EOL : "").append(" Offset ")
+                  .append(limit.getCommentOffsetValue() != null ? " "+limit.getCommentOffsetValue()+" "+ExpressionDeParser.EOL : "").append(limit.getOffset());
         }
 
     }
@@ -326,57 +326,57 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
     }
 
     public void visit(SubJoin subjoin) {
-        buffer.append(subjoin.getCommentBeginBracket() != null ? subjoin.getCommentBeginBracket()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("(");
+        buffer.append(subjoin.getCommentBeginBracket() != null ? subjoin.getCommentBeginBracket()+" "+ExpressionDeParser.EOL : "").append("(");
         subjoin.getLeft().accept(this);
         buffer.append(" ");
         deparseJoin(subjoin.getJoin());
-        buffer.append(subjoin.getCommentEndBracket() != null ? subjoin.getCommentEndBracket()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(")");
+        buffer.append(subjoin.getCommentEndBracket() != null ? subjoin.getCommentEndBracket()+" "+ExpressionDeParser.EOL : "").append(")");
     }
 
     public void deparseJoin(Join join) {
         if (join.isSimple()) {
-            buffer.append(join.getComment() != null ? join.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(", ");
+            buffer.append(join.getComment() != null ? join.getComment()+" "+ExpressionDeParser.EOL : "").append(", ");
         } else {
 
             buffer.append(" ");
             if (join.isRight()) {
-                buffer.append(join.getCommentRight() != null ? join.getCommentRight()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("Right ");
+                buffer.append(join.getCommentRight() != null ? join.getCommentRight()+" "+ExpressionDeParser.EOL : "").append("Right ");
             } else if (join.isNatural()) {
-                buffer.append(join.getCommentNatural() != null ? join.getCommentNatural()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("Natural ");
+                buffer.append(join.getCommentNatural() != null ? join.getCommentNatural()+" "+ExpressionDeParser.EOL : "").append("Natural ");
             } else if (join.isFull()) {
-                buffer.append(join.getCommentFull() != null ? join.getCommentFull()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("Full ");
+                buffer.append(join.getCommentFull() != null ? join.getCommentFull()+" "+ExpressionDeParser.EOL : "").append("Full ");
             } else if (join.isLeft()) {
-                buffer.append(join.getCommentLeft() != null ? join.getCommentLeft()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("Left ");
+                buffer.append(join.getCommentLeft() != null ? join.getCommentLeft()+" "+ExpressionDeParser.EOL : "").append("Left ");
             }
 
             if (join.isOuter()) {
-                buffer.append(join.getCommentOuter() != null ? join.getCommentOuter()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("Outer ");
+                buffer.append(join.getCommentOuter() != null ? join.getCommentOuter()+" "+ExpressionDeParser.EOL : "").append("Outer ");
             } else if (join.isInner()) {
-                buffer.append(join.getCommentInner() != null ? join.getCommentInner()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("Inner ");
+                buffer.append(join.getCommentInner() != null ? join.getCommentInner()+" "+ExpressionDeParser.EOL : "").append("Inner ");
             }
 
-            buffer.append(join.getCommentJoin() != null ? join.getCommentJoin()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("Join ");
+            buffer.append(join.getCommentJoin() != null ? join.getCommentJoin()+" "+ExpressionDeParser.EOL : "").append("Join ");
 
         }
 
         FromItem fromItem = join.getRightItem();
         fromItem.accept(this);
         if (join.getOnExpression() != null) {
-            buffer.append(join.getCommentOn() != null ? " "+join.getCommentOn()+ExpressionDeParser.LINE_SEPARATOR : "").append(" on ");
+            buffer.append(join.getCommentOn() != null ? " "+join.getCommentOn()+ExpressionDeParser.EOL : "").append(" on ");
             join.getOnExpression().accept(expressionVisitor);
         }
         if (join.getUsingColumns() != null) {
-            buffer.append(join.getCommentUsing() != null ? " "+join.getCommentUsing()+ExpressionDeParser.LINE_SEPARATOR : "").append(" Using")
-                  .append(join.getCommentBeginBracket() != null ? " "+join.getCommentBeginBracket()+ExpressionDeParser.LINE_SEPARATOR : "").append(" ( ");
+            buffer.append(join.getCommentUsing() != null ? " "+join.getCommentUsing()+ExpressionDeParser.EOL : "").append(" Using")
+                  .append(join.getCommentBeginBracket() != null ? " "+join.getCommentBeginBracket()+ExpressionDeParser.EOL : "").append(" ( ");
             for (int i = 0, s = join.getUsingColumns().size(); i < s; i++) {
                 Column column = (Column) join.getUsingColumns().get(i);
-                buffer.append(column.getComment() != null ? column.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(column.getWholeColumnName());
+                buffer.append(column.getComment() != null ? column.getComment()+" "+ExpressionDeParser.EOL : "").append(column.getWholeColumnName());
                 if (i < join.getUsingColumns().size() - 1) {
-                    buffer.append(!join.getCommentComma().get(i).toString().isEmpty()?" "+join.getCommentComma().get(i)+" "+ExpressionDeParser.LINE_SEPARATOR:"");
+                    buffer.append(!join.getCommentComma().get(i).toString().isEmpty()?" "+join.getCommentComma().get(i)+" "+ExpressionDeParser.EOL:"");
                     buffer.append(", ");
                 }
             }
-            buffer.append(join.getCommentEndBracket() != null ? join.getCommentEndBracket()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(")");
+            buffer.append(join.getCommentEndBracket() != null ? join.getCommentEndBracket()+" "+ExpressionDeParser.EOL : "").append(")");
         }
     }
 }
