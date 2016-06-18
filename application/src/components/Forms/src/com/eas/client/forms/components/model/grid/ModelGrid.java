@@ -357,7 +357,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     public static final int CELLS_CACHE_SIZE = 65536;// 2^16
     public static final Color FIXED_COLOR = new Color(154, 204, 255);
     public static Icon processIcon = IconCache.getIcon("16x16/process-indicator.gif");
-    protected TablesFocusManager tablesFocusManager = new TablesFocusManager();
+    protected TablesKeyboardManager tablesKeyboardManager = new TablesKeyboardManager();
     protected TablesMousePropagator tablesMousePropagator = new TablesMousePropagator();
     // design
     protected Icon openFolderIcon;
@@ -401,6 +401,8 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     protected ListSelectionModel rowsSelectionModel;
     protected ListSelectionModel columnsSelectionModel;
     protected GeneralSelectionChangesReflector generalSelectionChangesReflector;
+    // focus
+    protected TablesFocusPropagator focusPropagator = new TablesFocusPropagator();
     // visual components
     protected LinearConstraint topRowsConstraint = new LinearConstraint(0, -1);
     protected LinearConstraint bottomRowsConstraint = new LinearConstraint(0, Integer.MAX_VALUE);
@@ -456,10 +458,15 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         brTable.setAutoCreateColumnsFromModel(false);
 
         // keyboard focus flow setup
-        tlTable.addKeyListener(tablesFocusManager);
-        trTable.addKeyListener(tablesFocusManager);
-        blTable.addKeyListener(tablesFocusManager);
-        brTable.addKeyListener(tablesFocusManager);
+        tlTable.addKeyListener(tablesKeyboardManager);
+        trTable.addKeyListener(tablesKeyboardManager);
+        blTable.addKeyListener(tablesKeyboardManager);
+        brTable.addKeyListener(tablesKeyboardManager);
+        // focus events setup
+        tlTable.addFocusListener(focusPropagator);
+        trTable.addFocusListener(focusPropagator);
+        blTable.addFocusListener(focusPropagator);
+        brTable.addFocusListener(focusPropagator);
         // mouse propagating setup
         tlTable.addMouseListener(tablesMousePropagator);
         trTable.addMouseListener(tablesMousePropagator);
@@ -1036,7 +1043,13 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     @ScriptFunction(jsDoc = FOCUS_JSDOC)
     @Override
     public void focus() {
-        super.requestFocus();
+        if (!brTable.requestFocusInWindow()) {
+            if (!trTable.requestFocusInWindow()) {
+                if (!blTable.requestFocusInWindow()) {
+                    tlTable.requestFocusInWindow();
+                }
+            }
+        }
     }
 
     @ScriptFunction(jsDoc = VISIBLE_JSDOC)
@@ -1565,6 +1578,26 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
             }
         }
+    }
+
+    protected class TablesFocusPropagator implements FocusListener {
+
+        @Override
+        public void focusGained(FocusEvent e) {
+            FocusEvent fe = new FocusEvent(ModelGrid.this, e.getID(), e.isTemporary(), e.getOppositeComponent());
+            for (FocusListener l : getFocusListeners()) {
+                l.focusGained(fe);
+            }
+        }
+
+        @Override
+        public void focusLost(FocusEvent e) {
+            FocusEvent fe = new FocusEvent(ModelGrid.this, e.getID(), e.isTemporary(), e.getOppositeComponent());
+            for (FocusListener l : getFocusListeners()) {
+                l.focusLost(fe);
+            }
+        }
+
     }
 
     protected class GeneralSelectionChangesReflector implements ListSelectionListener {
@@ -2290,7 +2323,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         }
     }
 
-    protected class TablesFocusManager implements KeyListener {
+    protected class TablesKeyboardManager implements KeyListener {
 
         @Override
         public void keyTyped(KeyEvent e) {
