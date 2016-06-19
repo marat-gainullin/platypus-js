@@ -36,3 +36,6 @@ The platform offers a set of features, making development process extremely prod
 
 ## Build instructions
 Build instructions may be found at https://github.com/altsoft/PlatypusJS/blob/master/build-instructions.md
+
+## Tests
+There is a test project 'PlatypusTests' at https://github.com/altsoft/PlatypusTests
