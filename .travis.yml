@@ -23,8 +23,7 @@ services:
 before_install:
 - docker pull altsoft/platypus
 - docker run -v `pwd`:/platypus altsoft/platypus /bin/sh -c "ant -Dlibs.javaee-web-api-7.0.classpath=/usr/local/apache-tomcat-8.0.36/lib/servlet-api.jar:/usr/local/apache-tomcat-8.0.36/lib/websocket-api.jar -f /platypus/application/src/group/build.xml clean compile"
+ant -f /home/jskonst/workspace/Altsoft/PlatypusJS/application/src/group -Dnb.internal.action.name=test -Dignore.failing.tests=true test
 
-# - docker ps -a
-# - docker run carlad/sinatra /bin/sh -c "cd /root/sinatra; bundle exec rake test"
-
-# Headless testing in browsers
+script:
+- docker run -v `pwd`:/platypus altsoft/platypus /bin/sh -c "ant -Dlibs.javaee-web-api-7.0.classpath=/usr/local/apache-tomcat-8.0.36/lib/servlet-api.jar:/usr/local/apache-tomcat-8.0.36/lib/websocket-api.jar:$ANT_HOME/lib/junit4.jar:$T_HOME/lib/ant-junit4.jar -f /platypus/application/src/group/build.xml -Dlibs.junit_4.classpath=$ANT_HOME/lib/junit4.jar -Dlibs.hamcrest.classpath=$ANT_HOME/lib/hamcrest-core.jar -Dnb.internal.action.name=test -Dignore.failing.tests=true test"
