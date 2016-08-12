@@ -7,6 +7,7 @@ package com.eas.client.queries;
 import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.SqlQuery;
 import com.eas.client.StoredQueryFactory;
+import com.eas.client.TestConstants;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.metadata.Field;
@@ -31,12 +32,45 @@ public class StoredQueryFactoryTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        indexer = new ApplicationSourceIndexer(Paths.get("c:/projects/PlatypusTests/app"), Paths.get("c:/projects/PlatypusTests/WEB-INF/classes"), new ScriptsConfigs());
+
+        String url = System.getProperty(TestConstants.DATASOURCE_URL_1);
+        if (url == null) {
+            System.err.println(TestConstants.DATASOURCE_URL_1 + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String user = System.getProperty(TestConstants.DATASOURCE_USER_1);
+        if (user == null) {
+            System.err.println(TestConstants.DATASOURCE_USER_1 + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String passwd = System.getProperty(TestConstants.DATASOURCE_PASSWORD_1);
+        if (passwd == null) {
+            System.err.println(TestConstants.DATASOURCE_PASSWORD_1 + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String schema = System.getProperty(TestConstants.DATASOURCE_SCHEMA_1);
+        if (schema == null) {
+            System.err.println(TestConstants.DATASOURCE_SCHEMA_1 + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String sourceURL = System.getProperty(TestConstants.TEST_SOURCE_URL);
+        if (sourceURL == null) {
+            System.err.println(TestConstants.TEST_SOURCE_URL + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+//        indexer = new ApplicationSourceIndexer(Paths.get("c:/projects/PlatypusTests/app"), Paths.get("c:/projects/PlatypusTests/WEB-INF/classes"), new ScriptsConfigs());
+        indexer = new ApplicationSourceIndexer(Paths.get(sourceURL), Paths.get(sourceURL+ "WEB-INF/classes"), new ScriptsConfigs());
+//       indexer = new ApplicationSourceIndexer(Paths.get(System.getProperty(KEY_TESTS_PATH) ), Paths.get(KEY_TESTS_PATH+"/WEB-INF/classes"), new ScriptsConfigs());
         DbConnectionSettings settings = new DbConnectionSettings();
-        settings.setUrl("jdbc:oracle:thin:@asvr/adb");
-        settings.setUser("eas");
-        settings.setPassword("eas");
-        settings.setSchema("eas");
+//        settings.setUrl("jdbc:oracle:thin:@asvr/adb");
+        settings.setUrl(url);
+//        settings.setUrl(KEY_DB_URL);
+        settings.setUser(user);
+//        settings.setUser(KEY_USER);
+        settings.setPassword(passwd);
+//        settings.setPassword(KEY_PASSWORD);
+//        settings.setSchema(KEY_SCHEMA);
+        settings.setSchema(schema);
         settings.setMaxConnections(1);
         settings.setMaxStatements(1);
         resource = new DatabasesClientWithResource(settings);
@@ -278,7 +312,7 @@ public class StoredQueryFactoryTest {
             } else {
                 assertNull(fieldMtd.getDescription());
             }
-            */
+             */
         }
         assertEquals(4, testQuery.getParameters().getParametersCount());
     }
@@ -311,7 +345,7 @@ public class StoredQueryFactoryTest {
             } else {
                 assertNull(fieldMtd.getDescription());
             }
-            */
+             */
         }
         assertEquals(4, testQuery.getParameters().getParametersCount());
     }

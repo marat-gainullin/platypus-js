@@ -5,6 +5,7 @@
  */
 package com.eas.client.application;
 
+import com.eas.client.TestConstants;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -14,28 +15,109 @@ import org.junit.Test;
  */
 public class WithoutServerTest extends ScriptedTests {
 
+//            "-datasource", "eas",
+//            "-dburl", "jdbc:oracle:thin:@asvr:1521:adb",
+//            "-dbuser", "eas",
+//            "-dbpassword", "eas",
+//            "-dbschema", "EAS",
+//            "-datasource", "easHR",
+//            "-dburl", "jdbc:oracle:thin:@asvr:1521:adb",
+//            "-dbuser", "hr",
+//            "-dbpassword", "hr",
+//            "-dbschema", "HR",
+//            "-default-datasource", "eas",
+//            "-url", "file:/C:/projects/PlatypusTests/",
+//              file:///home/jskonst/workspace/Altsoft/PlatypusTests/
+//            "-source-path", "app"
     @BeforeClass
     public static void init() throws Exception {
+
+        String source1 = System.getProperty(TestConstants.DATASOURCE_NAME_1);
+        if (source1 == null) {
+            System.err.println(TestConstants.DATASOURCE_NAME_1 + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String url1 = System.getProperty(TestConstants.DATASOURCE_URL_1);
+        if (url1 == null) {
+            System.err.println(TestConstants.DATASOURCE_URL_1 + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String user1 = System.getProperty(TestConstants.DATASOURCE_USER_1);
+        if (user1 == null) {
+            System.err.println(TestConstants.DATASOURCE_USER_1 + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String passwd1 = System.getProperty(TestConstants.DATASOURCE_PASSWORD_1);
+        if (passwd1 == null) {
+            System.err.println(TestConstants.DATASOURCE_PASSWORD_1 + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String schema1 = System.getProperty(TestConstants.DATASOURCE_SCHEMA_1);
+        if (schema1 == null) {
+            System.err.println(TestConstants.DATASOURCE_SCHEMA_1 + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String source2 = System.getProperty(TestConstants.DATASOURCE_NAME_2);
+        if (source2 == null) {
+            System.err.println(TestConstants.DATASOURCE_NAME_2 + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String url2 = System.getProperty(TestConstants.DATASOURCE_URL_2);
+        if (url2 == null) {
+            System.err.println(TestConstants.DATASOURCE_URL_2 + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String user2 = System.getProperty(TestConstants.DATASOURCE_USER_2);
+        if (user2 == null) {
+            System.err.println(TestConstants.DATASOURCE_USER_2 + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String passwd2 = System.getProperty(TestConstants.DATASOURCE_PASSWORD_2);
+        if (passwd2 == null) {
+            System.err.println(TestConstants.DATASOURCE_PASSWORD_2 + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String schema2 = System.getProperty(TestConstants.DATASOURCE_SCHEMA_2);
+        if (schema2 == null) {
+            System.err.println(TestConstants.DATASOURCE_SCHEMA_2 + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String defaultSchema = System.getProperty(TestConstants.DATASOURCE_DEFAULT);
+        if (defaultSchema == null) {
+            System.err.println(TestConstants.DATASOURCE_DEFAULT + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String sourceURL = System.getProperty(TestConstants.TEST_SOURCE_URL);
+        if (sourceURL == null) {
+            System.err.println(TestConstants.TEST_SOURCE_URL + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String sourcePath = System.getProperty(TestConstants.APP_SOURCE_PATH);
+        if (sourcePath == null) {
+            System.err.println(TestConstants.NO_APP_SOURCE_PATH);
+            System.exit(1);
+        }
+
         PlatypusClientApplication.init(PlatypusClientApplication.Config.parse(new String[]{
-            "-datasource", "eas",
-            "-dburl", "jdbc:oracle:thin:@asvr:1521:adb",
-            "-dbuser", "eas",
-            "-dbpassword", "eas",
-            "-dbschema", "EAS",
-            "-datasource", "easHR",
-            "-dburl", "jdbc:oracle:thin:@asvr:1521:adb",
-            "-dbuser", "hr",
-            "-dbpassword", "hr",
-            "-dbschema", "HR",
-            "-default-datasource", "eas",
-            "-url", "file:/C:/projects/PlatypusTests/",
-            "-source-path", "app"
+            "-datasource", source1,
+            "-dburl", url1,
+            "-dbuser", user1,
+            "-dbpassword", passwd1,
+            "-dbschema", schema1,
+            "-datasource", source2,
+            "-dburl", url2,
+            "-dbuser", user2,
+            "-dbpassword", passwd2,
+            "-dbschema", schema1,
+            "-default-datasource", defaultSchema,
+            "-url", sourceURL,
+            "-source-path", sourcePath
         }));
     }
 
     @Test
     public void id_generator_test() throws InterruptedException {
-        start("IDGeneratorTest", 5*60*1000L);
+        start("IDGeneratorTest", 5 * 60 * 1000L);
     }
 
     @Test
