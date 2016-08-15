@@ -124,40 +124,6 @@ public class ExelTemplateTest {
     public void tearDown() {
     }
 
-<<<<<<< HEAD
-    private DatabasesClientWithResource getDBClient() throws Exception {
-
-        String url = System.getProperty(TestConstants.DATASOURCE_URL_1);
-        if (url == null) {
-            System.err.println(TestConstants.DATASOURCE_URL_1 + TestConstants.PROPERTY_ERROR);
-            System.exit(1);
-        }
-        String user = System.getProperty(TestConstants.DATASOURCE_USER_1);
-        if (user == null) {
-            System.err.println(TestConstants.DATASOURCE_USER_1 + TestConstants.PROPERTY_ERROR);
-            System.exit(1);
-        }
-        String passwd = System.getProperty(TestConstants.DATASOURCE_PASSWORD_1);
-        if (passwd == null) {
-            System.err.println(TestConstants.DATASOURCE_PASSWORD_1 + TestConstants.PROPERTY_ERROR);
-            System.exit(1);
-        }
-        String schema = System.getProperty(TestConstants.DATASOURCE_SCHEMA_1);
-        if (schema == null) {
-            System.err.println(TestConstants.DATASOURCE_SCHEMA_1 + TestConstants.PROPERTY_ERROR);
-            System.exit(1);
-        }
-        DbConnectionSettings settings = new DbConnectionSettings();
-        settings.setUrl(url);
-        settings.setSchema(schema);
-        settings.setUser(user);
-        settings.setPassword(passwd);
-        settings.setMaxStatements(1);
-        return new DatabasesClientWithResource(settings);
-    }
-
-=======
->>>>>>> master
     /**
      * Test of generateDataNamedMap method, of class ExelTemplate.
      *
