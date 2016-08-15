@@ -110,7 +110,7 @@ public class WithoutServerTest extends ScriptedTests {
             "-dbpassword", passwd2,
             "-dbschema", schema1,
             "-default-datasource", defaultSchema,
-            "-url", sourceURL,
+            "-url", ("file://" + sourceURL),
             "-source-path", sourcePath
         }));
     }
