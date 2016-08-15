@@ -6,7 +6,6 @@
 package com.eas.client.reports;
 
 import com.eas.client.Application;
-import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.ModuleStructure;
 import com.eas.client.ModulesProxy;
 import com.eas.client.ServerModulesProxy;
@@ -16,7 +15,6 @@ import com.eas.client.cache.ReportsConfigs;
 import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.scripts.ScriptedResource;
-import com.eas.client.settings.DbConnectionSettings;
 import com.eas.script.Scripts;
 import java.io.File;
 import java.nio.file.Path;
@@ -125,16 +123,6 @@ public class ExelTemplateTest {
     public void tearDown() {
     }
 
-    private DatabasesClientWithResource getDBClient() throws Exception {
-        DbConnectionSettings settings = new DbConnectionSettings();
-        settings.setUrl("jdbc:oracle:thin:@asvr/adb");
-        settings.setSchema("eas");
-        settings.setUser("eas");
-        settings.setPassword("eas");
-        settings.setMaxStatements(1);
-        return new DatabasesClientWithResource(settings);
-    }
-
     /**
      * Test of generateDataNamedMap method, of class ExelTemplate.
      *
@@ -143,7 +131,7 @@ public class ExelTemplateTest {
     @Test
     public void testGenerateDataNamedMap() throws Exception {
         System.out.println("GenerateDataNamedMap jsObject");
-        JSObject data = (JSObject) Scripts.getSpace().exec("({name : 'test', count : 5, time : new Date(2014, 05, 11, 11, 11, 11, 0), elems : [1, 'Hi', true, {text:'Hello!'}, new Date(2014, 05, 22, 22, 22, 22, 0)]})");
+        JSObject data = (JSObject) Scripts.getSpace().exec("({name : 'test', count : 5, time : new Date(1402470671000), elems : [1, 'Hi', true, {text:'Hello!'}, new Date(1403461342000)]})");
         ExelTemplate template = new ExelTemplate(data, "xlsx", new ReportTemplate(null, null, null, data));
         XLSTransformer transformer = new XLSTransformer();
         transformer.registerRowProcessor(new ExcelRowProcessor());
@@ -151,13 +139,17 @@ public class ExelTemplateTest {
         assertEquals(template.generated.size(), 4);
         assertEquals(template.generated.get("count"), 5);
         assertEquals(template.generated.get("name"), "test");
-        assertEquals(template.generated.get("time"), 1402474271000d / 86400000 + 25569);
+        double expectedNamedTimestamp = 1402470671000d / 86400000d + 25569;
+        double generatedNamedTimestamp = (Double)template.generated.get("time");
+        assertTrue(Math.abs(expectedNamedTimestamp - generatedNamedTimestamp) < 1e-10d);
         JSDynaList list = (JSDynaList) template.generated.get("elems");
         assertEquals(list.get(0), 1);
         assertEquals(list.get(1), "Hi");
         assertEquals(list.get(2), Boolean.TRUE);
         assertEquals(((JSDynaBean) list.get(3)).get("text"), "Hello!");
-        assertEquals(list.get(4), 1403464942000d / 86400000 + 25569);
+        double expectedIndexedTimestamp = 1403461342000d / 86400000d + 25569;
+        double generatedIndexedTimestamp = (Double)list.get(4);
+        assertTrue(Math.abs(expectedIndexedTimestamp - generatedIndexedTimestamp) < 1e-10);
     }
 
 }

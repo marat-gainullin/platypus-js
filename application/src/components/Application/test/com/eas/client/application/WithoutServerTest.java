@@ -18,24 +18,19 @@ public class WithoutServerTest extends ScriptedTests {
     public static void init() throws Exception {
         PlatypusClientApplication.init(PlatypusClientApplication.Config.parse(new String[]{
             "-datasource", "eas",
-            "-dburl", "jdbc:oracle:thin:@asvr:1521:adb",
-            "-dbuser", "eas",
-            "-dbpassword", "eas",
-            "-dbschema", "EAS",
+            "-dburl", "jdbc:mysql://192.168.10.205:3306/eas",
+            "-dbuser", "test2",
+            "-dbpassword", "test2",
+//            "-dbschema", "EAS",
             "-datasource", "easHR",
-            "-dburl", "jdbc:oracle:thin:@asvr:1521:adb",
-            "-dbuser", "hr",
-            "-dbpassword", "hr",
-            "-dbschema", "HR",
+            "-dburl", "jdbc:mysql://192.168.10.205:3306/hr",
+            "-dbuser", "test2",
+            "-dbpassword", "test2",
+//            "-dbschema", "HR",
             "-default-datasource", "eas",
             "-url", "file:/C:/projects/PlatypusTests/",
             "-source-path", "app"
         }));
-    }
-
-    @Test
-    public void id_generator_test() throws InterruptedException {
-        start("IDGeneratorTest", 5*60*1000L);
     }
 
     @Test
@@ -125,7 +120,7 @@ public class WithoutServerTest extends ScriptedTests {
 
     @Test
     public void orm_Relations_Test() throws InterruptedException {
-        start("ORM_Relations_Test", 10000L);
+        start("ORM_Relations_Test", 20000L);
     }
 
     @Test

@@ -19,9 +19,9 @@ import java.util.*;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
- * This class is intended to hold fields information. Supports clone,
- * copy operations. Supports factory method for new fields creation. Supports
- * field search, operations with primary and foreign keys.
+ * This class is intended to hold fields information. Supports clone, copy
+ * operations. Supports factory method for new fields creation. Supports field
+ * search, operations with primary and foreign keys.
  */
 public class Fields implements HasPublished {
 
@@ -35,7 +35,7 @@ public class Fields implements HasPublished {
         public OrmDef(String aName, String aOppositeName, JSObject aJsDef) {
             this(null, aName, aOppositeName, aJsDef);
         }
-        
+
         public OrmDef(String aBaseName, String aName, String aOppositeName, JSObject aDef) {
             baseName = aBaseName;
             name = aName;
@@ -98,10 +98,7 @@ public class Fields implements HasPublished {
                 }
             }
             assert fields.size() == aSource.getFieldsCount();
-            String sDesc = aSource.getTableDescription();
-            if (sDesc != null) {
-                setTableDescription(sDesc);
-            }
+            setTableDescription(aSource.getTableDescription());
         }
     }
 
@@ -118,7 +115,7 @@ public class Fields implements HasPublished {
             if (!ormScalarDefinitions.containsKey(aName)) {
                 ormScalarDefinitions.put(aName, aDefinition);
                 Set<OrmDef> expandings = ormScalarExpandings.get(aDefinition.getBaseName());
-                if(expandings == null){
+                if (expandings == null) {
                     expandings = new HashSet<>();
                     ormScalarExpandings.put(aDefinition.getBaseName(), expandings);
                 }
@@ -266,7 +263,7 @@ public class Fields implements HasPublished {
         }
         int counter = 0;
         String currentName = aPrefix;
-        while(contains(currentName)){
+        while (contains(currentName)) {
             currentName += ++counter;
         }
         return currentName;
@@ -304,8 +301,8 @@ public class Fields implements HasPublished {
     }
 
     /**
-     * Yet another method to retrive fields count. Intended for collections
-     * like syntax, in script for example.
+     * Yet another method to retrive fields count. Intended for collections like
+     * syntax, in script for example.
      *
      * @return Fields count.
      * @see #getFieldsCount()

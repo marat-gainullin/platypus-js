@@ -14,11 +14,6 @@ import org.junit.Test;
 public abstract class WithServerTests extends ScriptedTests {
 
     @Test
-    public void id_generator_test() throws InterruptedException {
-        start("IDGeneratorTest", 20000L);
-    }
-
-    @Test
     public void select_stateless_test() throws InterruptedException {
         start("select_stateless_test", 20000L);
     }
