@@ -4,11 +4,6 @@
  */
 package com.eas.client.metadata;
 
-import com.eas.client.ClientConstants;
-import com.eas.client.dataflow.ColumnsIndicies;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 

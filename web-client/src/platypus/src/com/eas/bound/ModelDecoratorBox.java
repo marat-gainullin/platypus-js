@@ -261,19 +261,7 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 
 				@Override
 				public void onChange(JavaScriptObject anEvent) {
-					if (!settingValueToJs) {
-						settingValueFromJs = true;
-						try {
-							try {
-								Object pathData = Utils.getPathData(data, field);
-								setJsValue(pathData);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						} finally {
-							settingValueFromJs = false;
-						}
-					}
+				    rebind();
 				}
 			});
 			Object oData = Utils.getPathData(data, field);
@@ -298,6 +286,12 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 
 			};
 			boundToValue = addValueChangeHandler(valueChangeHandler);
+		}else{
+            try {
+                setJsValue(null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 		}
 	}
 
@@ -310,6 +304,22 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 			boundToValue.removeHandler();
 			boundToValue = null;
 		}
+	}
+	
+	protected void rebind(){
+        if (!settingValueToJs) {
+            settingValueFromJs = true;
+            try {
+                try {
+                    Object pathData = Utils.getPathData(data, field);
+                    setJsValue(pathData);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } finally {
+                settingValueFromJs = false;
+            }
+        }
 	}
 
 	@Override

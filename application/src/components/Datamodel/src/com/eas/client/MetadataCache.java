@@ -46,28 +46,28 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
 
     protected class CaseInsesitiveMap<V> extends HashMap<String, V> {
 
-        protected String transformKey(String aKey) {
+        protected String keyToLowerCase(String aKey) {
             return aKey != null ? aKey.toLowerCase() : null;
         }
 
         @Override
         public V get(Object key) {
-            return super.get(transformKey((String) key));
+            return super.get(keyToLowerCase((String) key));
         }
 
         @Override
         public V put(String key, V value) {
-            return super.put(transformKey(key), value);
+            return super.put(keyToLowerCase(key), value);
         }
 
         @Override
         public V remove(Object key) {
-            return super.remove(transformKey((String) key));
+            return super.remove(keyToLowerCase((String) key));
         }
 
         @Override
         public boolean containsKey(Object key) {
-            return super.containsKey(transformKey((String) key));
+            return super.containsKey(keyToLowerCase((String) key));
         }
 
     }
@@ -76,28 +76,28 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
 
         protected final String nullKey = "null-" + IdGenerator.genId();
 
-        protected String transformKey(String aKey) {
+        protected String keyToLowerCase(String aKey) {
             return aKey != null ? aKey.toLowerCase() : nullKey;
         }
 
         @Override
         public V get(Object key) {
-            return super.get(transformKey((String) key));
+            return super.get(keyToLowerCase((String) key));
         }
 
         @Override
         public V put(String key, V value) {
-            return super.put(transformKey(key), value);
+            return super.put(keyToLowerCase(key), value);
         }
 
         @Override
         public V remove(Object key) {
-            return super.remove(transformKey((String) key));
+            return super.remove(keyToLowerCase((String) key));
         }
 
         @Override
         public boolean containsKey(Object key) {
-            return super.containsKey(transformKey((String) key));
+            return super.containsKey(keyToLowerCase((String) key));
         }
 
     }
@@ -140,7 +140,7 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
         return schema;
     }
 
-    private String trimSchemaFromTableName(String aTableName) {
+    private String pureTableName(String aTableName) {
         int indexOfDot = aTableName.indexOf(".");
         if (indexOfDot != -1) {
             return aTableName.substring(indexOfDot + 1);
@@ -158,23 +158,12 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
         return schemasTablesIndexes.get(schema);
     }
 
-    private void checkSchemaFields(String aTableName) throws Exception {
+    @Override
+    public Fields getTableMetadata(String aTableName) throws Exception {
         String schema = schemaFromTableName(aTableName);
         if (!schemasTablesFields.containsKey(schema)) {
             fillTablesCacheBySchema(schema);
         }
-    }
-
-    private void checkSchemaIndexes(String aTableName) throws Exception {
-        String schema = schemaFromTableName(aTableName);
-        String pureTableName = trimSchemaFromTableName(aTableName);
-        fillIndexesCacheByTable(schema, pureTableName);
-    }
-
-    @Override
-    public Fields getTableMetadata(String aTableName) throws Exception {
-        checkSchemaFields(aTableName);
-        String schema = schemaFromTableName(aTableName);
         TablesFieldsCache cache = lookupFieldsCache(schema);
         return cache != null ? cache.get(aTableName) : null;
     }
@@ -530,7 +519,9 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
     }
 
     public DbTableIndexes getTableIndexes(String aTableName) throws Exception {
-        checkSchemaIndexes(aTableName);
+        String schema = schemaFromTableName(aTableName);
+        String pureTableName = pureTableName(aTableName);
+        fillIndexesCacheByTable(schema, pureTableName);
         TablesIndexesCache cache = lookupIndexesCache(aTableName);
         return cache != null ? cache.get(aTableName) : null;
     }

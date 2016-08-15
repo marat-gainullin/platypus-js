@@ -672,15 +672,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
 
                 @Override
                 public Object call(Object thiz, Object... args) {
-                    if (!settingValueToJs) {
-                        settingValueFromJs = true;
-                        try {
-                            Object newValue = ModelWidget.getPathData(data, field);
-                            setJsValue(JSType.nullOrUndefined(newValue) ? null : newValue);
-                        } finally {
-                            settingValueFromJs = false;
-                        }
-                    }
+                    rebind();
                     return null;
                 }
 
@@ -698,10 +690,25 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
                 }
             };
             addValueChangeListener(boundToValue);
+        } else {
+            setJsValue(null);
+        }
+    }
+
+    private void rebind() {
+        if (!settingValueToJs) {
+            settingValueFromJs = true;
+            try {
+                Object newValue = ModelWidget.getPathData(data, field);
+                setJsValue(JSType.nullOrUndefined(newValue) ? null : newValue);
+            } finally {
+                settingValueFromJs = false;
+            }
         }
     }
 
     protected void unbind() {
+        boolean wasBoundToData = boundToData != null;
         if (boundToData != null) {
             Scripts.unlisten(boundToData);
             boundToData = null;
@@ -709,6 +716,9 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         if (boundToValue != null) {
             removeValueChangeListener(boundToValue);
             boundToValue = null;
+        }
+        if (wasBoundToData) {
+            setValue(null);
         }
     }
 
@@ -867,6 +877,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
 
     @ScriptFunction(jsDoc = REDRAW_JSDOC)
     public void redraw() {
+        rebind();
         revalidate();
         repaint();
     }
@@ -905,7 +916,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
             setJsValue((V) value);
             addValueChangeListener(cellEditingCompletedAlerter);
             extraTools.setVisible(false);
-            EventQueue.invokeLater(()->{
+            EventQueue.invokeLater(() -> {
                 extraTools.setVisible(true);
             });
             return this;

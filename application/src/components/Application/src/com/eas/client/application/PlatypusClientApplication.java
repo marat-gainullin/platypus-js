@@ -35,7 +35,6 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.concurrent.Callable;
 import java.util.logging.*;
-import javax.script.ScriptException;
 import javax.swing.UIManager;
 
 /**

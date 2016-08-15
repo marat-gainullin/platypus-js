@@ -409,7 +409,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
         public boolean isEnabled() {
             return super.isEnabled();
         }
-        
+
         @Override
         public void actionPerformed(ActionEvent e) {
             undoSupport.beginUpdate();
@@ -889,7 +889,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
         public boolean isEnabled() {
             return editable && super.isEnabled();
         }
-        
+
         @Override
         public void actionPerformed(ActionEvent e) {
             if (isEnabled()) {
@@ -1129,7 +1129,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
     }
 
     protected boolean editable;
-    
+
     @Override
     public void setModel(DbSchemeModel aModel) {
         super.setModel(aModel);
@@ -1164,11 +1164,20 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
     public void resolveTables() throws Exception {
         Map<Long, FieldsEntity> entities = model.getEntities();
         if (entities != null && !entities.isEmpty()) {
+            boolean touched = false;
+            MetadataCache mdCache = model.getBasesProxy().getMetadataCache(sqlController.getDatasourceName());
             List<FieldsEntity> entities2Delete = new ArrayList<>();
             for (FieldsEntity entity : entities.values()) {
                 if (entity != null) {
-                    if (!isEntityTableExists(entity)) {
-                        entities2Delete.add(entity);
+                    if (!mdCache.containsTableMetadata(entity.getFullTableName())) {
+                        entity.setTableName(entity.getTableName().toLowerCase());
+                        touched = true;
+                        if (!mdCache.containsTableMetadata(entity.getFullTableName())) {
+                            entity.setTableName(entity.getTableName().toUpperCase());
+                            if (!mdCache.containsTableMetadata(entity.getFullTableName())) {
+                                entities2Delete.add(entity);
+                            }
+                        }
                     }
                 }
             }
@@ -1176,7 +1185,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                 DeleteEntityEdit<FieldsEntity, DbSchemeModel> edit = new DeleteEntityEdit<>(model, fEntity);
                 edit.redo();
             }
-            if (!entities2Delete.isEmpty()) {
+            if (touched) {
                 recreateEntityViews();
             }
         }
@@ -1187,8 +1196,4 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
         addFkRelations(true, null);
     }
 
-    private boolean isEntityTableExists(FieldsEntity fEntity) throws Exception {
-        MetadataCache cache = model.getBasesProxy().getMetadataCache(sqlController.getDatasourceName());
-        return cache.containsTableMetadata(fEntity.getFullTableName());
-    }
 }

@@ -6,6 +6,7 @@
 package com.eas.client.forms.components.model.grid.header;
 
 import com.bearsoft.gui.grid.header.GridColumnsNode;
+import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.design.Designable;
 import com.eas.script.AlreadyPublishedException;
@@ -47,18 +48,18 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
         copied.assign(this);
         return copied;
     }
-    
+
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Returns script handler, used for calculate cell's data, display value and style attributes.\n"
             + " */")
     public JSObject getOnRender() {
-        return ((ModelColumn)getTableColumn()).getOnRender();
+        return ((ModelColumn) getTableColumn()).getOnRender();
     }
 
     @ScriptFunction
     public void setOnRender(JSObject aValue) {
-        ((ModelColumn)getTableColumn()).setOnRender(aValue);
+        ((ModelColumn) getTableColumn()).setOnRender(aValue);
     }
 
     @ScriptFunction(jsDoc = ""
@@ -66,14 +67,34 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
             + " * Returns script handler, used for select a value of the cell.\n"
             + " */")
     public JSObject getOnSelect() {
-        return ((ModelColumn)getTableColumn()).getOnSelect();
+        return ((ModelColumn) getTableColumn()).getOnSelect();
     }
 
     @ScriptFunction
     public void setOnSelect(JSObject aValue) throws Exception {
-        ((ModelColumn)getTableColumn()).setOnSelect(aValue);
+        ((ModelColumn) getTableColumn()).setOnSelect(aValue);
     }
-    
+
+    @ScriptFunction
+    public ModelWidget getEditor() {
+        return ((ModelColumn) getTableColumn()).getEditor();
+    }
+
+    @ScriptFunction
+    public void setEditor(ModelWidget aEditor) {
+        ((ModelColumn) getTableColumn()).setEditor(aEditor);
+    }
+
+    @ScriptFunction
+    public ModelWidget getView() {
+        return ((ModelColumn) getTableColumn()).getView();
+    }
+
+    @ScriptFunction
+    public void setView(ModelWidget aEditor) {
+        ((ModelColumn) getTableColumn()).setView(aEditor);
+    }
+
     @ScriptFunction(params = {"node"})
     @Override
     public void removeColumnNode(GridColumnsNode aNode) {
@@ -91,7 +112,7 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
     public void insertColumnNode(int atIndex, GridColumnsNode aNode) {
         super.insertColumnNode(atIndex, aNode);
     }
-    
+
     @ScriptFunction
     public GridColumnsNode[] columnNodes() {
         return children.toArray(new GridColumnsNode[]{});
@@ -298,7 +319,7 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
             throw new AlreadyPublishedException();
         }
         published = jsColumn;
-        ((ModelColumn)getTableColumn()).setEventsSource(jsColumn);
+        ((ModelColumn) getTableColumn()).setEventsSource(jsColumn);
         /*
          if(view != null)
          view.injectPublished(published);

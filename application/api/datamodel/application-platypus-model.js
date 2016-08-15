@@ -40,18 +40,6 @@ define(['boxing'], function(B) {
     };
 
     /**
-     * Reverts model data changes.
-     * After this method call, no data changes are avaliable for <code>model.save()</code> method.
-     * @method revert
-     * @memberOf ApplicationPlatypusModel
-     */
-    ApplicationPlatypusModel.prototype.revert = function() {
-        var delegate = this.unwrap();
-        var value = delegate.revert();
-        return B.boxAsJs(value);
-    };
-
-    /**
      * Requeries the model data. Forces the model data refresh, no matter if its parameters has changed or not.
      * @param onSuccess The handler function for refresh data on success event (optional).
      * @param onFailure The handler function for refresh data on failure event (optional).
@@ -61,6 +49,18 @@ define(['boxing'], function(B) {
     ApplicationPlatypusModel.prototype.requery = function(onSuccess, onFailure) {
         var delegate = this.unwrap();
         var value = delegate.requery(B.boxAsJava(onSuccess), B.boxAsJava(onFailure));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Reverts model data changes.
+     * After this method call, no data changes are avaliable for <code>model.save()</code> method.
+     * @method revert
+     * @memberOf ApplicationPlatypusModel
+     */
+    ApplicationPlatypusModel.prototype.revert = function() {
+        var delegate = this.unwrap();
+        var value = delegate.revert();
         return B.boxAsJs(value);
     };
 

@@ -89,6 +89,9 @@ public class ModelSpin extends ModelDecoratorBox<Double> implements HasEmptyText
 	}
 
 	private native static void publish(ModelSpin aWidget, JavaScriptObject aPublished)/*-{
+        aPublished.redraw = function(){
+            aWidget.@com.eas.bound.ModelSpin::rebind()();
+        };
 		Object.defineProperty(aPublished, "emptyText", {
 			get : function() {
 				return aWidget.@com.eas.ui.HasEmptyText::getEmptyText()();

@@ -16,7 +16,7 @@ public class WithWebServerTest extends WithServerTests {
     @BeforeClass
     public static void init() throws Exception {
         PlatypusClientApplication.init(PlatypusClientApplication.Config.parse(new String[]{
-            "-url", "http://localhost:8080/p-tests",
+            "-url", "http://localhost:8084/p-tests",
             "-source-path", "app",
             "-user", "testuser2",
             "-password", "test"

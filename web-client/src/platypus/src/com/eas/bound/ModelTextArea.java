@@ -42,6 +42,9 @@ public class ModelTextArea extends ModelDecoratorBox<String> implements HasEmpty
 	}
 
 	protected native static void publish(ModelTextArea aWidget, JavaScriptObject aPublished)/*-{
+        aPublished.redraw = function(){
+            aWidget.@com.eas.bound.ModelTextArea::rebind()();
+        };
 		Object.defineProperty(aPublished, "emptyText", {
 			get : function() {
 				return aWidget.@com.eas.ui.HasEmptyText::getEmptyText()();

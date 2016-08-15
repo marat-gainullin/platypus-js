@@ -36,17 +36,16 @@ public abstract class ArrayModel {
         generalOnRender = aGeneralOnRender;
     }
 
-    protected boolean elementsChangedEnqueued;
+    protected Runnable elementsChangedEnqueued;
 
     protected void enqueueElementsChanged() {
         if (boundToDataElements != null) {
             Scripts.unlisten(boundToDataElements);
             boundToDataElements = null;
         }
-        elementsChangedEnqueued = true;
-        EventQueue.invokeLater(() -> {
-            if (elementsChangedEnqueued) {
-                elementsChangedEnqueued = false;
+        elementsChangedEnqueued = () -> {
+            if (elementsChangedEnqueued == this) {
+                elementsChangedEnqueued = null;
                 if (data != null && Scripts.isInitialized()) {
                     boundToDataElements = Scripts.getSpace().listenElements(data, new AbstractJSObject() {
 
@@ -60,19 +59,20 @@ public abstract class ArrayModel {
                 }
                 fireElementsChanged();
             }
-        });
+        };
+        EventQueue.invokeLater(elementsChangedEnqueued);
     }
 
-    protected boolean elementsDataChangedEnqueued;
+    protected Runnable elementsDataChangedEnqueued;
 
     protected void enqueueElementsDataChanged() {
-        elementsDataChangedEnqueued = true;
-        EventQueue.invokeLater(() -> {
-            if (elementsDataChangedEnqueued) {
-                elementsDataChangedEnqueued = false;
+        elementsDataChangedEnqueued = () -> {
+            if (elementsDataChangedEnqueued == this) {
+                elementsDataChangedEnqueued =  null;
                 fireElementsDataChanged();
             }
-        });
+        };
+        EventQueue.invokeLater(elementsDataChangedEnqueued);
     }
 
     protected void bind() {
