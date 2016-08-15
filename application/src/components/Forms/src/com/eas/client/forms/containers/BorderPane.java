@@ -386,6 +386,7 @@ public class BorderPane extends JPanel implements HasPublished, HasContainerEven
         add(aComp, HorizontalPosition.CENTER);
     }
 
+    @ScriptFunction(jsDoc = CHILD_JSDOC, params = "index")
     @Override
     public JComponent child(int aIndex) {
         return (JComponent) super.getComponent(aIndex);

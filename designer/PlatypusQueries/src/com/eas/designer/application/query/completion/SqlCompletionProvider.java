@@ -20,7 +20,6 @@ import com.eas.designer.application.query.lexer.SqlLanguageHierarchy;
 import com.eas.designer.application.query.lexer.SqlTokenId;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
@@ -96,22 +95,20 @@ public class SqlCompletionProvider implements CompletionProvider {
         fillCompletionByTables(tablesFields, dataObject, point, resultSet);
     }
 
-    public void fillCompletionByTables(Map<String, Fields> tables, PlatypusQueryDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet) throws Exception {
-        if (tables != null) {
-            for (Entry<String, Fields> aTableEntry : tables.entrySet()) {
-                SqlCompletionItem item = new TableSqlCompletionItem(dataObject, aTableEntry, point.startOffset, point.endOffset);
+    public void fillCompletionByTables(Map<String, Fields> aTables, PlatypusQueryDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet) throws Exception {
+        if (aTables != null) {
+            aTables.values().stream().map((aTableFields) -> new TableSqlCompletionItem(dataObject, aTableFields, point.startOffset, point.endOffset)).forEach((item) -> {
                 addCompletionItem(point, item, resultSet);
-            }
+            });
         }
     }
 
-    public void fillCompletionByFields(Fields fields, PlatypusQueryDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet) throws Exception {
-        if (fields != null) {
-            if (!fields.isEmpty()) {
-                for (Field field : fields.toCollection()) {
-                    SqlCompletionItem item = new FieldSqlCompletionItem(field, point.startOffset, point.endOffset);
+    public void fillCompletionByFields(Fields aFields, PlatypusQueryDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet) throws Exception {
+        if (aFields != null) {
+            if (!aFields.isEmpty()) {
+                aFields.toCollection().stream().map((field) -> new FieldSqlCompletionItem(field, point.startOffset, point.endOffset)).forEach((item) -> {
                     addCompletionItem(point, item, resultSet);
-                }
+                });
             } else {
                 SqlCompletionItem item = new EmptySqlCompletionItem(NbBundle.getMessage(SqlCompletionProvider.class, "NoFields"));
                 addCompletionItem(point, item, resultSet);
@@ -176,12 +173,10 @@ public class SqlCompletionProvider implements CompletionProvider {
                     }
                 }
             }
+        } else if (point.filter != null && point.filter.startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {
+            fillCompletionByStoredQueries(dataObject, point, resultSet);
         } else {
-            if (point.filter != null && point.filter.startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {
-                fillCompletionByStoredQueries(dataObject, point, resultSet);
-            } else {
-                fillCompletionByTablesBySchema(null, dataObject, point, resultSet);
-            }
+            fillCompletionByTablesBySchema(null, dataObject, point, resultSet);
         }
     }
 
@@ -538,13 +533,11 @@ public class SqlCompletionProvider implements CompletionProvider {
                 fillCompletionParametersZone(point, dataObject, resultSet);
             } else if (point.zone == KEYWORD_ZONE) {
                 fillCompletionWithKeywords(point, resultSet);
-            } else {
-                if (addedCompletionItems == 0) {
-                    if (point.filter != null && !point.filter.isEmpty()) {
-                        fillCompletionWithKeywords(point, resultSet);
-                    } else {
-                        fillCompletionWithBaseKeywords(point, resultSet);
-                    }
+            } else if (addedCompletionItems == 0) {
+                if (point.filter != null && !point.filter.isEmpty()) {
+                    fillCompletionWithKeywords(point, resultSet);
+                } else {
+                    fillCompletionWithBaseKeywords(point, resultSet);
                 }
             }
         } catch (Exception ex) {

@@ -342,6 +342,7 @@ public class AnchorsPane extends JPanel implements HasPublished, HasContainerEve
         }
     }
 
+    @ScriptFunction(jsDoc = CHILD_JSDOC, params = "index")
     @Override
     public JComponent child(int aIndex) {
         return (JComponent) super.getComponent(aIndex);

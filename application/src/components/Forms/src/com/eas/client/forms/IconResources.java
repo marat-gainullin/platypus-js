@@ -17,11 +17,10 @@ import jdk.nashorn.api.scripting.JSObject;
 public class IconResources {
 
     public static ImageIcon load(String aResourceName, String aCalledFromFile, JSObject onSuccess, JSObject onFailure) throws Exception {
-        Scripts.Space space = Scripts.getSpace();
-        return load(aResourceName, aCalledFromFile, space, onSuccess != null ? (ImageIcon aLoaded) -> {
+        return load(aResourceName, aCalledFromFile, Scripts.getSpace(), onSuccess != null ? (ImageIcon aLoaded) -> {
             onSuccess.call(null, new Object[]{aLoaded});
-        } : null, onSuccess != null ? (Exception ex) -> {
-            onFailure.call(null, new Object[]{space.toJs(ex.getMessage())});
+        } : null, onFailure != null ? (Exception ex) -> {
+            onFailure.call(null, new Object[]{ex.getMessage()});
         } : null);
     }
 

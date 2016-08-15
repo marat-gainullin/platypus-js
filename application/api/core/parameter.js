@@ -136,8 +136,8 @@ define(['boxing'], function(B) {
         /**
          * The value of the parameter.
          */
-        this.value = new Object();
-        Object.defineProperty(this, "value", {
+        this.jsValue = new Object();
+        Object.defineProperty(this, "jsValue", {
             get: function() {
                 var value = delegate.jsValue;
                 return B.boxAsJs(value);

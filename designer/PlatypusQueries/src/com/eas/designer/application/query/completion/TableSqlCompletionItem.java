@@ -9,7 +9,6 @@ import com.eas.client.model.gui.IconCache;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.application.query.editing.QueryDocumentEditsComplementor;
 import java.util.Map;
-import java.util.Map.Entry;
 import net.sf.jsqlparser.TablesFinder;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
@@ -24,8 +23,8 @@ public class TableSqlCompletionItem extends SqlCompletionItem {
     protected PlatypusQueryDataObject editedQueryDataObject;
     protected String alias;
 
-    public TableSqlCompletionItem(PlatypusQueryDataObject aEditedQuery, Entry<String, Fields> aTableEntry, int aStartOffset, int aEndOffset) {
-        super(aTableEntry.getKey(), aTableEntry.getValue().getTableDescription(), aStartOffset, aEndOffset);
+    public TableSqlCompletionItem(PlatypusQueryDataObject aEditedQuery, Fields aTable, int aStartOffset, int aEndOffset) {
+        super(aTable.get(1).getTableName(), aTable.getTableDescription(), aStartOffset, aEndOffset);
         editedQueryDataObject = aEditedQuery;
         icon = IconCache.getIcon("table.png");
         rightText = NbBundle.getMessage(TableSqlCompletionItem.class, "table");

@@ -377,6 +377,7 @@ public class CardPane extends JPanel implements HasPublished, HasContainerEvents
         }
     }
 
+    //@ScriptFunction(jsDoc = CHILD_JSDOC) child(String) is published and it is enough for both methods
     @Override
     public JComponent child(int aIndex) {
         return (JComponent) super.getComponent(aIndex);

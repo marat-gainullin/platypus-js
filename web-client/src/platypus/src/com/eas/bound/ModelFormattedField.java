@@ -146,6 +146,9 @@ public class ModelFormattedField extends ModelDecoratorBox<Object> implements Ha
 
 	private native static void publish(ModelFormattedField aWidget, JavaScriptObject aPublished)/*-{
 		var B = @com.eas.core.Predefine::boxing;
+        aPublished.redraw = function(){
+            aWidget.@com.eas.bound.ModelFormattedField::rebind()();
+        };
 		Object.defineProperty(aPublished, "emptyText", {
 			get : function() {
 				return aWidget.@com.eas.ui.HasEmptyText::getEmptyText()();

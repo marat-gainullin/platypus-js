@@ -27,61 +27,61 @@ public class JsTree extends TreeAdapter<JavaScriptObject> implements JsDataConta
 		childrenField = aChildrenField;
 	}
 
-	protected boolean changesQueued;
+	protected ScheduledCommand changesQueued;
 
 	protected void enqueueChanges() {
-		changesQueued = true;
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+		changesQueued = new ScheduledCommand() {
 
-			@Override
-			public void execute() {
-				if (changesQueued) {
-					changesQueued = false;
-					if (data != null) {
-						List<JavaScriptObject> items = new JsArrayList(data);
-						for (int i = 0; i < items.size(); i++) {
-							JavaScriptObject item = items.get(i);
-							changed(item);
-						}
-					}
-				}
-			}
-		});
+            @Override
+            public void execute() {
+                if (changesQueued == this) {
+                    changesQueued = null;
+                    if (data != null) {
+                        List<JavaScriptObject> items = new JsArrayList(data);
+                        for (int i = 0; i < items.size(); i++) {
+                            JavaScriptObject item = items.get(i);
+                            changed(item);
+                        }
+                    }
+                }
+            }
+        };
+		Scheduler.get().scheduleDeferred(changesQueued);
 	}
 
-	protected boolean readdQueued;
+	protected ScheduledCommand readdQueued;
 
 	private void enqueueReadd() {
-		readdQueued = true;
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+		readdQueued = new ScheduledCommand() {
 
-			@Override
-			public void execute() {
-				if (readdQueued) {
-					readdQueued = false;
-					if (boundToDataElements != null) {
-						boundToDataElements.removeHandler();
-						boundToDataElements = null;
-					}
-					if (data != null) {
-						boundToDataElements = Utils.listenElements(data, new Utils.OnChangeHandler() {
-							
-							@Override
-							public void onChange(JavaScriptObject anEvent) {
-								enqueueChanges();
-							}
-						});
-					}
-					everythingChanged();
-				}
-			}
-		});
+            @Override
+            public void execute() {
+                if (readdQueued == this) {
+                    readdQueued = null;
+                    if (boundToDataElements != null) {
+                        boundToDataElements.removeHandler();
+                        boundToDataElements = null;
+                    }
+                    if (data != null) {
+                        boundToDataElements = Utils.listenElements(data, new Utils.OnChangeHandler() {
+
+                            @Override
+                            public void onChange(JavaScriptObject anEvent) {
+                                enqueueChanges();
+                            }
+                        });
+                    }
+                    everythingChanged();
+                }
+            }
+        };
+		Scheduler.get().scheduleDeferred(readdQueued);
 	}
-	
+
 	protected void bind() {
 		if (data != null) {
 			boundToData = Utils.listenPath(data, "length", new Utils.OnChangeHandler() {
-				
+
 				@Override
 				public void onChange(JavaScriptObject anEvent) {
 					enqueueReadd();
@@ -172,4 +172,20 @@ public class JsTree extends TreeAdapter<JavaScriptObject> implements JsDataConta
 	@Override
 	public void remove(JavaScriptObject anElement) {
 	}
+
+	@Override
+	public void changedItems(JavaScriptObject anArray) {
+		enqueueChanges();
+	}
+
+	@Override
+	public void addedItems(JavaScriptObject anArray) {
+		enqueueReadd();
+	}
+
+	@Override
+	public void removedItems(JavaScriptObject anArray) {
+		enqueueReadd();
+	}
+
 }

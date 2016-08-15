@@ -65,10 +65,10 @@ define(['boxing'], function(B) {
         Object.defineProperty(this, "fixed", {
             get: function() {
                 var value = delegate.fixed;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.fixed = aValue;
+                delegate.fixed = B.boxAsJava(aValue);
             }
         });
 

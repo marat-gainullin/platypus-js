@@ -112,12 +112,8 @@ public class WithoutServerTest extends ScriptedTests {
             "-default-datasource", defaultSchema,
             "-url", ("file://" + sourceURL),
             "-source-path", sourcePath
-        }));
-    }
 
-    @Test
-    public void id_generator_test() throws InterruptedException {
-        start("IDGeneratorTest", 5 * 60 * 1000L);
+        }));
     }
 
     @Test
@@ -207,7 +203,7 @@ public class WithoutServerTest extends ScriptedTests {
 
     @Test
     public void orm_Relations_Test() throws InterruptedException {
-        start("ORM_Relations_Test", 10000L);
+        start("ORM_Relations_Test", 20000L);
     }
 
     @Test

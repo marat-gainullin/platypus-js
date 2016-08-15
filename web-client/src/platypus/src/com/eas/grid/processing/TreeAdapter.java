@@ -30,19 +30,19 @@ public abstract class TreeAdapter<T> implements Tree<T> {
         };
     }
 
-    protected void added(T aElement) {
+    public void added(T aElement) {
         for (Tree.ChangeHandler<?> handler : changesHandlers.toArray(new Tree.ChangeHandler<?>[]{})) {
             ((Tree.ChangeHandler<T>) handler).added(aElement);
         }
     }
 
-    protected void removed(T aElement, T aRemovedFrom) {
+    public void removed(T aElement) {
         for (Tree.ChangeHandler<?> handler : changesHandlers.toArray(new Tree.ChangeHandler<?>[]{})) {
-            ((Tree.ChangeHandler<T>) handler).removed(aElement, aRemovedFrom);
+            ((Tree.ChangeHandler<T>) handler).removed(aElement);
         }
     }
     
-	protected void changed(T aElement) {
+    public void changed(T aElement) {
 		for (Tree.ChangeHandler<?> handler : changesHandlers.toArray(new Tree.ChangeHandler<?>[] {})) {
 			((Tree.ChangeHandler<T>) handler).changed(aElement);
 		}

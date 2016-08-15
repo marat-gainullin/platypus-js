@@ -1,6 +1,7 @@
 package com.eas.grid;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -108,7 +109,7 @@ import com.google.gwt.view.client.SetSelectionModel;
 public class ModelGrid extends Grid<JavaScriptObject>
 		implements HasJsFacade, HasOnRender, HasComponentPopupMenu, HasEventsExecutor, HasEnabled, HasShowHandlers,
 		HasHideHandlers, HasResizeHandlers, HasBinding, HasSelectionHandlers<JavaScriptObject>, HasFocusHandlers,
-		HasBlurHandlers, Focusable, HasKeyDownHandlers, HasKeyPressHandlers, HasKeyUpHandlers {
+		HasBlurHandlers, Focusable, HasKeyDownHandlers, HasKeyPressHandlers, HasKeyUpHandlers, JsDataContainer {
 
 	protected boolean enabled = true;
 	protected EventsExecutor eventsExecutor;
@@ -183,51 +184,47 @@ public class ModelGrid extends Grid<JavaScriptObject>
 					if (activeEditor == null && getSelectionModel() instanceof SetSelectionModel<?>) {
 						final SetSelectionModel<JavaScriptObject> rowsSelection = (SetSelectionModel<JavaScriptObject>) getSelectionModel();
 						if (event.getNativeKeyCode() == KeyCodes.KEY_DELETE && deletable) {
-							final List<JavaScriptObject> viewElements = dataProvider.getList();
-							if (!viewElements.isEmpty() && rowsSelection.getSelectedSet() != null
-									&& !rowsSelection.getSelectedSet().isEmpty()) {
-								// calculate some view sugar
-								int lastSelectedViewIndex = -1;
-								for (int i = viewElements.size() - 1; i >= 0; i--) {
-									JavaScriptObject element = viewElements.get(i);
-									if (rowsSelection.isSelected(element)) {
-										lastSelectedViewIndex = i;
-										break;
-									}
-								}
-								// actually delete selected elements
-								int deletedAt = -1;
-								for (int i = jsData.length() - 1; i >= 0; i--) {
-									JavaScriptObject element = jsData.getSlot(i);
-									if (rowsSelection.isSelected(element)) {
-										jsData.splice(i, 1);
-										deletedAt = i;
-									}
-								}
-								final int viewIndexToSelect = lastSelectedViewIndex;
-								Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-									@Override
-									public void execute() {
-										Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-											@Override
-											public void execute() {
-												int vIndex = viewIndexToSelect;
-												if (vIndex >= 0 && !viewElements.isEmpty()) {
-													if (vIndex >= viewElements.size())
-														vIndex = viewElements.size() - 1;
-													JavaScriptObject toSelect = viewElements.get(vIndex);
-													makeVisible(toSelect, true);
-												} else {
-													ModelGrid.this.setFocus(true);
-												}
-											}
-										});
-									}
-
-								});
-							}
+                            final List<JavaScriptObject> viewElements = dataProvider.getList();
+                            if (!viewElements.isEmpty() && rowsSelection.getSelectedSet() != null
+                                    && !rowsSelection.getSelectedSet().isEmpty()) {
+                                // calculate some view sugar
+                                int lastSelectedViewIndex = -1;
+                                for (int i = viewElements.size() - 1; i >= 0; i--) {
+                                    JavaScriptObject element = viewElements.get(i);
+                                    if (rowsSelection.isSelected(element)) {
+                                        lastSelectedViewIndex = i;
+                                        break;
+                                    }
+                                }
+                                // actually delete selected elements
+                                int deletedAt = -1;
+                                for (int i = jsData.length() - 1; i >= 0; i--) {
+                                    JavaScriptObject element = jsData.getSlot(i);
+                                    if (rowsSelection.isSelected(element)) {
+                                        jsData.splice(i, 1);
+                                        deletedAt = i;
+                                    }
+                                }
+                                final int viewIndexToSelect = lastSelectedViewIndex;
+                                if(deletedAt > -1){
+                                    afterRender(new Runnable(){
+    
+                                        @Override
+                                        public void run() {
+                                            int vIndex = viewIndexToSelect;
+                                            if (vIndex >= 0 && !viewElements.isEmpty()) {
+                                                if (vIndex >= viewElements.size())
+                                                    vIndex = viewElements.size() - 1;
+                                                JavaScriptObject toSelect = viewElements.get(vIndex);
+                                                makeVisible(toSelect, true);
+                                            } else {
+                                                ModelGrid.this.setFocus(true);
+                                            }
+                                        }
+                                        
+                                    });
+                                }
+                            }
 						} else if (event.getNativeKeyCode() == KeyCodes.KEY_INSERT && insertable) {
 							int insertAt = -1;
 							if (rowsSelection instanceof HasSelectionLead<?>
@@ -240,21 +237,14 @@ public class ModelGrid extends Grid<JavaScriptObject>
 								final JavaScriptObject inserted = elementClass != null ? elementClass.newObject()
 										: JavaScriptObject.createObject();
 								jsData.splice(insertAt, 0, inserted);
-								Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-									@Override
-									public void execute() {
-										Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-											@Override
-											public void execute() {
-												makeVisible(inserted, true);
-											}
-										});
-									}
-
-								});
-							}
+                                afterRender(new Runnable(){
+                                    
+                                    @Override
+                                    public void run() {
+                                        makeVisible(inserted, true);
+                                    }
+                                }); 							
+                            }
 						}
 					}
 				}
@@ -346,20 +336,20 @@ public class ModelGrid extends Grid<JavaScriptObject>
 		});
 	}
 
-	protected boolean redrawQueued;
+	protected ScheduledCommand redrawQueued;
 
 	private void enqueueRedraw() {
-		redrawQueued = true;
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+		redrawQueued = new ScheduledCommand() {
 
-			@Override
-			public void execute() {
-				if (redrawQueued) {
-					redrawQueued = false;
-					redraw();
-				}
-			}
-		});
+            @Override
+            public void execute() {
+                if (redrawQueued == this) {
+                    redrawQueued = null;
+                    redraw();
+                }
+            }
+        };
+		Scheduler.get().scheduleDeferred(redrawQueued);
 	}
 
 	protected void applyRows() {
@@ -376,6 +366,9 @@ public class ModelGrid extends Grid<JavaScriptObject>
 				if (sortList.size() > 0) {
 					sortList.clear();
 					redrawHeaders();
+				}
+				if(dataProvider == null || dataProvider.getList() == null || dataProvider.getList().isEmpty()){
+				    clearSelection();
 				}
 			}
 
@@ -460,12 +453,28 @@ public class ModelGrid extends Grid<JavaScriptObject>
 
 	@Override
 	public void setDataProvider(ListDataProvider<JavaScriptObject> aDataProvider) {
-		if (getDataProvider() instanceof JsDataContainer)
-			((JsDataContainer) getDataProvider()).setData(null);
+	    if(getDataProvider() != null){
+	        ((JsDataContainer) getDataProvider()).setData(null);
+	    }
 		super.setDataProvider(aDataProvider);
 		checkTreeIndicatorColumnDataProvider();
 	}
 
+	@Override
+	public void changedItems(JavaScriptObject anItems){
+		((JsDataContainer) getDataProvider()).changedItems(anItems);
+	}
+	
+	@Override	
+	public void addedItems(JavaScriptObject anItems){
+		((JsDataContainer) getDataProvider()).addedItems(anItems);
+	}
+	
+	@Override
+	public void removedItems(JavaScriptObject anItems){
+		((JsDataContainer) getDataProvider()).removedItems(anItems);
+	}
+	
 	public void redraw() {
 		super.redraw();
 		pingGWTFinallyCommands();
@@ -480,7 +489,7 @@ public class ModelGrid extends Grid<JavaScriptObject>
 	private void pingGWTFinallyCommands() {
 		// Dirty hack of GWT Scgeduler.get().scheduleFinally();
 		// Finally commands occasionally not been executed without user
-		// interaction for while.
+		// interaction for a while.
 		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
 			@Override
@@ -587,13 +596,37 @@ public class ModelGrid extends Grid<JavaScriptObject>
 		return parentField != null && !parentField.isEmpty() && childrenField != null && !childrenField.isEmpty();
 	}
 
+	private List<Runnable> onAfterRenderTasks = new ArrayList<>();
+	
+	protected void afterRender(Runnable aTask){
+		onAfterRenderTasks.add(aTask);
+	}
+	
 	@Override
 	protected void renderingCompleted() {
 		super.renderingCompleted();
+		for(final Runnable task : onAfterRenderTasks){
+			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+				
+				@Override
+				public void execute() {
+					task.run();
+				}
+			});
+		}
+		onAfterRenderTasks.clear();
 		if (onAfterRender != null) {
 			final Utils.JsObject event = JavaScriptObject.createObject().cast();
 			event.setJs("source", published);
-			onAfterRender.<Utils.JsObject> cast().call(published, event);
+			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+				
+				@Override
+				public void execute() {
+					if (onAfterRender != null) {
+						onAfterRender.<Utils.JsObject> cast().call(published, event);
+					}
+				}
+			});
 		}
 	}
 
@@ -1041,261 +1074,280 @@ public class ModelGrid extends Grid<JavaScriptObject>
 
 	private native static void publish(ModelGrid aWidget, JavaScriptObject aPublished)/*-{
         aPublished.select = function(aRow) {
-          if (aRow != null && aRow != undefined)
-          aWidget.@com.eas.grid.ModelGrid::selectElement(Lcom/google/gwt/core/client/JavaScriptObject;)(aRow);
-          };
-          aPublished.unselect = function(aRow) {
-          if (aRow != null && aRow != undefined)
-          aWidget.@com.eas.grid.ModelGrid::unselectElement(Lcom/google/gwt/core/client/JavaScriptObject;)(aRow);
-          };
-          aPublished.clearSelection = function() {
-          aWidget.@com.eas.grid.ModelGrid::clearSelection()();
-          };
-          aPublished.find = function() {
-          aWidget.@com.eas.grid.ModelGrid::find()();
-          };
-          aPublished.findSomething = function() {
-          aPublished.find();
-          };
-          aPublished.makeVisible = function(aInstance, needToSelect) {
-          var need2Select = arguments.length > 1 ? !!needToSelect : false;
-          if (aInstance != null)
-          return aWidget.@com.eas.grid.ModelGrid::makeVisible(Lcom/google/gwt/core/client/JavaScriptObject;Z)(aInstance, need2Select);
-          else
-          return false;
-          };
+            if (aRow != null && aRow != undefined)
+                aWidget.@com.eas.grid.ModelGrid::selectElement(Lcom/google/gwt/core/client/JavaScriptObject;)(aRow);
+            };
+        aPublished.unselect = function(aRow) {
+            if (aRow != null && aRow != undefined)
+                aWidget.@com.eas.grid.ModelGrid::unselectElement(Lcom/google/gwt/core/client/JavaScriptObject;)(aRow);
+        };
+        aPublished.clearSelection = function() {
+            aWidget.@com.eas.grid.ModelGrid::clearSelection()();
+        };
+        aPublished.find = function() {
+            aWidget.@com.eas.grid.ModelGrid::find()();
+        };
+        aPublished.findSomething = function() {
+            aPublished.find();
+        };
+        aPublished.makeVisible = function(aInstance, needToSelect) {
+            var need2Select = arguments.length > 1 ? !!needToSelect : false;
+            if (aInstance != null){
+            	// We have to use willBeVisible() instead of makeVisible(), because of
+            	// asynchronous nature of grid's cells rendering.
+            	// Imagine, that someone requested cells re-rendering already.
+            	// In such situation, results of makeVisible call is a zombie.
+                aWidget.@com.eas.grid.ModelGrid::willBeVisible(Lcom/google/gwt/core/client/JavaScriptObject;Z)(aInstance, need2Select);
+            }
+        };
           
-          aPublished.expanded = function(aInstance) {
-          return aWidget.@com.eas.grid.ModelGrid::expanded(Lcom/google/gwt/core/client/JavaScriptObject;)(aInstance);
-          };
+        aPublished.expanded = function(aInstance) {
+            return aWidget.@com.eas.grid.ModelGrid::expanded(Lcom/google/gwt/core/client/JavaScriptObject;)(aInstance);
+        };
           
-          aPublished.expand = function(aInstance) {
-          aWidget.@com.eas.grid.ModelGrid::expand(Lcom/google/gwt/core/client/JavaScriptObject;)(aInstance);
-          };
+        aPublished.expand = function(aInstance) {
+            aWidget.@com.eas.grid.ModelGrid::expand(Lcom/google/gwt/core/client/JavaScriptObject;)(aInstance);
+        };
           
-          aPublished.collapse = function(aInstance) {
-          aWidget.@com.eas.grid.ModelGrid::collapse(Lcom/google/gwt/core/client/JavaScriptObject;)(aInstance);
-          };
+        aPublished.collapse = function(aInstance) {
+            aWidget.@com.eas.grid.ModelGrid::collapse(Lcom/google/gwt/core/client/JavaScriptObject;)(aInstance);
+        };
           
-          aPublished.toggle = function(aInstance) {
-          aWidget.@com.eas.grid.ModelGrid::toggle(Lcom/google/gwt/core/client/JavaScriptObject;)(aInstance);
-          };
+        aPublished.toggle = function(aInstance) {
+            aWidget.@com.eas.grid.ModelGrid::toggle(Lcom/google/gwt/core/client/JavaScriptObject;)(aInstance);
+        };
           
-          aPublished.unsort = function() {
-          aWidget.@com.eas.grid.ModelGrid::unsort()();
-          };
+        aPublished.unsort = function() {
+            aWidget.@com.eas.grid.ModelGrid::unsort()();
+        };
           
-          aPublished.redraw = function() {
-          	  // ModelGrid.redraw() is used as substitute for automatic
-          	  // changes handling, e.g. without Object.observe in a browser.
-          	  // So, in the absence of data change events, we can
-          	  // completely redraw grid only through rebind of its data.
-              aWidget.@com.eas.grid.ModelGrid::rebind()();
-          };
-          aPublished.removeColumnNode = function(aColumnFacade){
-          if(aColumnFacade && aColumnFacade.unwrap)
-          return aWidget.@com.eas.grid.ModelGrid::removeColumnNode(Lcom/eas/grid/columns/header/HeaderNode;)(aColumnFacade.unwrap());
-          else
-          return false;
-          };
-          aPublished.addColumnNode = function(aColumnFacade){
-          if(aColumnFacade && aColumnFacade.unwrap)
-          aWidget.@com.eas.grid.ModelGrid::addColumnNode(Lcom/eas/grid/columns/header/HeaderNode;)(aColumnFacade.unwrap());
-          };
-          aPublished.insertColumnNode = function(aIndex, aColumnFacade){
-          if(aColumnFacade && aColumnFacade.unwrap)
-          aWidget.@com.eas.grid.ModelGrid::insertColumnNode(ILcom/eas/grid/columns/header/HeaderNode;)(aIndex, aColumnFacade.unwrap());
-          };
-          aPublished.columnNodes = function(){
-          var headerRoots = aWidget.@com.eas.grid.ModelGrid::getHeader()();
-          var rootsCount = headerRoots.@java.util.List::size()();
-          var res = [];
-          for(var r = 0; r < rootsCount; r++){
-          var nNode = headerRoots.@java.util.List::get(I)(r);
-          var jsNode = nNode.@com.eas.core.HasPublished::getPublished()();
-          res.push(jsNode);
-          }
-          return res;
-          };
-          Object.defineProperty(aPublished, "headerVisible", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::isHeaderVisible()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setHeaderVisible(Z)(!!aValue);
-          }
+        aPublished.redraw = function() {
+            // ModelGrid.redraw() is used as a rebinder in applications.
+            // Because applications don't care about grid's dataProviders' internal
+            // data structures, such as JsArrayDataProvider and its internal list of elements.
+          	// So, redraw grid through rebinding of its data.
+            aWidget.@com.eas.grid.ModelGrid::rebind()();
+        };
+        aPublished.changed = function(aItems){
+            if(!$wnd.Array.isArray(aItems))
+                aItems = [aItems];
+            aWidget.@com.eas.grid.ModelGrid::changedItems(Lcom/google/gwt/core/client/JavaScriptObject;)(aItems);
+        };
+        aPublished.added = function(aItems){
+            if(!$wnd.Array.isArray(aItems))
+                aItems = [aItems];
+            aWidget.@com.eas.grid.ModelGrid::addedItems(Lcom/google/gwt/core/client/JavaScriptObject;)(aItems);
+        };
+        aPublished.removed = function(aItems){
+            if(!$wnd.Array.isArray(aItems))
+                aItems = [aItems];
+            aWidget.@com.eas.grid.ModelGrid::removedItems(Lcom/google/gwt/core/client/JavaScriptObject;)(aItems);
+        };
+          
+        aPublished.removeColumnNode = function(aColumnFacade){
+            if(aColumnFacade && aColumnFacade.unwrap)
+                return aWidget.@com.eas.grid.ModelGrid::removeColumnNode(Lcom/eas/grid/columns/header/HeaderNode;)(aColumnFacade.unwrap());
+            else
+              return false;
+        };
+        aPublished.addColumnNode = function(aColumnFacade){
+            if(aColumnFacade && aColumnFacade.unwrap)
+                aWidget.@com.eas.grid.ModelGrid::addColumnNode(Lcom/eas/grid/columns/header/HeaderNode;)(aColumnFacade.unwrap());
+        };
+        aPublished.insertColumnNode = function(aIndex, aColumnFacade){
+            if(aColumnFacade && aColumnFacade.unwrap)
+                aWidget.@com.eas.grid.ModelGrid::insertColumnNode(ILcom/eas/grid/columns/header/HeaderNode;)(aIndex, aColumnFacade.unwrap());
+        };
+        aPublished.columnNodes = function(){
+            var headerRoots = aWidget.@com.eas.grid.ModelGrid::getHeader()();
+            var rootsCount = headerRoots.@java.util.List::size()();
+            var res = [];
+            for(var r = 0; r < rootsCount; r++){
+                var nNode = headerRoots.@java.util.List::get(I)(r);
+                var jsNode = nNode.@com.eas.core.HasPublished::getPublished()();
+                res.push(jsNode);
+            }
+            return res;
+        };
+        Object.defineProperty(aPublished, "headerVisible", {
+            get : function() {
+              return aWidget.@com.eas.grid.ModelGrid::isHeaderVisible()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setHeaderVisible(Z)(!!aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "draggableRows", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::isDraggableRows()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setDraggableRows(Z)(!!aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "frozenRows", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getFrozenRows()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setFrozenRows(I)(+aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "frozenColumns", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getFrozenColumns()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setFrozenColumns(I)(+aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "rowsHeight", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getRowsHeight()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setRowsHeight(I)(aValue * 1);
+            }
+        });
+        Object.defineProperty(aPublished, "showHorizontalLines", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::isShowHorizontalLines()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setShowHorizontalLines(Z)(!!aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "showVerticalLines", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::isShowVerticalLines()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setShowVerticalLines(Z)(!!aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "showOddRowsInOtherColor", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::isShowOddRowsInOtherColor()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setShowOddRowsInOtherColor(Z)(!!aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "gridColor", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getGridColor()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setGridColor(Lcom/eas/ui/PublishedColor;)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "oddRowsColor", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getOddRowsColor()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setOddRowsColor(Lcom/eas/ui/PublishedColor;)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "cursorProperty", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getCursorProperty()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setCursorProperty(Ljava/lang/String;)(aValue ? '' + aValue : null);
+            }
+        });
+        
+        Object.defineProperty(aPublished, "onRender", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getOnRender()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setOnRender(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "onAfterRender", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getOnAfterRender()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setOnAfterRender(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "onExpand", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getOnExpand()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setOnExpand(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "onCollapse", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getOnCollapse()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setOnCollapse(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+            }
           });
-          Object.defineProperty(aPublished, "draggableRows", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::isDraggableRows()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setDraggableRows(Z)(!!aValue);
-          }
-          });
-          Object.defineProperty(aPublished, "frozenRows", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::getFrozenRows()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setFrozenRows(I)(+aValue);
-          }
-          });
-          Object.defineProperty(aPublished, "frozenColumns", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::getFrozenColumns()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setFrozenColumns(I)(+aValue);
-          }
-          });
-          Object.defineProperty(aPublished, "rowsHeight", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::getRowsHeight()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setRowsHeight(I)(aValue * 1);
-          }
-          });
-          Object.defineProperty(aPublished, "showHorizontalLines", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::isShowHorizontalLines()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setShowHorizontalLines(Z)(!!aValue);
-          }
-          });
-          Object.defineProperty(aPublished, "showVerticalLines", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::isShowVerticalLines()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setShowVerticalLines(Z)(!!aValue);
-          }
-          });
-          Object.defineProperty(aPublished, "showOddRowsInOtherColor", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::isShowOddRowsInOtherColor()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setShowOddRowsInOtherColor(Z)(!!aValue);
-          }
-          });
-          Object.defineProperty(aPublished, "gridColor", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::getGridColor()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setGridColor(Lcom/eas/ui/PublishedColor;)(aValue);
-          }
-          });
-          Object.defineProperty(aPublished, "oddRowsColor", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::getOddRowsColor()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setOddRowsColor(Lcom/eas/ui/PublishedColor;)(aValue);
-          }
-          });
-          Object.defineProperty(aPublished, "cursorProperty", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::getCursorProperty()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setCursorProperty(Ljava/lang/String;)(aValue ? '' + aValue : null);
-          }
-          });
-
-          Object.defineProperty(aPublished, "onRender", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::getOnRender()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setOnRender(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-          }
-          });
-          Object.defineProperty(aPublished, "onAfterRender", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::getOnAfterRender()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setOnAfterRender(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-          }
-          });
-          Object.defineProperty(aPublished, "onExpand", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::getOnExpand()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setOnExpand(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-          }
-          });
-          Object.defineProperty(aPublished, "onCollapse", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::getOnCollapse()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setOnCollapse(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-          }
-          });
-          Object.defineProperty(aPublished, "selected", {
-          get : function() {
-          var selectionList = aWidget.@com.eas.grid.ModelGrid::getJsSelected()();
-          var selectionArray = [];
-          for ( var i = 0; i < selectionList.@java.util.List::size()(); i++) {
-          selectionArray[selectionArray.length] = selectionList.@java.util.List::get(I)(i);
-          }
-          return selectionArray;
-          }
-          });
-          Object.defineProperty(aPublished, "editable", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::isEditable()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setEditable(Z)(aValue);
-          }
-          });
-          Object.defineProperty(aPublished, "deletable", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::isDeletable()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setDeletable(Z)(aValue);
-          }
-          });
-          Object.defineProperty(aPublished, "insertable", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::isInsertable()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setInsertable(Z)(aValue);
-          }
-          });
-          Object.defineProperty(aPublished, "data", {
-          get : function() {
-          return aWidget.@com.eas.ui.HasBinding::getData()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.ui.HasBinding::setData(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-          }
-          });
-          Object.defineProperty(aPublished, "field", {
-          get : function() {
-          return aWidget.@com.eas.ui.HasBinding::getField()();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.ui.HasBinding::setField(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
-          }
-          });
-          Object.defineProperty(aPublished, "parentField", {
-          get : function() {
-          return aWidget.@com.eas.grid.ModelGrid::getParentField();
-          },
-          set : function(aValue) {
-          aWidget.@com.eas.grid.ModelGrid::setParentField(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
-          }
-          });
+        Object.defineProperty(aPublished, "selected", {
+            get : function() {
+                var selectionList = aWidget.@com.eas.grid.ModelGrid::getJsSelected()();
+                var selectionArray = [];
+                for ( var i = 0; i < selectionList.@java.util.List::size()(); i++) {
+                    selectionArray[selectionArray.length] = selectionList.@java.util.List::get(I)(i);
+                }
+                return selectionArray;
+            }
+        });
+        Object.defineProperty(aPublished, "editable", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::isEditable()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setEditable(Z)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "deletable", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::isDeletable()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setDeletable(Z)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "insertable", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::isInsertable()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setInsertable(Z)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "data", {
+            get : function() {
+                return aWidget.@com.eas.ui.HasBinding::getData()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.ui.HasBinding::setData(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "field", {
+            get : function() {
+                return aWidget.@com.eas.ui.HasBinding::getField()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.ui.HasBinding::setField(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+            }
+        });
+        Object.defineProperty(aPublished, "parentField", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getParentField();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setParentField(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+            }
+        });
 		Object.defineProperty(aPublished, "childrenField", {
 			get : function() {
 				return aWidget.@com.eas.grid.ModelGrid::getChildrenField();
@@ -1361,21 +1413,13 @@ public class ModelGrid extends Grid<JavaScriptObject>
 	}
 
 	public List<JavaScriptObject> getJsSelected() throws Exception {
-		List<JavaScriptObject> result = new ArrayList<>();
-		for (JavaScriptObject row : dataProvider.getList()) {
-			if (getSelectionModel().isSelected(row))
-				result.add(row);
-		}
-		return result;
+        SetSelectionModel<? super JavaScriptObject> sm = getSelectionModel();
+        return new ArrayList<JavaScriptObject>((Collection<JavaScriptObject>)sm.getSelectedSet());
 	}
 
 	public void clearSelection() {
-		SelectionModel<? super JavaScriptObject> sm = getSelectionModel();
-		for (JavaScriptObject row : dataProvider.getList()) {
-			if (getSelectionModel().isSelected(row)) {
-				sm.setSelected(row, false);
-			}
-		}
+		SetSelectionModel<? super JavaScriptObject> sm = getSelectionModel();
+		sm.clear();
 		pingGWTFinallyCommands();
 	}
 
@@ -1437,7 +1481,19 @@ public class ModelGrid extends Grid<JavaScriptObject>
 		}
 	}
 
-	public boolean makeVisible(JavaScriptObject anElement, boolean needToSelect) {
+	public void willBeVisible(final JavaScriptObject anElement, final boolean aNeedToSelect){
+	    redraw(); // force rendering request to avoid makeVisible() deferring on an undefined moment in the future. 
+	    afterRender(new Runnable(){
+
+            @Override
+            public void run() {
+                makeVisible(anElement, aNeedToSelect);
+            }
+	        
+	    });
+	}
+	
+	public boolean makeVisible(JavaScriptObject anElement, boolean aNeedToSelect) {
 		IndexOfProvider<JavaScriptObject> indexOfProvider = (IndexOfProvider<JavaScriptObject>) dataProvider;
 		int index = indexOfProvider.indexOf(anElement);
 		if (index > -1) {
@@ -1460,7 +1516,7 @@ public class ModelGrid extends Grid<JavaScriptObject>
 						rightCell.scrollIntoView();
 				}
 			}
-			if (needToSelect) {
+			if (aNeedToSelect) {
 				clearSelection();
 				selectElement(anElement);
 				if (index >= 0 && index < frozenRows) {
