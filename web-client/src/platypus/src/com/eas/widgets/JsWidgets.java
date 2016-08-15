@@ -543,10 +543,12 @@ public class JsWidgets {
 				for(var i = aPublished.count - 1; i >= 0; i--)
 					comp.@com.google.gwt.user.client.ui.IndexedPanel::remove(I)(i);
 			};
-			aPublished.child = function(aIndex) {
-				var widget = comp.@com.google.gwt.user.client.ui.IndexedPanel::getWidget(I)(aIndex);
-				return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(widget);
-			};
+			if(!aPublished.child){
+			    aPublished.child = function(aIndex) {
+				    var widget = comp.@com.google.gwt.user.client.ui.IndexedPanel::getWidget(I)(aIndex);
+				    return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(widget);
+			    };
+			}
 			publishChildren(aPublished);
 		}
 

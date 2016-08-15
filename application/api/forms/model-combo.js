@@ -40,10 +40,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onMouseReleased = aValue;
+                delegate.onMouseReleased = B.boxAsJava(aValue);
             }
         });
 
@@ -79,10 +79,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onValueChange", {
             get: function() {
                 var value = delegate.onValueChange;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onValueChange = aValue;
+                delegate.onValueChange = B.boxAsJava(aValue);
             }
         });
 
@@ -107,10 +107,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onComponentMoved", {
             get: function() {
                 var value = delegate.onComponentMoved;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onComponentMoved = aValue;
+                delegate.onComponentMoved = B.boxAsJava(aValue);
             }
         });
 
@@ -246,30 +246,30 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         });
 
         /**
-         * Main action performed event handler function.
-         */
-        this.onActionPerformed = new Object();
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = aValue;
-            }
-        });
-
-        /**
          * Key released event handler function.
          */
         this.onKeyReleased = new Object();
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onKeyReleased = aValue;
+                delegate.onKeyReleased = B.boxAsJava(aValue);
+            }
+        });
+
+        /**
+         * Main action performed event handler function.
+         */
+        this.onActionPerformed = new Object();
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return B.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = B.boxAsJava(aValue);
             }
         });
 
@@ -294,10 +294,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onKeyTyped", {
             get: function() {
                 var value = delegate.onKeyTyped;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onKeyTyped = aValue;
+                delegate.onKeyTyped = B.boxAsJava(aValue);
             }
         });
 
@@ -336,10 +336,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onMouseWheelMoved", {
             get: function() {
                 var value = delegate.onMouseWheelMoved;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onMouseWheelMoved = aValue;
+                delegate.onMouseWheelMoved = B.boxAsJava(aValue);
             }
         });
 
@@ -475,10 +475,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onMousePressed = aValue;
+                delegate.onMousePressed = B.boxAsJava(aValue);
             }
         });
 
@@ -528,8 +528,8 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         /**
          * Widget's value.
          */
-        this.value = new Object();
-        Object.defineProperty(this, "value", {
+        this.jsValue = new Object();
+        Object.defineProperty(this, "jsValue", {
             get: function() {
                 var value = delegate.jsValue;
                 return B.boxAsJs(value);
@@ -588,10 +588,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
                 var value = delegate.onMouseMoved;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onMouseMoved = aValue;
+                delegate.onMouseMoved = B.boxAsJava(aValue);
             }
         });
 
@@ -652,10 +652,10 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
                 var value = delegate.onFocusGained;
-                return value;
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onFocusGained = aValue;
+                delegate.onFocusGained = B.boxAsJava(aValue);
             }
         });
 

@@ -29,6 +29,10 @@ public class VTextArea extends JTextPane implements HasValue<String>, HasEditabl
 
             @Override
             public void focusLost(FocusEvent e) {
+                String text = getText();
+                if (text != null && !"".equals(text)) {
+                    nullValue = false;
+                }
                 checkValueChanged();
             }
 

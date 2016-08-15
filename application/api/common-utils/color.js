@@ -30,18 +30,18 @@ define(['boxing'], function(B) {
         if(Color.superclass)
             Color.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        this.WHITE = new Object();
-        Object.defineProperty(this, "WHITE", {
-            get: function() {
-                var value = delegate.WHITE;
-                return B.boxAsJs(value);
-            }
-        });
-
         this.GRAY = new Object();
         Object.defineProperty(this, "GRAY", {
             get: function() {
                 var value = delegate.GRAY;
+                return B.boxAsJs(value);
+            }
+        });
+
+        this.WHITE = new Object();
+        Object.defineProperty(this, "WHITE", {
+            get: function() {
+                var value = delegate.WHITE;
                 return B.boxAsJs(value);
             }
         });
@@ -110,18 +110,18 @@ define(['boxing'], function(B) {
             }
         });
 
-        this.CYAN = new Object();
-        Object.defineProperty(this, "CYAN", {
-            get: function() {
-                var value = delegate.CYAN;
-                return B.boxAsJs(value);
-            }
-        });
-
         this.DARK_GRAY = new Object();
         Object.defineProperty(this, "DARK_GRAY", {
             get: function() {
                 var value = delegate.DARK_GRAY;
+                return B.boxAsJs(value);
+            }
+        });
+
+        this.CYAN = new Object();
+        Object.defineProperty(this, "CYAN", {
+            get: function() {
+                var value = delegate.CYAN;
                 return B.boxAsJs(value);
             }
         });

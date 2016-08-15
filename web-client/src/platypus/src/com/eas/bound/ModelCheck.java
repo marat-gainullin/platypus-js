@@ -60,6 +60,9 @@ public class ModelCheck extends ModelDecoratorBox<Boolean> implements HasActionH
 
 	private static native void publish(ModelCheck aField, JavaScriptObject aPublished)/*-{
 		var B = @com.eas.core.Predefine::boxing;
+		aPublished.redraw = function(){
+		    aField.@com.eas.bound.ModelCheck::rebind()();
+		};
 		Object.defineProperty(aPublished, "text", {
 			get : function() {
 				return aField.@com.eas.bound.ModelCheck::getText()();

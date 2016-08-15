@@ -72,6 +72,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.SetSelectionModel;
 
 /**
  * 
@@ -255,7 +256,7 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 		};
 		scrollableLeftContainer = new ScrollPanel(scrollableLeft);
 		scrollableRight = new GridSection<T>(aKeyProvider) {
-
+		    
 			@Override
 			protected void replaceAllChildren(List<T> values, SafeHtml html) {
 				super.replaceAllChildren(values, html);
@@ -1029,8 +1030,8 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 		scrollableRight.setSelectionModel(sModel);
 	}
 
-	public SelectionModel<? super T> getSelectionModel() {
-		return scrollableRight.getSelectionModel();
+	public SetSelectionModel<? super T> getSelectionModel() {
+		return (SetSelectionModel<? super T>)scrollableRight.getSelectionModel();
 	}
 
 	/**
@@ -1486,20 +1487,20 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 		checkRenderingCompleted();
 	}
 	
-	private boolean renderingCompletedChecking;
+	private ScheduledCommand renderingCompletedCommand;
 	
 	private void checkRenderingCompleted(){
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+	    renderingCompletedCommand = new ScheduledCommand() {
 
-			@Override
-			public void execute() {
-				if (renderingCompletedChecking) {
-					renderingCompleted();
-					renderingCompletedChecking = false;
-				}
-			}
-		});
-		renderingCompletedChecking = true;
+            @Override
+            public void execute() {
+                if (renderingCompletedCommand == this) {
+                    renderingCompletedCommand = null;
+                    renderingCompleted();
+                }
+            }
+        };
+		Scheduler.get().scheduleDeferred(renderingCompletedCommand);
 	}
 
 	protected void renderingCompleted(){

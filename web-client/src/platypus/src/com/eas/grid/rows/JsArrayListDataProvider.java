@@ -37,53 +37,53 @@ public class JsArrayListDataProvider extends ListDataProvider<JavaScriptObject> 
 		return data;
 	}
 
-	protected boolean changesQueued;
+	protected ScheduledCommand changesQueued;
 
 	protected void enqueueChanges() {
-		changesQueued = true;
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+		changesQueued = new ScheduledCommand() {
 
-			@Override
-			public void execute() {
-				if (changesQueued) {
-					changesQueued = false;
-					if (onChange != null)
-						onChange.run();
-				}
-			}
-		});
+            @Override
+            public void execute() {
+                if (changesQueued == this) {
+                    changesQueued = null;
+                    if (onChange != null)
+                        onChange.run();
+                }
+            }
+        };
+		Scheduler.get().scheduleDeferred(changesQueued);
 	}
 
-	protected boolean readdQueued;
+	protected ScheduledCommand readdQueued;
 
 	private void enqueueReadd() {
-		readdQueued = true;
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+		readdQueued = new ScheduledCommand() {
 
-			@Override
-			public void execute() {
-				if (readdQueued) {
-					readdQueued = false;
-					if (boundToDataElements != null) {
-						boundToDataElements.removeHandler();
-						boundToDataElements = null;
-					}
-					getList().clear();
-					if (data != null) {
-						getList().addAll(new JsArrayList(data));
-						boundToDataElements = Utils.listenElements(data, new Utils.OnChangeHandler() {
-							
-							@Override
-							public void onChange(JavaScriptObject anEvent) {
-								enqueueChanges();
-							}
-						});
-					}
-					if (onResize != null)
-						onResize.run();
-				}
-			}
-		});
+            @Override
+            public void execute() {
+                if (readdQueued == this) {
+                    readdQueued = null;
+                    if (boundToDataElements != null) {
+                        boundToDataElements.removeHandler();
+                        boundToDataElements = null;
+                    }
+                    getList().clear();
+                    if (data != null) {
+                        getList().addAll(new JsArrayList(data));
+                        boundToDataElements = Utils.listenElements(data, new Utils.OnChangeHandler() {
+                            
+                            @Override
+                            public void onChange(JavaScriptObject anEvent) {
+                                enqueueChanges();
+                            }
+                        });
+                    }
+                    if (onResize != null)
+                        onResize.run();
+                }
+            }
+        };
+		Scheduler.get().scheduleDeferred(readdQueued);
 	}
 
 	protected void bind() {
@@ -143,5 +143,20 @@ public class JsArrayListDataProvider extends ListDataProvider<JavaScriptObject> 
 	public void rescan() {
 		invalidate();
 		validate();
+	}
+
+	@Override
+	public void changedItems(JavaScriptObject anArray) {
+		enqueueChanges();
+	}
+
+	@Override
+	public void addedItems(JavaScriptObject anArray) {
+		enqueueReadd();
+	}
+
+	@Override
+	public void removedItems(JavaScriptObject anArray) {
+		enqueueReadd();
 	}
 }

@@ -584,7 +584,10 @@ public class QueryResultsView extends javax.swing.JPanel {
                                     generateChangeLogKeys(delete.getKeys(), jsDeletedItem, null, null);
                                     changeLog.add(delete);
                                 }
+                                grid.removed((JSObject) res);
                             }
+                            JSObject added = aSpace.makeArray();
+                            JSObject push = (JSObject)added.getMember("push");
                             for (int i = 2; i < args.length; i++) {
                                 Insert insert = new Insert("");
                                 JSObject jsSubject = (JSObject) args[i];
@@ -595,7 +598,9 @@ public class QueryResultsView extends javax.swing.JPanel {
                                 changeLog.add(insert);
                                 lastInsert = insert;
                                 lastInserted = (JSObject) args[i];
+                                push.call(added, args[i]);
                             }
+                            grid.added(added);
                             return res;
                         }
 

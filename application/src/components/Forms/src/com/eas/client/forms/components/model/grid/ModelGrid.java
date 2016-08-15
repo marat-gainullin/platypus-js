@@ -357,7 +357,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     public static final int CELLS_CACHE_SIZE = 65536;// 2^16
     public static final Color FIXED_COLOR = new Color(154, 204, 255);
     public static Icon processIcon = IconCache.getIcon("16x16/process-indicator.gif");
-    protected TablesFocusManager tablesFocusManager = new TablesFocusManager();
+    protected TablesKeyboardManager tablesKeyboardManager = new TablesKeyboardManager();
     protected TablesMousePropagator tablesMousePropagator = new TablesMousePropagator();
     // design
     protected Icon openFolderIcon;
@@ -401,6 +401,8 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     protected ListSelectionModel rowsSelectionModel;
     protected ListSelectionModel columnsSelectionModel;
     protected GeneralSelectionChangesReflector generalSelectionChangesReflector;
+    // focus
+    protected TablesFocusPropagator focusPropagator = new TablesFocusPropagator();
     // visual components
     protected LinearConstraint topRowsConstraint = new LinearConstraint(0, -1);
     protected LinearConstraint bottomRowsConstraint = new LinearConstraint(0, Integer.MAX_VALUE);
@@ -456,10 +458,15 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         brTable.setAutoCreateColumnsFromModel(false);
 
         // keyboard focus flow setup
-        tlTable.addKeyListener(tablesFocusManager);
-        trTable.addKeyListener(tablesFocusManager);
-        blTable.addKeyListener(tablesFocusManager);
-        brTable.addKeyListener(tablesFocusManager);
+        tlTable.addKeyListener(tablesKeyboardManager);
+        trTable.addKeyListener(tablesKeyboardManager);
+        blTable.addKeyListener(tablesKeyboardManager);
+        brTable.addKeyListener(tablesKeyboardManager);
+        // focus events setup
+        tlTable.addFocusListener(focusPropagator);
+        trTable.addFocusListener(focusPropagator);
+        blTable.addFocusListener(focusPropagator);
+        brTable.addFocusListener(focusPropagator);
         // mouse propagating setup
         tlTable.addMouseListener(tablesMousePropagator);
         trTable.addMouseListener(tablesMousePropagator);
@@ -1036,7 +1043,13 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     @ScriptFunction(jsDoc = FOCUS_JSDOC)
     @Override
     public void focus() {
-        super.requestFocus();
+        if (!brTable.requestFocusInWindow()) {
+            if (!trTable.requestFocusInWindow()) {
+                if (!blTable.requestFocusInWindow()) {
+                    tlTable.requestFocusInWindow();
+                }
+            }
+        }
     }
 
     @ScriptFunction(jsDoc = VISIBLE_JSDOC)
@@ -1353,6 +1366,41 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         configureTreedView();
     }
 
+    private static final String CHANGED_JS_DOC = ""
+            + "/**\n"
+            + " * Notifies the grid about data have been changed.\n"
+            + " * @param aChanged Array of changed objects.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = CHANGED_JS_DOC, params = "aChanged")
+    public void changed(JSObject aChangedItems) {
+        if (aChangedItems.hasMember("length") && JSType.toNumber(aChangedItems.getMember("length")) > 0) {
+            rowsModel.fireElementsDataChanged();
+        }
+    }
+
+    private static final String ADDED_JS_DOC = ""
+            + "/**\n"
+            + " * Notifies the grid about some elements have been added to grid's rows array.\n"
+            + " * @param aAdded Array of added objects.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = ADDED_JS_DOC, params = "aAdded")
+    public void added(JSObject aAddedItems) {
+        rowsModel.fireElementsChanged();
+    }
+
+    private static final String REMOVED_JS_DOC = ""
+            + "/**\n"
+            + " * Notifies the grid about some elements have been removed from grid's rows array.\n"
+            + " * @param aRemoved Array of removed objects.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = REMOVED_JS_DOC, params = "aRemoved")
+    public void removed(JSObject aRemovedItems) {
+        rowsModel.fireElementsChanged();
+    }
+
     @Undesignable
     public List<GridColumnsNode> getHeader() {
         return header;
@@ -1414,8 +1462,8 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     public void insertElementAtCursor() {
         try {
             if (insertable && rowsModel.getData() != null && rowsModel.getData().hasMember("splice")) {
-                JSObject ldata = rowsModel.getData();
                 ListSelectionModel columnSelection = saveColumnsSelection();
+                JSObject ldata = rowsModel.getData();
                 JSObject jsSplice = (JSObject) ldata.getMember("splice");
                 JSObject jsIndexOf = (JSObject) ldata.getMember("indexOf");
                 Object oElementClass = ldata.getMember("elementClass");
@@ -1439,9 +1487,6 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                     }
                 } finally {
                     rowsSelectionModel.addListSelectionListener(generalSelectionChangesReflector);
-                }
-                if (isAutoRedraw()) {
-                    redraw();
                 }
                 EventQueue.invokeLater(() -> {
                     try {
@@ -1503,9 +1548,6 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                         jsSplice.call(ldata, new Object[]{i, 1});
                     }
                 }
-                if (isAutoRedraw()) {
-                    redraw();
-                }
             } finally {
                 EventQueue.invokeLater(() -> {
                     restoreRowsSelection(wasSeletedRows);
@@ -1533,38 +1575,57 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         for (int viewColumnIndex = aSeleted.getMinSelectionIndex(); viewColumnIndex <= aSeleted.getMaxSelectionIndex(); viewColumnIndex++) {
             if (viewColumnIndex >= 0 && viewColumnIndex < columnModel.getColumnCount()) {
                 columnsSelectionModel.addSelectionInterval(viewColumnIndex, viewColumnIndex);
+
             }
         }
+    }
+
+    protected class TablesFocusPropagator implements FocusListener {
+
+        @Override
+        public void focusGained(FocusEvent e) {
+            FocusEvent fe = new FocusEvent(ModelGrid.this, e.getID(), e.isTemporary(), e.getOppositeComponent());
+            for (FocusListener l : getFocusListeners()) {
+                l.focusGained(fe);
+            }
+        }
+
+        @Override
+        public void focusLost(FocusEvent e) {
+            FocusEvent fe = new FocusEvent(ModelGrid.this, e.getID(), e.isTemporary(), e.getOppositeComponent());
+            for (FocusListener l : getFocusListeners()) {
+                l.focusLost(fe);
+            }
+        }
+
     }
 
     protected class GeneralSelectionChangesReflector implements ListSelectionListener {
 
         @Override
         public void valueChanged(ListSelectionEvent e) {
-            if (rowsSelectionModel.getLeadSelectionIndex() != -1) {
+            try {
+                if (!try2StopAnyEditing()) {
+                    try2CancelAnyEditing();
+                }
+                Object oModelData = field != null && !field.isEmpty() ? ModelWidget.getPathData(data, field) : data;
+                JSObject modelData = oModelData instanceof JSObject ? (JSObject) oModelData : null;
+                if (modelData != null) {
+                    JSObject jsNewCursor = rowsSelectionModel.getLeadSelectionIndex() != -1 ? elementByViewIndex(rowsSelectionModel.getLeadSelectionIndex()) : null;
+                    if (modelData.hasMember(cursorProperty)) {
+                        modelData.setMember(cursorProperty, jsNewCursor);
+                    }
+                }
+                repaint();
+            } catch (Exception ex) {
+                Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if (onItemSelected != null) {
                 try {
-                    if (!try2StopAnyEditing()) {
-                        try2CancelAnyEditing();
-                    }
-                    Object oModelData = field != null && !field.isEmpty() ? ModelWidget.getPathData(data, field) : data;
-                    JSObject modelData = oModelData instanceof JSObject ? (JSObject) oModelData : null;
-                    if (modelData != null) {
-                        JSObject jsNewCursor = elementByViewIndex(rowsSelectionModel.getLeadSelectionIndex());
-                        if (jsNewCursor != null && modelData.hasMember(cursorProperty)) {
-                            modelData.setMember(cursorProperty, jsNewCursor);
-                        }
-                    }
-                    repaint();
+                    JSObject jsItem = elementByViewIndex(rowsSelectionModel.getLeadSelectionIndex());
+                    onItemSelected.call(getPublished(), new Object[]{new com.eas.client.forms.events.ItemEvent(ModelGrid.this, jsItem).getPublished()});
                 } catch (Exception ex) {
                     Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                if (onItemSelected != null) {
-                    try {
-                        JSObject jsItem = elementByViewIndex(rowsSelectionModel.getLeadSelectionIndex());
-                        onItemSelected.call(getPublished(), new Object[]{new com.eas.client.forms.events.ItemEvent(ModelGrid.this, jsItem).getPublished()});
-                    } catch (Exception ex) {
-                        Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, null, ex);
-                    }
                 }
             }
         }
@@ -1782,17 +1843,17 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         return aCandidate.hasMember("onRequeried") && aCandidate.hasMember("append");
     }
 
-    protected boolean redrawEnqueued;
+    protected Runnable redrawEnqueued;
 
     @Override
     public void enqueueRedraw() {
-        redrawEnqueued = true;
-        EventQueue.invokeLater(() -> {
-            if (redrawEnqueued) {
-                redrawEnqueued = false;
+        redrawEnqueued = () -> {
+            if (redrawEnqueued == this) {
+                redrawEnqueued = null;
                 redraw();
             }
-        });
+        };
+        EventQueue.invokeLater(redrawEnqueued);
     }
 
     public TableColumnModel getColumnModel() {
@@ -2064,7 +2125,9 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
             focusedTable = brTable;
         }
         return focusedTable;
+
     }
+
     /*
      private String transformCellValue(Object aValue, int aCol, boolean isData) {
      if (aValue != null) {
@@ -2168,7 +2231,6 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
      }
      }
      */
-
     protected class TablesMousePropagator implements MouseListener, MouseMotionListener, MouseWheelListener {
 
         @Override
@@ -2261,7 +2323,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         }
     }
 
-    protected class TablesFocusManager implements KeyListener {
+    protected class TablesKeyboardManager implements KeyListener {
 
         @Override
         public void keyTyped(KeyEvent e) {
@@ -2452,6 +2514,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
             insertElementAtCursor();
         }
     }
+
     /*
      protected class DbGridInsertChildAction extends AbstractAction {
 
@@ -2608,7 +2671,6 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
      }
      }
      */
-
     protected class ModelGridFindSomethingAction extends AbstractAction {
 
         protected JFrame findFrame;

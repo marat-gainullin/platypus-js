@@ -88,7 +88,7 @@ public class TreeDataProvider<T> extends ListDataProvider<T> implements IndexOfP
 		tree.addChangesHandler(new Tree.ChangeHandler<T>() {
 
 			@Override
-			public void removed(T aSubject, T aRemovedFrom) {
+			public void removed(T aSubject) {
 				if (indexOf(aSubject) != -1) {
 					if (isExpanded(aSubject)) {
 						collapse(aSubject);
