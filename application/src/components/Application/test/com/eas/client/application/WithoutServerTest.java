@@ -223,7 +223,7 @@ public class WithoutServerTest extends ScriptedTests {
 
     @Test
     public void resourceLoadTest() throws InterruptedException {
-        start("ResourceLoadTest", 10000L);
+        start("ResourceLoadTest", 15000L);
     }
 
     @Test
