@@ -11,4 +11,5 @@ mv $DIR/$JAVA_RESULT_NAME /usr/lib/jvm/$JAVA_RESULT_NAME && \
 rm $DIR/$JAVA_NAME && \
 update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/$JAVA_RESULT_NAME/bin/javac 1 && \
 update-alternatives --install /usr/bin/java java /usr/lib/jvm/$JAVA_RESULT_NAME/bin/java 1 && \
-update-alternatives --install /usr/bin/javaws javaws /usr/lib/jvm/$JAVA_RESULT_NAME/bin/javaws 1
+update-alternatives --install /usr/bin/javaws javaws /usr/lib/jvm/$JAVA_RESULT_NAME/bin/javaws 1 && \
+cp /usr/lib/jvm/jdk1.8.0_92/jre/lib/security/cacerts /root/.keystore

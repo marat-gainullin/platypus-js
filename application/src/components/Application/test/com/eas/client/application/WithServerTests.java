@@ -25,7 +25,7 @@ public abstract class WithServerTests extends ScriptedTests {
 
     @Test
     public void append_test() throws InterruptedException {
-        start("append_test", 25000L);
+        start("append_test", 35000L);
     }
 
     @Test
