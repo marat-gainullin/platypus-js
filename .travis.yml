@@ -24,7 +24,7 @@ before_install:
 - git clone --depth=1 https://github.com/altsoft/PlatypusTests.git platypusTests
 - docker pull altsoft/platypus
 - docker pull altsoft/testdb
-- docker run --name=testDb -p 3307:3306 --link pricom:pricom -d altsoft/testdb
+- docker run --name=testDb -p 3307:3306 -d altsoft/testdb
 - docker run -d -v `pwd`:/platypus -v `pwd`/platypusTests:/platypusTests --link testDb:testDb -p 8500:8500 -p 8080:8080 altsoft/platypus --name platypus
 - until nc -z $(docker inspect --format='{{.NetworkSettings.IPAddress}}' platypus) 8500
 - do
