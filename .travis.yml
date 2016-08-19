@@ -26,7 +26,7 @@ before_install:
 - docker pull altsoft/testdb
 - docker run --name=testDb -p 3307:3306 -d altsoft/testdb
 - docker run --name=platypus -d -v `pwd`:/platypus -v `pwd`/platypusTests:/platypusTests --link testDb:testDb -p 8500:8500 -p 8080:8080 altsoft/platypus 
-- until nc -z $(docker inspect --format='{{.NetworkSettings.IPAddress}}' platypus) 8500 do echo "Waiting servers start..." sleep 0.5 done
+# - until nc -z $(docker inspect --format='{{.NetworkSettings.IPAddress}}' platypus) 8500 do echo "Waiting servers start..." sleep 0.5 done
 
 script:
 - docker exec platypus /bin/bash -c "ant -DnativeSever.url=platypus://localhost:8500 -DnativeSever.user=testuser2 -DnativeSever.password=test -Dapplication.source.path=app -DwebSever.url=http://localhost:8080/p-tests -DwebSever.user=testuser2 -DwebSever.password=test -Ddatasource.name.1=eas -Ddatasource.dburl.1=jdbc:mysql://testDb:3306/eas -Ddatasource.dbuser.1=test -Ddatasource.dbpassword.1=test -Ddatasource.dbschema.1=eas -Ddatasource.name.2=easHR  -Ddatasource.dburl.2=jdbc:mysql://testDb:3306/hr -Ddatasource.dbuser.2=test -Ddatasource.dbpassword.2=test -Ddatasource.dbschema.2=hr -Ddatasource.default=eas -Dtestsource.url=file:///platypusTests/ -Dlibs.javaee-web-api-7.0.classpath=/usr/local/apache-tomcat-8.0.36/lib/servlet-api.jar:/usr/local/apache-tomcat-8.0.36/lib/websocket-api.jar -f /platypus/application/src/group/build.xml -Dlibs.junit_4.classpath=/usr/local/ant/lib/junit4.jar -Dlibs.hamcrest.classpath=/usr/local/ant/lib/hamcrest-core.jar -Dnb.internal.action.name=test -Dignore.failing.tests=true test"
