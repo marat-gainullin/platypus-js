@@ -6,7 +6,7 @@ ENV TOMCAT_VERSION 8.0.36
 ENV ANT_HOME /usr/local/ant
 ENV PATH ${PATH}:/usr/local/ant/bin
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install wget git console-setup keyboard-configuration language-pack-ru -y  && \
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install wget git console-setup keyboard-configuration language-pack-ru libxrender1 -y  && \
     echo "export LC_ALL=ru_RU.UTF-8" >> /root/.bashrc && echo "export LANG=ru_RU.UTF-8" >> /root/.bashrc && echo "export LANGUAGE=ru_RU.UTF-8" >> /root/.bashrc
 COPY locale /etc/default/locale
 COPY installJava.sh /root/
