@@ -28,11 +28,11 @@ before_install:
   - docker run --name=platypus -d -v `pwd`:/platypus -v `pwd`/platypusTests:/platypusTests --link testDb:testDb -p 8500:8500 -p 8080:8080 altsoft/platypus 
   - # docker/platypus.js/installTravisJava.sh
   - # echo $(java -version)
-  - sleep 280
+  - sleep 120
   # - until nc -z $(docker inspect --format='{{.NetworkSettings.IPAddress}}' platypus) 8500 do echo "Waiting servers start..." sleep 0.5 done
 
 before_script:
-  - docker exec platypus /bin/bash -c "Xvfb :1 -screen 0 640x480x24 -fbdir /var/tmp"
+  - docker exec platypus /bin/bash -c "Xvfb :1 -screen 0 640x480x24 -fbdir /var/tmp&"
 #   - sh -e /etc/init.d/xvfb start
 #   - sleep 5
 #   - export DISPLAY=:99.0
