@@ -35,7 +35,6 @@ public class StoredQueryFactoryTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-
         String url = System.getProperty(TestConstants.DATASOURCE_URL_1);
         if (url == null) {
             System.err.println(TestConstants.DATASOURCE_URL_1 + TestConstants.PROPERTY_ERROR);
