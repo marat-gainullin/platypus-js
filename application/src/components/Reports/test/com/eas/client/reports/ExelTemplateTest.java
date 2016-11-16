@@ -9,6 +9,7 @@ import com.eas.client.Application;
 import com.eas.client.ModuleStructure;
 import com.eas.client.ModulesProxy;
 import com.eas.client.ServerModulesProxy;
+import com.eas.client.TestConstants;
 import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
