@@ -24,7 +24,7 @@ before_install:
   - git clone --depth=1 https://github.com/altsoft/PlatypusTests.git platypusTests
   - docker pull altsoft/platypus
   - docker pull altsoft/testdb
-  - docker run --name=testDb -p 3306:3306 -d altsoft/testdb
+  - docker run --name=testDb -p 3307:3306 -d altsoft/testdb
   - docker run --name=platypus -d -v `pwd`:/platypus -v `pwd`/platypusTests:/platypusTests --link testDb:testDb -p 8500:8500 -p 8080:8080 altsoft/platypus 
   - # docker/platypus.js/installTravisJava.sh
   - # echo $(java -version)
