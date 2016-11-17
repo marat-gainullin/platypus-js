@@ -496,12 +496,13 @@ public class Scripts {
             }
         }
 
-        public Object[] toJs(Object[] aArray) {
-            Object[] publishedArgs = new Object[aArray.length];
-            for (int i = 0; i < aArray.length; i++) {
-                publishedArgs[i] = toJs(aArray[i]);
+        public JSObject toJsArray(List aArray) {
+            JSObject published = makeArray();
+            JSObject push = (JSObject) published.getMember("push");
+            for (int i = 0; i < aArray.size(); i++) {
+                push.call(published, toJs(aArray.get(i)));
             }
-            return publishedArgs;
+            return published;
         }
 
         public Object parseJson(String json) {

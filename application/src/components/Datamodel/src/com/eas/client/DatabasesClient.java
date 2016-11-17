@@ -437,12 +437,12 @@ public class DatabasesClient {
         }
     }
 
-    public int commit(Map<String, List<Change>> aDatasourcesChangeLogs, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public int commit(Map<String, List<Change>> aChangeLogs, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Callable<Integer> doWork = () -> {
             int rowsAffected = 0;
-            List<ApplyResult> results = new ArrayList<>(aDatasourcesChangeLogs.size());
+            List<ApplyResult> results = new ArrayList<>(aChangeLogs.size());
             try {
-                for (Map.Entry<String, List<Change>> logEntry : aDatasourcesChangeLogs.entrySet()) {
+                for (Map.Entry<String, List<Change>> logEntry : aChangeLogs.entrySet()) {
                     results.add(apply(logEntry.getKey(), logEntry.getValue()));
                 }
                 for (ApplyResult r : results) {

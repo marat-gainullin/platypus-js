@@ -206,6 +206,13 @@
     space.setLoadFunc(function (aSourceLocation) {
         return load(aSourceLocation);
     });
+    require([
+        'core/change-value',
+        'core/jdbc-change-value',
+        'core/command',
+        'core/insert',
+        'core/delete',
+        'core/update']);
     var Report = require('core/report');
     var EngineUtilsClass = Java.type('jdk.nashorn.api.scripting.ScriptUtils');
     var HashMapClass = Java.type('java.util.HashMap');
