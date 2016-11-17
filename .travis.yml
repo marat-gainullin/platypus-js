@@ -32,9 +32,9 @@ before_install:
 
 before_script:
   # - docker exec platypus /bin/bash -c "Xvfb :1 -screen 0 640x480x24 -fbdir /var/tmp&"
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
-  - sleep 5
+  # - export DISPLAY=:99.0
+  # - sh -e /etc/init.d/xvfb start
+  # - sleep 5
 
 script:
-  - docker exec platypus /bin/bash -c "export DISPLAY=localhost:99.0 && DISPLAY=localhost:99.0 ant -DnativeSever.url=platypus://localhost:8500 -DnativeSever.user=testuser2 -DnativeSever.password=test -Dapplication.source.path=app -DwebSever.url=http://localhost:8080/p-tests -DwebSever.user=testuser2 -DwebSever.password=test -Ddatasource.name.1=eas -Ddatasource.dburl.1=jdbc:mysql://testDb:3306/eas -Ddatasource.dbuser.1=test -Ddatasource.dbpassword.1=test -Ddatasource.dbschema.1=eas -Ddatasource.name.2=easHR  -Ddatasource.dburl.2=jdbc:mysql://testDb:3306/hr -Ddatasource.dbuser.2=test -Ddatasource.dbpassword.2=test -Ddatasource.dbschema.2=hr -Ddatasource.default=eas -Dtestsource.url=file:///platypusTests/ -Dlibs.javaee-web-api-7.0.classpath=/usr/local/apache-tomcat-8.0.39/lib/servlet-api.jar:/usr/local/apache-tomcat-8.0.39/lib/websocket-api.jar -f /platypus/application/src/group/build.xml -Dlibs.junit_4.classpath=/usr/local/ant/lib/junit4.jar -Dlibs.hamcrest.classpath=/usr/local/ant/lib/hamcrest-core.jar -Dtestfx.headless=true -Dnb.internal.action.name=test test"
+  - docker exec platypus /bin/bash -c "export DISPLAY=localhost:1.0 && DISPLAY=localhost:1.0 ant -DnativeSever.url=platypus://localhost:8500 -DnativeSever.user=testuser2 -DnativeSever.password=test -Dapplication.source.path=app -DwebSever.url=http://localhost:8080/p-tests -DwebSever.user=testuser2 -DwebSever.password=test -Ddatasource.name.1=eas -Ddatasource.dburl.1=jdbc:mysql://testDb:3306/eas -Ddatasource.dbuser.1=test -Ddatasource.dbpassword.1=test -Ddatasource.dbschema.1=eas -Ddatasource.name.2=easHR  -Ddatasource.dburl.2=jdbc:mysql://testDb:3306/hr -Ddatasource.dbuser.2=test -Ddatasource.dbpassword.2=test -Ddatasource.dbschema.2=hr -Ddatasource.default=eas -Dtestsource.url=file:///platypusTests/ -Dlibs.javaee-web-api-7.0.classpath=/usr/local/apache-tomcat-8.0.39/lib/servlet-api.jar:/usr/local/apache-tomcat-8.0.39/lib/websocket-api.jar -f /platypus/application/src/group/build.xml -Dlibs.junit_4.classpath=/usr/local/ant/lib/junit4.jar -Dlibs.hamcrest.classpath=/usr/local/ant/lib/hamcrest-core.jar -Dtestfx.headless=true -Dnb.internal.action.name=test test"
