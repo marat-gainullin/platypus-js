@@ -33,7 +33,6 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
     protected JavaScriptObjectKeyProvider rowKeyProvider = new JavaScriptObjectKeyProvider();
     protected String keyForNullValue = String.valueOf(IdGenerator.genId());
     protected String emptyText;
-    protected JavaScriptObject injected;
     protected JavaScriptObject displayList;
     protected String displayField;
     protected HandlerRegistration boundToList;
@@ -127,34 +126,14 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
     public void setValue(JavaScriptObject aValue, boolean fireEvents) {
         JavaScriptObject oldValue = getValue();
         if (oldValue != aValue) {
-            StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
-            int newValueIndex = box.indexOf(aValue);
-            if (injected != null) {
-                int injectedValueIndex = box.indexOf(injected);
-                if (injectedValueIndex != -1) {
-                    box.removeItem(injectedValueIndex);
-                }
-            }
-            injected = null;
-            if (newValueIndex == -1) {
-                injectValueItem(aValue);
-                injected = aValue;
-            }
             super.setValue(aValue, fireEvents);
-            nonListMask.setValue(box.getSelectedItemText());
+            nonListMask.setValue(calcLabel(aValue));
         }
     }
 
     @Override
     protected void onAttach() {
         super.onAttach();
-    }
-
-    private void injectValueItem(JavaScriptObject aValue) {
-        assert aValue != null : "null met assumption failed in ModelCombo";
-        StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
-        String label = calcLabel(aValue);
-        box.addItem(label != null ? label : "", aValue.hashCode() + "", aValue, "");
     }
 
     @Override
@@ -180,52 +159,50 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 
     protected void rebindList() {
         try {
-            JavaScriptObject value = getValue();
-            StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
-            box.setSelectedIndex(-1);
-            box.clear();
-            box.addItem(calcLabel(null), keyForNullValue, null, "");
-            box.setSelectedIndex(0);
-            injected = null;
-            boolean valueMet = false;
-            if (null == value)
-                valueMet = true;
-            if (ModelCombo.this.list && displayList != null) {
-                List<JavaScriptObject> jsoList = new JsArrayList(displayList);
-                for (int i = 0; i < jsoList.size(); i++) {
-                    JavaScriptObject listItem = jsoList.get(i);
-                    if (listItem != null) {
-                        String _label = calcLabel(listItem);
-                        box.addItem(_label, listItem.hashCode() + "", listItem, "");
-                        if (listItem == value) {
-                            valueMet = true;
+            StyledListBox<JavaScriptObject> listBox = (StyledListBox<JavaScriptObject>) decorated;
+            listBox.setSelectedIndex(-1);
+            listBox.clear();
+            listBox.addItem(calcLabel(null), keyForNullValue, null, "");
+            listBox.setSelectedIndex(0);
+            if (list) {
+                boolean valueMet = false;
+                if (displayList != null) {
+                    JavaScriptObject value = getValue();
+                    List<JavaScriptObject> jsoList = new JsArrayList(displayList);
+                    for (int i = 0; i < jsoList.size(); i++) {
+                        JavaScriptObject item = jsoList.get(i);
+                        if (item != null) {
+                            String itemLabel = calcLabel(item);
+                            listBox.addItem(itemLabel, item.hashCode() + "", item, "");
+                            if (value == item) {
+                                valueMet = true;
+                                listBox.setSelectedIndex(i + 1);
+                            }
                         }
                     }
                 }
+                if(!valueMet){
+                    clearValue();
+                }
             }
-            if (!valueMet) {
-                injectValueItem(value);
-                injected = value;
-            }
-            int valueIndex = box.indexOf(value);
-            box.setSelectedIndex(valueIndex);
-            nonListMask.setValue(box.getSelectedItemText());
-            if (onRedraw != null)
+            nonListMask.setValue(calcLabel(getValue()));
+            if (onRedraw != null) {
                 onRedraw.run();
+            }
         } catch (Exception e) {
             Logger.getLogger(ModelCombo.class.getName()).log(Level.SEVERE, e.getMessage(), e);
         }
     }
 
     public String calcLabel(JavaScriptObject aValue) {
-        String label = aValue != null ? new StringValueConverter().convert(Utils.getPathData(aValue, displayField))
+        String labelText = aValue != null ? new StringValueConverter().convert(Utils.getPathData(aValue, displayField))
                 : "...";
         PublishedCell cell = WidgetsUtils.calcValuedPublishedCell(published, onRender, aValue,
-                label != null ? label : "", null);
+                labelText != null ? labelText : "", null);
         if (cell != null && cell.getDisplay() != null && !cell.getDisplay().isEmpty()) {
-            label = cell.getDisplay();
+            labelText = cell.getDisplay();
         }
-        return label;
+        return labelText;
     }
 
     protected HasValue<JavaScriptObject> getDecorated() {
@@ -321,17 +298,17 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
     public void setList(boolean aValue) {
         if (list != aValue) {
             list = aValue;
-            StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
+            StyledListBox<JavaScriptObject> listBox = (StyledListBox<JavaScriptObject>) decorated;
             if (list) {
-                box.getElement().addClassName(CUSTOM_DROPDOWN_CLASS);
-                box.getElement().getStyle().clearVisibility();
+                listBox.getElement().addClassName(CUSTOM_DROPDOWN_CLASS);
+                listBox.getElement().getStyle().clearVisibility();
                 nonListMask.getStyle().setDisplay(Style.Display.NONE);
                 selectButton.getElement().addClassName("decorator-select-combo");
                 clearButton.getElement().addClassName("decorator-clear-combo");
                 nonListMask.removeClassName("form-control");
             } else {
-                box.getElement().removeClassName(CUSTOM_DROPDOWN_CLASS);
-                box.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
+                listBox.getElement().removeClassName(CUSTOM_DROPDOWN_CLASS);
+                listBox.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
                 nonListMask.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
                 selectButton.getElement().removeClassName("decorator-select-combo");
                 clearButton.getElement().removeClassName("decorator-clear-combo");
