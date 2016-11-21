@@ -176,7 +176,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
                             listBox.addItem(itemLabel, item.hashCode() + "", item, "");
                             if (value == item) {
                                 valueMet = true;
-                                listBox.setSelectedIndex(i + 1);
+                                listBox.setSelectedIndex(listBox.getItemCount() - 1);
                             }
                         }
                     }
