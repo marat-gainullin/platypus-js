@@ -23,9 +23,9 @@ public class TestConstants {
     public static final String DATASOURCE_PASSWORD_2 = "datasource.dbpassword.2";
     public static final String DATASOURCE_SCHEMA_2 = "datasource.dbschema.2";
     public static final String DATASOURCE_DEFAULT = "datasource.default";
-    public static final String TEST_SOURCE_URL = "testsource.path";
-    public static final String APP_SOURCE_PATH = "application.source.path";
-    public static final String NO_APP_SOURCE_PATH = APP_SOURCE_PATH + " property is not specified.";
+    public static final String TEST_SOURCE_URL = "testsource.url";
+    //public static final String APP_SOURCE_PATH = "application.source.path";
+   //public static final String NO_APP_SOURCE_PATH = APP_SOURCE_PATH + " property is not specified.";
     public static final String PROPERTY_ERROR = " property is not specified.";
 
 }
