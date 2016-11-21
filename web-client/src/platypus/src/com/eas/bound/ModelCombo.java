@@ -115,7 +115,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
                 superReg.removeHandler();
                 actionHandlers--;
                 if (actionHandlers == 0) {
-                    assert valueChangeReg != null : "Erroneous use of addActionHandler/removeHandler detected in ModelDate";
+                    assert valueChangeReg != null : "Erroneous use of addActionHandler/removeHandler detected in ModelCombo";
                     valueChangeReg.removeHandler();
                     valueChangeReg = null;
                 }
