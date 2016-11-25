@@ -15,6 +15,7 @@ import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.script.JsDoc;
+import java.net.URI;
 import java.nio.file.Paths;
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -61,7 +62,9 @@ public class StoredQueryFactoryTest {
             System.exit(1);
         }
 //        indexer = new ApplicationSourceIndexer(Paths.get("c:/projects/PlatypusTests/app"), Paths.get("c:/projects/PlatypusTests/WEB-INF/classes"), new ScriptsConfigs());
-        indexer = new ApplicationSourceIndexer(Paths.get(sourceURL), Paths.get(sourceURL+ "WEB-INF/classes"), new ScriptsConfigs());
+        URI uri = new URI(sourceURL);
+        URI classesUri = new URI(sourceURL+ "WEB-INF/classes");
+        indexer = new ApplicationSourceIndexer(Paths.get(uri), Paths.get(classesUri), new ScriptsConfigs());
 //       indexer = new ApplicationSourceIndexer(Paths.get(System.getProperty(KEY_TESTS_PATH) ), Paths.get(KEY_TESTS_PATH+"/WEB-INF/classes"), new ScriptsConfigs());
         DbConnectionSettings settings = new DbConnectionSettings();
 //        settings.setUrl("jdbc:oracle:thin:@asvr/adb");
