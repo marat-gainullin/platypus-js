@@ -14,12 +14,12 @@ import org.junit.BeforeClass;
  */
 public class WithSeServerTest extends WithServerTests {
 
-    public static final String NATIVE_SERVER_URL = "nativeSever.url";
-    public static final String NO_NATIVE_SERVER_URL_MSG = NATIVE_SERVER_URL + " property is not specified.";
-    public static final String NATIVE_SERVER_USER = "nativeSever.user";
-    public static final String NATIVE_SERVER_PASSWORD = "nativeSever.password";
-    public static final String NO_NATIVE_SERVER_USER = NATIVE_SERVER_USER + " property is not specified.";
-    public static final String NO_NATIVE_SERVER_PASSWORD = NATIVE_SERVER_PASSWORD + " property is not specified.";
+    public static final String PLATYPUS_SERVER_URL = "platypus-server.url";
+    public static final String NO_PLATYPUS_SERVER_URL_MSG = PLATYPUS_SERVER_URL + " property is not specified.";
+    public static final String PLATYPUS_SERVER_USER = "platypus-server.user";
+    public static final String PLATYPUS_SERVER_PASSWORD = "platypus-server.password";
+    public static final String NO_PLATYPUS_SERVER_USER = PLATYPUS_SERVER_USER + " property is not specified.";
+    public static final String NO_PLATYPUS_SERVER_PASSWORD = PLATYPUS_SERVER_PASSWORD + " property is not specified.";
     
 
 //    "-url", "platypus://localhost:8500",
@@ -29,19 +29,19 @@ public class WithSeServerTest extends WithServerTests {
     @BeforeClass
     public static void init() throws Exception {
 
-        String url = System.getProperty(NATIVE_SERVER_URL);
+        String url = System.getProperty(PLATYPUS_SERVER_URL);
         if (url == null) {
-            System.err.println(NO_NATIVE_SERVER_URL_MSG);
+            System.err.println(NO_PLATYPUS_SERVER_URL_MSG);
             System.exit(1);
         }
-        String user = System.getProperty(NATIVE_SERVER_USER);
+        String user = System.getProperty(PLATYPUS_SERVER_USER);
         if (user == null) {
-            System.err.println(NO_NATIVE_SERVER_USER);
+            System.err.println(NO_PLATYPUS_SERVER_USER);
             System.exit(1);
         }
-        String passwd = System.getProperty(NATIVE_SERVER_PASSWORD);
+        String passwd = System.getProperty(PLATYPUS_SERVER_PASSWORD);
         if (passwd == null) {
-            System.err.println(NO_NATIVE_SERVER_PASSWORD);
+            System.err.println(NO_PLATYPUS_SERVER_PASSWORD);
             System.exit(1);
         }
         String sourcePath = System.getProperty(TestConstants.APP_SOURCE_PATH);

@@ -14,12 +14,12 @@ import org.junit.BeforeClass;
  */
 public class WithWebServerTest extends WithServerTests {
 
-    public static final String WEB_SERVER_URL = "webSever.url";
-    public static final String NO_WEB_SERVER_URL_MSG = WEB_SERVER_URL + " property is not specified.";
-    public static final String WEB_SERVER_USER = "webSever.user";
-    public static final String WEB_SERVER_PASSWORD = "webSever.password";
-    public static final String NO_WEB_SERVER_USER = WEB_SERVER_USER + " property is not specified.";
-    public static final String NO_WEB_SERVER_PASSWORD = WEB_SERVER_PASSWORD + " property is not specified.";
+    public static final String SERVLET_CONTAINER_URL = "servlet-container.url";
+    public static final String NO_SERVLET_CONTAINER_URL_MSG = SERVLET_CONTAINER_URL + " property is not specified.";
+    public static final String SERVLET_CONTAINER_USER = "servlet-container.user";
+    public static final String SERVLET_CONTAINER_PASSWORD = "servlet-container.password";
+    public static final String NO_SERVLET_CONTAINER_USER = SERVLET_CONTAINER_USER + " property is not specified.";
+    public static final String NO_SERVLET_CONTAINER_PASSWORD = SERVLET_CONTAINER_PASSWORD + " property is not specified.";
 
 
 //    "-url", "http://localhost:8080/p-tests",
@@ -29,19 +29,19 @@ public class WithWebServerTest extends WithServerTests {
     @BeforeClass
     public static void init() throws Exception {
 
-        String url = System.getProperty(WEB_SERVER_URL);
+        String url = System.getProperty(SERVLET_CONTAINER_URL);
         if (url == null) {
-            System.err.println(NO_WEB_SERVER_URL_MSG);
+            System.err.println(NO_SERVLET_CONTAINER_URL_MSG);
             System.exit(1);
         }
-        String user = System.getProperty(WEB_SERVER_USER);
+        String user = System.getProperty(SERVLET_CONTAINER_USER);
         if (user == null) {
-            System.err.println(NO_WEB_SERVER_USER);
+            System.err.println(NO_SERVLET_CONTAINER_USER);
             System.exit(1);
         }
-        String passwd = System.getProperty(WEB_SERVER_PASSWORD);
+        String passwd = System.getProperty(SERVLET_CONTAINER_PASSWORD);
         if (passwd == null) {
-            System.err.println(NO_WEB_SERVER_PASSWORD);
+            System.err.println(NO_SERVLET_CONTAINER_PASSWORD);
             System.exit(1);
         }
         String sourcePath = System.getProperty(TestConstants.APP_SOURCE_PATH);
