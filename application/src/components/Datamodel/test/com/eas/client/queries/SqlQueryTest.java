@@ -8,6 +8,7 @@ import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
+import com.eas.client.TestConstants;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.script.Scripts;
 import org.junit.After;
@@ -32,11 +33,32 @@ public class SqlQueryTest {
 
     @BeforeClass
     public static void init() throws Exception {
+        String url = System.getProperty(TestConstants.DATASOURCE_URL_1);
+        if (url == null) {
+            System.err.println(TestConstants.DATASOURCE_URL_1 + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String user = System.getProperty(TestConstants.DATASOURCE_USER_1);
+        if (user == null) {
+            System.err.println(TestConstants.DATASOURCE_USER_1 + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String passwd = System.getProperty(TestConstants.DATASOURCE_PASSWORD_1);
+        if (passwd == null) {
+            System.err.println(TestConstants.DATASOURCE_PASSWORD_1 + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+        String schema = System.getProperty(TestConstants.DATASOURCE_SCHEMA_1);
+        if (schema == null) {
+            System.err.println(TestConstants.DATASOURCE_SCHEMA_1 + TestConstants.PROPERTY_ERROR);
+            System.exit(1);
+        }
+
         DbConnectionSettings settings = new DbConnectionSettings();
-        settings.setUrl("jdbc:oracle:thin:@asvr/adb");
-        settings.setUser("eas");
-        settings.setPassword("eas");
-        settings.setSchema("eas");
+        settings.setUrl(url);
+        settings.setUser(user);
+        settings.setPassword(passwd);
+        settings.setSchema(schema);
         settings.setMaxConnections(1);
         settings.setMaxStatements(1);
         resource = new DatabasesClientWithResource(settings);
