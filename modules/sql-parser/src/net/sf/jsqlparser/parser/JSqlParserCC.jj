@@ -1,0 +1,3653 @@
+/* ================================================================
+/* ================================================================
+ * JSQLParser : java based sql parser 
+ * ================================================================
+ *
+ * Project Info:  http://jsqlparser.sourceforge.net
+ * Project Lead:  Leonardo Francalanci (leoonardoo@yahoo.it);
+ *
+ * (C) Copyright 2004, by Leonardo Francalanci
+ *
+ * This library is free software; you can redistribute it and/or modify it under the terms
+ * of the GNU Lesser General Public License as published by the Free Software Foundation;
+ * either version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with this
+ * library; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
+ 
+options{
+    IGNORE_CASE=true;
+    STATIC=false;
+    UNICODE_INPUT=true;
+    ERROR_REPORTING=true;
+//  DEBUG_LOOKAHEAD= true;
+//  FORCE_LA_CHECK=true;
+//  DEBUG_TOKEN_MANAGER=true;
+}
+
+PARSER_BEGIN(CCJSqlParser)
+/* ================================================================
+ * JSQLParser : java based sql parser 
+ * ================================================================
+ *
+ * Project Info:  http://jsqlparser.sourceforge.net
+ * Project Lead:  Leonardo Francalanci (leoonardoo@yahoo.it);
+ *
+ * (C) Copyright 2004, by Leonardo Francalanci
+ *
+ * This library is free software; you can redistribute it and/or modify it under the terms
+ * of the GNU Lesser General Public License as published by the Free Software Foundation;
+ * either version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with this
+ * library; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
+
+
+package net.sf.jsqlparser.parser;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import net.sf.jsqlparser.expression.BinaryExpression;
+import net.sf.jsqlparser.expression.DoubleValue;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.InverseExpression;
+import net.sf.jsqlparser.expression.JdbcParameter;
+import net.sf.jsqlparser.expression.NamedParameter;
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.DateValue;
+import net.sf.jsqlparser.expression.TimeValue;
+import net.sf.jsqlparser.expression.TimestampValue;
+import net.sf.jsqlparser.expression.NullValue;
+import net.sf.jsqlparser.expression.Parenthesis;
+import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.CaseExpression;
+import net.sf.jsqlparser.expression.WhenClause;
+import net.sf.jsqlparser.expression.AnyComparisonExpression;
+import net.sf.jsqlparser.expression.AllComparisonExpression;
+import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
+import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseAnd;
+import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseOr;
+import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseXor;
+import net.sf.jsqlparser.expression.operators.arithmetic.Concat;
+import net.sf.jsqlparser.expression.operators.arithmetic.Division;
+import net.sf.jsqlparser.expression.operators.arithmetic.Multiplication;
+import net.sf.jsqlparser.expression.operators.arithmetic.Subtraction;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
+import net.sf.jsqlparser.expression.operators.relational.Between;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
+import net.sf.jsqlparser.expression.operators.relational.ItemsList;
+import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
+import net.sf.jsqlparser.expression.operators.relational.ExistsExpression;
+import net.sf.jsqlparser.expression.operators.relational.Matches;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.create.table.ColDataType;
+import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
+import net.sf.jsqlparser.statement.create.table.CreateTable;
+import net.sf.jsqlparser.statement.create.table.Index;
+import net.sf.jsqlparser.statement.delete.Delete;
+import net.sf.jsqlparser.statement.drop.Drop;
+import net.sf.jsqlparser.statement.insert.Insert;
+import net.sf.jsqlparser.statement.replace.Replace;
+import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.AllTableColumns;
+import net.sf.jsqlparser.statement.select.Distinct;
+import net.sf.jsqlparser.statement.select.FromItem;
+import net.sf.jsqlparser.statement.select.Join;
+import net.sf.jsqlparser.statement.select.SubJoin;
+import net.sf.jsqlparser.statement.select.Limit;
+import net.sf.jsqlparser.statement.select.OrderByElement;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectBody;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sf.jsqlparser.statement.select.Top;
+import net.sf.jsqlparser.statement.select.Union;
+import net.sf.jsqlparser.statement.select.UnionTypes;
+import net.sf.jsqlparser.statement.select.WithItem;
+import net.sf.jsqlparser.statement.select.Connect;
+import net.sf.jsqlparser.statement.truncate.Truncate;
+import net.sf.jsqlparser.statement.update.Update;
+import net.sf.jsqlparser.statement.select.Alias;
+import net.sf.jsqlparser.statement.select.Into;
+
+/**
+ * The parser generated by JavaCC
+ */
+public class CCJSqlParser {
+   public List<ParseException> syntaxErrors = new ArrayList<ParseException> ();
+   public Statement parsedStatement;
+
+   protected void recover (ParseException ex) {
+      syntaxErrors.add (ex);
+   }
+
+   public Statement parse()
+   {
+        try
+        {
+            parsedStatement = Statement();
+            return parsedStatement;
+        }catch(ParseException ex)
+        {
+            recover(ex);
+            return null;
+        }
+   }
+}
+
+
+PARSER_END(CCJSqlParser)
+
+
+SKIP:
+{
+    " "
+|   "\t"
+|   "\r"
+|   "\n"
+|   "\f"
+}
+
+
+TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
+{
+    <K_AS: "AS">
+|   <K_START:"START">
+|   <K_CONNECT:"CONNECT">
+|   <K_NOCYCLE:"NOCYCLE">
+|   <K_PRIOR:"PRIOR">
+|   <K_BY:"BY">
+|   <K_DO:"DO">
+|   <K_IS:"IS">
+|   <K_IN:"IN">
+|   <K_OR:"OR">
+|   <K_ON:"ON">
+|   <K_ALL:"ALL">
+|   <K_AND:"AND">
+|   <K_ANY:"ANY">
+|   <K_KEY:"KEY">
+|   <K_NOT:"NOT">
+|   <K_SET:"SET">
+|   <K_ASC:"ASC">
+|   <K_TOP:"TOP">
+|   <K_END:"END">
+|   <K_DESC:"DESC">
+|   <K_INTO:"INTO">
+|   <K_NULL:"NULL">
+|   <K_LIKE:"LIKE">
+|   <K_DROP:"DROP">
+|   <K_JOIN:"JOIN">
+|   <K_LEFT:"LEFT">
+|   <K_FROM:"FROM">
+|   <K_OPEN:"OPEN">
+|   <K_CASE:"CASE">
+|   <K_WHEN:"WHEN">
+|   <K_THEN:"THEN">
+|   <K_ELSE:"ELSE">
+|   <K_SOME:"SOME">
+|   <K_FULL:"FULL">
+|   <K_WITH:"WITH">
+|   <K_TABLE:"TABLE">
+|   <K_WHERE:"WHERE">
+|   <K_USING:"USING">
+|   <K_UNION:"UNION">
+|   <K_EXCEPT:"EXCEPT">     
+|   <K_GROUP:"GROUP">
+|   <K_BEGIN:"BEGIN">
+|   <K_INDEX: "INDEX">
+|   <K_INNER:"INNER">
+|   <K_LIMIT:"LIMIT">
+|   <K_OUTER:"OUTER">
+|   <K_ORDER:"ORDER">
+|   <K_RIGHT:"RIGHT">
+|   <K_DELETE:"DELETE">
+|   <K_CREATE:"CREATE">
+|   <K_SELECT:"SELECT">
+|   <K_OFFSET:"OFFSET">
+|   <K_EXISTS:"EXISTS">
+|   <K_HAVING:"HAVING">
+|   <K_INSERT:"INSERT">
+|   <K_UPDATE:"UPDATE">
+|   <K_VALUES:"VALUES">
+|   <K_ESCAPE:"ESCAPE">
+|   <K_PRIMARY:"PRIMARY">
+|   <K_NATURAL:"NATURAL">
+|   <K_REPLACE:"REPLACE">
+|   <K_BETWEEN:"BETWEEN">
+|   <K_TRUNCATE:"TRUNCATE">
+|   <K_DISTINCT:"DISTINCT">
+|   <K_INTERSECT:"INTERSECT">
+}
+
+TOKEN : /* Numeric Constants */
+{
+	< S_DOUBLE: ((<S_INTEGER>)? "." <S_INTEGER> ( ["e","E"] ([ "-","+"])? <S_INTEGER> )? 
+				|
+				(<S_INTEGER>)+ (".")? ["e","E"] ([ "-","+"])? (<S_INTEGER>)+
+				)>
+  | 	< S_INTEGER: ( <DIGIT> )+ >
+  | 	< #DIGIT: ["0" - "9"] >
+
+}
+
+TOKEN : 
+{
+   <S_CROSS: "#">
+}
+
+SPECIAL_TOKEN: 
+{
+   <LINE_COMMENT: "--"(~["\r","\n"])*>
+|  <MULTI_LINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
+}
+
+TOKEN:
+{
+    < S_IDENTIFIER: ( <S_CROSS> | <LETTER> ) + ( <DIGIT> | <LETTER> |<SPECIAL_CHARS>)* >
+|   < #LETTER: [
+
+         "A"-"Z",
+         "_",
+         "a"-"z",
+         "\u00a2"-"\u00a5",
+         "\u00aa",
+         "\u00b5",
+         "\u00ba",
+         "\u00c0"-"\u00d6",
+         "\u00d8"-"\u00f6",
+         "\u00f8"-"\u021f",
+         "\u0222"-"\u0233",
+         "\u0250"-"\u02ad",
+         "\u02b0"-"\u02b8",
+         "\u02bb"-"\u02c1",
+         "\u02d0"-"\u02d1",
+         "\u02e0"-"\u02e4",
+         "\u02ee",
+         "\u037a",
+         "\u0386",
+         "\u0388"-"\u038a",
+         "\u038c",
+         "\u038e"-"\u03a1",
+         "\u03a3"-"\u03ce",
+         "\u03d0"-"\u03d7",
+         "\u03da"-"\u03f3",
+         "\u0400"-"\u0481",
+         "\u048c"-"\u04c4",
+         "\u04c7"-"\u04c8",
+         "\u04cb"-"\u04cc",
+         "\u04d0"-"\u04f5",
+         "\u04f8"-"\u04f9",
+         "\u0531"-"\u0556",
+         "\u0559",
+         "\u0561"-"\u0587",
+         "\u05d0"-"\u05ea",
+         "\u05f0"-"\u05f2",
+         "\u0621"-"\u063a",
+         "\u0640"-"\u064a",
+         "\u0671"-"\u06d3",
+         "\u06d5",
+         "\u06e5"-"\u06e6",
+         "\u06fa"-"\u06fc",
+         "\u0710",
+         "\u0712"-"\u072c",
+         "\u0780"-"\u07a5",
+         "\u0905"-"\u0939",
+         "\u093d",
+         "\u0950",
+         "\u0958"-"\u0961",
+         "\u0985"-"\u098c",
+         "\u098f"-"\u0990",
+         "\u0993"-"\u09a8",
+         "\u09aa"-"\u09b0",
+         "\u09b2",
+         "\u09b6"-"\u09b9",
+         "\u09dc"-"\u09dd",
+         "\u09df"-"\u09e1",
+         "\u09f0"-"\u09f3",
+         "\u0a05"-"\u0a0a",
+         "\u0a0f"-"\u0a10",
+         "\u0a13"-"\u0a28",
+         "\u0a2a"-"\u0a30",
+         "\u0a32"-"\u0a33",
+         "\u0a35"-"\u0a36",
+         "\u0a38"-"\u0a39",
+         "\u0a59"-"\u0a5c",
+         "\u0a5e",
+         "\u0a72"-"\u0a74",
+         "\u0a85"-"\u0a8b",
+         "\u0a8d",
+         "\u0a8f"-"\u0a91",
+         "\u0a93"-"\u0aa8",
+         "\u0aaa"-"\u0ab0",
+         "\u0ab2"-"\u0ab3",
+         "\u0ab5"-"\u0ab9",
+         "\u0abd",
+         "\u0ad0",
+         "\u0ae0",
+         "\u0b05"-"\u0b0c",
+         "\u0b0f"-"\u0b10",
+         "\u0b13"-"\u0b28",
+         "\u0b2a"-"\u0b30",
+         "\u0b32"-"\u0b33",
+         "\u0b36"-"\u0b39",
+         "\u0b3d",
+         "\u0b5c"-"\u0b5d",
+         "\u0b5f"-"\u0b61",
+         "\u0b85"-"\u0b8a",
+         "\u0b8e"-"\u0b90",
+         "\u0b92"-"\u0b95",
+         "\u0b99"-"\u0b9a",
+         "\u0b9c",
+         "\u0b9e"-"\u0b9f",
+         "\u0ba3"-"\u0ba4",
+         "\u0ba8"-"\u0baa",
+         "\u0bae"-"\u0bb5",
+         "\u0bb7"-"\u0bb9",
+         "\u0c05"-"\u0c0c",
+         "\u0c0e"-"\u0c10",
+         "\u0c12"-"\u0c28",
+         "\u0c2a"-"\u0c33",
+         "\u0c35"-"\u0c39",
+         "\u0c60"-"\u0c61",
+         "\u0c85"-"\u0c8c",
+         "\u0c8e"-"\u0c90",
+         "\u0c92"-"\u0ca8",
+         "\u0caa"-"\u0cb3",
+         "\u0cb5"-"\u0cb9",
+         "\u0cde",
+         "\u0ce0"-"\u0ce1",
+         "\u0d05"-"\u0d0c",
+         "\u0d0e"-"\u0d10",
+         "\u0d12"-"\u0d28",
+         "\u0d2a"-"\u0d39",
+         "\u0d60"-"\u0d61",
+         "\u0d85"-"\u0d96",
+         "\u0d9a"-"\u0db1",
+         "\u0db3"-"\u0dbb",
+         "\u0dbd",
+         "\u0dc0"-"\u0dc6",
+         "\u0e01"-"\u0e30",
+         "\u0e32"-"\u0e33",
+         "\u0e3f"-"\u0e46",
+         "\u0e81"-"\u0e82",
+         "\u0e84",
+         "\u0e87"-"\u0e88",
+         "\u0e8a",
+         "\u0e8d",
+         "\u0e94"-"\u0e97",
+         "\u0e99"-"\u0e9f",
+         "\u0ea1"-"\u0ea3",
+         "\u0ea5",
+         "\u0ea7",
+         "\u0eaa"-"\u0eab",
+         "\u0ead"-"\u0eb0",
+         "\u0eb2"-"\u0eb3",
+         "\u0ebd",
+         "\u0ec0"-"\u0ec4",
+         "\u0ec6",
+         "\u0edc"-"\u0edd",
+         "\u0f00",
+         "\u0f40"-"\u0f47",
+         "\u0f49"-"\u0f6a",
+         "\u0f88"-"\u0f8b",
+         "\u1000"-"\u1021",
+         "\u1023"-"\u1027",
+         "\u1029"-"\u102a",
+         "\u1050"-"\u1055",
+         "\u10a0"-"\u10c5",
+         "\u10d0"-"\u10f6",
+         "\u1100"-"\u1159",
+         "\u115f"-"\u11a2",
+         "\u11a8"-"\u11f9",
+         "\u1200"-"\u1206",
+         "\u1208"-"\u1246",
+         "\u1248",
+         "\u124a"-"\u124d",
+         "\u1250"-"\u1256",
+         "\u1258",
+         "\u125a"-"\u125d",
+         "\u1260"-"\u1286",
+         "\u1288",
+         "\u128a"-"\u128d",
+         "\u1290"-"\u12ae",
+         "\u12b0",
+         "\u12b2"-"\u12b5",
+         "\u12b8"-"\u12be",
+         "\u12c0",
+         "\u12c2"-"\u12c5",
+         "\u12c8"-"\u12ce",
+         "\u12d0"-"\u12d6",
+         "\u12d8"-"\u12ee",
+         "\u12f0"-"\u130e",
+         "\u1310",
+         "\u1312"-"\u1315",
+         "\u1318"-"\u131e",
+         "\u1320"-"\u1346",
+         "\u1348"-"\u135a",
+         "\u13a0"-"\u13f4",
+         "\u1401"-"\u166c",
+         "\u166f"-"\u1676",
+         "\u1681"-"\u169a",
+         "\u16a0"-"\u16ea",
+         "\u1780"-"\u17b3",
+         "\u17db",
+         "\u1820"-"\u1877",
+         "\u1880"-"\u18a8",
+         "\u1e00"-"\u1e9b",
+         "\u1ea0"-"\u1ef9",
+         "\u1f00"-"\u1f15",
+         "\u1f18"-"\u1f1d",
+         "\u1f20"-"\u1f45",
+         "\u1f48"-"\u1f4d",
+         "\u1f50"-"\u1f57",
+         "\u1f59",
+         "\u1f5b",
+         "\u1f5d",
+         "\u1f5f"-"\u1f7d",
+         "\u1f80"-"\u1fb4",
+         "\u1fb6"-"\u1fbc",
+         "\u1fbe",
+         "\u1fc2"-"\u1fc4",
+         "\u1fc6"-"\u1fcc",
+         "\u1fd0"-"\u1fd3",
+         "\u1fd6"-"\u1fdb",
+         "\u1fe0"-"\u1fec",
+         "\u1ff2"-"\u1ff4",
+         "\u1ff6"-"\u1ffc",
+         "\u203f"-"\u2040",
+         "\u207f",
+         "\u20a0"-"\u20af",
+         "\u2102",
+         "\u2107",
+         "\u210a"-"\u2113",
+         "\u2115",
+         "\u2119"-"\u211d",
+         "\u2124",
+         "\u2126",
+         "\u2128",
+         "\u212a"-"\u212d",
+         "\u212f"-"\u2131",
+         "\u2133"-"\u2139",
+         "\u2160"-"\u2183",
+         "\u3005"-"\u3007",
+         "\u3021"-"\u3029",
+         "\u3031"-"\u3035",
+         "\u3038"-"\u303a",
+         "\u3041"-"\u3094",
+         "\u309d"-"\u309e",
+         "\u30a1"-"\u30fe",
+         "\u3105"-"\u312c",
+         "\u3131"-"\u318e",
+         "\u31a0"-"\u31b7",
+         "\u3400"-"\u4db5",
+         "\u4e00"-"\u9fa5",
+         "\ua000"-"\ua48c",
+         "\uac00"-"\ud7a3",
+         "\uf900"-"\ufa2d",
+         "\ufb00"-"\ufb06",
+         "\ufb13"-"\ufb17",
+         "\ufb1d",
+         "\ufb1f"-"\ufb28",
+         "\ufb2a"-"\ufb36",
+         "\ufb38"-"\ufb3c",
+         "\ufb3e",
+         "\ufb40"-"\ufb41",
+         "\ufb43"-"\ufb44",
+         "\ufb46"-"\ufbb1",
+         "\ufbd3"-"\ufd3d",
+         "\ufd50"-"\ufd8f",
+         "\ufd92"-"\ufdc7",
+         "\ufdf0"-"\ufdfb",
+         "\ufe33"-"\ufe34",
+         "\ufe4d"-"\ufe4f",
+         "\ufe69",
+         "\ufe70"-"\ufe72",
+         "\ufe74",
+         "\ufe76"-"\ufefc",
+         "\uff04",
+         "\uff21"-"\uff3a",
+         "\uff3f",
+         "\uff41"-"\uff5a",
+         "\uff65"-"\uffbe",
+         "\uffc2"-"\uffc7",
+         "\uffca"-"\uffcf",
+         "\uffd2"-"\uffd7",
+         "\uffda"-"\uffdc",
+         "\uffe0"-"\uffe1",
+         "\uffe5"-"\uffe6"
+
+] >
+|   < #SPECIAL_CHARS: "$" | "_">
+|   < S_CHAR_LITERAL: "'" (~["'"])* "'" ("'" (~["'"])* "'")*>
+|   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])* "\"" | ("`" (~["\n","\r","`"])* "`") >
+}
+
+TOKEN:
+{
+    < SEMICOLON: ";" >
+
+   |< PERCENT: "%" >
+   |< LSQPAREN: "[" >
+   |< RSQPAREN: "]" >
+   |< TILDA: "~" >
+   |< EXCLAMATION: "!" >
+   |< AT: "@" >
+   |< DOLLAR: "$" >
+   |< SINGLEQUOTE: "'" >
+   |< DOUBLEQUOTE: "\"" >
+   |< BACKQUOTE: "`" >
+   |< BACKSLASH: "\\" >
+
+   |< EQUALS: "=" >
+   |< COMMA: "," >
+   |< LPAREN: "(" >
+   |< RPAREN: ")" >
+   |< DOT: "." >
+   |< MULTIPLY: "*" >
+   |< HOOK: "?" >
+   |< GT: ">" >
+   |< LT: "<" >
+   |< GE: ">=" >
+   |< LE: "<=" >
+   |< NOTEQUAL1: "<>" >
+   |< NOTEQUAL2: "!=" >
+   |< ATAT: "@@" >
+   |< OR: "||" >
+   |< BITWISEOR: "|" >
+   |< BITWISEAND: "&" >
+   |< ADD: "+" >
+   |< MINUS: "-" >
+   |< DIVIDE: "/" >
+   |< XOR: "^" >
+   |< COLON: ":" >
+   |< DATELITERAL: "{d" >
+   |< TIMELITERAL: "{t" >
+   |< TIMESTAMPLITERAL: "{ts" >
+   |< ESCAPEDLITEARL: "{fn" >
+   |< LITERALBEGIN: "{" >
+   |< LITERALEND: "}" >
+}
+
+Statement Statement():
+{ Statement stm; 
+  Token tk = null; 
+}
+{
+	(
+            stm = Select()
+            |
+            stm = Update()
+            |
+            stm = Insert()
+            |
+            stm = Delete()
+            |
+            stm = Replace()
+            |
+            stm = CreateTable()
+            |
+            stm = Drop()
+            |
+            stm = Truncate()
+        )
+        [ tk=";"
+        {if (tk.specialToken != null) {
+	     stm.setEndComment(tk.specialToken.image);
+	     } 
+	    }
+		]
+		tk=<EOF>
+		{if (tk.specialToken != null) {
+	     stm.setEndComment(tk.specialToken.image);
+	     } 
+	    }
+    {return stm;}
+}
+
+
+
+Update Update():
+{ 
+	Update update = new Update(); 
+	Table table = null;
+	Expression where = null;
+	Column tableColumn = null;
+	List expList = new ArrayList(); 
+	List columns = new ArrayList(); 
+	Expression value = null;
+    Alias alias = null;
+	Token tk = null;
+	List commentsComma = new ArrayList();
+	List commentsEqaulas = new ArrayList();
+}
+{
+    //<K_UPDATE> table=TableWithAlias()
+    tk=<K_UPDATE> 
+	{if (tk.specialToken != null) {
+       update.setComment(tk.specialToken.image);
+     } 
+    }
+	table=Table()
+    [alias=Alias() { table.setAlias(alias); } ] 
+	tk=<K_SET> 
+	{if (tk.specialToken != null) {
+      update.setCommentSet(tk.specialToken.image);
+     } 
+    }
+	tableColumn=Column() 
+	tk="=" 
+	{if (tk.specialToken != null) {
+      commentsEqaulas.add(tk.specialToken.image);
+     } else {commentsEqaulas.add("");}
+    }
+	value=SimpleExpression() { columns.add(tableColumn); expList.add(value); }
+		  (tk=","
+           {if (tk.specialToken != null) {
+             commentsComma.add(tk.specialToken.image);
+            } else {commentsComma.add("");}
+           } 
+		  tableColumn=Column() 
+		  tk="=" 
+		  {if (tk.specialToken != null) {
+            commentsEqaulas.add(tk.specialToken.image);
+           } else {commentsEqaulas.add("");}
+          }
+		  value=SimpleExpression()  { columns.add(tableColumn); expList.add(value); } )*
+    {update.setCommentsComma(commentsComma);
+	 update.setCommentsEqaulas(commentsEqaulas);
+	}
+   [ tk=<K_WHERE> 
+     {if (tk.specialToken != null) {
+       update.setCommentWhere(tk.specialToken.image);
+      } 
+     }
+	 where=WhereClause() { update.setWhere(where); } ]
+   { 
+   		update.setColumns(columns);
+   		update.setExpressions(expList);
+   		update.setTable(table);
+		return update;
+   }
+}
+
+Replace Replace():
+{ 
+	Replace replace = new Replace(); 
+	Table table = null;
+	Column tableColumn = null;
+	Expression value = null;
+	
+	List columns = new ArrayList(); 
+	List expList = new ArrayList(); 
+	ItemsList itemsList = null;
+	Expression exp = null;
+	Token tk = null;
+	List commentEqlas = new ArrayList(); 
+	List commentComma = new ArrayList(); 
+	List commentItems= new ArrayList(); 
+	SubSelect subSelect = null;
+}
+{
+    tk=<K_REPLACE> 
+	{if (tk.specialToken != null) {
+       replace.setComment(tk.specialToken.image);
+     } 
+    }
+	[tk=<K_INTO>
+	{if (tk.specialToken != null) {
+       replace.setCommentInto(tk.specialToken.image);
+     } 
+	 replace.setUseInto(true);
+    }
+	] table=TableWithAlias()
+    
+    (
+		(    
+		    tk=<K_SET> 
+			{if (tk.specialToken != null) {
+              replace.setCommentSet(tk.specialToken.image);
+             } 
+            }
+			tableColumn=Column() 
+			tk="=" 
+			{if (tk.specialToken != null) {
+               commentEqlas.add(tk.specialToken.image);
+             } else { commentEqlas.add("");}
+            }
+			value=SimpleExpression() { columns.add(tableColumn); expList.add(value); }
+			  (tk="," 
+			  {if (tk.specialToken != null) {
+                commentComma.add(tk.specialToken.image);
+               } else {commentComma.add("");}
+              }
+			  tableColumn=Column()
+			  tk="=" 
+			  {if (tk.specialToken != null) {
+                 commentEqlas.add(tk.specialToken.image);
+                } else { commentEqlas.add("");}
+              }
+			  value=SimpleExpression() { columns.add(tableColumn); expList.add(value); } )*
+			 {
+		   		replace.setExpressions(expList);
+				replace.setCommentEqlasColums(commentEqlas);
+				replace.setCommentCommaExpr(commentComma);
+			 }
+		)
+		|
+	
+		(
+		     [LOOKAHEAD(2) 
+			 tk="(" 
+			 {if (tk.specialToken != null) {
+               replace.setCommentBeforeColums(tk.specialToken.image);
+              } 
+             }
+			 tableColumn=Column() { columns.add(tableColumn); } (
+			 tk="," {
+			 if (tk.specialToken != null) {
+                  commentComma.add(tk.specialToken.image);
+                 } else {commentComma.add("");}
+			 } 
+			 tableColumn=Column() { columns.add(tableColumn); } )* 
+			 tk=")" {
+			 if (tk.specialToken != null) {
+                  replace.setCommentAfterColums(tk.specialToken.image);
+                 } 
+				replace.setCommentCommaColums(commentComma); 
+			 } 
+			 ]
+			
+			( 
+				tk=<K_VALUES>
+				{if (tk.specialToken != null) {
+                  replace.setCommentValues(tk.specialToken.image);
+                 } 
+                }
+				tk="("
+                {if (tk.specialToken != null) {
+                  replace.setCommentBeforeItems(tk.specialToken.image);
+                 } 
+                }
+				exp=PrimaryExpression() { expList.add(exp); } 
+						(
+						tk=","
+						{if (tk.specialToken != null) {
+                          commentItems.add(tk.specialToken.image);
+                         } else {commentItems.add("");}
+                        }
+						exp=PrimaryExpression()  { expList.add(exp); } )* 
+				tk=")" { 
+				 if (tk.specialToken != null) {
+                  replace.setCommentAfterItems(tk.specialToken.image);
+                 } 
+				replace.setCommentCommaItems(commentItems);
+				itemsList = new ExpressionList(expList, commentItems,replace.getCommentAfterItems()); }
+				
+				| 
+					{ replace.setUseValues(false); }
+				
+				    subSelect=SubSelect()
+                    {
+					 subSelect.setReplace(true);
+					 itemsList=subSelect;
+					}  					
+			)
+		    { 
+				replace.setItemsList(itemsList);
+		    }
+		)
+	)
+   { 
+   		if (columns.size() > 0)
+	   		replace.setColumns(columns);
+   		replace.setTable(table);
+		return replace;
+   }
+}
+
+
+Insert Insert():
+{ 
+	Insert insert = new Insert(); 
+	Table table = null;
+	Column tableColumn = null;
+	List columns = new ArrayList(); 
+	List columnsComments = new ArrayList();
+	List primaryExpList = new ArrayList(); 
+	ItemsList itemsList = null;
+	List itemsListComments = new ArrayList();
+	Expression exp = null;
+	SubSelect subSel = new SubSelect();
+	Token tk = null;
+	String commentBeginBracket = null;
+}
+{
+    tk=<K_INSERT> 
+	{if (tk.specialToken != null) {
+       insert.setComment(tk.specialToken.image);
+     } 
+    }
+	[tk=<K_INTO>
+	 {if (tk.specialToken != null) {
+        insert.setCommentInto(tk.specialToken.image);
+      } 
+     }
+	] table=TableWithAlias()
+    
+    
+     [LOOKAHEAD(2) 
+	 	tk="(" 
+		{if (tk.specialToken != null) {
+          insert.setCommentBeforeColums(tk.specialToken.image);
+         }  
+        }
+		tableColumn=Column() { columns.add(tableColumn); } (
+		tk="," 
+		{if (tk.specialToken != null) {
+          columnsComments.add(tk.specialToken.image);
+         } else {
+		  columnsComments.add("");
+		 }
+        }
+		tableColumn=Column() { columns.add(tableColumn); } )* 
+		tk=")" 
+		{if (tk.specialToken != null) {
+          insert.setCommentAfterColums(tk.specialToken.image);
+         } 
+         insert.setColumsComment(columnsComments); 	 
+        }
+		]
+	
+	( 
+		tk=<K_VALUES>
+        {if (tk.specialToken != null) {
+          insert.setCommentValues(tk.specialToken.image);
+         } 
+        }
+		tk="(" 
+		{if (tk.specialToken != null) {
+          insert.setCommentItemsList(tk.specialToken.image);
+         } 
+        }
+		exp=SimpleExpression() { primaryExpList.add(exp); } 
+				(tk="," 
+				{if (tk.specialToken != null) {
+                  itemsListComments.add(tk.specialToken.image);
+                 } else {
+		          itemsListComments.add("");
+		         }
+                }
+				exp=SimpleExpression()  { primaryExpList.add(exp); } )* 
+		tk=")" {
+		 if (tk.specialToken != null) {
+           insert.setCommentAfterItemsList(tk.specialToken.image);
+         } 
+		 insert.setItemsListComments(itemsListComments); 
+         itemsList = new ExpressionList(primaryExpList, itemsListComments, insert.getCommentAfterItemsList()); }
+		
+		| 
+		
+		[LOOKAHEAD(2) tk="("
+        {if (tk.specialToken != null) {
+          commentBeginBracket = tk.specialToken.image;
+         }
+        }		 
+		]
+		(
+			{ insert.setUseValues(false); }
+			subSel =  SubSelect() 
+			{subSel.setCommentBeginBracket(commentBeginBracket);}
+		)
+		[ tk=")"
+        {if (tk.specialToken != null) {
+          subSel.setCommentEndBracket(tk.specialToken.image);
+         }
+        }
+		]
+		{itemsList=subSel;}
+	)
+    
+    { 
+    insert.setItemsList(itemsList);
+    insert.setTable(table);
+    if (columns.size() > 0)
+    	insert.setColumns(columns);
+    	return insert; 
+    }
+}
+
+
+
+Delete Delete():
+{ 
+	Delete delete = new Delete();
+	Table table = null;
+        Alias alias = null;
+	Expression where = null;
+	Token tk = null;
+}
+{
+    //<K_DELETE> [<K_FROM>] table=TableWithAlias()
+    tk=<K_DELETE>
+    {if (tk.specialToken != null) {
+       delete.setComment(tk.specialToken.image);
+     } 
+    }	
+	[tk=<K_FROM>
+	{if (tk.specialToken != null) {
+       delete.setFromComment(tk.specialToken.image);
+     } 
+    }
+	] table=Table()
+    [ alias=Alias() { table.setAlias(alias); }]
+    [tk=<K_WHERE>
+	 {if (tk.specialToken != null) {
+       delete.setWhereComment(tk.specialToken.image);
+      } 
+     }
+	 where=WhereClause() { delete.setWhere(where); } ]
+    { 
+    	delete.setTable(table);
+    	return delete;
+    }
+}
+
+
+
+Column Column():
+{
+	String name1 = null;
+	String name2 = null;
+	String name3 = null;
+	Column column = null;
+	String comment = null;
+}
+{
+    // [schema.][tabella.]colonna
+    name1=RelObjectName() 
+	{if (token.specialToken != null) {
+            comment=token.specialToken.image;
+        }
+    }		
+	[ "." name2=RelObjectName() ["." name3=RelObjectName()]]
+    {
+    	String colName = null;
+    	Table table = null;
+    	if (name3 != null) {
+    		table = new Table(name1, name2);
+    		colName = name3;
+    	} else if (name2 != null) {
+    		table = new Table(null, name1);
+    		colName = name2;
+    	} else {
+    		table = new Table(null, null);
+    		colName = name1;
+    	}
+    	
+    	column = new Column(table, colName);
+		column.setComment(comment);
+        
+		return column; 
+    }
+}
+
+String RelObjectName()  :
+{	Token tk = null; }
+{
+	(
+	tk=<S_IDENTIFIER>
+	|
+	tk=<S_QUOTED_IDENTIFIER>
+	)
+	
+    {return tk.image;}
+}
+
+Table TableWithAlias():
+{
+	Table table = null;
+	Alias alias = null;
+}
+{
+	table=Table() [alias=Alias() { table.setAlias(alias); }]
+	{ return table; }
+}
+
+
+Table Table():
+{ 
+	Table table = null;
+	String name1 = null;
+	String name2 = null;
+}
+{
+	(LOOKAHEAD(3) 
+		name1=RelObjectName() "." name2=RelObjectName()  { 
+		table = new Table(name1, name2);
+		if (token.specialToken != null) {
+         table.setComment(token.specialToken.image);
+        } 
+		}
+		|
+		name1=RelObjectName() {
+		table = new Table(null, name1);
+		if (token.specialToken != null) {
+         table.setComment(token.specialToken.image);
+        }
+		} 
+	)	
+	{		
+		return table; 
+	}
+	
+}
+
+
+Select Select():
+{ 
+	Select select = new Select();
+	SelectBody selectBody = null;
+	List with = null; 
+}
+{
+	[ with=WithList(select) { 
+	  select.setWithItemsList(with);
+	} ]
+    selectBody = SelectBody()
+	{ 
+		select.setSelectBody(selectBody);
+		return select; 
+	}
+}
+
+SelectBody SelectBody():
+{ SelectBody selectBody = null; }
+{
+	(
+		LOOKAHEAD(Union())
+		selectBody = Union() 
+    	|
+	    selectBody = PlainSelect()
+	)
+	{ return selectBody; }
+}
+
+PlainSelect PlainSelect():
+{ 
+	PlainSelect plainSelect = new PlainSelect(); 
+	List selectItems = null;
+	FromItem fromItem = null;
+	List joins = null;
+	List distinctOn = null;
+	Expression where = null;
+	List orderByElements;
+	List groupByColumnReferences = null;
+	Expression having = null;
+	Limit limit = null;
+	Top top = null;
+    Connect connect = null;
+	Token tk = null;
+    Into into = null;	
+	List commentCommaDistinct = new ArrayList();
+	List commentCommaSelect = new ArrayList();
+}
+{
+    tk=<K_SELECT> 
+    {if (tk.specialToken != null) {
+	     plainSelect.setComment(tk.specialToken.image);
+	 }
+	}
+    [ 
+    	<K_ALL> 
+    	| 
+    		(
+    			tk=<K_DISTINCT> 
+				{ 
+				 Distinct distinct = new Distinct(); plainSelect.setDistinct(distinct); 
+				 if (tk.specialToken != null) {
+                  distinct.setComment(tk.specialToken.image);
+                 }
+				} 
+    				[ tk="ON" {
+					  if (tk.specialToken != null) {
+                       distinct.setCommentOn(tk.specialToken.image);
+                      }
+					 } 
+					  tk="(" {
+					  if (tk.specialToken != null) {
+                       distinct.setCommentBeginBracket(tk.specialToken.image);
+                      }
+					 } 
+					  distinctOn=SelectItemsList(commentCommaDistinct)  { 
+					    plainSelect.getDistinct().setOnSelectItems(distinctOn); 
+						plainSelect.getDistinct().setCommentsComma(commentCommaDistinct);
+					  } 
+					  tk=")" {
+					  if (tk.specialToken != null) {
+                       distinct.setCommentEndBracket(tk.specialToken.image);
+                      }
+					 } 
+					]
+    		)
+    ] 
+    
+    [ 	top = Top() { plainSelect.setTop(top);	} ]
+
+    
+    selectItems=SelectItemsList(commentCommaSelect)
+    
+    [into=IntoClause()
+	 {plainSelect.setInto(into);}
+	]
+    tk=<K_FROM>
+	 {if (tk.specialToken != null) {
+       plainSelect.setCommentFrom(tk.specialToken.image);
+      } 
+     }
+    fromItem=FromItem()
+    joins=JoinsList()
+    [tk=<K_WHERE> 
+	 {if (tk.specialToken != null) {
+       plainSelect.setCommentWhere(tk.specialToken.image);
+      } 
+     }
+	where=WhereClause() { plainSelect.setWhere(where); }]
+    [ connect=ConnectClause() {plainSelect.setConnect(connect); }]
+    [ groupByColumnReferences=GroupByColumnReferences(plainSelect) { plainSelect.setGroupByColumnReferences(groupByColumnReferences); }]
+    [ having=Having(plainSelect) { plainSelect.setHaving(having); }]
+	[ 	orderByElements = OrderByElements(plainSelect)	{ 		 plainSelect.setOrderByElements(orderByElements);	}   ]
+    [ 	limit = Limit() { plainSelect.setLimit(limit);	} ]
+	
+	{ 
+		plainSelect.setSelectItems(selectItems);
+		plainSelect.setCommentCommaItems(commentCommaSelect);
+		plainSelect.setFromItem(fromItem);
+		if (joins.size() > 0)
+			plainSelect.setJoins(joins);
+		return plainSelect; 
+	}
+}
+
+
+
+Union Union():
+{ 
+	Union union = new Union(); 
+	List orderByElements = null;
+	Limit limit = null;
+	PlainSelect select = null;
+	ArrayList selects = new ArrayList();
+	UnionTypes typeUnion = null;
+	ArrayList typeUnions = new ArrayList();
+	ArrayList commentBeginBracket = new ArrayList();
+	ArrayList commentEndBracket = new ArrayList();
+	Token tk = null;
+/*
+this is not 100% right, since multiple UNION could have different ALL/DISTINCT clauses...
+*/
+}
+{
+	(
+	
+		(
+			tk="("
+            {if (tk.specialToken != null) {
+              commentBeginBracket.add(tk.specialToken.image);
+             } else {commentBeginBracket.add("");} 
+            } 			
+			select=PlainSelect() {selects.add(select);} 
+			tk=")"
+			{if (tk.specialToken != null) {
+              commentEndBracket.add(tk.specialToken.image);
+             } else {commentEndBracket.add("");}
+            } 
+			    {typeUnion = new UnionTypes();}
+				(tk=<K_UNION> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentUnion(tk.specialToken.image);
+                 }
+				typeUnion.setUnion(true);}
+				| tk=<K_EXCEPT> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentUnion(tk.specialToken.image);
+                 }
+				typeUnion.setExcept(true);} 
+				| tk=<K_INTERSECT> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentUnion(tk.specialToken.image);
+                 }
+				typeUnion.setIntersect(true);}) [ 
+				tk=<K_ALL> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentAll(tk.specialToken.image);
+                 }
+				 typeUnion.setAll(true);} 
+				| tk=<K_DISTINCT> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentAll(tk.specialToken.image);
+                 }
+				typeUnion.setDistinct(true);}]
+				{typeUnions.add(typeUnion);}
+			tk="("
+            {if (tk.specialToken != null) {
+              commentBeginBracket.add(tk.specialToken.image);
+             } else {commentBeginBracket.add("");}
+            } 			
+			select=PlainSelect() {selects.add(select);} 
+			tk=")"
+            {if (tk.specialToken != null) {
+              commentEndBracket.add(tk.specialToken.image);
+             } else {commentEndBracket.add("");}
+            } 			
+
+			(	{typeUnion = new UnionTypes();}
+			    (tk=<K_UNION> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentUnion(tk.specialToken.image);
+                 }
+				typeUnion.setUnion(true);}
+				| tk=<K_EXCEPT> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentUnion(tk.specialToken.image);
+                 }
+				typeUnion.setExcept(true);} 
+				| tk=<K_INTERSECT> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentUnion(tk.specialToken.image);
+                 }
+				typeUnion.setIntersect(true);}) [ 
+				tk=<K_ALL> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentAll(tk.specialToken.image);
+                 }
+				typeUnion.setAll(true);} 
+				| tk=<K_DISTINCT> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentAll(tk.specialToken.image);
+                 }
+				typeUnion.setDistinct(true);}] 
+				{typeUnions.add(typeUnion);}
+				tk="("
+				{if (tk.specialToken != null) {
+                  commentBeginBracket.add(tk.specialToken.image);
+                 } else {commentBeginBracket.add("");}
+                }
+				select=PlainSelect() {selects.add(select);} 
+				tk=")" 
+				{if (tk.specialToken != null) {
+                  commentEndBracket.add(tk.specialToken.image);
+                 } else {commentEndBracket.add("");}
+                }
+			)*
+			{ union.setCommentsBeginBracket(commentBeginBracket);
+			  union.setCommentsEndBracket(commentEndBracket);
+			}
+			[orderByElements=OrderByElements(union) {union.setOrderByElements(orderByElements);} ]
+			[limit=Limit() {union.setLimit(limit);} ]
+		)
+		| 	
+		(
+			select=PlainSelect() {selects.add(select);} 
+				{typeUnion = new UnionTypes();}
+				(tk=<K_UNION> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentUnion(tk.specialToken.image);
+                 }
+				typeUnion.setUnion(true);}
+				| tk=<K_EXCEPT> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentUnion(tk.specialToken.image);
+                 }
+				typeUnion.setExcept(true);} 
+				| tk=<K_INTERSECT> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentUnion(tk.specialToken.image);
+                 }
+				typeUnion.setIntersect(true);}) [ 
+				tk=<K_ALL> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentAll(tk.specialToken.image);
+                 }
+				typeUnion.setAll(true);} 
+				| tk=<K_DISTINCT> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentAll(tk.specialToken.image);
+                 }
+				typeUnion.setDistinct(true);}]
+				{typeUnions.add(typeUnion);}
+			select=PlainSelect() {selects.add(select);}
+			(	{typeUnion = new UnionTypes();}
+			    (tk=<K_UNION> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentUnion(tk.specialToken.image);
+                 }
+				typeUnion.setUnion(true);}
+				| tk=<K_EXCEPT> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentUnion(tk.specialToken.image);
+                 }
+				typeUnion.setExcept(true);} 
+				| tk=<K_INTERSECT> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentUnion(tk.specialToken.image);
+                 }
+				typeUnion.setIntersect(true);}) [ 
+				tk=<K_ALL> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentAll(tk.specialToken.image);
+                 }
+				typeUnion.setAll(true);} 
+				| tk=<K_DISTINCT> {
+				 if (tk.specialToken != null) {
+                  typeUnion.setCommentAll(tk.specialToken.image);
+                 }
+				typeUnion.setDistinct(true);}] 
+				{typeUnions.add(typeUnion);}
+				select=PlainSelect() {selects.add(select);} 
+			)*
+			
+		)
+	)
+
+	{ 
+		union.setPlainSelects(selects);
+		union.setTypeOperations(typeUnions);
+		return union; 
+	}
+}
+
+List WithList(Select select):
+{
+	ArrayList withItemsList = new ArrayList();
+	WithItem with = null;
+	Token tk = null;
+	ArrayList commentsComma = new ArrayList();
+}
+{
+	tk=<K_WITH> 
+	{if (tk.specialToken != null) {
+      select.setCommentWith(tk.specialToken.image);
+     } 
+	} 
+	with=WithItem() 
+	{withItemsList.add(with); } (
+	tk="," 
+	{if (tk.specialToken != null) {
+      commentsComma.add(tk.specialToken.image);
+     } else {commentsComma.add("");} 
+	}
+	with=WithItem() { withItemsList.add(with); } )*
+ 
+ 	{
+     select.setCommentsComma(commentsComma);	
+	 return withItemsList; 
+	}
+}
+
+WithItem WithItem():
+{
+	WithItem with = new WithItem();
+	String name = null;
+	List selectItems = null;
+	SelectBody selectBody = null;
+	Token tk = null;
+	List commentComma = new ArrayList();
+}
+{
+	 name=RelObjectName() { 
+	 if (token.specialToken != null) {
+      with.setCommentName(token.specialToken.image);
+     } 
+	 with.setName(name); 
+	 }
+	 [ tk="("
+       {if (tk.specialToken != null) {
+         with.setCommentBeginBracketWith(tk.specialToken.image);
+        } 
+       }
+	 selectItems=SelectItemsList(commentComma) 
+	 tk=")" { 
+	    if (tk.specialToken != null) {
+         with.setCommentEndBracketWith(tk.specialToken.image);
+        }
+	 with.setWithItemList(selectItems); 
+	 with.setCommentsCommaWith(commentComma);} ]
+	 tk=<K_AS>
+     	{if (tk.specialToken != null) {
+         with.setCommentAs(tk.specialToken.image);
+        } 
+       } 
+	 tk="("
+	   {if (tk.specialToken != null) {
+         with.setCommentBeginBracketAs(tk.specialToken.image);
+        } 
+       }
+	 selectBody = SelectBody() { with.setSelectBody(selectBody); } 
+	 tk=")"
+	   {if (tk.specialToken != null) {
+         with.setCommentEndBracketAs(tk.specialToken.image);
+        } 
+       }
+	 { return with; }
+}
+
+List SelectItemsList(List commas):
+{ 
+	ArrayList selectItemsList = new ArrayList();
+	SelectItem selectItem = null; 
+	Token tk = null;
+}
+{ 
+    selectItem=SelectItem() { selectItemsList.add(selectItem); } (
+	tk="," 
+	{if (tk.specialToken != null) {
+      commas.add(tk.specialToken.image);
+     } else {commas.add("");}
+	}
+	selectItem=SelectItem() { selectItemsList.add(selectItem); } )*
+    
+    { return selectItemsList; }
+}
+
+SelectItem SelectItem():
+{
+	Function function = null;
+	AllColumns allTableColumns = null;
+	AllColumns allCol = null;
+	Column tableColumn = null;
+	Alias alias = null;
+	SelectItem selectItem = null;
+	SelectExpressionItem selectExpressionItem = null;
+	Expression expression = null;
+	SubSelect subSelect = null;
+	Token tk = null;
+}
+{
+	
+    (tk="*" { allCol = new AllColumns();
+     if (tk.specialToken != null) {
+      allCol.setComment(tk.specialToken.image);
+     }
+	 selectItem = allCol;
+	}
+    |
+	LOOKAHEAD(AllTableColumns()) selectItem=AllTableColumns()
+	|
+	 expression=SimpleExpression() { selectExpressionItem = new SelectExpressionItem(); selectExpressionItem.setExpression(expression); }
+			 [alias=Alias() { selectExpressionItem.setAlias(alias); }] { selectItem = selectExpressionItem; }
+	)
+	{
+		return selectItem;
+	}
+	
+}
+
+AllTableColumns AllTableColumns():
+{
+	Table table = null;
+}
+{  
+     table=Table() "." "*"
+	{ 
+		return new AllTableColumns(table); 
+	}
+	
+}
+
+Alias Alias():
+{ String retval = null;
+  Alias alias = new Alias();
+  Token tk = null;
+ }
+{
+   [tk=<K_AS> {
+      alias.setAs(true);
+      if (tk.specialToken != null) {
+        alias.setCommentAs(tk.specialToken.image);
+      }
+   }]
+   retval = RelObjectName()
+   { 
+     if (token.specialToken != null) {
+        alias.setCommentName(token.specialToken.image);
+     }
+	 alias.setName(retval);
+     return alias; 
+   }
+}
+
+Into IntoClause():
+{ Into into = new Into();
+  Token tk = null;
+  List commentComma = new ArrayList(); ;
+  List tables = new ArrayList(); ;
+  Table table = null;
+ }
+{
+   tk=<K_INTO>
+   {if (tk.specialToken != null) {
+     into.setCommentInto(tk.specialToken.image);
+    }
+   }   
+   table=TableWithAlias()
+   {tables.add(table);}
+   (
+   tk=","
+   {if (tk.specialToken != null) {
+     commentComma.add(tk.specialToken.image);
+    } else {commentComma.add("");}
+   } 
+   table=TableWithAlias()
+   {tables.add(table);}
+   )*
+   {into.setCommentsComma(commentComma);
+    into.setTables(tables);
+    return into;	
+   }
+}
+
+FromItem FromItem():
+{
+	FromItem fromItem = null;
+	Alias alias = null;
+	String commentBeginBrakcet = null;
+	Token tk = null;
+	SubJoin subJoin = null;
+	SubSelect subSel = null;
+}
+{
+	(
+		(	
+			tk="("
+            {if (tk.specialToken != null) {
+              commentBeginBrakcet=tk.specialToken.image;
+             } 
+            }			
+				(
+				LOOKAHEAD(SubJoin())
+				subJoin=SubJoin()  
+				{subJoin.setCommentBeginBracket(commentBeginBrakcet);}
+				|  
+				subSel=SubSelect()
+				{subSel.setCommentBeginBracket(commentBeginBrakcet);}
+				)
+			tk=")"
+			{if (tk.specialToken != null) {
+                if (subJoin != null) {
+				 subJoin.setCommentEndBracket(tk.specialToken.image);
+				} else {
+                 if (subSel != null) {
+                   subSel.setCommentEndBracket(tk.specialToken.image);
+                 } 				  
+				}
+             } 
+			 fromItem = subJoin != null ? subJoin : subSel;
+            }
+		)
+		|
+		fromItem=Table() 
+	)
+	
+	[alias=Alias() { fromItem.setAlias(alias);  } ]
+	{
+		return fromItem;
+	}
+}
+
+SubJoin SubJoin():
+{
+	FromItem fromItem = null;
+	Join join = null;
+	SubJoin subJoin = new SubJoin();
+}
+{
+	fromItem=FromItem() { subJoin.setLeft(fromItem); } 
+	join=JoinerExpression() { subJoin.setJoin(join); }
+	
+	{
+		return subJoin;
+	}
+	
+}
+
+List JoinsList():
+{
+	ArrayList joinsList = new ArrayList();
+	Join join = null; 
+}
+{
+
+    (join=JoinerExpression() { joinsList.add(join); })*
+    
+    { return joinsList; }
+}
+
+Join JoinerExpression():
+{ 
+	Join join = new Join(); 
+	FromItem right = null;
+	Expression onExpression = null;
+	Column tableColumn;
+	List columns = null;
+	Token tk = null;
+	List commentComma = new ArrayList();
+}
+{
+
+	  [ (
+	  	tk=<K_LEFT> { 
+		if (tk.specialToken != null) {
+         join.setCommentLeft(tk.specialToken.image);
+        }
+		join.setLeft(true); }
+  		| tk=<K_RIGHT> { 
+		if (tk.specialToken != null) {
+         join.setCommentRight(tk.specialToken.image);
+        }
+		join.setRight(true); } 
+  		| tk=<K_FULL> { 
+		if (tk.specialToken != null) {
+         join.setCommentFull(tk.specialToken.image);
+        }
+		join.setFull(true); } 
+  		| tk=<K_NATURAL> { 
+		if (tk.specialToken != null) {
+         join.setCommentNatural(tk.specialToken.image);
+        }
+		join.setNatural(true); } 
+  		)
+  	   ]
+  		
+  	   [
+  	    (
+  		tk=<K_OUTER> { 
+		if (tk.specialToken != null) {
+         join.setCommentOuter(tk.specialToken.image);
+        }
+		join.setOuter(true); }
+  		| tk=<K_INNER> { 
+		if (tk.specialToken != null) {
+         join.setCommentInner(tk.specialToken.image);
+        }
+		join.setInner(true); }
+  		)
+  	   ]
+  	  
+  	    ( tk=<K_JOIN> 
+		{if (tk.specialToken != null) {
+          join.setCommentJoin(tk.specialToken.image);
+         }
+		}
+		| tk="," {
+         if (tk.specialToken != null) {
+          join.setComment(tk.specialToken.image);
+         }
+		join.setSimple(true); } ) right=FromItem()  
+	[
+		( tk=<K_ON> 
+		{if (tk.specialToken != null) {
+          join.setCommentOn(tk.specialToken.image);
+         }
+		}
+		onExpression=Expression()  { join.setOnExpression(onExpression); } )
+		|
+		( tk=<K_USING>
+		{if (tk.specialToken != null) {
+          join.setCommentUsing(tk.specialToken.image);
+         }
+		}
+		tk="("
+		{if (tk.specialToken != null) {
+          join.setCommentBeginBracket(tk.specialToken.image);
+         }
+		}
+		tableColumn=Column() { columns = new ArrayList(); columns.add(tableColumn); } 
+				(tk=","
+				{if (tk.specialToken != null) {
+                  commentComma.add(tk.specialToken.image);
+                 } else {commentComma.add("");}
+				}
+				tableColumn=Column() { columns.add(tableColumn); } )* 
+				tk=")"
+                {if (tk.specialToken != null) {
+                  join.setCommentEndBracket(tk.specialToken.image);
+                 }
+				}				
+		  { join.setCommentComma(commentComma);
+		    join.setUsingColumns(columns); }   )
+  	]			
+  {
+  	join.setRightItem(right); 
+  } 
+  
+  
+  { return join; }
+}
+
+
+Expression WhereClause():
+{
+	Expression retval = null;
+}
+{
+    retval=Expression()
+    { return retval; }
+}
+
+Connect ConnectClause():
+{
+        Connect retval = new Connect();
+        Expression startWith = null;
+        Expression connectBy = null;
+		Token tk = null;
+}
+{
+   [tk=<K_START> 
+    {if (tk.specialToken != null) {
+      retval.setComment(tk.specialToken.image);
+     }  
+    }
+   tk=<K_WITH>
+    {if (tk.specialToken != null) {
+      retval.setCommentWith(tk.specialToken.image);
+     } 
+    }
+   startWith = Expression() {retval.setStartWith(startWith);} ] 
+	tk=<K_CONNECT>
+	{if (tk.specialToken != null) {
+      retval.setCommentConnect(tk.specialToken.image);
+     }  
+    }
+   tk=<K_BY> 
+	{if (tk.specialToken != null) {
+      retval.setCommentBy(tk.specialToken.image);
+     }  
+    }
+   [tk=<K_NOCYCLE> 
+	{if (tk.specialToken != null) {
+      retval.setCommentNoCycle(tk.specialToken.image);
+     }  
+    }
+   {retval.setNoCycle(true);}] connectBy = Expression() {retval.setConnectBy(connectBy);}
+    { return retval; }
+}
+
+List GroupByColumnReferences(PlainSelect select):
+{
+	Expression columnReference = null;
+	List columnReferences = new ArrayList();
+	Token tk = null;
+	List commentComma = new ArrayList();
+	String group = null;
+	String by = null;
+}
+{
+    tk=<K_GROUP> 
+	{if (tk.specialToken != null) {
+      group = tk.specialToken.image;
+     }  
+    }
+	tk=<K_BY> 
+	{if (tk.specialToken != null) {
+      by = tk.specialToken.image;
+     }  
+    }
+	columnReference=SimpleExpression() {columnReferences.add(columnReference); }
+    (tk=","
+     {if (tk.specialToken != null) {
+       commentComma.add(tk.specialToken.image);
+      } else {commentComma.add("");}
+     }
+	columnReference=SimpleExpression()  {columnReferences.add(columnReference); } )*
+	{
+	    select.setCommentGroup(group);
+		select.setCommentGroupBy(by);
+		select.setCommentCommaGroupBy(commentComma);
+		return columnReferences;
+	}
+}
+
+Expression Having(PlainSelect select):
+{
+	Expression having = null;
+	Token tk = null;
+}
+{
+    tk=<K_HAVING> 
+	{if (tk.specialToken != null) {
+      select.setCommentHaving(tk.specialToken.image);
+     } 
+    }
+	having=Expression()
+	{
+		return having;
+	}
+}
+
+List OrderByElements(SelectBody sel):
+{ 
+	List orderByList = new ArrayList();
+	OrderByElement orderByElement = null;
+	Token tk = null;
+	List commentComma = new ArrayList();
+	String order = null;
+	String by = null;
+}
+{
+    tk=<K_ORDER> 
+	{if (tk.specialToken != null) {
+      order = tk.specialToken.image;
+     }  
+    }
+	tk=<K_BY> 
+	{if (tk.specialToken != null) {
+      by = tk.specialToken.image;
+     }  
+    }
+	orderByElement=OrderByElement() { orderByList.add(orderByElement); }
+        (tk=","
+		 {if (tk.specialToken != null) {
+           commentComma.add(tk.specialToken.image);
+          } else {commentComma.add("");} 
+         }
+		orderByElement=OrderByElement() { orderByList.add(orderByElement); } )*
+    {
+	    if (sel instanceof PlainSelect) {
+		 ((PlainSelect) sel).setCommentOrder(order);
+		 ((PlainSelect) sel).setCommentOrderBy(by);
+		 ((PlainSelect) sel).setCommentCommaOrderBy(commentComma);
+		} else {
+		 ((Union) sel).setCommentOrder(order);
+		 ((Union) sel).setCommentOrderBy(by);
+		 ((Union) sel).setCommentCommaOrderBy(commentComma);
+		}
+    	return orderByList; 	
+    }
+}
+
+OrderByElement OrderByElement():
+{
+	OrderByElement orderByElement = new OrderByElement(); 
+	List retval = new ArrayList();
+	Expression columnReference = null;
+	Token tk = null;
+}
+{
+	columnReference = SimpleExpression()
+    [(
+	  tk=<K_ASC> { 
+	   orderByElement.setAsc(true); 
+	   if (tk.specialToken != null) {
+        orderByElement.setComment(tk.specialToken.image);
+       } 
+	  } 
+	  | 
+	  tk=<K_DESC> { 
+	   orderByElement.setDesc(true); 
+	   if (tk.specialToken != null) {
+        orderByElement.setComment(tk.specialToken.image);
+       } 
+	  } 
+	 )  
+	]
+	{
+    	orderByElement.setExpression(columnReference);
+		return orderByElement;
+	}
+}
+
+Limit Limit():
+{
+	Limit limit = new Limit(); 
+	Token token = null;
+}
+{
+	(
+			LOOKAHEAD(3)
+				// mysql-> LIMIT offset,row_count
+				token=<K_LIMIT> 
+				{if (token.specialToken != null) {
+                  limit.setCommentLimit(token.specialToken.image);
+                 } 
+                }
+					 (
+					 	token=<S_INTEGER> { 
+						if (token.specialToken != null) {
+                         limit.setCommentLimitValue(token.specialToken.image);
+                        }
+						limit.setOffset(Long.parseLong(token.image)); } 
+					 	|
+					 	token="?" { 
+						if (token.specialToken != null) {
+                         limit.setCommentLimitValue(token.specialToken.image);
+                        }
+						limit.setOffsetJdbcParameter(true);} 
+					 ) 
+					 token=","  
+				     {if (token.specialToken != null) {
+                       limit.setCommentComma(token.specialToken.image);
+                      }
+					  limit.setComma(true);
+					 }
+				(
+				token=<S_INTEGER> 
+				{ 
+				if (token.specialToken != null) {
+                 limit.setCommentAfterCommaValue(token.specialToken.image);
+                }
+				limit.setRowCount(Long.parseLong(token.image)); } 
+				| 
+				token="?" 
+				{
+                if (token.specialToken != null) {
+                 limit.setCommentAfterCommaValue(token.specialToken.image);
+                }				
+				limit.setRowCountJdbcParameter(true);}
+				)
+			| 
+			// postgresql-> OFFSET offset
+			 token=<K_OFFSET>
+			 {if (token.specialToken != null) {
+                 limit.setCommentOffset(token.specialToken.image);
+              }
+			 }
+				 (token=<S_INTEGER> 
+				 { 
+				 if (token.specialToken != null) {
+                  limit.setCommentOffsetValue(token.specialToken.image);
+                 }
+				 limit.setOffset(Long.parseLong(token.image)); } 
+				 | 
+				 token="?" 
+				 { 
+				 if (token.specialToken != null) {
+                  limit.setCommentOffsetValue(token.specialToken.image);
+                 }
+				 limit.setOffsetJdbcParameter(true);} 
+				 )  
+			|
+				// mysql-postgresql-> LIMIT (row_count | ALL) [OFFSET offset]
+				token=<K_LIMIT> 
+				{if (token.specialToken != null) {
+                  limit.setCommentLimit(token.specialToken.image);
+                 } 
+                }
+				 (
+				 	token=<S_INTEGER> { 
+					if (token.specialToken != null) {
+                     limit.setCommentLimitValue(token.specialToken.image);
+                    }
+					limit.setRowCount(Long.parseLong(token.image)); } 
+				 	|
+				 	token="?" { 
+					if (token.specialToken != null) {
+                     limit.setCommentLimitValue(token.specialToken.image);
+                    }
+					limit.setRowCountJdbcParameter(true);}  
+				 	|
+				 	token=<K_ALL> { 
+					if (token.specialToken != null) {
+                     limit.setCommentAll(token.specialToken.image);
+                    }
+					limit.setLimitAll(true);}  
+				 )
+				 
+				 [token=<K_OFFSET>
+				  {if (token.specialToken != null) {
+                    limit.setCommentOffset(token.specialToken.image);
+                   }
+				  }
+					 (token=<S_INTEGER> 
+					 {
+                     if (token.specialToken != null) {
+                      limit.setCommentOffsetValue(token.specialToken.image);
+                     }  					 
+					 limit.setOffset(Long.parseLong(token.image)); } 
+					 | 
+					 token="?" 
+					 { 
+					 if (token.specialToken != null) {
+                      limit.setCommentOffsetValue(token.specialToken.image);
+                     }
+					 limit.setOffsetJdbcParameter(true);} 
+					 ) 
+				 ]
+
+		)
+	{
+		return limit;
+	}
+}
+
+Top Top():
+{
+	Top top = new Top(); 
+	Token token = null;
+}
+{
+	token=<K_TOP>
+	{if (token.specialToken != null) {
+      top.setCommentTop(token.specialToken.image);
+     } 
+    }
+	 (
+	 	token=<S_INTEGER> { 
+		if (token.specialToken != null) {
+         top.setCommentTopValue(token.specialToken.image);
+        }
+		top.setRowCount(Long.parseLong(token.image)); 
+		} 
+	 	|
+	 	token="?" { 
+		if (token.specialToken != null) {
+         top.setCommentTopValue(token.specialToken.image);
+        }
+		top.setRowCountJdbcParameter(true);
+		} 
+	 ) 
+	{
+		return top;
+	}
+}
+
+	
+
+Expression Expression():
+{ 
+	Expression retval = null;
+	Token tk = null;
+	String commentBeginBracket = null;
+}
+{
+	(
+	LOOKAHEAD(OrExpression())
+		retval=OrExpression() 
+		|
+		tk="(" 
+		{if (tk.specialToken != null) {
+          commentBeginBracket = tk.specialToken.image;
+         } 
+        }
+		retval=Expression() 
+		tk=")" 
+		{retval = new Parenthesis(retval); 
+		 ((Parenthesis) retval).setCommentBeginBracket(commentBeginBracket);
+		 if (tk.specialToken != null) {
+          ((Parenthesis) retval).setCommentEndBracket(tk.specialToken.image);
+         } 
+		}
+		
+	)
+	
+    {
+        return retval;
+    }
+}
+
+Expression OrExpression()  :
+{
+	Expression left, right, result;
+	Token tk = null;
+	String commentOr = null;
+}
+{
+	left=AndExpression() { result = left; }
+	(
+		LOOKAHEAD(<K_OR>) 
+			tk=<K_OR>
+			{if (tk.specialToken != null) {
+              commentOr=tk.specialToken.image;
+             } 
+			}
+			right=AndExpression()
+			{
+				result = new OrExpression(left, right);
+				if (commentOr != null) {((OrExpression) result).setComment(commentOr);}
+				left = result;
+	   		}
+	 )*
+	 {
+	 	return result;
+	 }
+	   
+}
+
+
+
+Expression AndExpression() :
+{
+	Expression left, right, result;
+	boolean not = false;
+	Token tk = null;
+	String commentAnd = null;
+	String commentBeginBracket = null;
+	String commentNot = null;
+}
+{
+
+	(
+	LOOKAHEAD(Condition())
+	    left=Condition()
+	    |
+	    [ tk=<K_NOT> { 
+		  if (tk.specialToken != null) {
+           commentNot = tk.specialToken.image;
+          }
+		not = true; } ]
+	    tk="(" 
+		{if (tk.specialToken != null) {
+          commentBeginBracket = tk.specialToken.image;
+         }
+		}
+		left=OrExpression() 
+		tk=")" {left = new Parenthesis(left); 
+		((Parenthesis) left).setCommentBeginBracket(commentBeginBracket);
+		((Parenthesis) left).setCommentNot(commentNot);
+		if (tk.specialToken != null) {
+          ((Parenthesis) left).setCommentEndBracket(tk.specialToken.image);
+         }
+		if (not) { ((Parenthesis)left).setNot(); not = false; } }
+	)
+	{ result = left; }
+	
+	(
+		LOOKAHEAD(<K_AND>)
+ 		tk=<K_AND>
+		{if (tk.specialToken != null) {
+          commentAnd=tk.specialToken.image;
+         } 
+		}
+		(
+		LOOKAHEAD(Condition())
+		    right=Condition()
+		    |
+		    [ <K_NOT> { 
+			if (tk.specialToken != null) {
+             commentNot = tk.specialToken.image;
+            }
+			not = true; } ]
+		    tk="(" 
+			{if (tk.specialToken != null) {
+              commentBeginBracket = tk.specialToken.image;
+             }
+		    }
+			right=OrExpression() 
+			tk=")" {right = new Parenthesis(right); 
+			((Parenthesis) right).setCommentBeginBracket(commentBeginBracket);
+		    ((Parenthesis) right).setCommentNot(commentNot);
+		    if (tk.specialToken != null) {
+             ((Parenthesis) right).setCommentEndBracket(tk.specialToken.image);
+            }
+			if (not) { ((Parenthesis)right).setNot(); not = false; } }
+		)
+		{
+			result = new AndExpression(left, right);
+			if (commentAnd != null) {((AndExpression) result).setComment(commentAnd);}
+			left = result;
+		}
+	)*
+	{
+		return result;
+	}
+}
+
+Expression Condition():
+{
+	Expression result;
+}
+{
+	(LOOKAHEAD(SQLCondition()) result=SQLCondition()
+	| result=RegularCondition())
+	
+	{ return result; }
+}
+
+Expression RegularCondition():
+{
+	Expression result = null;
+	Expression leftExpression;
+	Expression rightExpression;
+	boolean not = false;
+    boolean leftPrior = false;
+    boolean rightPrior = false;
+	Token tk = null;	
+	String commentNot = null;
+	String commentLeftPrior = null;
+	String commentRightPrior = null;
+}
+{
+
+        [tk=<K_PRIOR> { 
+		 if (tk.specialToken != null) {
+          commentLeftPrior=tk.specialToken.image;
+         } 
+		 leftPrior = true; }
+		]
+
+	[ tk=<K_NOT> { 
+	 if (tk.specialToken != null) {
+      commentNot=tk.specialToken.image;
+     } 
+	 not = true; } 
+	]
+
+	leftExpression=ComparisonItem()
+        {
+                result = leftExpression;
+        }
+
+	(
+	tk=">" { result = new GreaterThan();
+     if (tk.specialToken != null) {
+      ((GreaterThan) result).setComment(tk.specialToken.image);
+     } 
+	}
+	| tk="<" { result = new MinorThan(); 
+	 if (tk.specialToken != null) {
+      ((MinorThan) result).setComment(tk.specialToken.image);
+     }
+	}
+	| tk="=" { result = new EqualsTo(); 
+	 if (tk.specialToken != null) {
+      ((EqualsTo) result).setComment(tk.specialToken.image);
+     }
+	}
+	| tk=">=" { result = new GreaterThanEquals(); 
+	 if (tk.specialToken != null) {
+      ((GreaterThanEquals) result).setComment(tk.specialToken.image);
+     }
+	}
+	| tk="<=" { result = new MinorThanEquals(); 
+	 if (tk.specialToken != null) {
+      ((MinorThanEquals) result).setComment(tk.specialToken.image);
+     }
+	}
+	| (tk="<>" | tk="!=") { result = new NotEqualsTo(); 
+	 if (tk.specialToken != null) {
+      ((NotEqualsTo) result).setComment(tk.specialToken.image);
+     }
+	}
+	| tk="@@" { result = new Matches(); 
+	 if (tk.specialToken != null) {
+      ((Matches) result).setComment(tk.specialToken.image);
+     }
+	}
+	)
+
+        [tk=<K_PRIOR> { 
+		 if (tk.specialToken != null) {
+          commentRightPrior=tk.specialToken.image;
+         } 
+		 rightPrior = true;
+		 }
+		]
+
+	rightExpression=ComparisonItem()
+	{
+		BinaryExpression regCond = (BinaryExpression) result;
+		regCond.setLeftExpression(leftExpression);
+                regCond.setLeftPrior(leftPrior);
+		regCond.setRightExpression(rightExpression);
+                regCond.setRightPrior(rightPrior);
+		if (not)
+			regCond.setNot();
+		regCond.setCommentNot(commentNot);
+		regCond.setCommentLeftPrior(commentLeftPrior);
+		regCond.setCommentRightPrior(commentRightPrior);	
+	}		
+	
+	{ return result; }
+}
+
+
+Expression SQLCondition():
+{
+	Expression result;
+}
+{
+	(
+	LOOKAHEAD(InExpression()) result=InExpression()
+	| LOOKAHEAD(Between()) result=Between()
+	| LOOKAHEAD(IsNullExpression()) result=IsNullExpression()
+	| LOOKAHEAD(ExistsExpression()) result=ExistsExpression()
+	|  result=LikeExpression()
+	)
+	{ return result; }
+}
+
+Expression InExpression() :
+{
+	InExpression result = new InExpression();
+	ItemsList itemsList = null;
+	Expression leftExpression = null;
+	Token tk = null;
+	String commentBeginBrakcet = null;
+	String commentEndBrakcet = null;
+	SubSelect subSel = null;
+	List commentComma = new ArrayList();
+}
+{
+	leftExpression=SimpleExpression()
+    [tk=<K_NOT> { 
+	 if (tk.specialToken != null) {
+      result.setCommentNot(tk.specialToken.image);
+     }
+	result.setNot(true); } 
+	] 
+	tk=<K_IN>
+	{if (tk.specialToken != null) {
+      result.setCommentIn(tk.specialToken.image);
+     }
+	}
+	tk="("
+    {if (tk.specialToken != null) {
+      commentBeginBrakcet=tk.specialToken.image;
+     } 
+    } 	
+	 (LOOKAHEAD(SubSelect()) 
+	  subSel=SubSelect()
+      {subSel.setCommentBeginBracket(commentBeginBrakcet);} 	  
+	  | 
+	  itemsList=SimpleExpressionList() 
+	 ) 
+	tk=")"
+	{if (tk.specialToken != null) {
+      commentEndBrakcet=tk.specialToken.image;
+     } 
+	 if (subSel != null) {
+	  subSel.setCommentEndBracket(commentEndBrakcet);
+	  itemsList = subSel;
+	 } else { 
+	  result.setCommentBeginBracket(commentBeginBrakcet);
+	  ((ExpressionList) itemsList).setCommentEndBracket(commentEndBrakcet);}
+    }
+	{ 
+		result.setLeftExpression(leftExpression);
+		result.setItemsList(itemsList);
+		return result; 
+	}
+}
+
+Expression Between():
+{
+	Between result = new Between();
+	Expression leftExpression = null;
+	Expression betweenExpressionStart = null;
+	Expression betweenExpressionEnd = null;
+	Token tk = null;
+}
+{
+	leftExpression=SimpleExpression()
+	    [tk=<K_NOT> { 
+		 if (tk.specialToken != null) {
+          result.setCommentNot(tk.specialToken.image);
+         }
+		 result.setNot(true); }
+	    ] 
+	    tk=<K_BETWEEN> 
+		{if (tk.specialToken != null) {
+          result.setCommentBetween(tk.specialToken.image);
+         }
+		}
+		betweenExpressionStart=SimpleExpression() 
+		tk=<K_AND> 
+		{if (tk.specialToken != null) {
+          result.setCommentAnd(tk.specialToken.image);
+         }
+		} 
+		betweenExpressionEnd=SimpleExpression()
+	
+	{ 
+		result.setLeftExpression(leftExpression);
+		result.setBetweenExpressionStart(betweenExpressionStart);
+		result.setBetweenExpressionEnd(betweenExpressionEnd);
+		return result; 
+	}
+}
+
+Expression LikeExpression():
+{
+	LikeExpression result = new LikeExpression();
+	Expression leftExpression = null;
+	Expression rightExpression = null;
+	Token tk = null;
+}
+{
+    leftExpression=SimpleExpression()
+    [tk=<K_NOT> { 
+	 if (tk.specialToken != null) {
+      result.setCommentNot(tk.specialToken.image);
+     }
+	 result.setNot(true); } 
+	] 
+	tk=<K_LIKE> 
+	{if (tk.specialToken != null) {
+      result.setCommentLike(tk.specialToken.image);
+     }
+	}
+	rightExpression=SimpleExpression()
+    [tk=<K_ESCAPE> {
+	  if (tk.specialToken != null) {
+       result.setCommentEscape(tk.specialToken.image);
+      }
+	 }
+	 token=<S_CHAR_LITERAL> {
+	 if (token.specialToken != null) {
+      result.setCommentLiteral(token.specialToken.image);
+     }
+	 result.setEscape((new StringValue(token.image)).getValue()); }
+	]
+	{ 
+		result.setLeftExpression(leftExpression);
+		result.setRightExpression(rightExpression);
+		return result; 
+	}
+}
+
+Expression IsNullExpression():
+{
+	IsNullExpression result = new IsNullExpression();
+	Expression leftExpression = null;
+	Token tk = null;
+}
+{
+	leftExpression=SimpleExpression()
+    tk=<K_IS>
+    {if (tk.specialToken != null) {
+      result.setCommentIs(tk.specialToken.image);
+     }
+	}
+	[tk=<K_NOT> { 
+	 if (tk.specialToken != null) {
+      result.setCommentNot(tk.specialToken.image);
+     }
+	 result.setNot(true); } 
+	] 
+	tk=<K_NULL>
+	{if (tk.specialToken != null) {
+      result.setCommentNull(tk.specialToken.image);
+     }
+	}
+
+	{ 
+		result.setLeftExpression(leftExpression);
+		return result; 
+	}
+}
+
+
+Expression ExistsExpression():
+{
+	ExistsExpression result = new ExistsExpression();
+	Expression rightExpression = null;
+	Token tk = null;
+}
+{
+    [tk=<K_NOT> { 
+	 if (tk.specialToken != null) {
+      result.setCommentNot(tk.specialToken.image);
+     }
+	 result.setNot(true); } 
+	] 
+	tk=<K_EXISTS> 
+	{if (tk.specialToken != null) {
+      result.setCommentExists(tk.specialToken.image);
+     }
+	}
+	rightExpression=SimpleExpression()
+	{ 
+		result.setRightExpression(rightExpression);
+    	return result; 
+	}
+}
+
+
+ExpressionList SQLExpressionList():
+{
+	ExpressionList retval = new ExpressionList();
+	List expressions = new ArrayList();
+	List comments = new ArrayList();
+	Expression expr = null;
+	Token tk = null;
+}
+{
+    expr=Expression() { expressions.add(expr); } (
+	tk="," 
+	{if (tk.specialToken != null) {
+      comments.add(tk.specialToken.image);
+     } else {comments.add("");}
+	}
+	expr=Expression() { expressions.add(expr); })*
+	{
+		retval.setExpressions(expressions);
+		retval.setCommentsComma(comments);
+		return retval;
+	}
+}
+
+ExpressionList SimpleExpressionList():
+{
+	ExpressionList retval = new ExpressionList();
+	List expressions = new ArrayList();
+	List comments = new ArrayList();
+	Expression expr = null;
+	Token tk = null;
+}
+{
+    expr=SimpleExpression() { expressions.add(expr); } (
+	tk="," 
+	{if (tk.specialToken != null) {
+      comments.add(tk.specialToken.image);
+     } else {comments.add("");}
+	}
+	expr=SimpleExpression() { expressions.add(expr); })*
+	{
+		retval.setExpressions(expressions);
+		retval.setCommentsComma(comments);
+		return retval;
+	}
+}
+
+Expression ComparisonItem() :
+{ 
+	Expression retval = null; 
+}
+{
+  (
+    retval=AllComparisonExpression()
+    | retval=AnyComparisonExpression()
+    | retval=SimpleExpression()
+  )
+
+   {
+      return retval;
+   }
+}
+
+Expression AllComparisonExpression() :
+{ 
+	AllComparisonExpression retval = null; 
+	SubSelect subselect = null; 
+	Token tk = null;
+	String commentBeginBrakcet = null;
+	String comment = null;
+}
+{
+ tk=<K_ALL> 
+ {if (tk.specialToken != null) {
+   comment=tk.specialToken.image;
+  }
+ }
+ tk="("
+ {if (tk.specialToken != null) {
+    commentBeginBrakcet=tk.specialToken.image;
+  } 
+ }
+ subselect=SubSelect()
+ {subselect.setCommentBeginBracket(commentBeginBrakcet);}
+ tk=")"
+ {if (tk.specialToken != null) {
+    subselect.setCommentEndBracket(tk.specialToken.image);
+  } 
+ }
+ { retval = new AllComparisonExpression(subselect); 
+   retval.setComment(comment); 
+ }
+   {
+      return retval;
+   }
+}
+
+Expression AnyComparisonExpression() :
+{ 
+	AnyComparisonExpression retval = null; 
+	SubSelect subselect = null; 
+	Token tk = null;
+	String commentBeginBrakcet = null;
+	String comment = null;
+}
+{
+ (tk=<K_ANY> | tk=<K_SOME>) 
+ {if (tk.specialToken != null) {
+   comment=tk.specialToken.image;
+  }
+ }
+ tk="(" 
+ {if (tk.specialToken != null) {
+    commentBeginBrakcet=tk.specialToken.image;
+  } 
+ }
+ subselect=SubSelect() 
+ {subselect.setCommentBeginBracket(commentBeginBrakcet);}
+ tk=")" 
+ {if (tk.specialToken != null) {
+    subselect.setCommentEndBracket(tk.specialToken.image);
+  } 
+ }
+ { retval = new AnyComparisonExpression(subselect); 
+   retval.setComment(comment); 
+ }
+   {
+      return retval;
+   }
+}
+
+Expression SimpleExpression():
+{ 
+	Expression retval = null; 
+	Token tk = null;
+	String commentBeginBracket = null;
+}
+{
+  (
+		LOOKAHEAD(BitwiseAndOr())
+		retval=BitwiseAndOr() 
+		|
+		tk="(" 
+		{if (tk.specialToken != null) {
+          commentBeginBracket = tk.specialToken.image;
+         }  
+        }
+		retval=BitwiseAndOr() 
+		tk=")" {retval = new Parenthesis(retval); 
+		 ((Parenthesis) retval).setCommentBeginBracket(commentBeginBracket); 
+		 {if (tk.specialToken != null) {
+           ((Parenthesis) retval).setCommentEndBracket(tk.specialToken.image);
+          }  
+         }
+		}
+  )
+
+   {
+      return retval;
+   }
+}
+
+Expression ConcatExpression():
+{
+	Expression result = null;
+	Expression leftExpression = null;
+	Expression rightExpression = null;
+	Token tk = null;
+	String concat = null;
+}
+{
+    leftExpression=AdditiveExpression()  { result = leftExpression; }
+    (
+    	tk="||"
+		{if (tk.specialToken != null) {
+          concat=tk.specialToken.image;
+         }
+		}
+    	rightExpression=AdditiveExpression()
+		{
+			Concat binExp = new Concat();
+			if (concat != null) {binExp.setComment(concat);}
+			binExp.setLeftExpression(leftExpression);
+			binExp.setRightExpression(rightExpression);
+			result = binExp;
+			leftExpression = result; 
+		}								
+    )*
+    
+    { return result; }
+}
+
+Expression BitwiseAndOr():
+{
+	Expression result = null;
+	Expression leftExpression = null;
+	Expression rightExpression = null;
+	Token tk = null;
+}
+{
+    leftExpression=ConcatExpression()  { result = leftExpression; }
+    (
+    	LOOKAHEAD(2) (
+    					tk="|" { result = new BitwiseOr(); 
+						 if (tk.specialToken != null) {
+                          ((BitwiseOr) result).setComment(tk.specialToken.image);
+                         }
+						}
+    				  	| 
+    				  	tk="&" { result = new BitwiseAnd();
+                         if (tk.specialToken != null) {
+                          ((BitwiseAnd) result).setComment(tk.specialToken.image);
+                         }
+						} 
+    				  ) 
+    								
+    						rightExpression=ConcatExpression()
+    						
+		{
+			BinaryExpression binExp = (BinaryExpression) result;
+			binExp.setLeftExpression(leftExpression);
+			binExp.setRightExpression(rightExpression);
+			leftExpression = result; 
+		}								
+    )*
+    
+    { return result; }
+}
+
+Expression AdditiveExpression():
+{
+	Expression result = null;
+	Expression leftExpression = null;
+	Expression rightExpression = null;
+	Token tk = null;
+}
+{
+    leftExpression=MultiplicativeExpression()  { result = leftExpression; }
+    (
+    	LOOKAHEAD(2) (tk="+" { result = new Addition(); 
+		                      if (tk.specialToken != null) {
+                               ((Addition) result).setComment(tk.specialToken.image);
+                              }
+							 }
+    								| tk="-" { result = new Subtraction(); 
+									 if (tk.specialToken != null) {
+                                      ((Subtraction) result).setComment(tk.specialToken.image);
+                                     }
+									} ) 
+    								
+    						rightExpression=MultiplicativeExpression()
+    						
+		{
+			BinaryExpression binExp = (BinaryExpression) result;
+			binExp.setLeftExpression(leftExpression);
+			binExp.setRightExpression(rightExpression);
+			leftExpression = result; 
+		}								
+    )*
+    
+    { return result; }
+}
+
+
+Expression MultiplicativeExpression():
+{
+	Expression result = null;
+	Expression leftExpression = null;
+	Expression rightExpression = null;
+	Token tk = null;
+	String commentBeginBracket = null;
+}
+{
+	(
+	LOOKAHEAD(BitwiseXor())
+	    leftExpression=BitwiseXor()
+	    |
+	    tk="(" 
+		{if (tk.specialToken != null) {
+          commentBeginBracket = tk.specialToken.image;
+         } 
+        }
+		leftExpression=AdditiveExpression() 
+		tk=")" {leftExpression = new Parenthesis(leftExpression); 
+		 ((Parenthesis) leftExpression).setCommentBeginBracket(commentBeginBracket); 
+		 {if (tk.specialToken != null) {
+           ((Parenthesis) leftExpression).setCommentEndBracket(tk.specialToken.image);
+          }  
+         }
+		}
+	)
+      { result = leftExpression; }
+    (
+    	LOOKAHEAD(2) (tk="*" { result = new Multiplication(); 
+		                      if (tk.specialToken != null) {
+                               ((Multiplication) result).setComment(tk.specialToken.image);
+                              }
+							 }
+    								| tk="/" { result = new Division(); 
+									 if (tk.specialToken != null) {
+                                      ((Division) result).setComment(tk.specialToken.image);
+                                     }
+									} ) 
+    								
+				(
+				LOOKAHEAD(BitwiseXor())
+    						rightExpression=BitwiseXor()
+						    |
+						    tk="(" 
+							{if (tk.specialToken != null) {
+                              commentBeginBracket = tk.specialToken.image;
+                             } 
+                            }
+							rightExpression=AdditiveExpression() 
+							tk=")" {rightExpression = new Parenthesis(rightExpression); 
+							 ((Parenthesis) rightExpression).setCommentBeginBracket(commentBeginBracket); 
+		                     {if (tk.specialToken != null) {
+                               ((Parenthesis) rightExpression).setCommentEndBracket(tk.specialToken.image);
+                              }  
+                             }
+							}
+				)
+    						
+		{
+			BinaryExpression binExp = (BinaryExpression) result;
+			binExp.setLeftExpression(leftExpression);
+			binExp.setRightExpression(rightExpression);
+			leftExpression = result; 
+		}								
+    )*
+    { return result; }
+}
+
+Expression BitwiseXor():
+{
+	Expression result = null;
+	Expression leftExpression = null;
+	Expression rightExpression = null;
+	Token tk = null;
+	String commentXor = null;
+}
+{
+    leftExpression=PrimaryExpression()  { result = leftExpression; }
+    (
+    	tk="^"
+		{if (tk.specialToken != null) {
+          commentXor=tk.specialToken.image;
+         } 
+		}
+    	rightExpression=PrimaryExpression()
+		{
+			BitwiseXor binExp = new BitwiseXor();
+			if (commentXor != null) {binExp.setComment(commentXor);}
+			binExp.setLeftExpression(leftExpression);
+			binExp.setRightExpression(rightExpression);
+			result = binExp;
+			leftExpression = result; 
+		}								
+    )*
+    
+    { return result; }
+}
+
+
+Expression PrimaryExpression():
+{ 
+	Expression retval = null;
+	Token token = null;
+	boolean isInverse = false;
+	String tmp = "";
+	SubSelect subSel = null;
+	String commentBeginBrakcet = null;
+	Token tk = null;
+}
+{
+
+(
+
+	tk=<K_NULL> { retval = new NullValue();
+     if (tk.specialToken != null) {
+      ((NullValue) retval).setComment(tk.specialToken.image);
+     } 
+	}
+
+	| retval=CaseWhenExpression()
+	
+	| tk="?" { retval = new JdbcParameter(); 
+	          if (tk.specialToken != null) {
+               ((JdbcParameter) retval).setComment(tk.specialToken.image);
+              } 
+	         }
+
+        | tk=":" token = <S_IDENTIFIER> { retval = new NamedParameter(token.image); 
+		                                 if (tk.specialToken != null) {
+                                          ((NamedParameter) retval).setComment(tk.specialToken.image);
+                                         }
+										}
+	
+	|    LOOKAHEAD([ "+" | "-"] Function()) [ "+" | "-" { isInverse = true; }] retval=Function() 
+	
+	| LOOKAHEAD([	"+" | "-"] <S_DOUBLE>) 	[	"+" | "-" { tmp = "-"; }]  token=<S_DOUBLE> { retval = new DoubleValue(tmp+token.image); 
+	                                                                                         if (token.specialToken != null) {
+                                                                                              ((DoubleValue) retval).setComment(token.specialToken.image);
+                                                                                             }
+																							}
+	
+	| LOOKAHEAD([	"+" | "-"] <S_INTEGER>)  	[	"+" | "-" { tmp = "-"; }]  token=<S_INTEGER> { retval = new LongValue(tmp+token.image); 
+	                                                                                              if (token.specialToken != null) {
+                                                                                                   ((LongValue) retval).setComment(token.specialToken.image);
+                                                                                                  }
+																								 }
+
+	| LOOKAHEAD(2) 	[ "+" | "-" { isInverse = true; }] retval=Column() 
+
+	| LOOKAHEAD(2) [ "+" | "-" { isInverse = true; }]  tk="(" 
+	                                                   {if (tk.specialToken != null) {
+                                                         commentBeginBrakcet=tk.specialToken.image;
+                                                        } 
+                                                       }   
+	                                                   retval=PrimaryExpression() 
+													   tk=")" 
+													   {retval = new Parenthesis(retval); 
+													    ((Parenthesis) retval).setCommentBeginBracket(commentBeginBrakcet); 
+		                                                {if (tk.specialToken != null) {
+                                                          ((Parenthesis) retval).setCommentEndBracket(tk.specialToken.image);
+                                                         }   
+                                                        }
+													   }
+
+	| token=<S_CHAR_LITERAL> { retval = new StringValue(token.image); 
+	                          if (token.specialToken != null) {
+                               ((StringValue) retval).setComment(token.specialToken.image);
+                              }
+							 }
+
+	| [ "+" | "-" { isInverse = true; }] 
+	tk="(" 
+	{if (tk.specialToken != null) {
+      commentBeginBrakcet=tk.specialToken.image;
+     } 
+    }
+	subSel=SubSelect()
+    {subSel.setCommentBeginBracket(commentBeginBrakcet);}	
+	tk=")"
+	{if (tk.specialToken != null) {
+      subSel.setCommentEndBracket(tk.specialToken.image);
+     } 
+	 retval = subSel;
+    }
+	
+	| 	tk="{d" token=<S_CHAR_LITERAL> "}" { retval = new DateValue(token.image); 
+	                                     if (tk.specialToken != null) {
+                                          ((DateValue) retval).setComment(tk.specialToken.image);
+                                         }
+										}
+
+	| 	tk="{t" token=<S_CHAR_LITERAL> "}" { retval = new TimeValue(token.image);
+                                         if (tk.specialToken != null) {
+                                          ((TimeValue) retval).setComment(tk.specialToken.image);
+                                         }                                    
+  									    }
+
+	| 	tk="{ts" token=<S_CHAR_LITERAL> "}" { retval = new TimestampValue(token.image); 
+	                                      if (tk.specialToken != null) {
+                                           ((TimestampValue) retval).setComment(tk.specialToken.image);
+                                          }
+										 }	
+)
+    { 
+		if (isInverse) { 
+			retval = new InverseExpression(retval); 
+		}
+    	return retval; 
+    }
+}
+
+
+Expression CaseWhenExpression():
+{
+	CaseExpression caseExp = new CaseExpression();
+	Expression switchExp = null;
+	WhenClause clause;
+	List whenClauses = new ArrayList();
+	Expression elseExp = null;
+	Token tk = null;
+}
+{
+	tk=<K_CASE>
+    {if (tk.specialToken != null) {
+      caseExp.setCommentCase(tk.specialToken.image);
+     } 
+	}	
+	(
+    	    ( clause=WhenThenSearchCondition() { whenClauses.add(clause); } )+
+             [tk=<K_ELSE> 
+			 {if (tk.specialToken != null) {
+               caseExp.setCommentElse(tk.specialToken.image);
+              } 
+	         }
+			 elseExp=PrimaryExpression()
+			 ]
+		|
+		    switchExp=PrimaryExpression()
+             ( clause=WhenThenValue() { whenClauses.add(clause); } )*
+             [tk=<K_ELSE> 
+			 {if (tk.specialToken != null) {
+               caseExp.setCommentElse(tk.specialToken.image);
+              } 
+	         }
+			 elseExp=PrimaryExpression()
+			 ]
+	)             
+    tk=<K_END>
+    { 
+	    if (tk.specialToken != null) {
+         caseExp.setCommentEnd(tk.specialToken.image);
+        } 
+    	caseExp.setSwitchExpression(switchExp);
+        caseExp.setWhenClauses(whenClauses);
+		caseExp.setElseExpression(elseExp);
+    	return caseExp;
+    }
+}
+
+WhenClause WhenThenSearchCondition():
+{
+	WhenClause whenThen = new WhenClause();
+	Expression whenExp = null;
+	Expression thenExp = null;
+	Token tk = null;
+}
+{
+	tk=<K_WHEN> 
+	{if (tk.specialToken != null) {
+      whenThen.setCommentWhen(tk.specialToken.image);
+     } 
+	}
+	whenExp=Expression() 
+	tk=<K_THEN> 
+	{if (tk.specialToken != null) {
+      whenThen.setCommentThen(tk.specialToken.image);
+     } 
+	}
+	thenExp=SimpleExpression()
+	{
+	   whenThen.setWhenExpression(whenExp);
+	   whenThen.setThenExpression(thenExp);
+	   return whenThen;
+	}
+}
+
+WhenClause WhenThenValue():
+{
+	WhenClause whenThen = new WhenClause();
+	Expression whenExp = null;
+	Expression thenExp = null;
+	Token tk = null;
+}
+{
+	tk=<K_WHEN> 
+	{if (tk.specialToken != null) {
+      whenThen.setCommentWhen(tk.specialToken.image);
+     } 
+	}
+	whenExp=PrimaryExpression() 
+	tk=<K_THEN> 
+	{if (tk.specialToken != null) {
+      whenThen.setCommentThen(tk.specialToken.image);
+     } 
+	}
+	thenExp=SimpleExpression()
+	{
+	   whenThen.setWhenExpression(whenExp);
+	   whenThen.setThenExpression(thenExp);
+	   return whenThen;
+	}
+}
+
+
+Function Function():
+{
+	Function retval = new Function();
+	String funcName = null;
+	String tmp = null;
+	ExpressionList expressionList = null;  
+	Token tk = null;
+}
+{
+	[tk="{fn" { retval.setEscaped(true); 
+	 if (tk.specialToken != null) {
+      retval.setCommentBeginEscaped(tk.specialToken.image);
+     } 
+	} ]
+	(
+	    funcName=RelObjectName()
+		{if (token.specialToken != null) {
+          retval.setCommentName(token.specialToken.image);
+         } 
+		}
+    	| 
+    	// workaround for replace(string) function (name clash with mysql REPLACE expression)
+	    tk=<K_REPLACE> { funcName = "REPLACE"; 
+		 if (tk.specialToken != null) {
+          retval.setCommentName(tk.specialToken.image);
+         }  
+		}
+    ) [ "." tmp=RelObjectName() { funcName+= "." + tmp; } ["." tmp=RelObjectName() { funcName+= "." + tmp; }]]
+    tk="(" 
+	  {if (tk.specialToken != null) {
+        retval.setCommentBeginBracket(tk.specialToken.image);
+       }
+	  }
+	  [ [tk=<K_DISTINCT> { retval.setDistinct(true); 
+	        if (tk.specialToken != null) {
+             retval.setCommentDistinct(tk.specialToken.image);
+            } 
+	       } 
+		  | tk=<K_ALL> { retval.setAllColumns(true);
+            if (tk.specialToken != null) {
+             retval.setCommentAll(tk.specialToken.image);
+            } 		  
+		   }
+		  ] 
+	  (expressionList=SimpleExpressionList() 
+	  | 
+	  tk="*" { retval.setAllColumns(true); 
+	   if (tk.specialToken != null) {
+        retval.setCommentAllColumns(tk.specialToken.image);
+       } 
+	  }
+	  ) 
+	  ] 
+	tk=")"
+      {if (tk.specialToken != null) {
+        retval.setCommentEndBracket(tk.specialToken.image);
+		if (expressionList != null) {
+		  expressionList.setCommentEndBracket(tk.specialToken.image);
+		}
+       }
+	  }
+    [tk="}"{
+	 if (tk.specialToken != null) {
+      retval.setCommentEndEscaped(tk.specialToken.image);
+     } 
+	}]
+    { 
+	    retval.setParameters(expressionList);
+	    retval.setName(funcName);
+    	return retval; 
+    }
+}
+
+
+
+SubSelect SubSelect():
+{
+	SelectBody selectBody = null;
+}
+{
+    selectBody=SelectBody()
+    {
+    	SubSelect subSelect = new SubSelect();
+    	subSelect.setSelectBody(selectBody);
+    	return subSelect;
+    }
+}
+
+CreateTable CreateTable():
+{
+	CreateTable createTable = new CreateTable();
+	Table table = null;
+	ArrayList columnDefinitions = new ArrayList();
+	List columnSpecs = null;
+	List commentColumnSpecs = null;
+	List tableOptions = new ArrayList();
+	Token columnName;
+	Token tk = null;
+	Token tk2 = null;
+	Token tk3 = null;
+	ColDataType colDataType = null;
+	String stringList = null;
+	ColumnDefinition coldef = null;
+	List indexes = new ArrayList();
+	List commentsCommaIndexes = new ArrayList();
+	List commentTableOptions = new ArrayList();
+	List colNames = null;
+	Index index = null;
+	String parameter = null;
+	String commentColName = null;
+	Token tks = null;
+	List createOptions = new ArrayList();
+	List commentCreateOptions = new ArrayList();
+}
+{
+	tks=<K_CREATE> 
+	{if (tks.specialToken != null) {
+       createTable.setComment(tks.specialToken.image);
+     } 
+    }
+	
+//	[ [ GLOBAL | LOCAL ] { TEMPORARY | TEMP } ] 
+	(parameter=CreateParameter(commentCreateOptions) { createOptions.add(parameter); })*
+
+	tks=<K_TABLE> 
+	{if (tks.specialToken != null) {
+       createTable.setCommentTable(tks.specialToken.image);
+     } 
+    }
+	table=Table() 
+	[
+		tks="("
+		{if (tks.specialToken != null) {
+          createTable.setCommentBeginBracket(tks.specialToken.image);
+         } 
+        }
+		columnName=<S_IDENTIFIER>
+		{if (columnName.specialToken != null) {
+          commentColName=columnName.specialToken.image;
+         } 
+        }
+		colDataType = ColDataType()
+		{
+			columnSpecs = new ArrayList();
+			commentColumnSpecs = new ArrayList();
+		}
+	
+		( parameter=CreateParameter(commentColumnSpecs) { columnSpecs.add(parameter); } )*
+	
+		{ 
+			coldef = new ColumnDefinition();
+			coldef.setCommentName(commentColName);
+			coldef.setColumnName(columnName.image);
+			coldef.setColDataType(colDataType);
+			if (columnSpecs.size() > 0) {
+				coldef.setColumnSpecStrings(columnSpecs);
+				coldef.setCommentsSpec(commentColumnSpecs);
+			}	
+			columnDefinitions.add(coldef);
+		}
+		
+		(
+			tks=","
+			{if (tks.specialToken != null) {
+              commentsCommaIndexes.add(tks.specialToken.image);
+             } else {commentsCommaIndexes.add("");}
+            }
+			(
+				(
+					tk=<K_INDEX>
+						tk3=<S_IDENTIFIER>		
+						{   index = new Index(); }
+                        colNames=ColumnsNamesList(index)
+						{						
+						    if (tk.specialToken != null) {
+                             index.setCommentType(tk.specialToken.image);
+                            } 
+							index.setType(tk.image);
+							if (tk3.specialToken != null) {
+                             index.setCommentName(tk3.specialToken.image);
+                            }
+							index.setColumnsNames(colNames);
+							index.setName(tk3.image);
+							indexes.add(index);
+						}
+				)
+				|
+				(
+					tk=<K_PRIMARY> tk2=<K_KEY> 
+						{ index = new Index();}
+						colNames=ColumnsNamesList(index)
+						{   
+						    if (tk.specialToken != null) {
+                             index.setCommentType(tk.specialToken.image);
+                            } 
+							index.setType(tk.image + " "+ tk2.image);
+							index.setKey(true);
+							if (tk2.specialToken != null) {
+                             index.setCommentKey(tk2.specialToken.image);
+                            } 
+							index.setColumnsNames(colNames);
+							indexes.add(index);
+						}
+				)
+				|
+				(
+					tk=<K_KEY>
+						tk3=<S_IDENTIFIER>		
+						{ index = new Index();}
+						colNames=ColumnsNamesList(index)
+						{
+						    if (tk.specialToken != null) {
+                             index.setCommentType(tk.specialToken.image);
+                            } 
+							index.setType(tk.image);
+							if (tk3.specialToken != null) {
+                             index.setCommentName(tk3.specialToken.image);
+                            } 
+							index.setName(tk3.image);
+							index.setColumnsNames(colNames);
+							indexes.add(index);
+						}
+				)
+				|
+				(
+					columnName=<S_IDENTIFIER> 
+					{if (columnName.specialToken != null) {
+                      commentColName=columnName.specialToken.image;
+                     } 
+                    }
+					colDataType = ColDataType()
+					{
+						columnSpecs = new ArrayList();
+						commentColumnSpecs = new ArrayList();
+					}
+				
+					( 	parameter=CreateParameter(commentColumnSpecs) { columnSpecs.add(parameter); } 	)*
+		
+					{ 
+						coldef = new ColumnDefinition();
+						coldef.setCommentName(commentColName);
+						coldef.setColumnName(columnName.image);
+						coldef.setColDataType(colDataType);
+						if (columnSpecs.size() > 0) {
+							coldef.setColumnSpecStrings(columnSpecs);
+							coldef.setCommentsSpec(commentColumnSpecs);
+						}	
+						columnDefinitions.add(coldef);
+					}
+				)
+			)
+		)* 
+				
+		tks=")"
+		{if (tks.specialToken != null) {
+          createTable.setCommentEndBracket(tks.specialToken.image);
+         } 
+        }
+		( 	parameter=CreateParameter(commentTableOptions) { tableOptions.add(parameter); } )*
+	
+	]
+	
+	
+	{
+		createTable.setTable(table);
+		if (indexes.size() > 0) {
+			createTable.setIndexes(indexes);
+			createTable.setCommentCommaIndexes(commentsCommaIndexes);
+		}	
+		if (tableOptions.size() > 0) {
+			createTable.setTableOptionsStrings(tableOptions);
+			createTable.setCommentTableOptions(commentTableOptions);
+		}	
+		if (createOptions.size() > 0) {
+			createTable.setCreateOptions(createOptions);
+			createTable.setCommentCreateOptions(commentCreateOptions);
+		}	
+		if (columnDefinitions.size() > 0)
+			createTable.setColumnDefinitions(columnDefinitions);
+		return createTable;
+	}
+	
+}
+
+ColDataType ColDataType():
+{
+	ColDataType colDataType = new ColDataType();
+	Token tk = null;
+	ArrayList argumentsStringList = new ArrayList();
+	ArrayList commentsValue = new ArrayList();
+	ArrayList commentsComma = new ArrayList();
+}
+{
+	( tk=<S_IDENTIFIER> { 
+	if (tk.specialToken != null) {
+     colDataType.setCommentType(tk.specialToken.image);
+    } 
+	colDataType.setDataType(tk.image); } )
+		
+	[LOOKAHEAD(2) tk="(" 
+	{if (tk.specialToken != null) {
+      colDataType.setCommentBeginBracket(tk.specialToken.image);
+     } 
+	}
+	( (tk=<S_INTEGER> | tk=<S_CHAR_LITERAL>) { 
+	 if (tk.specialToken != null) {
+      commentsValue.add(tk.specialToken.image);
+     } else {commentsValue.add("");}
+	argumentsStringList.add(tk.image); } [tk="," 
+	{if (tk.specialToken != null) {
+      commentsComma.add(tk.specialToken.image);
+     } else {commentsComma.add("");}
+	/*argumentsStringList.add(",");*/}] )*    
+	tk=")"
+	{if (tk.specialToken != null) {
+      colDataType.setCommentEndBracket(tk.specialToken.image);
+     } 
+	}
+	]
+	{
+		if (argumentsStringList.size() > 0)
+			{ colDataType.setArgumentsStringList(argumentsStringList); }
+		colDataType.setCommentsValue(commentsValue);
+		colDataType.setCommentsComma(commentsComma);
+		return colDataType;
+	}
+}
+
+String CreateParameter(List comments):
+{
+	String retval = null;
+	Token tk = null;
+}
+{
+		(
+			tk=<S_IDENTIFIER> { 
+			 if (tk.specialToken != null) {
+              comments.add(tk.specialToken.image);
+             } else {comments.add("");} 
+			 retval = tk.image;
+			} 
+			|
+			tk=<K_NULL> { 
+			 if (tk.specialToken != null) {
+              comments.add(tk.specialToken.image);
+             } else {comments.add("");} 
+			 retval = tk.image;
+			} 
+			|
+			tk=<K_NOT> { 
+			 if (tk.specialToken != null) {
+              comments.add(tk.specialToken.image);
+             } else {comments.add("");} 
+			 retval = tk.image;
+			} 
+			|
+			tk=<K_PRIMARY> { 
+			 if (tk.specialToken != null) {
+              comments.add(tk.specialToken.image);
+             } else {comments.add("");} 
+			 retval = tk.image;
+			} 
+			|
+			tk=<K_KEY> { 
+			 if (tk.specialToken != null) {
+              comments.add(tk.specialToken.image);
+             } else {comments.add("");} 
+			 retval = tk.image;
+			} 
+			|
+			tk=<S_CHAR_LITERAL> { 
+			 if (tk.specialToken != null) {
+              comments.add(tk.specialToken.image);
+             } else {comments.add("");} 
+			 retval = tk.image;
+			} 
+			|
+			tk=<S_INTEGER> { 
+			 if (tk.specialToken != null) {
+              comments.add(tk.specialToken.image);
+             } else {comments.add("");} 
+			 retval = tk.image;
+			} 
+			|
+			tk=<S_DOUBLE> { 
+			 if (tk.specialToken != null) {
+              comments.add(tk.specialToken.image);
+             } else {comments.add("");} 
+			 retval = tk.image;
+			} 
+			|
+			tk="=" { 
+			 if (tk.specialToken != null) {
+              comments.add(tk.specialToken.image);
+             } else {comments.add("");} 
+			 retval = tk.image;
+			} 
+			| 
+			retval=AList()
+			{ comments.add("");} 
+		)
+	{return retval;}
+}
+
+String AList():
+{
+	StringBuilder retval = new StringBuilder("");
+	Token tk = null;
+}
+{
+	 tk="(" 
+	 {if (tk.specialToken != null) {
+       retval.append(tk.specialToken.image).append(" ");
+      }
+      retval.append("(");	  
+	 }
+	 ( (tk=<S_INTEGER> | tk=<S_DOUBLE> | tk=<S_CHAR_LITERAL> | tk=<S_IDENTIFIER>) { 
+	  if (tk.specialToken != null) {
+       retval.append(" ").append(tk.specialToken.image).append(" ");
+      }
+	 retval.append(tk.image); } [tk="," {
+	  if (tk.specialToken != null) {
+       retval.append(" ").append(tk.specialToken.image).append(" ");
+      }
+	 retval.append(",");}] )*    
+	 
+	tk=")"
+	{
+	  if (tk.specialToken != null) {
+       retval.append(" ").append(tk.specialToken.image).append(" ");
+      }
+		retval.append(")");
+		return retval.toString();
+	}
+}
+
+List ColumnsNamesList(Index idx):
+{
+	List retval = new ArrayList();
+	List comments = new ArrayList();
+	List commentsComma = new ArrayList();
+	Token tk = null;
+}
+{
+	 tk="("
+     {if (tk.specialToken != null) {
+       idx.setCommentBeginBracket(tk.specialToken.image);
+      } 
+     } 	 
+	 
+	 	tk=<S_IDENTIFIER> 
+		{if (tk.specialToken != null) {
+          comments.add(tk.specialToken.image);
+         } else {comments.add("");}
+        }
+		{ retval.add(tk.image); } 
+	 	( tk="," 
+		{if (tk.specialToken != null) {
+          commentsComma.add(tk.specialToken.image);
+         } else {commentsComma.add("");}
+        }
+		tk=<S_IDENTIFIER> 
+		{if (tk.specialToken != null) {
+          comments.add(tk.specialToken.image);
+         } else {comments.add("");}
+        }
+		{ retval.add(tk.image); } )*
+	 
+	tk=")"
+	{if (tk.specialToken != null) {
+       idx.setCommentEndBracket(tk.specialToken.image);
+      } 
+    }
+	{   
+	    idx.setCommentsComma(commentsComma);
+		idx.setCommentsValue(comments);
+		return retval;
+	}
+}
+
+
+Drop Drop():
+{
+	Drop drop = new Drop();
+	Token tk = null;
+	List dropArgs = new ArrayList();
+	List commentArgs = new ArrayList();
+}
+{
+	tk=<K_DROP>
+	{if (tk.specialToken != null) {
+       drop.setComment(tk.specialToken.image);
+     } 
+    }
+	(
+		tk=<S_IDENTIFIER>
+		| 
+		tk=<K_TABLE>
+		|
+		tk=<K_INDEX>
+	)
+    { drop.setType(tk.image);
+	  if (tk.specialToken != null) {drop.setTypeComment(tk.specialToken.image); }
+	}
+	tk=<S_IDENTIFIER> { 
+	if (tk.specialToken != null) {drop.setNameComment(tk.specialToken.image);}
+	drop.setName(tk.image); }
+	(tk=<S_IDENTIFIER> { 
+	if (tk.specialToken != null) {commentArgs.add(tk.specialToken.image);}
+    else {commentArgs.add("");}	
+	dropArgs.add(tk.image); })*
+	
+	{
+		if (dropArgs.size() > 0) {
+			drop.setParameters(dropArgs);
+			drop.setParametersComment(commentArgs);
+		}
+		return drop;
+	}
+}
+
+Truncate Truncate():
+{
+	Truncate truncate = new Truncate();
+	Table table;
+	Token tk = null;
+}
+{
+	tk=<K_TRUNCATE>
+	{if (tk.specialToken != null) {
+       truncate.setComment(tk.specialToken.image);
+     } 
+    }
+	tk=<K_TABLE>
+	{if (tk.specialToken != null) {
+       truncate.setCommentTable(tk.specialToken.image);
+     } 
+    }
+	table=Table() { truncate.setTable(table); }
+	
+	{
+		return truncate;
+	}
+}

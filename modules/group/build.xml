@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See commented blocks below for -->
+<!-- some examples of how to customize the build. -->
+<!-- (If you delete it and reopen the project it will be recreated.) -->
+<!-- By default, only the Clean and Build commands use this build script. -->
+<!-- Commands such as Run, Debug, and Test only use this build script if -->
+<!-- the Compile on Save feature is turned off for the project. -->
+<!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
+<!-- in the project's Project Properties dialog box.-->
+<project name="group" default="default" basedir=".">
+    <description>Builds, tests, and runs the project group.</description>
+    <import file="nbproject/build-impl.xml"/>
+    <!--
+
+    There exist several targets which are by default empty and which can be 
+    used for execution of your tasks. These targets are usually executed 
+    before and after some main targets. They are: 
+
+      -pre-init:                 called before initialization of project properties
+      -post-init:                called after initialization of project properties
+      -pre-compile:              called before javac compilation
+      -post-compile:             called after javac compilation
+      -pre-compile-single:       called before javac compilation of single file
+      -post-compile-single:      called after javac compilation of single file
+      -pre-compile-test:         called before javac compilation of JUnit tests
+      -post-compile-test:        called after javac compilation of JUnit tests
+      -pre-compile-test-single:  called before javac compilation of single JUnit test
+      -post-compile-test-single: called after javac compilation of single JUunit test
+      -pre-jar:                  called before JAR building
+      -post-jar:                 called after JAR building
+      -post-clean:               called after cleaning build products
+
+    (Targets beginning with '-' are not intended to be called on their own.)
+
+    Example of inserting an obfuscator after compilation could look like this:
+
+        <target name="-post-compile">
+            <obfuscate>
+                <fileset dir="${build.classes.dir}"/>
+            </obfuscate>
+        </target>
+
+    For list of available properties check the imported 
+    nbproject/build-impl.xml file. 
+
+
+    Another way to customize the build is by overriding existing main targets.
+    The targets of interest are: 
+
+      -init-macrodef-javac:     defines macro for javac compilation
+      -init-macrodef-junit:     defines macro for junit execution
+      -init-macrodef-debug:     defines macro for class debugging
+      -init-macrodef-java:      defines macro for class execution
+      -do-jar-with-manifest:    JAR building (if you are using a manifest)
+      -do-jar-without-manifest: JAR building (if you are not using a manifest)
+      run:                      execution of project 
+      -javadoc-build:           Javadoc generation
+      test-report:              JUnit report generation
+
+    An example of overriding the target for project execution could look like this:
+
+        <target name="run" depends="group-impl.jar">
+            <exec dir="bin" executable="launcher.exe">
+                <arg file="${dist.jar}"/>
+            </exec>
+        </target>
+
+    Notice that the overridden target depends on the jar target and not only on 
+    the compile target as the regular run target does. Again, for a list of available 
+    properties which you can use, check the target you are overriding in the
+    nbproject/build-impl.xml file. 
+
+    -->
+                                <!--
+                                    Build section
+                                /-->
+
+    <target depends="init,-deps-jar-init" name="deps-jar" unless="no.deps">
+        <mkdir dir="${build.dir}"/>
+        <touch file="${built-jar.properties}" verbose="false"/>
+        <property file="${built-jar.properties}" prefix="already.built.jar."/>
+        <antcall target="-warn-already-built-jar"/>
+        <propertyfile file="${built-jar.properties}">
+            <entry key="${basedir}" value=""/>
+        </propertyfile>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.JSqlParser}" name="call.subproject"/>
+            <param location="${project.JSqlParser}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.CommonUtils}" name="call.subproject"/>
+            <param location="${project.CommonUtils}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.Grid}" name="call.subproject"/>
+            <param location="${project.Grid}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.ScalablePane}" name="call.subproject"/>
+            <param location="${project.ScalablePane}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+	<antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}" /> 
+            <param location="${project.Updater}" name="call.subproject" /> 
+            <param location="${project.Updater}/build.xml" name="call.script" /> 
+            <param name="call.target" value="jar" /> 
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}" /> 
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.OpcDa}" name="call.subproject"/>
+            <param location="${project.OpcDa}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.BinaryTags}" name="call.subproject"/>
+            <param location="${project.BinaryTags}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.Routing}" name="call.subproject"/>
+            <param location="${project.Routing}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.Core}" name="call.subproject"/>
+            <param location="${project.Core}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.Datamodel}" name="call.subproject"/>
+            <param location="${project.Datamodel}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.Modules}" name="call.subproject"/>
+            <param location="${project.Modules}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.JCalendar}" name="call.subproject"/>
+            <param location="${project.JCalendar}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.Reports}" name="call.subproject"/>
+            <param location="${project.Reports}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.Forms}" name="call.subproject"/>
+            <param location="${project.Forms}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.Application}" name="call.subproject"/>
+            <param location="${project.Application}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.DatamodelDesigner}" name="call.subproject"/>
+            <param location="${project.DatamodelDesigner}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.Server}" name="call.subproject"/>
+            <param location="${project.Server}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.ServletSupport}" name="call.subproject"/>
+            <param location="${project.ServletSupport}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.Tools}" name="call.subproject"/>
+            <param location="${project.Tools}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+
+<!--
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.MetaSync}" name="call.subproject"/>
+            <param location="${project.MetaSync}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+-->
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.Tools}" name="call.subproject"/>
+            <param location="${project.Tools}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+    </target>
+
+                                <!--
+                                    Test section
+                                /-->
+    <target depends="init,compile-test,-pre-test-run,-do-test-run,test-report,-post-test-run,-test-browse" description="Run unit tests." name="test">
+        <subant buildpath="${project.JSqlParser}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.CommonUtils}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.Grid}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.ScalablePane}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.Updater}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.OpcDa}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.BinaryTags}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.Core}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.Datamodel}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.Modules}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.JCalendar}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.Reports}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.Forms}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.Application}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.Server}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.ServletSupport}" antfile="build.xml" target="test"/>
+        <subant buildpath="${project.Tools}" antfile="build.xml" target="test"/>
+    </target>
+                                <!--
+                                    Clean section
+                                /-->
+    <target depends="init,deps-clean,-do-clean,-post-clean" description="Clean build products." name="clean">
+    </target>   
+	                           <!--
+                                    Version section depends="jar"
+                                /-->
+	<target description="Create update file" name="markversion">
+	    <property name="versionXMLPath" value="../../updates/version.xml"/>
+	    <loadfile property="versionFile" srcFile="${versionXMLPath}"/>
+	    <macrodef name="incrementBuildNumber">
+		<sequential>
+			<script language="javascript">
+			  var versionXMLContent = project.getProperty("versionFile");
+			  var re = /\d+\.\d+\.(\d+)/;
+			  var buildNumber = +re.exec(versionXMLContent)[1];
+			  buildNumber++;
+			  project.setProperty("buildNumber",buildNumber);
+			</script>
+		</sequential>
+	    </macrodef>
+  	    <incrementBuildNumber/>
+            <replaceregexp file="${versionXMLPath}"
+                   match="&lt;Version version=&quot;(\d+\.\d+\.)\d+&quot;/&gt;"
+                   replace="&lt;Version version=&quot;\1${buildNumber}&quot;/&gt;"
+                   byline="true"/> 
+	</target>
+
+	<target name="packupdates">
+	    <zip destfile="../../updates/application.zip">
+            <fileset dir="../../" >
+                <include name="bin/**"/>
+                <include name="api/**"/>
+				<include name="lib/**/*.jar"/>
+			</fileset>
+        </zip>
+    </target>
+                                <!--
+                                    Make lite update file.
+                                /-->
+	<target name="buildupdates" depends="markversion,packupdates"> 
+    </target>
+</project>
