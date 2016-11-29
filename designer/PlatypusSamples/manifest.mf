@@ -1,7 +1,0 @@
-Manifest-Version: 1.0
-AutoUpdate-Show-In-Client: true
-OpenIDE-Module: com.eas.samples
-OpenIDE-Module-Implementation-Version: 3
-OpenIDE-Module-Layer: com/eas/samples/layer.xml
-OpenIDE-Module-Localizing-Bundle: com/eas/samples/Bundle.properties
-

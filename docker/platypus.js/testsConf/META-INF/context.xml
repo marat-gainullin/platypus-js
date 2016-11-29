@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?><Context path="/p-tests">
-  <Realm className="org.apache.catalina.realm.DataSourceRealm" dataSourceName="eas" digest="MD5" localDataSource="true" roleNameCol="GROUP_NAME" userCredCol="USR_PASSWD" userNameCol="USR_NAME" userRoleTable="MTD_GROUPS" userTable="MTD_USERS"/>
-  <Resource driverClassName="com.mysql.jdbc.Driver" name="eas" password="test" type="javax.sql.DataSource" url="jdbc:mysql://testDb:3306/eas?zeroDateTimeBehavior=convertToNull" username="test"/>
-  <Resource driverClassName="com.mysql.jdbc.Driver" name="easHR" password="test" type="javax.sql.DataSource" url="jdbc:mysql://testDb:3306/hr?zeroDateTimeBehavior=convertToNull" username="test"/>
-</Context>

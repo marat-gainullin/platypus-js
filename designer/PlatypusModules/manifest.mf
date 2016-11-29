@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Bundle-Name: %OpenIDE-Module-Name
-OpenIDE-Module: com.eas.designer.application.module/5
-OpenIDE-Module-Implementation-Version: 35
-OpenIDE-Module-Localizing-Bundle: com/eas/designer/application/module/Bundle.properties
-OpenIDE-Module-Layer: com/eas/designer/application/module/layer.xml
-OpenIDE-Module-Requires: org.openide.windows.WindowManager, org.netbeans.api.debugger.jpda.JPDADebuggerEngineImpl,
-  org.netbeans.spi.debugger.ui
-OpenIDE-Module-Package-Dependencies: com.sun.jdi[VirtualMachineManager]

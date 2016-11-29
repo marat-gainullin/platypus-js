@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module: com.eas.designer.application/5
-OpenIDE-Module-Implementation-Version: 88
-OpenIDE-Module-Install: com/eas/designer/application/Installer.class
-OpenIDE-Module-Localizing-Bundle: com/eas/designer/application/Bundle.properties
-OpenIDE-Module-Layer: com/eas/designer/application/layer.xml

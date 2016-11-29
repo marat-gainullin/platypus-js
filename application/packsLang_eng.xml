@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<langpack>
-   <str id="client.package.description" txt="The core of the system Platypus contains modules necessary for system work."/>
-   <str id="maps.package.description" txt="Modules necessary for work with maps."/>
-   <str id="server.package.description" txt="Modules necessary for work system Platypus on three-tier architecture."/>
-   <str id="communications.package.description" txt="Modules necessary for work with COM/DCOM and OPC servers."/>
-   <str id="tools.package.description" txt="Platypus tools."/>
-</langpack>
