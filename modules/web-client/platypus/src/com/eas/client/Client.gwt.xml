@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.7.0//EN" "http://google-web-toolkit.googlecode.com/svn/tags/1.7.0/distro-source/core/src/gwt-module.dtd">
+
+<module>
+    <inherits name="com.google.gwt.xml.XML"/>
+    <inherits name="com.google.gwt.logging.Logging"/>
+    <inherits name="com.eas.facade.Facade"/>
+    
+    <!-- Default noop implementation of url processing for xhr requests -->
+	<replace-with class="com.eas.client.xhr.impl.NoopUrlQueryProcessor">
+		<when-type-is class="com.eas.client.xhr.UrlQueryProcessor"/>
+	</replace-with>
+	
+	<!-- Chrome bug 266971 needs a workaround>
+	<replace-with class="com.eas.client.xhr.impl.ChromeUrlQueryProcessor">
+	  <when-type-is class="com.eas.client.xhr.UrlQueryProcessor" />
+	  <any>
+	    <when-property-is name="user.agent" value="safari"/>
+	  </any>
+	</replace-with-->
+	
+    <source path=""/>
+</module>
