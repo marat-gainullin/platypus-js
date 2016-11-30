@@ -1,6 +1,3 @@
-test-classes
-www-test
-war
+.settings
 gwt-unitCache
-.gwt
-extras
+war
