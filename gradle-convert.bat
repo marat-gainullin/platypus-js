@@ -1,6 +1,6 @@
+@echo off
 set target=%1
 set location=%~p0
-@echo off
 cd %target%
 rmdir nbproject /s /q
 del build.xml
