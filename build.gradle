@@ -9,3 +9,11 @@ allprojects{
         testCompile 'junit:junit:4.11'
     }
 }
+
+subprojects{
+    apply plugin: 'maven'
+
+    repositories{
+        mavenLocal()
+    }
+}
