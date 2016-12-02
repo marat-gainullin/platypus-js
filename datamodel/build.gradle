@@ -1,7 +1,4 @@
 dependencies{
     compile project(':core')
     compile project(':sql-parser')
-    compile 'com.hynnet:oracle-driver-ojdbc6:12.1.0.1'
-    compile 'org.geotools.jdbc:gt-jdbc-oracle:16.0'
-    compile 'org.postgis:postgis-jdbc:2.1.0'
 }

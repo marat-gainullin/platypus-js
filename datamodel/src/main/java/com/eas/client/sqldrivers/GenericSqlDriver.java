@@ -24,6 +24,11 @@ import java.util.List;
 public class GenericSqlDriver extends SqlDriver {
 
     @Override
+    public boolean is(String aDialect) {
+        return true;
+    }
+
+    @Override
     public boolean isConstraintsDeferrable() {
         return false;
     }

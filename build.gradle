@@ -7,9 +7,6 @@ allprojects{
         }
         jcenter()
         maven {
-            url 'http://download.osgeo.org/webdav/geotools/'
-        }
-        maven {
             url 'http://repo.boundlessgeo.com/main/'
         }
         maven {

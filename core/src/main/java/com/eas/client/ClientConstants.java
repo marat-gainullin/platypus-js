@@ -106,7 +106,6 @@ public class ClientConstants {
      */
     public static final String SERVER_PROPERTY_ORACLE_DIALECT = "Oracle";
     public static final String SERVER_PROPERTY_MSSQL_DIALECT = "MsSql";
-    public static final String SERVER_PROPERTY_DERBY_DIALECT = "Derby";
     public static final String SERVER_PROPERTY_POSTGRE_DIALECT = "PostgreSql";
     public static final String SERVER_PROPERTY_MYSQL_DIALECT = "MySql";
     public static final String SERVER_PROPERTY_DB2_DIALECT = "Db2";

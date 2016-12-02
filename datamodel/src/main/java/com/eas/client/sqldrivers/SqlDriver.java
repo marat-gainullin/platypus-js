@@ -1,12 +1,3 @@
-/* Datamodel license.
- * Exclusive rights on this code in any form
- * are belong to it's author. This code was
- * developed for commercial purposes only. 
- * For any questions and any actions with this
- * code in any form you have to contact to it's
- * author.
- * All rights reserved.
- */
 package com.eas.client.sqldrivers;
 
 import com.eas.client.ClientConstants;
@@ -43,7 +34,7 @@ public abstract class SqlDriver implements StatementsGenerator.GeometryConverter
         private final String left;
         private final String right;
 
-        TwinString(String aLeft, String aRight) {
+        public TwinString(String aLeft, String aRight) {
             left = aLeft;
             right = aRight;
         }
@@ -546,6 +537,8 @@ public abstract class SqlDriver implements StatementsGenerator.GeometryConverter
         return aName;
     }
 
+    public abstract boolean is(String aDialect);
+    
     public boolean isWrappedName(String aName) {
         return getWrapLength(aName) > 0;
     }

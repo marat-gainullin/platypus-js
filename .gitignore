@@ -1,3 +1,4 @@
 #ignoring in all subfolders
 *\build/
 *\.gradle/
+/.nb-gradle/

@@ -1,27 +1,16 @@
-/* Datamodel license.
- * Exclusive rights on this code in any form
- * are belong to it's author. This code was
- * developed for commercial purposes only. 
- * For any questions and any actions with this
- * code in any form you have to contact to it's
- * author.
- * All rights reserved.
- */
 package com.eas.client;
 
 import com.eas.client.sqldrivers.SqlDriver;
-import com.eas.client.sqldrivers.H2SqlDriver;
-import com.eas.client.sqldrivers.Db2SqlDriver;
-import com.eas.client.sqldrivers.MySqlSqlDriver;
-import com.eas.client.sqldrivers.MsSqlSqlDriver;
-import com.eas.client.sqldrivers.OracleSqlDriver;
-import com.eas.client.sqldrivers.PostgreSqlDriver;
 import com.eas.client.metadata.Fields;
 import com.eas.client.sqldrivers.GenericSqlDriver;
 import java.sql.*;
+import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.ServiceLoader;
+import java.util.Set;
+import org.apache.mina.util.ConcurrentHashSet;
 
 /**
  *
@@ -42,6 +31,16 @@ public class SQLUtils {
     public static final String SQL_DELETE_COMMON_WHERE_BY_FIELD = "delete from %s where %s.%s = :" + SQL_PARAMETER_FIELD_VALUE;
     public static final String SQL_INSERT_COMMON_ID_FIELD = "insert into %s columns = (%s) values = ( :" + SQL_PARAMETER_FIELD_VALUE + ")";
     public static final String SQL_MAX_COMMON_BY_FIELD = "select max(%s) %s from %s";
+    private static final SqlDriver GENERIC_DRIVER = new GenericSqlDriver();
+    private static final Set<SqlDriver> DRIVERS = new ConcurrentHashSet<SqlDriver>() {
+        {
+            ServiceLoader<SqlDriver> loader = ServiceLoader.load(SqlDriver.class);
+            Iterator<SqlDriver> drivers = loader.iterator();
+            while (drivers.hasNext()) {
+                DRIVERS.add(drivers.next());
+            }
+        }
+    };
 
     public static String dialectByUrl(String aJdbcUrl) {
         String dialect = null;
@@ -86,21 +85,10 @@ public class SQLUtils {
     }
 
     public static SqlDriver getSqlDriver(String aDialect) {
-        if (ClientConstants.SERVER_PROPERTY_ORACLE_DIALECT.equalsIgnoreCase(aDialect)) {
-            return new OracleSqlDriver();
-        } else if (ClientConstants.SERVER_PROPERTY_MSSQL_DIALECT.equalsIgnoreCase(aDialect)) {
-            return new MsSqlSqlDriver();
-        } else if (ClientConstants.SERVER_PROPERTY_POSTGRE_DIALECT.equalsIgnoreCase(aDialect)) {
-            return new PostgreSqlDriver();
-        } else if (ClientConstants.SERVER_PROPERTY_MYSQL_DIALECT.equalsIgnoreCase(aDialect)) {
-            return new MySqlSqlDriver();
-        } else if (ClientConstants.SERVER_PROPERTY_DB2_DIALECT.equalsIgnoreCase(aDialect)) {
-            return new Db2SqlDriver();
-        } else if (ClientConstants.SERVER_PROPERTY_H2_DIALECT.equalsIgnoreCase(aDialect)) {
-            return new H2SqlDriver();
-        } else {
-            return new GenericSqlDriver();
-        }
+        return DRIVERS.stream()
+                .filter(sqlDriver -> sqlDriver.is(aDialect))
+                .findFirst()
+                .orElse(GENERIC_DRIVER);
     }
 
     public static SqlQuery validateTableSqlQuery(String aTableDatasource, String tableName, String tableSchemaName, DatabasesClient aClient) throws Exception {

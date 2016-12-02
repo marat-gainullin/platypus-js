@@ -1,0 +1,5 @@
+dependencies {
+    compile 'org.postgis:postgis-jdbc:2.1.0'
+    compile project(':core')
+    compile project(':datamodel')
+}
