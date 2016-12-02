@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.scripts.ole;
 
 import java.util.logging.Level;
@@ -61,7 +57,7 @@ public class ComObject extends AbstractJSObject {
         else{
             try {
                 int dispId = dispatch.getIDsOfNames(INDEXED_COLLECTIONS_PROPERTY_NAME);
-                return propertyGet(dispId, new Object[]{new Integer(index)});
+                return propertyGet(dispId, new Object[]{index});
             } catch (JIException ex) {
                 Logger.getLogger(ComObject.class.getName()).log(Level.SEVERE, null, ex);
                 return null;
@@ -149,11 +145,13 @@ public class ComObject extends AbstractJSObject {
 
     private static JIVariant wrapObject(Object o) {
         JIVariant variant = null;
+        /*
         if (o instanceof String) {
             variant = new JIVariant((String) o);
         } else {
             variant = new JIVariant(o);
         }
+        */
         return variant;
     }
 

@@ -2,7 +2,22 @@ allprojects{
     apply plugin: 'java'
 
     repositories{
+        maven {
+            url 'http://download.osgeo.org/webdav/geotools/'
+        }
         jcenter()
+        maven {
+            url 'http://download.osgeo.org/webdav/geotools/'
+        }
+        maven {
+            url 'http://repo.boundlessgeo.com/main/'
+        }
+        maven {
+            url 'http://www.datanucleus.org/downloads/maven2/'
+        }
+        maven {
+            url 'https://clojars.org/repo/'
+        }
     }
 
     dependencies{

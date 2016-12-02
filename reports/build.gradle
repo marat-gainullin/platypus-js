@@ -1,0 +1,5 @@
+dependencies{
+    compile 'net.sf.jxls:jxls-core:1.0.6'
+    compile project(':core')
+    compile project(':datamodel')
+}
