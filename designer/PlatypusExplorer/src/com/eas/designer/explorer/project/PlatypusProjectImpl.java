@@ -206,7 +206,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
         };
         basesProxy = new ScriptedDatabasesClient(settings.getDefaultDataSourceName(), indexer, false, BearResourcePool.DEFAULT_MAXIMUM_SIZE) {
 
-            @Override
+            //@Override
             protected JSObject createModule(String aModuleName) throws Exception {
                 return createLocalEngineModule(aModuleName);
             }
