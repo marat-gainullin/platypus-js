@@ -4,7 +4,6 @@ import com.eas.client.cache.PlatypusIndexer;
 import com.eas.client.changes.Change;
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.Scripts;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +14,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.ECMAException;
@@ -58,11 +58,6 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         indexer = aIndexer;
     }
 
-    protected JSObject createModule(String aModuleName) throws Exception {
-        ScriptedResource.require(new String[]{aModuleName}, null);
-        return Scripts.getSpace().createModule(aModuleName);
-    }
-
     /**
      * Adds transaction validator module. Validator modules are used in commit
      * to verify transaction changes log. They mey consume particuled changes
@@ -77,28 +72,10 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         validators.put(aModuleName, aDatasources);
     }
 
-    @Override
-    protected ApplyResult apply(final String aDatasourceName, final List<Change> aLog, Scripts.Space aSpace, Consumer<ApplyResult> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        if (onSuccess != null) {
-            validate(aDatasourceName, aLog, (Void v) -> {
-                try {
-                    super.apply(aDatasourceName, aLog, aSpace, onSuccess, onFailure);
-                } catch (Exception ex) {
-                    onFailure.accept(ex);
-                }
-            }, onFailure, aSpace);
-            return null;
-        } else {
-            validate(aDatasourceName, aLog, null, null, aSpace);
-            return super.apply(aDatasourceName, aLog, null, null, null);
-        }
-    }
-    protected static final String CANT_CREATE_MODULE_MSG = "Can't create module %s";
-
     private static class CallPoint {
 
-        public JSObject module;
-        public JSObject function;
+        private final JSObject module;
+        private final JSObject function;
 
         public CallPoint(JSObject aModule, JSObject aFunction) {
             super();
@@ -107,29 +84,36 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         }
     }
 
-    private static class ValidateProcess {
+    private static class CollectionAsyncProcess<T> {
 
-        public int expected;
-        public int completed;
-        public int rowsAffected;
-        public Set<Exception> exceptions = new HashSet<>();
-        public Consumer<Void> onSuccess;
-        public Consumer<Exception> onFailure;
+        private final Collection<T> processed;
+        private final Scripts.Space space;
+        private final Consumer<Void> onSuccess;
+        private final Consumer<Exception> onFailure;
+        private int completed;
+        private final Set<Exception> exceptions = new HashSet<>();
 
-        public ValidateProcess(int aExpected, Consumer<Void> aOnSuccess, Consumer<Exception> aOnFailure) {
-            expected = aExpected;
+        public CollectionAsyncProcess(Collection<T> aProcessed, Scripts.Space aSpace, Consumer<Void> aOnSuccess, Consumer<Exception> aOnFailure) {
+            processed = aProcessed;
+            space = aSpace;
             onSuccess = aOnSuccess;
             onFailure = aOnFailure;
+        }
+
+        public void complete() {
+            complete(null);
         }
 
         public void complete(Exception aFailureCause) {
             if (aFailureCause != null) {
                 exceptions.add(aFailureCause);
             }
-            if (++completed == expected) {
+            if (++completed == processed.size()) {
                 if (exceptions.isEmpty()) {
                     if (onSuccess != null) {
-                        onSuccess.accept(null);
+                        space.process(() -> {
+                            onSuccess.accept(null);
+                        });
                     }
                 } else if (onFailure != null) {
                     StringBuilder eMessagesSum = new StringBuilder();
@@ -139,78 +123,126 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                         }
                         eMessagesSum.append(ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage() : ex.toString());
                     });
-                    onFailure.accept(new IllegalStateException(eMessagesSum.toString()));
+                    space.process(() -> {
+                        onFailure.accept(new IllegalStateException(eMessagesSum.toString()));
+                    });
                 }
+            }
+        }
+
+        public void perform(Consumer<T> action) {
+            if (processed.isEmpty()) {
+                space.process(() -> {
+                    onSuccess.accept(null);
+                });
+            } else {
+                processed.stream().forEach(action);
             }
         }
     }
 
-    private void validate(final String aDatasourceName, final List<Change> aLog, Consumer<Void> onSuccess, Consumer<Exception> onFailure, Scripts.Space aSpace) {
-        List<CallPoint> toBeCalled = new ArrayList<>();
-        validators.keySet().stream().forEach((validatorName) -> {
-            Collection<String> datasourcesUnderControl = validators.get(validatorName);
-            if (((datasourcesUnderControl == null || datasourcesUnderControl.isEmpty()) && (aDatasourceName == null || Objects.equals(aDatasourceName, defaultDatasourceName)))
-                    || (datasourcesUnderControl != null && datasourcesUnderControl.contains(aDatasourceName))) {
+    @Override
+    public int commit(Map<String, List<Change>> aChangeLogs, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        Scripts.Space space = Scripts.getSpace();
+        if (onSuccess != null) {
+            CollectionAsyncProcess<Map.Entry<String, List<Change>>> logsProcess = new CollectionAsyncProcess<>(aChangeLogs.entrySet(), space, v -> {
                 try {
-                    JSObject module = createModule(validatorName);
-                    if (module != null) {
-                        Object oValidate = module.getMember("validate");
-                        if (oValidate instanceof JSObject) {
-                            JSObject validateFunction = (JSObject) oValidate;
-                            toBeCalled.add(new CallPoint(module, validateFunction));
-                        } else {
-                            Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "\"validate\" method couldn''t be found in {0} module.", validatorName);
-                        }
-                    } else {
-                        Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "{0} constructor couldn''t be found", validatorName);
-                    }
+                    super.commit(aChangeLogs, onSuccess, onFailure);
                 } catch (Exception ex) {
                     Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            }
-        });
+            }, onFailure);
+            logsProcess.perform(dsEntry -> {
+                String dsName = dsEntry.getKey();
+                List<Change> changeLog = dsEntry.getValue();
+                validate(dsName, changeLog, v -> {
+                    logsProcess.complete(null);
+                }, ex -> {
+                    logsProcess.complete(ex);
+                }, space);
+            });
+            return 0;
+        } else {
+            aChangeLogs.entrySet().stream().forEach(dsEntry -> {
+                String dataSourceName = dsEntry.getKey();
+                List<Change> log = dsEntry.getValue();
+                validate(dataSourceName, log, null, null, space);
+            });
+            return super.commit(aChangeLogs, null, null);
+        }
+    }
+
+    private void validate(final String aDatasourceName, final List<Change> aLog, Consumer<Void> onSuccess, Consumer<Exception> onFailure, Scripts.Space aSpace) {
+        Collection<String> requiredModules = validators.entrySet().stream()
+                .filter(vEntry -> {
+                    Collection<String> datasourcesUnderControl = vEntry.getValue();
+                    return (((datasourcesUnderControl == null || datasourcesUnderControl.isEmpty()) && (aDatasourceName == null || Objects.equals(aDatasourceName, defaultDatasourceName)))
+                            || (datasourcesUnderControl != null && datasourcesUnderControl.contains(aDatasourceName)));
+                })
+                .map(vEntry -> vEntry.getKey())
+                .collect(Collectors.toSet());
         if (onSuccess != null) {
-            if (toBeCalled.isEmpty()) {
-                onSuccess.accept(null);
-            } else {
-                ValidateProcess process = new ValidateProcess(toBeCalled.size(), onSuccess, onFailure);
-                toBeCalled.stream().forEach((v) -> {
-                    try {
-                        v.function.call(v.module, new Object[]{aSpace.toJs(aLog.toArray()), aDatasourceName,
-                            new AbstractJSObject() {
+            try {
+                ScriptedResource._require(requiredModules.stream().toArray(size -> new String[size]), null, Scripts.getSpace(), new HashSet<>(), v -> {
+                    Collection<CallPoint> validatorsPoints = toCallPoints(requiredModules);
+                    JSObject jsLog = validatorsPoints.isEmpty() ? aSpace.makeArray() : aSpace.toJsArray(aLog);
+                    CollectionAsyncProcess<CallPoint> logProcess = new CollectionAsyncProcess<>(validatorsPoints, aSpace, onSuccess, onFailure);
+                    logProcess.perform(validatorPoint -> {
+                        try {
+                            validatorPoint.function.call(validatorPoint.module, new Object[]{jsLog, aDatasourceName,
+                                new AbstractJSObject() {
 
-                                @Override
-                                public Object call(final Object thiz, final Object... args) {
-                                    process.complete(null);
-                                    return null;
-                                }
-                            },
-                            new AbstractJSObject() {
-
-                                @Override
-                                public Object call(final Object thiz, final Object... args) {
-                                    if (args.length > 0) {
-                                        if (args[0] instanceof Exception) {
-                                            process.complete((Exception) args[0]);
-                                        } else {
-                                            process.complete(new Exception(String.valueOf(aSpace.toJava(args[0]))));
-                                        }
-                                    } else {
-                                        process.complete(new Exception("No error information from validate method"));
+                                    @Override
+                                    public Object call(final Object thiz, final Object... args) {
+                                        logProcess.complete(null);
+                                        return null;
                                     }
-                                    return null;
+                                },
+                                new AbstractJSObject() {
+
+                                    @Override
+                                    public Object call(final Object thiz, final Object... args) {
+                                        if (args.length > 0) {
+                                            if (args[0] instanceof Exception) {
+                                                logProcess.complete((Exception) args[0]);
+                                            } else {
+                                                logProcess.complete(new Exception(String.valueOf(aSpace.toJava(args[0]))));
+                                            }
+                                        } else {
+                                            logProcess.complete(new Exception("No error information from validate method"));
+                                        }
+                                        return null;
+                                    }
                                 }
-                            }
-                        });
-                    } catch (ECMAException ex) {
-                        process.complete(ex);
-                    }
-                });
+                            });
+                        } catch (ECMAException ex) {
+                            logProcess.complete(ex);
+                        }
+                    });
+                }, onFailure);
+            } catch (Exception ex) {
+                Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
-            toBeCalled.stream().forEach((v) -> {
-                v.function.call(v.module, new Object[]{Scripts.getSpace().toJs(aLog.toArray()), aDatasourceName});
+            try {
+                ScriptedResource._require(requiredModules.stream().toArray(size -> new String[size]), null, Scripts.getSpace(), new HashSet<>());
+            } catch (Exception ex) {
+                throw new IllegalStateException(ex);
+            }
+            Collection<CallPoint> validatorsPoints = toCallPoints(requiredModules);
+            JSObject jsLog = validatorsPoints.isEmpty() ? aSpace.makeArray() : aSpace.toJsArray(aLog);
+            validatorsPoints.stream().forEach((v) -> {
+                v.function.call(v.module, new Object[]{jsLog, aDatasourceName});
             });
         }
+    }
+
+    private static Collection<CallPoint> toCallPoints(Collection<String> requiredModules) {
+        return requiredModules.stream()
+                .map(validatorName -> Scripts.getSpace().createModule(validatorName))
+                .filter(module -> module != null)
+                .filter(module -> module.getMember("validate") instanceof JSObject)
+                .map(module -> new CallPoint(module, (JSObject) module.getMember("validate")))
+                .collect(Collectors.toList());
     }
 }
