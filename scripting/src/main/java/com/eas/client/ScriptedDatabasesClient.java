@@ -20,7 +20,7 @@ import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.ECMAException;
 
 /**
- * Multi data source client. It allows to use js modules as datasources,
+ * Multi datasource client. It allows to use js modules as datasources,
  * validators and appliers.
  *
  * @author mg
@@ -172,6 +172,10 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         }
     }
 
+    protected JSObject createModule(String aModuleName) {
+        return Scripts.getSpace().createModule(aModuleName);
+    }
+
     private void validate(final String aDatasourceName, final List<Change> aLog, Consumer<Void> onSuccess, Consumer<Exception> onFailure, Scripts.Space aSpace) {
         Collection<String> requiredModules = validators.entrySet().stream()
                 .filter(vEntry -> {
@@ -237,9 +241,9 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         }
     }
 
-    private static Collection<CallPoint> toCallPoints(Collection<String> requiredModules) {
+    private Collection<CallPoint> toCallPoints(Collection<String> requiredModules) {
         return requiredModules.stream()
-                .map(validatorName -> Scripts.getSpace().createModule(validatorName))
+                .map(validatorName -> createModule(validatorName))
                 .filter(module -> module != null)
                 .filter(module -> module.getMember("validate") instanceof JSObject)
                 .map(module -> new CallPoint(module, (JSObject) module.getMember("validate")))
