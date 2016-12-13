@@ -10,7 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.ServiceLoader;
 import java.util.Set;
-import org.apache.mina.util.ConcurrentHashSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  *
@@ -32,7 +32,7 @@ public class SQLUtils {
     public static final String SQL_INSERT_COMMON_ID_FIELD = "insert into %s columns = (%s) values = ( :" + SQL_PARAMETER_FIELD_VALUE + ")";
     public static final String SQL_MAX_COMMON_BY_FIELD = "select max(%s) %s from %s";
     private static final SqlDriver GENERIC_DRIVER = new GenericSqlDriver();
-    private static final Set<SqlDriver> DRIVERS = new ConcurrentHashSet<SqlDriver>() {
+    private static final Set<SqlDriver> DRIVERS = new ConcurrentSkipListSet<SqlDriver>() {
         {
             ServiceLoader<SqlDriver> loader = ServiceLoader.load(SqlDriver.class);
             Iterator<SqlDriver> drivers = loader.iterator();

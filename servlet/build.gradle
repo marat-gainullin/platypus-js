@@ -2,5 +2,9 @@ dependencies {
     compileOnly 'javax.servlet:javax.servlet-api:3.1.0'
     compileOnly 'javax.websocket:javax.websocket-api:1.1'
     compile project(':core')
+    compile project(':common-utils')
+    compile project(':binary-tags')
+    compile project(':datamodel')
+    compile project(':scripting')
     compile project(':server')
 }

@@ -1,4 +1,6 @@
 dependencies {
+    compile project(':common-utils')
+    compile project(':core')
     compile project(':datamodel')
     compile project(':scripting')
 }

@@ -15,6 +15,9 @@ allprojects{
         maven {
             url 'https://clojars.org/repo/'
         }
+        maven {
+            url 'http://maven.geotoolkit.org/'
+        }
     }
 
     dependencies{
@@ -25,7 +28,13 @@ allprojects{
 subprojects{
     apply plugin: 'maven'
 
-    repositories{
+    configurations {
+        compile.transitive = false
+        compileClasspath.transitive = false
+        compileOnly.transitive = false
+    }    
+    
+    repositories {
         mavenLocal()
     }
 }

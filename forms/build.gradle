@@ -1,6 +1,7 @@
 dependencies {
+    compile project(':common-utils')
     compile project(':core')
-    compile project(':calendar-widget')
-    compile project(':grid-widget')
     compile project(':scripting')
+    compile project(':grid-widget')
+    compile project(':calendar-widget')
 }
