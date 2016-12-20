@@ -819,62 +819,64 @@ public class ScriptedResource {
     }
 
     public static void _require(String[] aModulesNames, String aCalledFromFile, Scripts.Space aSpace, Set<String> aCyclic) throws Exception {
-        Path apiPath = Scripts.getAbsoluteApiPath();
-        Path appPath = getAbsoluteAppPath();
-        for (String moduleName : aModulesNames) {
-            if (!aSpace.getDefined().containsKey(moduleName)) {
-                if (aCyclic.contains(moduleName)) {
-                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "Cyclic dependency detected: {0}", checkedModuleName(moduleName));
-                } else {
-                    aCyclic.add(moduleName);
-                    Path apiLocalPath = apiPath.resolve(moduleName + PlatypusFiles.JAVASCRIPT_FILE_END);
-                    if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
-                        URL scriptURL = apiLocalPath.toUri().toURL();
-                        aSpace.exec(moduleName, scriptURL);
+        if (aModulesNames != null && aModulesNames.length > 0) {
+            Path apiPath = Scripts.getAbsoluteApiPath();
+            Path appPath = getAbsoluteAppPath();
+            for (String moduleName : aModulesNames) {
+                if (!aSpace.getDefined().containsKey(moduleName)) {
+                    if (aCyclic.contains(moduleName)) {
+                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "Cyclic dependency detected: {0}", checkedModuleName(moduleName));
                     } else {
-                        ModuleStructure structure = app.getModules().getModule(moduleName, null, null, null);
-                        if (structure != null) {
-                            AppElementFiles files = structure.getParts();
-                            File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
-                            URL scriptURL = sourceFile.toURI().toURL();
-                            if (!aSpace.getExecuted().containsKey(scriptURL)) {
-                                if (files.isModule()) {
-                                    qRequire(structure.getQueryDependencies().toArray(new String[]{}), null, null, null);
-                                    sRequire(structure.getServerDependencies().toArray(new String[]{}), null, null, null);
+                        aCyclic.add(moduleName);
+                        Path apiLocalPath = apiPath.resolve(moduleName + PlatypusFiles.JAVASCRIPT_FILE_END);
+                        if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
+                            URL scriptURL = apiLocalPath.toUri().toURL();
+                            aSpace.exec(moduleName, scriptURL);
+                        } else {
+                            ModuleStructure structure = app.getModules().getModule(moduleName, null, null, null);
+                            if (structure != null) {
+                                AppElementFiles files = structure.getParts();
+                                File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
+                                URL scriptURL = sourceFile.toURI().toURL();
+                                if (!aSpace.getExecuted().containsKey(scriptURL)) {
+                                    if (files.isModule()) {
+                                        qRequire(structure.getQueryDependencies().toArray(new String[]{}), null, null, null);
+                                        sRequire(structure.getServerDependencies().toArray(new String[]{}), null, null, null);
+                                    }
+                                    String[] autoDiscoveredDependencies = structure.getClientDependencies().toArray(new String[]{});
+                                    _require(autoDiscoveredDependencies, null, aSpace, aCyclic);
+                                    Path fileToLoad = Paths.get(scriptURL.toURI());
+                                    Path appRelative = appPath.relativize(fileToLoad);
+                                    aSpace.exec(appRelative.toString().replace(File.separator, "/"), scriptURL);
                                 }
-                                String[] autoDiscoveredDependencies = structure.getClientDependencies().toArray(new String[]{});
-                                _require(autoDiscoveredDependencies, null, aSpace, aCyclic);
-                                Path fileToLoad = Paths.get(scriptURL.toURI());
-                                Path appRelative = appPath.relativize(fileToLoad);
-                                aSpace.exec(appRelative.toString().replace(File.separator, "/"), scriptURL);
+                            } else {
+                                throw new FileNotFoundException(moduleName);
                             }
-                        } else {
-                            throw new FileNotFoundException(moduleName);
                         }
-                    }
-                    Collection<Scripts.AmdDefine> amdDefines = aSpace.consumeAmdDefines();
-                    Collection<String> amdNames = new HashSet<>();
-                    for (Scripts.AmdDefine amdDefine : amdDefines) {
-                        assert amdDefine.getModuleName() != null : DEFAULT_MODULE_NAME_ASSERT_MSG;
-                        amdNames.add(amdDefine.getModuleName());
-                        final String amdModuleName = amdDefine.getModuleName();
-                        final String[] amdDependencies = amdDefine.getAmdDependencies();
-                        final JSObject amdModuleDefiner = amdDefine.getModuleDefiner();
-                        _require(amdDependencies, null, aSpace, aCyclic);
-                        amdModuleDefiner.call(null, new Object[]{amdModuleName});
-                        // If module is still not defined (buggy definer in script, etc.)
-                        // we have to put it definition as undefined by hand.
-                        if (!aSpace.getDefined().containsKey(amdModuleName)) {
-                            aSpace.getDefined().put(amdModuleName, null);
+                        Collection<Scripts.AmdDefine> amdDefines = aSpace.consumeAmdDefines();
+                        Collection<String> amdNames = new HashSet<>();
+                        for (Scripts.AmdDefine amdDefine : amdDefines) {
+                            assert amdDefine.getModuleName() != null : DEFAULT_MODULE_NAME_ASSERT_MSG;
+                            amdNames.add(amdDefine.getModuleName());
+                            final String amdModuleName = amdDefine.getModuleName();
+                            final String[] amdDependencies = amdDefine.getAmdDependencies();
+                            final JSObject amdModuleDefiner = amdDefine.getModuleDefiner();
+                            _require(amdDependencies, null, aSpace, aCyclic);
+                            amdModuleDefiner.call(null, new Object[]{amdModuleName});
+                            // If module is still not defined (buggy definer in script, etc.)
+                            // we have to put it definition as undefined by hand.
+                            if (!aSpace.getDefined().containsKey(amdModuleName)) {
+                                aSpace.getDefined().put(amdModuleName, null);
+                            }
                         }
-                    }
-                    // If module is global or it is a plain *.js file, we have to
-                    // put it as undefined in AMD structure.
-                    if (!amdNames.contains(moduleName)) {
-                        if (!aSpace.getDefined().containsKey(moduleName)) {
-                            aSpace.getDefined().put(moduleName, null);
-                        } else {
-                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "Module {0} is defined multiple times. May be it exists both as AMD module and as a global function", checkedModuleName(moduleName));
+                        // If module is global or it is a plain *.js file, we have to
+                        // put it as undefined in AMD structure.
+                        if (!amdNames.contains(moduleName)) {
+                            if (!aSpace.getDefined().containsKey(moduleName)) {
+                                aSpace.getDefined().put(moduleName, null);
+                            } else {
+                                Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "Module {0} is defined multiple times. May be it exists both as AMD module and as a global function", checkedModuleName(moduleName));
+                            }
                         }
                     }
                 }

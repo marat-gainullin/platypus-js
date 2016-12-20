@@ -10,7 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.ServiceLoader;
 import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -32,15 +32,15 @@ public class SQLUtils {
     public static final String SQL_INSERT_COMMON_ID_FIELD = "insert into %s columns = (%s) values = ( :" + SQL_PARAMETER_FIELD_VALUE + ")";
     public static final String SQL_MAX_COMMON_BY_FIELD = "select max(%s) %s from %s";
     private static final SqlDriver GENERIC_DRIVER = new GenericSqlDriver();
-    private static final Set<SqlDriver> DRIVERS = new ConcurrentSkipListSet<SqlDriver>() {
+    private static final Set<SqlDriver> DRIVERS = new ConcurrentHashMap<SqlDriver, Boolean>() {
         {
             ServiceLoader<SqlDriver> loader = ServiceLoader.load(SqlDriver.class);
             Iterator<SqlDriver> drivers = loader.iterator();
             while (drivers.hasNext()) {
-                DRIVERS.add(drivers.next());
+                put(drivers.next(), true);
             }
         }
-    };
+    }.keySet();
 
     public static String dialectByUrl(String aJdbcUrl) {
         String dialect = null;
