@@ -14,7 +14,24 @@ repositories {
     jcenter()
 }
 
-gwt{
-    gwtVersion = '2.7.0'
+gwt {
+    gwtVersion = "$versionGwt"
     modules 'com.eas.application.Application'
+
+    compiler {
+        strict = true;
+        disableClassMetadata = true;
+        disableCastChecking = true;
+    }
 }
+    
+compileGwt {
+    maxHeapSize='1024M'
+}
+
+task theme(type: Copy) {
+    from "src/main/theme"
+    into "build/gwt/out/pwc"
+}
+
+theme.dependsOn compileGwt
