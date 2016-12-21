@@ -1,0 +1,38 @@
+/* 
+    Created on : 31.12.2013, 13:07:40
+    Author     : mg
+*/
+
+.gridHeaderMover{
+	box-sizing: border-box;
+    position: absolute;
+    top: 0px;
+    height: 100%;
+    left: 0px;
+    right: 0px;
+    /* Prevent the text contents of draggable elements from being selectable. */
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    /* Required to make elements draggable in old WebKit */
+    -khtml-user-drag: element;
+    -webkit-user-drag: element;
+}
+
+.gridHeaderResizer{
+	box-sizing: border-box;
+	position: absolute;
+    top: 0px;
+	height: 100%;
+    width: 5px;
+    right: 0px;
+    /* Prevent the text contents of draggable elements from being selectable. */
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    /* Required to make elements draggable in old WebKit */
+    -khtml-user-drag: element;
+    -webkit-user-drag: element;
+}
