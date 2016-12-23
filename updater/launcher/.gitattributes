@@ -1,4 +1,0 @@
-* -crlf
-update.bat merge=ours
-update.ini merge=ours
-update.sh merge=ours

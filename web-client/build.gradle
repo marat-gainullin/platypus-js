@@ -9,10 +9,7 @@ buildscript {
 
 apply plugin: 'java'
 apply plugin: 'gwt'
-
-repositories {
-    jcenter()
-}
+apply plugin: 'maven'
 
 gwt {
     gwtVersion = "$versionGwt"
@@ -35,3 +32,13 @@ task theme(type: Copy) {
 }
 
 theme.dependsOn compileGwt
+
+task pack(type: Zip) {
+    from 'build/gwt/out/pwc'
+    extension = 'jar'
+    destinationDir = file('build/libs')
+}
+
+pack.dependsOn theme
+
+install.dependsOn pack
