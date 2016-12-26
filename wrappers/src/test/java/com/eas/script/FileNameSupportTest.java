@@ -23,6 +23,8 @@ public class FileNameSupportTest {
         assertEquals(FileNameSupport.getFileName("aSimpleName"), "a-simple-name");
         assertEquals(FileNameSupport.getFileName("aSimpleNameX"), "a-simple-name-x");
         assertEquals(FileNameSupport.getFileName("SimpleNameXY"), "simple-name-xy");
+        assertEquals(FileNameSupport.getFileName("SimpleNameXY-7.8.9"), "simple-name-xy");
+        assertEquals(FileNameSupport.getFileName("SimpleNameXY"), "simple-name-xy");
     }
     
 }

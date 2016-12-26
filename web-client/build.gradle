@@ -35,10 +35,17 @@ theme.dependsOn compileGwt
 
 task pack(type: Zip) {
     from 'build/gwt/out/pwc'
-    extension = 'jar'
     destinationDir = file('build/libs')
 }
 
 pack.dependsOn theme
 
 install.dependsOn pack
+
+artifacts {
+    archives pack
+}
+
+configurations.archives.artifacts.removeAll { 
+    it.archiveTask.is jar
+}

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.script;
 
 import com.eas.client.cache.PlatypusFiles;
@@ -48,7 +43,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class Classes2Scripts {
 
     public static final String CMD_SWITCHS_PREFIX = "-";//NOI18N
-    public static final String CLASS_PATH_CMD_SWITCH = "dirs";//NOI18N
+    public static final String CLASS_PATH_CMD_SWITCH = "source";//NOI18N
     public static final String DESTINATION_DIRECTORY_CMD_SWITCH = "dest";//NOI18N
 
     private static final String JAVA_CLASS_FILE_EXT = ".class";//NOI18N
@@ -157,7 +152,7 @@ public class Classes2Scripts {
     }
 
     private void validate() {
-        if (!destDirectory.exists()) {
+        if (destDirectory == null || !destDirectory.exists()) {
             throw new IllegalArgumentException("Destination directory does not exists: " + destDirectory);
         }
 

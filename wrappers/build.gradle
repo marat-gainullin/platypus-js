@@ -2,22 +2,60 @@ apply plugin: 'application'
 
 dependencies {
     compile project(':common-utils')
-    compile project(':binary-tags')
-    compile project(':calendar-widget')
-    compile project(':grid-widget')
-    compile project(':scalable-widget')
     compile project(':core')
-    compile project(':datamodel')
     compile project(':forms')
-    compile project(':reports')
-    compile project(':routing')
-    compile project(':scripting')
-    compile project(':server')
-    compile project(':servlet')
-    compile project(':tools')
+    runtime project(':binary-tags')
+    runtime project(':calendar-widget')
+    runtime project(':grid')
+    runtime project(':scalable-widget')
+    runtime project(':datamodel')
+    runtime project(':reports')
+    runtime project(':routing')
+    runtime project(':scripting')
+    runtime project(':server')
+    runtime project(':servlet')
+    runtime project(':tools')
+    runtime 'javax.servlet:javax.servlet-api:3.1.0'
+    runtime 'javax.websocket:javax.websocket-api:1.1'
 }
 
-startScripts {
-    mainClassName = 'com.eas.scripts.Classes2Scripts'
+mainClassName = 'com.eas.script.Classes2Scripts'
+
+run.dependsOn installDist
+
+run {
+    def source = file("build/install/wrappers/lib");
+    def dest = file("build/wrappers");
+    doFirst {
+        dest.mkdirs()
+    }
+    args = ['-source', source.absolutePath, '-dest', dest.absolutePath]
 }
-    
+
+task copyApi(type: Copy){
+    from 'src/main/api'
+    into 'build/wrappers'
+}
+
+task pack(type: Zip) {
+    from 'build/wrappers'
+    destinationDir = file('build/libs')
+}
+
+pack.dependsOn run
+pack.dependsOn copyApi
+install.dependsOn pack
+
+artifacts {
+    archives pack
+}
+
+configurations.archives.artifacts.removeAll { 
+    it.archiveTask.is jar
+}
+configurations.archives.artifacts.removeAll { 
+    it.archiveTask.is distTar
+}
+configurations.archives.artifacts.removeAll { 
+    it.archiveTask.is distZip
+}

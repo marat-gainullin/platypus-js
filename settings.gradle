@@ -1,7 +1,7 @@
 include 'common-utils'
 include 'binary-tags'
 include 'calendar-widget'
-include 'grid-widget'
+include 'grid'
 include 'map-widget'
 include 'scalable-widget'
 include 'launcher'
