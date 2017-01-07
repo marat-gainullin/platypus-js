@@ -29,7 +29,7 @@ run {
     doFirst {
         dest.mkdirs()
     }
-    args = ['-source', source.absolutePath, '-dest', dest.absolutePath]
+    args '-source', source.absolutePath, '-dest', dest.absolutePath
 }
 
 task copyApi(type: Copy){
