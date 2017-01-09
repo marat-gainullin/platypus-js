@@ -1,0 +1,5 @@
+dependencies {
+    compile 'org.apache.mina:mina-core:2.0.16'
+    compile project(':platypus-js-common-utils')
+    compile project(':platypus-js-binary-tags')
+}

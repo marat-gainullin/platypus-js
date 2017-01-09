@@ -1,5 +1,0 @@
-dependencies {
-    compile 'org.apache.mina:mina-core:2.0.16'
-    compile project(':common-utils')
-    compile project(':binary-tags')
-}

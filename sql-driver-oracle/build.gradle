@@ -1,8 +1,0 @@
-dependencies {
-    compileOnly 'com.hynnet:oracle-driver-ojdbc6:12.1.0.1'
-    compile 'org.geotools.jdbc:gt-jdbc-oracle:16.0'
-    compile 'com.vividsolutions:jts:1.13'
-    compile project(':common-utils')
-    compile project(':core')
-    compile project(':datamodel')
-}
