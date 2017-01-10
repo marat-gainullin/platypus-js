@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<outputFields>
+        <field description="Идентификатор заказа" index="0"/>
+        <field description="Количество товара" index="5"/>
+</outputFields>

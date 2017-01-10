@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="20" entityLocationY="27" entityWidth="150"/>
+  <entity Name="appElements2" Title="Элементы приложения по родителю" entityHeight="200" entityIconified="false" entityId="137948121744500" entityLocationX="75" entityLocationY="316" entityWidth="150" queryId="_24832514140608864" tableName="" tableSchemaName=""/>
+  <entity Name="appElements1" Title="Элементы приложения по родителю" entityHeight="200" entityIconified="false" entityId="137948123229611" entityLocationX="254" entityLocationY="30" entityWidth="150" queryId="_24832514140608864" tableName="" tableSchemaName=""/>
+  <entity Name="appElements3" Title="Элементы приложения по родителю" entityHeight="200" entityIconified="false" entityId="137948121289087" entityLocationX="456" entityLocationY="263" entityWidth="150" queryId="_24832514140608864" tableName="" tableSchemaName=""/>
+  <referenceRelation collectionPropertyName="children" leftEntityFieldName="MDENT_PARENT_ID" leftEntityId="137948121744500" rightEntityFieldName="MDENT_ID" rightEntityId="137948121744500" scalarPropertyName="parent"/>
+  <referenceRelation leftEntityFieldName="MDENT_PARENT_ID" leftEntityId="137948123229611" rightEntityFieldName="MDENT_ID" rightEntityId="137948121744500"/>
+  <referenceRelation collectionPropertyName="children" leftEntityFieldName="MDENT_PARENT_ID" leftEntityId="137948121289087" rightEntityFieldName="MDENT_ID" rightEntityId="137948121289087" scalarPropertyName="parent"/>
+  <referenceRelation collectionPropertyName="children" leftEntityFieldName="MDENT_PARENT_ID" leftEntityId="137948123229611" rightEntityFieldName="MDENT_ID" rightEntityId="137948123229611" scalarPropertyName="parent"/>
+  <referenceRelation leftEntityFieldName="MDENT_PARENT_ID" leftEntityId="137948121289087" rightEntityFieldName="MDENT_ID" rightEntityId="137948121744500"/>
+  <referenceRelation leftEntityFieldName="MDENT_PARENT_ID" leftEntityId="137948123229611" rightEntityFieldName="MDENT_ID" rightEntityId="137948121289087"/>
+  <referenceRelation leftEntityFieldName="MDENT_PARENT_ID" leftEntityId="137948121744500" rightEntityFieldName="MDENT_ID" rightEntityId="137948121289087"/>
+  <referenceRelation leftEntityFieldName="MDENT_PARENT_ID" leftEntityId="137948121289087" rightEntityFieldName="MDENT_ID" rightEntityId="137948123229611"/>
+  <referenceRelation leftEntityFieldName="MDENT_PARENT_ID" leftEntityId="137948121744500" rightEntityFieldName="MDENT_ID" rightEntityId="137948123229611"/>
+</datamodel>

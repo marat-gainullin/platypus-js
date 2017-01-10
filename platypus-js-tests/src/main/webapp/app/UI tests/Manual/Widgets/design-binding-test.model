@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <parameters>
+    <parameter description="" name="svalue" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="nvalue" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="2" typeName="NUMERIC"/>
+    <parameter description="" name="dvalue" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="91" typeName="DATE"/>
+    <parameter description="" name="dirValue" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="300" type="12" typeName="VARCHAR"/>
+  </parameters>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="12" entityLocationY="12" entityWidth="150"/>
+  <entity Name="appElements" Title="" entityHeight="200" entityIconified="false" entityId="140410667793902" entityLocationX="262" entityLocationY="72" entityWidth="150" queryId="_24832514140608864" tableName="" tableSchemaName=""/>
+  <referenceRelation collectionPropertyName="children" leftEntityFieldName="MDENT_PARENT_ID" leftEntityId="140410667793902" rightEntityFieldName="MDENT_ID" rightEntityId="140410667793902" scalarPropertyName="parent"/>
+</datamodel>

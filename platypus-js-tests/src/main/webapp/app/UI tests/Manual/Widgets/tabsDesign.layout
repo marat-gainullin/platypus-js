@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><layout defaultCloseOperation="2" name="Form" prefHeight="300px" prefWidth="400px">
+  <widget name="tabbedPane" parent="Form" prefHeight="252px" prefWidth="396px" type="TabsDesignInfo">
+    <constraints bottom="0px" left="0px" right="4px" top="48px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <widget name="panel" parent="tabbedPane" prefHeight="224px" prefWidth="391px" type="PanelDesignInfo">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints tabIcon="http://favicon.yandex.net/favicon/rm.tvigle.ru" tabTitle="tab0" tabTooltipText="Первая закладка" type="TabsConstraintsDesignInfo"/>
+  </widget>
+  <widget name="label" parent="panel" prefHeight="14px" prefWidth="108px" text="label" type="LabelDesignInfo">
+    <constraints height="14px" left="72px" top="96px" type="MarginConstraintsDesignInfo" width="108px"/>
+  </widget>
+  <widget name="panel1" parent="tabbedPane" prefHeight="224px" prefWidth="391px" type="PanelDesignInfo" visible="false">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints tabTitle="tab1" type="TabsConstraintsDesignInfo"/>
+  </widget>
+  <widget name="label1" parent="panel1" prefHeight="14px" prefWidth="100px" text="label1" type="LabelDesignInfo">
+    <constraints height="14px" left="72px" top="96px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="panel2" parent="tabbedPane" prefHeight="224px" prefWidth="391px" type="PanelDesignInfo" visible="false">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints tabTitle="tab2" type="TabsConstraintsDesignInfo"/>
+  </widget>
+  <widget name="label2" parent="panel2" prefHeight="14px" prefWidth="124px" text="label2" type="LabelDesignInfo">
+    <constraints height="14px" left="60px" top="96px" type="MarginConstraintsDesignInfo" width="124px"/>
+  </widget>
+  <widget name="menuBar" parent="Form" prefHeight="25px" prefWidth="396px" type="MenubarDesignInfo">
+    <constraints height="25px" left="0px" right="4px" top="0px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <widget name="mnuFile" parent="menuBar" prefHeight="23px" prefWidth="37px" text="Файл" type="MenuDesignInfo"/>
+  <widget name="menuItem" parent="mnuFile" prefHeight="22px" prefWidth="185px" text="menuItem" type="MenuItemDesignInfo"/>
+  <widget name="JSeparator" parent="mnuFile" prefHeight="9px" prefWidth="185px" type="MenuSeparatorDesignInfo"/>
+  <widget name="menuItem1" parent="mnuFile" prefHeight="22px" prefWidth="185px" text="menuItem1" type="MenuItemDesignInfo"/>
+  <widget name="mnuEdit" parent="menuBar" prefHeight="23px" prefWidth="97px" text="Редактирование" type="MenuDesignInfo"/>
+  <widget name="menuItem2" parent="mnuEdit" prefHeight="22px" prefWidth="189px" text="menuItem2" type="MenuItemDesignInfo"/>
+  <widget name="menu" parent="mnuEdit" prefHeight="22px" prefWidth="189px" text="menu" type="MenuDesignInfo"/>
+  <widget name="menuItem5" parent="menu" prefHeight="22px" prefWidth="209px" text="menuItem5" type="MenuItemDesignInfo"/>
+  <widget name="radioMenuItem" parent="menu" prefHeight="22px" prefWidth="209px" selected="true" text="radioMenuItem" type="MenuRadioItemDesignInfo"/>
+  <widget name="checkMenuItem" parent="menu" prefHeight="22px" prefWidth="209px" selected="true" text="checkMenuItem" type="MenuCheckItemDesignInfo"/>
+  <widget name="menuItem4" parent="menu" prefHeight="22px" prefWidth="209px" text="menuItem4" type="MenuItemDesignInfo"/>
+  <widget name="menuItem3" parent="mnuEdit" prefHeight="22px" prefWidth="189px" text="menuItem3" type="MenuItemDesignInfo"/>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

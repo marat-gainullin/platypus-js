@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout defaultCloseOperation="2" name="Form" prefHeight="315px" prefWidth="485px">
+  <widget componentRemoved="dbGrid1ComponentRemoved" componentResized="dbGrid1ComponentResized" name="dbGrid1" parent="Form" prefHeight="220px" prefWidth="485px" type="DbGridDesignInfo">
+    <rowsColumnsDesignInfo generalRowFunction="dbGrid1OnRender" rowsHeaderType="2">
+      <rowsDatasource entityId="134174204786703" field="false"/>
+    </rowsColumnsDesignInfo>
+    <treeDesignInfo>
+      <unaryLinkField/>
+      <param2GetChildren/>
+      <paramSourceField/>
+    </treeDesignInfo>
+    <column name="ORDER_ID" title="Id заказа">
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="134174204786703" fieldName="ORDER_ID"/>
+      <columnsDisplayField/>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+    </column>
+    <column name="AMOUNT" selectFunction="AMOUNTSelectValue" title="Количество товара">
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="134174204786703" fieldName="AMOUNT"/>
+      <columnsDisplayField/>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+    </column>
+    <column cellFunction="GOODOnRender" name="GOOD" title="Заказанный товар">
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="134174204786703" fieldName="GOOD"/>
+      <columnsDisplayField/>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+    </column>
+    <column name="CUSTOMER" selectFunction="dbCombo1SelectValue" title="Заказчик">
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="134174204786703" fieldName="CUSTOMER"/>
+      <columnsDisplayField/>
+      <controlInfo classHint="DbComboDesignInfo" name="view" prefHeight="0px" prefWidth="0px">
+        <valueField entityId="134174205006299" fieldName="CUSTOMER_ID"/>
+        <displayField entityId="134174205006299" fieldName="CUSTOMER_NAME"/>
+      </controlInfo>
+    </column>
+    <column name="GOOD_ID" title="Id товара">
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="134174204786703" fieldName="GOOD_ID"/>
+      <columnsDisplayField/>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+    </column>
+    <column name="GOOD_NAME" title="Наименование товара">
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="134174204786703" fieldName="GOOD_NAME"/>
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+    </column>
+    <column cellFunction="fake1OnRender" name="fake1">
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+    </column>
+    <constraints bottom="35px" left="0px" right="0px" top="60px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <widget backgroundColor="#f0f0f0" foregroundColor="#000000" handleFunction="dbCombo1OnRender" name="dbCombo1" parent="Form" prefHeight="20px" prefWidth="460px" selectFunction="dbCombo1SelectValue" type="DbComboDesignInfo">
+    <valueField entityId="134174205006299" fieldName="CUSTOMER_ID"/>
+    <displayField entityId="134174205006299" fieldName="CUSTOMER_NAME"/>
+    <datamodelElement entityId="134174204786703" fieldName="CUSTOMER"/>
+    <constraints bottom="5px" height="20px" left="0px" type="MarginConstraintsDesignInfo" width="460px"/>
+  </widget>
+  <widget name="jPanel1" opaque="false" parent="Form" prefHeight="60px" prefWidth="485px" type="PanelDesignInfo">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints height="60px" left="0px" right="0px" top="0px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <widget icon="hard-hat.png" name="jLabel1" parent="jPanel1" prefHeight="20px" prefWidth="133px" text="jLabel1" type="LabelDesignInfo">
+    <constraints height="20px" left="0px" right="352px" top="0px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <widget actionPerformed="btnSelectActionPerformed" name="btnSelect" parent="jPanel1" prefHeight="23px" prefWidth="73px" text="Select" type="ButtonDesignInfo">
+    <constraints height="23px" left="120px" top="0px" type="MarginConstraintsDesignInfo" width="73px"/>
+  </widget>
+  <widget actionPerformed="btnUnselectActionPerformed" name="btnUnselect" parent="jPanel1" prefHeight="23px" prefWidth="73px" text="Unselect" type="ButtonDesignInfo">
+    <constraints height="23px" left="210px" top="0px" type="MarginConstraintsDesignInfo" width="73px"/>
+  </widget>
+  <widget actionPerformed="btnClearSelectionActionPerformed" name="btnClearSelection" parent="jPanel1" prefHeight="23px" prefWidth="130px" text="Clear selection" type="ButtonDesignInfo">
+    <constraints height="23px" left="300px" top="0px" type="MarginConstraintsDesignInfo" width="130px"/>
+  </widget>
+  <widget actionPerformed="btnShowComboValueActionPerformed" name="btnShowComboValue" parent="jPanel1" prefHeight="23px" prefWidth="140px" text="dbCombo1.value" type="ButtonDesignInfo">
+    <constraints height="23px" left="120px" top="30px" type="MarginConstraintsDesignInfo" width="140px"/>
+  </widget>
+  <widget actionPerformed="btnSetFormTitleActionPerformed" name="btnSetFormTitle" parent="jPanel1" prefHeight="23px" prefWidth="130px" text="Set _ form _ title" type="ButtonDesignInfo">
+    <constraints height="23px" left="300px" top="30px" type="MarginConstraintsDesignInfo" width="130px"/>
+  </widget>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

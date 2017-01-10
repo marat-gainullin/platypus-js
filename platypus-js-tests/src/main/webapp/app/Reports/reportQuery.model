@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datamodel>
+<parameters>
+<parameter description="" name="idValue" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="2" typeName="NUMERIC"/>
+</parameters>
+<parametersEntity entityHeight="200" entityIconified="false" entityLocationX="8" entityLocationY="7" entityWidth="150"/>
+<entity Title="Измеряемые величины" entityHeight="200" entityIconified="false" entityId="136369011559336" entityLocationX="176" entityLocationY="6" entityWidth="150" tableAlias="t1" tableName="MEASURANDS" tableSchemaName=""/>
+<relation leftEntityFieldName="idValue" leftEntityId="-1" rightEntityFieldName="ID" rightEntityId="136369011559336"/>
+</datamodel>

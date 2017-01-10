@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><layout defaultCloseOperation="2" name="Form" prefHeight="754px" prefWidth="467px">
+  <widget name="label" parent="Form" prefHeight="36px" prefWidth="72px" text="label" type="LabelDesignInfo">
+    <constraints height="36px" left="12px" top="48px" type="MarginConstraintsDesignInfo" width="72px"/>
+  </widget>
+  <widget name="button" parent="Form" prefHeight="23px" prefWidth="65px" text="button" type="ButtonDesignInfo">
+    <constraints height="23px" left="108px" top="48px" type="MarginConstraintsDesignInfo" width="65px"/>
+  </widget>
+  <widget name="toggleButton" parent="Form" prefHeight="23px" prefWidth="95px" text="toggleButton" type="ToggleButtonDesignInfo">
+    <constraints height="23px" left="192px" top="48px" type="MarginConstraintsDesignInfo" width="95px"/>
+  </widget>
+  <widget name="dropDownButton" parent="Form" prefHeight="23px" prefWidth="124px" text="dropDownButton" type="DropDownButtonDesignInfo">
+    <constraints height="23px" left="300px" top="48px" type="MarginConstraintsDesignInfo" width="124px"/>
+  </widget>
+  <widget name="checkBox" parent="Form" prefHeight="23px" prefWidth="71px" text="checkBox" type="CheckDesignInfo">
+    <constraints height="23px" left="0px" top="96px" type="MarginConstraintsDesignInfo" width="71px"/>
+  </widget>
+  <widget name="radioButton" parent="Form" prefHeight="23px" prefWidth="81px" text="radioButton" type="RadioDesignInfo">
+    <constraints height="23px" left="108px" top="96px" type="MarginConstraintsDesignInfo" width="81px"/>
+  </widget>
+  <widget name="textField" parent="Form" prefHeight="20px" prefWidth="84px" text="textField" type="TextFieldDesignInfo">
+    <constraints height="20px" left="204px" top="96px" type="MarginConstraintsDesignInfo" width="84px"/>
+  </widget>
+  <widget name="slider" parent="Form" prefHeight="23px" prefWidth="200px" type="SliderDesignInfo">
+    <constraints height="23px" left="0px" top="132px" type="MarginConstraintsDesignInfo" width="200px"/>
+  </widget>
+  <widget name="progressBar" parent="Form" prefHeight="14px" prefWidth="146px" type="ProgressBarDesignInfo">
+    <constraints height="14px" left="216px" top="132px" type="MarginConstraintsDesignInfo" width="146px"/>
+  </widget>
+  <widget name="formattedField" parent="Form" prefHeight="20px" prefWidth="76px" text="formattedField" type="FormattedFieldDesignInfo">
+    <constraints height="20px" left="0px" top="180px" type="MarginConstraintsDesignInfo" width="76px"/>
+  </widget>
+  <widget name="passwordField" parent="Form" prefHeight="20px" prefWidth="97px" text="passwordField" type="PasswordFieldDesignInfo">
+    <constraints height="20px" left="108px" top="180px" type="MarginConstraintsDesignInfo" width="97px"/>
+  </widget>
+  <widget name="scrollPane" parent="Form" prefHeight="100px" prefWidth="100px" type="ScrollDesignInfo">
+    <constraints height="100px" left="228px" top="168px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="textArea" parent="scrollPane" prefHeight="98px" prefWidth="98px" type="TextPaneDesignInfo"/>
+  <widget name="scrollPane1" parent="Form" prefHeight="100px" prefWidth="100px" type="ScrollDesignInfo">
+    <constraints height="100px" right="19px" top="168px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="htmlArea" parent="scrollPane1" prefHeight="98px" prefWidth="98px" text="    &lt;p style=&quot;margin-top: 0&quot;&gt;&#13;&#10;      &#13;&#10;    &lt;/p&gt;&#13;&#10;" type="EditorPaneDesignInfo"/>
+  <widget name="modelCheckBox" parent="Form" prefHeight="20px" prefWidth="100px" type="DbCheckDesignInfo">
+    <constraints height="20px" left="12px" top="300px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="modelCombo" parent="Form" prefHeight="20px" prefWidth="100px" type="DbComboDesignInfo">
+    <constraints height="20px" left="132px" top="300px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="modelDate" parent="Form" prefHeight="20px" prefWidth="100px" type="DbDateDesignInfo">
+    <constraints height="20px" left="252px" top="300px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="modelGrid" parent="Form" prefHeight="100px" prefWidth="100px" type="DbGridDesignInfo">
+    <rowsColumnsDesignInfo>
+      <rowsDatasource/>
+    </rowsColumnsDesignInfo>
+    <treeDesignInfo/>
+    <constraints height="100px" left="0px" top="348px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="modelFormattedField" parent="Form" prefHeight="20px" prefWidth="100px" type="DbLabelDesignInfo">
+    <constraints height="20px" left="132px" top="348px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="modelSpin" parent="Form" prefHeight="20px" prefWidth="100px" type="DbSpinDesignInfo">
+    <constraints height="20px" left="252px" top="348px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="modelTextArea" parent="Form" prefHeight="60px" prefWidth="100px" type="DbTextDesignInfo">
+    <constraints height="60px" left="132px" top="384px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="panel" parent="Form" prefHeight="100px" prefWidth="100px" type="PanelDesignInfo">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints height="100px" left="0px" top="471px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="tabbedPane" parent="Form" prefHeight="100px" prefWidth="100px" type="TabsDesignInfo">
+    <constraints height="100px" left="132px" top="471px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="splitPane" parent="Form" prefHeight="100px" prefWidth="100px" type="SplitDesignInfo">
+    <constraints height="100px" left="300px" top="471px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="scrollPane2" parent="Form" prefHeight="100px" prefWidth="100px" type="ScrollDesignInfo">
+    <constraints bottom="51px" height="100px" left="0px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="toolBar" parent="Form" prefHeight="25px" prefWidth="100px" rollover="true" type="ToolbarDesignInfo">
+    <constraints bottom="126px" height="25px" left="132px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="desktopPane" parent="Form" prefHeight="100px" prefWidth="100px" type="DesktopDesignInfo">
+    <constraints bottom="51px" height="100px" left="300px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="menuBar" parent="Form" prefHeight="25px" prefWidth="100px" type="MenubarDesignInfo">
+    <constraints height="25px" left="0px" top="0px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="mnuFile" parent="menuBar" prefHeight="23px" prefWidth="27px" text="Файл" type="MenuDesignInfo"/>
+  <widget name="menuItem" parent="mnuFile" prefHeight="22px" prefWidth="209px" text="menuItem" type="MenuItemDesignInfo"/>
+  <widget name="radioMenuItem" parent="mnuFile" prefHeight="22px" prefWidth="209px" selected="true" text="radioMenuItem" type="MenuRadioItemDesignInfo"/>
+  <widget name="checkMenuItem" parent="mnuFile" prefHeight="22px" prefWidth="209px" selected="true" text="checkMenuItem" type="MenuCheckItemDesignInfo"/>
+  <widget name="mnuEdit" parent="menuBar" prefHeight="23px" prefWidth="72px" text="Редактирование" type="MenuDesignInfo"/>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

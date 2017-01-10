@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <entity Name="ambigousChanges" Title="ambigousChanges @writable" entityHeight="139" entityIconified="false" entityId="141458858497988" entityLocationX="211" entityLocationY="28" entityWidth="200" queryId="test.ambigous.changes.mutatable" tableName="" tableSchemaName=""/>
+</datamodel>

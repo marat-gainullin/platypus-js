@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><layout icon="" title="" view="view">
+  <AnchorsPane cursor="0" name="view" prefHeight="64px" prefWidth="308px"/>
+  <Label cursor="0" horizontalAlignment="10" name="label" parent="view" prefHeight="24px" prefWidth="84px" text="You Name">
+    <AnchorsPaneConstraints height="24px" left="84px" top="0px" width="84px"/>
+  </Label>
+  <TextField cursor="0" name="txtName" parent="view" prefHeight="27px" prefWidth="216px">
+    <AnchorsPaneConstraints height="27px" left="12px" top="24px" width="216px"/>
+  </TextField>
+  <Button cursor="0" name="btnOk" parent="view" prefHeight="29px" prefWidth="60px" text="Ok">
+    <AnchorsPaneConstraints height="29px" right="8px" top="24px" width="60px"/>
+  </Button>
+</layout>

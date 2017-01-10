@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout defaultCloseOperation="2" name="Form" prefHeight="456px" prefWidth="400px" windowOpened="formWindowOpened">
+  <widget name="button" parent="Form" prefHeight="23px" prefWidth="65px" text="button" type="ButtonDesignInfo">
+    <constraints height="23px" left="24px" top="12px" type="MarginConstraintsDesignInfo" width="65px"/>
+  </widget>
+  <widget name="toggleButton" parent="Form" prefHeight="23px" prefWidth="95px" text="toggleButton" type="ToggleButtonDesignInfo">
+    <constraints height="23px" left="96px" top="12px" type="MarginConstraintsDesignInfo" width="95px"/>
+  </widget>
+  <widget name="dropDownButton" parent="Form" prefHeight="23px" prefWidth="124px" text="dropDownButton" type="DropDownButtonDesignInfo">
+    <constraints height="23px" left="204px" top="12px" type="MarginConstraintsDesignInfo" width="124px"/>
+  </widget>
+  <widget name="checkBox" parent="Form" prefHeight="23px" prefWidth="71px" text="checkBox" type="CheckDesignInfo">
+    <constraints height="23px" left="24px" top="48px" type="MarginConstraintsDesignInfo" width="71px"/>
+  </widget>
+  <widget name="radioButton" parent="Form" prefHeight="23px" prefWidth="81px" text="radioButton" type="RadioDesignInfo">
+    <constraints height="23px" left="108px" top="48px" type="MarginConstraintsDesignInfo" width="81px"/>
+  </widget>
+  <widget backgroundColor="#cccccc" name="textField" parent="Form" prefHeight="20px" prefWidth="48px" text="textField" type="TextFieldDesignInfo">
+    <constraints height="20px" left="204px" top="48px" type="MarginConstraintsDesignInfo" width="48px"/>
+  </widget>
+  <widget name="formattedField" parent="Form" prefHeight="20px" prefWidth="76px" text="formattedField" type="FormattedFieldDesignInfo">
+    <constraints height="20px" left="264px" top="48px" type="MarginConstraintsDesignInfo" width="76px"/>
+  </widget>
+  <widget name="passwordField" parent="Form" prefHeight="20px" prefWidth="97px" text="passwordField" type="PasswordFieldDesignInfo">
+    <constraints height="20px" left="24px" top="84px" type="MarginConstraintsDesignInfo" width="97px"/>
+  </widget>
+  <widget name="scrollPane" parent="Form" prefHeight="96px" prefWidth="100px" type="ScrollDesignInfo">
+    <constraints height="96px" left="144px" top="84px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="textArea" parent="scrollPane" prefHeight="94px" prefWidth="98px" type="TextPaneDesignInfo"/>
+  <widget name="scrollPane1" parent="Form" prefHeight="100px" prefWidth="100px" type="ScrollDesignInfo">
+    <constraints height="100px" left="264px" top="84px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="htmlArea" parent="scrollPane1" prefHeight="98px" prefWidth="98px" text="    &#13;&#10;" type="EditorPaneDesignInfo"/>
+  <widget name="modelCheckBox" parent="Form" prefHeight="20px" prefWidth="100px" type="DbCheckDesignInfo">
+    <datamodelElement entityId="-1" fieldName="Param1"/>
+    <constraints height="20px" left="12px" top="216px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="modelCombo" parent="Form" prefHeight="20px" prefWidth="100px" type="DbComboDesignInfo">
+    <datamodelElement entityId="-1" fieldName="Param3"/>
+    <constraints height="20px" left="132px" top="216px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget dateFormat="dd.MM.yyyy" name="modelDate" parent="Form" prefHeight="20px" prefWidth="100px" type="DbDateDesignInfo">
+    <datamodelElement entityId="-1" fieldName="Param2"/>
+    <constraints height="20px" left="252px" top="216px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="modelImage" parent="Form" prefHeight="20px" prefWidth="100px" type="DbImageDesignInfo">
+    <datamodelElement entityId="-1" fieldName="Param1"/>
+    <constraints height="20px" left="12px" top="276px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget backgroundColor="#ccccff" name="modelFormattedField" parent="Form" prefHeight="20px" prefWidth="100px" selectFunction="modelFormattedFieldOnSelect" type="DbLabelDesignInfo">
+    <datamodelElement entityId="-1" fieldName="Param1"/>
+    <constraints height="20px" left="132px" top="276px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="modelSpin" parent="Form" prefHeight="20px" prefWidth="100px" type="DbSpinDesignInfo">
+    <datamodelElement entityId="-1" fieldName="Param3"/>
+    <constraints height="20px" left="252px" right="48px" top="264px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <widget name="modelTextArea" parent="Form" prefHeight="96px" prefWidth="100px" type="DbTextDesignInfo">
+    <datamodelElement entityId="-1" fieldName="Param1"/>
+    <constraints bottom="48px" height="96px" left="252px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget actionPerformed="button1ActionPerformed" name="button1" parent="Form" prefHeight="23px" prefWidth="96px" text="clear error" type="ButtonDesignInfo">
+    <constraints bottom="37px" height="23px" left="132px" type="MarginConstraintsDesignInfo" width="96px"/>
+  </widget>
+  <widget actionPerformed="button2ActionPerformed" name="button2" parent="Form" prefHeight="23px" prefWidth="108px" text="set error" type="ButtonDesignInfo">
+    <constraints bottom="37px" height="23px" left="12px" type="MarginConstraintsDesignInfo" width="108px"/>
+  </widget>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

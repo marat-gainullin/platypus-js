@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datamodel>
+  <parameters>
+    <parameter description="" name="Param1" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="Param2" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="Param3" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="Param4" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="Param5" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="Param6" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="Param7" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+  </parameters>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="12" entityLocationY="12" entityWidth="150"/>
+  <entity Name="" Title="Единицы измерения" entityHeight="200" entityIconified="false" entityId="134123372648433" entityLocationX="176" entityLocationY="6" entityWidth="150" queryId="128032313214099" tableName="" tableSchemaName=""/>
+</datamodel>

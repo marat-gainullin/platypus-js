@@ -38,43 +38,31 @@ public class StoredQueryFactoryTest {
     public static void setUpClass() throws Exception {
         String url = System.getProperty(TestConstants.DATASOURCE_URL_1);
         if (url == null) {
-            System.err.println(TestConstants.DATASOURCE_URL_1 + TestConstants.PROPERTY_ERROR);
-            System.exit(1);
+            throw new IllegalStateException(TestConstants.DATASOURCE_URL_1 + TestConstants.PROPERTY_ERROR);
         }
         String user = System.getProperty(TestConstants.DATASOURCE_USER_1);
         if (user == null) {
-            System.err.println(TestConstants.DATASOURCE_USER_1 + TestConstants.PROPERTY_ERROR);
-            System.exit(1);
+            throw new IllegalStateException(TestConstants.DATASOURCE_USER_1 + TestConstants.PROPERTY_ERROR);
         }
         String passwd = System.getProperty(TestConstants.DATASOURCE_PASSWORD_1);
         if (passwd == null) {
-            System.err.println(TestConstants.DATASOURCE_PASSWORD_1 + TestConstants.PROPERTY_ERROR);
-            System.exit(1);
+            throw new IllegalStateException(TestConstants.DATASOURCE_PASSWORD_1 + TestConstants.PROPERTY_ERROR);
         }
         String schema = System.getProperty(TestConstants.DATASOURCE_SCHEMA_1);
         if (schema == null) {
-            System.err.println(TestConstants.DATASOURCE_SCHEMA_1 + TestConstants.PROPERTY_ERROR);
-            System.exit(1);
+            throw new IllegalStateException(TestConstants.DATASOURCE_SCHEMA_1 + TestConstants.PROPERTY_ERROR);
         }
         String sourceURL = System.getProperty(TestConstants.TEST_SOURCE_URL);
         if (sourceURL == null) {
-            System.err.println(TestConstants.TEST_SOURCE_URL + TestConstants.PROPERTY_ERROR);
-            System.exit(1);
+            throw new IllegalStateException(TestConstants.TEST_SOURCE_URL + TestConstants.PROPERTY_ERROR);
         }
-//        indexer = new ApplicationSourceIndexer(Paths.get("c:/projects/PlatypusTests/app"), Paths.get("c:/projects/PlatypusTests/WEB-INF/classes"), new ScriptsConfigs());
         URI uri = new URI(sourceURL);
         URI classesUri = new URI(sourceURL+ "WEB-INF/classes");
         indexer = new ApplicationSourceIndexer(Paths.get(uri), Paths.get(classesUri), new ScriptsConfigs());
-//       indexer = new ApplicationSourceIndexer(Paths.get(System.getProperty(KEY_TESTS_PATH) ), Paths.get(KEY_TESTS_PATH+"/WEB-INF/classes"), new ScriptsConfigs());
         DbConnectionSettings settings = new DbConnectionSettings();
-//        settings.setUrl("jdbc:oracle:thin:@asvr/adb");
         settings.setUrl(url);
-//        settings.setUrl(KEY_DB_URL);
         settings.setUser(user);
-//        settings.setUser(KEY_USER);
         settings.setPassword(passwd);
-//        settings.setPassword(KEY_PASSWORD);
-//        settings.setSchema(KEY_SCHEMA);
         settings.setSchema(schema);
         settings.setMaxConnections(1);
         settings.setMaxStatements(1);

@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout name="Form" prefHeight="311px" prefWidth="536px">
+  <widget name="lblNorth" parent="Form" prefHeight="44px" prefWidth="536px" text="jLabel1" type="LabelDesignInfo">
+    <constraints place="North" type="BorderLayoutConstraintsDesignInfo"/>
+    <easFont name="Tahoma" size="36"/>
+  </widget>
+  <widget deletable="false" insertable="false" name="dbGrid1" parent="Form" prefHeight="267px" prefWidth="536px" rowsHeight="15" showHorizontalLines="false" showOddRowsInOtherColor="false" showVerticalLines="false" type="DbGridDesignInfo">
+    <rowsColumnsDesignInfo rowsHeaderType="3">
+      <rowsDatasource entityId="134123372648433" field="false"/>
+    </rowsColumnsDesignInfo>
+    <treeDesignInfo>
+      <unaryLinkField/>
+      <param2GetChildren/>
+      <paramSourceField/>
+    </treeDesignInfo>
+    <column name="column" title="Группа 0">
+      <column name="ID" visible="false">
+        <columnsDatasource/>
+        <cellsDatasource/>
+        <cellDesignInfo>
+          <rowsKeyField/>
+          <columnsKeyField/>
+          <cellValueField/>
+        </cellDesignInfo>
+        <headerStyle>
+          <nativeFont name="Tahoma" size="11"/>
+        </headerStyle>
+        <datamodelElement entityId="134123372648433" fieldName="ID"/>
+        <columnsDisplayField/>
+        <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      </column>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+    </column>
+    <column name="column1" title="Группа 1">
+      <column name="NAME" readonly="true" title="Наим&lt;b&gt;енов&lt;/b&gt;ание" width="150">
+        <columnsDatasource/>
+        <cellsDatasource/>
+        <cellDesignInfo>
+          <rowsKeyField/>
+          <columnsKeyField/>
+          <cellValueField/>
+        </cellDesignInfo>
+        <headerStyle>
+          <nativeFont name="Tahoma" size="11"/>
+        </headerStyle>
+        <datamodelElement entityId="134123372648433" fieldName="NAME"/>
+        <columnsDisplayField/>
+        <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      </column>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+    </column>
+    <column cellFunction="MEASURANDHandleCell" name="MEASURAND" selectFunction="MEASURANDSelectValue" title="Измеряемая величина">
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="134123372648433" fieldName="MEASURAND"/>
+      <columnsDisplayField/>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+    </column>
+    <column cellFunction="FOUNDATIONHandleCell" name="FOUNDATION" selectFunction="FOUNDATIONSelectValue">
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="134123372648433" fieldName="FOUNDATION"/>
+      <columnsDisplayField/>
+      <controlInfo classHint="DbDateDesignInfo" dateFormat="dd.MM.yyyy" name="view" prefHeight="0px" prefWidth="0px"/>
+    </column>
+    <column cellFunction="SYMBOL_RUSHandleCell" name="SYMBOL_RUS" selectFunction="SYMBOL_RUSSelectValue" title="Обозначение(рус.)">
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="134123372648433" fieldName="SYMBOL_RUS"/>
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+    </column>
+    <column name="SYMBOL_INT" title="Обозначение(межд.)">
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="134123372648433" fieldName="SYMBOL_INT"/>
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+    </column>
+    <column name="ISBASIC" title="Основная">
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="134123372648433" fieldName="ISBASIC"/>
+      <columnsDisplayField/>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+    </column>
+    <column name="SI" readonly="true" title="СИ">
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="134123372648433" fieldName="SI"/>
+      <columnsDisplayField/>
+      <controlInfo classHint="DbCheckDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+    </column>
+    <column name="TEMPPERMITTED" title="Временно разрешенная">
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="134123372648433" fieldName="TEMPPERMITTED"/>
+      <columnsDisplayField/>
+      <controlInfo classHint="DbSpinDesignInfo" max="25.0" min="0.0" name="view" prefHeight="0px" prefWidth="0px" step="0.2"/>
+    </column>
+    <column name="DEFINITION" title="Определение">
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="134123372648433" fieldName="DEFINITION"/>
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+    </column>
+    <constraints place="Center" type="BorderLayoutConstraintsDesignInfo"/>
+  </widget>
+  <layout type="BorderLayoutDesignInfo"/>
+</layout>

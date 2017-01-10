@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?><layout defaultCloseOperation="2" name="Form" prefHeight="567px" prefWidth="708px">
+  <widget name="btnSetValue" parent="Form" prefHeight="23px" prefWidth="110px" text="set value" type="ButtonDesignInfo">
+    <constraints height="23px" left="20px" top="10px" type="MarginConstraintsDesignInfo" width="110px"/>
+  </widget>
+  <widget format="###-####" name="formattedField" parent="Form" prefHeight="20px" prefWidth="170px" text="   -    " type="FormattedFieldDesignInfo">
+    <constraints height="20px" left="20px" top="63px" type="MarginConstraintsDesignInfo" width="170px"/>
+  </widget>
+  <widget format="###-####" name="modelText" parent="Form" prefHeight="20px" prefWidth="170px" type="DbLabelDesignInfo">
+    <datamodelElement entityId="-1" fieldName="Param2"/>
+    <constraints height="20px" left="20px" top="100px" type="MarginConstraintsDesignInfo" width="170px"/>
+  </widget>
+  <widget name="modelTextArea" parent="Form" prefHeight="130px" prefWidth="180px" type="DbTextDesignInfo">
+    <datamodelElement entityId="-1" fieldName="Param2"/>
+    <constraints height="130px" left="20px" top="150px" type="MarginConstraintsDesignInfo" width="180px"/>
+  </widget>
+  <widget name="button" parent="Form" prefHeight="23px" prefWidth="110px" text="grab value" type="ButtonDesignInfo">
+    <constraints height="23px" left="20px" top="35px" type="MarginConstraintsDesignInfo" width="110px"/>
+  </widget>
+  <widget name="scrollPane" parent="Form" prefHeight="150px" prefWidth="298px" type="ScrollDesignInfo">
+    <constraints height="150px" left="260px" top="10px" type="MarginConstraintsDesignInfo" width="298px"/>
+  </widget>
+  <widget name="htmlArea" parent="scrollPane" prefHeight="148px" prefWidth="296px" text="    &#13;&#10;This is WYSIWYG html-editor" type="EditorPaneDesignInfo"/>
+  <widget name="scrollPane1" parent="Form" prefHeight="140px" prefWidth="298px" type="ScrollDesignInfo">
+    <constraints height="140px" left="260px" top="170px" type="MarginConstraintsDesignInfo" width="298px"/>
+  </widget>
+  <widget name="textArea" parent="scrollPane1" prefHeight="138px" prefWidth="296px" type="TextPaneDesignInfo"/>
+  <widget name="modelGrid" parent="Form" prefHeight="240px" prefWidth="700px" type="DbGridDesignInfo">
+    <treeDesignInfo>
+      <unaryLinkField entityId="-1" fieldName="Param3"/>
+    </treeDesignInfo>
+    <rowsColumnsDesignInfo>
+      <rowsDatasource entityId="-1" field="false"/>
+    </rowsColumnsDesignInfo>
+    <column name="columnDate" title="Дата" width="150">
+      <controlInfo classHint="DbLabelDesignInfo" format="dd.MM.yyyy SS" name="view" prefHeight="0px" prefWidth="0px" valueType="1"/>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Dialog" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="-1" fieldName="Param1"/>
+    </column>
+    <column name="columnMask" title="Маска" width="150">
+      <controlInfo classHint="DbLabelDesignInfo" format="###-####" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Dialog" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="-1" fieldName="Param2"/>
+    </column>
+    <column name="columnNumber" title="Число" width="150">
+      <controlInfo classHint="DbLabelDesignInfo" format="#,##0.###" name="view" prefHeight="0px" prefWidth="0px" valueType="0"/>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Dialog" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="-1" fieldName="Param3"/>
+    </column>
+    <column name="columnPercent" title="%" width="150">
+      <controlInfo classHint="DbLabelDesignInfo" format="#,##0%" name="view" prefHeight="0px" prefWidth="0px" valueType="3"/>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Dialog" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="-1" fieldName="Param3"/>
+    </column>
+    <column name="columnCurrency" title="Валюта" width="150">
+      <controlInfo classHint="DbLabelDesignInfo" format="#,##0.## ¤" name="view" prefHeight="0px" prefWidth="0px" valueType="4"/>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Dialog" size="11"/>
+      </headerStyle>
+      <datamodelElement entityId="-1" fieldName="Param3"/>
+    </column>
+    <constraints bottom="7px" left="0px" right="8px" top="320px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <widget name="btnSetParams" parent="Form" prefHeight="23px" prefWidth="110px" text="set params" type="ButtonDesignInfo">
+    <constraints height="23px" left="0px" top="290px" type="MarginConstraintsDesignInfo" width="110px"/>
+  </widget>
+  <widget name="btnSetSelectors" parent="Form" prefHeight="23px" prefWidth="110px" text="set selectors" type="ButtonDesignInfo">
+    <constraints height="23px" left="120px" top="290px" type="MarginConstraintsDesignInfo" width="110px"/>
+  </widget>
+  <widget name="btnCreateFormattedField" parent="Form" prefHeight="23px" prefWidth="120px" text="create" type="ButtonDesignInfo">
+    <constraints height="23px" right="18px" top="10px" type="MarginConstraintsDesignInfo" width="120px"/>
+  </widget>
+  <widget name="button1" parent="Form" prefHeight="23px" prefWidth="90px" text="clear mask" type="ButtonDesignInfo">
+    <constraints height="23px" left="160px" top="12px" type="MarginConstraintsDesignInfo" width="90px"/>
+  </widget>
+  <nonvisual name="column" type="DbGridColumn">
+    <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+    <columnsDatasource/>
+    <columnsDisplayField/>
+    <cellsDatasource/>
+    <cellDesignInfo>
+      <rowsKeyField/>
+      <columnsKeyField/>
+      <cellValueField/>
+    </cellDesignInfo>
+    <headerStyle>
+      <nativeFont name="Dialog" size="11"/>
+    </headerStyle>
+  </nonvisual>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

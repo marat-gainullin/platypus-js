@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <parameters>
+    <parameter description="" name="P2" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="P3" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="P1" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="P4" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="2" typeName="NUMERIC"/>
+  </parameters>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="8" entityLocationY="7" entityWidth="150"/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="141456640257176" entityLocationX="813" entityLocationY="22" entityWidth="150" tableAlias="" tableName="TABLE1" tableSchemaName=""/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="141456640257175" entityLocationX="230" entityLocationY="25" entityWidth="150" tableAlias="" tableName="TABLE2" tableSchemaName=""/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="141456641377110" entityLocationX="437" entityLocationY="32" entityWidth="150" queryId="namedQuery4Tests" tableAlias="T0" tableName="" tableSchemaName=""/>
+  <relation leftEntityId="-1" leftEntityParameterName="P4" rightEntityId="141456641377110" rightEntityParameterName="Param1"/>
+</datamodel>

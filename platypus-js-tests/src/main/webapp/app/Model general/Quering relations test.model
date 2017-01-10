@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datamodel>
+  <parameters>
+    <parameter description="Родитель" name="P_ID" nullable="true" parameterMode="0" precision="10" scale="0" selectionForm="null" signed="true" size="22" type="3" typeName="NUMBER">
+      <primaryKey field="ID" name="PK_ASSET_GROUPS" schema="EAS" table="ASSET_GROUPS"/>
+    </parameter>
+  </parameters>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="8" entityLocationY="22" entityWidth="150"/>
+  <entity Name="" Title="Марки объектов ремонта" entityHeight="200" entityIconified="false" entityId="128049574970367" entityLocationX="378" entityLocationY="494" entityWidth="187" queryId="128049551290614" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Единицы оборудования по марке" entityHeight="200" entityIconified="false" entityId="128049775173425" entityLocationX="620" entityLocationY="491" entityWidth="231" queryId="128049731084369" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Единицы измерения  по величине" entityHeight="200" entityIconified="false" entityId="128049746332840" entityLocationX="616" entityLocationY="23" entityWidth="232" queryId="128049734162523" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Наименования СИ по величине" entityHeight="200" entityIconified="false" entityId="128049750556261" entityLocationX="617" entityLocationY="248" entityWidth="236" queryId="128049732520388" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Единицы измерения  по величине 1" entityHeight="200" entityIconified="false" entityId="128073170857902" entityLocationX="885" entityLocationY="21" entityWidth="335" queryId="128049734162523" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Измеряемые величины" entityHeight="211" entityIconified="false" entityId="128049576695369" entityLocationX="360" entityLocationY="23" entityWidth="190" queryId="128049562734356" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Вид объекта ремонта" entityHeight="200" entityIconified="false" entityId="128049576096827" entityLocationX="184" entityLocationY="495" entityWidth="150" queryId="128049558485943" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Группа объекта ремонта по родителю" entityHeight="200" entityIconified="false" entityId="128049787114001" entityLocationX="181" entityLocationY="22" entityWidth="166" queryId="128049779804659" tableName="" tableSchemaName=""/>
+  <relation leftEntityFieldName="ID" leftEntityId="128049574970367" rightEntityId="128049775173425" rightEntityParameterName="MARK"/>
+  <relation leftEntityId="-1" leftEntityParameterName="P_ID" rightEntityId="128049787114001" rightEntityParameterName="P_ID"/>
+  <relation leftEntityFieldName="MEASURAND" leftEntityId="128049746332840" rightEntityId="128073170857902" rightEntityParameterName="VALUE"/>
+  <relation leftEntityFieldName="ID" leftEntityId="128049576695369" rightEntityId="128049746332840" rightEntityParameterName="VALUE"/>
+  <relation leftEntityFieldName="ID" leftEntityId="128049576695369" rightEntityId="128049750556261" rightEntityParameterName="VALUE"/>
+</datamodel>

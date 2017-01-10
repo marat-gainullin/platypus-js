@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datamodel>
+<parameters>
+<parameter description="Родитель" name="P_ID" nullable="true" parameterMode="0" precision="10" scale="0" selectionForm="null" signed="true" size="22" type="3" typeName="NUMBER">
+<primaryKey field="ID" name="PK_ASSET_GROUPS" schema="EAS" table="ASSET_GROUPS"/>
+</parameter>
+</parameters>
+<parametersEntity entityHeight="200" entityIconified="false" entityLocationX="10" entityLocationY="20" entityWidth="150"/>
+<entity Title="Группа объекта ремонта" entityHeight="200" entityIconified="false" entityId="128049546270364" entityLocationX="189" entityLocationY="19" entityWidth="150" tableAlias="T_ASSET_GROUPS_1" tableName="ASSET_GROUPS" tableSchemaName=""/>
+<relation leftEntityFieldName="P_ID" leftEntityId="-1" rightEntityFieldName="P_ID" rightEntityId="128049546270364"/>
+</datamodel>

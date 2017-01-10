@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <entity Name="dsSecureRead" Title="" entityHeight="200" entityIconified="false" entityId="141648588500665" entityLocationX="228" entityLocationY="29" entityWidth="150" queryId="133189634694079" tableName="" tableSchemaName=""/>
+  <entity Name="dsSecure" Title="" entityHeight="200" entityIconified="false" entityId="141657344061369" entityLocationX="46" entityLocationY="28" entityWidth="150" queryId="133189623152950" tableName="" tableSchemaName=""/>
+  <entity Name="dsSecureWrite" Title="" entityHeight="200" entityIconified="false" entityId="141648631937534" entityLocationX="439" entityLocationY="28" entityWidth="150" queryId="133189638245364" tableName="" tableSchemaName=""/>
+  <entity Name="deleter" Title="" entityHeight="28" entityIconified="true" entityId="143012848326394" entityLocationX="44" entityLocationY="259" entityWidth="182" queryId="133215630470014" tableName="" tableSchemaName=""/>
+</datamodel>

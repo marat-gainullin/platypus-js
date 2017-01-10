@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel datasource="null">
+  <fieldsEntity entityHeight="200" entityIconified="false" entityId="131158275303106" entityLocationX="642" entityLocationY="87" entityWidth="150" tableName="CuSTOMER"/>
+  <fieldsEntity entityHeight="200" entityIconified="false" entityId="141640574852094" entityLocationX="357" entityLocationY="272" entityWidth="150" tableName="MTD_GROUPS"/>
+  <fieldsEntity entityHeight="200" entityIconified="false" entityId="131158191753151" entityLocationX="326" entityLocationY="66" entityWidth="144" tableName="GOOD"/>
+  <fieldsEntity entityHeight="200" entityIconified="false" entityId="141640574035744" entityLocationX="153" entityLocationY="288" entityWidth="150" tableName="MTD_USERS"/>
+  <fieldsEntity entityHeight="200" entityIconified="false" entityId="131158188485918" entityLocationX="38" entityLocationY="57" entityWidth="150" tableName="GOODORDER"/>
+</datamodel>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<datamodel datamodelDbId="null">
+<fieldsEntity entityHeight="200" entityIconified="false" entityId="128049533389016" entityLocationX="645" entityLocationY="43" entityWidth="150" tableName="UNIT_OF_MEASUREMEN"/>
+<fieldsEntity entityHeight="200" entityIconified="false" entityId="128049511625079" entityLocationX="482" entityLocationY="27" entityWidth="150" tableName="ASSET_MARKS"/>
+<fieldsEntity entityHeight="200" entityIconified="false" entityId="128049532396885" entityLocationX="250" entityLocationY="29" entityWidth="150" tableName="PK_EQUIPMENT"/>
+<fieldsEntity entityHeight="200" entityIconified="false" entityId="128049510357884" entityLocationX="10" entityLocationY="20" entityWidth="150" tableName="ASSET_GROUPS"/>
+<fieldsEntity entityHeight="200" entityIconified="false" entityId="128049511001599" entityLocationX="22" entityLocationY="275" entityWidth="205" tableName="ASSET_KINDS"/>
+<fieldsEntity entityHeight="200" entityIconified="false" entityId="128049537181300" entityLocationX="502" entityLocationY="332" entityWidth="250" tableName="MEASURANDS"/>
+<fieldsEntity entityHeight="200" entityIconified="false" entityId="128049534328119" entityLocationX="838" entityLocationY="280" entityWidth="201" tableName="MT_NAMES"/>
+</datamodel>

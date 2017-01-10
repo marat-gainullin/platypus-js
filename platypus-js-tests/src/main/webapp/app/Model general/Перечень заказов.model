@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datamodel>
+<parameters>
+<parameter description="Объем заказа" name="amount" nullable="true" parameterMode="0" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="2" typeName=""/>
+</parameters>
+<parametersEntity entityHeight="200" entityIconified="false" entityLocationX="12" entityLocationY="12" entityWidth="150"/>
+<entity Title="Товары" entityHeight="200" entityIconified="false" entityId="128999954315643" entityLocationX="585" entityLocationY="69" entityWidth="150" tableAlias="goods" tableName="GOOD" tableSchemaName=""/>
+<entity Title="Заказы" entityHeight="200" entityIconified="false" entityId="128999954312580" entityLocationX="270" entityLocationY="44" entityWidth="150" tableAlias="goodOrder" tableName="GOODORDER" tableSchemaName=""/>
+<entity Title="Заказчик" entityHeight="200" entityIconified="false" entityId="128999954317162" entityLocationX="777" entityLocationY="42" entityWidth="150" tableAlias="customers" tableName="CUSTOMER" tableSchemaName=""/>
+<relation leftEntityFieldName="CUSTOMER" leftEntityId="128999954312580" rightEntityFieldName="CUSTOMER_ID" rightEntityId="128999954317162"/>
+<relation leftEntityFieldName="AMOUNT" leftEntityId="-1" rightEntityFieldName="AMOUNT" rightEntityId="128999954312580"/>
+<relation leftEntityFieldName="GOOD" leftEntityId="128999954312580" rightEntityFieldName="GOOD_ID" rightEntityId="128999954315643"/>
+</datamodel>

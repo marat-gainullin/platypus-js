@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datamodel>
+  <parameters>
+    <parameter description="" name="Param1" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="Param2" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+  </parameters>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="83" entityLocationY="32" entityWidth="150"/>
+  <entity Title="Заказы" entityHeight="200" entityIconified="false" entityId="131158276968754" entityLocationX="448" entityLocationY="64" entityWidth="150" tableAlias="t2" tableName="GOODORDER" tableSchemaName=""/>
+  <entity Title="Товары" entityHeight="200" entityIconified="false" entityId="131158276964004" entityLocationX="276" entityLocationY="34" entityWidth="150" tableAlias="t1" tableName="GOOD" tableSchemaName=""/>
+  <relation leftEntityFieldName="GOOD" leftEntityId="131158276968754" rightEntityFieldName="GOOD_ID" rightEntityId="131158276964004"/>
+</datamodel>

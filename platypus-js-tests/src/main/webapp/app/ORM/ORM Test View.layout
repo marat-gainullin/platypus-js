@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><layout defaultCloseOperation="2" name="Form" prefHeight="300px" prefWidth="400px">
+  <widget name="btnTest" parent="Form" prefHeight="23px" prefWidth="65px" text="test it" type="ButtonDesignInfo">
+    <constraints height="23px" left="12px" top="12px" type="MarginConstraintsDesignInfo" width="65px"/>
+  </widget>
+  <nonvisual name="desktopPane" prefHeight="0px" prefWidth="0px" type="DesktopDesignInfo"/>
+  <nonvisual name="jSeparator" prefHeight="0px" prefWidth="0px" type="MenuSeparatorDesignInfo"/>
+  <nonvisual name="popupMenu" prefHeight="0px" prefWidth="0px" type="PopupDesignInfo"/>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

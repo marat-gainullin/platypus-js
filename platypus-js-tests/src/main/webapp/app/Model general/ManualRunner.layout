@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?><layout title="" view="view">
+  <AnchorsPane cursor="0" name="view" prefHeight="300px" prefWidth="400px"/>
+  <Button cursor="0" name="btnLoadEntity" parent="view" prefHeight="23px" prefWidth="120px" text="loadEntity Test">
+    <AnchorsPaneConstraints height="23px" left="12px" top="48px" width="120px"/>
+  </Button>
+  <Button cursor="0" name="btnCreateEntity" parent="view" prefHeight="23px" prefWidth="120px" text="createEntity Test">
+    <AnchorsPaneConstraints height="23px" left="12px" top="84px" width="120px"/>
+  </Button>
+  <Button cursor="0" name="btnModelAPI" parent="view" prefHeight="23px" prefWidth="120px" text="Model API test">
+    <AnchorsPaneConstraints height="23px" left="12px" top="12px" width="120px"/>
+  </Button>
+  <Button cursor="0" name="modifiedTest" parent="view" prefHeight="20px" prefWidth="130px" text="Modified Test">
+    <AnchorsPaneConstraints height="20px" left="10px" top="120px" width="130px"/>
+  </Button>
+</layout>

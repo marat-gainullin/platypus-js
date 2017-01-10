@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><layout defaultCloseOperation="2" name="Form" prefHeight="300px" prefWidth="400px">
+  <widget cursor="9" name="btnSelectFileMask" parent="Form" prefHeight="23px" prefWidth="240px" text="Select using a mask" type="ButtonDesignInfo">
+    <constraints height="23px" left="24px" top="48px" type="MarginConstraintsDesignInfo" width="240px"/>
+  </widget>
+  <widget name="btnSelectFile" parent="Form" prefHeight="23px" prefWidth="110px" text="Select a file" type="ButtonDesignInfo">
+    <constraints height="23px" left="20px" top="10px" type="MarginConstraintsDesignInfo" width="110px"/>
+  </widget>
+  <widget name="btnStartUpload" parent="Form" prefHeight="23px" prefWidth="110px" text="Start" type="ButtonDesignInfo">
+    <constraints height="23px" left="150px" top="10px" type="MarginConstraintsDesignInfo" width="110px"/>
+  </widget>
+  <widget name="btnAbort" parent="Form" prefHeight="23px" prefWidth="110px" text="Abort" type="ButtonDesignInfo">
+    <constraints height="23px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="110px"/>
+  </widget>
+  <widget name="progressBar" parent="Form" prefHeight="20px" prefWidth="370px" type="ProgressBarDesignInfo">
+    <constraints height="20px" left="12px" top="168px" type="MarginConstraintsDesignInfo" width="370px"/>
+  </widget>
+  <widget name="label" parent="Form" prefHeight="14px" prefWidth="60px" text="Файл:" type="LabelDesignInfo">
+    <constraints height="14px" left="12px" top="144px" type="MarginConstraintsDesignInfo" width="60px"/>
+  </widget>
+  <widget name="lblFileName" parent="Form" prefHeight="14px" prefWidth="290px" text="label1" type="LabelDesignInfo">
+    <constraints height="14px" left="96px" top="144px" type="MarginConstraintsDesignInfo" width="290px"/>
+  </widget>
+  <widget name="txtMask" parent="Form" prefHeight="27px" prefWidth="360px" text=".png,.jpg" type="TextFieldDesignInfo">
+    <constraints height="27px" left="24px" top="84px" type="MarginConstraintsDesignInfo" width="360px"/>
+  </widget>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

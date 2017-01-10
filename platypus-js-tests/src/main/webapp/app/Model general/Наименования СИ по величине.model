@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datamodel>
+<parameters>
+<parameter description="Измеряемая величина" name="VALUE" nullable="true" parameterMode="0" precision="10" scale="0" selectionForm="null" signed="true" size="22" type="3" typeName="NUMBER">
+<primaryKey field="ID" name="PK_MEASURANDS" schema="EAS" table="MEASURANDS"/>
+</parameter>
+</parameters>
+<parametersEntity entityHeight="200" entityIconified="false" entityLocationX="10" entityLocationY="20" entityWidth="150"/>
+<entity Title="Наименования СИ" entityHeight="200" entityIconified="false" entityId="128049567945313" entityLocationX="185" entityLocationY="22" entityWidth="150" tableAlias="T_MT_NAMES_1" tableName="MT_NAMES" tableSchemaName=""/>
+<relation leftEntityFieldName="VALUE" leftEntityId="-1" rightEntityFieldName="VALUE" rightEntityId="128049567945313"/>
+</datamodel>

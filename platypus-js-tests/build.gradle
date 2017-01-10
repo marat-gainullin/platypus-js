@@ -1,0 +1,285 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'war'
+
+repositories {
+    jcenter()
+    mavenLocal()
+}
+
+configurations {
+    compile.transitive = false
+    testCompile.transitive = false
+    pwc.transitive = false
+    wrappers.transitive = false
+    tomcat
+    containerLibs
+}
+
+def tomcatVersion = '8.5.8'
+def pwcProject = project(':platypus-js-web-client')
+def wrappersProject = project(':platypus-js-wrappers')
+
+dependencies {
+    runtime project(':platypus-js-servlet')
+    pwc pwcProject
+    wrappers wrappersProject
+    tomcat "org.apache.tomcat:tomcat-catalina:$tomcatVersion",
+           "org.apache.tomcat:tomcat-jasper:$tomcatVersion",
+           "org.apache.tomcat:tomcat-dbcp:$tomcatVersion",
+           "org.apache.tomcat:tomcat-websocket:$tomcatVersion",
+           "org.apache.tomcat:tomcat-jaspic-api:$tomcatVersion"
+    containerLibs 'com.h2database:h2:1.4.193'
+    testCompile project(':platypus-js-scripting'),
+                project(':platypus-js-launcher'),
+                project(':platypus-js-core').sourceSets.test.output
+}
+
+def pwcDirName = "${webAppDirName}/pwc"
+def wrappersDirName = "${webAppDirName}/WEB-INF/classes"
+def libDirName = "${webAppDirName}/WEB-INF/lib"
+
+task cleanExplodedPwc(type: Delete) {
+    delete pwcDirName
+}
+
+task cleanExplodedWrappers(type: Delete) {
+    delete wrappersDirName
+}
+
+task cleanLib(type: Delete) {
+    delete libDirName
+}
+
+clean.dependsOn cleanExplodedPwc,
+                cleanExplodedWrappers,
+                cleanLib
+
+task explodePwc(type: Copy) {
+    configurations.pwc.each {
+        from zipTree(file(it.getAbsolutePath().replace('.jar', '.zip')))
+    }
+    into pwcDirName
+}
+explodePwc.dependsOn pwcProject.pack
+
+task explodeWrappers(type: Copy) {
+    configurations.wrappers.each {
+        from zipTree(file(it.getAbsolutePath().replace('.jar', '.zip')))
+    }
+    into wrappersDirName
+}
+explodeWrappers.dependsOn wrappersProject.pack
+
+task distilleLib(type: Copy) {
+    configurations.runtime.each {
+        from file(it)
+    }
+    into libDirName
+}
+
+war {
+    exclude 'platypus.xml'
+    exclude 'private.properties'
+    exclude 'project.properties'
+}
+war.dependsOn explodePwc
+war.dependsOn explodeWrappers
+war.dependsOn distilleLib
+
+def tomcatPort = '8080'
+def tomcatDir = 'tomcat'
+def tomcatBinDir = "${tomcatDir}/bin"
+def sharedLibDir = "${tomcatDir}/lib"
+
+task buildTomcatBin(type: Copy) {
+    configurations.tomcat.each {
+        from file(it)
+    }
+    into tomcatBinDir
+}
+
+task buildTomcatLibs(type: Copy) {
+    configurations.containerLibs.each {
+        from file(it)
+    }
+    into sharedLibDir
+}
+
+task buildTomcat() {
+}
+
+buildTomcat.dependsOn buildTomcatBin,
+                      buildTomcatLibs
+
+task cleanTomcat(type: Delete){
+    delete tomcatDir
+}
+clean.dependsOn cleanTomcat
+
+def props = { 
+    fileName ->
+    def input = file(fileName).newDataInputStream()
+    try {
+        def loadedProps = new Properties()
+        loadedProps.load(input)
+        return loadedProps
+    } finally {
+        input.close()
+    }
+}
+
+def appProps = props("${webAppDirName}/project.properties")
+def appPrivateProps = props("${webAppDirName}/private.properties")
+
+def datasource1Name = 'eas'
+def datasource1Dburl = 'jdbc:h2:tcp/localhost/~/platypus-tests-eas'
+def datasource1Dbuser = 'sa'
+def datasource1Dbpassword = 'sa'
+def datasource1Dbschema = 'PUBLIC'
+def datasource2Name = 'easHR'
+def datasource2Dburl = 'jdbc:h2:tcp/localhost/~/platypus-tests-easHR'
+def datasource2Dbuser = 'sa'
+def datasource2Dbpassword = 'sa'
+def datasource2Dbschema = 'PUBLIC'
+def servletContainerUrl = "http://localhost:${tomcatPort}/${appProps.context}"
+def servletContainerUser = 'testuser2'
+def servletContainerPassword = 'test'
+def platypusServerUrl = "platypus://localhost:8500"
+def platypusServerUser = servletContainerUser
+def platypusServerPassword = servletContainerPassword
+
+task completeTomcatConf(type: Copy){
+    from 'src/main/tomcat-conf'
+    into 'tomcat/conf'
+    rename 'default-web.xml', 'web.xml'
+}
+
+task tomcatExec(type: JavaExec) {
+    workingDir tomcatDir
+    classpath fileTree(tomcatBinDir)
+    main 'org.apache.catalina.startup.Bootstrap'
+    jvmArgs "-Dtomcat.http.port=${tomcatPort}",
+            "-Dapp.context=${appProps.context}",
+            "-Dapp.base=${file(webAppDirName)}",
+            "-Ddatasource.1.name=${datasource1Name}",
+            "-Ddatasource.1.dburl=${datasource1Dburl}",
+            "-Ddatasource.1.dbuser=${datasource1Dbuser}",
+            "-Ddatasource.1.dbpassword=${datasource1Dbpassword}",
+            "-Ddatasource.1.dbschema=${datasource1Dbschema}",
+            "-Ddatasource.2.name=${datasource2Name}",
+            "-Ddatasource.2.dburl=${datasource2Dburl}",
+            "-Ddatasource.2.dbuser=${datasource2Dbuser}",
+            "-Ddatasource.2.dbpassword=${datasource2Dbpassword}",
+            "-Ddatasource.2.dbschema=${datasource2Dbschema}",
+            "-Ddatasource.default=${datasource1Name}"
+}
+
+task thinServerExec(type: JavaExec) {
+    classpath fileTree(sharedLibDir), fileTree(libDirName), wrappersDirName
+    main 'com.eas.server.ServerMain'
+    args '-url', "${file(webAppDirName).toURI().toURL()}", '-default-datasource', datasource1Name,
+         '-datasource', datasource1Name, '-dburl', datasource1Dburl, '-dbuser', datasource1Dbuser, '-dbpassword', datasource1Dbpassword, '-dbschema', datasource1Dbschema,
+         '-datasource', datasource2Name, '-dburl', datasource2Dburl, '-dbuser', datasource2Dbuser, '-dbpassword', datasource2Dbpassword, '-dbschema', datasource2Dbschema,
+         '-source-path', "${appProps.sourcePath}",
+         '-global-api'
+}
+
+task h2Exec(type: JavaExec) {
+    classpath fileTree(sharedLibDir)
+    main 'org.h2.tools.Server'
+    args '-tcp'
+}
+
+def tomcatServer
+def thinServer
+def h2Server
+task launchServers(){
+    doFirst {
+        h2Server = new ProcessBuilder(h2Exec.commandLine)
+                            .redirectErrorStream(true)
+                            .start()
+        def h2StdOut = new InputStreamReader(h2Server.getInputStream())
+        def h2NextLine = h2StdOut.readLine()
+        while(!h2NextLine.contains('TCP server running at')){
+            println(h2NextLine)
+            h2NextLine = h2StdOut.readLine()
+        }
+        println(h2NextLine)
+        
+        tomcatServer = new ProcessBuilder(tomcatExec.commandLine)
+                            .directory(file(tomcatExec.workingDir))
+                            .redirectErrorStream(true).start()
+        def tomcatStdOut = new InputStreamReader(tomcatServer.getInputStream())
+        def tomcatNextLine = tomcatStdOut.readLine()
+        while(!tomcatNextLine.contains('Server startup in')){
+            println(tomcatNextLine)
+            tomcatNextLine = tomcatStdOut.readLine()
+        }
+        println(tomcatNextLine)
+        
+        thinServer = new ProcessBuilder(thinServerExec.commandLine)
+                            .redirectErrorStream(true)
+                            .start()
+        def thinServerStdOut = new InputStreamReader(thinServer.getInputStream())
+        def thinServerNextLine = thinServerStdOut.readLine()
+        while(!thinServerNextLine.contains('Listening platypus protocol on')){
+            println(thinServerNextLine)
+            thinServerNextLine = thinServerStdOut.readLine()
+        }
+        println(thinServerNextLine)
+    }
+}
+
+task shutdownServers (){
+    doFirst {
+        tomcatServer.destroy()
+        tomcatServer.waitFor()
+        println "Tomcat shutted down"
+        thinServer.destroy()
+        thinServer.waitFor()
+        println "Thin server shutted down"
+        h2Server.destroy()
+        h2Server.waitFor()
+        println "H2 server shutted down"
+    }
+}
+
+launchServers.dependsOn buildTomcat,
+                        completeTomcatConf,
+                        distilleLib,
+                        explodeWrappers,
+                        explodePwc
+
+test.dependsOn launchServers
+launchServers.finalizedBy shutdownServers
+shutdownServers.mustRunAfter test
+
+test {
+    forkEvery = 1
+    systemProperties["datasource.1.name"] = datasource1Name
+    systemProperties["datasource.1.dburl"] = datasource1Dburl
+    systemProperties["datasource.1.dbuser"] = datasource1Dbuser
+    systemProperties["datasource.1.dbpassword"] = datasource1Dbpassword
+    systemProperties["datasource.1.dbschema"] = datasource1Dbschema
+    systemProperties["datasource.2.name"] = datasource2Name
+    systemProperties["datasource.2.dburl"] = datasource2Dburl
+    systemProperties["datasource.2.dbuser"] = datasource2Dbuser
+    systemProperties["datasource.2.dbpassword"] = datasource2Dbpassword
+    systemProperties["datasource.2.dbschema"] = datasource2Dbschema
+    systemProperties["datasource.default"] = datasource1Name
+    systemProperties["testsource.url"] = file(webAppDirName).toURI().toURL()
+    systemProperties["application.source.path"] = appProps.sourcePath
+    systemProperties["servlet-container.url"] = servletContainerUrl
+    systemProperties["servlet-container.user"] = servletContainerUser
+    systemProperties["servlet-container.password"] = servletContainerPassword
+    systemProperties["platypus-server.url"] = platypusServerUrl
+    systemProperties["platypus-server.user"] = platypusServerUser
+    systemProperties["platypus-server.password"] = platypusServerPassword
+}
+

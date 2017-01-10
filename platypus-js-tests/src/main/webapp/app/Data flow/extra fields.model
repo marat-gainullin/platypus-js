@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <parameters>
+    <parameter description="" name="aOrderId" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="2" typeName="NUMERIC"/>
+  </parameters>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="14" entityLocationY="14" entityWidth="150"/>
+  <entity Title="" entityHeight="151" entityIconified="false" entityId="141459391502422" entityLocationX="246" entityLocationY="76" entityWidth="150" tableAlias="t1" tableName="GOOD" tableSchemaName=""/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="141459391502467" entityLocationX="504" entityLocationY="7" entityWidth="150" tableAlias="t2" tableName="GOODORDER" tableSchemaName=""/>
+  <relation leftEntityFieldName="order_id" leftEntityId="141459391502467" rightEntityId="-1" rightEntityParameterName="aOrderId"/>
+  <relation leftEntityFieldName="good" leftEntityId="141459391502467" rightEntityFieldName="good_id" rightEntityId="141459391502422"/>
+</datamodel>

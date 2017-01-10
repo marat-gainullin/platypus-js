@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel datasource="null">
+  <fieldsEntity entityHeight="200" entityIconified="false" entityId="141171590723763" entityLocationX="276" entityLocationY="302" entityWidth="150" tableName="GOOD"/>
+  <fieldsEntity entityHeight="200" entityIconified="false" entityId="133215615451931" entityLocationX="35" entityLocationY="29" entityWidth="225" tableName="SECURITY_TEST_DATA"/>
+  <fieldsEntity entityHeight="200" entityIconified="false" entityId="141171589936057" entityLocationX="538" entityLocationY="317" entityWidth="150" tableName="GOODORDER"/>
+  <fieldsEntity entityHeight="200" entityIconified="false" entityId="141328440452211" entityLocationX="446" entityLocationY="17" entityWidth="150" tableName="MTD_USERS"/>
+  <fieldsEntity entityHeight="200" entityIconified="false" entityId="141171588764667" entityLocationX="625" entityLocationY="104" entityWidth="150" tableName="ASSET_TYPES"/>
+  <fieldsEntity entityHeight="200" entityIconified="false" entityId="140497913829723" entityLocationX="282" entityLocationY="80" entityWidth="150" tableName="MTD_GROUPS"/>
+</datamodel>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <entity Name="testData" Title="" entityHeight="200" entityIconified="false" entityId="140361100803958" entityLocationX="365" entityLocationY="84" entityWidth="150" queryId="_24832514140608864" tableName="" tableSchemaName=""/>
+  <referenceRelation collectionPropertyName="children" leftEntityFieldName="mdent_parent_id" leftEntityId="140361100803958" rightEntityFieldName="mdent_id" rightEntityId="140361100803958" scalarPropertyName="parent"/>
+</datamodel>

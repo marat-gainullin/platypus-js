@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="12" entityLocationY="12" entityWidth="150"/>
+  <entity Name="ORM_properties_names_test" Title="" entityHeight="200" entityIconified="false" entityId="140749276842993" entityLocationX="227" entityLocationY="44" entityWidth="150" queryId="ORM_properties_names_test" tableName="" tableSchemaName=""/>
+</datamodel>

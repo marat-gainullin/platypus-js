@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datamodel>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="12" entityLocationY="12" entityWidth="150"/>
+  <entity Name="orders" Title="Заказы с товарами" entityHeight="200" entityIconified="false" entityId="134174204786703" entityLocationX="176" entityLocationY="6" entityWidth="150" queryId="131158272675021" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Все заказчики" entityHeight="200" entityIconified="false" entityId="134174205006299" entityLocationX="414" entityLocationY="56" entityWidth="150" queryId="129232748904692" tableName="" tableSchemaName=""/>
+</datamodel>

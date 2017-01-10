@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><layout defaultCloseOperation="2" name="Form" prefHeight="300px" prefWidth="400px">
+  <widget name="modelCombo" parent="Form" prefHeight="27px" prefWidth="192px" type="DbComboDesignInfo">
+    <displayField entityId="141761969106193" fieldName="id"/>
+    <valueField entityId="141761969106193" fieldName="id"/>
+    <datamodelElement entityId="141761969106193" fieldName="id"/>
+    <constraints height="27px" left="144px" top="36px" type="MarginConstraintsDesignInfo" width="192px"/>
+  </widget>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

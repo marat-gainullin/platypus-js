@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <entity Name="ambigousChanges" Title="" entityHeight="200" entityIconified="false" entityId="141459230655279" entityLocationX="143" entityLocationY="17" entityWidth="236" queryId="test.ambigous.changes" tableName="" tableSchemaName=""/>
+  <entity Name="sqlUpdate" Title="" entityHeight="200" entityIconified="false" entityId="141459265970617" entityLocationX="431" entityLocationY="105" entityWidth="150" queryId="134570075809763" tableName="" tableSchemaName=""/>
+</datamodel>

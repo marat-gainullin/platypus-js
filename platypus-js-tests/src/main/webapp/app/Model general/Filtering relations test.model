@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datamodel>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="11" entityLocationY="16" entityWidth="150"/>
+  <entity Name="" Title="Единицы измерения" entityHeight="200" entityIconified="false" entityId="128049575554676" entityLocationX="647" entityLocationY="39" entityWidth="229" queryId="128049555364003" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Наименования СИ" entityHeight="207" entityIconified="false" entityId="128049577162567" entityLocationX="648" entityLocationY="268" entityWidth="229" queryId="128049565893763" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Марки объектов ремонта" entityHeight="200" entityIconified="false" entityId="128049574970367" entityLocationX="374" entityLocationY="496" entityWidth="187" queryId="128049551290614" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Группа объекта ремонта" entityHeight="200" entityIconified="false" entityId="128049573928131" entityLocationX="176" entityLocationY="16" entityWidth="150" queryId="128049508301511" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Единицы оборудования" entityHeight="200" entityIconified="false" entityId="128049574495320" entityLocationX="658" entityLocationY="518" entityWidth="217" queryId="128049547464084" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Измеряемые величины" entityHeight="211" entityIconified="false" entityId="128049576695369" entityLocationX="372" entityLocationY="189" entityWidth="190" queryId="128049562734356" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Единицы измерения 1" entityHeight="200" entityIconified="false" entityId="128072901201589" entityLocationX="913" entityLocationY="39" entityWidth="229" queryId="128049555364003" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Вид объекта ремонта" entityHeight="200" entityIconified="false" entityId="128049576096827" entityLocationX="174" entityLocationY="271" entityWidth="150" queryId="128049558485943" tableName="" tableSchemaName=""/>
+  <relation leftEntityFieldName="ID" leftEntityId="128049576695369" rightEntityFieldName="MEASURAND" rightEntityId="128049575554676"/>
+  <relation leftEntityFieldName="ID" leftEntityId="128049576695369" rightEntityFieldName="VALUE" rightEntityId="128049577162567"/>
+  <relation leftEntityFieldName="ID" leftEntityId="128049575554676" rightEntityFieldName="ID" rightEntityId="128072901201589"/>
+  <relation leftEntityFieldName="ID" leftEntityId="128049574970367" rightEntityFieldName="MARK" rightEntityId="128049574495320"/>
+</datamodel>

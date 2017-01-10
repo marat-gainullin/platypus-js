@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><layout icon="" title="" view="view">
+  <AnchorsPane cursor="0" name="view" prefHeight="251px" prefWidth="389px"/>
+  <ModelFormattedField cursor="0" format="" name="modelFormattedField1" parent="view" prefHeight="20px" prefWidth="193px">
+    <AnchorsPaneConstraints height="20px" left="10px" top="35px" width="193px"/>
+  </ModelFormattedField>
+  <ModelFormattedField cursor="0" format="" name="modelFormattedField" parent="view" prefHeight="20px" prefWidth="193px">
+    <AnchorsPaneConstraints height="20px" left="10px" top="10px" width="193px"/>
+  </ModelFormattedField>
+  <Button cursor="0" name="btnBind" parent="view" prefHeight="23px" prefWidth="65px" text="bind">
+    <AnchorsPaneConstraints height="23px" left="220px" top="10px" width="65px"/>
+  </Button>
+  <Button cursor="0" name="btnUnbind" parent="view" prefHeight="23px" prefWidth="80px" text="unbind">
+    <AnchorsPaneConstraints height="23px" left="304px" top="10px" width="80px"/>
+  </Button>
+  <ModelGrid cursor="0" frozenRows="5" name="modelGrid" parent="view" prefHeight="160px" prefWidth="372px">
+    <AnchorsPaneConstraints bottom="11px" left="10px" right="7px" top="80px"/>
+    <ModelGridColumn field="key" maxWidth="800px" name="column1" title="key" width="206px">
+      <ModelSpin/>
+    </ModelGridColumn>
+    <ModelGridColumn field="txt" maxWidth="200px" name="column2" title="txt" width="98px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+    <ServiceGridColumn name="column" resizable="true"/>
+    <CheckGridColumn name="column3" resizable="true" title="column3"/>
+    <RadioGridColumn name="column4" resizable="true" title="column4"/>
+  </ModelGrid>
+  <Button cursor="0" name="btnRedraw" parent="view" prefHeight="20px" prefWidth="130px" text="redraw">
+    <AnchorsPaneConstraints height="20px" left="10px" top="58px" width="130px"/>
+  </Button>
+</layout>

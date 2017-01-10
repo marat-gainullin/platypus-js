@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datamodel>
+<parametersEntity entityHeight="200" entityIconified="false" entityLocationX="10" entityLocationY="20" entityWidth="150"/>
+<entity Title="Заказчик" entityHeight="200" entityIconified="false" entityId="129232750476600" entityLocationX="222" entityLocationY="31" entityWidth="150" tableAlias="T_CUSTOMER_1" tableName="CUSTOMER" tableSchemaName=""/>
+</datamodel>

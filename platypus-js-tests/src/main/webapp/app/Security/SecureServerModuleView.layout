@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?><layout title="" view="view">
+  <AnchorsPane cursor="0" name="view" prefHeight="300px" prefWidth="400px"/>
+  <Button cursor="0" name="button3" parent="view" prefHeight="23px" prefWidth="154px" text="callSecureFunctionAsync">
+    <AnchorsPaneConstraints height="23px" left="56px" top="48px" width="154px"/>
+  </Button>
+  <Button cursor="0" name="button2" parent="view" prefHeight="23px" prefWidth="156px" text="callRootSecureFunction">
+    <AnchorsPaneConstraints height="23px" left="56px" top="80px" width="156px"/>
+  </Button>
+  <Button cursor="0" name="button" parent="view" prefHeight="23px" prefWidth="154px" text="callSecureFunction">
+    <AnchorsPaneConstraints height="23px" left="56px" top="12px" width="154px"/>
+  </Button>
+  <Button cursor="0" name="button1" parent="view" prefHeight="23px" prefWidth="156px" text="callNonPublicModule">
+    <AnchorsPaneConstraints height="23px" left="56px" top="120px" width="156px"/>
+  </Button>
+</layout>

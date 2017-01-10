@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><layout title="" view="view">
+  <AnchorsPane background="#ffffff" cursor="0" name="view" prefHeight="300px" prefWidth="400px"/>
+  <ModelCombo cursor="0" name="modelCombo" parent="view" prefHeight="27px" prefWidth="180px">
+    <AnchorsPaneConstraints height="27px" left="10px" top="10px" width="180px"/>
+  </ModelCombo>
+  <Button cursor="0" name="button" parent="view" prefHeight="30px" prefWidth="90px" text="button">
+    <AnchorsPaneConstraints height="30px" left="200px" top="10px" width="90px"/>
+  </Button>
+</layout>

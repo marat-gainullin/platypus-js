@@ -1,4 +1,4 @@
-allprojects{
+allprojects {
     apply plugin: 'java'
 
     repositories{
@@ -20,12 +20,12 @@ allprojects{
         }
     }
 
-    dependencies{
+    dependencies {
         testCompile 'junit:junit:4.11'
     }
 }
 
-subprojects{
+subprojects {
     apply plugin: 'maven'
 
     configurations {

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><layout title="SE тесты" view="view">
+  <AnchorsPane cursor="0" name="view" prefHeight="296px" prefWidth="400px"/>
+  <Label cursor="0" name="lblTests" parent="view" prefHeight="24px" prefWidth="276px" text="Выполненные тесты:">
+    <AnchorsPaneConstraints height="24px" left="10px" top="35px" width="276px"/>
+  </Label>
+  <ScrollPane cursor="0" name="scrollPane" parent="view" prefHeight="172px" prefWidth="392px">
+    <AnchorsPaneConstraints bottom="4px" left="4px" right="4px" top="120px"/>
+  </ScrollPane>
+  <TextArea cursor="0" name="txtLog" parent="scrollPane" prefHeight="170px" prefWidth="390px"/>
+  <Label cursor="0" name="lblLog" parent="view" prefHeight="24px" prefWidth="276px" text="Журнал">
+    <AnchorsPaneConstraints height="24px" left="12px" right="112px" top="96px"/>
+  </Label>
+  <ProgressBar cursor="0" maximum="100" name="progress" parent="view" prefHeight="24px" prefWidth="372px" text="0%">
+    <AnchorsPaneConstraints height="24px" left="12px" right="16px" top="60px"/>
+  </ProgressBar>
+  <Button cursor="0" name="btnRun" parent="view" prefHeight="23px" prefWidth="96px" text="Запуск">
+    <AnchorsPaneConstraints height="23px" left="12px" top="2px" width="96px"/>
+  </Button>
+</layout>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datamodel>
+<parametersEntity entityHeight="200" entityIconified="false" entityLocationX="10" entityLocationY="20" entityWidth="150"/>
+<entity Title="Наименования СИ" entityHeight="200" entityIconified="false" entityId="128049567945313" entityLocationX="185" entityLocationY="27" entityWidth="150" tableAlias="T_MT_NAMES_1" tableName="MT_NAMES" tableSchemaName=""/>
+</datamodel>

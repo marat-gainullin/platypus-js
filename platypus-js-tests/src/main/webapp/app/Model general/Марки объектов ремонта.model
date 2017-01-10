@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datamodel>
+<parametersEntity entityHeight="200" entityIconified="false" entityLocationX="10" entityLocationY="20" entityWidth="150"/>
+<entity Title="Марки объектов ремонта" entityHeight="200" entityIconified="false" entityId="128049553103132" entityLocationX="182" entityLocationY="20" entityWidth="150" tableAlias="T_ASSET_MARKS_1" tableName="ASSET_MARKS" tableSchemaName=""/>
+</datamodel>

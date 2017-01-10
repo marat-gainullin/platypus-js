@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><layout defaultCloseOperation="2" name="Form" prefHeight="349px" prefWidth="402px">
+  <widget name="btnShowCard1" parent="Form" prefHeight="23px" prefWidth="96px" text="show card1" type="ButtonDesignInfo">
+    <constraints height="23px" right="30px" top="180px" type="MarginConstraintsDesignInfo" width="96px"/>
+  </widget>
+  <widget name="btnShowCard2" parent="Form" prefHeight="23px" prefWidth="96px" text="show card2" type="ButtonDesignInfo">
+    <constraints height="23px" right="30px" top="216px" type="MarginConstraintsDesignInfo" width="96px"/>
+  </widget>
+  <widget name="btnShowCard3" parent="Form" prefHeight="23px" prefWidth="96px" text="show card3" type="ButtonDesignInfo">
+    <constraints bottom="74px" height="23px" right="30px" type="MarginConstraintsDesignInfo" width="96px"/>
+  </widget>
+  <widget buttonGroup="buttonGroup" name="radioButton" parent="Form" prefHeight="23px" prefWidth="81px" text="radioButton" type="RadioDesignInfo">
+    <constraints height="23px" left="0px" top="0px" type="MarginConstraintsDesignInfo" width="81px"/>
+  </widget>
+  <widget buttonGroup="buttonGroup" name="radioButton1" parent="Form" prefHeight="23px" prefWidth="87px" text="radioButton1" type="RadioDesignInfo">
+    <constraints height="23px" left="0px" top="24px" type="MarginConstraintsDesignInfo" width="87px"/>
+  </widget>
+  <widget buttonGroup="buttonGroup" name="radioButton2" parent="Form" prefHeight="23px" prefWidth="87px" text="radioButton2" type="RadioDesignInfo">
+    <constraints height="23px" left="0px" top="48px" type="MarginConstraintsDesignInfo" width="87px"/>
+  </widget>
+  <widget name="tabs" parent="Form" prefHeight="156px" prefWidth="228px" type="TabsDesignInfo">
+    <constraints height="156px" left="108px" top="0px" type="MarginConstraintsDesignInfo" width="228px"/>
+  </widget>
+  <widget name="pnlTab1" parent="tabs" prefHeight="128px" prefWidth="223px" type="PanelDesignInfo" visible="false">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints tabTitle="tab2" type="TabsConstraintsDesignInfo"/>
+  </widget>
+  <widget name="pnlTab2" parent="tabs" prefHeight="128px" prefWidth="223px" type="PanelDesignInfo" visible="false">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints tabTitle="tab1" type="TabsConstraintsDesignInfo"/>
+  </widget>
+  <widget name="pnlTab3" parent="tabs" prefHeight="128px" prefWidth="223px" type="PanelDesignInfo">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints tabTitle="tab0" type="TabsConstraintsDesignInfo"/>
+  </widget>
+  <widget name="pnlCards" parent="Form" prefHeight="180px" prefWidth="252px" type="PanelDesignInfo">
+    <layout type="CardLayoutDesignInfo"/>
+    <constraints height="180px" left="0px" top="168px" type="MarginConstraintsDesignInfo" width="252px"/>
+  </widget>
+  <widget backgroundColor="#ccffcc" name="pnlCard1" parent="pnlCards" prefHeight="180px" prefWidth="252px" type="PanelDesignInfo">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints cardName="card1" type="CardLayoutConstraintsDesignInfo"/>
+  </widget>
+  <widget backgroundColor="#ff6666" name="pnlCard2" parent="pnlCards" prefHeight="180px" prefWidth="252px" type="PanelDesignInfo" visible="false">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints cardName="card2" type="CardLayoutConstraintsDesignInfo"/>
+  </widget>
+  <widget backgroundColor="#00cc99" name="pnlCard3" parent="pnlCards" prefHeight="180px" prefWidth="252px" type="PanelDesignInfo" visible="false">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints cardName="card3" type="CardLayoutConstraintsDesignInfo"/>
+  </widget>
+  <nonvisual name="buttonGroup" type="ButtonGroupDesignInfo"/>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

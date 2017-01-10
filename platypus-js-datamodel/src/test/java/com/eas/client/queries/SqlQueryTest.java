@@ -31,23 +31,19 @@ public class SqlQueryTest {
     public static void init() throws Exception {
         String url = System.getProperty(TestConstants.DATASOURCE_URL_1);
         if (url == null) {
-            System.err.println(TestConstants.DATASOURCE_URL_1 + TestConstants.PROPERTY_ERROR);
-            System.exit(1);
+            throw new IllegalStateException(TestConstants.DATASOURCE_URL_1 + TestConstants.PROPERTY_ERROR);
         }
         String user = System.getProperty(TestConstants.DATASOURCE_USER_1);
         if (user == null) {
-            System.err.println(TestConstants.DATASOURCE_USER_1 + TestConstants.PROPERTY_ERROR);
-            System.exit(1);
+            throw new IllegalStateException(TestConstants.DATASOURCE_USER_1 + TestConstants.PROPERTY_ERROR);
         }
         String passwd = System.getProperty(TestConstants.DATASOURCE_PASSWORD_1);
         if (passwd == null) {
-            System.err.println(TestConstants.DATASOURCE_PASSWORD_1 + TestConstants.PROPERTY_ERROR);
-            System.exit(1);
+            throw new IllegalStateException(TestConstants.DATASOURCE_PASSWORD_1 + TestConstants.PROPERTY_ERROR);
         }
         String schema = System.getProperty(TestConstants.DATASOURCE_SCHEMA_1);
         if (schema == null) {
-            System.err.println(TestConstants.DATASOURCE_SCHEMA_1 + TestConstants.PROPERTY_ERROR);
-            System.exit(1);
+            throw new IllegalStateException(TestConstants.DATASOURCE_SCHEMA_1 + TestConstants.PROPERTY_ERROR);
         }
 
         DbConnectionSettings settings = new DbConnectionSettings();
