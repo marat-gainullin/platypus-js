@@ -26,7 +26,10 @@ def pwcProject = project(':platypus-js-web-client')
 def wrappersProject = project(':platypus-js-wrappers')
 
 dependencies {
-    runtime project(':platypus-js-servlet')
+    runtime project(':platypus-js-servlet'),
+            project(':platypus-js-forms'),
+            project(':platypus-js-sql-driver-h2'),
+            project(':platypus-js-sql-driver-mysql')
     pwc pwcProject
     wrappers wrappersProject
     tomcat "org.apache.tomcat:tomcat-catalina:$tomcatVersion",
@@ -35,9 +38,11 @@ dependencies {
            "org.apache.tomcat:tomcat-websocket:$tomcatVersion",
            "org.apache.tomcat:tomcat-jaspic-api:$tomcatVersion"
     containerLibs 'com.h2database:h2:1.4.193'
+    containerLibs 'com.vividsolutions:jts:1.13'
     testCompile project(':platypus-js-scripting'),
                 project(':platypus-js-launcher'),
                 project(':platypus-js-core').sourceSets.test.output
+    testRuntime 'com.h2database:h2:1.4.193'
 }
 
 def pwcDirName = "${webAppDirName}/pwc"
@@ -57,8 +62,8 @@ task cleanLib(type: Delete) {
 }
 
 clean.dependsOn cleanExplodedPwc,
-                cleanExplodedWrappers,
-                cleanLib
+cleanExplodedWrappers,
+cleanLib
 
 task explodePwc(type: Copy) {
     configurations.pwc.each {
@@ -115,7 +120,7 @@ task buildTomcat() {
 }
 
 buildTomcat.dependsOn buildTomcatBin,
-                      buildTomcatLibs
+buildTomcatLibs
 
 task cleanTomcat(type: Delete){
     delete tomcatDir
@@ -136,14 +141,15 @@ def props = {
 
 def appProps = props("${webAppDirName}/project.properties")
 def appPrivateProps = props("${webAppDirName}/private.properties")
+def testBasesDirectory = "${project.buildDir}/test-databases"
 
 def datasource1Name = 'eas'
-def datasource1Dburl = 'jdbc:h2:tcp/localhost/~/platypus-tests-eas'
+def datasource1Dburl = "jdbc:h2:tcp://localhost/${testBasesDirectory}/platypus-tests-eas"
 def datasource1Dbuser = 'sa'
 def datasource1Dbpassword = 'sa'
 def datasource1Dbschema = 'PUBLIC'
 def datasource2Name = 'easHR'
-def datasource2Dburl = 'jdbc:h2:tcp/localhost/~/platypus-tests-easHR'
+def datasource2Dburl = "jdbc:h2:tcp://localhost/${testBasesDirectory}/platypus-tests-hr"
 def datasource2Dbuser = 'sa'
 def datasource2Dbpassword = 'sa'
 def datasource2Dbschema = 'PUBLIC'
@@ -188,12 +194,32 @@ task thinServerExec(type: JavaExec) {
          '-datasource', datasource2Name, '-dburl', datasource2Dburl, '-dbuser', datasource2Dbuser, '-dbpassword', datasource2Dbpassword, '-dbschema', datasource2Dbschema,
          '-source-path', "${appProps.sourcePath}",
          '-global-api'
+    def platypusServerLogDirName = "${projectDir}/ps/logs"
+    file(platypusServerLogDirName).mkdirs()
+    jvmArgs '-Djava.util.logging.config.class=com.eas.util.logging.LoggersConfig',
+            '-D.handlers=java.util.logging.FileHandler,java.util.logging.ConsoleHandler',
+            "-Djava.util.logging.FileHandler.encoding=utf-8",
+            "-Djava.util.logging.FileHandler.pattern=${platypusServerLogDirName}/server.log",
+            '-Djava.util.logging.FileHandler.level=INFO',
+            '-Djava.util.logging.FileHandler.formatter=java.util.logging.SimpleFormatter',
+            '-Djava.util.logging.ConsoleHandler.level=INFO',
+            '-Djava.util.logging.ConsoleHandler.formatter=java.util.logging.SimpleFormatter'
 }
 
 task h2Exec(type: JavaExec) {
     classpath fileTree(sharedLibDir)
     main 'org.h2.tools.Server'
     args '-tcp'
+}
+task h2FillEasExec(type: JavaExec) {
+    classpath fileTree(sharedLibDir)
+    main 'org.h2.tools.RunScript'
+    args '-url', datasource1Dburl, '-user', datasource1Dbuser, '-password', datasource1Dbpassword, '-script', "${projectDir}/src/test/resources/eas.sql"
+}
+task h2FillEasHrExec(type: JavaExec) {
+    classpath fileTree(sharedLibDir)
+    main 'org.h2.tools.RunScript'
+    args '-url', datasource2Dburl, '-user', datasource2Dbuser, '-password', datasource2Dbpassword, '-script', "${projectDir}/src/test/resources/hr.sql"
 }
 
 def tomcatServer
@@ -202,8 +228,8 @@ def h2Server
 task launchServers(){
     doFirst {
         h2Server = new ProcessBuilder(h2Exec.commandLine)
-                            .redirectErrorStream(true)
-                            .start()
+                    .redirectErrorStream(true)
+                    .start()
         def h2StdOut = new InputStreamReader(h2Server.getInputStream())
         def h2NextLine = h2StdOut.readLine()
         while(!h2NextLine.contains('TCP server running at')){
@@ -211,21 +237,19 @@ task launchServers(){
             h2NextLine = h2StdOut.readLine()
         }
         println(h2NextLine)
-        
-        tomcatServer = new ProcessBuilder(tomcatExec.commandLine)
-                            .directory(file(tomcatExec.workingDir))
-                            .redirectErrorStream(true).start()
-        def tomcatStdOut = new InputStreamReader(tomcatServer.getInputStream())
-        def tomcatNextLine = tomcatStdOut.readLine()
-        while(!tomcatNextLine.contains('Server startup in')){
-            println(tomcatNextLine)
-            tomcatNextLine = tomcatStdOut.readLine()
-        }
-        println(tomcatNextLine)
-        
+        if(new ProcessBuilder(h2FillEasExec.commandLine)
+            .start()
+            .waitFor() != 0)
+            throw new InvalidUserDataException("Can't fill test database 'eas'")
+        println 'Test database "eas" filled.'
+        if(new ProcessBuilder(h2FillEasHrExec.commandLine)
+            .start()
+            .waitFor() != 0)
+            throw new InvalidUserDataException("Can't fill test database 'easHR'")
+        println 'Test database "easHR" filled.'
         thinServer = new ProcessBuilder(thinServerExec.commandLine)
-                            .redirectErrorStream(true)
-                            .start()
+        .redirectErrorStream(true)
+        .start()
         def thinServerStdOut = new InputStreamReader(thinServer.getInputStream())
         def thinServerNextLine = thinServerStdOut.readLine()
         while(!thinServerNextLine.contains('Listening platypus protocol on')){
@@ -233,20 +257,39 @@ task launchServers(){
             thinServerNextLine = thinServerStdOut.readLine()
         }
         println(thinServerNextLine)
+        /*
+        tomcatServer = new ProcessBuilder(tomcatExec.commandLine)
+        .directory(file(tomcatExec.workingDir))
+        .redirectErrorStream(true).start()
+        def tomcatStdOut = new InputStreamReader(tomcatServer.getInputStream())
+        def tomcatNextLine = tomcatStdOut.readLine()
+        while(!tomcatNextLine.contains('Server startup in')){
+            println(tomcatNextLine)
+            tomcatNextLine = tomcatStdOut.readLine()
+        }
+        println(tomcatNextLine)
+        */
     }
 }
 
 task shutdownServers (){
     doFirst {
+        /*
         tomcatServer.destroy()
         tomcatServer.waitFor()
         println "Tomcat shutted down"
+        */        
         thinServer.destroy()
         thinServer.waitFor()
         println "Thin server shutted down"
         h2Server.destroy()
         h2Server.waitFor()
         println "H2 server shutted down"
+        
+        file(testBasesDirectory).list().each {
+            fileName -> delete "${testBasesDirectory}/${fileName}"
+        }
+        println "Test databases erased"
     }
 }
 
@@ -262,6 +305,13 @@ shutdownServers.mustRunAfter test
 
 test {
     forkEvery = 1
+    sourceSets {
+        test {
+            resources {
+                srcDir wrappersDirName
+            }
+        }
+    }
     systemProperties["datasource.1.name"] = datasource1Name
     systemProperties["datasource.1.dburl"] = datasource1Dburl
     systemProperties["datasource.1.dbuser"] = datasource1Dbuser

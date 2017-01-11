@@ -1,17 +1,14 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.application;
 
 import com.eas.client.TestConstants;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 
 /**
  *
  * @author mg
  */
+@Ignore
 public class WithWebServerTest extends WithServerTests {
 
     public static final String SERVLET_CONTAINER_URL = "servlet-container.url";

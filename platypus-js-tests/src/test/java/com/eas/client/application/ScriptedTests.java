@@ -79,6 +79,8 @@ public class ScriptedTests {
             }else{
                 fail(failedText + lastChance.toString());
             }
+        } else {
+            Logger.getLogger(ScriptedTests.class.getName()).log(Level.INFO, "{0} completed", aTestModuleName);
         }
     }
 
