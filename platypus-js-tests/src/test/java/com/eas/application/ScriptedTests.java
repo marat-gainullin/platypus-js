@@ -1,4 +1,4 @@
-package com.eas.client.application;
+package com.eas.application;
 
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.Scripts;

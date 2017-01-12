@@ -1,8 +1,10 @@
-package com.eas.client.application;
+package com.eas.application;
 
 
 import com.eas.client.TestConstants;
+import com.eas.client.application.PlatypusClientApplication;
 import org.junit.BeforeClass;
+
 /**
  *
  * @author mg

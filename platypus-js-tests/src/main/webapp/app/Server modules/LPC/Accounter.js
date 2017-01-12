@@ -23,15 +23,16 @@ function Accounter() {
                     onSuccess(sinusesSum);
             }
         }
-        function sinusCalced(aRes) {
+        function sinusCalcSucceded(aRes) {
             complete(aRes);
         }
+        function sinusCalcFailed(aError) {
+            P.Logger.severe(aError);
+            errors.push(aError);
+            complete(0);
+        }
         for (var i = 0; i < aCycles; i++) {
-            worker.execute(30 + i, sinusCalced, function (aError) {
-                P.Logger.severe(aError);
-                errors.push(aError);
-                complete(0);
-            });
+            worker.execute(30 + i, sinusCalcSucceded, sinusCalcFailed);
         }
     };
 }

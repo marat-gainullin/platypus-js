@@ -132,15 +132,11 @@ public class Entity implements HasPublished {
 				nEntity.@com.eas.model.Entity::execute(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
 			}
 		});
-		Object
-				.defineProperty(
-						aTarget,
-						'query',
-						{
-							value : function(params, onSuccess, onFailure) {
-								nEntity.@com.eas.model.Entity::query(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(params, onSuccess, onFailure);
-							}
-						});
+		Object.defineProperty(aTarget, 'query', {
+                        value : function(params, onSuccess, onFailure) {
+                                nEntity.@com.eas.model.Entity::query(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(params, onSuccess, onFailure);
+                        }
+                });
 		Object.defineProperty(aTarget, 'requery', {
 			value : function(onSuccess, onFailure) {
 				nEntity.@com.eas.model.Entity::requery(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
@@ -151,15 +147,11 @@ public class Entity implements HasPublished {
 				nEntity.@com.eas.model.Entity::append(Lcom/google/gwt/core/client/JavaScriptObject;)(aData);
 			}
 		});
-		Object
-				.defineProperty(
-						aTarget,
-						'update',
-						{
-							value : function(params, onSuccess, onFailure) {
-								nEntity.@com.eas.model.Entity::update(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(params, onSuccess, onFailure);
-							}
-						});
+		Object.defineProperty(aTarget, 'update', {
+                        value : function(params, onSuccess, onFailure) {
+                                nEntity.@com.eas.model.Entity::update(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(params, onSuccess, onFailure);
+                        }
+                });
 	}-*/;
 
 	public Fields getFields() {

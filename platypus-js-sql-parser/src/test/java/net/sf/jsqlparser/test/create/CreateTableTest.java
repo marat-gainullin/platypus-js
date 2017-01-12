@@ -1,9 +1,9 @@
 package net.sf.jsqlparser.test.create;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -19,14 +19,14 @@ import net.sf.jsqlparser.test.tablesfinder.TablesNamesFinder;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class CreateTableTest{
+public class CreateTableTest {
 
     CCJSqlParserManager parserManager = new CCJSqlParserManager();
 
     @Test
     public void testCreateTable() throws JSQLParserException {
-        String statement =
-                "CREATE TABLE mytab (mycol a (10, 20) c nm g, mycol2 mypar1 mypar2 (23,323,3) asdf ('23','123') dasd, "
+        String statement
+                = "CREATE TABLE mytab (mycol a (10, 20) c nm g, mycol2 mypar1 mypar2 (23,323,3) asdf ('23','123') dasd, "
                 + "PRIMARY KEY (mycol2, mycol)) type = myisam";
         CreateTable createTable = (CreateTable) parserManager.parse(new StringReader(statement));
         assertEquals(2, createTable.getColumnDefinitions().size());
@@ -36,11 +36,11 @@ public class CreateTableTest{
         assertEquals("mycol", ((Index) createTable.getIndexes().get(0)).getColumnsNames().get(1));
         assertEquals(statement, "" + createTable);
     }
-    
+
     @Test
     public void testComment() throws JSQLParserException {
-        String statement =
-                "/*90053*/ CREATE /*11*/ TEMPORARY /**/ TABLE /**/ mytab /**/ (/**/ mycol /**/ a /**/ (/**/ 10 /**/, /**/ 20 /**/ ) "
+        String statement
+                = "/*90053*/ CREATE /*11*/ TEMPORARY /**/ TABLE /**/ mytab /**/ (/**/ mycol /**/ a /**/ (/**/ 10 /**/, /**/ 20 /**/ ) "
                 + "/** /c /**/ nm /**/ g /*100*/, /**/ mycol2 /**/ mypar1 /**/ mypar2 /**/ ( /**/ 23 /**/ , /**/ 323 /**/ , /**/ 3 /**/ ) "
                 + "/**/ asdf /**/ ( /**/ '23' /**/ , /**/ '123' /**/ ) /**/ dasd /*200*/, "
                 + "/**/ PRIMARY /**/ KEY /**/ (/**/ mycol2 /**/, /**/ mycol /**/ ) /*300*/, /**/ INDEX /**/ "
@@ -48,14 +48,12 @@ public class CreateTableTest{
         CreateTable createTable = (CreateTable) parserManager.parse(new StringReader(statement));
         assertEquals(statement, "" + createTable);
     }
-    
+
     @Test
     public void testRUBiSCreateList() throws Exception {
-
-        BufferedReader in = new BufferedReader(new FileReader("testfiles" + File.separator + "RUBiS-create-requests.txt"));
-        TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
-
-        try {
+        URL rubis = Thread.currentThread().getContextClassLoader().getResource("RUBiS-create-requests.txt");
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(rubis.openStream()))) {
+            TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
             int numSt = 1;
             while (true) {
                 String line = getLine(in);
@@ -148,10 +146,6 @@ public class CreateTableTest{
                 }
                 numSt++;
 
-            }
-        } finally {
-            if (in != null) {
-                in.close();
             }
         }
     }

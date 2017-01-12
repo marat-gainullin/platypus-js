@@ -114,7 +114,7 @@
                                            algorithm="md5" />
                     </Realm>
                     <Resource driverClassName="org.h2.Driver" name="${datasource.1.name}" password="${datasource.1.dbpassword}" type="javax.sql.DataSource" url="${datasource.1.dburl}" username="${datasource.1.dbuser}"/>
-                    <Resource driverClassName="org.h2.Driver" name="${datasource.2.name}" password="${datasource.1.dbpassword}" type="javax.sql.DataSource" url="${datasource.2.dburl}" username="${datasource.2.dbuser}"/>
+                    <Resource driverClassName="org.h2.Driver" name="${datasource.2.name}" password="${datasource.2.dbpassword}" type="javax.sql.DataSource" url="${datasource.2.dburl}" username="${datasource.2.dbuser}"/>
                 </Context>
             </Host>
         </Engine>

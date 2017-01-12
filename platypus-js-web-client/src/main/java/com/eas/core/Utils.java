@@ -447,12 +447,12 @@ public class Utils {
 		else if (aValue instanceof Date || aValue instanceof $wnd.Date || aValue.constructor.name == "Date")
 			return @com.eas.core.Utils::double2Date(D)(aValue.getTime());
 		else if(aValue instanceof Boolean || aValue instanceof $wnd.Boolean || aValue.constructor.name == "Boolean")
-			return new @java.lang.Boolean::new(Z)((aValue == true));
+			return @java.lang.Boolean::new(Z)(aValue == true);
 		else if(aValue instanceof String || aValue instanceof $wnd.String || aValue.constructor.name == "String")
-			return new @java.lang.String::new(Ljava/lang/String;)(aValue+'');
-		else if(!isNaN(aValue)) {
-			return new @java.lang.Double::new(D)((new Number(aValue)) * 1);
-		} else
+			return @java.lang.String::new(Ljava/lang/String;)(aValue + '');
+		else if(!isNaN(aValue) || !$wnd.isNaN(aValue))
+			return @java.lang.Double::new(D)(aValue * 1);
+		else
 			return aValue;
 	}-*/;
 

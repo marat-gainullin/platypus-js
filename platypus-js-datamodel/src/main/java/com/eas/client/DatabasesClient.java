@@ -512,8 +512,8 @@ public class DatabasesClient {
         DataSource dataSource = obtainDataSource(aDatasourceName);
         Connection connection = dataSource.getConnection();
         boolean autoCommit = connection.getAutoCommit();
+        connection.setAutoCommit(false);
         try {
-            connection.setAutoCommit(false);
             List<StatementsGenerator.StatementsLogEntry> statements = new ArrayList<>();
             // This structure helps us to avoid actuality check for queries while
             // processing each statement in transaction. Thus, we can avoid speed degradation.

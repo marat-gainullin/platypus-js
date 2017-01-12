@@ -1,4 +1,4 @@
-package com.eas.client.application;
+package com.eas.application;
 
 import org.junit.Test;
 
@@ -7,7 +7,7 @@ import org.junit.Test;
  * @author mg
  */
 public abstract class WithServerTests extends ScriptedTests {
-/*
+
     @Test
     public void select_stateless_test() throws InterruptedException {
         start("select_stateless_test", 20000L);
@@ -20,7 +20,7 @@ public abstract class WithServerTests extends ScriptedTests {
 
     @Test
     public void append_test() throws InterruptedException {
-        start("append_test", 35000L);
+        start("append_test", 35000_00000000L);
     }
 
     @Test
@@ -148,12 +148,11 @@ public abstract class WithServerTests extends ScriptedTests {
         start("AsyncServerModulesTest", 20000L);
     }
 
-*/
+
     @Test
     public void accounterClient() throws InterruptedException {
         start("AccounterClient", 20000L);
     }
-/*
 
     @Test
     public void principalTestClient() throws InterruptedException {
@@ -184,5 +183,4 @@ public abstract class WithServerTests extends ScriptedTests {
     public void LPCCallbacksTest() throws InterruptedException {
         start("LPCCallbacksTest", 20000L);
     }
-*/
 }

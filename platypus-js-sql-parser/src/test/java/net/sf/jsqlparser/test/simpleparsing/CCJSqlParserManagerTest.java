@@ -3,7 +3,9 @@ package net.sf.jsqlparser.test.simpleparsing;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.net.URL;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
@@ -16,19 +18,21 @@ public class CCJSqlParserManagerTest {
     @Test
     public void testParse() throws Exception {
         CCJSqlParserManager parserManager = new CCJSqlParserManager();
-        BufferedReader in = new BufferedReader(new FileReader("testfiles" + File.separator + "simple_parsing.txt"));
-        String statement = "";
-        while (true) {
-            try {
-                statement = CCJSqlParserManagerTest.getStatement(in);
-                if (statement == null) {
-                    break;
-                }
+        URL simpleParsing = Thread.currentThread().getContextClassLoader().getResource("simple_parsing.txt");
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(simpleParsing.openStream()))) {
+            String statement = "";
+            while (true) {
+                try {
+                    statement = CCJSqlParserManagerTest.getStatement(in);
+                    if (statement == null) {
+                        break;
+                    }
 
-                Statement parsedStm = parserManager.parse(new StringReader(statement));
-                //System.out.println(statement);
-            } catch (JSQLParserException e) {
-                throw new TestException("impossible to parse statement: " + statement, e);
+                    Statement parsedStm = parserManager.parse(new StringReader(statement));
+                    //System.out.println(statement);
+                } catch (JSQLParserException e) {
+                    throw new TestException("impossible to parse statement: " + statement, e);
+                }
             }
         }
     }

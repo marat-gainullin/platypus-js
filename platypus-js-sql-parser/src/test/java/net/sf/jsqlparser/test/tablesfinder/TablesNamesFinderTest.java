@@ -3,7 +3,9 @@ package net.sf.jsqlparser.test.tablesfinder;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -22,11 +24,9 @@ public class TablesNamesFinderTest {
 
     @Test
     public void testRUBiSTableList() throws Exception {
-
-        BufferedReader in = new BufferedReader(new FileReader("testfiles" + File.separator + "RUBiS-select-requests.txt"));
-        TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
-
-        try {
+        URL rubis = Thread.currentThread().getContextClassLoader().getResource("RUBiS-select-requests.txt");
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(rubis.openStream()))) {
+            TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
             int numSt = 1;
             while (true) {
                 String line = getLine(in);
@@ -82,27 +82,20 @@ public class TablesNamesFinderTest {
                     throw new TestException("error at stm num: " + numSt, e);
                 }
                 numSt++;
-
-            }
-        } finally {
-            if (in != null) {
-                in.close();
             }
         }
     }
 
     @Test
     public void testGetTableList() throws Exception {
-
-        String sql =
-                "SELECT * FROM MY_TABLE1, MY_TABLE2, (SELECT * FROM MY_TABLE3) LEFT OUTER JOIN MY_TABLE4 "
+        String sql
+                = "SELECT * FROM MY_TABLE1, MY_TABLE2, (SELECT * FROM MY_TABLE3) LEFT OUTER JOIN MY_TABLE4 "
                 + " WHERE ID = (SELECT MAX(ID) FROM MY_TABLE5) AND ID2 IN (SELECT * FROM MY_TABLE6)";
         net.sf.jsqlparser.statement.Statement statement = pm.parse(new StringReader(sql));
 
         //now you should use a class that implements StatementVisitor to decide what to do
         //based on the kind of the statement, that is SELECT or INSERT etc. but here we are only
         //interested in SELECTS
-
         if (statement instanceof Select) {
             Select selectStatement = (Select) statement;
             TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
@@ -114,9 +107,8 @@ public class TablesNamesFinderTest {
                 assertEquals("MY_TABLE" + i, tableName);
             }
         }
-
     }
- 
+
     private String getLine(BufferedReader in) throws Exception {
         return CCJSqlParserManagerTest.getLine(in);
     }

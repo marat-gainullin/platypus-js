@@ -1,14 +1,13 @@
-package com.eas.client.application;
+package com.eas.application;
 
 import com.eas.client.TestConstants;
+import com.eas.client.application.PlatypusClientApplication;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 
 /**
  *
  * @author mg
  */
-@Ignore
 public class WithWebServerTest extends WithServerTests {
 
     public static final String SERVLET_CONTAINER_URL = "servlet-container.url";
@@ -20,7 +19,6 @@ public class WithWebServerTest extends WithServerTests {
 
     @BeforeClass
     public static void init() throws Exception {
-
         String url = System.getProperty(SERVLET_CONTAINER_URL);
         if (url == null) {
             throw new IllegalStateException(NO_SERVLET_CONTAINER_URL_MSG);
