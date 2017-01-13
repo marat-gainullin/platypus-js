@@ -6,7 +6,7 @@
 function append_test() {
     var self = this, model = P.loadModel(this.constructor.name);
 
-    self.execute = function (aOnSuccess) {
+    self.execute = function (aOnSuccess, aOnFailure) {
         model.customers.requery(function () {
             var originalLength = model.customers.length;
             model.customers.query({}, function (aData) {

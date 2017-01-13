@@ -9,7 +9,7 @@ import org.junit.Test;
  *
  * @author mg
  */
-public class WithoutServerTest extends ScriptedTests {
+public class TwoTierTest extends ScriptedTests {
 
     @BeforeClass
     public static void init() throws Exception {

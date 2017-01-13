@@ -41,8 +41,9 @@ dependencies {
     containerLibs 'com.vividsolutions:jts:1.13'
     testCompile project(':platypus-js-scripting'),
                 project(':platypus-js-launcher'),
-                project(':platypus-js-core').sourceSets.test.output
-                //'org.seleniumhq.selenium:selenium-java:3.0.1'
+                project(':platypus-js-core').sourceSets.test.output,
+                'io.github.bonigarcia:webdrivermanager:1.5.0',
+                'org.seleniumhq.selenium:selenium-java:3.0.1'
     testRuntime 'com.h2database:h2:1.4.193'
 }
 
@@ -256,6 +257,7 @@ task launchServers(){
                 h2NextLine = h2StdOut.readLine()
             }
             println("H2 server started")
+            println()
         }finally{
             h2StdOut.close()
         }
@@ -269,6 +271,7 @@ task launchServers(){
             .waitFor() != 0)
             throw new InvalidUserDataException("Can't fill test database 'easHR'")
         println 'Test database "easHR" filled.'
+        println()
         file(platypusServerLogDirName).mkdirs()
         thinServer = new ProcessBuilder(thinServerExec.commandLine)
         .redirectErrorStream(true)
@@ -280,7 +283,8 @@ task launchServers(){
                 println(thinServerNextLine)
                 thinServerNextLine = thinServerStdOut.readLine()
             }
-            println("Thin server started")
+            println("Platypus server started")
+            println()
         }finally{
             thinServerStdOut.close()
         }
@@ -295,6 +299,7 @@ task launchServers(){
                 tomcatNextLine = tomcatStdOut.readLine()
             }
             println("Tomcat started")
+            println()
         } finally {
             tomcatStdOut.close()
         }

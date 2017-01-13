@@ -281,11 +281,11 @@ public class Classes2Scripts {
     protected String getClassJs(Class clazz) {
         FunctionInfo ci = getJsConstructorInfo(clazz);
         if (ci.javaClassName.contains("$")) {
-            Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "======================================= Inner class: {0}", ci.javaClassName);
+            Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "Inner class: {0}", ci.javaClassName);
             return null;
         }
         if (Modifier.isAbstract(clazz.getModifiers())) {
-            Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "======================================= Abstract class: {0}", ci.javaClassName);
+            Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "Abstract class: {0}", ci.javaClassName);
             return null;
         }
         if (!checkForHasPublished(clazz)) {

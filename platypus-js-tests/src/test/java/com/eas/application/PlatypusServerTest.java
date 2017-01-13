@@ -1,6 +1,5 @@
 package com.eas.application;
 
-
 import com.eas.client.TestConstants;
 import com.eas.client.application.PlatypusClientApplication;
 import org.junit.BeforeClass;
@@ -9,7 +8,7 @@ import org.junit.BeforeClass;
  *
  * @author mg
  */
-public class WithSeServerTest extends WithServerTests {
+public class PlatypusServerTest extends ThreeTierTests {
 
     public static final String PLATYPUS_SERVER_URL = "platypus-server.url";
     public static final String PLATYPUS_SERVER_USER = "platypus-server.user";

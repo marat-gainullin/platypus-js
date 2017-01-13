@@ -8,7 +8,7 @@ import org.junit.BeforeClass;
  *
  * @author mg
  */
-public class WithWebServerTest extends WithServerTests {
+public class ServletContainerTest extends ThreeTierTests {
 
     public static final String SERVLET_CONTAINER_URL = "servlet-container.url";
     public static final String SERVLET_CONTAINER_USER = "servlet-container.user";

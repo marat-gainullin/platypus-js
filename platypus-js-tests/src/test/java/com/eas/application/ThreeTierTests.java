@@ -6,7 +6,7 @@ import org.junit.Test;
  *
  * @author mg
  */
-public abstract class WithServerTests extends ScriptedTests {
+public abstract class ThreeTierTests extends ScriptedTests {
 
     @Test
     public void select_stateless_test() throws InterruptedException {
@@ -20,7 +20,7 @@ public abstract class WithServerTests extends ScriptedTests {
 
     @Test
     public void append_test() throws InterruptedException {
-        start("append_test", 35000_00000000L);
+        start("append_test", 35000L);
     }
 
     @Test
