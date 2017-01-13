@@ -130,18 +130,30 @@ task cleanTomcat(type: Delete){
 
 def props = { 
     fileName ->
-    def input = file(fileName).newDataInputStream()
-    try {
-        def loadedProps = new Properties()
-        loadedProps.load(input)
-        return loadedProps
-    } finally {
-        input.close()
+    def loadedProps = new Properties()
+    def inputFile = file(fileName)
+    if(inputFile.exists()){
+        def input = inputFile.newDataInputStream()
+        try {
+            loadedProps.load(input)
+            return loadedProps
+        } finally {
+            input.close()
+        }
     }
+    return loadedProps
 }
 
 def appProps = props("${webAppDirName}/project.properties")
+if(!appProps.context)
+    appProps.context = 'p-tests'
+if(!appProps.sourcePath)
+    appProps.sourcePath = 'app'
 def appPrivateProps = props("${webAppDirName}/private.properties")
+if(!appPrivateProps.debugServerPort)
+    appPrivateProps.debugServerPort = 8901
+if(!appPrivateProps.debugTomcatPort)
+    appPrivateProps.debugTomcatPort = 8902
 def testBasesDirectory = "${buildDir}/test-databases"
 
 def datasource1Name = 'eas'

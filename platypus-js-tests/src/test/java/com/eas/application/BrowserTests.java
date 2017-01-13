@@ -71,7 +71,7 @@ public class BrowserTests {
         browser.quit();
     }
 
-    private static void start(String aTestName) {
+    private static void perform(String aTestName) {
         Object requireError = browser.executeAsyncScript(""
                 + "var complete = arguments[arguments.length - 1];\n"
                 + "require(['" + aTestName + "'], function(){\n"
@@ -95,176 +95,176 @@ public class BrowserTests {
 
     @Test
     public void select_stateless_test() {
-        start("select_stateless_test");
+        perform("select_stateless_test");
     }
 
     @Test
     public void easHRValidatorTest() {
-        start("EasHRValidatorTest");
+        perform("EasHRValidatorTest");
     }
 
     @Test
     public void append_test() {
-        start("append_test");
+        perform("append_test");
     }
 
     @Test
     public void ambigous_changes_semi_writable() {
-        start("ambigous_changes_semi_writable");
+        perform("ambigous_changes_semi_writable");
     }
 
     @Test
     public void ambigous_changes() {
-        start("ambigous_changes");
+        perform("ambigous_changes");
     }
 
     @Test
     public void extra_fields_insert_update() {
-        start("extra_fields_insert_update");
+        perform("extra_fields_insert_update");
     }
 
     @Test
     public void modelModyfiedTestClient() {
-        start("ModelModyfiedTestClient");
+        perform("ModelModyfiedTestClient");
     }
 
     @Test
     public void sqlUpdateTestClient() {
-        start("SqlUpdateTestClient");
+        perform("SqlUpdateTestClient");
     }
 
     @Test
     public void sqlExecuteUpdateTestClient() {
-        start("SqlExecuteUpdateTestClient");
+        perform("SqlExecuteUpdateTestClient");
     }
 
     @Test
     public void sqlUpdateTest() {
-        start("SqlUpdateTest");
+        perform("SqlUpdateTest");
     }
 
     @Test
     public void sqlEnqueueUpdateTest() {
-        start("SqlEnqueueUpdateTest");
+        perform("SqlEnqueueUpdateTest");
     }
 
     @Test
     public void dependenciesTest() {
-        start("DependenciesTest");
+        perform("DependenciesTest");
     }
 
     @Test
     public void parallelRequireTest() {
-        start("ParallelRequireTest");
+        perform("ParallelRequireTest");
     }
 
     @Test
     public void createEntityTestClient() {
-        start("CreateEntityTestClient");
+        perform("CreateEntityTestClient");
     }
 
     @Test
     public void loadEntityTestClient() {
-        start("LoadEntityTestClient");
+        perform("LoadEntityTestClient");
     }
 
     @Test
     public void modelAPI() {
-        start("ModelAPI");
+        perform("ModelAPI");
     }
 
     @Test
     public void multiSourceTest() {
-        start("MultiSourceTest");
+        perform("MultiSourceTest");
     }
 
     @Test
     public void multiSourceWithErrorTest() {
-        start("MultiSourceWithErrorTest");
+        perform("MultiSourceWithErrorTest");
     }
 
     @Test
     public void orm_Relations_Test() {
-        start("ORM_Relations_Test");
+        perform("ORM_Relations_Test");
     }
 
     @Test
     public void orm_properties_names_calc() {
-        start("ORM_properties_names_calc");
+        perform("ORM_properties_names_calc");
     }
 
     @Test
     public void testReportClient() {
-        start("TestReportClient");
+        perform("TestReportClient");
     }
 
     @Test
     public void iconLoadTest() {
-        start("IconLoadTest");
+        perform("IconLoadTest");
     }
 
     @Test
     public void resourceLoadTest() {
-        start("ResourceLoadTest");
+        perform("ResourceLoadTest");
     }
 
     @Test
     public void storedProcedureTestClient() {
-        start("StoredProcedureTestClient");
+        perform("StoredProcedureTestClient");
     }
 
     @Test
     public void secureServerModulesClient() {
-        start("SecureServerModulesClient");
+        perform("SecureServerModulesClient");
     }
 
     @Test
     public void secureDataSourcesTest() {
-        start("SecureDataSourcesTest");
+        perform("SecureDataSourcesTest");
     }
 
     @Test
     public void syncServerModulesTest() {
-        start("SyncServerModulesTest");
+        perform("SyncServerModulesTest");
     }
 
     @Test
     public void asyncServerModulesTest() {
-        start("AsyncServerModulesTest");
+        perform("AsyncServerModulesTest");
     }
 
     @Test
     public void accounterClient() {
-        start("AccounterClient");
+        perform("AccounterClient");
     }
 
     @Test
     public void principalTestClient() {
-        start("PrincipalTestClient");
+        perform("PrincipalTestClient");
     }
 
     @Test
     public void invokeLaterDelayedClient() {
-        start("InvokeLaterDelayedClient");
+        perform("InvokeLaterDelayedClient");
     }
 
     @Test
     public void invokeLaterDelayedTest() {
-        start("InvokeLaterDelayedTest");
+        perform("InvokeLaterDelayedTest");
     }
 
     @Test
     public void errorsTestClient() {
-        start("ErrorsTestClient");
+        perform("ErrorsTestClient");
     }
 
     @Test
     public void AMDSelfTest() {
-        start("AMDSelfTest");
+        perform("AMDSelfTest");
     }
 
     @Test
     public void LPCCallbacksTest() {
-        start("LPCCallbacksTest");
+        perform("LPCCallbacksTest");
     }
 }
