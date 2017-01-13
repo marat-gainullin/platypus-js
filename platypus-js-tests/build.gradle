@@ -99,7 +99,6 @@ war.dependsOn explodePwc
 war.dependsOn explodeWrappers
 war.dependsOn distilleLib
 
-def tomcatPort = '8080'
 def tomcatDir = "${buildDir}/tomcat"
 def tomcatBinDir = "${tomcatDir}/bin"
 def sharedLibDir = "${tomcatDir}/lib"
@@ -154,6 +153,8 @@ if(!appPrivateProps.debugServerPort)
     appPrivateProps.debugServerPort = 8901
 if(!appPrivateProps.debugTomcatPort)
     appPrivateProps.debugTomcatPort = 8902
+if(!appPrivateProps.httpTomcatPort)
+    appPrivateProps.httpTomcatPort = 8085
 def testBasesDirectory = "${buildDir}/test-databases"
 
 def datasource1Name = 'eas'
@@ -166,7 +167,7 @@ def datasource2Dburl = "jdbc:h2:tcp://localhost/${testBasesDirectory}/platypus-t
 def datasource2Dbuser = 'sa'
 def datasource2Dbpassword = 'sa'
 def datasource2Dbschema = 'PUBLIC'
-def servletContainerUrl = "http://localhost:${tomcatPort}/${appProps.context}"
+def servletContainerUrl = "http://localhost:${appPrivateProps.httpTomcatPort}/${appProps.context}"
 def servletContainerUser = 'testuser2'
 def servletContainerPassword = 'test'
 def platypusServerUrl = "platypus://localhost:8500"
@@ -186,7 +187,7 @@ task tomcatExec(type: JavaExec) {
     jvmArgs '-Xdebug',
             "-Xrunjdwp:server=y,transport=dt_socket,address=${appPrivateProps.debugTomcatPort},suspend=n",
             "-Djava.util.logging.config.file=${file(tomcatDir)}/conf/logging.properties",
-            "-Dtomcat.http.port=${tomcatPort}",
+            "-Dtomcat.http.port=${appPrivateProps.httpTomcatPort}",
             "-Dapp.context=/${appProps.context}",
             "-Dapp.base=${file(webAppDirName)}",
             "-Ddatasource.1.name=${datasource1Name}",
