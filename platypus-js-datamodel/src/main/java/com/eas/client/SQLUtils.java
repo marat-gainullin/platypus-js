@@ -37,7 +37,11 @@ public class SQLUtils {
             ServiceLoader<SqlDriver> loader = ServiceLoader.load(SqlDriver.class);
             Iterator<SqlDriver> drivers = loader.iterator();
             while (drivers.hasNext()) {
-                put(drivers.next(), true);
+                try {
+                    put(drivers.next(), true);
+                } catch (Exception ex) {
+                    Logger.getLogger(SQLUtils.class.getName()).log(Level.WARNING, null, ex);
+                }
             }
         }
     }.keySet();
