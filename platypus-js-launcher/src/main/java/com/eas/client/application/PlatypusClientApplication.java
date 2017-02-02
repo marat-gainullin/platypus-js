@@ -286,6 +286,7 @@ public class PlatypusClientApplication {
             Application app;
             PlatypusPrincipal.setClientSpacePrincipal(new AnonymousPlatypusPrincipal());
             Path apiFolder = ScriptedResource.lookupPlatypusJs();
+            Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.INFO, "Application is located at: {0}", config.url);
             if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTP)) {
                 app = new PlatypusClient(new PlatypusHttpConnection(config.url, config.sourcePath, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
             } else if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTPS)) {
