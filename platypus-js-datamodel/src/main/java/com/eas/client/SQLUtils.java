@@ -39,8 +39,8 @@ public class SQLUtils {
             while (drivers.hasNext()) {
                 try {
                     put(drivers.next(), true);
-                } catch (Exception ex) {
-                    Logger.getLogger(SQLUtils.class.getName()).log(Level.WARNING, null, ex);
+                } catch (Throwable t) {
+                    Logger.getLogger(SQLUtils.class.getName()).log(Level.WARNING, null, t);
                 }
             }
         }
