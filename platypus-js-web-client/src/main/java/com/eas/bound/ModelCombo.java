@@ -210,7 +210,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
     }
 
     public String getText() {
-        return ((StyledListBox<JavaScriptObject>) decorated).getText();
+        return list ? ((StyledListBox<JavaScriptObject>) decorated).getText() : nonListMask.getValue()/* value in nonListMask is exactly text */;
     }
 
     @Override

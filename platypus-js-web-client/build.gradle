@@ -20,11 +20,15 @@ gwt {
         disableClassMetadata = true;
         disableCastChecking = true;
     }
+    superDev {
+        maxHeapSize = '1024M'
+    }
 }
-    
+
 compileGwt {
-    maxHeapSize='1024M'
+    maxHeapSize = '1024M'
 }
+
 
 task theme(type: Copy) {
     from "src/main/theme"
