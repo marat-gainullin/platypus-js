@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.model.application;
 
 import com.eas.client.metadata.Field;
@@ -36,8 +32,9 @@ public class ReferenceRelation<E extends ApplicationEntity<?, ?, E>> extends Rel
     public void setScalarPropertyName(String aValue) {
         String oldValue = scalarPropertyName;
         scalarPropertyName = aValue;
-        changeSupport.firePropertyChange("scalarPropertyName", oldValue, scalarPropertyName);
+        changeSupport.firePropertyChange(SCALAR_PROPERTY_NAME, oldValue, scalarPropertyName);
     }
+    public static final String SCALAR_PROPERTY_NAME = "scalarPropertyName";
 
     public String getCollectionPropertyName() {
         return collectionPropertyName;
@@ -46,8 +43,9 @@ public class ReferenceRelation<E extends ApplicationEntity<?, ?, E>> extends Rel
     public void setCollectionPropertyName(String aValue) {
         String oldValue = collectionPropertyName;
         collectionPropertyName = aValue;
-        changeSupport.firePropertyChange("collectionPropertyName", oldValue, collectionPropertyName);
+        changeSupport.firePropertyChange(COLLECTION_PROPERTY_NAME, oldValue, collectionPropertyName);
     }
+    public static final String COLLECTION_PROPERTY_NAME = "collectionPropertyName";
 
     @Override
     public Relation<E> copy() {
