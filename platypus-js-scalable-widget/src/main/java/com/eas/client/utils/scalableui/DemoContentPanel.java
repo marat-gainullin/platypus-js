@@ -1,6 +1,5 @@
 package com.eas.client.utils.scalableui;
 
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -20,16 +19,6 @@ import javax.swing.JLayeredPane;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-
-/* Datamodel license.
- * Exclusive rights on this code in any form
- * are belong to it's author. This code was
- * developed for commercial purposes only. 
- * For any questions and any actions with this
- * code in any form you have to contact to it's
- * author.
- * All rights reserved.
- */
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
