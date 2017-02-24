@@ -3,8 +3,13 @@
 # travis lint [path to your .travis.yml]
 
 # we'll try to use container based infrastructure
-sudo: false
+sudo: required
 # sudo: required
+
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
 
 language: java
 
