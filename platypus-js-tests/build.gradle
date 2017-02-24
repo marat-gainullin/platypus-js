@@ -27,9 +27,9 @@ def wrappersProject = project(':platypus-js-wrappers')
 
 dependencies {
     runtime project(':platypus-js-servlet'),
-            project(':platypus-js-forms'),
-            project(':platypus-js-sql-driver-h2'),
-            project(':platypus-js-sql-driver-mysql')
+    project(':platypus-js-forms'),
+    project(':platypus-js-sql-driver-h2'),
+    project(':platypus-js-sql-driver-mysql')
     pwc pwcProject
     wrappers wrappersProject
     tomcat "org.apache.tomcat:tomcat-catalina:$tomcatVersion",
@@ -40,10 +40,10 @@ dependencies {
     containerLibs 'com.h2database:h2:1.4.193'
     containerLibs 'com.vividsolutions:jts:1.13'
     testCompile project(':platypus-js-scripting'),
-                project(':platypus-js-launcher'),
-                project(':platypus-js-core').sourceSets.test.output,
-                'io.github.bonigarcia:webdrivermanager:1.5.0',
-                'org.seleniumhq.selenium:selenium-java:3.0.1'
+    project(':platypus-js-launcher'),
+    project(':platypus-js-core').sourceSets.test.output,
+                'org.seleniumhq.selenium:selenium-java:3.0.1',
+                'io.github.bonigarcia:webdrivermanager:1.6.0'
     testRuntime 'com.h2database:h2:1.4.193'
 }
 
@@ -64,8 +64,8 @@ task cleanLib(type: Delete) {
 }
 
 clean.dependsOn cleanExplodedPwc,
-                cleanExplodedWrappers,
-                cleanLib
+cleanExplodedWrappers,
+cleanLib
 
 task explodePwc(type: Copy) {
     configurations.pwc.each {
@@ -121,7 +121,7 @@ task buildTomcat() {
 }
 
 buildTomcat.dependsOn buildTomcatBin,
-                      buildTomcatLibs
+buildTomcatLibs
 
 task cleanTomcat(type: Delete){
     delete tomcatDir
@@ -145,16 +145,16 @@ def props = {
 
 def appProps = props("${webAppDirName}/project.properties")
 if(!appProps.context)
-    appProps.context = 'p-tests'
+appProps.context = 'p-tests'
 if(!appProps.sourcePath)
-    appProps.sourcePath = 'app'
+appProps.sourcePath = 'app'
 def appPrivateProps = props("${webAppDirName}/private.properties")
 if(!appPrivateProps.debugServerPort)
-    appPrivateProps.debugServerPort = 8901
+appPrivateProps.debugServerPort = 8901
 if(!appPrivateProps.debugTomcatPort)
-    appPrivateProps.debugTomcatPort = 8902
+appPrivateProps.debugTomcatPort = 8902
 if(!appPrivateProps.httpTomcatPort)
-    appPrivateProps.httpTomcatPort = 8085
+appPrivateProps.httpTomcatPort = 8085
 def testBasesDirectory = "${buildDir}/test-databases"
 
 def datasource1Name = 'eas'
@@ -203,10 +203,10 @@ task tomcatExec(type: JavaExec) {
             "-Ddatasource.default=${datasource1Name}"
 }
 tomcatExec.dependsOn buildTomcat,
-                     configureTomcat,
-                     distilleLib,
-                     explodeWrappers,
-                     explodePwc
+configureTomcat,
+distilleLib,
+explodeWrappers,
+explodePwc
 
 def platypusServerLogDirName = "${buildDir}/platypus-server/logs"
 
@@ -233,9 +233,9 @@ task thinServerExec(type: JavaExec) {
             '-Djava.util.logging.ConsoleHandler.formatter=java.util.logging.SimpleFormatter'
 }
 thinServerExec.dependsOn buildTomcatLibs,
-                         distilleLib,
-                         explodeWrappers,
-                         explodePwc
+distilleLib,
+explodeWrappers,
+explodePwc
 
 
 task h2Exec(type: JavaExec) {
@@ -260,8 +260,8 @@ def h2Server
 task launchServers(){
     doFirst {
         h2Server = new ProcessBuilder(h2Exec.commandLine)
-                    .redirectErrorStream(true)
-                    .start()
+        .redirectErrorStream(true)
+        .start()
         def h2StdOut = new InputStreamReader(h2Server.getInputStream())
         try{
             def h2NextLine = h2StdOut.readLine()
@@ -277,12 +277,12 @@ task launchServers(){
         if(new ProcessBuilder(h2FillEasExec.commandLine)
             .start()
             .waitFor() != 0)
-            throw new InvalidUserDataException("Can't fill test database 'eas'")
+        throw new InvalidUserDataException("Can't fill test database 'eas'")
         println 'Test database "eas" filled.'
         if(new ProcessBuilder(h2FillHrExec.commandLine)
             .start()
             .waitFor() != 0)
-            throw new InvalidUserDataException("Can't fill test database 'easHR'")
+        throw new InvalidUserDataException("Can't fill test database 'easHR'")
         println 'Test database "easHR" filled.'
         println()
         file(platypusServerLogDirName).mkdirs()
@@ -321,15 +321,21 @@ task launchServers(){
 
 task shutdownServers (){
     doFirst {
-        tomcatServer.destroy()
-        tomcatServer.waitFor()
-        println "Tomcat shutted down"
-        thinServer.destroy()
-        thinServer.waitFor()
-        println "Thin server shutted down"
-        h2Server.destroy()
-        h2Server.waitFor()
-        println "H2 server shutted down"
+        if(tomcatServer != null){
+            tomcatServer.destroy()
+            tomcatServer.waitFor()
+            println "Tomcat shutted down"
+        }
+        if(thinServer != null){
+            thinServer.destroy()
+            thinServer.waitFor()
+            println "Thin server shutted down"
+        }
+        if(h2Server != null){
+            h2Server.destroy()
+            h2Server.waitFor()
+            println "H2 server shutted down"
+        }
         
         file(testBasesDirectory).list().each {
             fileName -> delete "${testBasesDirectory}/${fileName}"
@@ -339,10 +345,10 @@ task shutdownServers (){
 }
 
 launchServers.dependsOn buildTomcat,
-                        configureTomcat,
-                        distilleLib,
-                        explodeWrappers,
-                        explodePwc
+configureTomcat,
+distilleLib,
+explodeWrappers,
+explodePwc
 
 test.dependsOn launchServers
 launchServers.finalizedBy shutdownServers

@@ -18,7 +18,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  */
 public class BrowserTests {
 
-    private static final int SCRIPT_TIMEOUT = 20;
+    private static final int SCRIPT_TIMEOUT = 60;
 
     private static RemoteWebDriver browser;
 

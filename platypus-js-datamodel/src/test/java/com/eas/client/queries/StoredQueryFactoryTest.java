@@ -1,6 +1,5 @@
 package com.eas.client.queries;
 
-import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.SqlQuery;
 import com.eas.client.StoredQueryFactory;
@@ -22,14 +21,16 @@ import static org.junit.Assert.*;
  */
 public class StoredQueryFactoryTest {
 
-    protected static final String CRLF = System.getProperty(ClientConstants.LINE_SEPARATOR_PROP_NAME);
-    
     protected static ApplicationSourceIndexer indexer;
     protected static DatabasesClientWithResource resource;
 
     public StoredQueryFactoryTest() {
     }
 
+    private static String rn2n(String withRn){
+        return withRn.replace("\r\n", "\n").replace("\n\r", "\n").replace("\r", "\n");
+    }
+    
     @BeforeClass
     public static void setUpClass() throws Exception {
         String url = System.getProperty(TestConstants.DATASOURCE_URL_1);
@@ -278,20 +279,20 @@ public class StoredQueryFactoryTest {
     public void testCompilingWithSubqueries() throws Exception {
         LocalQueriesProxy queriesProxy = new LocalQueriesProxy(resource.getClient(), indexer);
         SqlQuery testQuery = queriesProxy.getQuery("sub_query_compile", null, null, null);
-        assertEquals("/**"+CRLF
-                + " * "+CRLF
-                + " * @author mg"+CRLF
-                + " * @name sub_query_compile"+CRLF
-                + " */"+CRLF
-                + "SELECT T0.ORDER_NO, 'Some text' AS VALUE_FIELD_1, TABLE1.ID, TABLE1.F1, TABLE1.F3, T0.AMOUNT FROM TABLE1, TABLE2,  (/**"+CRLF
-                + " * @name namedQuery4Tests"+CRLF
-                + "*/"+CRLF
-                + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER "+CRLF
-                + "From GOODORDER goodOrder"+CRLF
-                + " Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)"+CRLF
-                + " and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)"+CRLF
-                +" Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)"+CRLF,
-                testQuery.getSqlText());
+        assertEquals(rn2n("/**\n"
+                + " * \n"
+                + " * @author mg\n"
+                + " * @name sub_query_compile\n"
+                + " */\n"
+                + "SELECT T0.ORDER_NO, 'Some text' AS VALUE_FIELD_1, TABLE1.ID, TABLE1.F1, TABLE1.F3, T0.AMOUNT FROM TABLE1, TABLE2,  (/**\n"
+                + " * @name namedQuery4Tests\n"
+                + "*/\n"
+                + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \n"
+                + "From GOODORDER goodOrder\n"
+                + " Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n"
+                + " and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n"
+                +" Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)\n"),
+                rn2n(testQuery.getSqlText()));
         assertEquals(6, testQuery.getFields().getFieldsCount());
         for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
             Field fieldMtd = testQuery.getFields().get(i + 1);
@@ -311,20 +312,20 @@ public class StoredQueryFactoryTest {
     public void testCompilingWithSubqueriesBad() throws Exception {
         LocalQueriesProxy queriesProxy = new LocalQueriesProxy(resource.getClient(), indexer);
         SqlQuery testQuery = queriesProxy.getQuery("bad_schema", null, null, null);
-        assertEquals("/**"+CRLF
-                + " * "+CRLF
-                + " * @author mg"+CRLF
-                + " * @name bad_schema"+CRLF
-                + " */"+CRLF
-                + "SELECT T0.ORDER_NO, 'Some text', TABLE1.ID, TABLE1.F1, TABLE1.F3, T0.AMOUNT FROM TABLE1, TABLE2,  (/**"+CRLF
-                + " * @name 128082898425059"+CRLF
-                + "*/"+CRLF
-                + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER "+CRLF
-                + "From GOODORDER goodOrder"+CRLF
-                + " Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)"+CRLF
-                + " and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)"+CRLF
-                + " Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)"+CRLF,
-                testQuery.getSqlText());
+        assertEquals(rn2n("/**\n"
+                + " * \n"
+                + " * @author mg\n"
+                + " * @name bad_schema\n"
+                + " */\n"
+                + "SELECT T0.ORDER_NO, 'Some text', TABLE1.ID, TABLE1.F1, TABLE1.F3, T0.AMOUNT FROM TABLE1, TABLE2,  (/**\n"
+                + " * @name 128082898425059\n"
+                + "*/\n"
+                + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \n"
+                + "From GOODORDER goodOrder\n"
+                + " Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n"
+                + " and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n"
+                + " Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)\n"),
+                rn2n(testQuery.getSqlText()));
         assertEquals(6, testQuery.getFields().getFieldsCount());
         for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
             Field fieldMtd = testQuery.getFields().get(i + 1);
@@ -344,21 +345,21 @@ public class StoredQueryFactoryTest {
     public void testAsteriskMetadata() throws Exception {
         LocalQueriesProxy queriesProxy = new LocalQueriesProxy(resource.getClient(), indexer);
         SqlQuery testQuery = queriesProxy.getQuery("asterisk_schema", null, null, null);
-        assertEquals(""
-                + "/**"+CRLF
-                + " * "+CRLF
-                + " * @author mg"+CRLF
-                + " * @name asterisk_schema"+CRLF
-                + " */"+CRLF
-                + "SELECT * FROM TABLE1, TABLE2,  (/**"+CRLF
-                + " * @name 128082898425059"+CRLF
-                + "*/"+CRLF
-                + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER "+CRLF
-                +"From GOODORDER goodOrder"+CRLF
-                +" Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)"+CRLF
-                +" and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)"+CRLF
-                +" Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
-                testQuery.getSqlText());
+        assertEquals(rn2n(""
+                + "/**\n"
+                + " * \n"
+                + " * @author mg\n"
+                + " * @name asterisk_schema\n"
+                + " */\n"
+                + "SELECT * FROM TABLE1, TABLE2,  (/**\n"
+                + " * @name 128082898425059\n"
+                + "*/\n"
+                + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \n"
+                +"From GOODORDER goodOrder\n"
+                +" Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n"
+                +" and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n"
+                +" Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)"),
+                rn2n(testQuery.getSqlText()));
         assertEquals(11, testQuery.getFields().getFieldsCount());
         for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
             Field fieldMtd = testQuery.getFields().get(i + 1);
@@ -371,33 +372,35 @@ public class StoredQueryFactoryTest {
     public void testBadSubquery() throws Exception {
         LocalQueriesProxy queriesProxy = new LocalQueriesProxy(resource.getClient(), indexer);
         SqlQuery testQuery = queriesProxy.getQuery("bad_subquery", null, null, null);
-        assertEquals("/**"+CRLF
-                + " * "+CRLF
-                + " * @author mg"+CRLF
-                + " * @name bad_subquery"+CRLF
-                + " */"+CRLF
-                + "SELECT * FROM TABLE1, TABLE2, #_1_2_8082898425059 T0 WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)"+CRLF
-                + "", testQuery.getSqlText());
+        assertEquals(rn2n(""
+                + "/**\n"
+                + " * \n"
+                + " * @author mg\n"
+                + " * @name bad_subquery\n"
+                + " */\n"
+                + "SELECT * FROM TABLE1, TABLE2, #_1_2_8082898425059 T0 WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)\n"
+                + ""), rn2n(testQuery.getSqlText()));
     }
 
     @Test
     public void testPartialTablesAsteriskMetadata() throws Exception {
         LocalQueriesProxy queriesProxy = new LocalQueriesProxy(resource.getClient(), indexer);
         SqlQuery testQuery = queriesProxy.getQuery("partial_asterisk_schema", null, null, null);
-        assertEquals("/**"+CRLF
-                + " * "+CRLF
-                + " * @author mg"+CRLF
-                + " * @name partial_asterisk_schema"+CRLF
-                + " */"+CRLF
-                + "SELECT TABLE1.*, TABLE2.FiELdB FROM TABLE1, TABLE2,  (/**"+CRLF
-                + " * @name namedQuery4Tests"+CRLF
-                + "*/"+CRLF
-                + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER "+CRLF
-                + "From GOODORDER goodOrder"+CRLF
-                + " Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)"+CRLF
-                + " and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)"+CRLF
-                + " Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)"+CRLF,
-                testQuery.getSqlText());
+        assertEquals(rn2n(""
+                + "/**\n"
+                + " * \n"
+                + " * @author mg\n"
+                + " * @name partial_asterisk_schema\n"
+                + " */\n"
+                + "SELECT TABLE1.*, TABLE2.FiELdB FROM TABLE1, TABLE2,  (/**\n"
+                + " * @name namedQuery4Tests\n"
+                + "*/\n"
+                + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \n"
+                + "From GOODORDER goodOrder\n"
+                + " Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n"
+                + " and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n"
+                + " Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)\n"),
+                rn2n(testQuery.getSqlText()));
         assertEquals(5, testQuery.getFields().getFieldsCount());
         for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
             Field fieldMtd = testQuery.getFields().get(i + 1);
@@ -431,13 +434,14 @@ public class StoredQueryFactoryTest {
     public void testWithoutAliases_Schema_NonSchema_Schema_Columns() throws Exception {
         LocalQueriesProxy queriesProxy = new LocalQueriesProxy(resource.getClient(), indexer);
         SqlQuery testQuery = queriesProxy.getQuery("without_aliases_with_schema_without_schema_columns_from_single_table", null, null, null);
-        assertEquals("/**"+CRLF
-                + " * "+CRLF
-                + " * @author mg"+CRLF
-                + " * @name without_aliases_with_schema_without_schema_columns_from_single_table"+CRLF
-                + " */"+CRLF
-                + "SELECT EAS.MTD_EntitiES.MDENt_ID, MTD_EntitiES.MDENT_NAME, EAS.MTD_EntitiES.MDENT_TYPe, MDENT_ORDER FROM EaS.MTD_EntitiES"+CRLF,
-                testQuery.getSqlText());
+        assertEquals(rn2n(""
+                + "/**\n"
+                + " * \n"
+                + " * @author mg\n"
+                + " * @name without_aliases_with_schema_without_schema_columns_from_single_table\n"
+                + " */\n"
+                + "SELECT EAS.MTD_EntitiES.MDENt_ID, MTD_EntitiES.MDENT_NAME, EAS.MTD_EntitiES.MDENT_TYPe, MDENT_ORDER FROM EaS.MTD_EntitiES\n"),
+                rn2n(testQuery.getSqlText()));
         assertEquals(4, testQuery.getFields().getFieldsCount());
         for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
             Field fieldMtd = testQuery.getFields().get(i + 1);
