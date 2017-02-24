@@ -8,6 +8,8 @@ sudo: false
 
 addons:
   apt:
+    sources:
+      - google-chrome
     packages:
       - oracle-java8-installer
       - google-chrome-stable
