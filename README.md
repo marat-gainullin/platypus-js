@@ -34,7 +34,7 @@ The platform offers a set of features, making development process extremely prod
 * Built-in security support, including users authentication and authorization, constraints of access to application resources.
 
 ## Build
-The following commands will clone git repository and build Platypus.js frm source
+The following commands will clone git repository and build Platypus.js from source
 ```
 git clone https://github.com/altsoft/PlatypusJS.git
 cd PlatypusJS
