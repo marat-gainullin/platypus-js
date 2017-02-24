@@ -3,7 +3,7 @@
 # travis lint [path to your .travis.yml]
 
 # we'll try to use container based infrastructure
-sudo: required
+sudo: false
 # sudo: required
 
 addons:
