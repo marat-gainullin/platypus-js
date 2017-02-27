@@ -1,4 +1,7 @@
 # Platypus.js
+
+[![Build Status](https://travis-ci.org/altsoft/PlatypusJS.svg?branch=master)](https://travis-ci.org/altsoft/PlatypusJS)
+
 The Platypus.js is a platform for rapid development of enterprise-level JavaScript applications.
 
 Platypus.js is a server side JavaScript platform designed on top of JavaEE 7+ technologies and Nashorn JavaScript engine.
