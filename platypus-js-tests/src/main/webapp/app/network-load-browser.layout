@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?><layout title="" view="view">
+  <AnchorsPane background="#ffffff" cursor="0" name="view" prefHeight="300px" prefWidth="400px"/>
+  <Button cursor="0" name="btnRunIt" parent="view" prefHeight="20px" prefWidth="70px" text="run it">
+    <AnchorsPaneConstraints height="20px" left="130px" top="10px" width="70px"/>
+  </Button>
+</layout>

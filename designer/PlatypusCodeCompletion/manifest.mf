@@ -1,7 +1,0 @@
-Manifest-Version: 1.0
-AutoUpdate-Show-In-Client: true
-OpenIDE-Module: com.eas.designer.codecompletion
-OpenIDE-Module-Implementation-Version: 2
-OpenIDE-Module-Install: com/eas/designer/codecompletion/Installer.class
-OpenIDE-Module-Localizing-Bundle: com/eas/designer/codecompletion/Bundle.properties
-

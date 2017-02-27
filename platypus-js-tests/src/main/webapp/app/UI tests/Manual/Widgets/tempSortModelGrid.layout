@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><layout title="" view="view">
+  <AnchorsPane background="#ffffff" cursor="0" name="view" prefHeight="300px" prefWidth="700px"/>
+  <ModelGrid cursor="0" data="qPetTypes" name="modelGrid" parent="view" prefHeight="280px" prefWidth="460px">
+    <AnchorsPaneConstraints height="280px" left="230px" right="10px" top="10px"/>
+    <CheckGridColumn name="column" resizable="true"/>
+    <ModelGridColumn field="pettypes_id" name="colPettypes_id" title="colPettypes_id" width="213px">
+      <ModelSpin max="1.7976931348623157E308" min="-1.7976931348623157E308"/>
+    </ModelGridColumn>
+    <ModelGridColumn field="name" name="colName" sortable="false" title="colName" width="212px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+  </ModelGrid>
+  <Button cursor="0" name="btnAdd" parent="view" prefHeight="20px" prefWidth="70px" text="Add">
+    <AnchorsPaneConstraints height="20px" left="10px" top="50px" width="70px"/>
+  </Button>
+  <Button cursor="0" name="btnDelete" parent="view" prefHeight="20px" prefWidth="70px" text="Delete">
+    <AnchorsPaneConstraints height="20px" left="10px" top="80px" width="70px"/>
+  </Button>
+  <Button cursor="0" name="btnSave" parent="view" prefHeight="20px" prefWidth="70px" text="Save">
+    <AnchorsPaneConstraints height="20px" left="10px" top="110px" width="70px"/>
+  </Button>
+  <ModelFormattedField cursor="0" data="qPetTypes" field="cursor.name" format="" name="modelFormattedField" parent="view" prefHeight="27px" prefWidth="173px" text="modelFormattedField">
+    <AnchorsPaneConstraints height="27px" left="20px" top="10px" width="173px"/>
+  </ModelFormattedField>
+  <Button cursor="0" name="button" parent="view" prefHeight="20px" prefWidth="70px" text="button">
+    <AnchorsPaneConstraints height="20px" left="10px" top="140px" width="70px"/>
+  </Button>
+  <Button cursor="0" name="button1" parent="view" prefHeight="20px" prefWidth="70px" text="Sort">
+    <AnchorsPaneConstraints height="20px" left="10px" top="170px" width="70px"/>
+  </Button>
+  <Button cursor="0" name="button2" parent="view" prefHeight="20px" prefWidth="110px" text="SortDesc">
+    <AnchorsPaneConstraints height="20px" left="10px" top="200px" width="110px"/>
+  </Button>
+  <Button cursor="0" name="button3" parent="view" prefHeight="20px" prefWidth="70px" text="unsort">
+    <AnchorsPaneConstraints bottom="50px" height="20px" left="10px" width="70px"/>
+  </Button>
+  <ModelCombo cursor="0" data="qPetTypes" displayField="name" displayList="qPetTypes" field="cursor.pettypes_id" name="modelCombo" parent="view" prefHeight="27px" prefWidth="130px">
+    <AnchorsPaneConstraints height="27px" left="90px" top="50px" width="130px"/>
+  </ModelCombo>
+</layout>

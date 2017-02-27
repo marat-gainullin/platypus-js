@@ -1,0 +1,10 @@
+dependencies {
+    compileOnly 'javax.servlet:javax.servlet-api:3.1.0'
+    compileOnly 'javax.websocket:javax.websocket-api:1.1'
+    compile project(':platypus-js-core')
+    compile project(':platypus-js-common-utils')
+    compile project(':platypus-js-binary-tags')
+    compile project(':platypus-js-datamodel')
+    compile project(':platypus-js-scripting')
+    compile project(':platypus-js-server')
+}

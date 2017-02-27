@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <parameters>
+    <parameter description="" name="Param1" nullable="true" parameterMode="0" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="3" typeName="DECIMAL"/>
+  </parameters>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="10" entityLocationY="20" entityWidth="150"/>
+  <entity Title="Заказы" entityHeight="200" entityIconified="false" entityId="128082940854601" entityLocationX="249" entityLocationY="27" entityWidth="150" tableAlias="goodOrder" tableName="GOODORDER" tableSchemaName=""/>
+  <entity Title="Заказчик" entityHeight="200" entityIconified="false" entityId="128082940856258" entityLocationX="464" entityLocationY="25" entityWidth="150" tableAlias="customers" tableName="CUSTOMER" tableSchemaName=""/>
+</datamodel>

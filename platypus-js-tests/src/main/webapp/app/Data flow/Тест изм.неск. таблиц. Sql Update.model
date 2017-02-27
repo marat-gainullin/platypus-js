@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datamodel>
+<parameters>
+<parameter description="" name="gname" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="12" typeName="VARCHAR"/>
+<parameter description="" name="gid" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="2" typeName="NUMERIC"/>
+</parameters>
+<parametersEntity entityHeight="200" entityIconified="false" entityLocationX="8" entityLocationY="7" entityWidth="150"/>
+<entity Title="Группа объекта ремонта" entityHeight="200" entityIconified="false" entityId="134579103717873" entityLocationX="218" entityLocationY="7" entityWidth="150" tableAlias="g" tableName="ASSET_GROUPS" tableSchemaName=""/>
+<relation leftEntityFieldName="ID" leftEntityId="134579103717873" rightEntityFieldName="gid" rightEntityId="-1"/>
+<relation leftEntityFieldName="NAME" leftEntityId="134579103717873" rightEntityFieldName="gname" rightEntityId="-1"/>
+</datamodel>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datamodel>
+  <parameters>
+    <parameter description="" name="parent" nullable="true" parameterMode="0" precision="1" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+  </parameters>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="24" entityLocationY="12" entityWidth="150"/>
+  <entity Title="MTD_ENTITIES" entityHeight="200" entityIconified="false" entityId="127191363002026" entityLocationX="335" entityLocationY="26" entityWidth="150" tableAlias="entities" tableName="MTD_ENTITIES" tableSchemaName=""/>
+  <relation leftEntityId="-1" leftEntityParameterName="parent" rightEntityFieldName="MDENT_PARENT_ID" rightEntityId="127191363002026"/>
+</datamodel>

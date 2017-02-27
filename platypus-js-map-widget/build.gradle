@@ -1,0 +1,8 @@
+dependencies {
+    compile 'com.vividsolutions:jts:1.13'
+    compile 'org.geotools:gt-api:16.0'
+    compile 'org.geotools:gt-render:16.0'
+    compile 'org.geotools:gt-referencing:16.0'
+    compile 'org.opengis:geoapi:2.2.0'
+    compile project(':platypus-js-common-utils')
+}

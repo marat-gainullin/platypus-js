@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<langpack>
-   <str id="client.package.description" txt="Ядро системы Platypus содержит модули необходимые для работы системы."/>
-   <str id="maps.package.description" txt="Модули необходимые для работы с картами."/>
-   <str id="server.package.description" txt="Модули необходимые для работы системы Platypus по трехзвенной архитектуре."/>
-   <str id="communications.package.description" txt="Модули необходимые для работы с COM/DCOM и OPC серверами."/>
-   <str id="html.client.package.description" txt="Platypus HTML5 клиент."/>
-   <str id="tools.package.description" txt="Инструменты Platypus."/>
-</langpack>

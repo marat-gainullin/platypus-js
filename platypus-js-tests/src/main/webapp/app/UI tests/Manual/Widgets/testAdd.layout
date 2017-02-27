@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><layout icon="" title="" view="view">
+  <AnchorsPane cursor="0" name="view" prefHeight="491px" prefWidth="853px"/>
+  <HtmlArea cursor="0" emptyText="Text" name="htmlArea1" parent="view" prefHeight="380px" prefWidth="830px" text="&lt;b&gt;hello&lt;/b&gt;">
+    <AnchorsPaneConstraints height="380px" left="10px" top="30px" width="830px"/>
+  </HtmlArea>
+  <Button cursor="0" name="button" parent="view" prefHeight="40px" prefWidth="100px" text="button">
+    <AnchorsPaneConstraints bottom="31px" height="40px" left="10px" width="100px"/>
+  </Button>
+  <Button cursor="0" name="button1" parent="view" prefHeight="40px" prefWidth="90px" text="button1">
+    <AnchorsPaneConstraints bottom="31px" height="40px" left="120px" width="90px"/>
+  </Button>
+  <FormattedField cursor="0" format="" name="formattedField" parent="view" prefHeight="27px" prefWidth="130px" text="formattedField">
+    <AnchorsPaneConstraints bottom="44px" height="27px" left="210px" width="130px"/>
+  </FormattedField>
+  <Button cursor="0" name="button2" parent="view" prefHeight="40px" prefWidth="110px" text="button2">
+    <AnchorsPaneConstraints bottom="31px" height="40px" left="350px" width="110px"/>
+  </Button>
+  <Button cursor="0" name="button3" parent="view" prefHeight="40px" prefWidth="100px" text="button3">
+    <AnchorsPaneConstraints bottom="31px" height="40px" left="470px" width="100px"/>
+  </Button>
+  <Button cursor="0" name="button4" parent="view" prefHeight="20px" prefWidth="70px" text="button4">
+    <AnchorsPaneConstraints bottom="51px" height="20px" right="203px" width="70px"/>
+  </Button>
+  <Button cursor="0" name="button5" parent="view" prefHeight="20px" prefWidth="70px" text="button5">
+    <AnchorsPaneConstraints bottom="21px" height="20px" right="203px" width="70px"/>
+  </Button>
+</layout>

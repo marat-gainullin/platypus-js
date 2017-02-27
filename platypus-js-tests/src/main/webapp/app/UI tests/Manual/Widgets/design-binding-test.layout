@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?><layout defaultCloseOperation="2" name="Form" prefHeight="405px" prefWidth="540px" title="Виджеты">
+  <widget name="modelCheckBox" parent="Form" prefHeight="20px" prefWidth="152px" text="Sample text" type="DbCheckDesignInfo">
+    <datamodelElement entityId="-1" fieldName="nvalue"/>
+    <constraints height="20px" left="12px" top="12px" type="MarginConstraintsDesignInfo" width="152px"/>
+  </widget>
+  <widget name="modelCombo" parent="Form" prefHeight="20px" prefWidth="204px" type="DbComboDesignInfo">
+    <displayField entityId="140410667793902" fieldName="MDENT_NAME"/>
+    <valueField entityId="140410667793902" fieldName="MDENT_ID"/>
+    <datamodelElement entityId="-1" fieldName="dirValue"/>
+    <constraints height="20px" left="168px" right="168px" top="12px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <widget dateFormat="dd.MM.yyyy" name="modelDate" parent="Form" prefHeight="20px" prefWidth="163px" type="DbDateDesignInfo">
+    <datamodelElement entityId="-1" fieldName="dvalue"/>
+    <constraints height="20px" left="12px" right="365px" top="60px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <widget name="modelFormattedField" parent="Form" prefHeight="20px" prefWidth="193px" type="DbLabelDesignInfo">
+    <datamodelElement entityId="-1" fieldName="dirValue"/>
+    <constraints height="20px" right="168px" top="60px" type="MarginConstraintsDesignInfo" width="193px"/>
+  </widget>
+  <widget name="modelTextArea" parent="Form" prefHeight="84px" prefWidth="132px" type="DbTextDesignInfo">
+    <datamodelElement entityId="-1" fieldName="svalue"/>
+    <constraints height="84px" right="16px" top="12px" type="MarginConstraintsDesignInfo" width="132px"/>
+  </widget>
+  <widget name="modelSpin" parent="Form" prefHeight="20px" prefWidth="163px" type="DbSpinDesignInfo">
+    <datamodelElement entityId="-1" fieldName="nvalue"/>
+    <constraints height="20px" left="12px" right="365px" top="108px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <widget name="modelFormattedField1" parent="Form" prefHeight="20px" prefWidth="193px" type="DbLabelDesignInfo">
+    <datamodelElement entityId="-1" fieldName="svalue"/>
+    <constraints height="20px" right="168px" top="108px" type="MarginConstraintsDesignInfo" width="193px"/>
+  </widget>
+  <widget name="modelGrid" parent="Form" prefHeight="192px" prefWidth="527px" type="DbGridDesignInfo">
+    <rowsColumnsDesignInfo fixedRows="5">
+      <rowsDatasource entityId="140410667793902" field="false"/>
+    </rowsColumnsDesignInfo>
+    <treeDesignInfo>
+      <unaryLinkField entityId="140410667793902" fieldName="MDENT_PARENT_ID"/>
+    </treeDesignInfo>
+    <column name="colMDENT_NAME" readonly="true" title="Название">
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="140410667793902" fieldName="MDENT_NAME"/>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <columnsKeyField/>
+        <cellValueField/>
+        <rowsKeyField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="colMDENT_TYPE" readonly="true" title="Тип" visible="false">
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="140410667793902" fieldName="MDENT_TYPE"/>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <columnsKeyField/>
+        <cellValueField/>
+        <rowsKeyField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="colMisc" title="Разное">
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <column name="colMDENT_PARENT_ID" title="Родитель">
+        <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+        <datamodelElement entityId="140410667793902" fieldName="MDENT_PARENT_ID"/>
+        <columnsDatasource/>
+        <columnsDisplayField/>
+        <cellsDatasource/>
+        <cellDesignInfo>
+          <columnsKeyField/>
+          <cellValueField/>
+          <rowsKeyField/>
+        </cellDesignInfo>
+        <headerStyle>
+          <nativeFont name="Tahoma" size="11"/>
+        </headerStyle>
+      </column>
+      <column name="colMDENT_ORDER" title="Порядок">
+        <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+        <datamodelElement entityId="140410667793902" fieldName="MDENT_ORDER"/>
+        <columnsDatasource/>
+        <columnsDisplayField/>
+        <cellsDatasource/>
+        <cellDesignInfo>
+          <columnsKeyField/>
+          <cellValueField/>
+          <rowsKeyField/>
+        </cellDesignInfo>
+        <headerStyle>
+          <nativeFont name="Tahoma" size="11"/>
+        </headerStyle>
+      </column>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <columnsKeyField/>
+        <cellValueField/>
+        <rowsKeyField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="colTAG1" title="Доплнение 1">
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="140410667793902" fieldName="TAG1"/>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <columnsKeyField/>
+        <cellValueField/>
+        <rowsKeyField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="colTAG2" title="Доплнение 2">
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="140410667793902" fieldName="TAG2"/>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <columnsKeyField/>
+        <cellValueField/>
+        <rowsKeyField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="colTAG3" title="Доплнение 3">
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="140410667793902" fieldName="TAG3"/>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <columnsKeyField/>
+        <cellValueField/>
+        <rowsKeyField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <constraints bottom="57px" left="12px" right="1px" top="156px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <widget name="btnSelectionTest" parent="Form" prefHeight="21px" prefWidth="144px" text="Selection test" type="ButtonDesignInfo">
+    <constraints height="21px" right="4px" top="132px" type="MarginConstraintsDesignInfo" width="144px"/>
+  </widget>
+  <widget name="btnSelectAll" parent="Form" prefHeight="23px" prefWidth="65px" text="all" type="ButtonDesignInfo">
+    <constraints height="23px" left="216px" top="130px" type="MarginConstraintsDesignInfo" width="65px"/>
+  </widget>
+  <widget name="btnUnselectAll" parent="Form" prefHeight="23px" prefWidth="71px" text="null" type="ButtonDesignInfo">
+    <constraints height="23px" left="306px" top="130px" type="MarginConstraintsDesignInfo" width="71px"/>
+  </widget>
+  <widget name="btnMakeVisible" parent="Form" prefHeight="23px" prefWidth="156px" text="make visible" type="ButtonDesignInfo">
+    <constraints height="23px" left="12px" top="132px" type="MarginConstraintsDesignInfo" width="156px"/>
+  </widget>
+  <widget name="button" parent="Form" prefHeight="23px" prefWidth="65px" text="min" type="ButtonDesignInfo">
+    <constraints bottom="10px" height="23px" left="12px" type="MarginConstraintsDesignInfo" width="65px"/>
+  </widget>
+  <widget name="button1" parent="Form" prefHeight="23px" prefWidth="71px" text="max" type="ButtonDesignInfo">
+    <constraints bottom="10px" height="23px" left="84px" type="MarginConstraintsDesignInfo" width="71px"/>
+  </widget>
+  <widget name="button2" parent="Form" prefHeight="23px" prefWidth="71px" text="res" type="ButtonDesignInfo">
+    <constraints bottom="10px" height="23px" left="168px" type="MarginConstraintsDesignInfo" width="71px"/>
+  </widget>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

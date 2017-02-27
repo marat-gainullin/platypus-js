@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?><layout defaultCloseOperation="2" name="Form" prefHeight="347px" prefWidth="532px">
+  <widget name="modelCheckBox" parent="Form" prefHeight="20px" prefWidth="152px" type="DbCheckDesignInfo">
+    <datamodelElement entityId="-1" fieldName="nvalue"/>
+    <constraints height="20px" left="12px" top="12px" type="MarginConstraintsDesignInfo" width="152px"/>
+  </widget>
+  <widget name="modelCombo" parent="Form" prefHeight="20px" prefWidth="193px" type="DbComboDesignInfo">
+    <displayField entityId="140410667793902" fieldName="MDENT_NAME"/>
+    <valueField entityId="140410667793902" fieldName="MDENT_ID"/>
+    <datamodelElement entityId="-1" fieldName="dirValue"/>
+    <constraints height="20px" right="168px" top="12px" type="MarginConstraintsDesignInfo" width="193px"/>
+  </widget>
+  <widget dateFormat="dd.MM.yyyy" name="modelDate" parent="Form" prefHeight="20px" prefWidth="152px" type="DbDateDesignInfo">
+    <datamodelElement entityId="-1" fieldName="dvalue"/>
+    <constraints height="20px" left="12px" top="60px" type="MarginConstraintsDesignInfo" width="152px"/>
+  </widget>
+  <widget name="modelFormattedField" parent="Form" prefHeight="20px" prefWidth="193px" type="DbLabelDesignInfo">
+    <datamodelElement entityId="-1" fieldName="svalue"/>
+    <constraints height="20px" right="168px" top="60px" type="MarginConstraintsDesignInfo" width="193px"/>
+  </widget>
+  <widget name="modelTextArea" parent="Form" prefHeight="84px" prefWidth="132px" type="DbTextDesignInfo">
+    <datamodelElement entityId="-1" fieldName="svalue"/>
+    <constraints height="84px" right="16px" top="12px" type="MarginConstraintsDesignInfo" width="132px"/>
+  </widget>
+  <widget name="modelSpin" parent="Form" prefHeight="20px" prefWidth="152px" type="DbSpinDesignInfo">
+    <datamodelElement entityId="-1" fieldName="nvalue"/>
+    <constraints height="20px" left="12px" top="108px" type="MarginConstraintsDesignInfo" width="152px"/>
+  </widget>
+  <widget name="modelFormattedField1" parent="Form" prefHeight="20px" prefWidth="193px" type="DbLabelDesignInfo">
+    <datamodelElement entityId="-1" fieldName="dirValue"/>
+    <constraints height="20px" right="168px" top="108px" type="MarginConstraintsDesignInfo" width="193px"/>
+  </widget>
+  <widget name="modelGrid" parent="Form" prefHeight="180px" prefWidth="519px" type="DbGridDesignInfo">
+    <rowsColumnsDesignInfo>
+      <rowsDatasource entityId="140410667793902" field="false"/>
+    </rowsColumnsDesignInfo>
+    <treeDesignInfo>
+      <unaryLinkField entityId="140410667793902" fieldName="MDENT_PARENT_ID"/>
+    </treeDesignInfo>
+    <column name="colMDENT_ID">
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="140410667793902" fieldName="MDENT_ID"/>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <columnsKeyField/>
+        <cellValueField/>
+        <rowsKeyField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="colMDENT_NAME">
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="140410667793902" fieldName="MDENT_NAME"/>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <columnsKeyField/>
+        <cellValueField/>
+        <rowsKeyField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="colMDENT_TYPE">
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="140410667793902" fieldName="MDENT_TYPE"/>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <columnsKeyField/>
+        <cellValueField/>
+        <rowsKeyField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="colTAG1">
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="140410667793902" fieldName="TAG1"/>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <columnsKeyField/>
+        <cellValueField/>
+        <rowsKeyField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="colTAG2">
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="140410667793902" fieldName="TAG2"/>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <columnsKeyField/>
+        <cellValueField/>
+        <rowsKeyField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="colTAG3">
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="140410667793902" fieldName="TAG3"/>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <columnsKeyField/>
+        <cellValueField/>
+        <rowsKeyField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="colMDENT_PARENT_ID">
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="140410667793902" fieldName="MDENT_PARENT_ID"/>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <columnsKeyField/>
+        <cellValueField/>
+        <rowsKeyField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="colMDENT_ORDER">
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="140410667793902" fieldName="MDENT_ORDER"/>
+      <columnsDatasource/>
+      <columnsDisplayField/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <columnsKeyField/>
+        <cellValueField/>
+        <rowsKeyField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <constraints bottom="11px" left="12px" right="1px" top="156px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

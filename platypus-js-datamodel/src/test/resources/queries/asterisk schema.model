@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <parameters>
+    <parameter description="" name="P3" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="P2" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="P4" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="2" typeName="NUMERIC"/>
+    <parameter description="" name="P1" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+  </parameters>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="8" entityLocationY="7" entityWidth="150"/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="141456711384853" entityLocationX="518" entityLocationY="34" entityWidth="150" queryId="128082898425059" tableAlias="T0" tableName="" tableSchemaName=""/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="141456711384852" entityLocationX="346" entityLocationY="6" entityWidth="150" tableAlias="" tableName="TABLE1" tableSchemaName=""/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="141456711384851" entityLocationX="183" entityLocationY="5" entityWidth="150" tableAlias="" tableName="TABLE2" tableSchemaName=""/>
+  <relation leftEntityId="-1" leftEntityParameterName="P4" rightEntityId="141456711384853" rightEntityParameterName="Param1"/>
+</datamodel>

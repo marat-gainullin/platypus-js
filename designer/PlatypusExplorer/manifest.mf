@@ -1,7 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module: com.eas.designer.explorer/5
-OpenIDE-Module-Implementation-Version: 30
-OpenIDE-Module-Layer: com/eas/designer/explorer/layer.xml
-OpenIDE-Module-Localizing-Bundle: com/eas/designer/explorer/Bundle.properties
-OpenIDE-Module-Requires: org.openide.windows.WindowManager
-

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout backgroundColor="#ccffcc" defaultCloseOperation="2" name="Form" prefHeight="464px" prefWidth="691px">
+  <widget actionPerformed="btnLoginActionPerformed" name="btnLogin" parent="Form" prefHeight="23px" prefWidth="100px" text="login" type="ButtonDesignInfo">
+    <constraints height="23px" right="15px" top="84px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget keyPressed="txtUserNameKeyPressed" name="txtUserName" parent="Form" prefHeight="24px" prefWidth="592px" type="TextFieldDesignInfo">
+    <constraints height="24px" left="90px" right="9px" top="12px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <widget name="lblUserName" parent="Form" prefHeight="20px" prefWidth="70px" text="user name:" type="LabelDesignInfo">
+    <constraints height="20px" left="10px" top="10px" type="MarginConstraintsDesignInfo" width="70px"/>
+  </widget>
+  <widget name="lblPassword" parent="Form" prefHeight="14px" prefWidth="70px" text="password:" type="LabelDesignInfo">
+    <constraints height="14px" left="10px" top="50px" type="MarginConstraintsDesignInfo" width="70px"/>
+  </widget>
+  <widget keyPressed="txtPasswordKeyPressed" name="txtPassword" parent="Form" prefHeight="24px" prefWidth="592px" type="PasswordFieldDesignInfo">
+    <constraints height="24px" left="90px" right="9px" top="48px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

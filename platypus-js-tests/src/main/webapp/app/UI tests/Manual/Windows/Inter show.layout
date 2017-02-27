@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><layout defaultCloseOperation="2" name="Form" prefHeight="399px" prefWidth="609px">
+  <widget name="btnTest1" parent="Form" prefHeight="25px" prefWidth="120px" text="show" type="ButtonDesignInfo">
+    <constraints height="25px" left="0px" top="10px" type="MarginConstraintsDesignInfo" width="120px"/>
+  </widget>
+  <widget name="btnTest2" parent="Form" prefHeight="25px" prefWidth="120px" text="showInternal" type="ButtonDesignInfo">
+    <constraints height="25px" left="0px" top="50px" type="MarginConstraintsDesignInfo" width="120px"/>
+  </widget>
+  <widget name="cbModal1" parent="Form" prefHeight="25px" prefWidth="130px" text="Modal view" type="CheckDesignInfo">
+    <constraints height="25px" left="130px" top="10px" type="MarginConstraintsDesignInfo" width="130px"/>
+  </widget>
+  <widget foregroundColor="#000000" name="pnlDesktop" parent="Form" prefHeight="269px" prefWidth="300px" type="DesktopDesignInfo">
+    <constraints bottom="0px" left="0px" top="130px" type="MarginConstraintsDesignInfo" width="300px"/>
+    <easFont name="Tahoma" size="11"/>
+  </widget>
+  <widget name="btnShowOnPanel" parent="Form" prefHeight="23px" prefWidth="120px" text="showOnPanel" type="ButtonDesignInfo">
+    <constraints height="23px" left="0px" top="90px" type="MarginConstraintsDesignInfo" width="120px"/>
+  </widget>
+  <widget backgroundColor="#ffffcc" name="pnlContainer" parent="Form" prefHeight="260px" prefWidth="290px" type="PanelDesignInfo">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints bottom="9px" left="310px" top="130px" type="MarginConstraintsDesignInfo" width="290px"/>
+  </widget>
+  <widget name="btnMinnimize" parent="Form" prefHeight="23px" prefWidth="90px" text="minimize" type="ButtonDesignInfo">
+    <constraints height="23px" left="300px" top="10px" type="MarginConstraintsDesignInfo" width="90px"/>
+  </widget>
+  <widget name="btnRestore" parent="Form" prefHeight="23px" prefWidth="100px" text="restore" type="ButtonDesignInfo">
+    <constraints height="23px" left="400px" top="10px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="btnMaximize" parent="Form" prefHeight="23px" prefWidth="90px" text="maximize" type="ButtonDesignInfo">
+    <constraints height="23px" right="9px" top="10px" type="MarginConstraintsDesignInfo" width="90px"/>
+  </widget>
+  <widget name="button" parent="Form" prefHeight="23px" prefWidth="90px" text="close" type="ButtonDesignInfo">
+    <constraints height="23px" left="300px" top="40px" type="MarginConstraintsDesignInfo" width="90px"/>
+  </widget>
+  <widget name="button1" parent="Form" prefHeight="23px" prefWidth="100px" text="forms" type="ButtonDesignInfo">
+    <constraints height="23px" left="400px" top="40px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

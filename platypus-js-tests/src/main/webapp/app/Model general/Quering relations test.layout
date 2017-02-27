@@ -1,0 +1,621 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout name="Form" prefHeight="300px" prefWidth="400px">
+  <widget name="dbSpin" parent="Form" prefHeight="10px" prefWidth="10px" type="DbSpinDesignInfo">
+    <datamodelElement entityId="-1" fieldName="P_ID"/>
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <widget name="dbGrid" parent="Form" prefHeight="10px" prefWidth="10px" type="DbGridDesignInfo">
+    <column name="ID">
+      <datamodelElement entityId="128049787114001" fieldName="ID"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="NAME" title="Наименование">
+      <datamodelElement entityId="128049787114001" fieldName="NAME"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="P_ID" title="Родитель">
+      <datamodelElement entityId="128049787114001" fieldName="P_ID"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <treeDesignInfo>
+      <unaryLinkField/>
+      <param2GetChildren/>
+      <paramSourceField/>
+    </treeDesignInfo>
+    <rowsColumnsDesignInfo>
+      <rowsDatasource entityId="128049787114001" field="false"/>
+    </rowsColumnsDesignInfo>
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <widget name="jETALabel" parent="Form" prefHeight="10px" prefWidth="10px" text="Родитель" type="LabelDesignInfo">
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <widget name="jETALabel1" parent="Form" prefHeight="10px" prefWidth="10px" text="Группа объекта ремонта по родителю" type="LabelDesignInfo">
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <widget name="jETALabel2" parent="Form" prefHeight="10px" prefWidth="10px" text="Вид объекта ремонта" type="LabelDesignInfo">
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <widget name="dbGrid1" parent="Form" prefHeight="10px" prefWidth="10px" type="DbGridDesignInfo">
+    <column name="ID">
+      <datamodelElement entityId="128049576096827" fieldName="ID"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="NAME" title="Наименование">
+      <datamodelElement entityId="128049576096827" fieldName="NAME"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <treeDesignInfo>
+      <unaryLinkField/>
+      <param2GetChildren/>
+      <paramSourceField/>
+    </treeDesignInfo>
+    <rowsColumnsDesignInfo>
+      <rowsDatasource entityId="128049576096827" field="false"/>
+    </rowsColumnsDesignInfo>
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <widget name="jETALabel3" parent="Form" prefHeight="10px" prefWidth="10px" text="Измеряемые величины" type="LabelDesignInfo">
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <widget name="dbGrid2" parent="Form" prefHeight="10px" prefWidth="10px" type="DbGridDesignInfo">
+    <column name="ID">
+      <datamodelElement entityId="128049576695369" fieldName="ID"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="NAME" title="Наименование">
+      <datamodelElement entityId="128049576695369" fieldName="NAME"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <treeDesignInfo>
+      <unaryLinkField/>
+      <param2GetChildren/>
+      <paramSourceField/>
+    </treeDesignInfo>
+    <rowsColumnsDesignInfo>
+      <rowsDatasource entityId="128049576695369" field="false"/>
+    </rowsColumnsDesignInfo>
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <widget name="jETALabel4" parent="Form" prefHeight="10px" prefWidth="10px" text="Марки объектов ремонта" type="LabelDesignInfo">
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <widget name="dbGrid3" parent="Form" prefHeight="10px" prefWidth="10px" type="DbGridDesignInfo">
+    <column name="ID">
+      <datamodelElement entityId="128049574970367" fieldName="ID"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="NAME" title="Наименование">
+      <datamodelElement entityId="128049574970367" fieldName="NAME"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <treeDesignInfo>
+      <unaryLinkField/>
+      <param2GetChildren/>
+      <paramSourceField/>
+    </treeDesignInfo>
+    <rowsColumnsDesignInfo>
+      <rowsDatasource entityId="128049574970367" field="false"/>
+    </rowsColumnsDesignInfo>
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <widget actionPerformed="actionPerformed" name="jButton" parent="Form" prefHeight="10px" prefWidth="10px" text="Save" type="ButtonDesignInfo">
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <widget name="jETALabel5" parent="Form" prefHeight="10px" prefWidth="10px" text="Единицы измерения  по величине" type="LabelDesignInfo">
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <widget name="dbGrid4" parent="Form" prefHeight="10px" prefWidth="10px" type="DbGridDesignInfo">
+    <column name="ID">
+      <datamodelElement entityId="128049746332840" fieldName="ID"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="NAME" title="Наименование">
+      <datamodelElement entityId="128049746332840" fieldName="NAME"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="MEASURAND" title="Измеряемая величина">
+      <datamodelElement entityId="128049746332840" fieldName="MEASURAND"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="SYMBOL_RUS" title="Обозначение(рус.)">
+      <datamodelElement entityId="128049746332840" fieldName="SYMBOL_RUS"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="SYMBOL_INT" title="Обозначение(межд.)">
+      <datamodelElement entityId="128049746332840" fieldName="SYMBOL_INT"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="ISBASIC" title="Основная">
+      <datamodelElement entityId="128049746332840" fieldName="ISBASIC"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="SI" title="СИ">
+      <datamodelElement entityId="128049746332840" fieldName="SI"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="TEMPPERMITTED" title="Временно разрешенная">
+      <datamodelElement entityId="128049746332840" fieldName="TEMPPERMITTED"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="DEFINITION" title="Определение">
+      <datamodelElement entityId="128049746332840" fieldName="DEFINITION"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <treeDesignInfo>
+      <unaryLinkField/>
+      <param2GetChildren/>
+      <paramSourceField/>
+    </treeDesignInfo>
+    <rowsColumnsDesignInfo>
+      <rowsDatasource entityId="128049746332840" field="false"/>
+    </rowsColumnsDesignInfo>
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <widget name="jETALabel6" parent="Form" prefHeight="10px" prefWidth="10px" text="Наименования СИ по величине" type="LabelDesignInfo">
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <widget name="dbGrid5" parent="Form" prefHeight="10px" prefWidth="10px" type="DbGridDesignInfo">
+    <column name="EQ_ID" title="Единица оборудования">
+      <datamodelElement entityId="128049775173425" fieldName="EQ_ID"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="EQ_NAME" title="Наименование единицы оборудования">
+      <datamodelElement entityId="128049775173425" fieldName="EQ_NAME"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="MARK" title="Марка оборудования">
+      <datamodelElement entityId="128049775173425" fieldName="MARK"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <treeDesignInfo>
+      <unaryLinkField/>
+      <param2GetChildren/>
+      <paramSourceField/>
+    </treeDesignInfo>
+    <rowsColumnsDesignInfo>
+      <rowsDatasource entityId="128049775173425" field="false"/>
+    </rowsColumnsDesignInfo>
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <widget name="dbGrid6" parent="Form" prefHeight="10px" prefWidth="10px" type="DbGridDesignInfo">
+    <column name="ID">
+      <datamodelElement entityId="128049750556261" fieldName="ID"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="NAME" title="Наименование">
+      <datamodelElement entityId="128049750556261" fieldName="NAME"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="VALUE" title="Измеряемая величина">
+      <datamodelElement entityId="128049750556261" fieldName="VALUE"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <treeDesignInfo>
+      <unaryLinkField/>
+      <param2GetChildren/>
+      <paramSourceField/>
+    </treeDesignInfo>
+    <rowsColumnsDesignInfo>
+      <rowsDatasource entityId="128049750556261" field="false"/>
+    </rowsColumnsDesignInfo>
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <widget name="jETALabel7" parent="Form" prefHeight="10px" prefWidth="10px" text="Единицы оборудования по марке" type="LabelDesignInfo">
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <widget name="dbGrid7" parent="Form" prefHeight="10px" prefWidth="10px" type="DbGridDesignInfo">
+    <column name="ID">
+      <datamodelElement entityId="128073170857902" fieldName="ID"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="NAME" title="Наименование">
+      <datamodelElement entityId="128073170857902" fieldName="NAME"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="MEASURAND" title="Измеряемая величина">
+      <datamodelElement entityId="128073170857902" fieldName="MEASURAND"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="SYMBOL_RUS" title="Обозначение(рус.)">
+      <datamodelElement entityId="128073170857902" fieldName="SYMBOL_RUS"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="SYMBOL_INT" title="Обозначение(межд.)">
+      <datamodelElement entityId="128073170857902" fieldName="SYMBOL_INT"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="ISBASIC" title="Основная">
+      <datamodelElement entityId="128073170857902" fieldName="ISBASIC"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="SI" title="СИ">
+      <datamodelElement entityId="128073170857902" fieldName="SI"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="TEMPPERMITTED" title="Временно разрешенная">
+      <datamodelElement entityId="128073170857902" fieldName="TEMPPERMITTED"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <column name="DEFINITION" title="Определение">
+      <datamodelElement entityId="128073170857902" fieldName="DEFINITION"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <columnsDisplayField/>
+    </column>
+    <treeDesignInfo>
+      <unaryLinkField/>
+      <param2GetChildren/>
+      <paramSourceField/>
+    </treeDesignInfo>
+    <rowsColumnsDesignInfo>
+      <rowsDatasource entityId="128073170857902" field="false"/>
+    </rowsColumnsDesignInfo>
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <widget name="jETALabel8" parent="Form" prefHeight="10px" prefWidth="10px" text="Единицы измерения  по величине 1" type="LabelDesignInfo">
+    <constraints bottom="10px" height="10px" left="10px" right="10px" top="10px" type="MarginConstraintsDesignInfo" width="10px"/>
+  </widget>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

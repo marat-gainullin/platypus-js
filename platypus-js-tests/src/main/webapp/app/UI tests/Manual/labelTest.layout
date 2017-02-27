@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout defaultCloseOperation="2" name="Form" prefHeight="683px" prefWidth="944px" title="box Test">
+  <widget backgroundColor="#ccffcc" horizontalAlignment="11" name="label" opaque="true" parent="Form" prefHeight="653px" prefWidth="904px" text="&lt;html&gt;&lt;b&gt;Программный комплекс &lt;br&gt;&lt;br&gt;&quot;Электронный паспорт плети&quot;&lt;/b&gt;&lt;/html&gt;" type="LabelDesignInfo" verticalAlignment="3">
+    <constraints bottom="10px" left="20px" right="20px" top="20px" type="MarginConstraintsDesignInfo"/>
+    <easFont name="Tahoma" size="48"/>
+  </widget>
+  <widget actionPerformed="buttonActionPerformed" name="button" parent="Form" prefHeight="23px" prefWidth="130px" text="load/reset" type="ButtonDesignInfo">
+    <constraints height="23px" left="30px" top="0px" type="MarginConstraintsDesignInfo" width="130px"/>
+  </widget>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

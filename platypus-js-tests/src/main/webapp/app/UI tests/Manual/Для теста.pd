@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datamodel datamodelDbId="null">
+<fieldsEntity entityHeight="200" entityIconified="false" entityId="134976442024040" entityLocationX="10" entityLocationY="10" entityWidth="150" tableName="MTD_USERS"/>
+<fieldsEntity entityHeight="200" entityIconified="false" entityId="134976477440677" entityLocationX="11" entityLocationY="236" entityWidth="150" tableName="MTD_GROUPS"/>
+<fieldsEntity entityHeight="200" entityIconified="false" entityId="128032320384333" entityLocationX="242" entityLocationY="16" entityWidth="150" tableName="UNIT_OF_MEASUREMEN"/>
+</datamodel>

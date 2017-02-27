@@ -1,0 +1,55 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'gwt'
+apply plugin: 'maven'
+
+gwt {
+    gwtVersion = "$versionGwt"
+    modules 'com.eas.application.Application'
+
+    compiler {
+        strict = true;
+        disableClassMetadata = true;
+        disableCastChecking = true;
+    }
+    superDev {
+        maxHeapSize = '1024M'
+    }
+}
+
+compileGwt {
+    maxHeapSize = '1024M'
+}
+
+
+task theme(type: Copy) {
+    from "src/main/theme"
+    into "build/gwt/out/pwc"
+}
+
+theme.dependsOn compileGwt
+
+task pack(type: Zip) {
+    from 'build/gwt/out/pwc'
+    destinationDir = file('build/libs')
+}
+
+pack.dependsOn theme
+
+install.dependsOn pack
+
+artifacts {
+    archives pack
+}
+
+configurations.archives.artifacts.removeAll { 
+    it.archiveTask.is jar
+}

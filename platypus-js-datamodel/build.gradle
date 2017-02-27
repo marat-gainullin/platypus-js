@@ -1,0 +1,61 @@
+configurations {
+    h2
+}
+
+dependencies{
+    compile project(':platypus-js-core'),
+            project(':platypus-js-common-utils'),
+            project(':platypus-js-sql-parser')
+    testCompile project(':platypus-js-core').sourceSets.test.output
+    h2 'com.h2database:h2:1.4.193',
+       'com.vividsolutions:jts:1.13'
+    testRuntime 'com.h2database:h2:1.4.193',
+       'com.vividsolutions:jts:1.13'
+}
+
+def appDirName = "${projectDir}/src/test/resources/queries"
+def h2Dir = "${buildDir}/h2"
+def testBasesDirectory = "${buildDir}/test-databases"
+def datasource1Name = 'eas'
+def datasource1Dburl = "jdbc:h2:/${testBasesDirectory}/platypus-tests-eas"
+def datasource1Dbuser = 'sa'
+def datasource1Dbpassword = 'sa'
+def datasource1Dbschema = 'PUBLIC'
+
+task buildH2(type: Copy) {
+    configurations.h2.each {
+        from file(it)
+    }
+    into h2Dir
+}
+
+task h2FillEasExec(type: JavaExec) {
+    classpath fileTree(h2Dir)
+    main 'org.h2.tools.RunScript'
+    args '-url', datasource1Dburl, '-user', datasource1Dbuser, '-password', datasource1Dbpassword, '-script', "${projectDir}/src/test/resources/eas.sql"
+    doLast {
+        println 'Test database "eas" filled.'
+    }
+}
+h2FillEasExec.dependsOn buildH2
+
+task eraseEas(type: Delete) {
+    delete testBasesDirectory
+    doLast {
+        println 'Test database "eas" erased'
+    }
+}
+
+test.dependsOn h2FillEasExec
+h2FillEasExec.finalizedBy eraseEas
+eraseEas.mustRunAfter test
+
+test {
+    forkEvery = 1
+    systemProperties["datasource.1.name"] = datasource1Name
+    systemProperties["datasource.1.dburl"] = datasource1Dburl
+    systemProperties["datasource.1.dbuser"] = datasource1Dbuser
+    systemProperties["datasource.1.dbpassword"] = datasource1Dbpassword
+    systemProperties["datasource.1.dbschema"] = datasource1Dbschema
+    systemProperties["testsource.url"] = file(appDirName).toURI().toURL()
+}

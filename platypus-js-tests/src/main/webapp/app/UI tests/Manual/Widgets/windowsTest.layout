@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?><layout defaultCloseOperation="2" name="Form" prefHeight="507px" prefWidth="837px">
+  <widget name="btnClone" parent="Form" prefHeight="23px" prefWidth="106px" text="clone" type="ButtonDesignInfo">
+    <constraints bottom="13px" height="23px" right="11px" type="MarginConstraintsDesignInfo" width="106px"/>
+  </widget>
+  <widget name="desktopPane" parent="Form" prefHeight="459px" prefWidth="833px" type="DesktopDesignInfo">
+    <constraints bottom="48px" left="0px" right="4px" top="0px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <widget name="btnMinimize" parent="Form" prefHeight="23px" prefWidth="83px" text="minimize" type="ButtonDesignInfo">
+    <constraints bottom="4px" height="23px" left="12px" type="MarginConstraintsDesignInfo" width="83px"/>
+  </widget>
+  <widget name="btnMaximize" parent="Form" prefHeight="23px" prefWidth="84px" text="maximize" type="ButtonDesignInfo">
+    <constraints bottom="4px" height="23px" left="108px" type="MarginConstraintsDesignInfo" width="84px"/>
+  </widget>
+  <widget name="btnClose" parent="Form" prefHeight="23px" prefWidth="84px" text="close" type="ButtonDesignInfo">
+    <constraints bottom="4px" height="23px" left="312px" type="MarginConstraintsDesignInfo" width="84px"/>
+  </widget>
+  <widget name="btnRestore" parent="Form" prefHeight="23px" prefWidth="96px" text="restore" type="ButtonDesignInfo">
+    <constraints bottom="4px" height="23px" left="204px" type="MarginConstraintsDesignInfo" width="96px"/>
+  </widget>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

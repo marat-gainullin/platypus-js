@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datamodel>
+<parametersEntity entityHeight="200" entityIconified="false" entityLocationX="10" entityLocationY="20" entityWidth="150"/>
+<entity Title="Измеряемые величины" entityHeight="200" entityIconified="false" entityId="128049564260972" entityLocationX="187" entityLocationY="19" entityWidth="150" tableAlias="T_MEASURANDS_1" tableName="MEASURANDS" tableSchemaName=""/>
+</datamodel>

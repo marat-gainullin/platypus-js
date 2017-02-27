@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datamodel>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="7" entityLocationY="23" entityWidth="136"/>
+  <entity Name="" Title="Единицы измерения  по величине 1" entityHeight="200" entityIconified="false" entityId="128073231281282" entityLocationX="886" entityLocationY="23" entityWidth="275" queryId="128049734162523" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Марки объектов ремонта" entityHeight="200" entityIconified="false" entityId="128049574970367" entityLocationX="366" entityLocationY="496" entityWidth="187" queryId="128049551290614" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Наименования СИ" entityHeight="210" entityIconified="false" entityId="128049764412588" entityLocationX="364" entityLocationY="254" entityWidth="186" queryId="128049565893763" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Наименования СИ по величине 1" entityHeight="200" entityIconified="false" entityId="128073233404649" entityLocationX="885" entityLocationY="252" entityWidth="249" queryId="128049732520388" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Единицы измерения  по величине" entityHeight="200" entityIconified="false" entityId="128049746332840" entityLocationX="609" entityLocationY="23" entityWidth="232" queryId="128049734162523" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Группа объекта ремонта" entityHeight="199" entityIconified="false" entityId="128049573928131" entityLocationX="175" entityLocationY="24" entityWidth="150" queryId="128049508301511" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Наименования СИ по величине" entityHeight="200" entityIconified="false" entityId="128049750556261" entityLocationX="619" entityLocationY="252" entityWidth="246" queryId="128049732520388" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Единицы оборудования" entityHeight="200" entityIconified="false" entityId="128049574495320" entityLocationX="625" entityLocationY="493" entityWidth="227" queryId="128049547464084" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Измеряемые величины" entityHeight="199" entityIconified="false" entityId="128049576695369" entityLocationX="350" entityLocationY="23" entityWidth="172" queryId="128049562734356" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Вид объекта ремонта" entityHeight="200" entityIconified="false" entityId="128049576096827" entityLocationX="179" entityLocationY="254" entityWidth="147" queryId="128049558485943" tableName="" tableSchemaName=""/>
+  <relation leftEntityFieldName="VALUE" leftEntityId="128049750556261" rightEntityId="128073233404649" rightEntityParameterName="VALUE"/>
+  <relation leftEntityFieldName="MEASURAND" leftEntityId="128049746332840" rightEntityId="128073231281282" rightEntityParameterName="VALUE"/>
+  <relation leftEntityFieldName="VALUE" leftEntityId="128049764412588" rightEntityFieldName="VALUE" rightEntityId="128049750556261"/>
+  <relation leftEntityFieldName="ID" leftEntityId="128049576695369" rightEntityId="128049746332840" rightEntityParameterName="VALUE"/>
+  <relation leftEntityFieldName="ID" leftEntityId="128049576695369" rightEntityId="128049750556261" rightEntityParameterName="VALUE"/>
+  <relation leftEntityFieldName="ID" leftEntityId="128049574970367" rightEntityFieldName="MARK" rightEntityId="128049574495320"/>
+</datamodel>

@@ -1,0 +1,679 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout backgroundColor="#ccffcc" defaultCloseOperation="2" name="Form" prefHeight="1151px" prefWidth="950px" windowClosed="formWindowClosed" windowClosing="formWindowClosing" windowMaximized="formWindowMaximized" windowMinimized="formWindowMinimized" windowOpened="formWindowOpened" windowRestored="formWindowRestored">
+  <widget name="jMenu" parent="jPopupMenu" prefHeight="0px" prefWidth="0px" text="jMenu" type="MenuDesignInfo"/>
+  <widget name="jMenuItem" parent="jMenu" prefHeight="0px" prefWidth="0px" text="jMenuItem" type="MenuItemDesignInfo"/>
+  <widget name="jSeparator" parent="jMenu" prefHeight="0px" prefWidth="0px" type="MenuSeparatorDesignInfo"/>
+  <widget name="jMenuItem1" parent="jMenu" prefHeight="0px" prefWidth="0px" text="jMenuItem1" type="MenuItemDesignInfo"/>
+  <widget name="jMenu1" parent="jMenu" prefHeight="0px" prefWidth="0px" text="jMenu1" type="MenuDesignInfo"/>
+  <widget name="modelGrid1" parent="Form" prefHeight="160px" prefWidth="410px" type="DbGridDesignInfo">
+    <treeDesignInfo>
+      <unaryLinkField entityId="-1" fieldName="Param3"/>
+    </treeDesignInfo>
+    <column name="param11" selectFunction="param11OnSelect">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="-1" fieldName="Param1"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="param21" selectFunction="param21OnSelect">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="-1" fieldName="Param2"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="param41" selectFunction="param41OnSelect">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbDateDesignInfo" dateFormat="dd.MM.yyyy" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="-1" fieldName="Param4"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="param61" selectFunction="param61OnSelect">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbImageDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="-1" fieldName="Param4"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="param71">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="-1" fieldName="Param7"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <rowsColumnsDesignInfo>
+      <rowsDatasource entityId="-1" field="false"/>
+    </rowsColumnsDesignInfo>
+    <constraints bottom="31px" height="160px" left="20px" type="MarginConstraintsDesignInfo" width="410px"/>
+  </widget>
+  <widget actionPerformed="jToggleButtonActionPerformed" buttonGroup="buttonGroup" componentPopupMenu="jPopupMenu" icon="card-medium.png" name="jToggleButton" parent="Form" prefHeight="23px" prefWidth="160px" selected="true" text="jToggleButton" type="ToggleButtonDesignInfo">
+    <constraints height="23px" left="30px" top="30px" type="MarginConstraintsDesignInfo" width="160px"/>
+  </widget>
+  <widget actionPerformed="jRadioButton1ActionPerformed" buttonGroup="buttonGroup" name="jRadioButton1" parent="Form" prefHeight="23px" prefWidth="160px" text="jRadioButton1" type="RadioDesignInfo">
+    <constraints height="23px" left="30px" top="100px" type="MarginConstraintsDesignInfo" width="160px"/>
+  </widget>
+  <widget name="jFormattedTextField" parent="Form" prefHeight="20px" prefWidth="160px" type="FormattedFieldDesignInfo">
+    <constraints height="20px" left="30px" top="160px" type="MarginConstraintsDesignInfo" width="160px"/>
+  </widget>
+  <widget actionPerformed="jRadioButtonActionPerformed" buttonGroup="buttonGroup" name="jRadioButton" parent="Form" prefHeight="23px" prefWidth="160px" text="jRadioButton" type="RadioDesignInfo">
+    <constraints height="23px" left="30px" top="60px" type="MarginConstraintsDesignInfo" width="160px"/>
+  </widget>
+  <widget name="jProgressBar" parent="Form" prefHeight="14px" prefWidth="180px" type="ProgressBarDesignInfo">
+    <constraints height="14px" left="30px" top="200px" type="MarginConstraintsDesignInfo" width="180px"/>
+  </widget>
+  <widget backgroundColor="#ffcccc" name="pnlBorder" parent="Form" prefHeight="170px" prefWidth="270px" type="PanelDesignInfo">
+    <layout type="BorderLayoutDesignInfo"/>
+    <constraints height="170px" left="240px" top="50px" type="MarginConstraintsDesignInfo" width="270px"/>
+  </widget>
+  <widget actionPerformed="btnSetClearBottomActionPerformed" name="btnSetClearBottom" parent="pnlBorder" prefHeight="127px" prefWidth="208px" text="set/clear bottom" type="ButtonDesignInfo">
+    <constraints place="Center" type="BorderLayoutConstraintsDesignInfo"/>
+  </widget>
+  <widget actionPerformed="jButton1ActionPerformed" name="jButton1" parent="pnlBorder" prefHeight="23px" prefWidth="270px" text="Grid, combo, grid selection test" type="ButtonDesignInfo">
+    <constraints place="First" type="BorderLayoutConstraintsDesignInfo"/>
+  </widget>
+  <widget keyPressed="jTextFieldKeyPressed" name="jTextField" parent="pnlBorder" prefHeight="20px" prefWidth="270px" text="jTextField" type="TextFieldDesignInfo">
+    <constraints place="Last" type="BorderLayoutConstraintsDesignInfo"/>
+  </widget>
+  <widget name="jLabel" parent="pnlBorder" prefHeight="127px" prefWidth="28px" text="jLabel" type="LabelDesignInfo">
+    <constraints place="After" type="BorderLayoutConstraintsDesignInfo"/>
+  </widget>
+  <widget name="jLabel1" parent="pnlBorder" prefHeight="127px" prefWidth="34px" text="jLabel1" type="LabelDesignInfo">
+    <constraints place="Before" type="BorderLayoutConstraintsDesignInfo"/>
+  </widget>
+  <widget name="pnlCards" parent="Form" prefHeight="90px" prefWidth="110px" type="PanelDesignInfo">
+    <layout type="CardLayoutDesignInfo"/>
+    <constraints height="90px" left="480px" top="290px" type="MarginConstraintsDesignInfo" width="110px"/>
+  </widget>
+  <widget name="txtCard1" parent="pnlCards" prefHeight="90px" prefWidth="110px" text="jTextField1" type="TextFieldDesignInfo" visible="false">
+    <constraints cardName="card1" type="CardLayoutConstraintsDesignInfo"/>
+  </widget>
+  <widget name="btnCard2" parent="pnlCards" prefHeight="90px" prefWidth="110px" text="btnCard2" type="ButtonDesignInfo" visible="false">
+    <constraints cardName="card2" type="CardLayoutConstraintsDesignInfo"/>
+  </widget>
+  <widget name="scrollCard3" parent="pnlCards" prefHeight="90px" prefWidth="110px" type="ScrollDesignInfo" visible="false">
+    <constraints cardName="card3" type="CardLayoutConstraintsDesignInfo"/>
+  </widget>
+  <widget enabled="false" name="jEditorPane" parent="scrollCard3" prefHeight="88px" prefWidth="108px" text="    &#10;Sample text" type="EditorPaneDesignInfo"/>
+  <widget name="pnlBox" parent="Form" prefHeight="140px" prefWidth="440px" type="PanelDesignInfo">
+    <layout type="BoxLayoutDesignInfo"/>
+    <constraints height="140px" left="30px" top="230px" type="MarginConstraintsDesignInfo" width="440px"/>
+  </widget>
+  <widget name="jTextField2" parent="pnlBox" prefHeight="140px" prefWidth="59px" text="jTextField2" type="TextFieldDesignInfo"/>
+  <widget actionPerformed="btnCursorActionPerformed" name="btnCursor" parent="pnlBox" prefHeight="140px" prefWidth="99px" text="Cursor Button" type="ButtonDesignInfo"/>
+  <widget actionPerformed="btnAdd2BoxActionPerformed" name="btnAdd2Box" parent="pnlBox" prefHeight="140px" prefWidth="51px" text="add" type="ButtonDesignInfo"/>
+  <widget componentPopupMenu="jPopupMenu" name="pnlAbsolute" parent="Form" prefHeight="130px" prefWidth="200px" type="PanelDesignInfo">
+    <layout type="AbsoluteLayoutDesignInfo"/>
+    <constraints height="130px" left="30px" top="380px" type="MarginConstraintsDesignInfo" width="200px"/>
+  </widget>
+  <widget actionPerformed="btnAdd2AbsoltueActionPerformed" name="btnAdd2Absoltue" parent="pnlAbsolute" prefHeight="23px" prefWidth="80px" text="add new" type="ButtonDesignInfo">
+    <constraints type="AbsoluteConstraintsDesignInfo">
+      <easSize height="-1" width="80"/>
+      <easLocation x="20" y="20"/>
+    </constraints>
+  </widget>
+  <widget name="jCheckBox" parent="pnlAbsolute" prefHeight="23px" prefWidth="75px" text="jCheckBox" type="CheckDesignInfo">
+    <constraints type="AbsoluteConstraintsDesignInfo">
+      <easSize height="-1" width="-1"/>
+      <easLocation x="30" y="80"/>
+    </constraints>
+  </widget>
+  <widget actionPerformed="btnSizeDebugActionPerformed" name="btnSizeDebug" parent="pnlAbsolute" prefHeight="23px" prefWidth="81px" text="debugSize" type="ButtonDesignInfo">
+    <constraints type="AbsoluteConstraintsDesignInfo">
+      <easSize height="-1" width="-1"/>
+      <easLocation x="110" y="20"/>
+    </constraints>
+  </widget>
+  <widget name="pnlGrid" parent="Form" prefHeight="150px" prefWidth="270px" type="PanelDesignInfo">
+    <layout columns="3" hgap="10" rows="2" type="GridLayoutDesignInfo" vgap="5"/>
+    <constraints height="150px" left="240px" top="370px" type="MarginConstraintsDesignInfo" width="270px"/>
+  </widget>
+  <widget actionPerformed="btnAddRemove2GridActionPerformed" name="btnAddRemove2Grid" parent="pnlGrid" prefHeight="72px" prefWidth="83px" text="add" type="ButtonDesignInfo"/>
+  <widget name="jCheckBox2" parent="pnlGrid" prefHeight="72px" prefWidth="83px" text="jCheckBox2" type="CheckDesignInfo"/>
+  <widget name="jCheckBox1" parent="pnlGrid" prefHeight="72px" prefWidth="83px" text="jCheckBox1" type="CheckDesignInfo"/>
+  <widget name="jTextField3" parent="pnlGrid" prefHeight="72px" prefWidth="83px" text="jTextField3" type="TextFieldDesignInfo"/>
+  <widget name="jPasswordField" parent="pnlGrid" prefHeight="72px" prefWidth="83px" text="jPasswordField" type="PasswordFieldDesignInfo"/>
+  <widget backgroundColor="#ccffcc" name="pnlFlow" parent="Form" prefHeight="160px" prefWidth="252px" type="PanelDesignInfo">
+    <layout type="FlowLayoutDesignInfo"/>
+    <constraints height="160px" left="520px" top="50px" type="MarginConstraintsDesignInfo" width="252px"/>
+  </widget>
+  <widget actionPerformed="btnAdd2FlowActionPerformed" name="btnAdd2Flow" parent="pnlFlow" prefHeight="23px" prefWidth="93px" text="add/Remove" type="ButtonDesignInfo"/>
+  <widget backgroundColor="#ffffcc" focusGained="dbCheckFocusGained" focusLost="dbCheckFocusLost" foregroundColor="#990099" handleFunction="dbCheckOnRender" name="dbCheck" parent="pnlFlow" prefHeight="20px" prefWidth="100px" selectFunction="dbCheckOnSelect" text="Пример" type="DbCheckDesignInfo">
+    <datamodelElement entityId="-1" fieldName="Param3"/>
+  </widget>
+  <widget dateFormat="dd.MM.yyyy" name="dbDate" parent="pnlFlow" prefHeight="20px" prefWidth="100px" type="DbDateDesignInfo">
+    <datamodelElement entityId="-1" fieldName="Param4"/>
+  </widget>
+  <widget max="32767.0" min="0.0" name="dbSpin" parent="pnlFlow" prefHeight="20px" prefWidth="100px" step="2.0" type="DbSpinDesignInfo">
+    <datamodelElement entityId="-1" fieldName="Param2"/>
+  </widget>
+  <widget name="dbCombo" parent="pnlFlow" prefHeight="20px" prefWidth="100px" selectFunction="dbComboSelectValue" type="DbComboDesignInfo">
+    <valueField entityId="135151532000209" fieldName="ID"/>
+    <displayField entityId="135151532000209" fieldName="SYMBOL_RUS"/>
+    <datamodelElement entityId="-1" fieldName="Param2"/>
+  </widget>
+  <widget name="dbLabel" parent="pnlFlow" prefHeight="20px" prefWidth="100px" type="DbLabelDesignInfo">
+    <datamodelElement entityId="-1" fieldName="Param3"/>
+  </widget>
+  <widget name="dbText" parent="pnlFlow" prefHeight="20px" prefWidth="100px" type="DbTextDesignInfo">
+    <datamodelElement entityId="135151532000209" fieldName="NAME"/>
+  </widget>
+  <widget actionPerformed="jDropDownButtonActionPerformed" dropDownMenu="jPopupMenu" name="jDropDownButton" parent="pnlFlow" prefHeight="23px" prefWidth="128px" text="jDropDownButton" type="DropDownButtonDesignInfo"/>
+  <widget actionPerformed="btnExpandActionPerformed" name="btnExpand" parent="pnlFlow" prefHeight="23px" prefWidth="69px" text="expand" type="ButtonDesignInfo"/>
+  <widget actionPerformed="btnCollapseActionPerformed" name="btnCollapse" parent="pnlFlow" prefHeight="23px" prefWidth="71px" text="collapse" type="ButtonDesignInfo"/>
+  <widget name="tabs" parent="Form" prefHeight="140px" prefWidth="180px" stateChanged="tabsStateChanged" type="TabsDesignInfo">
+    <constraints height="140px" left="600px" top="230px" type="MarginConstraintsDesignInfo" width="180px"/>
+  </widget>
+  <widget name="jPanel6" parent="tabs" prefHeight="112px" prefWidth="175px" type="PanelDesignInfo">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints tabTitle="Главная" type="TabsConstraintsDesignInfo"/>
+  </widget>
+  <widget backgroundColor="#f0f0f0" foregroundColor="#000000" name="dbImage" parent="jPanel6" prefHeight="110px" prefWidth="170px" selectFunction="dbImageSelectValue" type="DbImageDesignInfo">
+    <datamodelElement entityId="-1" fieldName="Param6"/>
+    <constraints bottom="2px" left="0px" right="5px" top="0px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <widget name="jPanel7" parent="tabs" prefHeight="112px" prefWidth="175px" type="PanelDesignInfo" visible="false">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints tabTitle="Детали" type="TabsConstraintsDesignInfo"/>
+  </widget>
+  <widget actionPerformed="btnAddNewTabActionPerformed" name="btnAddNewTab" parent="jPanel7" prefHeight="23px" prefWidth="120px" text="addNewTab" type="ButtonDesignInfo">
+    <constraints height="23px" left="0px" top="10px" type="MarginConstraintsDesignInfo" width="120px"/>
+  </widget>
+  <widget name="jPanel8" parent="tabs" prefHeight="112px" prefWidth="175px" type="PanelDesignInfo" visible="false">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints tabTitle="tab2" type="TabsConstraintsDesignInfo"/>
+  </widget>
+  <widget name="jPanel9" parent="tabs" prefHeight="112px" prefWidth="175px" type="PanelDesignInfo" visible="false">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints tabTitle="tab3" type="TabsConstraintsDesignInfo"/>
+  </widget>
+  <widget dividerLocation="150" foregroundColor="#000000" name="split" oneTouchExpandable="true" parent="Form" prefHeight="140px" prefWidth="320px" rightComponent="pnlSplitRight" type="SplitDesignInfo">
+    <constraints height="140px" left="600px" top="380px" type="MarginConstraintsDesignInfo" width="320px"/>
+    <easFont name="Tahoma" size="11"/>
+  </widget>
+  <widget name="pnlSplitRight" parent="split" prefHeight="138px" prefWidth="164px" type="PanelDesignInfo">
+    <layout type="MarginLayoutDesignInfo"/>
+  </widget>
+  <widget actionPerformed="btnSetClearLeftActionPerformed" name="btnSetClearLeft" parent="pnlSplitRight" prefHeight="23px" prefWidth="120px" text="set/clear Left" type="ButtonDesignInfo">
+    <constraints height="23px" left="30px" top="60px" type="MarginConstraintsDesignInfo" width="120px"/>
+  </widget>
+  <widget actionPerformed="btnRotateSplitActionPerformed" name="btnRotateSplit" parent="pnlSplitRight" prefHeight="23px" prefWidth="71px" text="rotate" type="ButtonDesignInfo">
+    <constraints height="23px" left="30px" top="90px" type="MarginConstraintsDesignInfo" width="71px"/>
+  </widget>
+  <widget componentRemoved="tlbTestComponentRemoved" name="tlbTest" parent="Form" prefHeight="31px" prefWidth="720px" type="ToolbarDesignInfo">
+    <constraints height="31px" left="20px" top="520px" type="MarginConstraintsDesignInfo" width="720px"/>
+  </widget>
+  <widget icon="address-book--minus.png" name="jLabel2" parent="tlbTest" prefHeight="16px" prefWidth="50px" text="jLabel2" type="LabelDesignInfo"/>
+  <widget focusable="false" horizontalTextPosition="0" name="jButton9" parent="tlbTest" prefHeight="21px" prefWidth="47px" text="jButton9" type="ButtonDesignInfo" verticalTextPosition="3"/>
+  <widget name="jTextField5" parent="tlbTest" prefHeight="29px" prefWidth="478px" text="jTextField5" type="TextFieldDesignInfo"/>
+  <widget actionPerformed="btnAddNewActionPerformed" focusable="false" horizontalTextPosition="0" name="btnAddNew" parent="tlbTest" prefHeight="21px" prefWidth="47px" text="add new" type="ButtonDesignInfo" verticalTextPosition="3"/>
+  <widget focusable="false" name="jRadioButton3" parent="tlbTest" prefHeight="15px" prefWidth="85px" text="jRadioButton3" type="RadioDesignInfo" verticalTextPosition="3"/>
+  <widget foregroundColor="#000000" name="jDesktopPane" parent="Form" prefHeight="130px" prefWidth="260px" type="DesktopDesignInfo">
+    <constraints height="130px" left="430px" top="590px" type="MarginConstraintsDesignInfo" width="260px"/>
+    <easFont name="Tahoma" size="11"/>
+  </widget>
+  <widget backgroundColor="#ffffcc" foregroundColor="#990099" name="dbGrid" parent="Form" prefHeight="130px" prefWidth="390px" toolTipText="Sample tooltip" type="DbGridDesignInfo">
+    <treeDesignInfo>
+      <unaryLinkField entityId="135151532000209" fieldName="ISBASIC"/>
+    </treeDesignInfo>
+    <column cellFunction="colFirstOnRender" name="colFirst" selectFunction="colFirstOnSelect" selectOnly="true" title="Первый">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="135151532000209" fieldName="NAME"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="SansSerif"/>
+      </headerStyle>
+    </column>
+    <column name="SYMBOL_INT" title="Обозначение(межд.)">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="135151532000209" fieldName="SYMBOL_INT"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="SansSerif"/>
+      </headerStyle>
+    </column>
+    <column name="SYMBOL_RUS" readonly="true" title="Обозначение(рус.)">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="135151532000209" fieldName="SYMBOL_RUS"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="SansSerif"/>
+      </headerStyle>
+    </column>
+    <rowsColumnsDesignInfo fixedColumns="1" fixedRows="2">
+      <rowsDatasource entityId="135151532000209" field="false"/>
+    </rowsColumnsDesignInfo>
+    <constraints height="130px" left="20px" right="540px" top="590px" type="MarginConstraintsDesignInfo"/>
+    <easFont name="Tahoma" size="11" style="1"/>
+  </widget>
+  <widget actionPerformed="buttonActionPerformed" name="button" parent="Form" prefHeight="20px" prefWidth="160px" text="!jToggleButton.selected" type="ButtonDesignInfo">
+    <constraints height="20px" left="30px" top="130px" type="MarginConstraintsDesignInfo" width="160px"/>
+  </widget>
+  <widget actionPerformed="btnMakeVisibleActionPerformed" name="btnMakeVisible" parent="Form" prefHeight="23px" prefWidth="130px" text="btnMakeVisible" type="ButtonDesignInfo">
+    <constraints height="23px" left="20px" top="560px" type="MarginConstraintsDesignInfo" width="130px"/>
+  </widget>
+  <widget actionPerformed="btnFindSomethingActionPerformed" name="btnFindSomething" parent="Form" prefHeight="23px" prefWidth="71px" text="find..." type="ButtonDesignInfo">
+    <constraints height="23px" left="160px" top="560px" type="MarginConstraintsDesignInfo" width="71px"/>
+  </widget>
+  <widget actionPerformed="btnSelectionActionPerformed" name="btnSelection" parent="Form" prefHeight="23px" prefWidth="110px" text="Selection test" type="ButtonDesignInfo">
+    <constraints height="23px" left="20px" top="750px" type="MarginConstraintsDesignInfo" width="110px"/>
+  </widget>
+  <widget name="jMenuBar" parent="Form" prefHeight="20px" prefWidth="770px" type="MenubarDesignInfo">
+    <constraints bottom="826px" height="20px" left="0px" right="180px" top="0px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <widget name="mnuFile" parent="jMenuBar" prefHeight="18px" prefWidth="37px" text="Файл" type="MenuDesignInfo"/>
+  <widget actionPerformed="mnuFillPopupMenuActionPerformed" name="mnuFillPopupMenu" parent="mnuFile" prefHeight="0px" prefWidth="0px" text="Fill popup menu" type="MenuItemDesignInfo"/>
+  <widget name="mnuEdit" parent="jMenuBar" prefHeight="18px" prefWidth="97px" text="Редактирование" type="MenuDesignInfo"/>
+  <widget buttonGroup="buttonGroup" name="jRadioButtonMenuItem" parent="mnuEdit" prefHeight="0px" prefWidth="0px" text="jRadioButtonMenuItem" type="MenuRadioItemDesignInfo"/>
+  <widget name="jSeparator1" parent="mnuEdit" prefHeight="0px" prefWidth="0px" type="MenuSeparatorDesignInfo"/>
+  <widget name="jCheckBoxMenuItem" parent="mnuEdit" prefHeight="0px" prefWidth="0px" selected="true" text="jCheckBoxMenuItem" type="MenuCheckItemDesignInfo"/>
+  <widget name="menuBar" parent="Form" prefHeight="25px" prefWidth="170px" type="MenubarDesignInfo">
+    <constraints height="25px" left="440px" top="560px" type="MarginConstraintsDesignInfo" width="170px"/>
+  </widget>
+  <widget name="mnuFile1" parent="menuBar" prefHeight="23px" prefWidth="37px" text="Файл" type="MenuDesignInfo"/>
+  <widget name="mnuEdit1" parent="menuBar" prefHeight="23px" prefWidth="97px" text="Редактирование" type="MenuDesignInfo"/>
+  <widget actionPerformed="mnuFillFileMenuActionPerformed" name="mnuFillFileMenu" parent="mnuEdit1" prefHeight="0px" prefWidth="0px" text="Fill file menu" type="MenuItemDesignInfo"/>
+  <widget actionPerformed="btnDeletableActionPerformed" name="btnDeletable" parent="Form" prefHeight="23px" prefWidth="95px" text="deletable" type="ToggleButtonDesignInfo">
+    <constraints height="23px" left="140px" top="750px" type="MarginConstraintsDesignInfo" width="95px"/>
+  </widget>
+  <widget actionPerformed="btnInsertableActionPerformed" name="btnInsertable" parent="Form" prefHeight="23px" prefWidth="95px" text="insertable" type="ToggleButtonDesignInfo">
+    <constraints height="23px" left="250px" top="750px" type="MarginConstraintsDesignInfo" width="95px"/>
+  </widget>
+  <widget name="modelGrid" parent="Form" prefHeight="160px" prefWidth="680px" type="DbGridDesignInfo">
+    <treeDesignInfo>
+      <unaryLinkField entityId="-1" fieldName="Param3"/>
+    </treeDesignInfo>
+    <column name="param1" selectFunction="param1OnSelect" width="100">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="-1" fieldName="Param1"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="param2" selectFunction="param2OnSelect" width="100">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="-1" fieldName="Param2"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column cellFunction="param7OnRender" name="param4" selectFunction="param4OnSelect" width="100">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbDateDesignInfo" dateFormat="dd.MM.yyyy HH:mm:ss.SSS" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="-1" fieldName="Param4"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="param6" selectFunction="param6OnSelect" width="100">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbImageDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="-1" fieldName="Param6"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column cellFunction="param7OnRender" name="param7" selectFunction="param7OnSelect" width="100">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbCheckDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="-1" fieldName="Param7"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="column" selectFunction="columnOnSelect" width="100">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbComboDesignInfo" name="view" prefHeight="0px" prefWidth="0px">
+        <valueField entityId="135151532000209" fieldName="ID"/>
+        <displayField entityId="135151532000209" fieldName="NAME"/>
+      </controlInfo>
+      <datamodelElement entityId="-1" fieldName="Param2"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="column1" width="100">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbComboDesignInfo" name="view" prefHeight="0px" prefWidth="0px">
+        <valueField entityId="135963425539283" fieldName="MDENT_ID"/>
+        <displayField entityId="135963425539283" fieldName="MDENT_NAME"/>
+      </controlInfo>
+      <datamodelElement entityId="-1" fieldName="Param5"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <rowsColumnsDesignInfo>
+      <rowsDatasource entityId="-1" field="false"/>
+    </rowsColumnsDesignInfo>
+    <constraints bottom="201px" height="160px" left="20px" type="MarginConstraintsDesignInfo" width="680px"/>
+  </widget>
+  <widget backgroundColor="#f0f0f0" foregroundColor="#000000" name="modelCombo" parent="Form" prefHeight="20px" prefWidth="170px" type="DbComboDesignInfo">
+    <valueField entityId="135963425539283" fieldName="MDENT_ID"/>
+    <displayField entityId="135963425539283" fieldName="MDENT_NAME"/>
+    <datamodelElement entityId="-1" fieldName="Param5"/>
+    <constraints height="20px" left="370px" top="750px" type="MarginConstraintsDesignInfo" width="170px"/>
+  </widget>
+  <widget backgroundColor="#f0f0f0" foregroundColor="#000000" name="modelText" parent="Form" prefHeight="20px" prefWidth="150px" type="DbLabelDesignInfo">
+    <datamodelElement entityId="-1" fieldName="Param5"/>
+    <constraints height="20px" left="550px" top="750px" type="MarginConstraintsDesignInfo" width="150px"/>
+  </widget>
+  <widget actionPerformed="btnSetClearCenterActionPerformed" name="btnSetClearCenter" parent="Form" prefHeight="23px" prefWidth="160px" text="set/clear center" type="ButtonDesignInfo">
+    <constraints height="23px" left="240px" top="20px" type="MarginConstraintsDesignInfo" width="160px"/>
+  </widget>
+  <widget actionPerformed="btnNextCardActionPerformed" name="btnNextCard" parent="Form" prefHeight="23px" prefWidth="110px" text="next card" type="ButtonDesignInfo">
+    <constraints height="23px" left="480px" top="230px" type="MarginConstraintsDesignInfo" width="110px"/>
+  </widget>
+  <widget actionPerformed="btnAddRemoveCardActionPerformed" name="btnAddRemoveCard" parent="Form" prefHeight="23px" prefWidth="110px" text="add/remove" type="ButtonDesignInfo">
+    <constraints height="23px" left="480px" top="260px" type="MarginConstraintsDesignInfo" width="110px"/>
+  </widget>
+  <widget name="scrollPane" parent="Form" prefHeight="100px" prefWidth="100px" type="ScrollDesignInfo">
+    <constraints bottom="211px" height="100px" right="120px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget backgroundColor="#ffffcc" name="panel" parent="scrollPane" prefHeight="270px" prefWidth="350px" type="PanelDesignInfo">
+    <layout type="MarginLayoutDesignInfo"/>
+  </widget>
+  <widget name="button1" parent="panel" prefHeight="23px" prefWidth="71px" text="button1" type="ButtonDesignInfo">
+    <constraints height="23px" left="10px" top="10px" type="MarginConstraintsDesignInfo" width="71px"/>
+  </widget>
+  <widget name="progressBar" parent="panel" prefHeight="14px" prefWidth="146px" type="ProgressBarDesignInfo">
+    <constraints height="14px" left="20px" top="70px" type="MarginConstraintsDesignInfo" width="146px"/>
+  </widget>
+  <widget name="button2" parent="panel" prefHeight="23px" prefWidth="71px" text="button2" type="ButtonDesignInfo">
+    <constraints height="23px" left="260px" top="240px" type="MarginConstraintsDesignInfo" width="71px"/>
+  </widget>
+  <widget name="scrollPane1" parent="Form" prefHeight="100px" prefWidth="100px" type="ScrollDesignInfo">
+    <constraints height="100px" right="120px" top="620px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget actionPerformed="button3ActionPerformed" name="button3" parent="scrollPane1" prefHeight="98px" prefWidth="98px" text="button3" type="ButtonDesignInfo"/>
+  <widget horizontalScrollBarPolicy="31" name="scrollWithBox" parent="Form" prefHeight="100px" prefWidth="102px" type="ScrollDesignInfo">
+    <constraints height="100px" right="8px" top="620px" type="MarginConstraintsDesignInfo" width="102px"/>
+  </widget>
+  <widget name="pnlScrollableBox" parent="scrollWithBox" prefHeight="98px" prefWidth="100px" type="PanelDesignInfo">
+    <layout axis="1" type="BoxLayoutDesignInfo"/>
+  </widget>
+  <widget actionPerformed="btnAddToBoxActionPerformed" name="btnAddToBox" parent="Form" prefHeight="23px" prefWidth="100px" text="add to box" type="ButtonDesignInfo">
+    <constraints height="23px" right="10px" top="590px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget actionPerformed="btnClearBoxActionPerformed" name="btnClearBox" parent="Form" prefHeight="23px" prefWidth="100px" text="clear box" type="ButtonDesignInfo">
+    <constraints height="23px" right="10px" top="560px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget actionPerformed="btnLaunchBoxTestActionPerformed" name="btnLaunchBoxTest" parent="Form" prefHeight="23px" prefWidth="100px" text="boxTest" type="ButtonDesignInfo">
+    <constraints height="23px" right="120px" top="560px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget actionPerformed="btnLaunchLabelTestActionPerformed" name="btnLaunchLabelTest" parent="Form" prefHeight="23px" prefWidth="100px" text="Label test" type="ButtonDesignInfo">
+    <constraints height="23px" left="410px" top="20px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget actionPerformed="btnStyleTestActionPerformed" name="btnStyleTest" parent="Form" prefHeight="23px" prefWidth="110px" text="Style test" type="ButtonDesignInfo">
+    <constraints height="23px" left="520px" top="20px" type="MarginConstraintsDesignInfo" width="110px"/>
+  </widget>
+  <widget actionPerformed="btnChartTestActionPerformed" name="btnChartTest" parent="Form" prefHeight="23px" prefWidth="120px" text="Chart test" type="ButtonDesignInfo">
+    <constraints height="23px" right="180px" top="20px" type="MarginConstraintsDesignInfo" width="120px"/>
+  </widget>
+  <widget actionPerformed="btnUnitsRequeryActionPerformed" name="btnUnitsRequery" parent="Form" prefHeight="23px" prefWidth="91px" text="requery" type="ButtonDesignInfo">
+    <constraints height="23px" left="310px" top="560px" type="MarginConstraintsDesignInfo" width="91px"/>
+  </widget>
+  <widget name="grdAddresses" parent="Form" prefHeight="160px" prefWidth="260px" type="DbGridDesignInfo">
+    <treeDesignInfo>
+      <unaryLinkField entityId="136091764773245" fieldName="MDENT_PARENT_ID"/>
+      <param2GetChildren entityId="136091764773245" field="false" fieldName="parent"/>
+      <paramSourceField entityId="136091764773245" fieldName="MDENT_ID"/>
+    </treeDesignInfo>
+    <column name="mDENT_ID">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="136091764773245" fieldName="MDENT_ID"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="mDENT_NAME">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="136091764773245" fieldName="MDENT_NAME"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="mDENT_TYPE">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="136091764773245" fieldName="MDENT_TYPE"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="tAG1">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="136091764773245" fieldName="TAG1"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="tAG2">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="136091764773245" fieldName="TAG2"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="tAG3">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="136091764773245" fieldName="TAG3"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="mDENT_PARENT_ID">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbLabelDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="136091764773245" fieldName="MDENT_PARENT_ID"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <column name="mDENT_ORDER">
+      <columnsDisplayField/>
+      <controlInfo classHint="DbSpinDesignInfo" name="view" prefHeight="0px" prefWidth="0px"/>
+      <datamodelElement entityId="136091764773245" fieldName="MDENT_ORDER"/>
+      <columnsDatasource/>
+      <cellsDatasource/>
+      <cellDesignInfo>
+        <rowsKeyField/>
+        <columnsKeyField/>
+        <cellValueField/>
+      </cellDesignInfo>
+      <headerStyle>
+        <nativeFont name="Tahoma" size="11"/>
+      </headerStyle>
+    </column>
+    <rowsColumnsDesignInfo>
+      <rowsDatasource entityId="136091764773245" field="false"/>
+    </rowsColumnsDesignInfo>
+    <constraints bottom="31px" height="160px" left="440px" type="MarginConstraintsDesignInfo" width="260px"/>
+  </widget>
+  <widget actionPerformed="btnTextsTestActionPerformed" name="btnTextsTest" parent="Form" prefHeight="23px" prefWidth="100px" text="Texts Test" type="ButtonDesignInfo">
+    <constraints height="23px" right="70px" top="20px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget actionPerformed="btnUploadTestActionPerformed" name="btnUploadTest" parent="Form" prefHeight="23px" prefWidth="100px" text="Upload Test" type="ButtonDesignInfo">
+    <constraints height="23px" right="70px" top="50px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget actionPerformed="btnLogoutActionPerformed" name="btnLogout" parent="Form" prefHeight="23px" prefWidth="100px" text="Log out" type="ButtonDesignInfo">
+    <constraints height="23px" right="70px" top="230px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget actionPerformed="btnTryToLeakActionPerformed" name="btnTryToLeak" parent="Form" prefHeight="23px" prefWidth="96px" text="Leaks Test" type="ButtonDesignInfo">
+    <constraints height="23px" right="74px" top="84px" type="MarginConstraintsDesignInfo" width="96px"/>
+  </widget>
+  <widget actionPerformed="btnGridAddressesFindActionPerformed" name="btnGridAddressesFind" parent="Form" prefHeight="23px" prefWidth="71px" text="find" type="ButtonDesignInfo">
+    <constraints bottom="168px" height="23px" right="171px" type="MarginConstraintsDesignInfo" width="71px"/>
+  </widget>
+  <nonvisual name="buttonGroup" type="ButtonGroupDesignInfo"/>
+  <nonvisual name="jPopupMenu" prefHeight="0px" prefWidth="0px" type="PopupDesignInfo"/>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <entity Name="extraFields" Title="" entityHeight="200" entityIconified="false" entityId="141459398772049" entityLocationX="256" entityLocationY="43" entityWidth="150" queryId="extra_fields" tableName="" tableSchemaName=""/>
+  <referenceRelation collectionPropertyName="children" leftEntityFieldName="good" leftEntityId="141459398772049" rightEntityFieldName="good_id" rightEntityId="141459398772049" scalarPropertyName="goodRef"/>
+</datamodel>

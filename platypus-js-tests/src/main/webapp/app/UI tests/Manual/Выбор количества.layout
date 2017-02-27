@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout name="Form" prefHeight="176px" prefWidth="400px" title="Выбор количества">
+  <widget name="lblAmount" parent="Form" prefHeight="25px" prefWidth="70px" text="Количество:" type="LabelDesignInfo">
+    <constraints height="25px" right="100px" top="10px" type="MarginConstraintsDesignInfo" width="70px"/>
+  </widget>
+  <widget actionPerformed="btnOkActionPerformed" name="btnOk" parent="Form" prefHeight="25px" prefWidth="50px" text="OK" type="ButtonDesignInfo">
+    <constraints bottom="2px" height="25px" right="80px" type="MarginConstraintsDesignInfo" width="50px"/>
+  </widget>
+  <widget actionPerformed="btnCancelActionPerformed" name="btnCancel" parent="Form" prefHeight="25px" prefWidth="70px" text="Cancel" type="ButtonDesignInfo">
+    <constraints bottom="2px" height="25px" right="5px" type="MarginConstraintsDesignInfo" width="70px"/>
+  </widget>
+  <widget backgroundColor="#f0f0f0" foregroundColor="#000000" max="10.0" min="2.0" name="dbSpin2" parent="Form" prefHeight="20px" prefWidth="80px" type="DbSpinDesignInfo">
+    <datamodelElement entityId="-1" fieldName="pAmount"/>
+    <constraints height="20px" right="10px" top="11px" type="MarginConstraintsDesignInfo" width="80px"/>
+  </widget>
+  <widget backgroundColor="#f0f0f0" dateFormat="dd.MM.yyyy" foregroundColor="#000000" name="dbDate1" parent="Form" prefHeight="20px" prefWidth="180px" type="DbDateDesignInfo">
+    <datamodelElement entityId="-1" fieldName="Param1"/>
+    <constraints height="20px" left="10px" top="10px" type="MarginConstraintsDesignInfo" width="180px"/>
+  </widget>
+  <widget backgroundColor="#f0f0f0" dateFormat="dd.MM.yyyy HH:mm:ss" foregroundColor="#000000" name="dbDate2" parent="Form" prefHeight="20px" prefWidth="180px" type="DbDateDesignInfo">
+    <datamodelElement entityId="-1" fieldName="Param1"/>
+    <constraints height="20px" left="10px" top="50px" type="MarginConstraintsDesignInfo" width="180px"/>
+  </widget>
+  <widget backgroundColor="#f0f0f0" foregroundColor="#000000" name="dbLabel1" parent="Form" prefHeight="20px" prefWidth="180px" type="DbLabelDesignInfo">
+    <datamodelElement entityId="-1" fieldName="pAmount"/>
+    <constraints height="20px" left="10px" top="100px" type="MarginConstraintsDesignInfo" width="180px"/>
+  </widget>
+  <widget backgroundColor="#f0f0f0" foregroundColor="#000000" name="dbLabel2" parent="Form" prefHeight="20px" prefWidth="180px" type="DbLabelDesignInfo">
+    <datamodelElement entityId="-1" fieldName="pAmount"/>
+    <constraints height="20px" left="10px" top="130px" type="MarginConstraintsDesignInfo" width="180px"/>
+  </widget>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

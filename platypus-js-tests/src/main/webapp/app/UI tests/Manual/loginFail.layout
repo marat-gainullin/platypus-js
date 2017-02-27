@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout defaultCloseOperation="2" name="Form" prefHeight="146px" prefWidth="400px">
+  <widget name="label" parent="Form" prefHeight="100px" prefWidth="360px" text="Ha ha ha! Failed Failed Failed!" type="LabelDesignInfo">
+    <constraints height="100px" left="20px" top="10px" type="MarginConstraintsDesignInfo" width="360px"/>
+    <easFont name="Tahoma" size="24"/>
+  </widget>
+  <widget cursor="12" foregroundColor="#3333ff" mousePressed="lblReloadMousePressed" name="lblReload" parent="Form" prefHeight="14px" prefWidth="150px" text="&lt;html&gt;&lt;u&gt;Another try...&lt;/u&gt;" type="LabelDesignInfo">
+    <constraints bottom="22px" height="14px" left="20px" type="MarginConstraintsDesignInfo" width="150px"/>
+    <easFont name="Arial" size="14"/>
+  </widget>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

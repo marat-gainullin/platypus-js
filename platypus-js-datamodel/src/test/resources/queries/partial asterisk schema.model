@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <parameters>
+    <parameter description="" name="P3" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="P2" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="P1" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="P4" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="2" typeName="NUMERIC"/>
+  </parameters>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="8" entityLocationY="7" entityWidth="150"/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="141457196224851" entityLocationX="358" entityLocationY="27" entityWidth="150" tableAlias="" tableName="TABLE1" tableSchemaName=""/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="141457196224850" entityLocationX="182" entityLocationY="30" entityWidth="150" tableAlias="" tableName="TABLE2" tableSchemaName=""/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="141457196224871" entityLocationX="548" entityLocationY="40" entityWidth="150" queryId="namedQuery4Tests" tableAlias="T0" tableName="" tableSchemaName=""/>
+  <relation leftEntityFieldName="fielda" leftEntityId="141457196224850" rightEntityFieldName="f1" rightEntityId="141457196224851"/>
+  <relation leftEntityId="-1" leftEntityParameterName="P3" rightEntityFieldName="AMOUNT" rightEntityId="141457196224871"/>
+  <relation leftEntityId="-1" leftEntityParameterName="P2" rightEntityFieldName="f3" rightEntityId="141457196224851"/>
+  <relation leftEntityId="-1" leftEntityParameterName="P4" rightEntityId="141457196224871" rightEntityParameterName="Param1"/>
+</datamodel>

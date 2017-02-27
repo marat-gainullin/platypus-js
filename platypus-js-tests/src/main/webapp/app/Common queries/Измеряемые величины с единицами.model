@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datamodel>
+<parametersEntity entityHeight="200" entityIconified="false" entityLocationX="17" entityLocationY="22" entityWidth="150"/>
+<entity Title="Единицы измерения" entityHeight="200" entityIconified="false" entityId="128049481428181" entityLocationX="475" entityLocationY="32" entityWidth="150" queryId="128032313214099" tableAlias="units" tableName="" tableSchemaName=""/>
+<entity Title="Измеряемые величины" entityHeight="200" entityIconified="false" entityId="128049481426569" entityLocationX="213" entityLocationY="33" entityWidth="150" tableAlias="measurands" tableName="MEASURANDS" tableSchemaName=""/>
+<relation leftEntityFieldName="ID" leftEntityId="128049481426569" rightEntityFieldName="MEASURAND" rightEntityId="128049481428181"/>
+</datamodel>

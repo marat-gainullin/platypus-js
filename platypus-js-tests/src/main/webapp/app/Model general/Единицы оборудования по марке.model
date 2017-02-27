@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datamodel>
+<parameters>
+<parameter description="Марка оборудования" name="MARK" nullable="false" parameterMode="0" precision="10" scale="0" selectionForm="null" signed="true" size="22" type="3" typeName="NUMBER">
+<primaryKey field="ID" name="PK_ASSET_MARKS" schema="EAS" table="ASSET_MARKS"/>
+</parameter>
+</parameters>
+<parametersEntity entityHeight="200" entityIconified="false" entityLocationX="10" entityLocationY="20" entityWidth="150"/>
+<entity Title="Единицы оборудования" entityHeight="200" entityIconified="false" entityId="128049550335903" entityLocationX="196" entityLocationY="29" entityWidth="150" tableAlias="T_PK_EQUIPMENT_1" tableName="PK_EQUIPMENT" tableSchemaName=""/>
+<relation leftEntityFieldName="MARK" leftEntityId="-1" rightEntityFieldName="MARK" rightEntityId="128049550335903"/>
+</datamodel>

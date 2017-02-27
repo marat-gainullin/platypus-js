@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <parameters>
+    <parameter description="" name="P3" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="P2" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="12" typeName="VARCHAR"/>
+  </parameters>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="8" entityLocationY="7" entityWidth="150"/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="141456726012960" entityLocationX="202" entityLocationY="2" entityWidth="150" tableAlias="" tableName="TABLE2" tableSchemaName=""/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="141456726012981" entityLocationX="418" entityLocationY="12" entityWidth="150" tableAlias="" tableName="TABLE1" tableSchemaName=""/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="141456726012982" entityLocationX="589" entityLocationY="60" entityWidth="150" queryId="_1_2_8082898425059" tableAlias="T0" tableName="" tableSchemaName=""/>
+  <relation leftEntityFieldName="fielda" leftEntityId="141456726012960" rightEntityFieldName="f1" rightEntityId="141456726012981"/>
+  <relation leftEntityId="-1" leftEntityParameterName="P3" rightEntityFieldName="AMOUNT" rightEntityId="141456726012982"/>
+  <relation leftEntityId="-1" leftEntityParameterName="P2" rightEntityFieldName="f3" rightEntityId="141456726012981"/>
+</datamodel>

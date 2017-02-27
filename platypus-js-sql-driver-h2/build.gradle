@@ -1,0 +1,5 @@
+dependencies {
+    compile project(':platypus-js-common-utils')
+    compile project(':platypus-js-core')
+    compile project(':platypus-js-datamodel')
+}

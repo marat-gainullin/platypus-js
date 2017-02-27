@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datamodel>
+  <parameters>
+    <parameter description="" name="res" nullable="true" parameterMode="4" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="3" typeName="DECIMAL"/>
+    <parameter description="" name="emp_id" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="3" typeName="DECIMAL"/>
+    <parameter description="" name="salary" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="3" typeName="DECIMAL"/>
+  </parameters>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="14" entityLocationY="16" entityWidth="150"/>
+</datamodel>

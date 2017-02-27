@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <parameters>
+    <parameter description="" name="p1" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="12" typeName="VARCHAR"/>
+  </parameters>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="8" entityLocationY="7" entityWidth="150"/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="141457338893851" entityLocationX="178" entityLocationY="30" entityWidth="150" tableAlias="T1" tableName="GOODORDER" tableSchemaName=""/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="141457338893899" entityLocationX="454" entityLocationY="95" entityWidth="150" tableAlias="" tableName="CUSTOMER" tableSchemaName=""/>
+</datamodel>

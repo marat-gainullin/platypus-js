@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datamodel>
+  <parameters>
+    <parameter description="" name="Param1" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="Param2" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="2" typeName="NUMERIC"/>
+    <parameter description="" name="Param3" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="Param4" nullable="false" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="93" typeName="TIMESTAMP"/>
+    <parameter description="" name="Param5" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="Param6" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="2004" typeName="BLOB"/>
+    <parameter description="" name="Param7" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="2" typeName="NUMERIC"/>
+  </parameters>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="12" entityLocationY="12" entityWidth="150" onAfterChange="onChanged"/>
+  <entity Name="" Title="Пользователи" entityHeight="200" entityIconified="false" entityId="136194917389938" entityLocationX="676" entityLocationY="26" entityWidth="150" queryId="132124811462367" tableName="" tableSchemaName=""/>
+  <entity Name="dsUnits" Title="Единицы измерения" entityHeight="200" entityIconified="false" entityId="135151532000209" entityLocationX="302" entityLocationY="69" entityWidth="150" onRequeried="rowsetRequeried" queryId="128032313214099" tableName="" tableSchemaName=""/>
+  <entity Name="" Title="Все элементы приложения" entityHeight="200" entityIconified="false" entityId="135963425539283" entityLocationX="507" entityLocationY="31" entityWidth="150" queryId="134148495410013" tableName="" tableSchemaName=""/>
+  <entity Name="" Title=" Элементы приложения по родителю" entityHeight="200" entityIconified="false" entityId="136091764773245" entityLocationX="493" entityLocationY="289" entityWidth="150" queryId="124832514140608864" tableName="" tableSchemaName=""/>
+  <entity Name="gridQuery" Title="Запрос для сетки" entityHeight="200" entityIconified="false" entityId="136074861259077" entityLocationX="238" entityLocationY="309" entityWidth="150" queryId="124505954732869424" tableName="" tableSchemaName=""/>
+  <referenceRelation leftEntityFieldName="MDENT_PARENT_ID" leftEntityId="135963425539283" rightEntityFieldName="MDENT_ID" rightEntityId="135963425539283"/>
+  <referenceRelation leftEntityFieldName="MDENT_PARENT_ID" leftEntityId="136091764773245" rightEntityFieldName="MDENT_ID" rightEntityId="135963425539283"/>
+  <referenceRelation leftEntityFieldName="MDENT_PARENT_ID" leftEntityId="135963425539283" rightEntityFieldName="MDENT_ID" rightEntityId="136091764773245"/>
+  <referenceRelation leftEntityFieldName="MDENT_PARENT_ID" leftEntityId="136091764773245" rightEntityFieldName="MDENT_ID" rightEntityId="136091764773245"/>
+</datamodel>

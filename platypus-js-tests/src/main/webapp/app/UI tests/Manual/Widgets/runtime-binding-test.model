@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <entity Name="appElements" Title="" entityHeight="200" entityIconified="false" entityId="140410667793902" entityLocationX="115" entityLocationY="69" entityWidth="150" queryId="_24832514140608864" tableName="" tableSchemaName=""/>
+  <relation leftEntityFieldName="MDENT_PARENT_ID" leftEntityId="140410667793902" rightEntityFieldName="MDENT_ID" rightEntityId="140410667793902"/>
+</datamodel>

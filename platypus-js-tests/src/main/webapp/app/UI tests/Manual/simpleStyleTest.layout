@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?><layout backgroundColor="#ffffcc" defaultCloseOperation="2" name="Form" prefHeight="319px" prefWidth="504px">
+  <widget name="layer1" parent="Form" prefHeight="160px" prefWidth="230px" type="PanelDesignInfo">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints height="160px" left="40px" top="40px" type="MarginConstraintsDesignInfo" width="230px"/>
+  </widget>
+  <widget name="layer2" parent="layer1" prefHeight="100px" prefWidth="100px" type="PanelDesignInfo">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints height="100px" left="110px" top="40px" type="MarginConstraintsDesignInfo" width="100px"/>
+  </widget>
+  <widget name="btnTest" parent="Form" prefHeight="23px" prefWidth="90px" text="test" type="ButtonDesignInfo">
+    <constraints bottom="57px" height="23px" left="40px" type="MarginConstraintsDesignInfo" width="90px"/>
+  </widget>
+  <widget backgroundColor="#fc8a18" name="panel" parent="Form" prefHeight="168px" prefWidth="144px" type="PanelDesignInfo">
+    <layout type="BoxLayoutDesignInfo"/>
+    <constraints height="168px" left="312px" top="36px" type="MarginConstraintsDesignInfo" width="144px"/>
+  </widget>
+  <widget name="label" parent="Form" prefHeight="36px" prefWidth="180px" text="label" type="LabelDesignInfo">
+    <constraints bottom="43px" height="36px" left="168px" type="MarginConstraintsDesignInfo" width="180px"/>
+  </widget>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

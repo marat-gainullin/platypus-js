@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?><layout title="" view="view">
+  <AnchorsPane background="#ffffff" cursor="0" name="view" prefHeight="300px" prefWidth="400px"/>
+  <Button cursor="0" name="btnRunIt" parent="view" prefHeight="20px" prefWidth="70px" text="run it">
+    <AnchorsPaneConstraints height="20px" left="70px" top="50px" width="70px"/>
+  </Button>
+  <Button cursor="0" name="button" parent="view" prefHeight="30px" prefWidth="100px" text="button">
+    <AnchorsPaneConstraints height="30px" left="70px" top="90px" width="100px"/>
+  </Button>
+  <ModelDate cursor="0" data="primary_key" name="modelDate" parent="view" prefHeight="20px" prefWidth="160px">
+    <AnchorsPaneConstraints height="20px" left="200px" top="80px" width="160px"/>
+  </ModelDate>
+  <ModelGrid cursor="0" name="modelGrid" parent="view" prefHeight="100px" prefWidth="230px">
+    <AnchorsPaneConstraints height="100px" left="50px" top="160px" width="230px"/>
+    <ModelGridColumn name="column" title="column" width="114px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+    <ModelGridColumn name="column1" title="column" width="114px">
+      <ModelFormattedField/>
+    </ModelGridColumn>
+  </ModelGrid>
+</layout>

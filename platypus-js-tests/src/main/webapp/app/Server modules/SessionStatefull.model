@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="12" entityLocationY="12" entityWidth="150"/>
+  <entity Name="reportQuery" Title="" entityHeight="200" entityIconified="false" entityId="141527348043074" entityLocationX="203" entityLocationY="16" entityWidth="150" queryId="reportQuery" tableName="" tableSchemaName=""/>
+</datamodel>

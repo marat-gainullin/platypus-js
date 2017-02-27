@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datamodel>
+<parameters>
+<parameter description="" name="Param1" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+</parameters>
+<parametersEntity entityHeight="200" entityIconified="false" entityLocationX="12" entityLocationY="12" entityWidth="150"/>
+<entity Name="assets" Title="Фонды" entityHeight="200" entityIconified="false" entityId="133923631737457" entityLocationX="176" entityLocationY="6" entityWidth="150" queryId="128015347915605" tableName="" tableSchemaName=""/>
+<entity Name="measurands" Title="Измеряемые величины с единицами" entityHeight="200" entityIconified="false" entityId="133923632339617" entityLocationX="279" entityLocationY="233" entityWidth="150" queryId="128032324209306" tableName="" tableSchemaName=""/>
+<entity Name="units" Title="Единицы измерения" entityHeight="200" entityIconified="false" entityId="133923631977614" entityLocationX="372" entityLocationY="8" entityWidth="150" queryId="128032313214099" tableName="" tableSchemaName=""/>
+<entity Name="" Title="Безымянный набор данных" entityHeight="200" entityIconified="false" entityId="133923637712200" entityLocationX="550" entityLocationY="10" entityWidth="150" queryId="124505954732869424" tableName="" tableSchemaName=""/>
+</datamodel>

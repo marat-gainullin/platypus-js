@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <parametersEntity entityHeight="117" entityIconified="false" entityLocationX="6" entityLocationY="30" entityWidth="158"/>
+  <entity Title="Вид объекта ремонта" entityHeight="83" entityIconified="false" entityId="134564175743971" entityLocationX="213" entityLocationY="26" entityWidth="150" tableAlias="k" tableName="ASSET_KINDS" tableSchemaName=""/>
+  <entity Title="Группа объекта ремонта" entityHeight="103" entityIconified="false" entityId="135115068223624" entityLocationX="180" entityLocationY="120" entityWidth="150" tableAlias="g" tableName="ASSET_GROUPS" tableSchemaName=""/>
+  <entity Title="Типы объектов ремонта" entityHeight="83" entityIconified="false" entityId="134564175743928" entityLocationX="405" entityLocationY="26" entityWidth="150" tableAlias="t" tableName="ASSET_TYPES" tableSchemaName=""/>
+  <relation leftEntityFieldName="id" leftEntityId="134564175743971" rightEntityFieldName="id" rightEntityId="135115068223624"/>
+  <relation leftEntityFieldName="id" leftEntityId="134564175743971" rightEntityFieldName="id" rightEntityId="134564175743928"/>
+</datamodel>

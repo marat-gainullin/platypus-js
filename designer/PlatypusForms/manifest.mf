@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module: com.bearsoft.org.netbeans.modules.form/5
-OpenIDE-Module-Localizing-Bundle: com/bearsoft/org/netbeans/modules/form/Bundle.properties
-OpenIDE-Module-Implementation-Version: 32
-OpenIDE-Module-Layer: com/bearsoft/org/netbeans/modules/form/resources/layer.xml
-AutoUpdate-Show-In-Client: true

@@ -1,0 +1,7 @@
+dependencies {
+    compileOnly 'org.postgresql:postgresql:9.4.1212.jre7'
+    compileOnly 'org.postgis:postgis-jdbc:2.1.0'
+    compile project(':platypus-js-common-utils')
+    compile project(':platypus-js-core')
+    compile project(':platypus-js-datamodel')
+}

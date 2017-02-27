@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><layout defaultCloseOperation="2" name="Form" prefHeight="182px" prefWidth="755px">
+  <widget name="slider" parent="Form" prefHeight="168px" prefWidth="372px" type="SliderDesignInfo">
+    <constraints height="168px" left="192px" top="0px" type="MarginConstraintsDesignInfo" width="372px"/>
+  </widget>
+  <widget name="txtMin" parent="Form" prefHeight="27px" prefWidth="84px" text="textField" type="TextFieldDesignInfo">
+    <constraints height="27px" left="96px" top="12px" type="MarginConstraintsDesignInfo" width="84px"/>
+  </widget>
+  <widget name="txtMax" parent="Form" prefHeight="27px" prefWidth="80px" text="textField1" type="TextFieldDesignInfo">
+    <constraints height="27px" left="96px" top="48px" type="MarginConstraintsDesignInfo" width="80px"/>
+  </widget>
+  <widget name="txtValue" parent="Form" prefHeight="27px" prefWidth="80px" text="textField2" type="TextFieldDesignInfo">
+    <constraints height="27px" left="96px" top="84px" type="MarginConstraintsDesignInfo" width="80px"/>
+  </widget>
+  <widget name="label" parent="Form" prefHeight="17px" prefWidth="34px" text="min" type="LabelDesignInfo">
+    <constraints height="17px" left="12px" top="17px" type="MarginConstraintsDesignInfo" width="34px"/>
+  </widget>
+  <widget name="label1" parent="Form" prefHeight="17px" prefWidth="42px" text="max" type="LabelDesignInfo">
+    <constraints height="17px" left="12px" top="53px" type="MarginConstraintsDesignInfo" width="42px"/>
+  </widget>
+  <widget name="label2" parent="Form" prefHeight="17px" prefWidth="42px" text="value" type="LabelDesignInfo">
+    <constraints height="17px" left="12px" top="89px" type="MarginConstraintsDesignInfo" width="42px"/>
+  </widget>
+  <widget name="button" parent="Form" prefHeight="29px" prefWidth="84px" text="getValue" type="ButtonDesignInfo">
+    <constraints height="29px" left="96px" top="120px" type="MarginConstraintsDesignInfo" width="84px"/>
+  </widget>
+  <nonvisual name="buttonGroup" type="ButtonGroupDesignInfo"/>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

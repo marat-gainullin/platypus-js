@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<datamodel>
+<parameters>
+<parameter description="" name="Param1" nullable="true" parameterMode="0" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+<parameter description="" name="Param2" nullable="true" parameterMode="0" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+<parameter description="" name="Param3" nullable="true" parameterMode="0" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="2002" typeName="MDSYS.SDO_GEOMETRY"/>
+</parameters>
+<parametersEntity entityHeight="200" entityIconified="false" entityLocationX="33" entityLocationY="11" entityWidth="150"/>
+</datamodel>

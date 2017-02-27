@@ -1,0 +1,5 @@
+/**
+ * @name 128049547464084
+ * @public
+*/
+SELECT * FROM PK_EQUIPMENT T_PK_EQUIPMENT_1

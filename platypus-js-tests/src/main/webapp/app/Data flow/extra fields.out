@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?><outputFields>
+  <field bindedColumn="extra1" sqlType="12"/>
+  <field bindedColumn="extra2" sqlType="2"/>
+</outputFields>

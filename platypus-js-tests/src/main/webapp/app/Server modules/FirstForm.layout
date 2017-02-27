@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><layout defaultCloseOperation="2" name="Form" prefHeight="104px" prefWidth="185px">
+  <widget name="btnStartAsyncTests" parent="Form" prefHeight="23px" prefWidth="132px" text="Start async tests" type="ButtonDesignInfo">
+    <constraints height="23px" left="24px" top="24px" type="MarginConstraintsDesignInfo" width="132px"/>
+  </widget>
+  <widget name="btnStartSyncTests" parent="Form" prefHeight="23px" prefWidth="132px" text="Sync tests" type="ButtonDesignInfo">
+    <constraints height="23px" left="24px" top="60px" type="MarginConstraintsDesignInfo" width="132px"/>
+  </widget>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

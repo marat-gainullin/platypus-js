@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><layout icon="" title="" view="view">
+  <AnchorsPane background="#ffffff" cursor="0" name="view" prefHeight="300px" prefWidth="400px"/>
+  <Button cursor="0" name="button" parent="view" prefHeight="20px" prefWidth="70px" text="run">
+    <AnchorsPaneConstraints height="20px" left="130px" top="100px" width="70px"/>
+  </Button>
+  <Slider cursor="0" name="slider" parent="view" prefHeight="20px" prefWidth="130px">
+    <AnchorsPaneConstraints height="20px" left="60px" top="40px" width="130px"/>
+  </Slider>
+</layout>

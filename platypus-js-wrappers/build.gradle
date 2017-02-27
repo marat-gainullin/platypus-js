@@ -1,0 +1,61 @@
+apply plugin: 'application'
+
+dependencies {
+    compile project(':platypus-js-common-utils')
+    compile project(':platypus-js-core')
+    compile project(':platypus-js-forms')
+    runtime project(':platypus-js-binary-tags')
+    runtime project(':platypus-js-calendar-widget')
+    runtime project(':platypus-js-grid')
+    runtime project(':platypus-js-scalable-widget')
+    runtime project(':platypus-js-datamodel')
+    runtime project(':platypus-js-reports')
+    runtime project(':platypus-js-routing')
+    runtime project(':platypus-js-scripting')
+    runtime project(':platypus-js-server')
+    runtime project(':platypus-js-servlet')
+    runtime project(':platypus-js-tools')
+    runtime 'javax.servlet:javax.servlet-api:3.1.0'
+    runtime 'javax.websocket:javax.websocket-api:1.1'
+}
+
+mainClassName = 'com.eas.script.Classes2Scripts'
+
+run.dependsOn installDist
+
+run {
+    def source = file("build/install/platypus-js-wrappers/lib");
+    def dest = file("build/wrappers");
+    doFirst {
+        dest.mkdirs()
+    }
+    args '-source', source.absolutePath, '-dest', dest.absolutePath
+}
+
+task copyApi(type: Copy){
+    from 'src/main/api'
+    into 'build/wrappers'
+}
+
+task pack(type: Zip) {
+    from 'build/wrappers'
+    destinationDir = file('build/libs')
+}
+
+pack.dependsOn run
+pack.dependsOn copyApi
+install.dependsOn pack
+
+artifacts {
+    archives pack
+}
+
+configurations.archives.artifacts.removeAll { 
+    it.archiveTask.is jar
+}
+configurations.archives.artifacts.removeAll { 
+    it.archiveTask.is distTar
+}
+configurations.archives.artifacts.removeAll { 
+    it.archiveTask.is distZip
+}

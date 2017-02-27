@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <parameters>
+    <parameter description="" name="P3" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="P2" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="P1" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="100" type="12" typeName="VARCHAR"/>
+    <parameter description="" name="P4" nullable="true" parameterMode="1" precision="0" scale="0" selectionForm="null" signed="true" size="0" type="2" typeName="NUMERIC"/>
+  </parameters>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="8" entityLocationY="7" entityWidth="150"/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="141456693523164" entityLocationX="193" entityLocationY="33" entityWidth="150" tableAlias="" tableName="TABLE2" tableSchemaName=""/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="141456693523165" entityLocationX="395" entityLocationY="32" entityWidth="150" tableAlias="" tableName="TABLE1" tableSchemaName=""/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="141456693523166" entityLocationX="586" entityLocationY="29" entityWidth="150" queryId="128082898425059" tableAlias="T0" tableName="" tableSchemaName=""/>
+  <relation leftEntityId="-1" leftEntityParameterName="P4" rightEntityId="141456693523166" rightEntityParameterName="Param1"/>
+  <relation leftEntityFieldName="fielda" leftEntityId="141456693523164" rightEntityFieldName="f1" rightEntityId="141456693523165"/>
+  <relation leftEntityId="-1" leftEntityParameterName="P3" rightEntityFieldName="AMOUNT" rightEntityId="141456693523166"/>
+  <relation leftEntityId="-1" leftEntityParameterName="P2" rightEntityFieldName="f3" rightEntityId="141456693523165"/>
+</datamodel>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><layout defaultCloseOperation="2" name="Form" prefHeight="423px" prefWidth="398px">
+  <widget name="button" parent="Form" prefHeight="23px" prefWidth="65px" text="add" type="ButtonDesignInfo">
+    <constraints height="23px" left="12px" top="12px" type="MarginConstraintsDesignInfo" width="65px"/>
+  </widget>
+  <widget name="scrollPane" parent="Form" prefHeight="329px" prefWidth="365px" type="ScrollDesignInfo">
+    <constraints bottom="46px" left="12px" right="21px" top="48px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <widget backgroundColor="#666666" name="box" parent="scrollPane" prefHeight="327px" prefWidth="363px" type="PanelDesignInfo">
+    <layout axis="1" type="BoxLayoutDesignInfo"/>
+  </widget>
+  <widget backgroundColor="#ccccff" name="box1" parent="box" prefHeight="100px" prefWidth="363px" type="PanelDesignInfo">
+    <layout axis="1" type="BoxLayoutDesignInfo" vgap="5"/>
+  </widget>
+  <widget backgroundColor="#ccffcc" name="box2" parent="box" prefHeight="100px" prefWidth="363px" type="PanelDesignInfo">
+    <layout axis="3" type="BoxLayoutDesignInfo" vgap="5"/>
+  </widget>
+  <widget name="btnIncVGap" parent="Form" prefHeight="23px" prefWidth="108px" text="inc vgap" type="ButtonDesignInfo">
+    <constraints height="23px" left="120px" top="12px" type="MarginConstraintsDesignInfo" width="108px"/>
+  </widget>
+  <widget name="btnDecVGap" parent="Form" prefHeight="23px" prefWidth="108px" text="dec vgap" type="ButtonDesignInfo">
+    <constraints height="23px" left="240px" top="12px" type="MarginConstraintsDesignInfo" width="108px"/>
+  </widget>
+  <widget name="button1" parent="Form" prefHeight="23px" prefWidth="132px" text="add vbox" type="ButtonDesignInfo">
+    <constraints bottom="4px" height="23px" left="12px" type="MarginConstraintsDesignInfo" width="132px"/>
+  </widget>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

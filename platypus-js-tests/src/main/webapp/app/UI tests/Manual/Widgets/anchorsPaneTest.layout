@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><layout defaultCloseOperation="2" name="Form" prefHeight="300px" prefWidth="556px">
+  <widget backgroundColor="#ff9966" name="panel" parent="Form" prefHeight="100px" prefWidth="100px" type="PanelDesignInfo">
+    <layout type="MarginLayoutDesignInfo"/>
+    <constraints bottom="164px" left="48px" right="408px" top="36px" type="MarginConstraintsDesignInfo"/>
+  </widget>
+  <widget name="btnLeft" parent="Form" prefHeight="23px" prefWidth="49px" text="left" type="ButtonDesignInfo">
+    <constraints height="23px" left="0px" top="0px" type="MarginConstraintsDesignInfo" width="49px"/>
+  </widget>
+  <widget name="btnRight" parent="Form" prefHeight="23px" prefWidth="55px" text="right" type="ButtonDesignInfo">
+    <constraints height="23px" left="60px" top="0px" type="MarginConstraintsDesignInfo" width="55px"/>
+  </widget>
+  <widget name="btnUp" parent="Form" prefHeight="23px" prefWidth="45px" text="up" type="ButtonDesignInfo">
+    <constraints height="23px" left="132px" top="0px" type="MarginConstraintsDesignInfo" width="45px"/>
+  </widget>
+  <widget name="btnDown" parent="Form" prefHeight="23px" prefWidth="59px" text="down" type="ButtonDesignInfo">
+    <constraints height="23px" left="192px" top="0px" type="MarginConstraintsDesignInfo" width="59px"/>
+  </widget>
+  <widget name="btnWider" parent="Form" prefHeight="23px" prefWidth="59px" text="wider" type="ButtonDesignInfo">
+    <constraints height="23px" left="264px" top="0px" type="MarginConstraintsDesignInfo" width="59px"/>
+  </widget>
+  <widget name="btnThiner" parent="Form" prefHeight="23px" prefWidth="61px" text="thiner" type="ButtonDesignInfo">
+    <constraints height="23px" left="336px" top="0px" type="MarginConstraintsDesignInfo" width="61px"/>
+  </widget>
+  <widget name="btnTaller" parent="Form" prefHeight="23px" prefWidth="57px" text="taller" type="ButtonDesignInfo">
+    <constraints height="23px" left="408px" top="0px" type="MarginConstraintsDesignInfo" width="57px"/>
+  </widget>
+  <widget name="btnSmaller" parent="Form" prefHeight="23px" prefWidth="65px" text="smaller" type="ButtonDesignInfo">
+    <constraints height="23px" left="480px" top="0px" type="MarginConstraintsDesignInfo" width="65px"/>
+  </widget>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>

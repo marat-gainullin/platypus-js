@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?><layout title="" view="view">
+  <AnchorsPane cursor="0" name="view" prefHeight="529px" prefWidth="1201px"/>
+  <ModelGrid cursor="0" data="ds21" name="dbGrid1" parent="view" prefHeight="108px" prefWidth="336px">
+    <AnchorsPaneConstraints height="108px" left="48px" top="132px" width="336px"/>
+    <ServiceGridColumn name="rows-header-service" resizable="true"/>
+    <ModelGridColumn field="ORDER_ID" name="ORDER_ID" title="21 Id заказа" width="75px">
+      <ModelSpin/>
+    </ModelGridColumn>
+    <ModelGridColumn field="GOOD_NAME" name="GOOD_NAME" title="Наименование товара" width="75px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+    <ModelGridColumn field="AMOUNT" name="AMOUNT" title="Количество товара" width="75px">
+      <ModelSpin/>
+    </ModelGridColumn>
+    <ModelGridColumn field="CUSTOMER_NAME" name="CUSTOMER_NAME" title="Имя заказчика" width="75px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+    <ModelGridColumn field="CUSTOMER_ADDRESS" name="CUSTOMER_ADDRESS" title="Адрес заказчика" width="75px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+  </ModelGrid>
+  <ModelGrid cursor="0" data="ds22" name="dbGrid2" parent="view" prefHeight="108px" prefWidth="338px">
+    <AnchorsPaneConstraints height="108px" left="48px" top="252px" width="338px"/>
+    <ServiceGridColumn name="rows-header-service" resizable="true"/>
+    <ModelGridColumn field="ORDER_ID" name="ORDER_ID" title="22 Id заказа" width="75px">
+      <ModelSpin/>
+    </ModelGridColumn>
+    <ModelGridColumn field="GOOD_NAME" name="GOOD_NAME" title="Наименование товара" width="75px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+    <ModelGridColumn field="AMOUNT" name="AMOUNT" title="Количество товара" width="75px">
+      <ModelSpin/>
+    </ModelGridColumn>
+    <ModelGridColumn field="CUSTOMER_NAME" name="CUSTOMER_NAME" title="Имя заказчика" width="75px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+    <ModelGridColumn field="CUSTOMER_ADDRESS" name="CUSTOMER_ADDRESS" title="Адрес заказчика" width="75px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+  </ModelGrid>
+  <ModelGrid cursor="0" data="ds31" name="dbGrid3" parent="view" prefHeight="110px" prefWidth="384px">
+    <AnchorsPaneConstraints height="110px" left="408px" top="132px" width="384px"/>
+    <ServiceGridColumn name="rows-header-service" resizable="true"/>
+    <ModelGridColumn field="ORDER_ID" name="ORDER_ID" title="31 Id заказа" width="75px">
+      <ModelSpin/>
+    </ModelGridColumn>
+    <ModelGridColumn field="GOOD_NAME" name="GOOD_NAME" title="Наименование товара" width="75px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+    <ModelGridColumn field="AMOUNT" name="AMOUNT" title="Количество товара" width="75px">
+      <ModelSpin/>
+    </ModelGridColumn>
+    <ModelGridColumn field="CUSTOMER_NAME" name="CUSTOMER_NAME" title="Имя заказчика" width="75px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+    <ModelGridColumn field="CUSTOMER_ADDRESS" name="CUSTOMER_ADDRESS" title="Адрес заказчика" width="75px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+  </ModelGrid>
+  <ModelGrid cursor="0" data="ds32" name="dbGrid4" parent="view" prefHeight="110px" prefWidth="386px">
+    <AnchorsPaneConstraints height="110px" left="408px" top="252px" width="386px"/>
+    <ServiceGridColumn name="rows-header-service" resizable="true"/>
+    <ModelGridColumn field="ORDER_ID" name="ORDER_ID" title="32 Id заказа" width="75px">
+      <ModelSpin/>
+    </ModelGridColumn>
+    <ModelGridColumn field="GOOD_NAME" name="GOOD_NAME" title="Наименование товара" width="75px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+    <ModelGridColumn field="AMOUNT" name="AMOUNT" title="Количество товара" width="75px">
+      <ModelSpin/>
+    </ModelGridColumn>
+    <ModelGridColumn field="CUSTOMER_NAME" name="CUSTOMER_NAME" title="Имя заказчика" width="75px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+    <ModelGridColumn field="CUSTOMER_ADDRESS" name="CUSTOMER_ADDRESS" title="Адрес заказчика" width="75px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+  </ModelGrid>
+  <ModelGrid cursor="0" data="ds33" name="dbGrid5" parent="view" prefHeight="110px" prefWidth="384px">
+    <AnchorsPaneConstraints bottom="35px" height="110px" left="408px" width="384px"/>
+    <ServiceGridColumn name="rows-header-service" resizable="true"/>
+    <ModelGridColumn field="ORDER_ID" name="ORDER_ID" title="33 Id заказа" width="75px">
+      <ModelSpin/>
+    </ModelGridColumn>
+    <ModelGridColumn field="GOOD_NAME" name="GOOD_NAME" title="Наименование товара" width="75px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+    <ModelGridColumn field="AMOUNT" name="AMOUNT" title="Количество товара" width="75px">
+      <ModelSpin/>
+    </ModelGridColumn>
+    <ModelGridColumn field="CUSTOMER_NAME" name="CUSTOMER_NAME" title="Имя заказчика" width="75px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+    <ModelGridColumn field="CUSTOMER_ADDRESS" name="CUSTOMER_ADDRESS" title="Адрес заказчика" width="75px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+  </ModelGrid>
+  <ModelGrid cursor="0" data="ds41" name="dbGrid6" parent="view" prefHeight="98px" prefWidth="386px">
+    <AnchorsPaneConstraints height="98px" left="804px" top="216px" width="386px"/>
+    <ServiceGridColumn name="rows-header-service" resizable="true"/>
+    <ModelGridColumn field="ORDER_ID" name="oRDER_ID1" title="41 Id заказа" width="75px">
+      <ModelSpin/>
+    </ModelGridColumn>
+    <ModelGridColumn field="GOOD_NAME" name="gOOD_NAME" title="Наименование товара" width="75px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+    <ModelGridColumn field="AMOUNT" name="aMOUNT1" title="Количество товара" width="75px">
+      <ModelSpin/>
+    </ModelGridColumn>
+    <ModelGridColumn field="CUSTOMER_NAME" name="cUSTOMER_NAME" title="Имя заказчика" width="75px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+    <ModelGridColumn field="CUSTOMER_ADDRESS" name="cUSTOMER_ADDRESS" title="Адрес заказчика" width="75px">
+      <ModelFormattedField format=""/>
+    </ModelGridColumn>
+  </ModelGrid>
+  <ModelGrid cursor="0" data="ds11" name="modelGrid" parent="view" prefHeight="120px" prefWidth="336px">
+    <AnchorsPaneConstraints height="120px" left="0px" top="0px" width="336px"/>
+    <ServiceGridColumn name="colService"/>
+    <ModelGridColumn field="order_id" name="colOrder_id" title="Id заказа" width="75px">
+      <ModelSpin max="1.7976931348623157E308" min="-1.7976931348623157E308"/>
+    </ModelGridColumn>
+    <ModelGridColumn field="amount" name="colAmount" title="Количество товара" width="75px">
+      <ModelSpin max="1.7976931348623157E308" min="-1.7976931348623157E308"/>
+    </ModelGridColumn>
+    <ModelGridColumn field="good" name="colGood" title="Заказанный товар" width="75px">
+      <ModelSpin max="1.7976931348623157E308" min="-1.7976931348623157E308"/>
+    </ModelGridColumn>
+    <ModelGridColumn field="customer" name="colCustomer" title="Заказчик" width="75px">
+      <ModelSpin max="1.7976931348623157E308" min="-1.7976931348623157E308"/>
+    </ModelGridColumn>
+    <ModelGridColumn field="field1" name="colField1" title="colField1" width="75px">
+      <ModelFormattedField/>
+    </ModelGridColumn>
+  </ModelGrid>
+  <AnchorsPane cursor="0" name="panel" parent="view" prefHeight="72px" prefWidth="240px">
+    <AnchorsPaneConstraints height="72px" left="384px" top="12px" width="240px"/>
+  </AnchorsPane>
+  <AnchorsPane cursor="0" name="panel1" parent="panel" prefHeight="72px" prefWidth="240px">
+    <AnchorsPaneConstraints height="72px" left="394px" top="22px" width="240px"/>
+  </AnchorsPane>
+  <Button cursor="0" name="btnRequery1" parent="panel1" prefHeight="23px" prefWidth="96px" text="requery">
+    <AnchorsPaneConstraints height="23px" left="12px" top="24px" width="96px"/>
+  </Button>
+  <Button cursor="0" name="btnExecute1" parent="panel1" prefHeight="23px" prefWidth="108px" text="execute">
+    <AnchorsPaneConstraints height="23px" left="120px" top="24px" width="108px"/>
+  </Button>
+  <Button cursor="0" name="btnModelRequery" parent="panel" prefHeight="23px" prefWidth="96px" text="requery">
+    <AnchorsPaneConstraints height="23px" left="12px" top="24px" width="96px"/>
+  </Button>
+  <Button cursor="0" name="btnModelExecute" parent="panel" prefHeight="23px" prefWidth="108px" text="execute">
+    <AnchorsPaneConstraints height="23px" left="120px" top="24px" width="108px"/>
+  </Button>
+  <Label cursor="0" name="label1" parent="panel" prefHeight="20px" prefWidth="70px" text="model">
+    <AnchorsPaneConstraints height="20px" left="0px" top="0px" width="70px"/>
+  </Label>
+  <AnchorsPane cursor="0" name="panel2" parent="view" prefHeight="72px" prefWidth="240px">
+    <AnchorsPaneConstraints height="72px" left="648px" top="12px" width="240px"/>
+  </AnchorsPane>
+  <Button cursor="0" name="btnEntityExecute" parent="panel2" prefHeight="23px" prefWidth="108px" text="execute">
+    <AnchorsPaneConstraints height="23px" left="118px" top="22px" width="108px"/>
+  </Button>
+  <Button cursor="0" name="btnEntityRequery" parent="panel2" prefHeight="23px" prefWidth="96px" text="requery">
+    <AnchorsPaneConstraints height="23px" left="10px" top="22px" width="96px"/>
+  </Button>
+  <Label cursor="0" name="label" parent="panel2" prefHeight="20px" prefWidth="70px" text="ds21">
+    <AnchorsPaneConstraints height="20px" left="0px" top="0px" width="70px"/>
+  </Label>
+</layout>

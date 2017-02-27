@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><layout defaultCloseOperation="2" name="Form" prefHeight="300px" prefWidth="400px">
+  <widget name="progressBar" parent="Form" prefHeight="14px" prefWidth="204px" type="ProgressBarDesignInfo">
+    <constraints height="14px" left="24px" top="36px" type="MarginConstraintsDesignInfo" width="204px"/>
+  </widget>
+  <widget name="slider" parent="Form" prefHeight="23px" prefWidth="200px" type="SliderDesignInfo">
+    <constraints height="23px" left="24px" top="84px" type="MarginConstraintsDesignInfo" width="200px"/>
+  </widget>
+  <widget name="button" parent="Form" prefHeight="23px" prefWidth="108px" text="test it!" type="ButtonDesignInfo">
+    <constraints bottom="13px" height="23px" left="12px" type="MarginConstraintsDesignInfo" width="108px"/>
+  </widget>
+  <layout type="MarginLayoutDesignInfo"/>
+</layout>
