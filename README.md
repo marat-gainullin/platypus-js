@@ -1,7 +1,6 @@
 # Platypus.js
 
 [![Build Status](https://travis-ci.org/altsoft/PlatypusJS.svg?branch=master)](https://travis-ci.org/altsoft/PlatypusJS)
-[![License](https://img.shields.io/github/license/srs/gradle-node-plugin.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 The Platypus.js is a platform for rapid development of enterprise-level JavaScript applications.
 
