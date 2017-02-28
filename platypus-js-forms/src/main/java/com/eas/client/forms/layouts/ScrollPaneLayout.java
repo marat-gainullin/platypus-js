@@ -443,7 +443,6 @@ public class ScrollPaneLayout extends javax.swing.ScrollPaneLayout
      * @param parent the <code>Container</code> that will be laid out
      * @return a <code>Dimension</code> object specifying the preferred size of the
      *         viewport and any scrollbars
-     * @see ViewportLayout
      * @see LayoutManager
      */
     public Dimension preferredLayoutSize(Container parent)

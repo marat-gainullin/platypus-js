@@ -950,7 +950,7 @@ public class Scripts {
      * For external API.
      *
      * @param aWrapped
-     * @return BiConsumer<Object, Throwable> Object - result instance, Throwable
+     * @return BiConsumer&lt;Object, Throwable&gt; Object - result instance, Throwable
      * - exception raised while an operation.
      */
     public static BiConsumer<Object, Throwable> inContext(BiConsumer<Object, Throwable> aWrapped) {

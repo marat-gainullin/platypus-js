@@ -142,7 +142,6 @@ public class SqlCompiledQuery {
      * @param onFailure
      * @return Rowset insatance, representing query results.
      * @throws Exception
-     * @see Rowset
      */
     public <T> T executeQuery(CallableConsumer<T, ResultSet> aResultSetProcessor, Executor aCallbacksExecutor, Consumer<T> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (basesProxy != null) {

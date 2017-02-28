@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class Db2SqlDriver extends SqlDriver {
 
-    // настройка экранирования наименования объектов БД
+    // Настройка экранирования наименования объектов БД
     private static final TwinString[] charsForWrap = {new TwinString("\"", "\"")};
     private static final char[] restrictedChars = {' ', ',', '\'', '"'};
 
@@ -34,9 +34,6 @@ public class Db2SqlDriver extends SqlDriver {
     protected static final Db2TypesResolver resolver = new Db2TypesResolver();
     /**
      * Listing of SQLSTATE values
-     *
-     * @see
-     * http://publib.boulder.ibm.com/infocenter/iseries/v5r3/index.jsp?topic=%2Frzala%2Frzalaco.htm
      */
     protected static final int[] db2ErrorCodes = {};
     protected static final String[] platypusErrorMessages = {};

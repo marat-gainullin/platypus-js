@@ -76,7 +76,7 @@ public class ConstrainedRowSorter<M extends TableModel> extends DelegatingRowSor
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public int convertRowIndexToModel(int vIndex) {
@@ -88,7 +88,7 @@ public class ConstrainedRowSorter<M extends TableModel> extends DelegatingRowSor
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public int convertRowIndexToView(int mIndex) {
@@ -100,7 +100,7 @@ public class ConstrainedRowSorter<M extends TableModel> extends DelegatingRowSor
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public int getViewRowCount() {

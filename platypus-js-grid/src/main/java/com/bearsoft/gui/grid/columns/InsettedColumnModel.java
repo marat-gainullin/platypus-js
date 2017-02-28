@@ -54,6 +54,7 @@ public class InsettedColumnModel implements TableColumnModel, ListSelectionListe
 
     protected class InsetListener implements InsetChangeListener {
 
+        @Override
         public void insetPreFirstChanged(InsetPreFirstChangedEvent anEvent) {
             if (anEvent.getNewValue() > anEvent.getOldValue()) {
                 assert leftInsetColumns.size() == anEvent.getOldValue();
@@ -77,6 +78,7 @@ public class InsettedColumnModel implements TableColumnModel, ListSelectionListe
             }
         }
 
+        @Override
         public void insetAfterLastChanged(InsetAfterLastChangedEvent anEvent) {
             if (anEvent.getNewValue() > anEvent.getOldValue()) {
                 assert rightInsetColumns.size() == anEvent.getOldValue();
@@ -104,19 +106,23 @@ public class InsettedColumnModel implements TableColumnModel, ListSelectionListe
 
     protected class DelegatedColumnModelListener implements TableColumnModelListener {
 
+        @Override
         public void columnAdded(TableColumnModelEvent e) {
             fireColumnAdded(inset.toOuterSpace(new InsetPart(PartKind.CONTENT, e.getToIndex()), LinearInset.EMPTY_CONTENT));
         }
 
+        @Override
         public void columnRemoved(TableColumnModelEvent e) {
             fireColumnRemoved(inset.toOuterSpace(new InsetPart(PartKind.CONTENT, e.getFromIndex()), LinearInset.EMPTY_CONTENT));
         }
 
+        @Override
         public void columnMoved(TableColumnModelEvent e) {
             fireColumnMoved(inset.toOuterSpace(new InsetPart(PartKind.CONTENT, e.getFromIndex()), LinearInset.EMPTY_CONTENT),
                     inset.toOuterSpace(new InsetPart(PartKind.CONTENT, e.getToIndex()), LinearInset.EMPTY_CONTENT));
         }
 
+        @Override
         public void columnMarginChanged(ChangeEvent e) {
             Object oSource = e.getSource();
             assert oSource == delegate;
@@ -130,6 +136,7 @@ public class InsettedColumnModel implements TableColumnModel, ListSelectionListe
             //}
         }
 
+        @Override
         public void columnSelectionChanged(ListSelectionEvent e) {
             fireSelectionModelChanged();
         }
@@ -139,10 +146,12 @@ public class InsettedColumnModel implements TableColumnModel, ListSelectionListe
 
         protected int columnIndex = 0;
 
+        @Override
         public boolean hasMoreElements() {
             return columnIndex < getColumnCount();
         }
 
+        @Override
         public TableColumn nextElement() {
             if (columnIndex >= 0 && columnIndex < leftInsetColumns.size()) {
                 return leftInsetColumns.get(columnIndex++);
@@ -251,24 +260,27 @@ public class InsettedColumnModel implements TableColumnModel, ListSelectionListe
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public void addColumn(TableColumn aColumn) {
         delegate.addColumn(aColumn);
         // the event will raise by itself
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public void removeColumn(TableColumn column) {
         delegate.removeColumn(column);
         // the event will raise by itself
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public void moveColumn(int sourceIndex, int destIndex) {
         InsetPart sourcePart = inset.toInnerSpace(sourceIndex, delegate.getColumnCount());
         InsetPart destPart = inset.toInnerSpace(destIndex, delegate.getColumnCount());
@@ -293,8 +305,9 @@ public class InsettedColumnModel implements TableColumnModel, ListSelectionListe
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public void setColumnMargin(int aMargin) {
         columnMargin = aMargin;
         delegate.setColumnMargin(aMargin);
@@ -302,22 +315,25 @@ public class InsettedColumnModel implements TableColumnModel, ListSelectionListe
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public int getColumnCount() {
         return delegate.getColumnCount() + leftInsetColumns.size() + rightInsetColumns.size();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public Enumeration<TableColumn> getColumns() {
         return new ColumnsEnumerator();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public int getColumnIndex(Object aColumnId) {
         for (int i = 0; i < leftInsetColumns.size(); i++) {
             Object id = leftInsetColumns.get(i).getIdentifier();
@@ -339,8 +355,9 @@ public class InsettedColumnModel implements TableColumnModel, ListSelectionListe
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public TableColumn getColumn(int aColumnIndex) {
         if (aColumnIndex >= 0 && aColumnIndex < leftInsetColumns.size()) {
             return leftInsetColumns.get(aColumnIndex);
@@ -353,15 +370,17 @@ public class InsettedColumnModel implements TableColumnModel, ListSelectionListe
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public int getColumnMargin() {
         return columnMargin;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public int getColumnIndexAtX(int xPosition) {
         int width = 0;
         for (int i = 0; i < getColumnCount(); i++) {
@@ -375,8 +394,9 @@ public class InsettedColumnModel implements TableColumnModel, ListSelectionListe
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public int getTotalColumnWidth() {
         int width = 0;
         for (int i = 0; i < leftInsetColumns.size(); i++) {
@@ -390,8 +410,9 @@ public class InsettedColumnModel implements TableColumnModel, ListSelectionListe
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public void setColumnSelectionAllowed(boolean aAllowed) {
         columnSelectionAllowed = aAllowed;
         delegate.setColumnSelectionAllowed(aAllowed);
@@ -399,15 +420,17 @@ public class InsettedColumnModel implements TableColumnModel, ListSelectionListe
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public boolean getColumnSelectionAllowed() {
         return columnSelectionAllowed;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public int[] getSelectedColumns() {
         List<Integer> selected = new ArrayList<>();
         for (int i = 0; i < getColumnCount(); i++) {
@@ -423,8 +446,9 @@ public class InsettedColumnModel implements TableColumnModel, ListSelectionListe
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public int getSelectedColumnCount() {
         if (delegate.getSelectionModel() != null) {
             return getLeftInsetSelectedColumnCount() + delegate.getSelectedColumnCount() + getRightInsetSelectedColumnCount();
@@ -434,8 +458,9 @@ public class InsettedColumnModel implements TableColumnModel, ListSelectionListe
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public void setSelectionModel(ListSelectionModel newModel) {
         if (selectionModel != null) {
             selectionModel.removeListSelectionListener(this);
@@ -446,26 +471,30 @@ public class InsettedColumnModel implements TableColumnModel, ListSelectionListe
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public ListSelectionModel getSelectionModel() {
         return selectionModel;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public void addColumnModelListener(TableColumnModelListener l) {
         listeners.add(l);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
+    @Override
     public void removeColumnModelListener(TableColumnModelListener l) {
         listeners.remove(l);
     }
 
+    @Override
     public void valueChanged(ListSelectionEvent e) {
         fireColumnSelectionChanged(e);
     }
@@ -477,36 +506,36 @@ public class InsettedColumnModel implements TableColumnModel, ListSelectionListe
 
     protected void fireColumnSelectionChanged(ListSelectionEvent e)
     {
-        for (TableColumnModelListener l : listeners) {
+        listeners.forEach((l) -> {
             l.columnSelectionChanged(e);
-        }
+        });
     }
 
     protected void fireColumnMarginChanged(int aMargin) {
         ChangeEvent event = new ChangeEvent(this);
-        for (TableColumnModelListener l : listeners) {
+        listeners.forEach((l) -> {
             l.columnMarginChanged(event);
-        }
+        });
     }
 
     protected void fireColumnRemoved(int aPosition) {
         TableColumnModelEvent event = new TableColumnModelEvent(this, aPosition, 0);
-        for (TableColumnModelListener l : listeners) {
+        listeners.forEach((l) -> {
             l.columnRemoved(event);
-        }
+        });
     }
 
     protected void fireColumnAdded(int aPosition) {
         TableColumnModelEvent event = new TableColumnModelEvent(this, 0, aPosition);
-        for (TableColumnModelListener l : listeners) {
+        listeners.forEach((l) -> {
             l.columnAdded(event);
-        }
+        });
     }
 
     protected void fireColumnMoved(int sourceIndex, int destIndex) {
         TableColumnModelEvent event = new TableColumnModelEvent(this, sourceIndex, destIndex);
-        for (TableColumnModelListener l : listeners) {
+        listeners.forEach((l) -> {
             l.columnMoved(event);
-        }
+        });
     }
 }

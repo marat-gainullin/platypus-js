@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.util.logging;
 
 import java.io.PrintWriter;
@@ -17,14 +13,14 @@ import java.util.logging.LogRecord;
 public class PlatypusFormatter extends Formatter {
 
     // format string for printing the log record
-    private static final String format = "%1$td:%1$tm:%1$tY %1$tH:%1$tM:%1$tS\t%2$s\t%3$s\t%4$s%n";
+    private static final String FORMAT = "%1$td:%1$tm:%1$tY %1$tH:%1$tM:%1$tS\t%2$s\t%3$s\t%4$s%n";
 
     public PlatypusFormatter() {
         super();
     }
 
     /**
-     * @inherit
+     * {@inheritDoc}
      */
     @Override
     public String format(LogRecord record) {
@@ -38,7 +34,7 @@ public class PlatypusFormatter extends Formatter {
             }
             throwable = sw.toString();
         }
-        return String.format(format,
+        return String.format(FORMAT,
                 dat,
                 record.getLevel().getLocalizedName(),
                 message,

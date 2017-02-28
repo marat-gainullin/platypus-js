@@ -54,7 +54,6 @@ public class Parameter extends Field {
      * @param aName Name of the created parameter.
      * @param aDescription Description of the created parameter.
      * @param aType Type name of the created parameter.
-     * @see DataTypeInfo
      */
     public Parameter(String aName, String aDescription, String aType) {
         super(aName, aDescription, aType);

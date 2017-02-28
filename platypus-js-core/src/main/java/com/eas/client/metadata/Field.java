@@ -339,7 +339,6 @@ public class Field implements HasPublished {
      * Sets the field's type description
      *
      * @param aValue The filed's type description
-     * @see DataTypeInfo
      */
     @ScriptFunction
     public void setType(String aValue) {
@@ -437,7 +436,7 @@ public class Field implements HasPublished {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String toString() {

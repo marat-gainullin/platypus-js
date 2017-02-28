@@ -263,9 +263,9 @@ public class SqlQuery extends Query {
      * The returned object is able to assign parameters values stored in it to
      * any PreparedStatement object.</p>
      *
-     * @param aSpace Scripts space for js->Java conversion. If null, no
+     * @param aSpace Scripts space for JavaScript to Java conversion. If null, no
      * conversion is performed.
-     * @return compiled SQL query object.
+     * @return Compiled Sql query.
      * @throws UnboundSqlParameterException
      * @throws Exception
      */

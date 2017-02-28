@@ -9,19 +9,18 @@ package com.eas.client.dataflow;
  * the FlowProvider interface, when flow provider is not paged.
  *
  * @author mg
- * @see com.bearsoft.rowset.dataflow.FlowProvider
  */
 public class FlowProviderNotPagedException extends FlowProviderFailedException {
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public FlowProviderNotPagedException(Exception aCause) {
         super(aCause);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public FlowProviderNotPagedException(String aMsg) {
         super(aMsg);

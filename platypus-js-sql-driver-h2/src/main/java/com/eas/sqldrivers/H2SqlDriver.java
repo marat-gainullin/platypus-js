@@ -73,7 +73,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public boolean isConstraintsDeferrable() {
@@ -81,7 +81,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public TypesResolver getTypesResolver() {
@@ -89,7 +89,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String getUsersSpaceInitResourceName() {
@@ -97,7 +97,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String getVersionInitResourceName() {
@@ -105,7 +105,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void applyContextToConnection(Connection aConnection, String aSchema) throws Exception {
@@ -122,7 +122,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String getSql4CreateSchema(String aSchemaName, String aPassword) {
@@ -133,7 +133,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String[] getSql4CreateColumnComment(String aOwnerName, String aTableName, String aFieldName, String aDescription) {
@@ -148,7 +148,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String getSql4CreateTableComment(String aOwnerName, String aTableName, String aDescription) {
@@ -164,7 +164,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String getSql4DropTable(String aSchemaName, String aTableName) {
@@ -176,7 +176,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String getSql4DropIndex(String aSchemaName, String aTableName, String aIndexName) {
@@ -185,7 +185,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String getSql4DropFkConstraint(String aSchemaName, ForeignKeySpec aFk) {
@@ -195,7 +195,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String[] getSql4CreatePkConstraint(String aSchemaName, List<PrimaryKeySpec> listPk) {
@@ -218,7 +218,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String getSql4DropPkConstraint(String aSchemaName, PrimaryKeySpec aPk) {
@@ -227,7 +227,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String getSql4CreateFkConstraint(String aSchemaName, ForeignKeySpec aFk) {
@@ -237,7 +237,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String getSql4CreateFkConstraint(String aSchemaName, List<ForeignKeySpec> listFk) {
@@ -296,7 +296,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String getSql4CreateIndex(String aSchemaName, String aTableName, DbTableIndexSpec aIndex) {
@@ -322,7 +322,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String getSql4EmptyTableCreation(String aSchemaName, String aTableName, String aPkFieldName) {
@@ -331,7 +331,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String parseException(Exception ex) {
@@ -366,7 +366,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String getSql4FieldDefinition(JdbcField aField) {
@@ -384,7 +384,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, JdbcField aOldFieldMd, JdbcField aNewFieldMd) {
@@ -429,7 +429,7 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, JdbcField aNewFieldMd) {

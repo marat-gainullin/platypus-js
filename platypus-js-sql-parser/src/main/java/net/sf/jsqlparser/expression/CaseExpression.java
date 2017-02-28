@@ -28,28 +28,28 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
  * CASE/WHEN expression.
  *
  * Syntax:
- * <code><pre>
+ * <code>
  * CASE
  * WHEN condition THEN expression
  * [WHEN condition THEN expression]...
  * [ELSE expression]
  * END
- * </pre></code>
+ * </code>
  *
- * <br/> or <br/> <br/>
+ * or <br>
  *
- * <code><pre>
+ * <code>
  * CASE expression
  * WHEN condition THEN expression
  * [WHEN condition THEN expression]...
  * [ELSE expression]
  * END
- * </pre></code>
+ * </code>
  *
  * See also: https://aurora.vcu.edu/db2help/db2s0/frame3.htm#casexp
  *  http://sybooks.sybase.com/onlinebooks/group-as/asg1251e/commands/
  *
- * @ebt-link;pt=5954?target=%25N%15_52628_START_RESTART_N%25
+ * &#63;ebt-link;pt=5954?target=%25N%15_52628_START_RESTART_N%25
  *
  *
  * @author Havard Rast Blok

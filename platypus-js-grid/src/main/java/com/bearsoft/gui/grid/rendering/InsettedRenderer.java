@@ -103,7 +103,7 @@ public class InsettedRenderer extends JPanel implements TableCellRenderer {
     }
 
     /**
-     * @inhertDoc
+     * {@inheritDoc}
      */
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         setBorder(null);
@@ -149,27 +149,6 @@ public class InsettedRenderer extends JPanel implements TableCellRenderer {
                 && back.equals(p.getBackground())
                 && p.isOpaque();
         return !colorMatch && super.isOpaque();
-    }
-
-    /**
-     * Overridden for performance reasons.
-     *
-    @Override
-    public void invalidate() {
-    }
-
-    /**
-     * Overridden for performance reasons.
-     *
-    @Override
-    public void validate() {
-    }
-
-    /**
-     * Overridden for performance reasons.
-     *
-    @Override
-    public void revalidate() {
     }
 
     /**

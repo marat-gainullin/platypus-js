@@ -104,7 +104,7 @@ public class OracleSqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String getSql4FieldDefinition(JdbcField aField) {
@@ -157,7 +157,7 @@ public class OracleSqlDriver extends SqlDriver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, JdbcField aOldFieldMd, JdbcField aNewFieldMd) {

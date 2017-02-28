@@ -173,7 +173,7 @@ public abstract class Model<E extends Entity<?, Q, E>, Q extends Query> {
      * notified whenever an datamodel edit action will occur.
      *
      * @param v an <code>DatamodelEditingValidator</code> object
-     * @see #removeDatamodelEditingValidator
+     * @see #removeEditingValidator(com.eas.client.model.ModelEditingValidator) 
      */
     public synchronized void addEditingValidator(ModelEditingValidator<E> v) {
         editingSupport.addValidator(v);
@@ -183,7 +183,7 @@ public abstract class Model<E extends Entity<?, Q, E>, Q extends Query> {
      * Removes an <code>DatamodelEditingValidator</code>.
      *
      * @param v the <code>DatamodelEditingValidator</code> object to be removed
-     * @see #addDatamodelEditingValidator
+     * @see #addEditingValidator(com.eas.client.model.ModelEditingValidator) 
      */
     public synchronized void removeEditingValidator(ModelEditingValidator<E> v) {
         editingSupport.removeValidator(v);

@@ -13,7 +13,7 @@ import javax.swing.table.TableModel;
 
 /**
  *
- * @author Gala
+ * @author mg
  */
 public abstract class DelegatingRowSorter<M extends TableModel> extends RowSorter<M> {
 
@@ -29,7 +29,7 @@ public abstract class DelegatingRowSorter<M extends TableModel> extends RowSorte
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public M getModel() {
@@ -41,7 +41,7 @@ public abstract class DelegatingRowSorter<M extends TableModel> extends RowSorte
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public int getModelRowCount() {
@@ -53,7 +53,7 @@ public abstract class DelegatingRowSorter<M extends TableModel> extends RowSorte
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void modelStructureChanged() {
@@ -65,7 +65,7 @@ public abstract class DelegatingRowSorter<M extends TableModel> extends RowSorte
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void allRowsChanged() {
@@ -77,7 +77,7 @@ public abstract class DelegatingRowSorter<M extends TableModel> extends RowSorte
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void rowsInserted(int firstRow, int endRow) {
@@ -89,7 +89,7 @@ public abstract class DelegatingRowSorter<M extends TableModel> extends RowSorte
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void rowsDeleted(int firstRow, int endRow) {
@@ -101,7 +101,7 @@ public abstract class DelegatingRowSorter<M extends TableModel> extends RowSorte
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void rowsUpdated(int firstRow, int endRow) {
@@ -113,7 +113,7 @@ public abstract class DelegatingRowSorter<M extends TableModel> extends RowSorte
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void rowsUpdated(int firstRow, int endRow, int column) {
@@ -125,7 +125,7 @@ public abstract class DelegatingRowSorter<M extends TableModel> extends RowSorte
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void setSortKeys(List<? extends SortKey> keys) {
@@ -137,7 +137,7 @@ public abstract class DelegatingRowSorter<M extends TableModel> extends RowSorte
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public List<? extends SortKey> getSortKeys() {
@@ -149,7 +149,7 @@ public abstract class DelegatingRowSorter<M extends TableModel> extends RowSorte
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void toggleSortOrder(int aColIndex) {

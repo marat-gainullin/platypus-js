@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.dataflow;
 
 import com.eas.client.changes.ChangeValue;
@@ -33,7 +29,6 @@ import java.util.logging.Logger;
  * logging of statemnents to be executed with parameters values. In log mode no
  * execution is performed.
  *
- * @see Jdbc
  * @author mg
  */
 public class StatementsGenerator implements ChangeVisitor {

@@ -123,7 +123,7 @@ public class InsettedEditor extends JPanel implements TableCellEditor {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
@@ -142,7 +142,7 @@ public class InsettedEditor extends JPanel implements TableCellEditor {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public Object getCellEditorValue() {
@@ -150,7 +150,7 @@ public class InsettedEditor extends JPanel implements TableCellEditor {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public boolean isCellEditable(EventObject anEvent) {
@@ -162,7 +162,7 @@ public class InsettedEditor extends JPanel implements TableCellEditor {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public boolean shouldSelectCell(EventObject anEvent) {
@@ -170,7 +170,7 @@ public class InsettedEditor extends JPanel implements TableCellEditor {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public boolean stopCellEditing() {
@@ -178,7 +178,7 @@ public class InsettedEditor extends JPanel implements TableCellEditor {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void cancelCellEditing() {
@@ -186,7 +186,7 @@ public class InsettedEditor extends JPanel implements TableCellEditor {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void addCellEditorListener(CellEditorListener l) {
@@ -194,7 +194,7 @@ public class InsettedEditor extends JPanel implements TableCellEditor {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void removeCellEditorListener(CellEditorListener l) {

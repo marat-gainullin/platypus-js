@@ -66,13 +66,13 @@ public abstract class DatabaseFlowProvider<JKT> implements FlowProvider {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public abstract Collection<Map<String, Object>> nextPage(Consumer<Collection<Map<String, Object>>> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public abstract Collection<Map<String, Object>> refresh(Parameters aParams, Consumer<Collection<Map<String, Object>>> onSuccess, Consumer<Exception> onFailure) throws Exception;

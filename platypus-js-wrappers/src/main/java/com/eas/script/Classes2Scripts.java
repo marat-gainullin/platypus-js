@@ -36,7 +36,7 @@ import jdk.nashorn.api.scripting.JSObject;
 /**
  * The utility application to convert JavaScript API classes with
  *
- * @ScritpFunction annotation to pure JavaScript objects.
+ * &#64;ScritpFunction annotation to pure JavaScript objects.
  *
  * @author vv
  */

@@ -168,7 +168,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void addColumn(TableColumn aColumn) {
@@ -177,7 +177,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void removeColumn(TableColumn aColumn) {
@@ -186,7 +186,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void moveColumn(int oldIndex, int newIndex) {
@@ -201,7 +201,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public Enumeration<TableColumn> getColumns() {
@@ -209,7 +209,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void setColumnMargin(int aMargin) {
@@ -219,7 +219,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public int getColumnCount() {
@@ -230,7 +230,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public int getColumnIndex(Object columnId) {
@@ -243,7 +243,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public TableColumn getColumn(int columnIndex) {
@@ -251,7 +251,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public int getColumnMargin() {
@@ -259,7 +259,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public int getColumnIndexAtX(int xPosition) {
@@ -275,7 +275,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public int getTotalColumnWidth() {
@@ -288,7 +288,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void setColumnSelectionAllowed(boolean aAllowed) {
@@ -298,7 +298,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public boolean getColumnSelectionAllowed() {
@@ -306,7 +306,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public int[] getSelectedColumns() {
@@ -326,7 +326,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public int getSelectedColumnCount() {
@@ -339,7 +339,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void setSelectionModel(ListSelectionModel newModel) {
@@ -352,7 +352,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public ListSelectionModel getSelectionModel() {
@@ -360,7 +360,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void addColumnModelListener(TableColumnModelListener l) {
@@ -368,7 +368,7 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void removeColumnModelListener(TableColumnModelListener l) {

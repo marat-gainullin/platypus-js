@@ -27,8 +27,6 @@ public interface PacketReciever {
      * device's request, than client code should return null.
      * Such situation is processed with <code>pending()</code> method.
      * @throws java.lang.Exception
-     * @see PositioningPacket
-     * @see #pending()
      */
     Object received(Packet aPacket) throws Exception;
 

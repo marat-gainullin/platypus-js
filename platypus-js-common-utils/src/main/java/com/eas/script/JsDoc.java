@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.script;
 
 import java.util.ArrayList;
@@ -92,7 +88,7 @@ public class JsDoc {
         /**
          * Annotation marks a module as a protocol acceptor Example:
          *
-         * @protocol asc6, asc2
+         * &#64;protocol asc6, asc2
          */
         public static final String ACCEPTOR_TAG = "@acceptor";
         public static final String ACCEPTED_PROTOCOL_TAG = "@protocol";
@@ -109,7 +105,7 @@ public class JsDoc {
          * Annotation marks a module or top level function access restrictions
          * for specific roles example:
          *
-         * @rolesAllowed admin, manager
+         * &#64;rolesAllowed admin, manager
          */
         public static final String ROLES_ALLOWED_TAG = "@rolesallowed";
         public static final String ROLES_ALLOWED_READ_TAG = "@rolesallowedread";
@@ -137,7 +133,7 @@ public class JsDoc {
         /**
          * Annotation marks module as a WebSocket endpoint. Incompatible with
          *
-         * @stateless and @resident WebSocket endpoint are session modules by
+         * &#64;stateless and &#64;resident WebSocket endpoint are session modules by
          * Java EE design.
          */
         public static final String WEBSOCKET_TAG = "@websocket";

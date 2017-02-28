@@ -162,7 +162,6 @@ public class StoredQueryFactory {
      * @param aSubQueriesProxy
      * @param aIndexer
      * @throws java.lang.Exception
-     * @see DbClientIntf
      */
     public StoredQueryFactory(DatabasesClient aBasesProxy, QueriesProxy<SqlQuery> aSubQueriesProxy, PlatypusIndexer aIndexer) throws Exception {
         super();

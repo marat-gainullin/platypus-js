@@ -38,7 +38,6 @@ import javax.sql.DataSource;
  * Two tier implementation of Client interface.
  *
  * @author mg
- * @see Client
  */
 public class DatabasesClient {
 

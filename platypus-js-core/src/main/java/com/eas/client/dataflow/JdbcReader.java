@@ -44,7 +44,8 @@ public class JdbcReader {
 
     /**
      *
-     * @see RowsetConverter
+     * @param aReader
+     * @param aResolver
      */
     protected JdbcReader(GeometryReader aReader, TypesResolver aResolver) {
         super();
@@ -55,7 +56,8 @@ public class JdbcReader {
     /**
      *
      * @param aExpectedFields Fields expected to be in read rowset
-     * @see Jdbc
+     * @param aReader
+     * @param aResolver
      */
     public JdbcReader(Fields aExpectedFields, GeometryReader aReader, TypesResolver aResolver) {
         this(aReader, aResolver);

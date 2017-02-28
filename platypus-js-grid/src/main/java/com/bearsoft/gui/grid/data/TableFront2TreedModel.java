@@ -149,7 +149,7 @@ public class TableFront2TreedModel<T> implements TableModel {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public int getColumnCount() {
@@ -157,7 +157,7 @@ public class TableFront2TreedModel<T> implements TableModel {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String getColumnName(int columnIndex) {
@@ -165,7 +165,7 @@ public class TableFront2TreedModel<T> implements TableModel {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public Class<?> getColumnClass(int columnIndex) {
@@ -173,7 +173,7 @@ public class TableFront2TreedModel<T> implements TableModel {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -181,7 +181,7 @@ public class TableFront2TreedModel<T> implements TableModel {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public int getRowCount() {
@@ -190,7 +190,7 @@ public class TableFront2TreedModel<T> implements TableModel {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
@@ -205,7 +205,7 @@ public class TableFront2TreedModel<T> implements TableModel {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
@@ -215,7 +215,7 @@ public class TableFront2TreedModel<T> implements TableModel {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void addTableModelListener(TableModelListener l) {
@@ -223,7 +223,7 @@ public class TableFront2TreedModel<T> implements TableModel {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void removeTableModelListener(TableModelListener l) {

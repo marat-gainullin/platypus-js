@@ -61,7 +61,6 @@ public class ForeignKeySpec extends PrimaryKeySpec {
      * @param afkUpdateRule Update rule for foreign key been constructed.
      * @param afkDeleteRule Delete rule for foreign key been constructed.
      * @param afkDeferrable Deferrable rule for foreign key check.
-     * @param aPkDbId Connection identifier for referent primary key. Null means application database.
      * @param aPkSchema Database schema for referent primary key. Null means application schema in application database.
      * @param aPkTable Table name of referent primary key. Null and empty string are not allowed.
      * @param aPkField Field name of referent primary key. Null and empty string are not allowed.
@@ -85,7 +84,7 @@ public class ForeignKeySpec extends PrimaryKeySpec {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public int hashCode() {
@@ -98,7 +97,7 @@ public class ForeignKeySpec extends PrimaryKeySpec {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public boolean equals(Object obj) {

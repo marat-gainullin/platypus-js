@@ -11,21 +11,21 @@ package com.bearsoft.gui.grid.exceptions;
 public class GridException extends Exception {
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public GridException() {
         super();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public GridException(String aMsg) {
         super(aMsg);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public GridException(Exception aCause) {
         super(aCause);

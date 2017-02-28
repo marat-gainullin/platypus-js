@@ -146,7 +146,7 @@ public class CachingTableModel implements TableModelWrapper {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void addTableModelListener(TableModelListener l) {
@@ -154,7 +154,7 @@ public class CachingTableModel implements TableModelWrapper {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void removeTableModelListener(TableModelListener l) {
@@ -162,7 +162,7 @@ public class CachingTableModel implements TableModelWrapper {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public int getColumnCount() {
@@ -170,7 +170,7 @@ public class CachingTableModel implements TableModelWrapper {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public Class<?> getColumnClass(int columnIndex) {
@@ -178,7 +178,7 @@ public class CachingTableModel implements TableModelWrapper {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String getColumnName(int columnIndex) {
@@ -186,7 +186,7 @@ public class CachingTableModel implements TableModelWrapper {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
@@ -199,7 +199,7 @@ public class CachingTableModel implements TableModelWrapper {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
@@ -207,7 +207,7 @@ public class CachingTableModel implements TableModelWrapper {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -215,7 +215,7 @@ public class CachingTableModel implements TableModelWrapper {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public int getRowCount() {

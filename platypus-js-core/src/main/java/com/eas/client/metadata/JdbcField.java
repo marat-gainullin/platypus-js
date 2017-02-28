@@ -214,7 +214,7 @@ public class JdbcField extends Field {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public String toString() {

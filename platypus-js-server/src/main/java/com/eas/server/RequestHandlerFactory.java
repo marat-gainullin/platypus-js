@@ -39,7 +39,6 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
      * @throws ProtoReaderException
      * @see PlatypusServerCore
      * @see Session
-     * @see UnknownRequest
      */
     public static RequestHandler<? extends Request, ? extends Response> getHandler(PlatypusServerCore serverCore, Request rq) throws Exception {
         RequestHandlerFactory factory = new RequestHandlerFactory(serverCore);

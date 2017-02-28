@@ -144,8 +144,8 @@ public class BearPreparedStatement implements PreparedStatement{
     }
 
     /**
-     * @inheritDoc
-     * @deprecatred
+     * {@inheritDoc}
+     * @deprecated
      */
     @Override
     public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {

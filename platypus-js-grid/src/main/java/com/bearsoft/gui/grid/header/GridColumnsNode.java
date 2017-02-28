@@ -88,7 +88,6 @@ public class GridColumnsNode implements ColumnNodesContainer {
      *
      * @param aCol Table column instance to get information from.
      * @see TableColumn
-     * @see GridColumnsGroup
      */
     public GridColumnsNode(TableColumn aCol) {
         this();

@@ -1,3 +1,12 @@
+buildscript {
+    repositories{
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+    }
+}
+
 allprojects {
     apply plugin: 'java'
 
@@ -27,6 +36,7 @@ allprojects {
 
 subprojects {
     apply plugin: 'maven'
+    apply plugin: 'com.jfrog.bintray'
 
     configurations {
         compile.transitive = false
@@ -37,7 +47,40 @@ subprojects {
     repositories {
         mavenLocal()
     }
+    
     tasks.withType(JavaCompile) { 
         options.encoding = 'utf-8'
+    }
+    
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    artifacts {
+        archives sourcesJar
+        archives javadocJar
+    }
+
+    bintray {
+        user = 'marat-gainullin'
+        key = project.hasProperty('bintrayKey') ? project.bintrayKey : ''
+        pkg {
+            repo = "$group"
+            name = "$project.name"
+            licenses = ['Apache-2.0']
+            vcsUrl = 'https://github.com/altsoft/PlatypusJS.git'
+            version {
+                name = "${project.version}"
+                released  = new Date()
+            }
+            githubRepo = 'altsoft/PlatypusJS'
+        }
+        configurations = ['archives']
     }
 }
