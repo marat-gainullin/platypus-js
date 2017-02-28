@@ -29,7 +29,6 @@ compileGwt {
     maxHeapSize = '1024M'
 }
 
-
 task theme(type: Copy) {
     from "src/main/theme"
     into "build/gwt/out/pwc"
