@@ -6,7 +6,7 @@ The Platypus.js is a platform for rapid development of enterprise-level JavaScri
 
 Platypus.js is a server side JavaScript platform designed on top of JavaEE 7+ technologies and Nashorn JavaScript engine.
 
-Platypus.js comprises both asynchronous IO model and reasonable use of multithreading with only few intensivly used threads.
+Platypus.js comprises both asynchronous IO model and reasonable use of multithreading with only few intensively used threads.
 
 Platypus.js provides a developer with libraries needed to develop complete and ready for market applications.
 
@@ -49,3 +49,10 @@ The following command will run all tests for Platypus.js
 ```
 gradlew test
 ```
+
+## Run demos
+There are some sample Platypus.js applications, showing how to build and run Platypus.js applications.
+They are in the following repositories:
+https://github.com/altsoft/UiDemo
+https://github.com/altsoft/pethotel
+https://github.com/altsoft/WebSocketDemo
