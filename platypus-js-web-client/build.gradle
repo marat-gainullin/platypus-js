@@ -21,12 +21,12 @@ gwt {
         disableCastChecking = true;
     }
     superDev {
-        maxHeapSize = '1760M'
+        maxHeapSize = '1G'
     }
 }
 
 compileGwt {
-    maxHeapSize = '1760M'
+    maxHeapSize = '2G'
 }
 
 task theme(type: Copy) {
