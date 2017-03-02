@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.channels.CompletionHandler;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -946,6 +947,18 @@ public class Scripts {
         }
     }
 
+    public static CompletionHandler<?, ?> asCompletionHandler(JSObject aOnSuccess, JSObject aOnFailure){
+        return new CompletionHandler<Integer, Object>(){
+            @Override
+            public void completed(Integer result, Object attachment) {
+            }
+
+            @Override
+            public void failed(Throwable exc, Object attachment) {
+            }
+        };
+    }
+    
     /**
      * For external API.
      *

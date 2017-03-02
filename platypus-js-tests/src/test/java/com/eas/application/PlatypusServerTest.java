@@ -3,11 +3,13 @@ package com.eas.application;
 import com.eas.client.TestConstants;
 import com.eas.client.application.PlatypusClientApplication;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 
 /**
  *
  * @author mg
  */
+@Ignore
 public class PlatypusServerTest extends ThreeTierTests {
 
     public static final String PLATYPUS_SERVER_URL = "platypus-server.url";
