@@ -3,7 +3,6 @@ package com.eas.application;
 import com.eas.client.TestConstants;
 import com.eas.client.application.PlatypusClientApplication;
 import java.io.IOException;
-import java.nio.file.Paths;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -31,19 +30,32 @@ public class LocalTests extends ScriptedTests {
 
     @Test
     public void pathTest() throws InterruptedException {
-        start("files-nio/path-test", 10000L);
+        start("files-nio/path-test", 1000L);
     }
 
     @Test
-    public void fileInputChannelTest() throws InterruptedException, IOException {
-        java.nio.channels.AsynchronousFileChannel ch;
-        ch.re
-        start("files-nio/file-input-channel-test", 10000L);
+    public void transferTest() throws InterruptedException, IOException {
+        start("files-nio/transfer-test", 10000L);
     }
 
     @Test
-    public void fileOutputChannelTest() throws InterruptedException {
-        start("files-nio/file-output-channel-test", 10000L);
+    public void writeAppendReadAllTest() throws InterruptedException {
+        start("files-nio/write-append-read-all-test", 10000L);
+    }
+
+    @Test
+    public void writeWriteReadAllTest() throws InterruptedException {
+        start("files-nio/write-write-read-all-test", 10000L);
+    }
+
+    @Test
+    public void writeReadLineByLineTest() throws InterruptedException {
+        start("files-nio/write-read-line-by-line-test", 10000L);
+    }
+
+    @Test
+    public void writeTuncateReadAllTest() throws InterruptedException {
+        start("files-nio/write-truncate-read-all-test", 10000L);
     }
 
 }

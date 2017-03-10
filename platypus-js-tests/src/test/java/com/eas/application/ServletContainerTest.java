@@ -3,13 +3,11 @@ package com.eas.application;
 import com.eas.client.TestConstants;
 import com.eas.client.application.PlatypusClientApplication;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 
 /**
  *
  * @author mg
  */
-@Ignore
 public class ServletContainerTest extends ThreeTierTests {
 
     public static final String SERVLET_CONTAINER_URL = "servlet-container.url";

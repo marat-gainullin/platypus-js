@@ -18,7 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.Bindings;
@@ -768,6 +771,31 @@ public class Scripts {
         tasks = aTasks;
     }
 
+    public static void initTasks(ExecutorService aExecutor) {
+        class TasksExecutor implements Consumer<Runnable>, Function<Void, ExecutorService> {
+
+            @Override
+            public void accept(Runnable aTask) {
+                aExecutor.submit(aTask);
+            }
+
+            @Override
+            public ExecutorService apply(Void v) {
+                return aExecutor;
+            }
+        }
+        initTasks(new TasksExecutor());
+    }
+
+    public static ExecutorService getTasksExecutorIfPresent() {
+        assert tasks != null : "Scripts tasks are not initialized";
+        if (tasks instanceof Callable<?>) {
+            return ((Function<Void, ExecutorService>) tasks).apply(null);
+        } else {
+            return null;
+        }
+    }
+
     public static void offerTask(Runnable aTask) {
         assert tasks != null : "Scripts tasks are not initialized";
         if (Scripts.getContext() != null) {
@@ -947,24 +975,36 @@ public class Scripts {
         }
     }
 
-    public static CompletionHandler<?, ?> asCompletionHandler(JSObject aOnSuccess, JSObject aOnFailure){
-        return new CompletionHandler<Integer, Object>(){
+    public static CompletionHandler<?, ?> asCompletionHandler(JSObject aOnSuccess, JSObject aOnFailure) {
+        final Space callingSpace = getSpace();
+        final LocalContext callingContext = getContext();
+        return new CompletionHandler<Integer, Object>() {
             @Override
             public void completed(Integer result, Object attachment) {
+                callingSpace.process(callingContext, () -> {
+                    if (aOnSuccess != null) {
+                        aOnSuccess.call(null, new Object[]{result});
+                    }
+                });
             }
 
             @Override
             public void failed(Throwable exc, Object attachment) {
+                callingSpace.process(callingContext, () -> {
+                    if (aOnFailure != null) {
+                        aOnFailure.call(null, new Object[]{exc.toString()});
+                    }
+                });
             }
         };
     }
-    
+
     /**
      * For external API.
      *
      * @param aWrapped
-     * @return BiConsumer&lt;Object, Throwable&gt; Object - result instance, Throwable
-     * - exception raised while an operation.
+     * @return BiConsumer&lt;Object, Throwable&gt; Object - result instance,
+     * Throwable - exception raised while an operation.
      */
     public static BiConsumer<Object, Throwable> inContext(BiConsumer<Object, Throwable> aWrapped) {
         Space callingSpace = getSpace();

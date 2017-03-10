@@ -258,7 +258,6 @@ def tomcatServer
 def thinServer
 def h2Server
 task launchServers(){
-    /*
     doFirst {
         h2Server = new ProcessBuilder(h2Exec.commandLine)
         .redirectErrorStream(true)
@@ -318,7 +317,6 @@ task launchServers(){
             tomcatStdOut.close()
         }
     }
-    */
 }
 
 task shutdownServers (){

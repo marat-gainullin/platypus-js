@@ -130,20 +130,9 @@ public class PlatypusHttpServlet extends HttpServlet {
                 basesProxy.setContextHost(platypusCore);
                 Scripts.initBIO(platypusConfig.getMaximumBIOTreads());
                 ScriptedResource.init(platypusCore, apiFolder, platypusConfig.isGlobalAPI());
-                Scripts.initTasks((Runnable aTask) -> {
-                    try {
-                        if (containerExecutor != null) {// J2EE 7+
-                            containerExecutor.submit(aTask);
-                        } else {
-                            // Other environment
-                            selfExecutor.submit(aTask);
-                        }
-                    } catch (RejectedExecutionException ex) {
-                        Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, ex.toString());
-                    }
-                });
+                Scripts.initTasks(containerExecutor != null ? containerExecutor /* J2EE 7+ */ : selfExecutor /* Other environment */);
                 if (platypusConfig.isWatch()) {
-                    // TODO: uncomment after watcher refactoring
+                    // TODO: Uncomment after watcher refactoring
                     //indexer.watch();
                 }
             } else {

@@ -9,7 +9,6 @@ import org.junit.Ignore;
  *
  * @author mg
  */
-@Ignore
 public class PlatypusServerTest extends ThreeTierTests {
 
     public static final String PLATYPUS_SERVER_URL = "platypus-server.url";

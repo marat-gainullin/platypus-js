@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
+import jdk.nashorn.api.scripting.NashornException;
 
 /**
  *
@@ -45,7 +46,10 @@ public abstract class AsyncProcess<T, F> {
                     }
                     String message = ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage() : ex.toString();
                     if (ex instanceof FileNotFoundException) {
-                        message = "Not found: " + message;
+                        message = "File or module not found: " + message;
+                    } else if(ex instanceof NashornException){
+                        NashornException nex = (NashornException)ex;
+                        message = nex.getFileName() + ":" + nex.getLineNumber() + " " + message;
                     }
                     eMessagesSum.append(message);
                 });

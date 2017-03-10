@@ -1,7 +1,7 @@
-define(['files'], function(files){
+define(['files'], function(Files){
     return function(){
         this.execute = function(onSuccess, onFailure){
-            var path = files.path('path/to/file');
+            var path = Files.path('path/to/file');
             if(path.resolve && path.relativize){
                 onSuccess();
             } else{

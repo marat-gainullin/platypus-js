@@ -6,6 +6,8 @@ The Platypus.js is a platform for rapid development of enterprise-level JavaScri
 
 Platypus.js is a server side JavaScript platform designed on top of JavaEE 7+ technologies and Nashorn JavaScript engine.
 
+Platypus.js is a client side development platform as well including HTML 5 browser and Java SE clients.
+
 Platypus.js comprises both asynchronous IO model and reasonable use of multithreading with only few intensively used threads.
 
 Platypus.js provides a developer with libraries needed to develop complete and ready for market applications.

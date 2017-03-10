@@ -8,7 +8,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.internal.runtime.ECMAException;
 import static org.junit.Assert.fail;
 
 /**
@@ -44,8 +43,8 @@ public class ScriptedTests {
                                     return null;
                                 }
                             }});
-                        } catch (ECMAException ex) {
-                            completion.set(ex);
+                        } catch (Throwable t) {
+                            completion.set(t);
                         }
                         return null;
                     }
@@ -67,16 +66,17 @@ public class ScriptedTests {
         }
         Object lastChance = completion.get();
         if (lastChance != success) {
-            String failedText = aTestModuleName + " failed due to ";
+            String failedText = aTestModuleName + " failed due to: ";
             if (lastChance == null) {
-               fail(failedText + "a timeout");
+                fail(failedText + "timeout");
             } else if (lastChance == failure) {
-                fail(failedText + "an unknown problem");
+                fail(failedText + "unknown problem");
             } else if (lastChance instanceof Throwable) {
                 fail(failedText + lastChance.toString());
             } else if (lastChance instanceof JSObject) {
-                fail(failedText + Scripts.getSpace().toJson(lastChance));
-            }else{
+                String jsonView = Scripts.getSpace().toJson(lastChance);
+                fail(failedText + (jsonView.length() > 2 ? jsonView : lastChance.toString()));
+            } else {
                 fail(failedText + lastChance.toString());
             }
         } else {

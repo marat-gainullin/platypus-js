@@ -238,9 +238,7 @@ public class ServerMain {
                         new PlatypusThreadFactory("TSA-", false));
                 serverProcessor.allowCoreThreadTimeOut(true);
 
-                Scripts.initTasks((Runnable aTask) -> {
-                    serverProcessor.submit(aTask);
-                });
+                Scripts.initTasks(serverProcessor);
                 serverCoreDbClient = new ScriptedDatabasesClient(defDatasource, indexer, true, tasksScanner.getValidators(), threadsConfig.getMaxJdbcTreads());
                 QueriesProxy<SqlQuery> queries = new LocalQueriesProxy(serverCoreDbClient, indexer);
                 serverCoreDbClient.setQueries(queries);

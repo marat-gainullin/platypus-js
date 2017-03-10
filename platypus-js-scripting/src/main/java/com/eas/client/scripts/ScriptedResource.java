@@ -50,7 +50,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
+import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.NashornException;
+import jdk.nashorn.internal.runtime.ECMAException;
 
 /**
  *
@@ -766,14 +769,19 @@ public class ScriptedResource {
                                         String[] amdDependencies = amdDefine.getAmdDependencies();
                                         JSObject amdModuleDefiner = amdDefine.getModuleDefiner();
                                         _require(amdDependencies, null, aSpace, new HashSet<>(), (Void v) -> {
-                                            amdModuleDefiner.call(null, new Object[]{amdModuleName});
-                                            // If module is still not defined because of buggy definer in script,
-                                            // we have to put it definition as undefined by hand.
-                                            if (!aSpace.getDefined().containsKey(amdModuleName)) {
-                                                aSpace.getDefined().put(amdModuleName, null);
+                                            try {
+                                                amdModuleDefiner.call(null, new Object[]{amdModuleName});
+                                                // If module is still not defined because of buggy definer in script,
+                                                // we have to put it definition as undefined by hand.
+                                                if (!aSpace.getDefined().containsKey(amdModuleName)) {
+                                                    aSpace.getDefined().put(amdModuleName, null);
+                                                }
+                                                Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedModuleName(amdModuleName));
+                                                aSpace.notifyLoaded(amdModuleName);
+                                            } catch (NashornException ex) {
+                                                Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "{0} - Failed {1}", new Object[]{checkedModuleName(amdModuleName), ex.toString()});
+                                                aSpace.notifyFailed(amdModuleName, ex);
                                             }
-                                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedModuleName(amdModuleName));
-                                            aSpace.notifyLoaded(amdModuleName);
                                         }, (Exception ex) -> {
                                             Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "{0} - Failed {1}", new Object[]{checkedModuleName(amdModuleName), ex.toString()});
                                             aSpace.notifyFailed(amdModuleName, ex);
@@ -796,6 +804,9 @@ public class ScriptedResource {
                             } else {
                                 aSpace.notifyLoaded(moduleName);
                             }
+                        } catch (NashornException | ScriptException ex) {
+                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "{0} - Failed {1}", new Object[]{checkedModuleName(moduleName), ex.toString()});
+                            aSpace.notifyFailed(moduleName, ex);
                         } catch (Exception ex) {
                             Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
                         }
