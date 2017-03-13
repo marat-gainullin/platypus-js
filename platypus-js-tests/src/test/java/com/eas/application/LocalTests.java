@@ -54,6 +54,11 @@ public class LocalTests extends ScriptedTests {
     }
 
     @Test
+    public void writeReadLineByLineAbortTest() throws InterruptedException {
+        start("files-nio/write-read-line-by-line-abort-test", 10000L);
+    }
+
+    @Test
     public void writeTuncateReadAllTest() throws InterruptedException {
         start("files-nio/write-truncate-read-all-test", 10000L);
     }

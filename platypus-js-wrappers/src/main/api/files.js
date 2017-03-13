@@ -41,23 +41,20 @@ define(['invoke'], function (Invoke) {
         try {
             var pathToReadFrom = typeof path === 'string' ? pathsGet(path) : path;
             var readChannel = openRead(pathToReadFrom);
-            var encoding = arguments.length > 4 ? aEncoding : 'utf-8';
-            var delimiter = arguments.length > 5 ? aDelimiter : /\n/;
-            var charset = CharsetClass.forName(encoding);
-            var buffer = ByteBufferClass.allocate(readChannel.read.bufferSize);
-            var readPosition = arguments.length > 6 ? startPosition : 0;
-            var head = null;
-            var abort = false;
-            function continueReading() {
-                try {
+            try {
+                var encoding = arguments.length > 4 ? aEncoding : 'utf-8';
+                var delimiter = arguments.length > 5 ? aDelimiter : /\n/;
+                var charset = CharsetClass.forName(encoding);
+                var buffer = ByteBufferClass.allocate(readChannel.read.bufferSize);
+                var readPosition = arguments.length > 6 ? startPosition : 0;
+                var head = null;
+                var abort = false;
+                function continueReading() {
                     readChannel.readChunk(buffer, readPosition, function (read) {
-                        if (abort) {
-                            readChannel.close();
-                            onSuccess();
-                        } else {
+                        try {
                             if (read === -1) {
                                 readChannel.close();
-                                if(head !== null){
+                                if (head !== null) {
                                     onLineRead(head);
                                 }
                                 onSuccess();
@@ -71,28 +68,39 @@ define(['invoke'], function (Invoke) {
                                     if (onLineRead((head === null ? '' : head) + lines[0]) === false) {
                                         abort = true;
                                     }
-                                    for (var l = 1; l < lines.length - 1; l++) {
-                                        if (onLineRead(lines[l]) === false) {
-                                            abort = true;
-                                            break;
+                                    if (!abort) {
+                                        for (var l = 1; l < lines.length - 1; l++) {
+                                            if (onLineRead(lines[l]) === false) {
+                                                abort = true;
+                                                break;
+                                            }
                                         }
+                                        head = lines[lines.length - 1];
                                     }
-                                    head = lines[lines.length - 1];
                                 } else {
                                     head = (head === null ? '' : head) + lines[0];
                                 }
                                 buffer.compact();
-                                continueReading();
+                                if (abort) {
+                                    readChannel.close();
+                                    onSuccess();
+                                } else {
+                                    continueReading();
+                                }
                             }
+                        } catch (e) {
+                            readChannel.close();
+                            onFailure(e);
                         }
                     }, onFailure);
-                } catch (e) {
-                    Invoke.later(function () {
-                        onFailure(e);
-                    });
                 }
+                continueReading();
+            } catch (e) {
+                Invoke.later(function () {
+                    onFailure(e);
+                });
+                readChannel.close();
             }
-            continueReading();
         } catch (e) {
             Invoke.later(function () {
                 onFailure(e);
@@ -280,8 +288,8 @@ define(['invoke'], function (Invoke) {
             var accumulator = new ByteArrayOutputStreamClass();
             var buffer = ByteBufferClass.allocate(self.read.bufferSize);
             var readPosition = position;
-            function continueReading() {
-                try {
+            try {
+                function continueReading() {
                     buffer.clear();
                     self.readChunk(buffer, readPosition, function (read) {
                         if (read === -1) {
@@ -293,13 +301,13 @@ define(['invoke'], function (Invoke) {
                             continueReading();
                         }
                     }, onFailure);
-                } catch (e) {
-                    Invoke.later(function () {
-                        onFailure(e);
-                    });
                 }
+                continueReading();
+            } catch (e) {
+                Invoke.later(function () {
+                    onFailure(e);
+                });
             }
-            continueReading();
         };
         this.read.bufferSize = 1024 * 8; // 8 Kb;
 

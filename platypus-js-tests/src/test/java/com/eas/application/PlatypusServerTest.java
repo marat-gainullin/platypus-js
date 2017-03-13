@@ -3,7 +3,6 @@ package com.eas.application;
 import com.eas.client.TestConstants;
 import com.eas.client.application.PlatypusClientApplication;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 
 /**
  *
