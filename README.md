@@ -1,6 +1,6 @@
 # Platypus.js
 
-[![Build Status](https://travis-ci.org/altsoft/PlatypusJS.svg?branch=master)](https://travis-ci.org/altsoft/PlatypusJS)
+[![Build Status](https://travis-ci.org/marat-gainullin/platypus-js.svg?branch=master)](https://travis-ci.org/marat-gainullin/platypus-js)
 
 The Platypus.js is a platform for rapid development of enterprise-level JavaScript applications.
 
@@ -41,8 +41,8 @@ The platform offers a set of features, making development process extremely prod
 ## Build
 The following commands will clone git repository and build Platypus.js from source
 ```
-git clone https://github.com/altsoft/PlatypusJS.git
-cd PlatypusJS
+git clone https://github.com/marat-gainullin/platypus-js.git
+cd platypus-js
 gradlew build
 ```
 
