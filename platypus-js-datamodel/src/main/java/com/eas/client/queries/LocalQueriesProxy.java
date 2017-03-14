@@ -102,7 +102,7 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
             return doWork.call();
         }
     }
-
+/*
     private void readScriptFields(String aQueryName, JSObject sSchema, Fields fields, Scripts.Space aSpace) {
         Object oLength = sSchema.getMember("length");
         if (oLength instanceof Number) {
@@ -181,7 +181,7 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
             }
         }
     }
-
+*/
     @Override
     public SqlQuery getCachedQuery(String aName) {
         if (aName != null) {
