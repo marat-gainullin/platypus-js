@@ -95,12 +95,12 @@ public class TwoTierTest extends ScriptedTests {
 
     @Test
     public void append_test() throws InterruptedException {
-        start("append_test", 20000L);
+        start("append_test", 40000L);
     }
 
     @Test
     public void ambigous_changes_semi_writable() throws InterruptedException {
-        start("ambigous_changes_semi_writable", 10000L);
+        start("ambigous_changes_semi_writable", 20000L);
     }
 
     @Test
@@ -150,7 +150,7 @@ public class TwoTierTest extends ScriptedTests {
 
     @Test
     public void load_Entity_Test() throws InterruptedException {
-        start("Load_Entity_Test", 10000L);
+        start("Load_Entity_Test", 20000L);
     }
 
     @Test
@@ -165,7 +165,7 @@ public class TwoTierTest extends ScriptedTests {
 
     @Test
     public void multiSourceWithErrorTest() throws InterruptedException {
-        start("MultiSourceWithErrorTest", 10000L);
+        start("MultiSourceWithErrorTest", 20000L);
     }
 
     @Test
@@ -175,12 +175,12 @@ public class TwoTierTest extends ScriptedTests {
 
     @Test
     public void orm_properties_names_calc() throws InterruptedException {
-        start("ORM_properties_names_calc", 10000L);
+        start("ORM_properties_names_calc", 20000L);
     }
 
     @Test
     public void testReportCore() throws InterruptedException {
-        start("TestReportCore", 10000L);
+        start("TestReportCore", 20000L);
     }
 
     @Test
