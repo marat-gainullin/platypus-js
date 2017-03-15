@@ -62,7 +62,13 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
                         if (file.getName().endsWith(PlatypusFiles.SQL_FILE_END)) {
                             query = factory.loadQuery(aName);
                         } else {
-                            throw new IllegalStateException("Query " + aName + " can't be constructed. Queries can be constructed with only platypus queries application elements.");
+                            String nameMsg;
+                            if (aName.isEmpty()) {
+                                nameMsg = "empty string name";
+                            } else {
+                                nameMsg = "name '" + aName + "'";
+                            }
+                            throw new IllegalStateException("Query with " + nameMsg + " can't be constructed. Queries can be constructed with only platypus queries application elements.");
                         }
                         entries.put(aName, new ActualCacheEntry<>(query, filesTimeStamp));
                     } else {
@@ -102,7 +108,8 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
             return doWork.call();
         }
     }
-/*
+
+    /*
     private void readScriptFields(String aQueryName, JSObject sSchema, Fields fields, Scripts.Space aSpace) {
         Object oLength = sSchema.getMember("length");
         if (oLength instanceof Number) {
@@ -181,7 +188,7 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
             }
         }
     }
-*/
+     */
     @Override
     public SqlQuery getCachedQuery(String aName) {
         if (aName != null) {

@@ -35,7 +35,7 @@ public class LocalTests extends ScriptedTests {
 
     @Test
     public void transferTest() throws InterruptedException, IOException {
-        start("files-nio/transfer-test", 10000L);
+        start("files-nio/transfer-test", 40000L);
     }
 
     @Test

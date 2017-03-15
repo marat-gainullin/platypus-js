@@ -341,6 +341,18 @@ public class StoredQueryFactoryTest {
         assertEquals(4, testQuery.getParameters().getParametersCount());
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void testBadQueryName() throws Exception {
+        LocalQueriesProxy queriesProxy = new LocalQueriesProxy(resource.getClient(), indexer);
+        queriesProxy.getQuery("bad_query_name", null, null, null);
+    }
+    
+    @Test(expected = IllegalStateException.class)
+    public void testEmptyQueryName() throws Exception {
+        LocalQueriesProxy queriesProxy = new LocalQueriesProxy(resource.getClient(), indexer);
+        queriesProxy.getQuery("", null, null, null);
+    }
+
     @Test
     public void testAsteriskMetadata() throws Exception {
         LocalQueriesProxy queriesProxy = new LocalQueriesProxy(resource.getClient(), indexer);
