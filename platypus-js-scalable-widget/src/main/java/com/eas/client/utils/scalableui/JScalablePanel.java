@@ -155,11 +155,11 @@ public class JScalablePanel extends JPanel implements MouseListener, MouseMotion
         }
     }
 
-    public void ZoomIn() {
+    public void zoomIn() {
         scaleBy(SCALE_STEP_VALUE);
     }
 
-    public void ZoomOut() {
+    public void zoomOut() {
         scaleBy(-SCALE_STEP_VALUE);
     }
 

@@ -74,31 +74,34 @@ public class StoredQueryFactory {
     protected void addTableFieldsToSelectResults(SqlQuery aQuery, Table aFieldsSource) throws Exception {
         FieldsResult fieldsRes = getTablyFields(aQuery.getDatasourceName(), aFieldsSource.getWholeTableName());
         if (fieldsRes != null && fieldsRes.fields != null) {
-            TypesResolver resolver = basesProxy.getMetadataCache(aQuery.getDatasourceName()).getDatasourceSqlDriver().getTypesResolver();
-            fieldsRes.fields.toCollection().stream().forEach((Field field) -> {
-                Field copied = new Field();
-                copied.assignFrom(field);
-                if (fieldsRes.fromRealTable) {
-                    JdbcField jField = (JdbcField) field;
-                    copied.setType(resolver.toApplicationType(jField.getJdbcType(), jField.getType()));
-                    if (jField.getSchemaName() != null && !jField.getSchemaName().isEmpty()) {
-                        copied.setTableName(jField.getSchemaName() + "." + copied.getTableName());
+            MetadataCache mdCache = basesProxy.getMetadataCache(aQuery.getDatasourceName());
+            if (mdCache != null) {
+                TypesResolver resolver = mdCache.getDatasourceSqlDriver().getTypesResolver();
+                fieldsRes.fields.toCollection().stream().forEach((Field field) -> {
+                    Field copied = new Field();
+                    copied.assignFrom(field);
+                    if (fieldsRes.fromRealTable) {
+                        JdbcField jField = (JdbcField) field;
+                        copied.setType(resolver.toApplicationType(jField.getJdbcType(), jField.getType()));
+                        if (jField.getSchemaName() != null && !jField.getSchemaName().isEmpty()) {
+                            copied.setTableName(jField.getSchemaName() + "." + copied.getTableName());
+                        }
                     }
-                }
-                /**
-                 * Заменять имя оригинальной таблицы нельзя, особенно если это
-                 * поле ключевое т.к. при установлении связи по этим полям будут
-                 * проблемы. ORM-у придется "разматывать" источник поля до
-                 * таблицы чтобы восстановиит связи по ключам.
-                 * Здесь это делается исключительно ради очень специального
-                 * использования фабрики в дизайнере запросов.
-                 */
-                if(aliasesToTableNames &&
-                        aFieldsSource.getAlias() != null && !aFieldsSource.getAlias().getName().isEmpty()){
-                     copied.setTableName(aFieldsSource.getAlias().getName());
-                }
-                aQuery.getFields().add(copied);
-            });
+                    /**
+                     * Заменять имя оригинальной таблицы нельзя, особенно если
+                     * это поле ключевое т.к. при установлении связи по этим
+                     * полям будут проблемы. ORM-у придется "разматывать"
+                     * источник поля до таблицы чтобы восстановиит связи по
+                     * ключам. Здесь это делается исключительно ради очень
+                     * специального использования фабрики в дизайнере запросов.
+                     */
+                    if (aliasesToTableNames
+                            && aFieldsSource.getAlias() != null && !aFieldsSource.getAlias().getName().isEmpty()) {
+                        copied.setTableName(aFieldsSource.getAlias().getName());
+                    }
+                    aQuery.getFields().add(copied);
+                });
+            }
         }
     }
 
@@ -584,8 +587,8 @@ public class StoredQueryFactory {
              * Здесь это делается исключительно ради очень специального
              * использования фабрики в дизайнере запросов.
              */
-            if (aliasesToTableNames &&
-                    fieldSource != null && fieldSource.getAlias() != null && !fieldSource.getAlias().getName().isEmpty()) {
+            if (aliasesToTableNames
+                    && fieldSource != null && fieldSource.getAlias() != null && !fieldSource.getAlias().getName().isEmpty()) {
                 copied.setTableName(fieldSource.getAlias().getName());
             }
             return copied;

@@ -1,14 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.forms.components.model.grid.header;
 
 import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.design.Designable;
+import com.eas.design.Undesignable;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
@@ -75,6 +71,7 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
         ((ModelColumn) getTableColumn()).setOnSelect(aValue);
     }
 
+    @Undesignable
     @ScriptFunction
     public ModelWidget getEditor() {
         return ((ModelColumn) getTableColumn()).getEditor();
@@ -85,6 +82,7 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
         ((ModelColumn) getTableColumn()).setEditor(aEditor);
     }
 
+    @Undesignable
     @ScriptFunction
     public ModelWidget getView() {
         return ((ModelColumn) getTableColumn()).getView();
