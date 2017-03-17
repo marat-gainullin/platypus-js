@@ -60,7 +60,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
     }
     private static final String MODIFIED_JSDOC = ""
             + "/**\n"
-            + " * Flagis set to true if model has been modified.\n"
+            + " * Flag is set to true if model has been modified.\n"
             + " */";
 
     @ScriptFunction(jsDoc = MODIFIED_JSDOC)
@@ -73,14 +73,24 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
 
     @Override
     public int commit(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        return basesProxy.commit(changeLogs, onSuccess, onFailure);
+        Map<String, List<Change>> logs = changeLogs.entrySet().stream()
+                .collect(
+                        () -> new HashMap<>(),
+                        (Map<String, List<Change>> m, Map.Entry<String, List<Change>> logEntry) -> {
+                            List<Change> log = logEntry.getValue();
+                            m.put(logEntry.getKey(), new ArrayList<>(log));
+                            log.clear();
+                        },
+                        (m1, m2) -> {
+                            m1.putAll(m2);
+                        });
+        // Change logs are cleared unconditionaly because of
+        // compliance of synchronous and asynchronous cases with errors while commit in mind.
+        return basesProxy.commit(logs, onSuccess, onFailure);
     }
 
     @Override
     public void commited() {
-        changeLogs.values().stream().forEach((changeLog) -> {
-            changeLog.clear();
-        });
         super.commited();
     }
 
@@ -107,8 +117,9 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
         // basesProxy.getDefaultDatasourceName() is needed here to avoid multi transaction
         // actions against the same datasource, leading to unexpected
         // row-level locking and deadlocks in two phase transaction commit process
-        if(datasourceName == null || datasourceName.isEmpty())
+        if (datasourceName == null || datasourceName.isEmpty()) {
             datasourceName = basesProxy.getDefaultDatasourceName();
+        }
         List<Change> changeLog = changeLogs.get(datasourceName);
         if (changeLog == null) {
             changeLog = new ArrayList<>();

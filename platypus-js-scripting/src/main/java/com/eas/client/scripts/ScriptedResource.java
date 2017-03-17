@@ -53,7 +53,6 @@ import java.util.zip.InflaterInputStream;
 import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornException;
-import jdk.nashorn.internal.runtime.ECMAException;
 
 /**
  *

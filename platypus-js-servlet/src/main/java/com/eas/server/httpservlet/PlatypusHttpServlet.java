@@ -98,7 +98,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                 try {
                     containerExecutor = (ExecutorService) InitialContext.doLookup("java:comp/env/concurrent/ThreadPool");
                 } catch (NamingException ex1) {
-                    selfExecutor = new ThreadPoolExecutor(1, platypusConfig.getMaximumLpcThreads(),
+                    selfExecutor = new ThreadPoolExecutor(platypusConfig.getMaximumLpcThreads(), platypusConfig.getMaximumLpcThreads(),
                             1L, TimeUnit.SECONDS,
                             new LinkedBlockingQueue<>(platypusConfig.getMaximumLpcQueueSize()),
                             new PlatypusThreadFactory("platypus-worker-", false));
