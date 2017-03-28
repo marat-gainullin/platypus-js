@@ -52,6 +52,7 @@ public class MarginsPane extends AnchorsPanel implements HasLayers, HasPublished
 	public MarginsPane() {
 		super();
 		getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+		getElement().getStyle().setPosition(Style.Position.RELATIVE);
 	}
 
 	@Override

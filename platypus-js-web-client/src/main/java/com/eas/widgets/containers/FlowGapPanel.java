@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.widgets.containers;
 
 import com.eas.core.XElement;
@@ -51,12 +46,12 @@ public class FlowGapPanel extends FlowPanel implements RequiresResize {
 	}
 
 	@Override
-	public void add(Widget w) {
-		w.getElement().getStyle().setMarginLeft(hgap, Style.Unit.PX);
-		w.getElement().getStyle().setMarginTop(vgap, Style.Unit.PX);
-		w.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-		w.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.BOTTOM);
-		super.add(w);
+	public void add(Widget aWidget) {
+		aWidget.getElement().getStyle().setMarginLeft(hgap, Style.Unit.PX);
+		aWidget.getElement().getStyle().setMarginTop(vgap, Style.Unit.PX);
+		aWidget.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		aWidget.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.BOTTOM);
+		super.add(aWidget);
 	}
 
 	@Override

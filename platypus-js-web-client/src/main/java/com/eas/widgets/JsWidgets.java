@@ -115,64 +115,60 @@ public class JsWidgets {
 		    }
 		    });
 	    Object.defineProperty(aPublished, "fontSet", { get : function(){return _font != null;}});
-		    Object.defineProperty(aPublished, "cursor", {
-		    	get : function(){
-		    		return _cursor;
-		    	},
-		    	set : function(aValue){
-		    		_cursor = aValue; 
-		    		// apply	
-		    	@com.eas.widgets.WidgetsUtils::applyCursor(Lcom/google/gwt/user/client/ui/UIObject;Ljava/lang/String;)(comp, _cursor); 
-		    	}
-		    	
-		    });
+            Object.defineProperty(aPublished, "cursor", {
+                get : function(){
+                        return _cursor;
+                },
+                set : function(aValue){
+                        _cursor = aValue; 
+                        // apply	
+                @com.eas.widgets.WidgetsUtils::applyCursor(Lcom/google/gwt/user/client/ui/UIObject;Ljava/lang/String;)(comp, _cursor); 
+                }
+
+            });
 	    Object.defineProperty(aPublished, "cursorSet", { get : function(){return _cursor != null;}});
-	    var _left = null;
 	    Object.defineProperty(aPublished, "left", {
 		    get : function() {
 		    	if(aPublished.parent){
-					_left = aPublished.parent.unwrap().@com.eas.widgets.HasChildrenPosition::getLeft(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
-		    	}
-				return _left;
+				return aPublished.parent.unwrap().@com.eas.widgets.HasChildrenPosition::getLeft(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
+		    	} else {
+                                return aPublished.element.offsetLeft;
+                        }
 		    },
 		    set : function(aValue) {
-		    	_left = aValue;
 		    	if(aPublished.parent instanceof AbsolutePane || aPublished.parent instanceof AnchorsPane)
 		    		aPublished.parent.unwrap().@com.eas.widgets.MarginsPane::ajustLeft(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
 		    }
-		    });
-		    var _top = null;
+            });
 	    Object.defineProperty(aPublished, "top", {
 		    get : function() {
 		    	if(aPublished.parent){
-					_top = aPublished.parent.unwrap().@com.eas.widgets.HasChildrenPosition::getTop(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
-		    	}
-				return _top;
+				return aPublished.parent.unwrap().@com.eas.widgets.HasChildrenPosition::getTop(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
+		    	} else {
+                                return aPublished.element.offsetTop;
+                        }
 		    },
 		    set : function(aValue) {
-		    	_top = aValue;
 		    	if(aPublished.parent instanceof AbsolutePane || aPublished.parent instanceof AnchorsPane)
 		    		aPublished.parent.unwrap().@com.eas.widgets.MarginsPane::ajustTop(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
 		    }
-		    });
-		    var _width = null;
-	    Object.defineProperty(aPublished, "widthSet", {
-	    	get: function(){
-	    		return _width != null;
-	    	}
-	    });
+            });
 	    Object.defineProperty(aPublished, "width", {
 		    get : function() {
-		    	return _width;
+		    	return aPublished.element.offsetWidth;
 		    },
 		    set : function(aValue) {
-		    	_width = aValue;
 		    	if(aPublished.parent instanceof AbsolutePane || aPublished.parent instanceof AnchorsPane){
-					if(aValue != null)
-		    			aPublished.parent.unwrap().@com.eas.widgets.MarginsPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);		    		
+				if(aValue != null)
+		    			aPublished.parent.unwrap().@com.eas.widgets.MarginsPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);		    		
 		    	}else if(aPublished.parent instanceof BorderPane){
-					if(aValue != null)
-	    				aPublished.parent.unwrap().@com.eas.widgets.containers.BorderPanel::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
+				if(aValue != null)
+	    				aPublished.parent.unwrap().@com.eas.widgets.containers.BorderPanel::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
+		    	}else if(aPublished.parent instanceof ScrollPane){
+				if(aValue != null)
+                                        aPublished.parent.unwrap().@com.eas.widgets.containers.ScrollBoxPanel::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
+		    		else
+    					aPublished.element.style.width = null;
 		    	}else if(aPublished.parent instanceof CardPane
 		    	      || aPublished.parent instanceof TabbedPane
 		    	      || aPublished.parent instanceof GridPane
@@ -181,31 +177,29 @@ public class JsWidgets {
 		    	}else if(aPublished.parent instanceof BoxPane && aPublished.parent.orientation != Orientation.HORIZONTAL){
 		    		// no op
 		    	}else{
-					if(aValue != null)
+				if(aValue != null)
 		    			aPublished.element.style.width = aValue + 'px';
 		    		else
     					aPublished.element.style.width = null;
 		    	}
 		    }
 		});
-		var _height = null;
-	    Object.defineProperty(aPublished, "heightSet", {
-	    	get: function(){
-	    		return _height != null;
-	    	}
-	    });
 	    Object.defineProperty(aPublished, "height", {
 		    get : function() {
-		    	return _height;
+		    	return aPublished.element.offsetHeight;
 		    },
 		    set : function(aValue) {
-		    	_height = aValue;
     			if(aPublished.parent instanceof AbsolutePane || aPublished.parent instanceof AnchorsPane){
-					if(aValue != null)
-		    			aPublished.parent.unwrap().@com.eas.widgets.MarginsPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
+				if(aValue != null)
+		    			aPublished.parent.unwrap().@com.eas.widgets.MarginsPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
 		    	}else if(aPublished.parent instanceof BorderPane){
-					if(aValue != null)
-	    				aPublished.parent.unwrap().@com.eas.widgets.containers.BorderPanel::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
+				if(aValue != null)
+	    				aPublished.parent.unwrap().@com.eas.widgets.containers.BorderPanel::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
+		    	}else if(aPublished.parent instanceof ScrollPane){
+				if(aValue != null)
+                                        aPublished.parent.unwrap().@com.eas.widgets.containers.ScrollBoxPanel::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
+	    			else
+                                        aPublished.element.style.height = null;
 		    	}else if(aPublished.parent instanceof CardPane
 		    	      || aPublished.parent instanceof TabbedPane
 		    	      || aPublished.parent instanceof GridPane
@@ -216,10 +210,10 @@ public class JsWidgets {
 		    	}else if(aPublished.parent instanceof BoxPane && aPublished.parent.orientation != Orientation.VERTICAL){
 		    		// no op
 		    	}else{
-					if(aValue != null)
+				if(aValue != null)
 	    				aPublished.element.style.height = aValue + 'px';
 	    			else
-	    			    aPublished.element.style.height = null;
+                                        aPublished.element.style.height = null;
 		    	}
 		    }
 		});
@@ -1062,19 +1056,7 @@ public class JsWidgets {
 					if(toAdd && toAdd.unwrap){
 						if(toAdd.parent == published)
 							throw 'A widget already added to this container';
-						if(published.orientation == Orientation.VERTICAL){
-							if(toAdd.heightSet){
-								aComponent.@com.eas.widgets.BoxPane::add(Lcom/google/gwt/user/client/ui/Widget;I)(toAdd.unwrap(), toAdd.height);
-							} else{
-								aComponent.@com.eas.widgets.BoxPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
-							}
-						}else{
-							if(toAdd.widthSet){
-								aComponent.@com.eas.widgets.BoxPane::add(Lcom/google/gwt/user/client/ui/Widget;I)(toAdd.unwrap(), toAdd.width);
-							} else {
-								aComponent.@com.eas.widgets.BoxPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
-							}
-						}
+						aComponent.@com.eas.widgets.BoxPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
 					}
 				}
 				

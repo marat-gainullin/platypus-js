@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.widgets.containers;
 
 import com.eas.core.XElement;
@@ -181,9 +177,6 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 	@Override
 	public void onResize() {
 		if (orientation == Orientation.HORIZONTAL) {
-			if (getParent() instanceof ScrollPanel) {
-				getElement().getStyle().setHeight(100, Style.Unit.PCT);
-			}
 			for (Widget child : getChildren()) {
 				child.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 				if (child instanceof RequiresResize) {
@@ -191,9 +184,6 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 				}
 			}
 		} else {
-			if (getParent() instanceof ScrollPanel) {
-				getElement().getStyle().setWidth(100, Style.Unit.PCT);
-			}
 			for (Widget child : getChildren()) {
 				child.getElement().getStyle().clearRight();
 				child.getElement().getStyle().setWidth(100, Style.Unit.PCT);

@@ -93,6 +93,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 			style.setWidth(100, Style.Unit.PCT);
 			style.setOutlineStyle(Style.OutlineStyle.NONE);
 			FlowPanel panel = new FlowPanel();
+                        panel.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 			panel.addStyleName("decorator");
 			initWidget(panel);
 			panel.add((Widget) decorated);

@@ -24,8 +24,13 @@ import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.TextArea;
+import com.eas.ui.HasScroll;
+import com.eas.ui.HorizontalScrollFiller;
+import com.eas.ui.VerticalScrollFiller;
 
-public class PlatypusTextArea extends TextArea implements HasJsFacade, HasEmptyText, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize {
+public class PlatypusTextArea extends TextArea implements HasScroll, HorizontalScrollFiller, VerticalScrollFiller, HasJsFacade,
+                                                          HasEmptyText, HasComponentPopupMenu, HasEventsExecutor,
+                                                          HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;

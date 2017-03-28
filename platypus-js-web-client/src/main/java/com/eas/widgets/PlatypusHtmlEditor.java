@@ -72,8 +72,11 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.RichTextArea;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.eas.ui.HasScroll;
+import com.eas.ui.HorizontalScrollFiller;
+import com.eas.ui.VerticalScrollFiller;
 
-public class PlatypusHtmlEditor extends Composite implements HasJsFacade, HasValueChangeHandlers<String>, HasEmptyText, HasValue<String>, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers,
+public class PlatypusHtmlEditor extends Composite implements HasScroll, HorizontalScrollFiller, VerticalScrollFiller, HasJsFacade, HasValueChangeHandlers<String>, HasEmptyText, HasValue<String>, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers,
         HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHandlers, HasBlurHandlers, Focusable, HasEnabled, HasKeyDownHandlers, HasKeyPressHandlers, HasKeyUpHandlers {
 
 	protected EventsExecutor eventsExecutor;
@@ -149,6 +152,7 @@ public class PlatypusHtmlEditor extends Composite implements HasJsFacade, HasVal
 		placeWidgetToMenu(fontSizes, null, "");
 		fontSizes.getElement().getStyle().setWidth(80, Style.Unit.PX);
 
+		container.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		container.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		container.getElement().getStyle().setWidth(100, Style.Unit.PCT);
 
@@ -156,7 +160,7 @@ public class PlatypusHtmlEditor extends Composite implements HasJsFacade, HasVal
 		textContainer.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		textContainer.getElement().getStyle().setWidth(100, Style.Unit.PCT);
 		textContainer.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
-		paneForRichTextBox.getElement().getStyle().setTop(30, Style.Unit.PX);
+		paneForRichTextBox.getElement().getStyle().setTop(32, Style.Unit.PX);
 		paneForRichTextBox.getElement().getStyle().setBottom(0, Style.Unit.PX);
 		paneForRichTextBox.getElement().getStyle().setWidth(100, Style.Unit.PCT);
 		paneForRichTextBox.getElement().getStyle().setProperty("position", "absolute");

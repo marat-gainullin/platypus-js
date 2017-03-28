@@ -107,6 +107,8 @@ public class TabbedPane extends TabsDecoratedPanel implements HasJsFacade, HasEn
 
 	public TabbedPane() {
 		super(30, Style.Unit.PX);
+		getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+		getElement().getStyle().setPosition(Style.Position.RELATIVE);
 	}
 
 	@Override

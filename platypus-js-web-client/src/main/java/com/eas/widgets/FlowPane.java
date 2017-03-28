@@ -21,10 +21,9 @@ import com.eas.ui.events.ShowEvent;
 import com.eas.ui.events.ShowHandler;
 import com.eas.widgets.containers.FlowGapPanel;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
@@ -43,10 +42,14 @@ public class FlowPane extends FlowGapPanel implements HasJsFacade, HasEnabled, H
 
 	public FlowPane() {
 		super();
+		getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+		getElement().getStyle().setPosition(Style.Position.RELATIVE);
 	}
 
 	public FlowPane(int aVGap, int aHGap) {
 		super();
+		getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+		getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		setHgap(aHGap);
 		setVgap(aVGap);
 	}

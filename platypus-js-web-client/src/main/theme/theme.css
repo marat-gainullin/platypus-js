@@ -975,6 +975,7 @@ select.form-control{
     background-position: center;
     cursor: pointer;
     float: right;
+    line-height: normal;
 }
 
 .decorator-clear:before {
@@ -997,6 +998,7 @@ select.form-control{
     opacity: 0.5;
     cursor: pointer;
     float: right;
+    line-height: normal;
 }
 
 .decorator-clear, .decorator-select, .date-select, .time-select{
@@ -1059,6 +1061,7 @@ select.form-control{
     cursor: pointer;
     float: right;
     padding-right: 11px;
+    line-height: normal;
 }
 
 .date-select:before, .time-select:before{
@@ -1209,12 +1212,13 @@ select.form-control{
     color: white;
 }
 
-.tabs p:focus, .tabs-tab .gwt-Label:focus{
+.tabs p:focus, .tabs-tab .label:focus{
     outline: none;
 }
 
 .treegrid-expanded-cell, .treegrid-collapased-cell{
     padding-left: 16px;
+    line-height: normal;
 }
 
 .treegrid-expanded-cell:before {
@@ -1294,6 +1298,7 @@ select.form-control{
     white-space: nowrap;
     display: inline-block;
     vertical-align: middle;
+    line-height: normal;
 }
 
 .grid-selected-row{
@@ -1339,6 +1344,7 @@ select.form-control{
     width: 15px;
     color: white;
     text-shadow: 1px 1px 1px rgb(0,0,0);
+    line-height: normal;
 }
 
 .grid-columns-chevron:hover {
@@ -1402,6 +1408,7 @@ select.form-control{
     background-image: linear-gradient(to bottom, #95a5a6,#7f8c8d);
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
+    line-height: normal;
 }
 
 .window-caption-text {

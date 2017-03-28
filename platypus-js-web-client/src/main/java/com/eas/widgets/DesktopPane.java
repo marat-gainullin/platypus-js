@@ -58,6 +58,7 @@ public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesRe
 	public DesktopPane() {
 		super();
 		getElement().getStyle().setOverflow(Style.Overflow.AUTO);
+		getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 

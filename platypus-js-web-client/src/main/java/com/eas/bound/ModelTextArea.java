@@ -6,8 +6,11 @@ import com.eas.ui.HasEmptyText;
 import com.eas.widgets.WidgetsUtils;
 import com.eas.widgets.boxes.NullableTextArea;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.eas.ui.HasScroll;
+import com.eas.ui.HorizontalScrollFiller;
+import com.eas.ui.VerticalScrollFiller;
 
-public class ModelTextArea extends ModelDecoratorBox<String> implements HasEmptyText {
+public class ModelTextArea extends ModelDecoratorBox<String> implements HasScroll, HorizontalScrollFiller, VerticalScrollFiller, HasEmptyText {
 
 	protected String emptyText;
 
@@ -34,6 +37,7 @@ public class ModelTextArea extends ModelDecoratorBox<String> implements HasEmpty
 		WidgetsUtils.applyEmptyText(getElement(), emptyText);
 	}
 
+        @Override
 	public void setPublished(JavaScriptObject aValue) {
 		super.setPublished(aValue);
 		if (published != null) {

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.widgets.containers;
 
 import com.eas.core.XElement;
@@ -35,7 +31,9 @@ public class CardsPanel extends ComplexPanel implements InsertPanel.ForIsWidget,
      */
     public CardsPanel() {
         setElement(Document.get().createDivElement());
-		getElement().<XElement>cast().addResizingTransitionEnd(this);
+        getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+        getElement().getStyle().setPosition(Style.Position.RELATIVE);
+	getElement().<XElement>cast().addResizingTransitionEnd(this);
     }
 
     public int getHgap() {

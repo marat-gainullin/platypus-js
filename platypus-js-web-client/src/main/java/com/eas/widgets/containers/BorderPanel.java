@@ -120,14 +120,14 @@ public class BorderPanel extends DockLayoutPanel {
 		}
 	}
 
-	public void ajustHeight(Widget aWidget, int aWidth) {
+	public void ajustHeight(Widget aWidget, int aHeight) {
 		Direction direction = getWidgetDirection(aWidget);
 		if (direction == Direction.NORTH) {
 			remove(aWidget);
 			Widget centerWidget = getCenter();
 			if (centerWidget != null)
 				remove(centerWidget);
-			addNorth(aWidget, aWidth);
+			addNorth(aWidget, aHeight);
 			if (centerWidget != null)
 				add(centerWidget);
 		} else if (direction == Direction.SOUTH) {
@@ -135,7 +135,7 @@ public class BorderPanel extends DockLayoutPanel {
 			Widget centerWidget = getCenter();
 			if (centerWidget != null)
 				remove(centerWidget);
-			addSouth(aWidget, aWidth);
+			addSouth(aWidget, aHeight);
 			if (centerWidget != null)
 				add(centerWidget);
 		}

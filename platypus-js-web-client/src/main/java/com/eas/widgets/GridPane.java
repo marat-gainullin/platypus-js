@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.widgets;
 
 import com.eas.core.HasPublished;
@@ -25,6 +21,7 @@ import com.eas.ui.events.ShowEvent;
 import com.eas.ui.events.ShowHandler;
 import com.eas.widgets.containers.GridPanel;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
@@ -49,10 +46,14 @@ public class GridPane extends GridPanel implements HasJsFacade, HasEnabled, HasC
 
 	public GridPane() {
 		super(1, 1);
+		getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+		getElement().getStyle().setPosition(Style.Position.RELATIVE);
 	}
 
 	public GridPane(int aRows, int aCols) {
 		super(aRows, aCols);
+		getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+		getElement().getStyle().setPosition(Style.Position.RELATIVE);
 	}
 
 	public GridPane(int aRows, int aCols, int aVGap, int aHGap) {

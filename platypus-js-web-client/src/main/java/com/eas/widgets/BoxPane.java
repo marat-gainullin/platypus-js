@@ -21,6 +21,7 @@ import com.eas.ui.events.ShowEvent;
 import com.eas.ui.events.ShowHandler;
 import com.eas.widgets.containers.BoxPanel;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
@@ -41,10 +42,14 @@ public class BoxPane extends BoxPanel implements HasJsFacade, HasEnabled, HasCom
 
 	public BoxPane() {
 		super();
+		getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+		getElement().getStyle().setPosition(Style.Position.RELATIVE);
 	}
 
 	public BoxPane(int aOrientation, int aHGap, int aVGap) {
 		super();
+		getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+		getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		setHgap(aHGap);
 		setVgap(aVGap);
 		setOrientation(aOrientation);

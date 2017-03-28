@@ -23,6 +23,7 @@ import com.eas.ui.events.ShowEvent;
 import com.eas.ui.events.ShowHandler;
 import com.eas.widgets.containers.BorderPanel;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
@@ -43,10 +44,14 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 
 	public BorderPane() {
 		super();
+		getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+		getElement().getStyle().setPosition(Style.Position.RELATIVE);
 	}
 
 	public BorderPane(int aVGap, int aHGap) {
 		this();
+		getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+		getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		setHgap(aHGap);
 		setVgap(aVGap);
 	}

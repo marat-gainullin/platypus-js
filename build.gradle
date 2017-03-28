@@ -74,12 +74,12 @@ subprojects {
             repo = "$group"
             name = "$project.name"
             licenses = ['Apache-2.0']
-            vcsUrl = 'https://github.com/altsoft/PlatypusJS.git'
+            vcsUrl = 'https://github.com/marat-gainullin/platypus-js.git'
             version {
                 name = "${project.version}"
                 released  = new Date()
             }
-            githubRepo = 'altsoft/PlatypusJS'
+            githubRepo = 'marat-gainullin/platypus-js'
         }
         configurations = ['archives']
     }

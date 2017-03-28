@@ -23,12 +23,12 @@ public class FormattedObjectBox extends ExplicitValueBox<Object> implements HasD
 		}
 
 		public FormattedObjectBox getBox() {
-	        return box;
-        }
+                        return box;
+                }
 		
 		public void setBox(FormattedObjectBox aValue) {
-	        box = aValue;
-        }
+                        box = aValue;
+                }
 		
 		@Override
 		public String render(Object value) {
@@ -60,12 +60,12 @@ public class FormattedObjectBox extends ExplicitValueBox<Object> implements HasD
 		}
 
 		public FormattedObjectBox getBox() {
-	        return box;
-        }
+                        return box;
+                }
 		
 		public void setBox(FormattedObjectBox aValue) {
-	        box = aValue;
-        }
+                        box = aValue;
+                }
 		
 		@Override
 		public Object parse(CharSequence text) throws ParseException {

@@ -19,7 +19,6 @@ import com.eas.ui.events.RemoveEvent;
 import com.eas.ui.events.RemoveHandler;
 import com.eas.ui.events.ShowEvent;
 import com.eas.ui.events.ShowHandler;
-import com.eas.widgets.boxes.DecoratorBox;
 import com.eas.widgets.containers.ScrollBoxPanel;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
@@ -32,8 +31,6 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
-import com.google.gwt.user.client.ui.RichTextArea;
-import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ScrollPane extends ScrollBoxPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor,
@@ -66,6 +63,7 @@ public class ScrollPane extends ScrollBoxPanel implements HasJsFacade, HasEnable
 
 	public ScrollPane() {
 		super();
+		getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		Element sollableElem = getElement().getFirstChild().cast();
 		sollableElem.getStyle().setPosition(Position.ABSOLUTE);
 		sollableElem.getStyle().setProperty("boxSizing", "border-box");
@@ -231,16 +229,9 @@ public class ScrollPane extends ScrollBoxPanel implements HasJsFacade, HasEnable
 	}
 
 	@Override
-	public void setWidget(Widget w) {
-		super.setWidget(w);
-		if(w instanceof TextArea || w instanceof RichTextArea ||
-				(w instanceof DecoratorBox<?> && ((DecoratorBox<?>)w).getWidget() instanceof TextArea) ||
-				(w instanceof DecoratorBox<?> && ((DecoratorBox<?>)w).getWidget() instanceof RichTextArea)
-				){
-			setHorizontalScrollPolicy(ScrollPane.ScrollPolicy.NEVER);
-			setVerticalScrollPolicy(ScrollPane.ScrollPolicy.NEVER);
-		}
-		AddEvent.fire(this, w);
+	public void setWidget(Widget aWidget) {
+		super.setWidget(aWidget);
+		AddEvent.fire(this, aWidget);
 	}
 
 	@Override

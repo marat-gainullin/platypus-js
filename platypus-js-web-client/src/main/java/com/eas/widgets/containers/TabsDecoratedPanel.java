@@ -72,12 +72,10 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 			public void insert(Widget child, Widget aTabWidget, int beforeIndex) {
 				child.getElement().getStyle().clearWidth();
 				child.getElement().getStyle().clearHeight();
-				// if (child instanceof FocusWidget) {
 				child.getElement().getStyle().clearRight();
 				child.getElement().getStyle().setWidth(100, Style.Unit.PCT);
 				com.eas.ui.CommonResources.INSTANCE.commons().ensureInjected();
 				child.getElement().addClassName(com.eas.ui.CommonResources.INSTANCE.commons().borderSized());
-				// }
 				super.insert(child, aTabWidget, beforeIndex);
 				Widget tab = ((FlowPanel)tabBar).getWidget(beforeIndex);
 				tab.setStylePrimaryName("tabs-tab");
@@ -119,8 +117,9 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 		});
 		tabBar = tabBarContainer.getWidget(0);
 		tabsContent = tabBarContainer.getWidget(1);
-	    tabBar.setStylePrimaryName("tabs-bar");
-	    tabs.setStylePrimaryName("tabs");
+                tabBar.getElement().getStyle().setProperty("lineHeight", "normal");
+                tabBar.setStylePrimaryName("tabs-bar");
+                tabs.setStylePrimaryName("tabs");
 		// GWT Layout animations are deprecated because of CSS3 transitions
 		tabs.setAnimationDuration(0);
 		scrollLeft = new Button("", new ClickHandler() {

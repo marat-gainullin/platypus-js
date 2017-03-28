@@ -69,6 +69,7 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 
 	protected PopupPanel popup = new PopupPanel() {
 
+                @Override
 		public void setPopupPosition(int popupLeft, int popupTop) {
 			super.setPopupPosition(popupLeft, popupTop);
 			if (datePicker != null) {

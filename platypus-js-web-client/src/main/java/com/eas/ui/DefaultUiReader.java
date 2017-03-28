@@ -270,8 +270,8 @@ public class DefaultUiReader extends UiReader {
 			Dimension prefSize = readPrefSize(anElement);
 			if (prefSize != null) {
 				PublishedComponent pComp = ((HasPublished) aTarget).getPublished().<PublishedComponent> cast();
-				pComp.setWidth(prefSize.width);
-				pComp.setHeight(prefSize.height);
+                                pComp.setWidth(prefSize.width);
+                                pComp.setHeight(prefSize.height);
 			}
 		}
 	}

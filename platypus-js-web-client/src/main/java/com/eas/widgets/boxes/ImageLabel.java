@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.widgets.boxes;
 
 import com.google.gwt.dom.client.Document;
@@ -17,7 +12,7 @@ public class ImageLabel extends ImageParagraph {
 
     protected static Element createLabelContainer() {
         Element container = Document.get().createDivElement();
-        container.setAttribute("class", "gwt-Label");
+        container.setAttribute("class", "label");
         container.getStyle().setProperty("outline", "none");
         return container;
     }

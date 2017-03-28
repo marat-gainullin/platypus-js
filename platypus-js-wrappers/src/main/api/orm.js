@@ -774,6 +774,15 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
             }
 
             /**
+             * Creates fresh empty model.
+             * @returns {Model}
+             */
+            function createModel() {
+                var modelDocument = Source2XmlDom.transform('<?xml version="1.0" encoding="UTF-8"?><datamodel></datamodel>');
+                return loadModelDocument(modelDocument, null, null);
+            }
+
+            /**
              * Loads entities definitions, needed to construct a model from a server.
              * If corresponding entities definitions are already loaded, then no extra network activity occur.
              * It reads entities related information from model definition.
@@ -816,6 +825,10 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
             Object.defineProperty(module, 'readModel', {
                 enumerable: true,
                 value: readModel
+            });
+            Object.defineProperty(module, 'createModel', {
+                enumerable: true,
+                value: createModel
             });
             Object.defineProperty(module, 'requireEntities', {
                 enumerable: true,

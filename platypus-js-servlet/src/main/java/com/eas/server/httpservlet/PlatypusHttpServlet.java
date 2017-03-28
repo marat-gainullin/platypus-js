@@ -386,7 +386,9 @@ public class PlatypusHttpServlet extends HttpServlet {
                             aHttpResponse.sendError(HttpServletResponse.SC_NOT_FOUND, ex.getMessage());
                         } else if (ex instanceof JsObjectException) {
                             String errorBody = aPlatypusSession.getSpace().toJson(((JsObjectException) ex).getData());
-                            aHttpResponse.setStatus(HttpServletResponse.SC_CONFLICT);
+                            if (aHttpResponse.getStatus() >= 200 && aHttpResponse.getStatus() < 300) {
+                                aHttpResponse.setStatus(HttpServletResponse.SC_CONFLICT);
+                            }
                             PlatypusHttpResponseWriter.writeJsonResponse(errorBody, aHttpResponse, null);
                         } else {
                             aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());

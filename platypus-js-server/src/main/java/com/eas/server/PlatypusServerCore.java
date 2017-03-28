@@ -256,7 +256,7 @@ public abstract class PlatypusServerCore implements ContextHost, Application<Sql
                                                             if (reason instanceof Exception) {
                                                                 onFailure.accept((Exception) reason);
                                                             } else {
-                                                                onFailure.accept(new JsObjectException(largs[0]));
+                                                                onFailure.accept(new JsObjectException(reason));
                                                             }
                                                         } else {
                                                             Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});

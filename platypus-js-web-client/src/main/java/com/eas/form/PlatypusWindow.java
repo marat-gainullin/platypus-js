@@ -227,16 +227,18 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	public void show(boolean aModal, final JavaScriptObject aCallback, DesktopPane aDesktop) {
 		popup = new WindowPopupPanel(this, autoHide, aModal);
 		popup.setWidget(view);
-		double actualWidth = view instanceof HasPublished ? ((HasPublished) view).getPublished().<PublishedComponent> cast().getWidth() : 0;
-		double actualHeight = view instanceof HasPublished ? ((HasPublished) view).getPublished().<PublishedComponent> cast().getHeight() : 0;
-		popup.setSize(actualWidth, actualHeight);
+                String sWidth = view.getElement().getStyle().getWidth();
+                String sHeight = view.getElement().getStyle().getHeight();
+		double width = sWidth != null && sWidth.endsWith("px") ? Double.parseDouble(sWidth.substring(0, sWidth.length() - 2)) : 0;
+		double height = sHeight != null && sHeight.endsWith("px") ? Double.parseDouble(sHeight.substring(0, sHeight.length() - 2)) : 0;
+		popup.setSize(sWidth, sHeight);
 		if (locationByPlatform) {
 			if (aDesktop != null) {
 				aDesktop.add(this);
 				setPosition(aDesktop.getConsideredPosition().getX(), aDesktop.getConsideredPosition().getY());
 			} else {
-				int left = (Document.get().getClientWidth() - (int) actualWidth) / 2;
-				int top = (Document.get().getClientHeight() - (int) actualHeight) / 2;
+				int left = (Document.get().getClientWidth() - (int) width) / 2;
+				int top = (Document.get().getClientHeight() - (int) height) / 2;
 				setPosition(left, top);
 				popup.show();
 			}
@@ -246,16 +248,16 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 				if (location != null)
 					setPosition(location.getX(), location.getY());
 				else {
-					int left = (aDesktop.getElement().getClientWidth() - (int) actualWidth) / 2;
-					int top = (aDesktop.getElement().getClientHeight() - (int) actualHeight) / 2;
+					int left = (aDesktop.getElement().getClientWidth() - (int) width) / 2;
+					int top = (aDesktop.getElement().getClientHeight() - (int) height) / 2;
 					setPosition(left, top);
 				}
 			} else {
 				if (location != null)
 					setPosition(location.getX(), location.getY());
 				else {
-					int left = (Document.get().getClientWidth() - (int) actualWidth) / 2;
-					int top = (Document.get().getClientHeight() - (int) actualHeight) / 2;
+					int left = (Document.get().getClientWidth() - (int) width) / 2;
+					int top = (Document.get().getClientHeight() - (int) height) / 2;
 					setPosition(left, top);
 				}
 				popup.show();
