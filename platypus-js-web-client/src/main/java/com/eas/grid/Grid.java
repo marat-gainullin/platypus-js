@@ -1,9 +1,3 @@
-/*
-
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.grid;
 
 import java.util.ArrayList;
@@ -305,6 +299,12 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 				footerRightContainer }) {
 			w.getElement().getFirstChildElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		}
+		scrollableLeftContainer.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+		scrollableLeftContainer.getElement().getStyle().setBottom(0, Style.Unit.PX);
+		scrollableLeftContainer.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		scrollableRightContainer.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+		scrollableRightContainer.getElement().getStyle().setBottom(0, Style.Unit.PX);
+		scrollableRightContainer.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		// propagation of some widths
 		headerLeft.setWidthPropagator(new GridWidthPropagator<T>(headerLeft) {
 
@@ -356,7 +356,9 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 		hive.setWidget(1, 0, frozenLeftContainer);
 		hive.setWidget(1, 1, frozenRightContainer);
 		hive.setWidget(2, 0, scrollableLeftContainer);
+		scrollableLeftContainer.getElement().getParentElement().getStyle().setPosition(Style.Position.RELATIVE);
 		hive.setWidget(2, 1, scrollableRightContainer);
+		scrollableRightContainer.getElement().getParentElement().getStyle().setPosition(Style.Position.RELATIVE);
 		hive.setWidget(3, 0, footerLeftContainer);
 		hive.setWidget(3, 1, footerRightContainer);
 
@@ -426,7 +428,8 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 					if (factTopDelta > 0) {
 						scrollableLeftContainer.getElement().getStyle().setBottom(factTopDelta, Style.Unit.PX);
 					} else {
-						scrollableLeftContainer.getElement().getStyle().clearBottom();
+						scrollableLeftContainer.getElement().getStyle().setBottom(0, Style.Unit.PX);
+						//scrollableLeftContainer.getElement().getStyle().clearBottom();
 					}
 					frozenRightContainer.getElement().setScrollLeft(aimLeft);
 					int factLeftDelta1 = aimLeft - frozenRightContainer.getElement().getScrollLeft();
@@ -914,14 +917,14 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 		// scrollableRightContainer.getElement().getParentElement().getStyle().setHeight(100,
 		// Style.Unit.PCT);
 		// some code for opera...
-		scrollableLeftContainer.getElement().getStyle().clearHeight();
-		scrollableRightContainer.getElement().getStyle().clearHeight();
+		//scrollableLeftContainer.getElement().getStyle().clearHeight();
+		//scrollableRightContainer.getElement().getStyle().clearHeight();
 		// it seems that after clearing the height, hive offsetHeight is changed
 		// ...
-		scrollableLeftContainer.getElement().getStyle()
-				.setHeight(hive.getElement().getOffsetHeight() - r0Height - r1Height - r3Height, Style.Unit.PX);
-		scrollableRightContainer.getElement().getStyle()
-				.setHeight(hive.getElement().getOffsetHeight() - r0Height - r1Height - r3Height, Style.Unit.PX);
+		//scrollableLeftContainer.getElement().getStyle()
+		//		.setHeight(hive.getElement().getOffsetHeight() - r0Height - r1Height - r3Height, Style.Unit.PX);
+		//scrollableRightContainer.getElement().getStyle()
+		//		.setHeight(hive.getElement().getOffsetHeight() - r0Height - r1Height - r3Height, Style.Unit.PX);
 	}
 
 	@Override
@@ -943,7 +946,7 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 	@Override
 	public void onResize() {
 		if (isAttached()) {
-			hive.setSize(getElement().getClientWidth() + "px", getElement().getClientHeight() + "px");
+			hive.setSize("100%", "100%");//(getElement().getClientWidth() + "px", getElement().getClientHeight() + "px");
 			propagateHeaderWidth();
 			onColumnsResize();
 			propagateHeightButScrollable();
@@ -1076,6 +1079,11 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 		List<T> list = dataProvider != null ? dataProvider.getList() : null;
 		int generalLength = list != null ? list.size() : 0;
 		int lfrozenRows = generalLength >= frozenRows ? frozenRows : generalLength;
+                if(lfrozenRows == 0){
+                    hive.getRowFormatter().setVisible(1, false);
+                } else {
+                    hive.getRowFormatter().setVisible(1, true);
+                }
 		int scrollableRowCount = generalLength - lfrozenRows;
 		//
 		headerLeft.setVisibleRange(new Range(0, 0));
@@ -1086,6 +1094,9 @@ public abstract class Grid<T> extends SimplePanel implements ProvidesResize, Req
 		scrollableRight.setVisibleRange(new Range(lfrozenRows, scrollableRowCount >= 0 ? scrollableRowCount : 0));
 		footerLeft.setVisibleRange(new Range(0, 0));
 		footerRight.setVisibleRange(new Range(0, 0));
+                //Since footerLeft and footerRight have bpth zero range,
+                //hide them entirely
+		hive.getRowFormatter().setVisible(3, false);
 		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
 			@Override

@@ -130,7 +130,6 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 				if (offsetLeft < 0) {
 					tabBar.getElement().getStyle().setLeft(Math.min(offsetLeft + 100, 0), Style.Unit.PX);
 				}
-				updateScrolls();
 			}
 		});
 		scrollLeft.setStyleName("tabs-chevron-left");
@@ -141,7 +140,6 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 			public void onClick(ClickEvent event) {
 				int newTabBarLeft = calcNewScrollRightPosition();
 				tabBar.getElement().getStyle().setLeft(newTabBarLeft, Style.Unit.PX);
-				updateScrolls();
 			}
 		});
 		scrollRight.setStyleName("tabs-chevron-right");
@@ -282,12 +280,6 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 	@Override
 	public void onResize() {
 		tabs.onResize();
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-			@Override
-			public void execute() {
-				updateScrolls();
-			}
-		});
 	}
 
 	protected int calcNewScrollRightPosition() {
@@ -299,14 +291,6 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 		if (nextTabBarLeft < tabBarMostLeft)
 			nextTabBarLeft = tabBarMostLeft;
 		return nextTabBarLeft;
-	}
-
-	protected void updateScrolls() {
-		int oldTabBarLeft = tabBar.getElement().getOffsetLeft();
-		scrollLeft.setEnabled(oldTabBarLeft < 0);
-		//
-		int newTabBarLeft = calcNewScrollRightPosition();
-		scrollRight.setEnabled(newTabBarLeft != oldTabBarLeft);
 	}
 
 	/**

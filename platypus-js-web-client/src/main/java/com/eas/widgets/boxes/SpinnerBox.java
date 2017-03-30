@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.widgets.boxes;
 
 import com.eas.core.XElement;
@@ -124,6 +119,9 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 		left.getElement().getStyle().setTop(0, Style.Unit.PX);
 		left.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		left.getElement().getStyle().setPosition(Style.Position.RELATIVE);
+                // FireFox hides this without such setting because of place in DOM.
+                // Place in DOM is after input element because of FireFox's float elements behaviour.
+		left.getElement().getStyle().setZIndex(1);
 
 		CommonResources.INSTANCE.commons().ensureInjected();
 
@@ -143,14 +141,17 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 		right.getElement().getStyle().setTop(0, Style.Unit.PX);
 		right.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		right.getElement().getStyle().setPosition(Style.Position.RELATIVE);
+                // FireFox hides this without such setting because of place in DOM.
+                // Place in DOM is after input element because of FireFox's float elements behaviour.
+		right.getElement().getStyle().setZIndex(1);
 
 		CommonResources.INSTANCE.commons().ensureInjected();
 		left.getElement().addClassName(CommonResources.INSTANCE.commons().unselectable());
 		right.getElement().addClassName(CommonResources.INSTANCE.commons().unselectable());
 
-		container.add(field);
-		container.add(left);
 		container.add(right);
+		container.add(left);
+		container.add(field);
 		left.addDomHandler(new ClickHandler() {
 
 			@Override

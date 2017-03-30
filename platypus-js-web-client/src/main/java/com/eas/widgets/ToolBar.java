@@ -197,9 +197,7 @@ public class ToolBar extends Toolbar implements HasJsFacade, HasEnabled, HasComp
 			if(toAdd && toAdd.unwrap){
 				if(toAdd.parent == published)
 					throw 'A widget already added to this container';
-				var widgetWidth = toAdd.width;
 				aWidget.@com.eas.widgets.ToolBar::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
-				aWidget.@com.eas.widgets.ToolBar::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(toAdd.unwrap(), widgetWidth);
 			}
 		};		
 	}-*/;

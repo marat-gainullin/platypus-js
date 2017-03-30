@@ -1090,6 +1090,7 @@ select.form-control{
 .spin-left{
     padding-left: 10px;
     background-image: url(spin-left.png);
+    float: left;
 }
 
 .spin-right{

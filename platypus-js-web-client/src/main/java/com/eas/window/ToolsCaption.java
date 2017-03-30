@@ -72,8 +72,8 @@ public class ToolsCaption extends FlowPanel implements HasHTML {
 
 		getElement().getStyle().setPosition(Style.Position.RELATIVE);
 
-		add(label);
 		add(tools);
+		add(label);
 		tools.add(btnMinimize);
 		tools.add(btnMaximize);
 		tools.add(btnRestore);

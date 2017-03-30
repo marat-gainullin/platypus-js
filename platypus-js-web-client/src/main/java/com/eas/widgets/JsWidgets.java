@@ -155,7 +155,11 @@ public class JsWidgets {
             });
 	    Object.defineProperty(aPublished, "width", {
 		    get : function() {
-		    	return aPublished.element.offsetWidth;
+                        if(aPublished.parent)
+                            return aPublished.element.offsetWidth;
+                        else {
+                            return parseFloat(aPublished.element.style.width);
+                        }
 		    },
 		    set : function(aValue) {
 		    	if(aPublished.parent instanceof AbsolutePane || aPublished.parent instanceof AnchorsPane){
@@ -186,7 +190,11 @@ public class JsWidgets {
 		});
 	    Object.defineProperty(aPublished, "height", {
 		    get : function() {
-		    	return aPublished.element.offsetHeight;
+                        if (aPublished.parent)
+                            return aPublished.element.offsetHeight;
+                        else {
+                            return parseFloat(aPublished.element.style.height);
+                        }
 		    },
 		    set : function(aValue) {
     			if(aPublished.parent instanceof AbsolutePane || aPublished.parent instanceof AnchorsPane){

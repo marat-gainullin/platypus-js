@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.widgets.boxes;
 
 import com.eas.core.XElement;
@@ -96,9 +91,9 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
                         panel.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 			panel.addStyleName("decorator");
 			initWidget(panel);
-			panel.add((Widget) decorated);
 			panel.add(selectButton);
 			panel.add(clearButton);
+			panel.add((Widget) decorated);
 		}
 
 		((Widget) decorated).addStyleName("decorator-content");
@@ -107,10 +102,12 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 		selectButton.getElement().getStyle().setDisplay(Style.Display.NONE);
 		selectButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		selectButton.getElement().getStyle().setPosition(Style.Position.RELATIVE);
+		selectButton.getElement().getStyle().setZIndex(1); // FireFox hides this in ModelCombo without such setting
 		clearButton.getElement().addClassName("decorator-clear");
 		clearButton.getElement().getStyle().setDisplay(Style.Display.NONE);
 		clearButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		clearButton.getElement().getStyle().setPosition(Style.Position.RELATIVE);
+		clearButton.getElement().getStyle().setZIndex(1); // FireFox hides this in ModelCombo without such setting
 
 		selectButton.addDomHandler(new ClickHandler() {
 
