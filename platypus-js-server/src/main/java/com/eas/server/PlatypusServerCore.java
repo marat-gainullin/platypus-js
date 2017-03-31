@@ -252,7 +252,7 @@ public abstract class PlatypusServerCore implements ContextHost, Application<Sql
                                                     public Object call(final Object thiz, final Object... largs) {
                                                         if (!aNetworkRPC || !executed.get()) {
                                                             executed.set(true);
-                                                            Object reason = largs.length > 0 ? targetSpace.toJava(largs[0]) : null;
+                                                            Object reason = largs.length > 0 ? largs[0] : null;
                                                             if (reason instanceof Exception) {
                                                                 onFailure.accept((Exception) reason);
                                                             } else {

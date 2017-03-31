@@ -80,7 +80,7 @@ public class BrowserTests {
                 + "function(aError){\n"
                 + "    complete('' + aError);\n"
                 + "})");
-        assertNull(requireError);
+        assertNull("" + requireError, requireError);
         Object testError = browser.executeAsyncScript(""
                 + "var complete = arguments[arguments.length - 1];\n"
                 + "var testInstance = new " + aTestName + "();\n"
@@ -90,9 +90,9 @@ public class BrowserTests {
                 + "function(aError){\n"
                 + "    complete('' + aError);"
                 + "});");
-        assertNull(testError);
+        assertNull("" + testError, testError);
     }
-
+/*
     @Test
     public void select_stateless_test() {
         perform("select_stateless_test");
@@ -252,12 +252,12 @@ public class BrowserTests {
     public void invokeLaterDelayedTest() {
         perform("InvokeLaterDelayedTest");
     }
-
+*/
     @Test
     public void errorsTestClient() {
         perform("ErrorsTestClient");
     }
-
+/*
     @Test
     public void AMDSelfTest() {
         perform("AMDSelfTest");
@@ -267,4 +267,5 @@ public class BrowserTests {
     public void LPCCallbacksTest() {
         perform("LPCCallbacksTest");
     }
+*/
 }
