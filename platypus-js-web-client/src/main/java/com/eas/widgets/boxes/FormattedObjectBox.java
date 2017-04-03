@@ -5,6 +5,7 @@ import java.text.ParseException;
 import com.eas.client.converters.StringValueConverter;
 import com.eas.core.Utils;
 import com.eas.core.Utils.JsObject;
+import com.eas.ui.CommonResources;
 import com.eas.ui.HasDecorationsWidth;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
@@ -93,6 +94,8 @@ public class FormattedObjectBox extends ExplicitValueBox<Object> implements HasD
 	public FormattedObjectBox() {
 		super(Document.get().createTextInputElement(), new PolymorphRenderer(), new PolymorphParser());
 		setStyleName("form-control");
+                CommonResources.INSTANCE.commons().ensureInjected();
+                getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
 		format = new ObjectFormat();
 		((PolymorphRenderer)renderer).setBox(this);
 		((PolymorphParser)parser).setBox(this);

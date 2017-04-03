@@ -17,8 +17,9 @@ public class FlowGapPanel extends FlowPanel implements RequiresResize {
 
 	public FlowGapPanel() {
 		super();
-		getElement().<XElement>cast().addResizingTransitionEnd(this);
+		getElement().getStyle().setWhiteSpace(Style.WhiteSpace.NORMAL);
 		getElement().getStyle().setLineHeight(0, Style.Unit.PX);
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
 	public int getHgap() {

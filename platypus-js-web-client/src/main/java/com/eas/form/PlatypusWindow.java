@@ -638,8 +638,8 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
         });
         
         (function() {
-			var B = @com.eas.core.Predefine::boxing;
-			var Logger = @com.eas.core.Predefine::logger;
+		var B = @com.eas.core.Predefine::boxing;
+		var Logger = @com.eas.core.Predefine::logger;
 	        var showedWnd = null;
 	        var closeCallback = null;
 	        aPublished.show = function() {

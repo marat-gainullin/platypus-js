@@ -4,6 +4,7 @@ import com.eas.core.HasPublished;
 import com.eas.core.XElement;
 import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusPopupMenu;
+import com.eas.ui.CommonResources;
 import com.eas.ui.HasEmptyText;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
@@ -44,6 +45,8 @@ public class PlatypusTextField extends TextBox implements HasActionHandlers, Has
 	public PlatypusTextField() {
 		super();
 		setStyleName("form-control");
+                CommonResources.INSTANCE.commons().ensureInjected();
+                getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
 		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
@@ -183,6 +186,7 @@ public class PlatypusTextField extends TextBox implements HasActionHandlers, Has
 		WidgetsUtils.applyEmptyText(getElement(), emptyText);
 	}
 
+        @Override
 	public JavaScriptObject getPublished() {
 		return published;
 	}
