@@ -277,7 +277,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                                                 // publishing a session
                                                 httpSession.setAttribute(PLATYPUS_SESSION_ID_ATTR_NAME, created.getId());
                                                 // a session has been published
-                                                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.INFO, "Platypus session opened. Session id: {0}", created.getId());
+                                                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.INFO, "Http platypus session opened. Session id: {0}", created.getId());
                                                 withPlatypusSession.accept(created);
                                             } catch (Exception ex) {
                                                 Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
