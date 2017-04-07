@@ -182,7 +182,9 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 	public JavaScriptObject submit(String aAction, final JavaScriptObject aDoneCallback) {
 		Map<String, String> fd = new HashMap<String, String>();
-		gatherForm(fd, (HasWidgets) getWidget());
+                if(getView() instanceof HasWidgets){
+                        gatherForm(fd, (HasWidgets) getView());
+                }
 		return Utils.publishCancellable(AppClient.getInstance().submitForm(aAction, fd, aDoneCallback == null ? null : new Callback<XMLHttpRequest, XMLHttpRequest>() {
 			@Override
 			public void onSuccess(XMLHttpRequest aRequest) {

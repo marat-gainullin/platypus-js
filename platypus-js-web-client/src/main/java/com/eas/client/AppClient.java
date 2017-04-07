@@ -429,9 +429,7 @@ public class AppClient {
 	public Cancellable submitForm(String aAction, Map<String, String> aFormData, final Callback<XMLHttpRequest, XMLHttpRequest> aCallback) {
 		final XMLHttpRequest req = XMLHttpRequest.create().cast();
 		aAction = (aAction != null ? aAction : "");
-		if (!aAction.startsWith("/"))
-			aAction = "/" + aAction;
-		String url = apiUrl + aAction;
+		String url = aAction.startsWith("/") ? aAction : remoteApiUri() + "/" + aAction;
 		List<String> parameters = new ArrayList<String>();
 		for (String paramName : aFormData.keySet()) {
 			parameters.add(param(paramName, aFormData.get(paramName)));
@@ -439,6 +437,7 @@ public class AppClient {
 		url += "?" + params(parameters.toArray(new String[] {}));
 		req.open("get", url);
 		req.setOnReadyStateChange(new ReadyStateChangeHandler() {
+                        @Override
 			public void onReadyStateChange(final XMLHttpRequest xhr) {
 				if (xhr.getReadyState() == XMLHttpRequest.DONE) {
 					xhr.clearOnReadyStateChange();
