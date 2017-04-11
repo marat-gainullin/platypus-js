@@ -67,7 +67,6 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String HTTP_SESSION_MISSING_MSG = "Container's session missing";
     public static final String PLATYPUS_SESSION_MISSING_MSG = "Platypus session missing";
     public static final String ERRORRESPONSE_ERROR_MSG = "Error while sending ErrorResponse";
-    public static final String REQUEST_PARAMETER_MISSING_MSG = "Http request parameter {0} not found.";
     public static final String UNKNOWN_REQUEST_MSG = "Unknown http request has arrived. It's type is %d";
     public static final String REQUEST_PROCESSSING_ERROR_MSG = "Request processsing error";
     public static final String SUBJECT_CONTEXT_KEY = "javax.security.auth.Subject.container";
@@ -505,8 +504,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                     }
                 }
             }
-            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, REQUEST_PARAMETER_MISSING_MSG, PlatypusHttpRequestParams.TYPE);
-            throw new Exception(String.format("Platypus http request parameter '%s' is missing", PlatypusHttpRequestParams.TYPE));
+            throw new Exception(String.format("Neither REST endpoint for URI %s, nor API parameters ('%s', '%s', '%s', etc.) found in the request", contextedUri, PlatypusHttpRequestParams.TYPE, PlatypusHttpRequestParams.QUERY_ID, PlatypusHttpRequestParams.MODULE_NAME));
         }
     }
 }

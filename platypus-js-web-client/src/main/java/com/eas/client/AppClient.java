@@ -398,6 +398,7 @@ public class AppClient {
 		req.overrideMimeType("multipart/form-data");
 		// Must set the onreadystatechange handler before calling send().
 		req.setOnReadyStateChange(new ReadyStateChangeHandler() {
+                        @Override
 			public void onReadyStateChange(XMLHttpRequest xhr) {
 				if (xhr.getReadyState() == XMLHttpRequest.DONE) {
 					xhr.clearOnReadyStateChange();
@@ -426,32 +427,43 @@ public class AppClient {
 		};
 	}
 
-	public Cancellable submitForm(String aAction, Map<String, String> aFormData, final Callback<XMLHttpRequest, XMLHttpRequest> aCallback) {
+	public Cancellable submitForm(String aAction, RequestBuilder.Method aMethod, String aContentType, Map<String, String> aFormData, final Callback<XMLHttpRequest, XMLHttpRequest> aCallback) {
 		final XMLHttpRequest req = XMLHttpRequest.create().cast();
-		aAction = (aAction != null ? aAction : "");
-		String url = aAction.startsWith("/") ? aAction : remoteApiUri() + "/" + aAction;
+		String urlPath = aAction != null ? aAction : "";
 		List<String> parameters = new ArrayList<String>();
 		for (String paramName : aFormData.keySet()) {
 			parameters.add(param(paramName, aFormData.get(paramName)));
 		}
-		url += "?" + params(parameters.toArray(new String[] {}));
-		req.open("get", url);
+                String paramsData = params(parameters.toArray(new String[] {}));
+                if(aMethod != RequestBuilder.POST){
+                    urlPath += "?" + paramsData;
+                }
+		req.open(aMethod.toString(), urlPath);
+                req.setRequestHeader("Content-Type", aContentType);
 		req.setOnReadyStateChange(new ReadyStateChangeHandler() {
                         @Override
 			public void onReadyStateChange(final XMLHttpRequest xhr) {
 				if (xhr.getReadyState() == XMLHttpRequest.DONE) {
 					xhr.clearOnReadyStateChange();
 					if (aCallback != null) {
-						try {
-							aCallback.onSuccess(xhr);
-						} catch (Exception ex) {
-							Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
-						}
+                                                try {
+                                                        if (xhr.getStatus() == Response.SC_OK) {
+                                                                aCallback.onSuccess(xhr);
+                                                        } else {
+                                                                aCallback.onFailure(xhr);
+                                                        }
+                                                } catch (Exception ex) {
+                                                        Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
+                                                }
 					}
 				}
 			}
 		});
-		req.send();
+                if(aMethod == RequestBuilder.POST){
+                    req.send(paramsData);
+                } else{
+                    req.send();
+                }
 		return new Cancellable() {
 			@Override
 			public void cancel() {
