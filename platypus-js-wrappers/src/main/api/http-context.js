@@ -15,8 +15,9 @@ define(['logger', 'boxing'], function (Logger, B) {
         /**
          * Native http request unwrap.
          */
-        Object.defineProperty(this, 'unwrap', {get: function () {
-                return function(){ return aHttpRequest; };
+        Object.defineProperty(this, 'unwrap', {
+            value: function () {
+                return aHttpRequest;
             }
         });
 
@@ -416,8 +417,9 @@ define(['logger', 'boxing'], function (Logger, B) {
         /**
          * Native http response unwrap.
          */
-        Object.defineProperty(this, 'unwrap', {get: function () {
-                return function(){ return aHttpResponse; };
+        Object.defineProperty(this, 'unwrap', {
+            value: function () {
+                return aHttpResponse;
             }
         });
 

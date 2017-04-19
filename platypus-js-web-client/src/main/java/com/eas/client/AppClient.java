@@ -211,13 +211,14 @@ public class AppClient {
 	}
 
 	public static String toFilyAppModuleId(String aRelative, String aStartPoint) {
-		Element div = com.google.gwt.dom.client.Document.get().createDivElement();
-		div.setInnerHTML("<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>");
-		String absolute = div.getFirstChildElement().<AnchorElement> cast().getHref();
+		Element moduleIdNormalizer = com.google.gwt.dom.client.Document.get().createDivElement();
+		moduleIdNormalizer.setInnerHTML("<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>");
+		String mormalizedAbsoluteModuleUrl = URL.decode(moduleIdNormalizer.getFirstChildElement().<AnchorElement> cast().getHref());
 		String hostContextPrefix = AppClient.relativeUri() + AppClient.getSourcePath();
-		absolute = URL.decode(absolute);
-		String appModuleId = absolute.substring(hostContextPrefix.length());
-		return appModuleId;
+		Element hostContextNormalizer = com.google.gwt.dom.client.Document.get().createDivElement();
+		hostContextNormalizer.setInnerHTML("<a href=\"" + hostContextPrefix + "\">o</a>");
+		String mormalizedHostContextPrefix = URL.decode(hostContextNormalizer.getFirstChildElement().<AnchorElement> cast().getHref());
+		return mormalizedAbsoluteModuleUrl.substring(mormalizedHostContextPrefix.length());
 	}
 
 	public static Object jsLoad(String aResourceName, final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
