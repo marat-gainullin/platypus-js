@@ -558,12 +558,27 @@ public class JsApi {
 							function(aResult){
 								if(typeof aResult === 'object' && aResult instanceof Report)
 									onSuccess(aResult);
-								else
-									onSuccess($wnd.JSON.parse(aResult, @com.eas.core.Utils.JsObject::dateReviver()()));
+                                                                else {
+                                                                        var parsed;
+                                                                        try {
+                                                                                parsed = $wnd.JSON.parse(aResult, @com.eas.core.Utils.JsObject::dateReviver()());
+                                                                        } catch(ex) {
+                                                                                parsed = aResult;
+                                                                        }
+									onSuccess(parsed);
+                                                                }
 							}, onFailure, Report);
 					} else {
 						var result = nativeClient.@com.eas.client.AppClient::requestServerMethodExecution(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params, null, null, Report);
-						return typeof result === 'object' && result instanceof Report ? result : $wnd.JSON.parse(result, @com.eas.core.Utils.JsObject::dateReviver()()); 
+						if (typeof result === 'object' && result instanceof Report)
+                                                        return result;
+                                                else {
+                                                        try {
+                                                                return $wnd.JSON.parse(result, @com.eas.core.Utils.JsObject::dateReviver()());
+                                                        } catch(ex){
+                                                                return result;
+                                                        }
+                                                }
 					}
 				};
 			}

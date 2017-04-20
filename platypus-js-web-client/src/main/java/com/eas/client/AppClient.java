@@ -1087,6 +1087,8 @@ public class AppClient {
 					String responseType = executed.getResponseHeader("content-type");
 					if (responseType != null) {
 						if (isJsonResponse(executed)) {
+                                                        // WARNING!!!Don't edit to Utils.jsonParse!
+                                                        // It is parsed in high-level js-code.
 							return Utils.toJs(executed.getResponseText());
 						} else if (responseType.toLowerCase().contains(REPORT_LOCATION_CONTENT_TYPE)) {
 							return createReport(aReportConstructor, executed.getResponseText());
