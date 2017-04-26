@@ -1,5 +1,5 @@
 /* global Java*/
-define(['boxing', 'forms/form', 'forms/index', 'grid/index'], function (B, Form) {
+define(['boxing', 'ui', 'forms/form', 'forms/index', 'grid/index'], function (B, Ui, Form) {
     // core imports
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
     var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
@@ -10,7 +10,7 @@ define(['boxing', 'forms/form', 'forms/index', 'grid/index'], function (B, Form)
 
     function loadFormDocument(aDocument, aModuleName, aModel, aTarget) {
         var formFactory = FormLoaderClass.load(aDocument, aModuleName, aModel ? aModel : null);
-        var form = formFactory.form;
+        var form = formFactory.getForm();
         if (aTarget) {
             Form.call(aTarget, null, null, form);
         } else {
@@ -43,7 +43,7 @@ define(['boxing', 'forms/form', 'forms/index', 'grid/index'], function (B, Form)
             form.formKey = aModuleName;
             return form;
         }else{
-            throw 'Layout definition for module "' + aModuleName + '" is not found';
+            throw "UI definition for module '" + aModuleName + "' is not found. May be it hasn't been prefetched";
         }
     }
 
@@ -54,27 +54,49 @@ define(['boxing', 'forms/form', 'forms/index', 'grid/index'], function (B, Form)
 
     var module = {
         /**
-         * Locates a prefetched resource by module name and reads widgets and form (window) definition from it.
+         * Locates a prefetched resource by module name and reads widgets and window definition from it.
          * @param {String} aName Name of module that is the owner of prefetched resource (*.model file).
          * @param {Object} aModel JavaScript object to use while widgets binding. (Optional)
          * @returns {Form}
          */
         loadForm: function (aName, aModel) {},
         /**
-         * Reads widgets and form (window) definition from aContent.
-         * @param {String} aContent String, all widgets and form itself should be read from.
+         * Locates a prefetched resource by module name and reads only widgets without window definition from it.
+         * @param {String} aName Name of module that is the owner of prefetched resource (*.model file).
+         * @param {Object} aModel JavaScript object to use while widgets binding. (Optional)
+         * @returns {Object} The returned object is populated with created widgets.
+         */
+        loadWidgets: function (aName, aModel) {},
+        /**
+         * Reads widgets and window definition from aContent.
+         * @param {String} aContent Widgets and window definitions should be read from.
          * @param {Object} aModel JavaScript object to use while widgets binding. (Optional)
          * @returns {Form}
          */
-        readForm: function (aContent, aModel) {}
+        readForm: function (aContent, aModel) {},
+        /**
+         * Reads widgets without window definition from aContent.
+         * @param {String} aContent Widgets definitions should be read from.
+         * @param {Object} aModel JavaScript object to use while widgets binding. (Optional)
+         * @returns {Object} The returned object is populated with created widgets.
+         */
+        readWidgets: function (aContent, aModel) {}
     };
     Object.defineProperty(module, 'loadForm', {
         enumerable: true,
         value: loadForm
     });
+    Object.defineProperty(module, 'loadWidgets', {
+        enumerable: true,
+        value: Ui.loadWidgets
+    });
     Object.defineProperty(module, 'readForm', {
         enumerable: true,
         value: readForm
+    });
+    Object.defineProperty(module, 'readWidgets', {
+        enumerable: true,
+        value: Ui.readWidgets
     });
     return module;
 });

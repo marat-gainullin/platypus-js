@@ -671,7 +671,7 @@ public class JsUi {
 					var widgetRootElement = aModuleName ? @com.eas.ui.JsUi::findLayoutElementByBundleName(Lcom/google/gwt/xml/client/Element;Ljava/lang/String;)(rootElement, aModuleName) : rootElement;
 					return readWidgetElement(widgetRootElement, aModel);
 				} else {
-					throw 'Layout definition for module "' + aModuleName + '" is not found';
+					throw 'UI definition for module "' + aModuleName + '" is not found';
 				}
 			}
 			

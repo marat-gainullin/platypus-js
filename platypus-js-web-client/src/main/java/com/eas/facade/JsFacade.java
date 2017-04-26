@@ -111,7 +111,7 @@ public class JsFacade {
 			accept(@com.eas.grid.GridPublisher::getConstructors()());
 			accept(@com.eas.menu.MenuPublisher::getConstructors()());
 			accept(@com.eas.ui.EventsPublisher::getConstructors()());
-			for ( var u in Ui) {
+			for (var u in Ui) {
 				if (u === '$H')
 					continue;
 				(function() {
@@ -122,15 +122,17 @@ public class JsFacade {
 					});
 				}());
 			}
-			for ( var f in Forms) {
+			for (var f in Forms) {
 				if (f === '$H')
 					continue;
 				(function() {
 					var p = f;
-					Object.defineProperty(module, p, {
-						enumerable : true,
-						get : function(){ return Forms[p]; }
-					});
+                                        if(module[p] !== Forms[p]){ // See Forms.loadWidgets,Forms.readWidgets and Ui.loadWidgets,Ui.readWidgets
+                                                Object.defineProperty(module, p, {
+                                                        enumerable : true,
+                                                        get : function(){ return Forms[p]; }
+                                                });
+                                        }
 				}());
 			}
 			Object.defineProperty(module, 'Anchors', {

@@ -92,6 +92,7 @@ public class FormFactory {
 
     public static final String OLD_FORM_ROOT_CONTAINER_NAME = "Form";
     protected Element element;
+    protected JComponent viewWidget;
     protected JSObject model;
     protected Form form;
     protected Map<String, JComponent> widgets = new HashMap<>();
@@ -115,7 +116,27 @@ public class FormFactory {
         return widgetsList;
     }
 
-    public Form getForm() {
+    public Form getForm() throws Exception {
+        if (form == null) {
+            form = new Form(viewWidget);
+            form.setDefaultCloseOperation(readIntegerAttribute(element, "dco", "defaultCloseOperation", JFrame.DISPOSE_ON_CLOSE));
+            resolveIcon(XmlDomUtils.getAttribute(element, "i", "icon"), (ImageIcon aLoaded) -> {
+                form.setIcon(aLoaded);
+            }, (Exception ex) -> {
+                Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, ex.getMessage());
+            });
+
+            form.setTitle(XmlDomUtils.getAttribute(element, "tl", "title"));
+            form.setClosable(readBooleanAttribute(element, "cle", "closable", Boolean.TRUE));
+            form.setMaximizable(readBooleanAttribute(element, "mxe", "maximizable", Boolean.TRUE));
+            form.setMinimizable(readBooleanAttribute(element, "mne", "minimizable", Boolean.TRUE));
+            form.setResizable(readBooleanAttribute(element, "rs", "resizable", Boolean.TRUE));
+            form.setUndecorated(readBooleanAttribute(element, "udr", "undecorated", Boolean.FALSE));
+            form.setOpacity(readFloatAttribute(element, "opc", "opacity", 1.0f));
+            form.setAlwaysOnTop(readBooleanAttribute(element, "aot", "alwaysOnTop", Boolean.FALSE));
+            form.setLocationByPlatform(readBooleanAttribute(element, "lbp", "locationByPlatform", Boolean.TRUE));
+            form.setDesignedViewSize(viewWidget.getPreferredSize());
+        }
         return form;
     }
 
@@ -154,7 +175,6 @@ public class FormFactory {
                 childNode = childNode.getNextSibling();
             }
         }
-        JComponent viewWidget;
         if (oldFormat) {
             element.setAttribute("type", "PanelDesignInfo");
             viewWidget = readWidget(element);
@@ -170,24 +190,6 @@ public class FormFactory {
             Logger.getLogger(FormFactory.class.getName()).log(Level.WARNING, "view widget missing. Falling back to AnchrosPane.");
         }
         viewWidget.setSize(viewWidget.getPreferredSize());
-        form = new Form(viewWidget);
-        form.setDefaultCloseOperation(readIntegerAttribute(element, "dco", "defaultCloseOperation", JFrame.DISPOSE_ON_CLOSE));
-        resolveIcon(XmlDomUtils.getAttribute(element, "i", "icon"), (ImageIcon aLoaded) -> {
-            form.setIcon(aLoaded);
-        }, (Exception ex) -> {
-            Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, ex.getMessage());
-        });
-
-        form.setTitle(XmlDomUtils.getAttribute(element, "tl", "title"));
-        form.setClosable(readBooleanAttribute(element, "cle", "closable", Boolean.TRUE));
-        form.setMaximizable(readBooleanAttribute(element, "mxe", "maximizable", Boolean.TRUE));
-        form.setMinimizable(readBooleanAttribute(element, "mne", "minimizable", Boolean.TRUE));
-        form.setResizable(readBooleanAttribute(element, "rs", "resizable", Boolean.TRUE));
-        form.setUndecorated(readBooleanAttribute(element, "udr", "undecorated", Boolean.FALSE));
-        form.setOpacity(readFloatAttribute(element, "opc", "opacity", 1.0f));
-        form.setAlwaysOnTop(readBooleanAttribute(element, "aot", "alwaysOnTop", Boolean.FALSE));
-        form.setLocationByPlatform(readBooleanAttribute(element, "lbp", "locationByPlatform", Boolean.TRUE));
-        form.setDesignedViewSize(viewWidget.getPreferredSize());
         //
         resolvers.stream().sequential().forEach((Consumer<Map<String, JComponent>> aResolver) -> {
             aResolver.accept(widgets);
@@ -1038,7 +1040,7 @@ public class FormFactory {
             String parentName = XmlDomUtils.getAttribute(anElement, "p", "parent");
             if (!parentName.isEmpty()) {
                 resolvers.add((Map<String, JComponent> aWidgets) -> {
-                    JComponent parent = oldFormat && OLD_FORM_ROOT_CONTAINER_NAME.equalsIgnoreCase(parentName) ? form.getViewWidget() : aWidgets.get(parentName);
+                    JComponent parent = oldFormat && OLD_FORM_ROOT_CONTAINER_NAME.equalsIgnoreCase(parentName) ? viewWidget : aWidgets.get(parentName);
                     addToParent(anElement, aTarget, parent);
                 });
             }

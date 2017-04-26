@@ -58,6 +58,7 @@ public class DefaultUiReader extends UiReader {
 		model = aModel != null ? aModel.<Utils.JsObject> cast() : null;
 	}
 
+        @Override
 	public Map<String, UIObject> getWidgets() {
 		return widgets;
 	}
@@ -119,10 +120,12 @@ public class DefaultUiReader extends UiReader {
 			return null;
 	}
 
+        @Override
 	public void addResolver(Runnable aResolver) {
 		resolvers.add(aResolver);
 	}
 
+        @Override
 	public UIObject readWidget(final Element anElement) throws Exception {
 		for (UiWidgetReader reader : UiReader.getFactories()) {
 			UIObject read = reader.readWidget(anElement, this);
@@ -133,6 +136,7 @@ public class DefaultUiReader extends UiReader {
 		return null;
 	}
 
+        @Override
 	public void readImageParagraph(Element anElement, final UIObject aImageParagraph) throws Exception {
 		if (Utils.hasAttribute(anElement, "i", "icon") && aImageParagraph instanceof HasImageResource) {
 			String iconImage = Utils.getAttribute(anElement, "i", "icon", null);
@@ -162,6 +166,7 @@ public class DefaultUiReader extends UiReader {
 		}
 	}
 
+        @Override
 	public void readGeneralProps(final Element anElement, final UIObject aTarget) throws Exception {
 		String widgetName = "";
 		if (Utils.hasAttribute(anElement, "n", "name") && aTarget instanceof HasJsName) {
@@ -228,6 +233,7 @@ public class DefaultUiReader extends UiReader {
 			final String popupName = Utils.getAttribute(anElement, "cpm", "componentPopupMenu", null);
 			if (popupName != null && !popupName.isEmpty()) {
 				resolvers.add(new Runnable() {
+                                        @Override
 					public void run() {
 						UIObject popup = widgets.get(popupName);
 						if (popup instanceof PlatypusPopupMenu) {
@@ -241,6 +247,7 @@ public class DefaultUiReader extends UiReader {
 			final String buttonGroupName = Utils.getAttribute(anElement, "bgr", "buttonGroup", null);
 			if (buttonGroupName != null && !buttonGroupName.isEmpty()) {
 				resolvers.add(new Runnable() {
+                                        @Override
 					public void run() {
 						UIObject buttonGroup = widgets.get(buttonGroupName);
 						if (buttonGroup instanceof ButtonGroup) {
@@ -255,6 +262,7 @@ public class DefaultUiReader extends UiReader {
 			final String parentName = Utils.getAttribute(anElement, "p", "parent", null);
 			if (parentName != null && !parentName.isEmpty()) {
 				resolvers.add(new Runnable() {
+                                        @Override
 					public void run() {
 						UIObject parent = widgets.get(parentName);
 						try {
@@ -276,6 +284,7 @@ public class DefaultUiReader extends UiReader {
 		}
 	}
 
+        @Override
 	public PublishedFont readFont(Element anElement) throws Exception {
 		PublishedFont font = readFontTag(anElement, "ft", "font");
 		if (font != null) {
@@ -375,6 +384,7 @@ public class DefaultUiReader extends UiReader {
 		}
 	}
 
+        @Override
 	public Utils.JsObject resolveEntity(String aEntityName) throws Exception {
 		if (model.has(aEntityName)) {
 			JavaScriptObject oEntity = model.getJs(aEntityName);
