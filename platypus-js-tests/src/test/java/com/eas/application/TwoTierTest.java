@@ -3,6 +3,7 @@ package com.eas.application;
 import com.eas.client.TestConstants;
 import com.eas.client.application.PlatypusClientApplication;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -208,4 +209,8 @@ public class TwoTierTest extends ScriptedTests {
         start("AMDSelfTest", 10000L);
     }
 
+    @Test
+    public void loadWidgetsWithoutWindow() throws InterruptedException {
+        start("load-widgets-without-window", 10000L);
+    }
 }
