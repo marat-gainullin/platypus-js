@@ -102,8 +102,9 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 
                 @Override
                 public void onValueChange(ValueChangeEvent<JavaScriptObject> event) {
-                    if (!settingValue)
+                    if (!settingValue){
                         ActionEvent.fire(ModelCombo.this, ModelCombo.this);
+                    }
                 }
 
             });

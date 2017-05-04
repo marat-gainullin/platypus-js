@@ -97,6 +97,7 @@ public class PlatypusButton extends ImageButton implements RequiresResize, HasAc
 
 				@Override
 				public void onClick(ClickEvent event) {
+                                        event.stopPropagation();
 					ActionEvent.fire(PlatypusButton.this, PlatypusButton.this);
 				}
 

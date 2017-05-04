@@ -116,6 +116,7 @@ public class PlatypusSplitButton extends DropDownButton implements RequiresResiz
 
 				@Override
 				public void onClick(ClickEvent event) {
+                                        event.stopPropagation();
 					ActionEvent.fire(PlatypusSplitButton.this, PlatypusSplitButton.this);
 				}
 

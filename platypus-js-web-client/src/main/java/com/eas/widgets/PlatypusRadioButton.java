@@ -122,6 +122,7 @@ public class PlatypusRadioButton extends RadioButton implements HasActionHandler
 
 				@Override
 				public void onClick(ClickEvent event) {
+                                        event.stopPropagation();
 					ActionEvent.fire(PlatypusRadioButton.this, PlatypusRadioButton.this);
 				}
 

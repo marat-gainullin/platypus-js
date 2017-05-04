@@ -96,8 +96,9 @@ public class PlatypusTextField extends TextBox implements HasActionHandlers, Has
 
 				@Override
 				public void onValueChange(ValueChangeEvent<String> event) {
-					if (!settingValue)
+					if (!settingValue) {
 						ActionEvent.fire(PlatypusTextField.this, PlatypusTextField.this);
+                                        }
 				}
 
 			});

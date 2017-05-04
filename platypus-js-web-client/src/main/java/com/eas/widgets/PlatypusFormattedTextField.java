@@ -92,8 +92,9 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 
 				@Override
 				public void onValueChange(ValueChangeEvent<Object> event) {
-					if (!settingValue)
+					if (!settingValue) {
 						ActionEvent.fire(PlatypusFormattedTextField.this, PlatypusFormattedTextField.this);
+                                        }
 				}
 
 			});

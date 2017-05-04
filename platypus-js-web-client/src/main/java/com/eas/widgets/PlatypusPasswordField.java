@@ -111,8 +111,9 @@ public class PlatypusPasswordField extends PasswordTextBox implements HasJsFacad
 
 				@Override
 				public void onValueChange(ValueChangeEvent<String> event) {
-					if (!settingValue)
+					if (!settingValue) {
 						ActionEvent.fire(PlatypusPasswordField.this, PlatypusPasswordField.this);
+                                        }
 				}
 
 			});

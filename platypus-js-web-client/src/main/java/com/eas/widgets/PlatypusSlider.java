@@ -205,8 +205,9 @@ public class PlatypusSlider extends SliderBar implements HasJsFacade, HasCompone
 
 				@Override
 				public void onValueChange(ValueChangeEvent<Double> event) {
-					if (!settingValue)
+					if (!settingValue) {
 						ActionEvent.fire(PlatypusSlider.this, PlatypusSlider.this);
+                                        }
 				}
 
 			});

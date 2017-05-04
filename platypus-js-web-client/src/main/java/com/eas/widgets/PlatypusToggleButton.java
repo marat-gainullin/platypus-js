@@ -100,6 +100,7 @@ public class PlatypusToggleButton extends ImageToggleButton implements RequiresR
 
 				@Override
 				public void onClick(ClickEvent event) {
+                                        event.stopPropagation();
 					ActionEvent.fire(PlatypusToggleButton.this, PlatypusToggleButton.this);
 				}
 

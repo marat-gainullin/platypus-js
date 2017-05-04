@@ -43,8 +43,9 @@ public class PlatypusMenuItemCheckBox extends MenuItemCheckBox implements HasAct
 
 				@Override
 				public void onValueChange(ValueChangeEvent<Boolean> event) {
-					if (!settingValue)
+					if (!settingValue) {
 						ActionEvent.fire(PlatypusMenuItemCheckBox.this, PlatypusMenuItemCheckBox.this);
+                                        }
 				}
 
 			});

@@ -130,9 +130,11 @@ public class JsWidgets {
 	    Object.defineProperty(aPublished, "left", {
 		    get : function() {
 		    	if(aPublished.parent){
-				return aPublished.parent.unwrap().@com.eas.widgets.HasChildrenPosition::getLeft(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
-		    	} else {
+                		return aPublished.parent.unwrap().@com.eas.widgets.HasChildrenPosition::getLeft(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
+                        } else if(aPublished.element.baseURI) { // element is attached
                                 return aPublished.element.offsetLeft;
+                        } else {
+                                return parseFloat(aPublished.element.style.left);
                         }
 		    },
 		    set : function(aValue) {
@@ -144,8 +146,10 @@ public class JsWidgets {
 		    get : function() {
 		    	if(aPublished.parent){
 				return aPublished.parent.unwrap().@com.eas.widgets.HasChildrenPosition::getTop(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
-		    	} else {
+                        } else if(aPublished.element.baseURI) { // element is attached
                                 return aPublished.element.offsetTop;
+                        } else {
+                                return parseFloat(aPublished.element.style.top);
                         }
 		    },
 		    set : function(aValue) {
@@ -155,7 +159,7 @@ public class JsWidgets {
             });
 	    Object.defineProperty(aPublished, "width", {
 		    get : function() {
-                        if(aPublished.parent)
+                        if(aPublished.element.baseURI) // element is attached
                             return aPublished.element.offsetWidth;
                         else {
                             return parseFloat(aPublished.element.style.width);
@@ -190,7 +194,7 @@ public class JsWidgets {
 		});
 	    Object.defineProperty(aPublished, "height", {
 		    get : function() {
-                        if (aPublished.parent)
+                        if (aPublished.element.baseURI)
                             return aPublished.element.offsetHeight;
                         else {
                             return parseFloat(aPublished.element.style.height);

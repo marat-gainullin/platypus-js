@@ -569,7 +569,7 @@ public class JsUi {
 						_green = aGreen;
 					if(aBlue)
 						_blue = aBlue;
-					if(aAlpha)
+					if(arguments.length > 3)
 						_alpha = aAlpha;
 				}else{
 					throw "String like \"#cfcfcf\" or three color components with optional alpha is expected.";
