@@ -164,6 +164,7 @@ public class PlatypusPasswordField extends PasswordTextBox implements HasJsFacad
 	@Override
 	public void setJsName(String aValue) {
 		name = aValue;
+                setName(name);
 	}
 
 	public void setJsValue(String value) {

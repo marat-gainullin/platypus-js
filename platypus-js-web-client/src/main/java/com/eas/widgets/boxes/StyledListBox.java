@@ -26,6 +26,7 @@ import com.google.gwt.user.client.ui.ListBox;
 /**
  * 
  * @author mg
+ * @param <T>
  */
 public class StyledListBox<T> extends ListBox implements HasValue<T>, HasDecorationsWidth {
 

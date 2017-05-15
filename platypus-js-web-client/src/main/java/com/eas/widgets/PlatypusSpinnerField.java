@@ -88,8 +88,10 @@ public class PlatypusSpinnerField extends ConstraintedSpinnerBox implements HasJ
 	@Override
 	public void setJsName(String aValue) {
 		name = aValue;
+                setName(name);
 	}
 
+        @Override
 	public JavaScriptObject getPublished() {
 		return published;
 	}

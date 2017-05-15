@@ -127,12 +127,11 @@ public class CardsPanel extends ComplexPanel implements InsertPanel.ForIsWidget,
      * Shows the widget at the specified index. This causes the currently-
      * visible widget to be hidden.
      *
-     * @param index the index of the widget to be shown
+     * @param toBeShown the widget to be shown
      */
-    public void showWidget(int index) {
-        checkIndexBoundsForAccess(index);
+    public void showWidget(Widget toBeShown) {
         Widget oldWidget = visibleWidget;
-        visibleWidget = getWidget(index);
+        visibleWidget = toBeShown;
 
         if (visibleWidget != oldWidget) {
             Element oldContainer = oldWidget != null ? oldWidget.getElement().getParentElement() : null;
@@ -236,7 +235,7 @@ public class CardsPanel extends ComplexPanel implements InsertPanel.ForIsWidget,
     protected void onAttach() {
         super.onAttach();
         if (getWidgetCount() > 0) {
-            showWidget(0);
+            showWidget(getWidget(0));
         }
     }
 }

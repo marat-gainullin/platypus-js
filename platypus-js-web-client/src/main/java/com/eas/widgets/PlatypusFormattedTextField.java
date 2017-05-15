@@ -160,6 +160,7 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 	@Override
 	public void setJsName(String aValue) {
 		name = aValue;
+                setName(name);
 	}
 
 	public Object getJsValue() {

@@ -164,6 +164,7 @@ public class PlatypusTextField extends TextBox implements HasActionHandlers, Has
 	@Override
 	public void setJsName(String aValue) {
 		name = aValue;
+                setName(name);
 	}
 
 	@Override

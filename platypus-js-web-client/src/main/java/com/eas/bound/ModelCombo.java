@@ -21,10 +21,12 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.HasName;
 import com.google.gwt.user.client.ui.HasValue;
 
 public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements HasEmptyText, HasActionHandlers {
@@ -39,6 +41,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
     protected HandlerRegistration boundToListElements;
     protected Runnable onRedraw;
     protected InputElement nonListMask = Document.get().createTextInputElement();
+    protected OptionElement nullOption;
 
     protected boolean list = true;
 
@@ -46,6 +49,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
         super(new StyledListBox<JavaScriptObject>());
         StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
         box.addItem("...", keyForNullValue, null, "");
+        nullOption = box.getItem(0);
         box.getElement().addClassName(CUSTOM_DROPDOWN_CLASS);
         box.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
         CommonResources.INSTANCE.commons().ensureInjected();
@@ -124,6 +128,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
         };
     }
 
+    @Override
     public void setValue(JavaScriptObject aValue, boolean fireEvents) {
         JavaScriptObject oldValue = getValue();
         if (oldValue != aValue) {
@@ -196,8 +201,9 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
     }
 
     public String calcLabel(JavaScriptObject aValue) {
+        String nullText = emptyText != null && !emptyText.isEmpty() ? emptyText : "..." ;
         String labelText = aValue != null ? new StringValueConverter().convert(Utils.getPathData(aValue, displayField))
-                : "...";
+                : nullText;
         PublishedCell cell = WidgetsUtils.calcValuedPublishedCell(published, onRender, aValue,
                 labelText != null ? labelText : "", null);
         if (cell != null && cell.getDisplay() != null && !cell.getDisplay().isEmpty()) {
@@ -226,9 +232,11 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
     @Override
     public void setEmptyText(String aValue) {
         emptyText = aValue;
+        nullOption.setInnerText(aValue);
         WidgetsUtils.applyEmptyText(getElement(), emptyText);
     }
 
+    @Override
     public void setPublished(JavaScriptObject aValue) {
         super.setPublished(aValue);
         if (published != null) {

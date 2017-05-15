@@ -129,10 +129,12 @@ public class JsWidgets {
 	    Object.defineProperty(aPublished, "cursorSet", { get : function(){return _cursor != null;}});
 	    Object.defineProperty(aPublished, "left", {
 		    get : function() {
-		    	if(aPublished.parent){
-                		return aPublished.parent.unwrap().@com.eas.widgets.HasChildrenPosition::getLeft(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
-                        } else if(aPublished.element.baseURI) { // element is attached
-                                return aPublished.element.offsetLeft;
+                        if(aPublished.element.baseURI) { // element is attached
+                                if(aPublished.parent){
+                                        return aPublished.parent.unwrap().@com.eas.widgets.HasChildrenPosition::getLeft(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
+                                } else {
+                                        return aPublished.element.offsetLeft;
+                                }
                         } else {
                                 return parseFloat(aPublished.element.style.left);
                         }
@@ -144,10 +146,12 @@ public class JsWidgets {
             });
 	    Object.defineProperty(aPublished, "top", {
 		    get : function() {
-		    	if(aPublished.parent){
-				return aPublished.parent.unwrap().@com.eas.widgets.HasChildrenPosition::getTop(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
-                        } else if(aPublished.element.baseURI) { // element is attached
-                                return aPublished.element.offsetTop;
+                        if(aPublished.element.baseURI) { // element is attached
+                                if(aPublished.parent){
+                                        return aPublished.parent.unwrap().@com.eas.widgets.HasChildrenPosition::getTop(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
+                                } else {
+                                        return aPublished.element.offsetTop;
+                                }
                         } else {
                                 return parseFloat(aPublished.element.style.top);
                         }
@@ -1088,7 +1092,7 @@ public class JsWidgets {
 				if (!(this instanceof CardPane)) {
 					throw  ' use  "new CardPane()" !';
 				}
-				var aComponent = arguments.length>2?arguments[2]:null;
+				var aComponent = arguments.length > 2 ? arguments[2] : null;
 				if(!aComponent)
 				{
 					if(!aVGap)

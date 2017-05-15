@@ -189,6 +189,7 @@ public class PlatypusRadioButton extends RadioButton implements HasActionHandler
 	@Override
 	public void setJsName(String aValue) {
 		name = aValue;
+                setName(name);
 	}
 
 	@Override

@@ -12,8 +12,9 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.text.shared.Parser;
+import com.google.gwt.user.client.ui.HasName;
 
-public class FormattedObjectBox extends ExplicitValueBox<Object> implements HasDecorationsWidth{
+public class FormattedObjectBox extends ExplicitValueBox<Object> implements HasDecorationsWidth {
 
 	public static class PolymorphRenderer extends AbstractRenderer<Object> {
 

@@ -127,6 +127,7 @@ public class PlatypusTextArea extends TextArea implements HasScroll, HorizontalS
 	@Override
 	public void setJsName(String aValue) {
 		name = aValue;
+                setName(name);
 	}
 
 	@Override

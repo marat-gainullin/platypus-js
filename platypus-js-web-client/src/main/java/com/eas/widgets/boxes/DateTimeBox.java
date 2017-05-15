@@ -41,6 +41,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Focusable;
+import com.google.gwt.user.client.ui.HasName;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -57,7 +58,7 @@ import com.google.gwt.user.datepicker.client.DateBox;
  * @author mg
  */
 public class DateTimeBox extends Composite implements RequiresResize, HasValue<Date>, HasText, HasValueChangeHandlers<Date>, IsEditor<LeafValueEditor<Date>>, Focusable, HasAllKeyHandlers,
-        HasFocusHandlers, HasBlurHandlers, HasDecorations, HasDecorationsWidth {
+        HasFocusHandlers, HasBlurHandlers, HasDecorations, HasDecorationsWidth, HasName {
 
 	private static final DateBox.DefaultFormat DEFAULT_FORMAT = GWT.create(DateBox.DefaultFormat.class);
 
@@ -392,6 +393,16 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 			setValue(newValue, true);
 		}
 	}
+
+        @Override
+        public String getName() {
+            return box.getName();
+        }
+
+        @Override
+        public void setName(String name) {
+            box.setName(name);
+        }
 
 	/**
 	 * Gets the format instance used to control formatting and parsing of this

@@ -177,6 +177,7 @@ public class PlatypusCheckBox extends CheckBox implements HasActionHandlers, Has
 	@Override
 	public void setJsName(String aValue) {
 		name = aValue;
+                setName(name);
 	}
 
 	@Override

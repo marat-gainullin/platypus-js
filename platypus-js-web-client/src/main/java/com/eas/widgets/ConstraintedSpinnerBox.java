@@ -7,13 +7,16 @@ import com.eas.ui.events.HideHandler;
 import com.eas.ui.events.ShowEvent;
 import com.eas.ui.events.ShowHandler;
 import com.eas.widgets.boxes.SpinnerBox;
+import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.HasName;
 import com.google.gwt.user.client.ui.ValueBox;
 
-public class ConstraintedSpinnerBox extends SpinnerBox<Double> implements HasShowHandlers, HasHideHandlers, HasResizeHandlers {
+public class ConstraintedSpinnerBox extends SpinnerBox<Double> implements HasShowHandlers, HasHideHandlers,
+        HasResizeHandlers, HasName {
 	
 	protected double step = 1.0;
 	protected Double min;
@@ -21,6 +24,7 @@ public class ConstraintedSpinnerBox extends SpinnerBox<Double> implements HasSho
 
 	public ConstraintedSpinnerBox(ValueBox<Double> aDecorated) {
 		super(aDecorated);
+                field.getElement().<InputElement>cast().setAttribute("type", "number");
 	}
 
 	@Override
@@ -81,6 +85,7 @@ public class ConstraintedSpinnerBox extends SpinnerBox<Double> implements HasSho
 
 	public void setMin(Double aValue) {
 		min = aValue;
+                field.getElement().setAttribute("min", aValue + "");
 	}
 
 	public Double getMax() {
@@ -89,6 +94,7 @@ public class ConstraintedSpinnerBox extends SpinnerBox<Double> implements HasSho
 
 	public void setMax(Double aValue) {
 		max = aValue;
+                field.getElement().setAttribute("max", aValue + "");
 	}
 
 	public Double getStep() {
@@ -97,5 +103,6 @@ public class ConstraintedSpinnerBox extends SpinnerBox<Double> implements HasSho
 
 	public void setStep(Double aValue) {
 		step = aValue;
+                field.getElement().setAttribute("step", aValue + "");
 	}
 }
