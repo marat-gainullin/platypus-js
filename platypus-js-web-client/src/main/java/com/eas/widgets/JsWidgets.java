@@ -18,6 +18,12 @@ public class JsWidgets {
 	private static JavaScriptObject SplitPane;
 	
 	public native static void publishComponentProperties(PublishedComponent aPublished)/*-{
+                function isAttached(element){
+                    while(element && element !== $doc.body)
+                        element = element.parentElement;
+                    return !!element;
+                }
+                
 		var TabbedPane = @com.eas.widgets.JsWidgets::TabbedPane;
 		var GridPane = @com.eas.widgets.JsWidgets::GridPane;
 		var CardPane = @com.eas.widgets.JsWidgets::CardPane;
@@ -129,7 +135,7 @@ public class JsWidgets {
 	    Object.defineProperty(aPublished, "cursorSet", { get : function(){return _cursor != null;}});
 	    Object.defineProperty(aPublished, "left", {
 		    get : function() {
-                        if(aPublished.element.baseURI) { // element is attached
+                        if (isAttached(aPublished.element)) {
                                 if(aPublished.parent){
                                         return aPublished.parent.unwrap().@com.eas.widgets.HasChildrenPosition::getLeft(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
                                 } else {
@@ -146,7 +152,7 @@ public class JsWidgets {
             });
 	    Object.defineProperty(aPublished, "top", {
 		    get : function() {
-                        if(aPublished.element.baseURI) { // element is attached
+                        if (isAttached(aPublished.element)) {
                                 if(aPublished.parent){
                                         return aPublished.parent.unwrap().@com.eas.widgets.HasChildrenPosition::getTop(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
                                 } else {
@@ -163,7 +169,7 @@ public class JsWidgets {
             });
 	    Object.defineProperty(aPublished, "width", {
 		    get : function() {
-                        if(aPublished.element.baseURI) // element is attached
+                        if (isAttached(aPublished.element))
                             return aPublished.element.offsetWidth;
                         else {
                             return parseFloat(aPublished.element.style.width);
@@ -198,7 +204,7 @@ public class JsWidgets {
 		});
 	    Object.defineProperty(aPublished, "height", {
 		    get : function() {
-                        if (aPublished.element.baseURI)
+                        if (isAttached(aPublished.element))
                             return aPublished.element.offsetHeight;
                         else {
                             return parseFloat(aPublished.element.style.height);
