@@ -465,6 +465,10 @@ public class Utils {
 			return null;
 	}
 
+	public static native boolean isMobile()/*-{
+                return $wnd.orientation !== undefined;
+        }-*/;
+        
 	/*
 	 * public static Element getElementByTagName(Element aTag, String aName) {
 	 * NodeList children = aTag.getElementsByTagName(aName); if
