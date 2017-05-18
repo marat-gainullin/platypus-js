@@ -1,5 +1,6 @@
 package com.eas.widgets;
 
+import com.eas.widgets.containers.Anchors;
 import com.eas.core.Utils;
 import com.eas.menu.PlatypusPopupMenu;
 import com.eas.ui.ButtonGroup;
@@ -185,7 +186,7 @@ public class WidgetsFactory implements UiWidgetReader{
 			return desktop;
 		case "ap":
 		case "AnchorsPane":
-			AnchorsPane anchorsPane = new AnchorsPane();
+			Anchors anchorsPane = new Anchors();
 			WidgetsPublisher.publish(anchorsPane);
 			aFactory.readGeneralProps(anElement, anchorsPane);
 			return anchorsPane;

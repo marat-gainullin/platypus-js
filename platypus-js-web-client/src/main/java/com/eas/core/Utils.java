@@ -295,7 +295,7 @@ public class Utils {
 			aValue.@com.eas.core.Utils.OnChangeHandler::onChange(Lcom/google/gwt/core/client/JavaScriptObject;)(aArg);
 		};
 	}-*/;
-
+        
 	public static native JavaScriptObject stringToArrayBuffer(String aValue) throws Exception/*-{
 		if (aValue) {
 			var buffer = new ArrayBuffer(aValue.length);

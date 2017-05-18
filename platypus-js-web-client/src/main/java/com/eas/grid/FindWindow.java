@@ -3,8 +3,8 @@ package com.eas.grid;
 import java.util.List;
 
 import com.eas.ui.Orientation;
-import com.eas.widgets.containers.AnchorsPanel;
-import com.eas.widgets.containers.BoxPanel;
+import com.eas.widgets.containers.AnchorsContainer;
+import com.eas.widgets.containers.Box;
 import com.eas.window.ToolsCaption;
 import com.eas.window.WindowPanel;
 import com.eas.window.WindowPopupPanel;
@@ -102,11 +102,11 @@ public class FindWindow extends WindowPanel {
 			}
 		});
 
-		BoxPanel findBox = new BoxPanel();
+		Box findBox = new Box();
 		findBox.setOrientation(Orientation.VERTICAL);
 		findBox.setVgap(10);
 
-		BoxPanel settingsBox = new BoxPanel();
+		Box settingsBox = new Box();
 		settingsBox.setHgap(10);
 		settingsBox.add(checkCase);
 		settingsBox.add(checkWhole);
@@ -114,7 +114,7 @@ public class FindWindow extends WindowPanel {
 		findBox.add(field);
 		findBox.add(settingsBox);
 
-		AnchorsPanel anchors = new AnchorsPanel();
+		AnchorsContainer anchors = new AnchorsContainer();
 
 		anchors.add(label);
 		anchors.setWidgetLeftWidth(label, 5, Style.Unit.PX, 40, Style.Unit.PX);

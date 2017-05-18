@@ -3,8 +3,8 @@ package com.eas.widgets;
 import com.eas.core.Utils;
 import com.eas.ui.ButtonGroup;
 import com.eas.ui.PublishedComponent;
-import com.eas.widgets.AbsolutePane;
-import com.eas.widgets.AnchorsPane;
+import com.eas.widgets.containers.Absolute;
+import com.eas.widgets.containers.Anchors;
 import com.eas.widgets.BorderPane;
 import com.eas.widgets.BoxPane;
 import com.eas.widgets.CardPane;
@@ -140,15 +140,9 @@ public class WidgetsPublisher {
 		return new constr(null, null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(AbsolutePane aComponent)/*-{
-		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('AbsolutePane');
-		return new constr(aComponent);
-	}-*/;
+	public native static PublishedComponent publish(Absolute aComponent);
 
-	public native static PublishedComponent publish(AnchorsPane aComponent)/*-{
-		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('AnchorsPane');
-		return new constr(aComponent);
-	}-*/;
+	public native static PublishedComponent publish(Anchors aComponent);
 
 	public native static PublishedComponent publish(DesktopPane aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('DesktopPane');

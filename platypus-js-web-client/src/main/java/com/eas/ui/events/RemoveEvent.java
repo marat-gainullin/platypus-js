@@ -1,53 +1,19 @@
 package com.eas.ui.events;
 
-import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.user.client.ui.UIObject;
+import com.eas.ui.Widget;
 
-public class RemoveEvent extends GwtEvent<RemoveHandler>{
+public class RemoveEvent extends Event {
 
-    /**
-     * Handler type.
-     */
-    private static Type<RemoveHandler> TYPE;
-
-    /**
-     * Fires a close event on all registered handlers in the handler manager. If
-     * no such handlers exist, this method will do nothing.
-     *
-     * @param <T> the target type
-     * @param source the source of the handlers
-     * @param target the target
-     */
-    public static void fire(HasRemoveHandlers source, UIObject target) {
-        if (TYPE != null) {
-            RemoveEvent event = new RemoveEvent(target);
-            source.fireEvent(event);
-        }
-    }
-
-    /**
-     * Gets the type associated with this event.
-     *
-     * @return returns the handler type
-     */
-    public static Type<RemoveHandler> getType() {
-        return TYPE != null ? TYPE : (TYPE = new Type<>());
-    }
-
-    private final UIObject widget;
+    private final Widget widget;
 
     /**
      * Creates a new close event.
      *
      * @param aWidget the target
      */
-    protected RemoveEvent(UIObject aWidget) {
+    public RemoveEvent(Object aSource, Widget aWidget) {
+        super(aSource);
         widget = aWidget;
-    }
-
-    @Override
-    public final Type<RemoveHandler> getAssociatedType() {
-        return TYPE;
     }
 
     /**
@@ -55,12 +21,8 @@ public class RemoveEvent extends GwtEvent<RemoveHandler>{
      *
      * @return the target
      */
-    public UIObject getWidget() {
+    public Widget getWidget() {
         return widget;
     }
 
-    @Override
-    protected void dispatch(RemoveHandler handler) {
-        handler.onRemove(this);
-    }
 }

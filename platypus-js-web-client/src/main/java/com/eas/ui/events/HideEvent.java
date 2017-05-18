@@ -1,53 +1,19 @@
 package com.eas.ui.events;
 
-import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.user.client.ui.UIObject;
+import com.eas.ui.Widget;
 
-public class HideEvent extends GwtEvent<HideHandler>{
+public class HideEvent extends Event {
 
-    /**
-     * Handler type.
-     */
-    private static Type<HideHandler> TYPE;
-
-    /**
-     * Fires a close event on all registered handlers in the handler manager. If
-     * no such handlers exist, this method will do nothing.
-     *
-     * @param <T> the target type
-     * @param source the source of the handlers
-     * @param target the target
-     */
-    public static void fire(HasHideHandlers source, UIObject target) {
-        if (TYPE != null) {
-            HideEvent event = new HideEvent(target);
-            source.fireEvent(event);
-        }
-    }
-
-    /**
-     * Gets the type associated with this event.
-     *
-     * @return returns the handler type
-     */
-    public static Type<HideHandler> getType() {
-        return TYPE != null ? TYPE : (TYPE = new Type<>());
-    }
-
-    private final UIObject widget;
+    private final Widget widget;
 
     /**
      * Creates a new close event.
      *
-     * @param aWidget the target
+     * @param w the target
      */
-    protected HideEvent(UIObject aWidget) {
-        widget = aWidget;
-    }
-
-    @Override
-    public final Type<HideHandler> getAssociatedType() {
-        return TYPE;
+    public HideEvent(Widget w) {
+        super(w);
+        widget = w;
     }
 
     /**
@@ -55,12 +21,7 @@ public class HideEvent extends GwtEvent<HideHandler>{
      *
      * @return the target
      */
-    public UIObject getWidget() {
+    public Widget getWidget() {
         return widget;
-    }
-
-    @Override
-    protected void dispatch(HideHandler handler) {
-        handler.onHide(this);
     }
 }

@@ -15,7 +15,7 @@ import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusMenu;
 import com.eas.menu.PlatypusMenuBar;
 import com.eas.menu.PlatypusPopupMenu;
-import com.eas.widgets.AnchorsPane;
+import com.eas.widgets.containers.Anchors;
 import com.eas.widgets.BorderPane;
 import com.eas.widgets.BoxPane;
 import com.eas.widgets.CardPane;
@@ -94,7 +94,7 @@ public class DefaultUiReader extends UiReader {
 		}
 		viewWidget = widgets.get(rootContainerName);
 		if (viewWidget == null) {
-			viewWidget = new AnchorsPane();
+			viewWidget = new Anchors();
 			viewWidget.setSize(400 + "px", 300 + "px");
 			Logger.getLogger(DefaultUiReader.class.getName()).log(Level.WARNING, "view widget missing. Falling back to AnchrosPane.");
 		}
@@ -377,10 +377,10 @@ public class DefaultUiReader extends UiReader {
 		} else if (parent instanceof GridPane) {
 			GridPane gridPane = (GridPane) parent;
 			gridPane.addToFreeCell((Widget) aTarget);
-		} else if (parent instanceof AnchorsPane) {
+		} else if (parent instanceof Anchors) {
 			Element constraintsElement = Utils.scanForElementByTagName(anElement, "apc", "AnchorsPaneConstraints");
 			MarginConstraints constraints = readMarginConstraints(constraintsElement);
-			((AnchorsPane) parent).add((Widget) aTarget, constraints);
+			((Anchors) parent).add((Widget) aTarget, constraints);
 		}
 	}
 

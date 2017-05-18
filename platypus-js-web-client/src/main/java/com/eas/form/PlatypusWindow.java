@@ -14,7 +14,7 @@ import com.eas.core.Utils.JsObject;
 import com.eas.ui.HasJsName;
 import com.eas.ui.PublishedComponent;
 import com.eas.ui.EventsPublisher;
-import com.eas.widgets.AnchorsPane;
+import com.eas.widgets.containers.Anchors;
 import com.eas.widgets.DesktopPane;
 import com.eas.widgets.WidgetsPublisher;
 import com.eas.window.ToolsCaption;
@@ -116,8 +116,8 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	protected String formKey = "window-" + Document.get().createUniqueId();
 
 	public PlatypusWindow() {
-		this(new AnchorsPane());
-		WidgetsPublisher.publish((AnchorsPane) view);
+		this(new Anchors());
+		WidgetsPublisher.publish((Anchors) view);
 	}
 
 	public PlatypusWindow(Widget aView) {

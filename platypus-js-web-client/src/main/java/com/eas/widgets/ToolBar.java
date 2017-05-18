@@ -1,5 +1,6 @@
 package com.eas.widgets;
 
+import com.eas.ui.HasChildrenPosition;
 import com.eas.core.HasPublished;
 import com.eas.core.XElement;
 import com.eas.menu.HasComponentPopupMenu;
