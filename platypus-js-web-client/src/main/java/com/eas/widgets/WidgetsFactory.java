@@ -1,5 +1,6 @@
 package com.eas.widgets;
 
+import com.eas.widgets.containers.Desktop;
 import com.eas.widgets.containers.Anchors;
 import com.eas.core.Utils;
 import com.eas.menu.PlatypusPopupMenu;
@@ -180,7 +181,7 @@ public class WidgetsFactory implements UiWidgetReader{
 			return toggle;
 		case "dp":
 		case "DesktopPane":
-			DesktopPane desktop = new DesktopPane();
+			Desktop desktop = new Desktop();
 			WidgetsPublisher.publish(desktop);
 			aFactory.readGeneralProps(anElement, desktop);
 			return desktop;

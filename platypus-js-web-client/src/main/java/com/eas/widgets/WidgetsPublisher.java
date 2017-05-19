@@ -8,7 +8,7 @@ import com.eas.widgets.containers.Anchors;
 import com.eas.widgets.BorderPane;
 import com.eas.widgets.BoxPane;
 import com.eas.widgets.CardPane;
-import com.eas.widgets.DesktopPane;
+import com.eas.widgets.containers.Desktop;
 import com.eas.widgets.FlowPane;
 import com.eas.widgets.GridPane;
 import com.eas.widgets.PlatypusButton;
@@ -144,10 +144,7 @@ public class WidgetsPublisher {
 
 	public native static PublishedComponent publish(Anchors aComponent);
 
-	public native static PublishedComponent publish(DesktopPane aComponent)/*-{
-		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('DesktopPane');
-		return new constr(aComponent);
-	}-*/;
+	public native static PublishedComponent publish(Desktop aComponent);
 
 	public native static PublishedComponent publish(TabbedPane aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('TabbedPane');

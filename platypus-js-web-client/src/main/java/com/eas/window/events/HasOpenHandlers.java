@@ -6,13 +6,13 @@ import com.google.gwt.event.shared.HandlerRegistration;
  *
  * @author mg
  */
-public interface HasBeforeCloseHandlers {
+public interface HasOpenHandlers<T> {
 
     /**
-     * Adds a {@link BeforeCloseEvent} handler.
+     * Adds a {@link OpenEvent} handler.
      *
      * @param handler the handler
      * @return the registration for the event
      */
-    HandlerRegistration addBeforeCloseHandler(BeforeCloseHandler handler);
+    HandlerRegistration addOpenHandler(OpenHandler handler);
 }

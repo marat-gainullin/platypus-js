@@ -19,6 +19,7 @@ public class Flow extends Container implements HasChildrenPosition {
         super();
         element.getStyle().setWhiteSpace(Style.WhiteSpace.NORMAL);
         element.getStyle().setLineHeight(0, Style.Unit.PX);
+	element.getStyle().setOverflow(Style.Overflow.AUTO);
     }
 
     public Flow(int aVGap, int aHGap) {

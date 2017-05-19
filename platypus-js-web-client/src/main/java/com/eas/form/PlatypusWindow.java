@@ -15,9 +15,9 @@ import com.eas.ui.HasJsName;
 import com.eas.ui.PublishedComponent;
 import com.eas.ui.EventsPublisher;
 import com.eas.widgets.containers.Anchors;
-import com.eas.widgets.DesktopPane;
+import com.eas.widgets.containers.Desktop;
 import com.eas.widgets.WidgetsPublisher;
-import com.eas.window.ToolsCaption;
+import com.eas.window.Caption;
 import com.eas.window.WindowPanel;
 import com.eas.window.WindowPopupPanel;
 import com.eas.window.WindowUI;
@@ -90,7 +90,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 	protected JavaScriptObject published;
 
-	protected ToolsCaption caption;
+	protected Caption caption;
 	protected Point location;
 	protected Widget view;
 	protected WindowPopupPanel popup;
@@ -123,7 +123,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	public PlatypusWindow(Widget aView) {
 		super();
 		view = aView;
-		caption = new ToolsCaption(this, "");
+		caption = new Caption(this, "");
 		setCaptionWidget(caption);
 		addMoveHandler(new MoveHandler<WindowUI>() {
 
@@ -229,14 +229,14 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 	@Override
 	protected Widget getMovableTarget() {
-		if (getParent() instanceof DesktopPane) {
+		if (getParent() instanceof Desktop) {
 			return this;
 		} else {
 			return popup != null ? popup : super.getMovableTarget();
 		}
 	}
 
-	public void show(boolean aModal, final JavaScriptObject aCallback, DesktopPane aDesktop) {
+	public void show(boolean aModal, final JavaScriptObject aCallback, Desktop aDesktop) {
 		popup = new WindowPopupPanel(this, autoHide, aModal);
 		popup.setWidget(view);
                 String sWidth = view.getElement().getStyle().getWidth();
@@ -301,7 +301,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 				for (WindowUI w : showingForms.values()) {
 					if (w != event.getTarget() && w instanceof PlatypusWindow) {
 						PlatypusWindow pw = (PlatypusWindow) w;
-						if (!(pw.getParent() instanceof DesktopPane)) {
+						if (!(pw.getParent() instanceof Desktop)) {
 							w.deactivate();
 						}
 					}

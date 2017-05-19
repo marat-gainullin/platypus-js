@@ -18,7 +18,6 @@ public class Box extends Container implements HasChildrenPosition {
     protected int orientation; // horizontal
     protected int hgap;
     protected int vgap;
-    protected HasDirection.Direction direction = HasDirection.Direction.LTR;
 
     public Box() {
         super();
@@ -41,28 +40,14 @@ public class Box extends Container implements HasChildrenPosition {
     }
 
     public final void setOrientation(int aValue) {
+        applyOrientation(aValue);
+    }
+
+    protected void applyOrientation(int aValue) {
         if (orientation != aValue) {
             orientation = aValue;
             for (int i = 0; i < children.size(); i++) {
-                Widget w = children.get(i);
-                format(w);
-                Style es = w.getElement().getStyle();
-                es.setMarginLeft(0, Style.Unit.PX);
-                es.setMarginRight(0, Style.Unit.PX);
-                es.setMarginTop(0, Style.Unit.PX);
-                if (i > 0) {
-                    if (orientation == Orientation.HORIZONTAL) {
-                        if (direction == HasDirection.Direction.LTR) {
-                            es.setMarginLeft(hgap, Style.Unit.PX);
-                            es.setMarginRight(0, Style.Unit.PX);
-                        } else {
-                            es.setMarginLeft(0, Style.Unit.PX);
-                            es.setMarginRight(hgap, Style.Unit.PX);
-                        }
-                    } else {
-                        es.setMarginTop(vgap, Style.Unit.PX);
-                    }
-                }
+                format(children.get(i));
             }
         }
     }
@@ -99,21 +84,28 @@ public class Box extends Container implements HasChildrenPosition {
         }
     }
 
-    protected void format(Widget child) {
-        boolean visible = !child.getElement().hasAttribute("aria-hidden");
-        Style ws = child.getElement().getStyle();
+    protected void format(Widget w) {
+        boolean visible = !w.getElement().hasAttribute("aria-hidden");
+        Style ws = w.getElement().getStyle();
+        ws.setMarginLeft(0, Style.Unit.PX);
+        ws.setMarginRight(0, Style.Unit.PX);
+        ws.setMarginTop(0, Style.Unit.PX);
         if (orientation == Orientation.HORIZONTAL) {
+            if (element.getFirstChildElement() != w.getElement()) {
+                ws.setMarginLeft(hgap, Style.Unit.PX);
+                ws.setMarginRight(0, Style.Unit.PX);
+            }
             ws.clearTop();
             ws.clearBottom();
             ws.setPosition(Style.Position.RELATIVE);
             ws.setHeight(100, Style.Unit.PCT);
             ws.setDisplay(visible ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
-            if (direction == HasDirection.Direction.LTR) {
-                ws.clearFloat();
-            } else {
-                ws.setFloat(Style.Float.RIGHT);
-            }
+            ws.clearFloat();
         } else {
+            if (element.getFirstChildElement() != w.getElement()) {
+                ws.setMarginTop(vgap, Style.Unit.PX);
+                ws.setMarginBottom(0, Style.Unit.PX);
+            }
             ws.setPosition(Style.Position.RELATIVE);
             ws.setDisplay(visible ? Style.Display.BLOCK : Style.Display.NONE);
             ws.setLeft(0, Style.Unit.PX);
@@ -121,40 +113,17 @@ public class Box extends Container implements HasChildrenPosition {
             ws.setWidth(100, Style.Unit.PCT);
         }
         ws.setVerticalAlign(Style.VerticalAlign.MIDDLE);
-        child.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
-    }
-
-    public void ajustDisplay(Widget child) {
-        if (child.getParent() == this) {
-            boolean visible = !child.getElement().hasAttribute("aria-hidden");
-            if (orientation == Orientation.HORIZONTAL) {
-                child.getElement().getStyle().setDisplay(visible ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
-            } else {
-                child.getElement().getStyle().setDisplay(visible ? Style.Display.BLOCK : Style.Display.NONE);
-            }
-        }
+        w.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
     }
 
     @Override
-    public void add(Widget child) {
+    public void add(Widget w) {
         if (orientation == Orientation.HORIZONTAL) {
-            if (children.size() > 0) {
-                if (direction == HasDirection.Direction.LTR) {
-                    child.getElement().getStyle().setMarginLeft(hgap, Style.Unit.PX);
-                    child.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
-                } else {
-                    child.getElement().getStyle().setMarginLeft(0, Style.Unit.PX);
-                    child.getElement().getStyle().setMarginRight(hgap, Style.Unit.PX);
-                }
-            }
-            format(child);
-            super.add(child);
+            super.add(w);
+            format(w);
         } else {
-            if (children.size() > 0) {
-                child.getElement().getStyle().setMarginTop(vgap, Style.Unit.PX);
-            }
-            format(child);
-            super.add(child);
+            super.add(w);
+            format(w);
         }
     }
 
@@ -174,15 +143,15 @@ public class Box extends Container implements HasChildrenPosition {
     }
      */
     @Override
-    public int getTop(Widget aWidget) {
-        assert aWidget.getParent() == this : "widget should be a child of this container";
-        return 0;
+    public int getTop(Widget w) {
+        assert w.getParent() == this : "widget should be a child of this container";
+        return orientation == Orientation.HORIZONTAL ? 0 : w.getElement().getOffsetTop();
     }
 
     @Override
-    public int getLeft(Widget aWidget) {
-        assert aWidget.getParent() == this : "widget should be a child of this container";
-        return aWidget.getElement().getOffsetLeft();
+    public int getLeft(Widget w) {
+        assert w.getParent() == this : "widget should be a child of this container";
+        return orientation == Orientation.HORIZONTAL ? w.getElement().getOffsetLeft() : 0;
     }
 
     @Override

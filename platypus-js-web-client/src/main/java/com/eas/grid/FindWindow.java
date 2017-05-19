@@ -5,7 +5,7 @@ import java.util.List;
 import com.eas.ui.Orientation;
 import com.eas.widgets.containers.AnchorsContainer;
 import com.eas.widgets.containers.Box;
-import com.eas.window.ToolsCaption;
+import com.eas.window.Caption;
 import com.eas.window.WindowPanel;
 import com.eas.window.WindowPopupPanel;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -51,7 +51,7 @@ public class FindWindow extends WindowPanel {
 		popup.setResizable(false);
 		popup.setMinimizable(false);
 		popup.setMaximizable(false);
-		ToolsCaption caption = new ToolsCaption(this, messages.heading());
+		Caption caption = new Caption(this, messages.heading());
 		setCaptionWidget(caption);
 		grid = aGrid;
 		initComponents();

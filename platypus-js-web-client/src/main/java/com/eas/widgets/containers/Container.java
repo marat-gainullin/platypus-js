@@ -22,12 +22,20 @@ public abstract class Container extends Widget implements HasAddHandlers, HasRem
 
     protected final List<Widget> children = new ArrayList<>();
 
-    protected Container(){
+    protected Container() {
         super();
         element.getStyle().setPosition(Style.Position.RELATIVE);
         element.getStyle().setOverflow(Style.Overflow.HIDDEN);
     }
-    
+
+    public int getCount() {
+        return children.size();
+    }
+
+    public int indexOf(Widget w) {
+        return children.indexOf(w);
+    }
+
     public void add(Widget w) {
         children.add(w);
         element.appendChild(w.getElement());

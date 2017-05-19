@@ -14,6 +14,7 @@ import com.eas.ui.events.ShowHandler;
 import com.eas.widgets.containers.Container;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
@@ -38,6 +39,10 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
     protected String name;
     protected EventsExecutor eventsExecutor;
 
+    public Widget(){
+        super();
+    }
+    
     @Override
     public PlatypusPopupMenu getPlatypusPopupMenu() {
         return menu;
@@ -190,6 +195,14 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
                 showHandlers.remove(handler);
             }
         };
+    }
+
+    public boolean isAttached() {
+        Element cursor = element;
+        while (cursor != null && element != Document.get().getBody()) {
+            cursor = cursor.getParentElement();
+        }
+        return cursor != null;
     }
 
 }
