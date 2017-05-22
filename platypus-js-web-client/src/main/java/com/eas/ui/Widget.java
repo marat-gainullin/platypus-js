@@ -1,16 +1,35 @@
 package com.eas.ui;
 
+import com.eas.core.HasPublished;
+import com.eas.core.Logger;
 import com.eas.core.Utils;
 import com.eas.core.XElement;
 import com.eas.menu.HasComponentPopupMenu;
-import com.eas.menu.PlatypusPopupMenu;
-import com.eas.ui.events.EventsExecutor;
+import com.eas.menu.Menu;
+import com.eas.ui.events.ActionEvent;
+import com.eas.ui.events.ActionHandler;
+import com.eas.ui.events.BlurHandler;
+import com.eas.ui.events.FocusHandler;
+import com.eas.ui.events.HasActionHandlers;
+import com.eas.ui.events.HasBlurHandlers;
+import com.eas.ui.events.HasFocusHandlers;
 import com.eas.ui.events.HasHideHandlers;
+import com.eas.ui.events.HasKeyDownHandlers;
+import com.eas.ui.events.HasKeyPressHandlers;
+import com.eas.ui.events.HasKeyUpHandlers;
+import com.eas.ui.events.HasSelectionHandlers;
 import com.eas.ui.events.HasShowHandlers;
-import com.eas.ui.events.HideEvent;
+import com.eas.ui.events.HasValueChangeHandlers;
 import com.eas.ui.events.HideHandler;
-import com.eas.ui.events.ShowEvent;
+import com.eas.ui.events.KeyDownHandler;
+import com.eas.ui.events.KeyPressHandler;
+import com.eas.ui.events.KeyUpHandler;
+import com.eas.ui.events.SelectionEvent;
+import com.eas.ui.events.SelectionHandler;
+import com.eas.ui.events.ComponentEvent;
 import com.eas.ui.events.ShowHandler;
+import com.eas.ui.events.ValueChangeEvent;
+import com.eas.ui.events.ValueChangeHandler;
 import com.eas.widgets.containers.Container;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.BrowserEvents;
@@ -27,31 +46,30 @@ import java.util.Set;
  *
  * @author mgainullin
  */
-public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor,
+public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPopupMenu,
         HasShowHandlers, HasHideHandlers {
 
     protected JavaScriptObject published;
     protected Element element;
     protected Container parent;
     private Style.Display visibleDisplay = Style.Display.INLINE_BLOCK;
-    protected PlatypusPopupMenu menu;
+    protected Menu menu;
     protected boolean enabled = true;
     protected String name;
-    protected EventsExecutor eventsExecutor;
 
-    public Widget(){
+    public Widget() {
         super();
     }
-    
+
     @Override
-    public PlatypusPopupMenu getPlatypusPopupMenu() {
+    public Menu getPlatypusPopupMenu() {
         return menu;
     }
 
     protected HandlerRegistration menuTriggerReg;
 
     @Override
-    public void setPlatypusPopupMenu(PlatypusPopupMenu aMenu) {
+    public void setPlatypusPopupMenu(Menu aMenu) {
         if (menu != aMenu) {
             if (menuTriggerReg != null) {
                 menuTriggerReg.removeHandler();
@@ -131,27 +149,17 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
                 element.getStyle().setDisplay(Style.Display.NONE);
             }
             if (aValue) {
-                ShowEvent event = new ShowEvent(this);
+                ComponentEvent event = new ComponentEvent(this);
                 for (ShowHandler h : showHandlers) {
                     h.onShow(event);
                 }
             } else {
-                HideEvent event = new HideEvent(this);
+                ComponentEvent event = new ComponentEvent(this);
                 for (HideHandler h : hideHandlers) {
                     h.onHide(event);
                 }
             }
         }
-    }
-
-    @Override
-    public EventsExecutor getEventsExecutor() {
-        return eventsExecutor;
-    }
-
-    @Override
-    public void setEventsExecutor(EventsExecutor aExecutor) {
-        eventsExecutor = aExecutor;
     }
 
     @Override
@@ -205,4 +213,534 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
         return cursor != null;
     }
 
+    private JavaScriptObject actionPerformed;
+    private JavaScriptObject mouseExited;
+    private JavaScriptObject mouseClicked;
+    private JavaScriptObject mousePressed;
+    private JavaScriptObject mouseReleased;
+    private JavaScriptObject mouseEntered;
+    private JavaScriptObject mouseWheelMoved;
+    private JavaScriptObject mouseDragged;
+    private JavaScriptObject mouseMoved;
+    private JavaScriptObject componentShown;
+    private JavaScriptObject componentHidden;
+    private JavaScriptObject focusGained;
+    private JavaScriptObject focusLost;
+    private JavaScriptObject keyTyped;
+    private JavaScriptObject keyPressed;
+    private JavaScriptObject keyReleased;
+    private JavaScriptObject itemSelected;
+    private JavaScriptObject valueChanged;
+
+    private static enum MOUSE {
+        NULL, PRESSED, MOVED, DRAGGED
+    }
+
+    private MOUSE mouseState = MOUSE.NULL;
+
+    public JavaScriptObject getActionPerformed() {
+        return actionPerformed;
+    }
+
+    public JavaScriptObject getMouseExited() {
+        return mouseExited;
+    }
+
+    public JavaScriptObject getMouseClicked() {
+        return mouseClicked;
+    }
+
+    public JavaScriptObject getMousePressed() {
+        return mousePressed;
+    }
+
+    public JavaScriptObject getMouseReleased() {
+        return mouseReleased;
+    }
+
+    public JavaScriptObject getMouseEntered() {
+        return mouseEntered;
+    }
+
+    public JavaScriptObject getMouseWheelMoved() {
+        return mouseWheelMoved;
+    }
+
+    public JavaScriptObject getMouseDragged() {
+        return mouseDragged;
+    }
+
+    public JavaScriptObject getMouseMoved() {
+        return mouseMoved;
+    }
+
+    public JavaScriptObject getComponentShown() {
+        return componentShown;
+    }
+
+    public JavaScriptObject getComponentHidden() {
+        return componentHidden;
+    }
+
+    public JavaScriptObject getFocusGained() {
+        return focusGained;
+    }
+
+    public JavaScriptObject getFocusLost() {
+        return focusLost;
+    }
+
+    public JavaScriptObject getKeyTyped() {
+        return keyTyped;
+    }
+
+    public JavaScriptObject getKeyPressed() {
+        return keyPressed;
+    }
+
+    public JavaScriptObject getKeyReleased() {
+        return keyReleased;
+    }
+
+    public JavaScriptObject getValueChanged() {
+        return valueChanged;
+    }
+
+    protected HandlerRegistration mouseOutReg;
+
+    public void setMouseExited(JavaScriptObject aValue) {
+        if (mouseExited != aValue) {
+            if (mouseOutReg != null) {
+                mouseOutReg.removeHandler();
+                mouseOutReg = null;
+            }
+            mouseExited = aValue;
+            if (mouseExited != null) {
+                mouseOutReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEOUT, new XElement.NativeHandler() {
+                    @Override
+                    public void on(NativeEvent evt) {
+                        if (mouseExited != null) {
+                            evt.stopPropagation();
+                            executeEvent(mouseExited, EventsPublisher.publishMouseEvent(evt));
+                        }
+                    }
+
+                });
+            }
+        }
+    }
+
+    protected HandlerRegistration actionPerformedReg;
+
+    public void setActionPerformed(JavaScriptObject aValue) {
+        if (actionPerformed != aValue) {
+            if (actionPerformedReg != null) {
+                actionPerformedReg.removeHandler();
+                actionPerformedReg = null;
+            }
+            actionPerformed = aValue;
+            if (actionPerformed != null && this instanceof HasActionHandlers) {
+                actionPerformedReg = ((HasActionHandlers) this).addActionHandler(new ActionHandler() {
+
+                    @Override
+                    public void onAction(ActionEvent event) {
+                        executeEvent(actionPerformed, EventsPublisher.publishActionEvent(event));
+                    }
+
+                });
+            }
+        }
+    }
+
+    protected HandlerRegistration mouseClickedReg;
+    protected HandlerRegistration mouseDblClickedReg;
+
+    public void setMouseClicked(JavaScriptObject aValue) {
+        if (mouseClicked != aValue) {
+            if (mouseClickedReg != null) {
+                mouseClickedReg.removeHandler();
+                mouseClickedReg = null;
+            }
+            if (mouseDblClickedReg != null) {
+                mouseDblClickedReg.removeHandler();
+                mouseDblClickedReg = null;
+            }
+            mouseClicked = aValue;
+            if (mouseClicked != null) {
+                mouseClickedReg = element.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
+                    @Override
+                    public void on(NativeEvent evt) {
+                        if (mouseClicked != null) {
+                            evt.stopPropagation();
+                            executeEvent(mouseClicked, EventsPublisher.publishMouseEvent(evt));
+                        }
+                    }
+
+                });
+                mouseDblClickedReg = element.<XElement>cast().addEventListener(BrowserEvents.DBLCLICK, new XElement.NativeHandler() {
+                    @Override
+                    public void on(NativeEvent evt) {
+                        if (mouseClicked != null) {
+                            evt.stopPropagation();
+                            executeEvent(mouseClicked, EventsPublisher.publishMouseEvent(evt, 2));
+                        }
+                    }
+
+                });
+            }
+        }
+    }
+
+    protected HandlerRegistration mouseDownReg;
+
+    public void setMousePressed(JavaScriptObject aValue) {
+        if (mousePressed != aValue) {
+            if (mouseDownReg != null) {
+                mouseDownReg.removeHandler();
+                mouseDownReg = null;
+            }
+            mousePressed = aValue;
+            if (mousePressed != null) {
+                mouseDownReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEDOWN, new XElement.NativeHandler() {
+                    @Override
+                    public void on(NativeEvent evt) {
+                        if (mousePressed != null) {
+                            evt.stopPropagation();
+                            // Event.setCapture(event.getRelativeElement());
+                            mouseState = MOUSE.PRESSED;
+                            executeEvent(mousePressed, EventsPublisher.publishMouseEvent(evt));
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    protected HandlerRegistration mouseUpReg;
+
+    public void setMouseReleased(JavaScriptObject aValue) {
+        if (mouseReleased != aValue) {
+            if (mouseUpReg != null) {
+                mouseUpReg.removeHandler();
+                mouseUpReg = null;
+            }
+            mouseReleased = aValue;
+            if (mouseReleased != null) {
+                mouseUpReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEUP, new XElement.NativeHandler() {
+                    @Override
+                    public void on(NativeEvent evt) {
+                        // if (mouseState == MOUSE.PRESSED)
+                        // Event.releaseCapture(event.getRelativeElement());
+                        if (mouseReleased != null) {
+                            evt.stopPropagation();
+                            mouseState = MOUSE.NULL;
+                            executeEvent(mouseReleased, EventsPublisher.publishMouseEvent(evt));
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    protected HandlerRegistration mouseOverReg;
+
+    public void setMouseEntered(JavaScriptObject aValue) {
+        if (mouseEntered != aValue) {
+            if (mouseOverReg != null) {
+                mouseOverReg.removeHandler();
+                mouseOverReg = null;
+            }
+            mouseEntered = aValue;
+            if (mouseEntered != null) {
+                mouseOverReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEOVER, new XElement.NativeHandler() {
+                    @Override
+                    public void on(NativeEvent evt) {
+                        if (mouseEntered != null) {
+                            evt.stopPropagation();
+                            executeEvent(mouseEntered, EventsPublisher.publishMouseEvent(evt));
+                        }
+                    }
+
+                });
+            }
+        }
+    }
+
+    protected HandlerRegistration mouseWheelReg;
+
+    public void setMouseWheelMoved(JavaScriptObject aValue) {
+        if (mouseWheelMoved != aValue) {
+            if (mouseWheelReg != null) {
+                mouseWheelReg.removeHandler();
+                mouseWheelReg = null;
+            }
+            mouseWheelMoved = aValue;
+            if (mouseWheelMoved != null) {
+                mouseWheelReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEWHEEL, new XElement.NativeHandler() {
+                    @Override
+                    public void on(NativeEvent evt) {
+                        if (mouseWheelMoved != null) {
+                            evt.stopPropagation();
+                            executeEvent(mouseWheelMoved, EventsPublisher.publishMouseEvent(evt));
+                        }
+                    }
+
+                });
+            }
+        }
+    }
+
+    protected HandlerRegistration mouseMoveReg;
+
+    public void setMouseMoved(JavaScriptObject aValue) {
+        if (mouseMoved != aValue) {
+            if (mouseMoveReg != null) {
+                mouseMoveReg.removeHandler();
+                mouseMoveReg = null;
+            }
+            mouseMoved = aValue;
+            if (mouseMoved != null) {
+                mouseMoveReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEMOVE, new XElement.NativeHandler() {
+                    @Override
+                    public void on(NativeEvent evt) {
+                        if (mouseMoved != null || mouseDragged != null) {
+                            evt.stopPropagation();
+                            if (mouseState == MOUSE.NULL || mouseState == MOUSE.MOVED) {
+                                mouseState = MOUSE.MOVED;
+                                executeEvent(mouseMoved, EventsPublisher.publishMouseEvent(evt));
+                            } else if (mouseState == MOUSE.PRESSED || mouseState == MOUSE.DRAGGED) {
+                                mouseState = MOUSE.DRAGGED;
+                                executeEvent(mouseDragged, EventsPublisher.publishMouseEvent(evt));
+                            }
+                        }
+                    }
+
+                });
+            }
+        }
+    }
+
+    protected HandlerRegistration componentShownReg;
+
+    public void setComponentShown(JavaScriptObject aValue) {
+        if (componentShown != aValue) {
+            if (componentShownReg != null) {
+                componentShownReg.removeHandler();
+                componentShownReg = null;
+            }
+            componentShown = aValue;
+            if (componentShown != null) {
+                componentShownReg = addShowHandler(new ShowHandler() {
+                    @Override
+                    public void onShow(ComponentEvent event) {
+                        if (componentShown != null) {
+                            executeEvent(componentShown, EventsPublisher.publishComponentEvent(event));
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    protected HandlerRegistration componentHiddenReg;
+
+    public void setComponentHidden(JavaScriptObject aValue) {
+        if (componentHidden != aValue) {
+            if (componentHiddenReg != null) {
+                componentHiddenReg.removeHandler();
+                componentHiddenReg = null;
+            }
+            componentHidden = aValue;
+            if (componentHidden != null) {
+                componentHiddenReg = addHideHandler(new HideHandler() {
+                    @Override
+                    public void onHide(ComponentEvent event) {
+                        if (componentHidden != null) {
+                            executeEvent(componentHidden, EventsPublisher.publishComponentEvent(event));
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    public void setMouseDragged(JavaScriptObject aValue) {
+        mouseDragged = aValue;
+    }
+
+    protected HandlerRegistration focusReg;
+
+    public void setFocusGained(JavaScriptObject aValue) {
+        if (focusGained != aValue) {
+            if (focusReg != null) {
+                focusReg.removeHandler();
+                focusReg = null;
+            }
+            focusGained = aValue;
+            if (focusGained != null && this instanceof HasFocusHandlers) {
+                focusReg = ((HasFocusHandlers) this).addFocusHandler(new FocusHandler() {
+                    @Override
+                    public void onFocus(NativeEvent event) {
+                        if (focusGained != null) {
+                            executeEvent(focusGained, EventsPublisher.publishFocusEvent(event));
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    protected HandlerRegistration blurReg;
+
+    public void setFocusLost(JavaScriptObject aValue) {
+        if (focusLost != aValue) {
+            if (blurReg != null) {
+                blurReg.removeHandler();
+                blurReg = null;
+            }
+            focusLost = aValue;
+            if (focusLost != null && this instanceof HasBlurHandlers) {
+                blurReg = ((HasBlurHandlers) this).addBlurHandler(new BlurHandler() {
+                    @Override
+                    public void onBlur(NativeEvent event) {
+                        if (focusLost != null) {
+                            executeEvent(focusLost, EventsPublisher.publishFocusEvent(event));
+                        }
+                        mouseState = MOUSE.NULL;
+                    }
+                });
+            }
+        }
+    }
+
+    protected HandlerRegistration keyTypedReg;
+
+    public void setKeyTyped(JavaScriptObject aValue) {
+        if (keyTyped != aValue) {
+            if (keyTypedReg != null) {
+                keyTypedReg.removeHandler();
+                keyTypedReg = null;
+            }
+            keyTyped = aValue;
+            if (keyTyped != null && this instanceof HasKeyPressHandlers) {
+                keyTypedReg = ((HasKeyPressHandlers) this).addKeyPressHandler(new KeyPressHandler() {
+                    @Override
+                    public void onKeyPress(NativeEvent event) {
+                        if (keyTyped != null) {
+                            event.stopPropagation();
+                            executeEvent(keyTyped, EventsPublisher.publishKeyEvent(event));
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    protected HandlerRegistration keyDownReg;
+
+    public void setKeyPressed(JavaScriptObject aValue) {
+        if (keyPressed != aValue) {
+            if (keyDownReg != null) {
+                keyDownReg.removeHandler();
+                keyDownReg = null;
+            }
+            keyPressed = aValue;
+            if (keyPressed != null && this instanceof HasKeyDownHandlers) {
+                keyDownReg = ((HasKeyDownHandlers) this).addKeyDownHandler(new KeyDownHandler() {
+                    @Override
+                    public void onKeyDown(NativeEvent event) {
+                        if (keyPressed != null) {
+                            event.stopPropagation();
+                            executeEvent(keyPressed, EventsPublisher.publishKeyEvent(event));
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    protected HandlerRegistration keyUpReg;
+
+    public void setKeyReleased(JavaScriptObject aValue) {
+        if (keyReleased != aValue) {
+            if (keyUpReg != null) {
+                keyUpReg.removeHandler();
+                keyUpReg = null;
+            }
+            keyReleased = aValue;
+            if (keyReleased != null && this instanceof HasKeyUpHandlers) {
+                keyUpReg = ((HasKeyUpHandlers) this).addKeyUpHandler(new KeyUpHandler() {
+                    @Override
+                    public void onKeyUp(NativeEvent event) {
+                        if (keyReleased != null) {
+                            event.stopPropagation();
+                            executeEvent(keyReleased, EventsPublisher.publishKeyEvent(event));
+                        }
+                    }
+
+                });
+            }
+        }
+    }
+
+    public JavaScriptObject getItemSelected() {
+        return itemSelected;
+    }
+
+    protected HandlerRegistration selectedItemReg;
+
+    public void setItemSelected(JavaScriptObject aValue) {
+        if (itemSelected != aValue) {
+            if (selectedItemReg != null) {
+                selectedItemReg.removeHandler();
+                selectedItemReg = null;
+            }
+            itemSelected = aValue;
+            if (this instanceof HasSelectionHandlers<?>) {
+                selectedItemReg = ((HasSelectionHandlers<Object>) this).addSelectionHandler(new SelectionHandler<Object>() {
+
+                    @Override
+                    public void onSelection(SelectionEvent<Object> event) {
+                        JavaScriptObject published = ((HasPublished) event.getSource()).getPublished();
+                        Object oItem = event.getSelectedItem();
+                        if (oItem instanceof HasPublished) {
+                            oItem = ((HasPublished) oItem).getPublished();
+                        }
+                        executeEvent(itemSelected, EventsPublisher.publishItemEvent(published, oItem instanceof JavaScriptObject ? (JavaScriptObject) oItem : null));
+                    }
+                });
+            }
+        }
+    }
+
+    protected HandlerRegistration valueChangedReg;
+
+    public void setValueChanged(JavaScriptObject aValue) {
+        if (valueChanged != aValue) {
+            if (valueChangedReg != null) {
+                valueChangedReg.removeHandler();
+                valueChangedReg = null;
+            }
+            valueChanged = aValue;
+            if (this instanceof HasValueChangeHandlers) {
+                valueChangedReg = ((HasValueChangeHandlers) this).addValueChangeHandler(new ValueChangeHandler() {
+
+                    @Override
+                    public void onValueChange(ValueChangeEvent event) {
+                        JavaScriptObject published = ((HasPublished) event.getSource()).getPublished();
+                        executeEvent(valueChanged, EventsPublisher.publishSourcedEvent(published));
+                    }
+                });
+
+            }
+        }
+    }
+
+    protected void executeEvent(JavaScriptObject aHandler, JavaScriptObject aEvent) {
+        try {
+            Utils.executeScriptEventVoid(published, aHandler, aEvent);
+        } catch (Exception e) {
+            Logger.severe(e);
+        }
+    }
 }

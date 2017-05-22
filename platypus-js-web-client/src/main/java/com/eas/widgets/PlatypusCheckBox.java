@@ -7,7 +7,6 @@ import com.eas.menu.PlatypusPopupMenu;
 import com.eas.ui.ButtonGroup;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
-import com.eas.ui.HasPlatypusButtonGroup;
 import com.eas.ui.events.ActionEvent;
 import com.eas.ui.events.ActionHandler;
 import com.eas.ui.events.EventsExecutor;
@@ -16,7 +15,7 @@ import com.eas.ui.events.HasHideHandlers;
 import com.eas.ui.events.HasShowHandlers;
 import com.eas.ui.events.HideEvent;
 import com.eas.ui.events.HideHandler;
-import com.eas.ui.events.ShowEvent;
+import com.eas.ui.events.ComponentEvent;
 import com.eas.ui.events.ShowHandler;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
@@ -32,8 +31,9 @@ import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.eas.ui.HasButtonGroup;
 
-public class PlatypusCheckBox extends CheckBox implements HasActionHandlers, HasJsFacade, HasPlatypusButtonGroup, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize {
+public class PlatypusCheckBox extends CheckBox implements HasActionHandlers, HasJsFacade, HasButtonGroup, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize {
 
 	protected Element anchor = Document.get().createDivElement();
 	
@@ -83,7 +83,7 @@ public class PlatypusCheckBox extends CheckBox implements HasActionHandlers, Has
 
 	@Override
 	public HandlerRegistration addShowHandler(ShowHandler handler) {
-		return addHandler(handler, ShowEvent.getType());
+		return addHandler(handler, ComponentEvent.getType());
 	}
 
 	@Override
@@ -92,7 +92,7 @@ public class PlatypusCheckBox extends CheckBox implements HasActionHandlers, Has
 		super.setVisible(visible);
 		if (oldValue != visible) {
 			if (visible) {
-				ShowEvent.fire(this, this);
+				ComponentEvent.fire(this, this);
 			} else {
 				HideEvent.fire(this, this);
 			}

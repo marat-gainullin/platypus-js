@@ -2,18 +2,18 @@ package com.eas.ui.events;
 
 import com.eas.ui.Widget;
 
-public class RemoveEvent extends Event {
+public class ComponentEvent extends Event {
 
     private final Widget widget;
 
     /**
      * Creates a new close event.
      *
-     * @param aWidget the target
+     * @param w the target
      */
-    public RemoveEvent(Object aSource, Widget aWidget) {
-        super(aSource);
-        widget = aWidget;
+    public ComponentEvent(Widget w) {
+        super(w, w);
+        widget = w;
     }
 
     /**
@@ -24,5 +24,4 @@ public class RemoveEvent extends Event {
     public Widget getWidget() {
         return widget;
     }
-
 }

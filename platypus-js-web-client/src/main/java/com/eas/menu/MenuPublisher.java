@@ -23,7 +23,7 @@ public class MenuPublisher {
 		constructors.setJs(aClassName, aPublisher);
 	}
 	
-	public native static PublishedComponent publish(PlatypusMenuItemSeparator aComponent)/*-{
+	public native static PublishedComponent publish(MenuItemSeparator aComponent)/*-{
 		var constr = @com.eas.menu.MenuPublisher::getPublisher(Ljava/lang/String;)('MenuSeparator');
 		return new constr(aComponent);
 	}-*/;
@@ -33,12 +33,12 @@ public class MenuPublisher {
 		return new constr(aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(PlatypusMenu aComponent)/*-{
+	public native static PublishedComponent publish(Menu aComponent)/*-{
 		var constr = @com.eas.menu.MenuPublisher::getPublisher(Ljava/lang/String;)('Menu');
 		return new constr(null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publishPopup(PlatypusMenu aComponent)/*-{
+	public native static PublishedComponent publishPopup(Menu aComponent)/*-{
 		var constr = @com.eas.menu.MenuPublisher::getPublisher(Ljava/lang/String;)('PopupMenu');
 		return new constr(aComponent);
 	}-*/;

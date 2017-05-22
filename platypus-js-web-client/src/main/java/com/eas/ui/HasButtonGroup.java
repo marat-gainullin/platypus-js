@@ -1,7 +1,7 @@
 package com.eas.ui;
 
 
-public interface HasPlatypusButtonGroup {
+public interface HasButtonGroup {
 
 	public ButtonGroup getButtonGroup();
 

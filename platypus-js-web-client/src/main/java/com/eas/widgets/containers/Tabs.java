@@ -3,10 +3,9 @@ package com.eas.widgets.containers;
 import com.eas.core.HasPublished;
 import com.eas.ui.HasChildrenPosition;
 import com.eas.ui.Widget;
-import com.eas.ui.events.AddEvent;
+import com.eas.ui.events.ContainerEvent;
 import com.eas.ui.events.AddHandler;
 import com.eas.ui.events.HasSelectionHandlers;
-import com.eas.ui.events.RemoveEvent;
 import com.eas.ui.events.RemoveHandler;
 import com.eas.ui.events.SelectionEvent;
 import com.eas.ui.events.SelectionHandler;
@@ -96,7 +95,7 @@ public class Tabs extends Borders implements HasSelectionHandlers<Widget>, HasCh
     public HandlerRegistration addAddHandler(AddHandler handler) {
         return super.addAddHandler(new AddHandler() {
             @Override
-            public void onAdd(AddEvent anEvent) {
+            public void onAdd(ContainerEvent anEvent) {
                 anEvent.getWidget().setParent(Tabs.this);
                 anEvent.setSource(Tabs.this);
                 handler.onAdd(anEvent);
@@ -109,7 +108,7 @@ public class Tabs extends Borders implements HasSelectionHandlers<Widget>, HasCh
     public HandlerRegistration addRemoveHandler(RemoveHandler handler) {
         return super.addRemoveHandler(new RemoveHandler() {
             @Override
-            public void onRemove(RemoveEvent anEvent) {
+            public void onRemove(ContainerEvent anEvent) {
                 anEvent.setSource(Tabs.this);
                 handler.onRemove(anEvent);
             }

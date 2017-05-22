@@ -2,18 +2,18 @@ package com.eas.ui.events;
 
 import com.eas.ui.Widget;
 
-public class ShowEvent extends Event {
+public class ContainerEvent extends Event {
 
     private final Widget widget;
 
     /**
      * Creates a new close event.
      *
-     * @param w the target
+     * @param aWidget the target
      */
-    public ShowEvent(Widget w) {
-        super(w);
-        widget = w;
+    public ContainerEvent(Object aSource, Widget aWidget) {
+        super(aSource, aWidget);
+        widget = aWidget;
     }
 
     /**
@@ -24,4 +24,5 @@ public class ShowEvent extends Event {
     public Widget getWidget() {
         return widget;
     }
+
 }

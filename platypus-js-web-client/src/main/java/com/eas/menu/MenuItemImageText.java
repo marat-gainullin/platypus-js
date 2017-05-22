@@ -1,158 +1,149 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.menu;
 
+import com.eas.core.HasPublished;
+import com.eas.core.XElement;
+import com.eas.ui.Widget;
+import com.eas.ui.events.ActionEvent;
+import com.eas.ui.events.ActionHandler;
+import com.eas.ui.events.HasActionHandlers;
 import com.eas.ui.events.HasHideHandlers;
 import com.eas.ui.events.HasShowHandlers;
-import com.eas.ui.events.HideEvent;
-import com.eas.ui.events.HideHandler;
-import com.eas.ui.events.ShowEvent;
-import com.eas.ui.events.ShowHandler;
-import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.shared.EventHandler;
-import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.event.shared.HasHandlers;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.safehtml.shared.SafeUri;
-import com.google.gwt.user.client.ui.MenuItem;
+import com.google.gwt.user.client.ui.HasHTML;
+import com.google.gwt.user.client.ui.HasText;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * 
+ *
  * @author mg
  */
-public class MenuItemImageText extends MenuItem implements HasHandlers, HasShowHandlers, HasHideHandlers {
+public class MenuItemImageText extends MenuItem implements HasActionHandlers, HasText, HasHTML {
 
-	protected String text;
-	protected boolean html;
-	protected SafeUri imageUri;
-	//
-	protected Element leftMark;
-	protected Element field;
-	//
-	private HandlerManager handlerManager;
+    protected String imageUri;
+    //
+    protected Element leftMark;
+    protected Element field;
 
-	public MenuItemImageText(String aText, boolean asHtml, SafeUri aImageUri, Scheduler.ScheduledCommand aCommand) {
-		super("", aCommand);
-		text = aText;
-		html = asHtml;
-		imageUri = aImageUri;
-	    setStyleName("menu-item");
-		regenerate();
-	}
+    public MenuItemImageText(String aText, boolean asHtml, String aImageUri) {
+        super();
+        element.setClassName("menu-item");
+        leftMark = Document.get().createDivElement();
+        leftMark.setClassName("menu-left-mark");
+        leftMark.getStyle().setDisplay(Style.Display.INLINE);
+        leftMark.getStyle().setPosition(Style.Position.RELATIVE);
+        leftMark.getStyle().setHeight(100, Style.Unit.PCT);
+        leftMark.setInnerHTML("&nbsp;&nbsp;&nbsp;&nbsp;");
+        setImageUri(aImageUri);
+        element.appendChild(leftMark);
 
-	@Override
-	public HandlerRegistration addHideHandler(HideHandler handler) {
-		return addHandler(handler, HideEvent.getType());
-	}
+        field = Document.get().createDivElement();
+        field.setClassName("menu-field");
+        field.getStyle().setDisplay(Style.Display.INLINE);
+        field.getStyle().setWhiteSpace(Style.WhiteSpace.NOWRAP);
+        if (asHtml) {
+            setHTML(aText);
+        } else {
+            setText(aText);
+        }
+        element.appendChild(field);
+        element.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent evt) {
+                fireActionPerformed();
+            }
+        });
+        element.<XElement>cast().addEventListener(BrowserEvents.TOUCHSTART, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent evt) {
+                fireActionPerformed();
+            }
+        });
+    }
 
-	@Override
-	public HandlerRegistration addShowHandler(ShowHandler handler) {
-		return addHandler(handler, ShowEvent.getType());
-	}
+    @Override
+    public String getText() {
+        return field.getInnerText();
+    }
 
-	@Override
-	public void setVisible(boolean visible) {
-		boolean oldValue = isVisible();
-		super.setVisible(visible);
-		if (oldValue != visible) {
-			if (visible) {
-				ShowEvent.fire(this, this);
-			} else {
-				HideEvent.fire(this, this);
-			}
-		}
-	}
+    @Override
+    public void setText(String text) {
+        field.setInnerText(text != null ? text : "");
+    }
 
-	/**
-	 * Adds this handler to the widget.
-	 * 
-	 * @param <H>
-	 *            the type of handler to add
-	 * @param type
-	 *            the event type
-	 * @param handler
-	 *            the handler
-	 * @return {@link HandlerRegistration} used to remove the handler
-	 */
-	public final <H extends EventHandler> HandlerRegistration addHandler(final H handler, GwtEvent.Type<H> type) {
-		return ensureHandlers().addHandler(type, handler);
-	}
+    @Override
+    public String getHTML() {
+        return field.getInnerHTML();
+    }
 
-	/**
-	 * Ensures the existence of the handler manager.
-	 * 
-	 * @return the handler manager
-	 * */
-	HandlerManager ensureHandlers() {
-		return handlerManager == null ? handlerManager = createHandlerManager() : handlerManager;
-	}
+    @Override
+    public void setHTML(String html) {
+        field.setInnerHTML(html != null ? html : "");
+    }
 
-	HandlerManager getHandlerManager() {
-		return handlerManager;
-	}
+    public String getImageUri() {
+        return imageUri;
+    }
 
-	@Override
-	public void fireEvent(GwtEvent<?> event) {
-		ensureHandlers().fireEvent(event);
-	}
+    public void setImageUri(String aValue) {
+        imageUri = aValue;
+        if (imageUri != null && !imageUri.isEmpty()) {
+            leftMark.getStyle().setBackgroundImage("url(" + imageUri + ")");
+            leftMark.getStyle().setProperty("background-repeat", "no-repeat");
+        } else {
+            leftMark.getStyle().clearBackgroundImage();
+            leftMark.getStyle().clearProperty("background-repeat");
+        }
+    }
 
-	/**
-	 * Creates the {@link HandlerManager} used by this Widget. You can override
-	 * this method to create a custom {@link HandlerManager}.
-	 * 
-	 * @return the {@link HandlerManager} you want to use
-	 */
-	protected HandlerManager createHandlerManager() {
-		return new HandlerManager(this);
-	}
+    protected Set<ActionHandler> actionHandlers = new HashSet<>();
 
-	@Override
-	public String getText() {
-		return text;
-	}
+    @Override
+    public HandlerRegistration addActionHandler(ActionHandler handler) {
+        actionHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                actionHandlers.remove(handler);
+            }
 
-	public boolean isAsHtml() {
-		return html;
-	}
+        };
+    }
 
-	public void setText(String aText, boolean asHtml) {
-		text = aText;
-		html = asHtml;
-		regenerate();
-	}
+    protected void fireActionPerformed() {
+        ActionEvent event = new ActionEvent(this);
+        for (ActionHandler h : actionHandlers) {
+            h.onAction(event);
+        }
+    }
 
-	@Override
-	public void setText(String text) {
-		setText(text, false);
-	}
+    @Override
+    protected void publish(JavaScriptObject aValue) {
+        publish(this, aValue);
+    }
 
-	@Override
-	public void setHTML(String html) {
-		setText(text, true);
-	}
-
-	public SafeUri getImageUri() {
-		return imageUri;
-	}
-
-	public void setImageUri(SafeUri aValue) {
-		imageUri = aValue;
-		regenerate();
-	}
-
-	protected void regenerate() {
-		String ltext = text != null ? text : "";
-		SafeHtml generated = MenuItemTemplates.INSTANCE.imageText(imageUri != null ? imageUri.asString() : "", html ? SafeHtmlUtils.fromTrustedString(ltext) : SafeHtmlUtils.fromString(ltext));
-		getElement().setInnerSafeHtml(generated);
-		leftMark = getElement().getFirstChildElement().getFirstChildElement();
-		field = (Element) getElement().getFirstChildElement().getLastChild();
-	}
-
+    private native static void publish(HasPublished aWidget, JavaScriptObject aPublished)/*-{
+        Object.defineProperty(aPublished, "text", {
+            get : function() {
+                return aWidget.@com.eas.menu.PlatypusMenuItemImageText::getText()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.menu.PlatypusMenuItemImageText::setText(Ljava/lang/String;)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "icon", {
+            get : function() {
+                return aWidget.@com.eas.menu.PlatypusMenuItemImageText::getIcon()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.menu.PlatypusMenuItemImageText::setIcon(Lcom/google/gwt/resources/client/ImageResource;)(aValue);
+            }
+        });			
+    }-*/;
 }

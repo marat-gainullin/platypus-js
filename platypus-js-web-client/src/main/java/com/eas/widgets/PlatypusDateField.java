@@ -11,7 +11,7 @@ import com.eas.ui.events.HasHideHandlers;
 import com.eas.ui.events.HasShowHandlers;
 import com.eas.ui.events.HideEvent;
 import com.eas.ui.events.HideHandler;
-import com.eas.ui.events.ShowEvent;
+import com.eas.ui.events.ComponentEvent;
 import com.eas.ui.events.ShowHandler;
 import com.eas.widgets.boxes.DateTimeBox;
 import com.google.gwt.core.client.GWT;
@@ -63,7 +63,7 @@ public class PlatypusDateField extends DateTimeBox implements HasJsFacade, HasEn
 
 	@Override
 	public HandlerRegistration addShowHandler(ShowHandler handler) {
-		return addHandler(handler, ShowEvent.getType());
+		return addHandler(handler, ComponentEvent.getType());
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class PlatypusDateField extends DateTimeBox implements HasJsFacade, HasEn
 		super.setVisible(visible);
 		if (oldValue != visible) {
 			if (visible) {
-				ShowEvent.fire(this, this);
+				ComponentEvent.fire(this, this);
 			} else {
 				HideEvent.fire(this, this);
 			}

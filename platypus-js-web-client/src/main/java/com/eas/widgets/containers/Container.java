@@ -1,12 +1,13 @@
 package com.eas.widgets.containers;
 
+import com.eas.ui.EventsPublisher;
 import com.eas.ui.Widget;
-import com.eas.ui.events.AddEvent;
+import com.eas.ui.events.ContainerEvent;
 import com.eas.ui.events.AddHandler;
 import com.eas.ui.events.HasAddHandlers;
 import com.eas.ui.events.HasRemoveHandlers;
-import com.eas.ui.events.RemoveEvent;
 import com.eas.ui.events.RemoveHandler;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.shared.HandlerRegistration;
 import java.util.ArrayList;
@@ -30,6 +31,14 @@ public abstract class Container extends Widget implements HasAddHandlers, HasRem
 
     public int getCount() {
         return children.size();
+    }
+
+    public Widget get(int index) {
+        if (index >= 0 && index < children.size()) {
+            return children.get(index);
+        } else {
+            return null;
+        }
     }
 
     public int indexOf(Widget w) {
@@ -96,7 +105,7 @@ public abstract class Container extends Widget implements HasAddHandlers, HasRem
     }
 
     private void fireAdded(Widget w) {
-        AddEvent event = new AddEvent(this, w);
+        ContainerEvent event = new ContainerEvent(this, w);
         for (AddHandler h : addHandlers) {
             h.onAdd(event);
         }
@@ -116,10 +125,65 @@ public abstract class Container extends Widget implements HasAddHandlers, HasRem
     }
 
     private void fireRemoved(Widget w) {
-        RemoveEvent event = new RemoveEvent(this, w);
+        ContainerEvent event = new ContainerEvent(this, w);
         for (RemoveHandler h : removeHandlers) {
             h.onRemove(event);
         }
     }
 
+    private JavaScriptObject componentAdded;
+    
+    public JavaScriptObject getComponentAdded() {
+        return componentAdded;
+    }
+
+    protected HandlerRegistration componentAddedReg;
+
+    public void setComponentAdded(JavaScriptObject aValue) {
+        if (componentAdded != aValue) {
+            if (componentAddedReg != null) {
+                componentAddedReg.removeHandler();
+                componentAddedReg = null;
+            }
+            componentAdded = aValue;
+            if (componentAdded != null) {
+                componentAddedReg = addAddHandler(new AddHandler() {
+                    @Override
+                    public void onAdd(ContainerEvent event) {
+                        if (componentAdded != null) {
+                            executeEvent(componentAdded, EventsPublisher.publishContainerEvent(event));
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    private JavaScriptObject componentRemoved;
+    
+    public JavaScriptObject getComponentRemoved() {
+        return componentRemoved;
+    }
+
+    protected HandlerRegistration componentRemovedReg;
+
+    public void setComponentRemoved(JavaScriptObject aValue) {
+        if (componentRemoved != aValue) {
+            if (componentRemovedReg != null) {
+                componentRemovedReg.removeHandler();
+                componentRemovedReg = null;
+            }
+            componentRemoved = aValue;
+            if (componentRemoved != null) {
+                componentRemovedReg = addRemoveHandler(new RemoveHandler() {
+                    @Override
+                    public void onRemove(ContainerEvent event) {
+                        if (componentRemoved != null) {
+                            executeEvent(componentRemoved, EventsPublisher.publishContainerEvent(event));
+                        }
+                    }
+                });
+            }
+        }
+    }
 }

@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 
 import com.eas.core.HasPublished;
 import com.eas.core.Utils;
-import com.eas.ui.events.AddEvent;
+import com.eas.ui.events.ContainerEvent;
 import com.eas.ui.events.AddHandler;
 import com.eas.ui.events.EventsExecutor;
 import com.eas.ui.events.HasAddHandlers;
@@ -56,7 +56,7 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade, HasAddHandle
 
 	@Override
 	public HandlerRegistration addAddHandler(AddHandler handler) {
-		return addHandler(handler, AddEvent.getType());
+		return addHandler(handler, ContainerEvent.getType());
 	}
 
 	@Override
@@ -81,9 +81,9 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade, HasAddHandle
 	public void add(HasPublished aItem) {
 		if (aItem instanceof HasValue<?>) {
 			super.add((HasValue<Boolean>) aItem);
-			if (aItem instanceof HasPlatypusButtonGroup) {
-				((HasPlatypusButtonGroup) aItem).mutateButtonGroup(this);
-				AddEvent.fire(this, (UIObject) aItem);
+			if (aItem instanceof HasButtonGroup) {
+				((HasButtonGroup) aItem).mutateButtonGroup(this);
+				ContainerEvent.fire(this, (UIObject) aItem);
 			}
 		}
 	}
@@ -91,8 +91,8 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade, HasAddHandle
 	public void remove(HasPublished aItem) {
 		if (aItem instanceof HasValue<?>) {
 			super.remove((HasValue<Boolean>) aItem);
-			if (aItem instanceof HasPlatypusButtonGroup) {
-				((HasPlatypusButtonGroup) aItem).setButtonGroup(null);
+			if (aItem instanceof HasButtonGroup) {
+				((HasButtonGroup) aItem).setButtonGroup(null);
 				RemoveEvent.fire(this, (UIObject) aItem);
 			}
 		}

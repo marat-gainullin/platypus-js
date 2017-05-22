@@ -13,7 +13,7 @@ public class MenuFactory implements UiWidgetReader{
 		switch (type) {
 		case "m":
 		case "Menu":
-			PlatypusMenu menu = new PlatypusMenu();
+			Menu menu = new Menu();
 			MenuPublisher.publish(menu);
 			aFactory.readGeneralProps(anElement, menu);
 			if (Utils.hasAttribute(anElement, "tx", "text")) {
@@ -60,7 +60,7 @@ public class MenuFactory implements UiWidgetReader{
 			return radioMenuItem;
 		case "ms":
 		case "MenuSeparator":
-			PlatypusMenuItemSeparator menuSeparator = new PlatypusMenuItemSeparator();
+			MenuItemSeparator menuSeparator = new MenuItemSeparator();
 			MenuPublisher.publish(menuSeparator);
 			aFactory.readGeneralProps(anElement, menuSeparator);
 			return menuSeparator;

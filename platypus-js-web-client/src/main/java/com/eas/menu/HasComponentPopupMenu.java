@@ -1,9 +1,8 @@
 package com.eas.menu;
 
-
 public interface HasComponentPopupMenu {
 
-	public PlatypusPopupMenu getPlatypusPopupMenu();
+    public Menu getPlatypusPopupMenu();
 
-	public void setPlatypusPopupMenu(PlatypusPopupMenu aMenu);
+    public void setPlatypusPopupMenu(Menu aMenu);
 }

@@ -5,29 +5,16 @@ import com.eas.ui.ButtonGroup;
 import com.eas.ui.PublishedComponent;
 import com.eas.widgets.containers.Absolute;
 import com.eas.widgets.containers.Anchors;
-import com.eas.widgets.BorderPane;
-import com.eas.widgets.BoxPane;
-import com.eas.widgets.CardPane;
+import com.eas.widgets.containers.Borders;
+import com.eas.widgets.containers.Box;
+import com.eas.widgets.containers.Cards;
+import com.eas.widgets.containers.Cells;
 import com.eas.widgets.containers.Desktop;
-import com.eas.widgets.FlowPane;
-import com.eas.widgets.GridPane;
-import com.eas.widgets.PlatypusButton;
-import com.eas.widgets.PlatypusCheckBox;
-import com.eas.widgets.PlatypusFormattedTextField;
-import com.eas.widgets.PlatypusHtmlEditor;
-import com.eas.widgets.PlatypusLabel;
-import com.eas.widgets.PlatypusPasswordField;
-import com.eas.widgets.PlatypusProgressBar;
-import com.eas.widgets.PlatypusRadioButton;
-import com.eas.widgets.PlatypusSlider;
-import com.eas.widgets.PlatypusSplitButton;
-import com.eas.widgets.PlatypusTextArea;
-import com.eas.widgets.PlatypusTextField;
-import com.eas.widgets.PlatypusToggleButton;
-import com.eas.widgets.ScrollPane;
-import com.eas.widgets.SplitPane;
-import com.eas.widgets.TabbedPane;
-import com.eas.widgets.ToolBar;
+import com.eas.widgets.containers.Flow;
+import com.eas.widgets.containers.Scroll;
+import com.eas.widgets.containers.Split;
+import com.eas.widgets.containers.Tabs;
+import com.eas.widgets.containers.Toolbar;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class WidgetsPublisher {
@@ -114,28 +101,28 @@ public class WidgetsPublisher {
 		return new constr(null, null, null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(BorderPane aComponent)/*-{
+	public native static PublishedComponent publish(Borders aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('BorderPane');
 		return new constr(null, null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(ScrollPane aComponent)/*-{
+	public native static PublishedComponent publish(Scroll aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('ScrollPane');
 		return new constr(null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(SplitPane aComponent)/*-{
+	public native static PublishedComponent publish(Split aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('SplitPane');
 		return new constr(null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(BoxPane aComponent)/*-{
+	public native static PublishedComponent publish(Box aComponent)/*-{
 		var Orientation = @com.eas.ui.JsUi::Orientation;
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('BoxPane');
 		return new constr(Orientation.HORIZONTAL, null, null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(CardPane aComponent)/*-{
+	public native static PublishedComponent publish(Cards aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('CardPane');
 		return new constr(null, null, aComponent);
 	}-*/;
@@ -146,22 +133,22 @@ public class WidgetsPublisher {
 
 	public native static PublishedComponent publish(Desktop aComponent);
 
-	public native static PublishedComponent publish(TabbedPane aComponent)/*-{
+	public native static PublishedComponent publish(Tabs aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('TabbedPane');
 		return new constr(aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(ToolBar aComponent)/*-{
+	public native static PublishedComponent publish(Toolbar aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('ToolBar');
 		return new constr(null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(FlowPane aComponent)/*-{
+	public native static PublishedComponent publish(Flow aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('FlowPane');
 		return new constr(null, null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(GridPane aComponent)/*-{
+	public native static PublishedComponent publish(Cells aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('GridPane');
 		return new constr(null, null, null, null, aComponent);
 	}-*/;

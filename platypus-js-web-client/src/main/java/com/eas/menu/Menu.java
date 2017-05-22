@@ -1,32 +1,50 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package com.eas.menu;
 
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.eas.core.HasPublished;
+import com.eas.widgets.containers.Container;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.user.client.ui.HasText;
 
-/**
- *
- * @author mg
- */
-public class Menu extends VerticalPanel{
-    
-    public Menu(){
+public class Menu extends Container implements HasText {
+
+    protected MenuItem parentItem;
+    protected String text;
+
+    public Menu() {
         super();
-        getElement().getStyle().setPropertyPx("cellPadding", 0);
-        getElement().getStyle().setPropertyPx("cellSpacing", 0);
-        getElement().getStyle().setPropertyPx("borderWidth", 0);
-        getElement().getStyle().setPropertyPx("borderSpacing", 0);
     }
-    
-  @Override
-  protected void add(Widget child, Element container) {
-      super.add(child, container);
-      container.addClassName("menu-row");
-  }    
+
+    @Override
+    public String getText() {
+        return text;
+    }
+
+    @Override
+    public void setText(String aValue) {
+        text = aValue;
+    }
+
+    public MenuItem getParentItem() {
+        return parentItem;
+    }
+
+    public void setParentItem(MenuItem aItem) {
+        parentItem = aItem;
+    }
+
+    @Override
+    protected void publish(JavaScriptObject aValue) {
+        publish(this, aValue);
+    }
+
+    private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
+        Object.defineProperty(published, "text", {
+            get : function() {
+                return aWidget.@com.eas.menu.PlatypusMenu::getText()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.menu.PlatypusMenu::setText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+            }
+        });
+    }-*/;
 }

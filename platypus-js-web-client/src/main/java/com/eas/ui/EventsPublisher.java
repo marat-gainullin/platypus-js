@@ -2,26 +2,10 @@ package com.eas.ui;
 
 import com.eas.core.Utils;
 import com.eas.ui.events.ActionEvent;
-import com.eas.ui.events.AddEvent;
-import com.eas.ui.events.HideEvent;
-import com.eas.ui.events.RemoveEvent;
-import com.eas.ui.events.ShowEvent;
-import com.eas.window.events.MoveEvent;
+import com.eas.ui.events.ContainerEvent;
+import com.eas.ui.events.ComponentEvent;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.MouseDownEvent;
-import com.google.gwt.event.dom.client.MouseMoveEvent;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.google.gwt.event.dom.client.MouseWheelEvent;
-import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.dom.client.NativeEvent;
 
 public class EventsPublisher {
 
@@ -62,102 +46,34 @@ public class EventsPublisher {
 		return new constr(aWindow);
 	}-*/;
 	
-	public native static JavaScriptObject publish(MouseDownEvent aEvent)/*-{
+	public native static JavaScriptObject publishMouseEvent(NativeEvent aEvent)/*-{
 		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('MouseEvent');
 		return new constr(aEvent);
 	}-*/;
 	
-	public native static JavaScriptObject publish(MouseUpEvent aEvent)/*-{
+	public native static JavaScriptObject publishMouseEvent(NativeEvent aEvent, int clickCount)/*-{
 		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('MouseEvent');
-		return new constr(aEvent);
+		return new constr(aEvent, clickCount);
 	}-*/;
 	
-	public native static JavaScriptObject publish(MouseWheelEvent aEvent)/*-{
-		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('MouseEvent');
-		return new constr(aEvent);
-	}-*/;
-	
-	public native static JavaScriptObject publish(MouseMoveEvent aEvent)/*-{
-		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('MouseEvent');
-		return new constr(aEvent);
-	}-*/;
-	
-	public native static JavaScriptObject publish(ClickEvent aEvent)/*-{
-		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('MouseEvent');
-		return new constr(aEvent, 1);
-	}-*/;
-	
-	public native static JavaScriptObject publish(DoubleClickEvent aEvent)/*-{
-		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('MouseEvent');
-		return new constr(aEvent, 2);
-	}-*/;
-	
-	public native static JavaScriptObject publish(MouseOverEvent aEvent)/*-{
-		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('MouseEvent');
-		return new constr(aEvent);
-	}-*/;
-	
-	public native static JavaScriptObject publish(MouseOutEvent aEvent)/*-{
-		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('MouseEvent');
-		return new constr(aEvent);
-	}-*/;
-	
-	public native static JavaScriptObject publish(KeyDownEvent aEvent)/*-{
+	public native static JavaScriptObject publishKeyEvent(NativeEvent aEvent)/*-{
 		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('KeyEvent');
 		return new constr(aEvent);
 	}-*/;
 	
-	public native static JavaScriptObject publish(KeyUpEvent aEvent)/*-{
-		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('KeyEvent');
-		return new constr(aEvent);
-	}-*/;
-	
-	public native static JavaScriptObject publish(KeyPressEvent aEvent)/*-{
-		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('KeyEvent');
-		return new constr(aEvent);
-	}-*/;
-	
-	public native static JavaScriptObject publish(FocusEvent aEvent)/*-{
+	public native static JavaScriptObject publishFocusEvent(NativeEvent aEvent)/*-{
 		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('FocusEvent');
 		return new constr(aEvent);
 	}-*/;
 	
-	public native static JavaScriptObject publish(BlurEvent aEvent)/*-{
-		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('FocusEvent');
-		return new constr(aEvent);
-	}-*/;
+	public native static JavaScriptObject publishComponentEvent(ComponentEvent aEvent);
 	
-	public native static JavaScriptObject publish(ResizeEvent aEvent)/*-{
-		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('ComponentEvent');
-		return new constr(aEvent);
-	}-*/;
-	
-	public native static JavaScriptObject publish(ShowEvent aEvent)/*-{
-		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('ComponentEvent');
-		return new constr(aEvent);
-	}-*/;
-	
-	public native static JavaScriptObject publish(HideEvent aEvent)/*-{
-		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('ComponentEvent');
-		return new constr(aEvent);
-	}-*/;
-	
-	public native static JavaScriptObject publish(MoveEvent<Object> aEvent)/*-{
-		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('ComponentEvent');
-		return new constr(aEvent);
-	}-*/;
-	
-	public native static JavaScriptObject publish(AddEvent aEvent)/*-{
+	public native static JavaScriptObject publishContainerEvent(ContainerEvent aEvent)/*-{
 		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('ContainerEvent');
 		return new constr(aEvent, true);
 	}-*/;
 	
-	public native static JavaScriptObject publish(RemoveEvent aEvent)/*-{
-		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('ContainerEvent');
-		return new constr(aEvent, false);
-	}-*/;
-	
-	public native static JavaScriptObject publish(ActionEvent aEvent)/*-{
+	public native static JavaScriptObject publishActionEvent(ActionEvent aEvent)/*-{
 		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('ActionEvent');
 		return new constr(aEvent);
 	}-*/;

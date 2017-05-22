@@ -9,7 +9,7 @@ public class SelectionEvent<T> extends Event {
     private T selectedItem;
 
     public SelectionEvent(Object aSource, T aItem) {
-        super(aSource);
+        super(aSource, aItem);
         selectedItem = aItem;
     }
 

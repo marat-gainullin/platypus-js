@@ -18,15 +18,15 @@ import com.google.gwt.xml.client.Element;
  */
 public class FormReader extends DefaultUiReader {
 
-	protected PlatypusWindow form;
+	protected Form form;
 
 	public FormReader(Element anElement, JavaScriptObject aModel) {
 		super(anElement, aModel);
 	}
 
-	public PlatypusWindow getForm() {
+	public Form getForm() {
                 if(form == null){
-                    form = new PlatypusWindow((Widget) viewWidget);
+                    form = new Form((Widget) viewWidget);
                     form.setDefaultCloseOperation(Utils.getIntegerAttribute(element, "dco", "defaultCloseOperation", 2));
                     String iconImage = Utils.getAttribute(element, "i", "icon", null);
                     if (iconImage != null && !iconImage.isEmpty()) {
@@ -38,7 +38,7 @@ public class FormReader extends DefaultUiReader {
 
                                     @Override
                                     public void onFailure(String reason) {
-                                            Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, "Factory failed to load window title icon. " + reason);
+                                            Logger.getLogger(Form.class.getName()).log(Level.SEVERE, "Factory failed to load window title icon. " + reason);
                                     }
                             });
                     }

@@ -10,9 +10,9 @@ import java.util.logging.Logger;
 import com.eas.client.CallbackAdapter;
 import com.eas.core.HasPublished;
 import com.eas.core.Utils;
-import com.eas.form.PlatypusWindow;
+import com.eas.form.Form;
 import com.eas.menu.HasComponentPopupMenu;
-import com.eas.menu.PlatypusMenu;
+import com.eas.menu.Menu;
 import com.eas.menu.PlatypusMenuBar;
 import com.eas.menu.PlatypusPopupMenu;
 import com.eas.widgets.containers.Anchors;
@@ -148,7 +148,7 @@ public class DefaultUiReader extends UiReader {
 
 				@Override
 				public void onFailure(String reason) {
-					Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, "Factory failed to load button icon. " + reason);
+					Logger.getLogger(Form.class.getName()).log(Level.SEVERE, "Factory failed to load button icon. " + reason);
 				}
 			});
 		}
@@ -243,7 +243,7 @@ public class DefaultUiReader extends UiReader {
 				});
 			}
 		}
-		if (Utils.hasAttribute(anElement, "bgr", "buttonGroup") && aTarget instanceof HasPlatypusButtonGroup) {
+		if (Utils.hasAttribute(anElement, "bgr", "buttonGroup") && aTarget instanceof HasButtonGroup) {
 			final String buttonGroupName = Utils.getAttribute(anElement, "bgr", "buttonGroup", null);
 			if (buttonGroupName != null && !buttonGroupName.isEmpty()) {
 				resolvers.add(new Runnable() {
@@ -274,7 +274,7 @@ public class DefaultUiReader extends UiReader {
 				});
 			}
 		}
-		if (aTarget instanceof Widget && aTarget instanceof HasPublished && !(aTarget instanceof PlatypusMenu)) {
+		if (aTarget instanceof Widget && aTarget instanceof HasPublished && !(aTarget instanceof Menu)) {
 			Dimension prefSize = readPrefSize(anElement);
 			if (prefSize != null) {
 				PublishedComponent pComp = ((HasPublished) aTarget).getPublished().<PublishedComponent> cast();
@@ -310,8 +310,8 @@ public class DefaultUiReader extends UiReader {
 	}
 
 	private void addToParent(Element anElement, UIObject aTarget, UIObject parent) throws Exception {
-		if (parent instanceof PlatypusMenu) {
-			((PlatypusMenu) parent).add(aTarget);
+		if (parent instanceof Menu) {
+			((Menu) parent).add(aTarget);
 		} else if (parent instanceof PlatypusMenuBar) {
 			((PlatypusMenuBar) parent).add(aTarget);
 		} else if (parent instanceof PlatypusPopupMenu) {
