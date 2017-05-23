@@ -141,6 +141,7 @@ public class PlatypusDateField extends DateTimeBox implements HasJsFacade, HasEn
 	@Override
 	public void setJsName(String aValue) {
 		name = aValue;
+                setName(name);
 	}
 
 	public String getFormatPattern() {

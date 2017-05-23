@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.AfterClass;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -74,23 +75,24 @@ public class BrowserTests {
     private static void perform(String aTestName) {
         Object requireError = browser.executeAsyncScript(""
                 + "var complete = arguments[arguments.length - 1];\n"
-                + "require(['" + aTestName + "'], function(){\n"
+                + "require(['" + aTestName + "'], function(aRequired){\n"
+                + "window['"+aTestName+"'] = aRequired;\n" // Hack for AMD modules. Since our tests are global modules, we need to make required module global
                 + "    complete();\n"
                 + "},\n"
                 + "function(aError){\n"
                 + "    complete('' + aError);\n"
                 + "})");
-        assertNull(requireError);
+        assertNull("" + requireError, requireError);
         Object testError = browser.executeAsyncScript(""
                 + "var complete = arguments[arguments.length - 1];\n"
-                + "var testInstance = new " + aTestName + "();\n"
+                + "var testInstance = new window['" + aTestName + "']();\n"
                 + "testInstance.execute(function(){\n"
                 + "    complete();"
                 + "},\n"
                 + "function(aError){\n"
                 + "    complete('' + aError);"
                 + "});");
-        assertNull(testError);
+        assertNull("" + testError, testError);
     }
 
     @Test
@@ -266,5 +268,10 @@ public class BrowserTests {
     @Test
     public void LPCCallbacksTest() {
         perform("LPCCallbacksTest");
+    }
+    
+    @Test
+    public void loadWidgetsWithoutWindow() {
+        perform("load-widgets-without-window");
     }
 }

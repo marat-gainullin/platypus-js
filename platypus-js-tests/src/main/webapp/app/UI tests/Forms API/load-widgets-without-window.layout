@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?><layout title="" view="view">
+  <AnchorsPane cursor="0" name="view" prefHeight="300px" prefWidth="400px"/>
+  <Button cursor="0" name="button" parent="view" prefHeight="30px" prefWidth="100px" text="button">
+    <AnchorsPaneConstraints height="30px" left="30px" top="30px" width="100px"/>
+  </Button>
+  <PasswordField name="passwordField" parent="view" prefHeight="22px" prefWidth="105px" text="passwordField">
+    <AnchorsPaneConstraints height="22px" left="190px" top="30px" width="105px"/>
+  </PasswordField>
+  <ModelCombo cursor="0" name="modelCombo" parent="view" prefHeight="24px" prefWidth="100px">
+    <AnchorsPaneConstraints height="24px" left="30px" top="90px" width="100px"/>
+  </ModelCombo>
+  <ModelGrid cursor="0" name="modelGrid" parent="view" prefHeight="100px" prefWidth="100px">
+    <AnchorsPaneConstraints height="100px" left="190px" top="90px" width="100px"/>
+  </ModelGrid>
+</layout>

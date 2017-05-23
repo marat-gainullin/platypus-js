@@ -44,8 +44,9 @@ public class PlatypusMenuItemRadioButton extends MenuItemRadioButton implements 
 
 				@Override
 				public void onValueChange(ValueChangeEvent<Boolean> event) {
-					if (!settingValue)
+					if (!settingValue) {
 						ActionEvent.fire(PlatypusMenuItemRadioButton.this, PlatypusMenuItemRadioButton.this);
+                                        }
 				}
 
 			});

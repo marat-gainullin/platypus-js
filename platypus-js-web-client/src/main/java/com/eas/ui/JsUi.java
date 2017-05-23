@@ -569,7 +569,7 @@ public class JsUi {
 						_green = aGreen;
 					if(aBlue)
 						_blue = aBlue;
-					if(aAlpha)
+					if(arguments.length > 3)
 						_alpha = aAlpha;
 				}else{
 					throw "String like \"#cfcfcf\" or three color components with optional alpha is expected.";
@@ -671,7 +671,7 @@ public class JsUi {
 					var widgetRootElement = aModuleName ? @com.eas.ui.JsUi::findLayoutElementByBundleName(Lcom/google/gwt/xml/client/Element;Ljava/lang/String;)(rootElement, aModuleName) : rootElement;
 					return readWidgetElement(widgetRootElement, aModel);
 				} else {
-					throw 'Layout definition for module "' + aModuleName + '" is not found';
+					throw 'UI definition for module "' + aModuleName + '" is not found';
 				}
 			}
 			

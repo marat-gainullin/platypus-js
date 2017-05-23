@@ -108,10 +108,11 @@ public class PlatypusCheckBox extends CheckBox implements HasActionHandlers, Has
 		if (actionHandlers == 0) {
 			clickReg = addClickHandler(new ClickHandler() {
 
-				@Override
-                public void onClick(ClickEvent event) {
-					ActionEvent.fire(PlatypusCheckBox.this, PlatypusCheckBox.this);
-                }
+                                @Override
+                                public void onClick(ClickEvent event) {
+                                        event.stopPropagation();
+                                        ActionEvent.fire(PlatypusCheckBox.this, PlatypusCheckBox.this);
+                                }
 
 			});
 		}
@@ -176,6 +177,7 @@ public class PlatypusCheckBox extends CheckBox implements HasActionHandlers, Has
 	@Override
 	public void setJsName(String aValue) {
 		name = aValue;
+                setName(name);
 	}
 
 	@Override

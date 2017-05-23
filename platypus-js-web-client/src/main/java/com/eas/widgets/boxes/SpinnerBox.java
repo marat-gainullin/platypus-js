@@ -32,6 +32,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Focusable;
+import com.google.gwt.user.client.ui.HasName;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -45,7 +46,7 @@ import com.google.gwt.user.client.ui.ValueBox;
  * @param <T>
  */
 public abstract class SpinnerBox<T> extends Composite implements RequiresResize, HasValue<T>, HasText, HasValueChangeHandlers<T>, IsEditor<LeafValueEditor<T>>, Focusable, HasAllKeyHandlers,
-        HasFocusHandlers, HasBlurHandlers, HasDecorations, HasDecorationsWidth {
+        HasFocusHandlers, HasBlurHandlers, HasDecorations, HasDecorationsWidth, HasName {
 
 	protected FlowPanel container = new FlowPanel();
 	protected SimplePanel left = new SimplePanel();
@@ -271,6 +272,17 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 		return addHandler(handler, ValueChangeEvent.getType());
 	}
 
+        @Override
+        public String getName(){
+            return field.getName();
+        }
+
+        @Override
+        public void setName(String name) {
+            field.setName(name);
+        }
+
+        
 	@Override
 	public LeafValueEditor<T> asEditor() {
 		return field.asEditor();

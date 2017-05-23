@@ -45,12 +45,14 @@
                 for (var f in Forms) {
                     (function () {
                         var p = f;
-                        Object.defineProperty(module, p, {
-                            enumerable: true,
-                            get: function () {
-                                return Forms[p];
-                            }
-                        });
+                        if(module[p] !== Forms[p]){ // See Forms.loadWidgets,Forms.readWidgets and Ui.loadWidgets,Ui.readWidgets
+                            Object.defineProperty(module, p, {
+                                enumerable: true,
+                                get: function () {
+                                    return Forms[p];
+                                }
+                            });
+                        }
                     }());
                 }
                 return module;

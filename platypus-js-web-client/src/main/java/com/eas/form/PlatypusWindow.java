@@ -43,6 +43,7 @@ import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.touch.client.Point;
 import com.google.gwt.user.client.ui.HasValue;
@@ -180,14 +181,18 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		}
 	}
 
-	public JavaScriptObject submit(String aAction, final JavaScriptObject aDoneCallback) {
-		Map<String, String> fd = new HashMap<String, String>();
-		gatherForm(fd, (HasWidgets) getWidget());
-		return Utils.publishCancellable(AppClient.getInstance().submitForm(aAction, fd, aDoneCallback == null ? null : new Callback<XMLHttpRequest, XMLHttpRequest>() {
+	public JavaScriptObject submit(final String aAction, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
+		Map<String, String> formData = new HashMap<String, String>();
+                if(getView() instanceof HasWidgets){
+                        gatherForm(formData, (HasWidgets) getView());
+                }
+		return Utils.publishCancellable(AppClient.getInstance().submitForm(aAction, RequestBuilder.POST, "application/x-www-form-urlencoded", formData, new Callback<XMLHttpRequest, XMLHttpRequest>() {
 			@Override
 			public void onSuccess(XMLHttpRequest aRequest) {
 				try {
-					Utils.executeScriptEventVoid(aDoneCallback, aDoneCallback, aRequest);
+                                        if(aOnSuccess != null){
+                                                Utils.executeScriptEventVoid(aOnSuccess, aOnSuccess, aRequest);
+                                        }
 				} catch (Exception ex) {
 					Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, null, ex);
 				}
@@ -195,6 +200,13 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 			@Override
 			public void onFailure(XMLHttpRequest aRequest) {
+				try {
+                                        if(aOnFailure != null){
+                                                Utils.executeScriptEventVoid(aOnFailure, aOnFailure, aRequest);
+                                        }
+				} catch (Exception ex) {
+					Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, null, ex);
+				}
 			}
 		}));
 	}
@@ -638,8 +650,8 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
         });
         
         (function() {
-			var B = @com.eas.core.Predefine::boxing;
-			var Logger = @com.eas.core.Predefine::logger;
+		var B = @com.eas.core.Predefine::boxing;
+		var Logger = @com.eas.core.Predefine::logger;
 	        var showedWnd = null;
 	        var closeCallback = null;
 	        aPublished.show = function() {
@@ -678,8 +690,8 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		        else
 		        	aForm.@com.eas.form.PlatypusWindow::close(Ljava/lang/Object;Lcom/google/gwt/core/client/JavaScriptObject;)(null, null);
 	        };
-	        aPublished.submit = function(aAction, aCallback) {
-	        	aForm.@com.eas.form.PlatypusWindow::submit(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aAction, aCallback);
+	        aPublished.submit = function(aAction, aOnSuccess, aOnFailure) {
+	        	aForm.@com.eas.form.PlatypusWindow::submit(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aAction, aOnSuccess, aOnFailure);
 	        }
 	        aPublished.unwrap = function(){
 	        	return aForm;

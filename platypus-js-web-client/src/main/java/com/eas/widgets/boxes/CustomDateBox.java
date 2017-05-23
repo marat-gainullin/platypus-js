@@ -1,5 +1,6 @@
 package com.eas.widgets.boxes;
 
+import com.google.gwt.user.client.ui.HasName;
 import java.util.Date;
 
 import com.google.gwt.user.datepicker.client.DateBox;

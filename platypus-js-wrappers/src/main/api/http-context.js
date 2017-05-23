@@ -11,13 +11,23 @@ define(['logger', 'boxing'], function (Logger, B) {
     function Request(aHttpRequest) {
 
         var self = this;
+        
+        /**
+         * Native http request unwrap.
+         */
+        Object.defineProperty(this, 'unwrap', {
+            value: function () {
+                return aHttpRequest;
+            }
+        });
 
         /**
          * The name of the protection authentication scheme.
          */
         Object.defineProperty(this, 'authType', {get: function () {
                 return aHttpRequest.getAuthType();
-            }});
+            }
+        });
 
         /**
          * The name of the character encoding used in the body of this request.
@@ -25,21 +35,24 @@ define(['logger', 'boxing'], function (Logger, B) {
          */
         Object.defineProperty(this, 'characterEncoding', {get: function () {
                 return aHttpRequest.getCharacterEncoding();
-            }});
+            }
+        });
 
         /**
          * The length, in bytes, of the request body and made available by the input stream, or -1 if the length is not known.
          */
         Object.defineProperty(this, 'contentLength', {get: function () {
                 return aHttpRequest.getContentLength();
-            }});
+            }
+        });
 
         /**
          * The MIME type of the body of the request, or <code>null</code> if the type is not known.
          */
         Object.defineProperty(this, 'contentType', {get: function () {
                 return aHttpRequest.getContentType();
-            }});
+            }
+        });
 
         var _body = null;
         /**
@@ -61,7 +74,8 @@ define(['logger', 'boxing'], function (Logger, B) {
                         throw "Character encoding " + encoding + " is not supported.";
                     }
                 }
-            }});
+            }
+        });
 
         var _bodyBuffer = null;
         /**
@@ -79,7 +93,8 @@ define(['logger', 'boxing'], function (Logger, B) {
                     }
                     return _bodyBuffer;
                 }
-            }});
+            }
+        });
 
         /**
          * The portion of the request URI that indicates the context of the request.
@@ -88,7 +103,8 @@ define(['logger', 'boxing'], function (Logger, B) {
          */
         Object.defineProperty(this, 'contextPath', {get: function () {
                 return aHttpRequest.getContextPath();
-            }});
+            }
+        });
 
         /**
          * The cookies for the request.
@@ -120,28 +136,32 @@ define(['logger', 'boxing'], function (Logger, B) {
          */
         Object.defineProperty(this, 'localAddr', {get: function () {
                 return aHttpRequest.getLocalAddr();
-            }});
+            }
+        });
 
         /**
          * The host name of the Internet Protocol (IP) interface on which the request was received.
          */
         Object.defineProperty(this, 'localName', {get: function () {
                 return aHttpRequest.getLocalName();
-            }});
+            }
+        });
 
         /**
          * The Internet Protocol (IP) port number of the interface on which the request was received.
          */
         Object.defineProperty(this, 'localPort', {get: function () {
                 return aHttpRequest.getLocalPort();
-            }});
+            }
+        });
 
         /**
          * The name of the HTTP method with which this request was made, for example, GET, POST, or PUT.
          */
         Object.defineProperty(this, 'method', {get: function () {
                 return aHttpRequest.getMethod();
-            }});
+            }
+        });
 
         /**
          * Any extra path information associated with the URL the client sent when it made this request.
@@ -149,35 +169,40 @@ define(['logger', 'boxing'], function (Logger, B) {
          */
         Object.defineProperty(this, 'pathInfo', {get: function () {
                 return aHttpRequest.getPathInfo();
-            }});
+            }
+        });
 
         /**
          * Any extra path information after the servlet name but before the query string, and translates it to a real path.
          */
         Object.defineProperty(this, 'pathTranslated', {get: function () {
                 return aHttpRequest.getPathTranslated();
-            }});
+            }
+        });
 
         /**
          * The name and version of the protocol the request uses in the form protocol/majorVersion.minorVersion, for example, HTTP/1.1.
          */
         Object.defineProperty(this, 'protocol', {get: function () {
                 return aHttpRequest.getProtocol();
-            }});
+            }
+        });
 
         /**
          * The query string that is contained in the request URL after the path.
          */
         Object.defineProperty(this, 'queryString', {get: function () {
                 return aHttpRequest.getQueryString();
-            }});
+            }
+        });
 
         /**
          * The Internet Protocol (IP) address of the client or last proxy that sent the request.
          */
         Object.defineProperty(this, 'remoteAddr', {get: function () {
                 return aHttpRequest.getRemoteAddr();
-            }});
+            }
+        });
 
         /**
          * The fully qualified name of the client or the last proxy that sent the request.
@@ -185,14 +210,16 @@ define(['logger', 'boxing'], function (Logger, B) {
          */
         Object.defineProperty(this, 'remoteHost', {get: function () {
                 return aHttpRequest.getRemoteHost();
-            }});
+            }
+        });
 
         /**
          * The Internet Protocol (IP) source port of the client or last proxy that sent the request.
          */
         Object.defineProperty(this, 'remotePort', {get: function () {
                 return aHttpRequest.getRemotePort();
-            }});
+            }
+        });
 
         /**
          * The part of this request's URL from the protocol name up to the query string in the first line of the HTTP request.
@@ -200,39 +227,45 @@ define(['logger', 'boxing'], function (Logger, B) {
          */
         Object.defineProperty(this, 'requestURI', {get: function () {
                 return aHttpRequest.getRequestURI();
-            }});
+            }
+        });
         /**
          * Reconstructs the URL the client used to make the request.
          * The returned URL contains a protocol, server name, port nmber, and server path, but it does not include query string parameters.
          */
         Object.defineProperty(this, 'requestURL', {get: function () {
                 return aHttpRequest.getRequestURL().toString();
-            }});
+            }
+        });
         /**
          * The name of the scheme used to make this request, for example, http, https, or ftp.
          */
 
         Object.defineProperty(this, 'scheme', {get: function () {
                 return aHttpRequest.getScheme();
-            }});
+            }
+        });
         /**
          * The host name of the server to which the request was sent. It is the value of the part before ":".
          */
         Object.defineProperty(this, 'serverName', {get: function () {
                 return aHttpRequest.getServerName();
-            }});
+            }
+        });
         /**
          * The port number to which the request was sent. It is the value of the part after ":".
          */
         Object.defineProperty(this, 'serverPort', {get: function () {
                 return aHttpRequest.getServerPort();
-            }});
+            }
+        });
         /**
          * A boolean indicating whether this request was made using a secure channel, such as HTTPS.
          */
         Object.defineProperty(this, 'secure', {get: function () {
                 return aHttpRequest.isSecure();
-            }});
+            }
+        });
     }
 
     function Cookies(aHttpRequest) {
@@ -380,6 +413,15 @@ define(['logger', 'boxing'], function (Logger, B) {
 
     function Response(aHttpResponse) {
         var self = this;
+
+        /**
+         * Native http response unwrap.
+         */
+        Object.defineProperty(this, 'unwrap', {
+            value: function () {
+                return aHttpResponse;
+            }
+        });
 
         /**
          * The current status code of this response.

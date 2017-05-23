@@ -30,6 +30,7 @@ public class ModelCheck extends ModelDecoratorBox<Boolean> implements HasActionH
 
 				@Override
 				public void onClick(ClickEvent event) {
+                                        event.stopPropagation();
 					ActionEvent.fire(ModelCheck.this, ModelCheck.this);
 				}
 

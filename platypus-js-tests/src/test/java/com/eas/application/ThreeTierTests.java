@@ -1,5 +1,6 @@
 package com.eas.application;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -182,5 +183,10 @@ public abstract class ThreeTierTests extends ScriptedTests {
     @Test
     public void LPCCallbacksTest() throws InterruptedException {
         start("LPCCallbacksTest", 20000L);
+    }
+    
+    @Test
+    public void loadWidgetsWithoutWindow() throws InterruptedException {
+        start("load-widgets-without-window", 10000L);
     }
 }

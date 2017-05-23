@@ -43,7 +43,6 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 
 	public PlatypusFormattedTextField() {
 		super();
-		setStyleName("form-control");
 		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
@@ -93,8 +92,9 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 
 				@Override
 				public void onValueChange(ValueChangeEvent<Object> event) {
-					if (!settingValue)
+					if (!settingValue) {
 						ActionEvent.fire(PlatypusFormattedTextField.this, PlatypusFormattedTextField.this);
+                                        }
 				}
 
 			});
@@ -160,6 +160,7 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 	@Override
 	public void setJsName(String aValue) {
 		name = aValue;
+                setName(name);
 	}
 
 	public Object getJsValue() {

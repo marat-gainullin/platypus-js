@@ -211,13 +211,14 @@ public class AppClient {
 	}
 
 	public static String toFilyAppModuleId(String aRelative, String aStartPoint) {
-		Element div = com.google.gwt.dom.client.Document.get().createDivElement();
-		div.setInnerHTML("<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>");
-		String absolute = div.getFirstChildElement().<AnchorElement> cast().getHref();
+		Element moduleIdNormalizer = com.google.gwt.dom.client.Document.get().createDivElement();
+		moduleIdNormalizer.setInnerHTML("<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>");
+		String mormalizedAbsoluteModuleUrl = URL.decode(moduleIdNormalizer.getFirstChildElement().<AnchorElement> cast().getHref());
 		String hostContextPrefix = AppClient.relativeUri() + AppClient.getSourcePath();
-		absolute = URL.decode(absolute);
-		String appModuleId = absolute.substring(hostContextPrefix.length());
-		return appModuleId;
+		Element hostContextNormalizer = com.google.gwt.dom.client.Document.get().createDivElement();
+		hostContextNormalizer.setInnerHTML("<a href=\"" + hostContextPrefix + "\">o</a>");
+		String mormalizedHostContextPrefix = URL.decode(hostContextNormalizer.getFirstChildElement().<AnchorElement> cast().getHref());
+		return mormalizedAbsoluteModuleUrl.substring(mormalizedHostContextPrefix.length());
 	}
 
 	public static Object jsLoad(String aResourceName, final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
@@ -398,6 +399,7 @@ public class AppClient {
 		req.overrideMimeType("multipart/form-data");
 		// Must set the onreadystatechange handler before calling send().
 		req.setOnReadyStateChange(new ReadyStateChangeHandler() {
+                        @Override
 			public void onReadyStateChange(XMLHttpRequest xhr) {
 				if (xhr.getReadyState() == XMLHttpRequest.DONE) {
 					xhr.clearOnReadyStateChange();
@@ -426,33 +428,43 @@ public class AppClient {
 		};
 	}
 
-	public Cancellable submitForm(String aAction, Map<String, String> aFormData, final Callback<XMLHttpRequest, XMLHttpRequest> aCallback) {
+	public Cancellable submitForm(String aAction, RequestBuilder.Method aMethod, String aContentType, Map<String, String> aFormData, final Callback<XMLHttpRequest, XMLHttpRequest> aCallback) {
 		final XMLHttpRequest req = XMLHttpRequest.create().cast();
-		aAction = (aAction != null ? aAction : "");
-		if (!aAction.startsWith("/"))
-			aAction = "/" + aAction;
-		String url = apiUrl + aAction;
+		String urlPath = aAction != null ? aAction : "";
 		List<String> parameters = new ArrayList<String>();
 		for (String paramName : aFormData.keySet()) {
 			parameters.add(param(paramName, aFormData.get(paramName)));
 		}
-		url += "?" + params(parameters.toArray(new String[] {}));
-		req.open("get", url);
+                String paramsData = params(parameters.toArray(new String[] {}));
+                if(aMethod != RequestBuilder.POST){
+                    urlPath += "?" + paramsData;
+                }
+		req.open(aMethod.toString(), urlPath);
+                req.setRequestHeader("Content-Type", aContentType);
 		req.setOnReadyStateChange(new ReadyStateChangeHandler() {
+                        @Override
 			public void onReadyStateChange(final XMLHttpRequest xhr) {
 				if (xhr.getReadyState() == XMLHttpRequest.DONE) {
 					xhr.clearOnReadyStateChange();
 					if (aCallback != null) {
-						try {
-							aCallback.onSuccess(xhr);
-						} catch (Exception ex) {
-							Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
-						}
+                                                try {
+                                                        if (xhr.getStatus() == Response.SC_OK) {
+                                                                aCallback.onSuccess(xhr);
+                                                        } else {
+                                                                aCallback.onFailure(xhr);
+                                                        }
+                                                } catch (Exception ex) {
+                                                        Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
+                                                }
 					}
 				}
 			}
 		});
-		req.send();
+                if(aMethod == RequestBuilder.POST){
+                    req.send(paramsData);
+                } else{
+                    req.send();
+                }
 		return new Cancellable() {
 			@Override
 			public void cancel() {
@@ -1075,6 +1087,8 @@ public class AppClient {
 					String responseType = executed.getResponseHeader("content-type");
 					if (responseType != null) {
 						if (isJsonResponse(executed)) {
+                                                        // WARNING!!!Don't edit to Utils.jsonParse!
+                                                        // It is parsed in high-level js-code.
 							return Utils.toJs(executed.getResponseText());
 						} else if (responseType.toLowerCase().contains(REPORT_LOCATION_CONTENT_TYPE)) {
 							return createReport(aReportConstructor, executed.getResponseText());

@@ -10,6 +10,7 @@ import com.eas.ui.HasBinding;
 import com.eas.ui.HasCustomEditing;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
+import com.eas.ui.HasJsName;
 import com.eas.ui.HasJsValue;
 import com.eas.ui.HasOnRender;
 import com.eas.ui.HasOnSelect;
@@ -32,6 +33,7 @@ import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.HasName;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
 
@@ -139,6 +141,9 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 	@Override
 	public void setJsName(String aValue) {
 		name = aValue;
+                if(decorated instanceof HasName){
+                    ((HasName)decorated).setName(aValue);
+                }
 	}
 
 	@Override

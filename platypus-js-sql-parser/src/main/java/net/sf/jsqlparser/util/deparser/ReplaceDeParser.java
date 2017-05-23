@@ -12,8 +12,8 @@ import net.sf.jsqlparser.statement.select.SelectVisitor;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
 /**
- * A class to de-parse (that is, tranform from JSqlParser hierarchy into a string)
- * a {@link net.sf.jsqlparser.statement.replace.Replace}
+ * A class to de-parse (that is, tranform from JSqlParser hierarchy into a
+ * string) a {@link net.sf.jsqlparser.statement.replace.Replace}
  */
 public class ReplaceDeParser implements ItemsListVisitor {
 
@@ -25,10 +25,12 @@ public class ReplaceDeParser implements ItemsListVisitor {
     }
 
     /**
-     * @param expressionVisitor a {@link ExpressionVisitor} to de-parse expressions. It has to share the same<br>
+     * @param expressionVisitor a {@link ExpressionVisitor} to de-parse
+     * expressions. It has to share the same<br>
      * StringBuilder (buffer parameter) as this object in order to work
-     * @param selectVisitor a {@link SelectVisitor} to de-parse {@link net.sf.jsqlparser.statement.select.Select}s.
-     * It has to share the same<br>
+     * @param selectVisitor a {@link SelectVisitor} to de-parse
+     * {@link net.sf.jsqlparser.statement.select.Select}s. It has to share the
+     * same<br>
      * StringBuilder (buffer parameter) as this object in order to work
      * @param buffer the buffer that will be filled with the select
      */
@@ -46,24 +48,24 @@ public class ReplaceDeParser implements ItemsListVisitor {
         this.buffer = buffer;
     }
 
-    public void deParse(Replace replace) {
-        buffer.append(replace.getComment() != null ? replace.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("Replace ");
-        if (replace.isUseInto()){
-            buffer.append(replace.getComment() != null ? replace.getCommentInto()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append("Into ");
+    public void deParse(Replace aReplace) {
+        buffer.append(aReplace.getComment() != null ? aReplace.getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append("Replace ");
+        if (aReplace.isUseInto()) {
+            buffer.append(aReplace.getCommentInto() != null ? aReplace.getCommentInto() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append("Into ");
         }
-        buffer.append(replace.getComment() != null ? replace.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(replace.getTable().getWholeTableName());
-        if (replace.getExpressions() != null && replace.getColumns() != null) {
-            buffer.append(replace.getCommentSet() != null ? " "+replace.getCommentSet()+ExpressionDeParser.LINE_SEPARATOR : "").append(" SET ");
+        buffer.append(aReplace.getTable().getComment() != null ? aReplace.getTable().getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append(aReplace.getTable().getWholeTableName());
+        if (aReplace.getExpressions() != null && aReplace.getColumns() != null) {
+            buffer.append(aReplace.getCommentSet() != null ? " " + aReplace.getCommentSet() + ExpressionDeParser.LINE_SEPARATOR : "").append(" SET ");
             //each element from expressions match up with a column from columns.
             int columnsCounter = 0;
-            for (int i = 0, s = replace.getColumns().size(); i < s; i++) {
-                Column column = (Column) replace.getColumns().get(i);
-                buffer.append(column.getComment() != null ? column.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(column.getWholeColumnName())
-                      .append(!replace.getCommentEqlasColums().get(i).toString().isEmpty()?" "+replace.getCommentEqlasColums().get(i)+ExpressionDeParser.LINE_SEPARATOR : "" ).append(" = ");
-                Expression expression = (Expression) replace.getExpressions().get(i);
+            for (int i = 0, s = aReplace.getColumns().size(); i < s; i++) {
+                Column column = (Column) aReplace.getColumns().get(i);
+                buffer.append(column.getComment() != null ? column.getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append(column.getWholeColumnName())
+                        .append(!aReplace.getCommentEqlasColums().get(i).toString().isEmpty() ? " " + aReplace.getCommentEqlasColums().get(i) + ExpressionDeParser.LINE_SEPARATOR : "").append(" = ");
+                Expression expression = (Expression) aReplace.getExpressions().get(i);
                 expression.accept(expressionVisitor);
-                if (i < replace.getColumns().size() - 1) {
-                    buffer.append(!replace.getCommentCommaExpr().get(i).toString().isEmpty()?" "+replace.getCommentCommaExpr().get(i)+" ":"");
+                if (i < aReplace.getColumns().size() - 1) {
+                    buffer.append(!aReplace.getCommentCommaExpr().get(i).toString().isEmpty() ? " " + aReplace.getCommentCommaExpr().get(i) + " " : "");
                     if (columnsCounter++ == 2) {
                         columnsCounter = 0;
                         buffer.append(ExpressionDeParser.LINE_SEPARATOR).append(", ");
@@ -73,29 +75,29 @@ public class ReplaceDeParser implements ItemsListVisitor {
                 }
             }
         } else {
-            if (replace.getColumns() != null) {
-                buffer.append(replace.getCommentBeforeColums() != null ? " "+replace.getCommentBeforeColums()+ExpressionDeParser.LINE_SEPARATOR : "").append(" (");
-                for (int i = 0; i < replace.getColumns().size(); i++) {
-                    Column column = (Column) replace.getColumns().get(i);
-                    buffer.append(column.getComment() != null ? column.getComment()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(column.getWholeColumnName());
-                    if (i < replace.getColumns().size() - 1) {
-                        buffer.append(!"".equals(replace.getCommentCommaColums().get(i)) ? " " + replace.getCommentCommaColums().get(i)+ExpressionDeParser.LINE_SEPARATOR : "")
-                              .append(", ");
+            if (aReplace.getColumns() != null) {
+                buffer.append(aReplace.getCommentBeforeColums() != null ? " " + aReplace.getCommentBeforeColums() + ExpressionDeParser.LINE_SEPARATOR : "").append(" (");
+                for (int i = 0; i < aReplace.getColumns().size(); i++) {
+                    Column column = (Column) aReplace.getColumns().get(i);
+                    buffer.append(column.getComment() != null ? column.getComment() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append(column.getWholeColumnName());
+                    if (i < aReplace.getColumns().size() - 1) {
+                        buffer.append(!"".equals(aReplace.getCommentCommaColums().get(i)) ? " " + aReplace.getCommentCommaColums().get(i) + ExpressionDeParser.LINE_SEPARATOR : "")
+                                .append(", ");
                     }
                 }
-                buffer.append(replace.getCommentAfterColums() != null ? replace.getCommentAfterColums()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(") ");
+                buffer.append(aReplace.getCommentAfterColums() != null ? aReplace.getCommentAfterColums() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append(") ");
             }
         }
-        if (replace.isUseValues()) {
-            buffer.append(replace.getCommentValues() != null ? " "+replace.getCommentValues() : "")
-                  .append(ExpressionDeParser.LINE_SEPARATOR).append(" Values ")
-                  .append(replace.getCommentBeforeItems()!= null ? replace.getCommentBeforeItems()+" "+ExpressionDeParser.LINE_SEPARATOR : ""); 
+        if (aReplace.isUseValues()) {
+            buffer.append(aReplace.getCommentValues() != null ? " " + aReplace.getCommentValues() : "")
+                    .append(ExpressionDeParser.LINE_SEPARATOR).append(" Values ")
+                    .append(aReplace.getCommentBeforeItems() != null ? aReplace.getCommentBeforeItems() + " " + ExpressionDeParser.LINE_SEPARATOR : "");
         }
-        replace.getItemsList().accept(this);
-        if (replace.isUseValues()) {
-            buffer.append(replace.getCommentAfterItems() != null ? replace.getCommentAfterItems()+" "+ExpressionDeParser.LINE_SEPARATOR : "").append(")");
+        aReplace.getItemsList().accept(this);
+        if (aReplace.isUseValues()) {
+            buffer.append(aReplace.getCommentAfterItems() != null ? aReplace.getCommentAfterItems() + " " + ExpressionDeParser.LINE_SEPARATOR : "").append(")");
         }
-        buffer.append(!"".equals(replace.getEndComment()) ? " "+replace.getEndComment() : "");
+        buffer.append(!"".equals(aReplace.getEndComment()) ? " " + aReplace.getEndComment() : "");
     }
 
     public void visit(ExpressionList expressionList) {

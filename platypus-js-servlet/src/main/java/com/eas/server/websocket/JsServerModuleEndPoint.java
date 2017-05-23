@@ -180,6 +180,7 @@ public class JsServerModuleEndPoint {
             JSObject errorEvent = Scripts.getSpace().makeObj();
             errorEvent.setMember("message", aError.getMessage());
             errorEvent.setMember("id", websocketSession.getId());
+            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.SEVERE, null, aError);
             platypusCore.executeMethod(moduleName, WS_ON_ERROR, new Object[]{errorEvent}, true, (Object aResult) -> {
                 Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_ERROR, moduleName});
             }, (Exception ex) -> {

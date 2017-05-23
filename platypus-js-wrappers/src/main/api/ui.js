@@ -79,7 +79,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             var formFactory = FormLoaderClass.load(document, aModuleName, aModel ? aModel : null);
             return publishWidgetsList(formFactory);
         }else{
-            throw 'Layout definition for module "' + aModuleName + '" is not found';
+            throw "UI definition for module '" + aModuleName + "' is not found. May be it hasn't been prefetched";
         }
     }
 

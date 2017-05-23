@@ -41,7 +41,8 @@ public class PlatypusTextArea extends TextArea implements HasScroll, HorizontalS
 	public PlatypusTextArea() {
 		super();
 		setStyleName("form-control");
-		getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
+                CommonResources.INSTANCE.commons().ensureInjected();
+                getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
 		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
@@ -126,6 +127,7 @@ public class PlatypusTextArea extends TextArea implements HasScroll, HorizontalS
 	@Override
 	public void setJsName(String aValue) {
 		name = aValue;
+                setName(name);
 	}
 
 	@Override

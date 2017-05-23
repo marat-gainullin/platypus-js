@@ -96,10 +96,9 @@ public class CardPane extends CardsPanel implements HasJsFacade, HasEnabled, Has
 	}
 
 	@Override
-	public void showWidget(int index) {
+	public void showWidget(Widget newWidget) {
 		Widget oldWidget = visibleWidget;
-		super.showWidget(index);
-		Widget newWidget = visibleWidget;
+		super.showWidget(newWidget);
 		if (oldWidget != newWidget) {
 			SelectionEvent.fire(this, newWidget);
 		}
@@ -185,7 +184,7 @@ public class CardPane extends CardsPanel implements HasJsFacade, HasEnabled, Has
 	public void show(String aCardName) {
 		if (cards.containsKey(aCardName)) {
 			Widget toShow = cards.get(aCardName);
-			showWidget(getWidgetIndex(toShow));
+			showWidget(toShow);
 		}
 	}
 

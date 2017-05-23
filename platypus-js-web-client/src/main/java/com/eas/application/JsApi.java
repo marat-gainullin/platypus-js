@@ -19,27 +19,31 @@ public class JsApi {
 		        }
 		    });
 		}
-		$wnd.require = function (aDeps, aOnSuccess, aOnFailure) {
-            if (!Array.isArray(aDeps))
-                aDeps = [aDeps];
-			var resolved = @com.eas.application.Application::require(Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;)(aDeps, aOnSuccess, aOnFailure);
-			return resolved.length === 1 ? resolved[0] : resolved; 
-		}; 
-		$wnd.define = function () {
-	        if (arguments.length === 1 ||
-	                arguments.length === 2 || arguments.length === 3) {
-	            var aModuleName = arguments.length === 3 ? arguments[0] : null;
-	            var aDeps = arguments.length === 3 ? arguments[1] : arguments.length === 2 ? arguments[0] : [];
-	            var aModuleDefiner = arguments.length === 3 ? arguments[2] : arguments.length === 2 ? arguments[1] : arguments[0];
-	            if (!Array.isArray(aDeps))
-	                aDeps = [aDeps];
-	            @com.eas.application.Application::define(Ljava/lang/String;Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;)(aModuleName ? aModuleName + '' : null, aDeps, function(){
-                	return typeof aModuleDefiner === 'function' ? aModuleDefiner.apply(null, arguments) : aModuleDefiner;
-	            });
-	        } else {
-	            throw 'Module definition arguments mismatch';
-	        }
+                $wnd.platypusjs = {};
+		$wnd.platypusjs.require = function (aDeps, aOnSuccess, aOnFailure) {
+                    if (!Array.isArray(aDeps))
+                        aDeps = [aDeps];
+                                var resolved = @com.eas.application.Application::require(Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;)(aDeps, aOnSuccess, aOnFailure);
+                                return resolved.length === 1 ? resolved[0] : resolved; 
 		};
+		$wnd.platypusjs.define = function () {
+                    if (arguments.length === 1 ||
+                            arguments.length === 2 || arguments.length === 3) {
+                        var aModuleName = arguments.length === 3 ? arguments[0] : null;
+                        var aDeps = arguments.length === 3 ? arguments[1] : arguments.length === 2 ? arguments[0] : [];
+                        var aModuleDefiner = arguments.length === 3 ? arguments[2] : arguments.length === 2 ? arguments[1] : arguments[0];
+                        if (!Array.isArray(aDeps))
+                            aDeps = [aDeps];
+                        @com.eas.application.Application::define(Ljava/lang/String;Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;)(aModuleName ? aModuleName + '' : null, aDeps, function(){
+                            return typeof aModuleDefiner === 'function' ? aModuleDefiner.apply(null, arguments) : aModuleDefiner;
+                        });
+                    } else {
+                        throw 'Module definition arguments mismatch';
+                    }
+		};
+                $wnd.Object.seal($wnd.platypusjs);
+                $wnd.require = $wnd.platypusjs.require;
+                $wnd.define = $wnd.platypusjs.define;
 		$wnd.define.amd = {};
 		
 		function predefine(aDeps, aName, aDefiner){
@@ -400,29 +404,29 @@ public class JsApi {
 		});
 		
 		predefine(['boxing'], 'resource', function(B){
-			var module = {};
+                        var module = {};
 			Object.defineProperty(module, 'upload', {
-                enumerable: true,
+                            enumerable: true,
 				value : function(aFile, aName, aCompleteCallback, aProgressCallback, aAbortCallback) {
 					return @com.eas.client.AppClient::jsUpload(Lcom/eas/client/published/PublishedFile;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aFile, aName, aCompleteCallback, aProgressCallback, aAbortCallback);
 				}
 			});
 			Object.defineProperty(module, 'load', {
-                enumerable: true,
+                            enumerable: true,
 				value : function(aResName, onSuccess, onFailure){
-	            	var loaded = B.boxAsJs(@com.eas.client.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, onSuccess, onFailure));
-	            	if(loaded)
-	            		loaded.length = loaded.byteLength; 
-	            	return loaded;
-		        }
+                                        var loaded = B.boxAsJs(@com.eas.client.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, onSuccess, onFailure));
+                                        if(loaded)
+                                                loaded.length = loaded.byteLength; 
+                                        return loaded;
+                                }
 			});
 			Object.defineProperty(module, 'loadText', {
-                enumerable: true,
+                            enumerable: true,
 				value : function(aResName, onSuccess, onFailure){
-	            	return B.boxAsJs(@com.eas.client.AppClient::jsLoadText(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, onSuccess, onFailure));
-		        }
+                                        return B.boxAsJs(@com.eas.client.AppClient::jsLoadText(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, onSuccess, onFailure));
+                                }
 			});
-	        return module;
+                        return module;
 		});		
 		
 		predefine([], 'security', function(){
@@ -521,12 +525,16 @@ public class JsApi {
 			function requireRemotes(aRemotesNames, aOnSuccess, aOnFailure){
 				var remotesNames = Array.isArray(aRemotesNames) ? aRemotesNames : [aRemotesNames];
 				@com.eas.application.Loader::jsLoadServerModules(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(remotesNames, function () {
-		            var proxies = [];
-		            for(var r = 0; r < remotesNames.length; r++){
-		                proxies.push(new RpcProxy(remotesNames[r]));
-		            }
-		            aOnSuccess.apply(null, proxies);
-		        }, aOnFailure);
+                                        try{
+                                                var proxies = [];
+                                                for(var r = 0; r < remotesNames.length; r++){
+                                                    proxies.push(new RpcProxy(remotesNames[r]));
+                                                }
+                                                aOnSuccess.apply(null, proxies);
+                                        } catch(ex){
+                                                aOnFailure(ex); // This is because of exceptions in RpcProxy constructor. They are related to server response and so, they are should be passed to failure callback.
+                                        }
+                                }, aOnFailure);
 			}		
 			function generateFunction(aModuleName, aFunctionName) {
 				return function() {
@@ -558,12 +566,27 @@ public class JsApi {
 							function(aResult){
 								if(typeof aResult === 'object' && aResult instanceof Report)
 									onSuccess(aResult);
-								else
-									onSuccess($wnd.JSON.parse(aResult, @com.eas.core.Utils.JsObject::dateReviver()()));
+                                                                else {
+                                                                        var parsed;
+                                                                        try {
+                                                                                parsed = $wnd.JSON.parse(aResult, @com.eas.core.Utils.JsObject::dateReviver()());
+                                                                        } catch(ex) {
+                                                                                parsed = aResult;
+                                                                        }
+									onSuccess(parsed);
+                                                                }
 							}, onFailure, Report);
 					} else {
 						var result = nativeClient.@com.eas.client.AppClient::requestServerMethodExecution(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params, null, null, Report);
-						return typeof result === 'object' && result instanceof Report ? result : $wnd.JSON.parse(result, @com.eas.core.Utils.JsObject::dateReviver()()); 
+						if (typeof result === 'object' && result instanceof Report)
+                                                        return result;
+                                                else {
+                                                        try {
+                                                                return $wnd.JSON.parse(result, @com.eas.core.Utils.JsObject::dateReviver()());
+                                                        } catch(ex){
+                                                                return result;
+                                                        }
+                                                }
 					}
 				};
 			}
@@ -574,7 +597,7 @@ public class JsApi {
 				if(!moduleData)
 					throw 'No server module proxy for module: ' + aModuleName;
 				if(!moduleData.isPermitted)
-					throw 'Access to server module ' + aModuleName + ' is not permitted.';
+					throw "Access to server module '" + aModuleName + "' functions list is not permitted.";
 				var self = this;
 				for (var i = 0; i < moduleData.functions.length; i++) {
 					var funcName = moduleData.functions[i];
