@@ -38,6 +38,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.HasEnabled;
 import java.util.HashSet;
 import java.util.Set;
@@ -82,8 +83,7 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
                     public void on(NativeEvent event) {
                         event.preventDefault();
                         event.stopPropagation();
-                        menu.setPopupPosition(event.getClientX(), event.getClientY());
-                        menu.show();
+                        menu.show(element.getAbsoluteLeft(), element.getAbsoluteTop(), element.getOffsetWidth(), element.getOffsetHeight());
                     }
                 });
             }
@@ -406,8 +406,6 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
                     public void on(NativeEvent evt) {
                         if (mousePressed != null) {
                             evt.stopPropagation();
-                            // Event.setCapture(event.getRelativeElement());
-                            mouseState = MOUSE.PRESSED;
                             executeEvent(mousePressed, EventsPublisher.publishMouseEvent(evt));
                         }
                     }
@@ -429,14 +427,90 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
                 mouseUpReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEUP, new XElement.NativeHandler() {
                     @Override
                     public void on(NativeEvent evt) {
-                        // if (mouseState == MOUSE.PRESSED)
-                        // Event.releaseCapture(event.getRelativeElement());
                         if (mouseReleased != null) {
                             evt.stopPropagation();
-                            mouseState = MOUSE.NULL;
                             executeEvent(mouseReleased, EventsPublisher.publishMouseEvent(evt));
                         }
                     }
+                });
+            }
+        }
+    }
+
+    protected HandlerRegistration mouseMoveReg;
+
+    public void setMouseMoved(JavaScriptObject aValue) {
+        if (mouseMoved != aValue) {
+            if (mouseMoveReg != null) {
+                mouseMoveReg.removeHandler();
+                mouseMoveReg = null;
+            }
+            mouseMoved = aValue;
+            if (mouseMoved != null) {
+                mouseMoveReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEMOVE, new XElement.NativeHandler() {
+                    @Override
+                    public void on(NativeEvent evt) {
+                        if (mouseMoved != null) {
+                            evt.stopPropagation();
+                            executeEvent(mouseDragged, EventsPublisher.publishMouseEvent(evt));
+                        }
+                    }
+
+                });
+            }
+        }
+    }
+
+    protected HandlerRegistration mouseDownForDragReg;
+    protected HandlerRegistration mouseUpForDragReg;
+    protected HandlerRegistration mouseMoveForDragReg;
+
+    public void setMouseDragged(JavaScriptObject aValue) {
+        if (mouseDragged != aValue) {
+            if (mouseDownForDragReg != null) {
+                mouseDownForDragReg.removeHandler();
+                mouseDownForDragReg = null;
+            }
+            if (mouseUpForDragReg != null) {
+                mouseUpForDragReg.removeHandler();
+                mouseUpForDragReg = null;
+            }
+            if (mouseMoveForDragReg != null) {
+                mouseMoveForDragReg.removeHandler();
+                mouseMoveForDragReg = null;
+            }
+            mouseDragged = aValue;
+            if (mouseDragged != null) {
+                mouseDownForDragReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEDOWN, new XElement.NativeHandler() {
+                    @Override
+                    public void on(NativeEvent evt) {
+                        DOM.setCapture(element);
+                        mouseState = MOUSE.PRESSED;
+                        executeEvent(mousePressed, EventsPublisher.publishMouseEvent(evt));
+                    }
+                });
+                mouseUpForDragReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEUP, new XElement.NativeHandler() {
+                    @Override
+                    public void on(NativeEvent evt) {
+                        if(element == DOM.getCaptureElement()){
+                            DOM.releaseCapture(element);
+                        }
+                        evt.stopPropagation();
+                        mouseState = MOUSE.NULL;
+                    }
+                });
+                mouseMoveForDragReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEMOVE, new XElement.NativeHandler() {
+                    @Override
+                    public void on(NativeEvent evt) {
+                        if (mouseDragged != null) {
+                            evt.stopPropagation();
+                            if (mouseState == MOUSE.PRESSED || mouseState == MOUSE.DRAGGED) {
+                                mouseState = MOUSE.DRAGGED;
+                                executeEvent(mouseDragged, EventsPublisher.publishMouseEvent(evt));
+                            }
+                        }
+                    }
+
                 });
             }
         }
@@ -490,36 +564,6 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
         }
     }
 
-    protected HandlerRegistration mouseMoveReg;
-
-    public void setMouseMoved(JavaScriptObject aValue) {
-        if (mouseMoved != aValue) {
-            if (mouseMoveReg != null) {
-                mouseMoveReg.removeHandler();
-                mouseMoveReg = null;
-            }
-            mouseMoved = aValue;
-            if (mouseMoved != null) {
-                mouseMoveReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEMOVE, new XElement.NativeHandler() {
-                    @Override
-                    public void on(NativeEvent evt) {
-                        if (mouseMoved != null || mouseDragged != null) {
-                            evt.stopPropagation();
-                            if (mouseState == MOUSE.NULL || mouseState == MOUSE.MOVED) {
-                                mouseState = MOUSE.MOVED;
-                                executeEvent(mouseMoved, EventsPublisher.publishMouseEvent(evt));
-                            } else if (mouseState == MOUSE.PRESSED || mouseState == MOUSE.DRAGGED) {
-                                mouseState = MOUSE.DRAGGED;
-                                executeEvent(mouseDragged, EventsPublisher.publishMouseEvent(evt));
-                            }
-                        }
-                    }
-
-                });
-            }
-        }
-    }
-
     protected HandlerRegistration componentShownReg;
 
     public void setComponentShown(JavaScriptObject aValue) {
@@ -562,10 +606,6 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
                 });
             }
         }
-    }
-
-    public void setMouseDragged(JavaScriptObject aValue) {
-        mouseDragged = aValue;
     }
 
     protected HandlerRegistration focusReg;
