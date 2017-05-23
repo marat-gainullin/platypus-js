@@ -157,13 +157,14 @@ if(!appPrivateProps.httpTomcatPort)
 appPrivateProps.httpTomcatPort = 8085
 def testBasesDirectory = "${buildDir}/test-databases"
 
+def dbPort = 21626
 def datasource1Name = 'eas'
-def datasource1Dburl = "jdbc:h2:tcp://localhost/${testBasesDirectory}/platypus-tests-eas"
+def datasource1Dburl = "jdbc:h2:tcp://localhost:${dbPort}/${testBasesDirectory}/platypus-tests-eas"
 def datasource1Dbuser = 'sa'
 def datasource1Dbpassword = 'sa'
 def datasource1Dbschema = 'PUBLIC'
 def datasource2Name = 'easHR'
-def datasource2Dburl = "jdbc:h2:tcp://localhost/${testBasesDirectory}/platypus-tests-hr"
+def datasource2Dburl = "jdbc:h2:tcp://localhost:${dbPort}/${testBasesDirectory}/platypus-tests-hr"
 def datasource2Dbuser = 'sa'
 def datasource2Dbpassword = 'sa'
 def datasource2Dbschema = 'PUBLIC'
@@ -241,7 +242,7 @@ explodePwc
 task h2Exec(type: JavaExec) {
     classpath fileTree(sharedLibDir)
     main 'org.h2.tools.Server'
-    args '-tcp'
+    args '-tcp', '-tcpPort', dbPort
 }
 task h2FillEasExec(type: JavaExec) {
     classpath fileTree(sharedLibDir)
