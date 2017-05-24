@@ -1,14 +1,16 @@
 package com.eas.widgets.containers;
 
 import com.eas.core.HasPublished;
+import com.eas.core.Logger;
+import com.eas.core.Utils;
 import com.eas.ui.CommonResources;
+import com.eas.ui.EventsPublisher;
 import com.eas.ui.Widget;
 import com.eas.ui.events.HasSelectionHandlers;
 import com.eas.ui.events.SelectionEvent;
 import com.eas.ui.events.SelectionHandler;
 import com.eas.ui.HasChildrenPosition;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -29,16 +31,17 @@ public class Cards extends Container implements HasSelectionHandlers<Widget>, Ha
     private int hgap;
     private int vgap;
 
+    protected JavaScriptObject onItemSelected;
     /**
      * Creates an empty deck panel.
      */
     public Cards(int aVGap, int aHGap) {
         super();
+        CommonResources.INSTANCE.commons().ensureInjected();
         element.getStyle().setOverflow(Style.Overflow.HIDDEN);
         element.getStyle().setPosition(Style.Position.RELATIVE);
         setHgap(aHGap);
         setVgap(aVGap);
-        CommonResources.INSTANCE.commons().ensureInjected();
     }
 
     public int getHgap() {
@@ -193,7 +196,7 @@ public class Cards extends Container implements HasSelectionHandlers<Widget>, Ha
         w.setVisible(false);
     }
 
-    private Set<SelectionHandler<Widget>> selectionHandlers = new HashSet<>();
+    private final Set<SelectionHandler<Widget>> selectionHandlers = new HashSet<>();
 
     @Override
     public HandlerRegistration addSelectionHandler(SelectionHandler<Widget> handler) {
@@ -204,6 +207,39 @@ public class Cards extends Container implements HasSelectionHandlers<Widget>, Ha
                 selectionHandlers.remove(handler);
             }
         };
+    }
+
+    public JavaScriptObject getOnItemSelected() {
+        return onItemSelected;
+    }
+
+    private HandlerRegistration selectedReg;
+
+    public void setOnItemSelected(JavaScriptObject aValue) {
+        if (onItemSelected != aValue) {
+            if (selectedReg != null) {
+                selectedReg.removeHandler();
+                selectedReg = null;
+            }
+            onItemSelected = aValue;
+            if (onItemSelected != null) {
+                selectedReg = addSelectionHandler(new SelectionHandler<Widget>() {
+
+                    @Override
+                    public void onSelection(SelectionEvent<Widget> event) {
+                        if (onItemSelected != null) {
+                            try {
+                                JavaScriptObject jsItem = event.getSelectedItem() instanceof HasPublished ? ((HasPublished) event.getSelectedItem()).getPublished() : null;
+                                Utils.executeScriptEventVoid(published, onItemSelected, EventsPublisher.publishItemEvent(published, jsItem));
+                            } catch (Exception e) {
+                                Logger.severe(e);
+                            }
+                        }
+                    }
+
+                });
+            }
+        }
     }
 
     @Override

@@ -14,17 +14,7 @@ import com.eas.form.Form;
 import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.Menu;
 import com.eas.menu.PlatypusMenuBar;
-import com.eas.menu.PlatypusPopupMenu;
 import com.eas.widgets.containers.Anchors;
-import com.eas.widgets.BorderPane;
-import com.eas.widgets.BoxPane;
-import com.eas.widgets.CardPane;
-import com.eas.widgets.FlowPane;
-import com.eas.widgets.GridPane;
-import com.eas.widgets.ScrollPane;
-import com.eas.widgets.SplitPane;
-import com.eas.widgets.TabbedPane;
-import com.eas.widgets.ToolBar;
 import com.eas.widgets.boxes.DropDownButton;
 import com.eas.widgets.boxes.ImageButton;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -49,7 +39,7 @@ public class DefaultUiReader extends UiReader {
 	protected Map<String, UIObject> widgets = new HashMap<>();
 	protected List<UIObject> widgetsList = new ArrayList<>();
 	protected List<Runnable> resolvers = new ArrayList<>();
-	protected UIObject viewWidget;
+	protected Widget viewWidget;
 	protected Utils.JsObject model;
 
 	public DefaultUiReader(Element anElement, JavaScriptObject aModel) {

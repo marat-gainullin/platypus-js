@@ -1,133 +1,261 @@
 package com.eas.ui;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.eas.core.HasPublished;
+import com.eas.core.Logger;
 import com.eas.core.Utils;
 import com.eas.ui.events.ContainerEvent;
 import com.eas.ui.events.AddHandler;
-import com.eas.ui.events.EventsExecutor;
 import com.eas.ui.events.HasAddHandlers;
 import com.eas.ui.events.HasRemoveHandlers;
-import com.eas.ui.events.RemoveEvent;
+import com.eas.ui.events.HasSelectionHandlers;
 import com.eas.ui.events.RemoveHandler;
+import com.eas.ui.events.SelectionEvent;
+import com.eas.ui.events.SelectionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.event.logical.shared.HasSelectionHandlers;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.UIObject;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-public class ButtonGroup extends RadioGroup implements HasJsFacade, HasAddHandlers, HasRemoveHandlers, HasSelectionHandlers<UIObject> {
+public class ButtonGroup implements HasJsFacade, HasAddHandlers, HasRemoveHandlers, HasSelectionHandlers<Widget> {
 
-	protected String name;
-	protected JavaScriptObject published;
-	protected JavaScriptObject onItemSelected;
+    protected final List<Widget> children = new ArrayList<>();
+    protected String name;
+    protected JavaScriptObject published;
+    protected JavaScriptObject onItemSelected;
 
-	public ButtonGroup() {
-		super();
-		addSelectionHandler(new SelectionHandler<UIObject>() {
+    public ButtonGroup() {
+        super();
+    }
 
-			@Override
-			public void onSelection(SelectionEvent<UIObject> event) {
-				if (onItemSelected != null) {
-					try {
-						JavaScriptObject jsItem = event.getSelectedItem() instanceof HasPublished ? ((HasPublished)event.getSelectedItem()).getPublished() : null; 
-						Utils.executeScriptEventVoid(published, onItemSelected, EventsPublisher.publishItemEvent(published, jsItem));
-					} catch (Exception e) {
-						Logger.getLogger(EventsExecutor.class.getName()).log(Level.SEVERE, null, e);
-					}
-				}
-			}
+    public int getCount() {
+        return children.size();
+    }
 
-		});
-	}
+    public Widget get(int index) {
+        if (index >= 0 && index < children.size()) {
+            return children.get(index);
+        } else {
+            return null;
+        }
+    }
 
-	public JavaScriptObject getItemSelected() {
-		return onItemSelected;
-	}
+    public int indexOf(Widget w) {
+        return children.indexOf(w);
+    }
 
-	public void setItemSelected(JavaScriptObject aValue) {
-		onItemSelected = aValue;
-	}
+    public void add(Widget w) {
+        children.add(w);
+        fireAdded(w);
+    }
 
-	@Override
-	public HandlerRegistration addAddHandler(AddHandler handler) {
-		return addHandler(handler, ContainerEvent.getType());
-	}
+    public void add(Widget w, int beforeIndex) {
+        children.add(beforeIndex, w);
+        fireAdded(w);
+    }
 
-	@Override
-	public HandlerRegistration addRemoveHandler(RemoveHandler handler) {
-		return addHandler(handler, RemoveEvent.getType());
-	}
+    public boolean remove(Widget w) {
+        boolean removed = children.remove(w);
+        if (removed) {
+            fireRemoved(w);
+        }
+        return removed;
+    }
 
-	@Override
-	public String getJsName() {
-		return name;
-	}
+    public Widget remove(int index) {
+        if (index >= 0 && index < children.size()) {
+            Widget w = children.remove(index);
+            fireRemoved(w);
+            return w;
+        } else {
+            return null;
+        }
+    }
 
-	@Override
-	public void setJsName(String aValue) {
-		name = aValue;
-	}
+    public void clear() {
+        for (int i = 0; i < children.size(); i++) {
+            remove(i);
+        }
+        children.clear();
+    }
 
-	public JavaScriptObject getPublished() {
-		return published;
-	}
+    private final Set<AddHandler> addHandlers = new HashSet<>();
 
-	public void add(HasPublished aItem) {
-		if (aItem instanceof HasValue<?>) {
-			super.add((HasValue<Boolean>) aItem);
-			if (aItem instanceof HasButtonGroup) {
-				((HasButtonGroup) aItem).mutateButtonGroup(this);
-				ContainerEvent.fire(this, (UIObject) aItem);
-			}
-		}
-	}
+    @Override
+    public HandlerRegistration addAddHandler(AddHandler handler) {
+        addHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                addHandlers.remove(handler);
+            }
+        };
+    }
 
-	public void remove(HasPublished aItem) {
-		if (aItem instanceof HasValue<?>) {
-			super.remove((HasValue<Boolean>) aItem);
-			if (aItem instanceof HasButtonGroup) {
-				((HasButtonGroup) aItem).setButtonGroup(null);
-				RemoveEvent.fire(this, (UIObject) aItem);
-			}
-		}
-	}
+    private void fireAdded(Widget w) {
+        ContainerEvent event = new ContainerEvent(this, w);
+        for (AddHandler h : addHandlers) {
+            h.onAdd(event);
+        }
+    }
 
-	public HasPublished getChild(int i) {
-		HasValue<Boolean> child = super.get(i);
-		if (child instanceof HasPublished)
-			return (HasPublished) child;
-		else
-			return null;
-	}
+    private final Set<RemoveHandler> removeHandlers = new HashSet<>();
 
-	@Override
-	public HandlerRegistration addSelectionHandler(SelectionHandler<UIObject> handler) {
-		return addHandler(handler, SelectionEvent.getType());
-	}
+    @Override
+    public HandlerRegistration addRemoveHandler(RemoveHandler handler) {
+        removeHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                removeHandlers.remove(handler);
+            }
+        };
+    }
 
-	@Override
-	public void onValueChange(ValueChangeEvent<Boolean> event) {
-		super.onValueChange(event);
-		SelectionEvent.fire(this, (UIObject) event.getSource());
-	}
+    private void fireRemoved(Widget w) {
+        ContainerEvent event = new ContainerEvent(this, w);
+        for (RemoveHandler h : removeHandlers) {
+            h.onRemove(event);
+        }
+    }
 
-	@Override
-	public void setPublished(JavaScriptObject aValue) {
-		if (published != aValue) {
-			published = aValue;
-			if (published != null) {
-				publish(this, aValue);
-			}
-		}
-	}
+    private Set<SelectionHandler<Widget>> selectionHandlers = new HashSet<>();
 
-	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
+    @Override
+    public HandlerRegistration addSelectionHandler(SelectionHandler<Widget> handler) {
+        selectionHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                selectionHandlers.remove(handler);
+            }
+        };
+    }
+
+    private JavaScriptObject componentAdded;
+
+    public JavaScriptObject getComponentAdded() {
+        return componentAdded;
+    }
+
+    protected HandlerRegistration componentAddedReg;
+
+    public void setComponentAdded(JavaScriptObject aValue) {
+        if (componentAdded != aValue) {
+            if (componentAddedReg != null) {
+                componentAddedReg.removeHandler();
+                componentAddedReg = null;
+            }
+            componentAdded = aValue;
+            if (componentAdded != null) {
+                componentAddedReg = addAddHandler(new AddHandler() {
+                    @Override
+                    public void onAdd(ContainerEvent event) {
+                        if (componentAdded != null) {
+                            try {
+                                Utils.executeScriptEventVoid(published, componentAdded, EventsPublisher.publishContainerEvent(event));
+                            } catch (Exception ex) {
+                                Logger.severe(ex);
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    private JavaScriptObject componentRemoved;
+
+    public JavaScriptObject getComponentRemoved() {
+        return componentRemoved;
+    }
+
+    protected HandlerRegistration componentRemovedReg;
+
+    public void setComponentRemoved(JavaScriptObject aValue) {
+        if (componentRemoved != aValue) {
+            if (componentRemovedReg != null) {
+                componentRemovedReg.removeHandler();
+                componentRemovedReg = null;
+            }
+            componentRemoved = aValue;
+            if (componentRemoved != null) {
+                componentRemovedReg = addRemoveHandler(new RemoveHandler() {
+                    @Override
+                    public void onRemove(ContainerEvent event) {
+                        if (componentRemoved != null) {
+                            try {
+                                Utils.executeScriptEventVoid(published, componentRemoved, EventsPublisher.publishContainerEvent(event));
+                            } catch (Exception ex) {
+                                Logger.severe(ex);
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    public JavaScriptObject getOnItemSelected() {
+        return onItemSelected;
+    }
+
+    private HandlerRegistration selectedReg;
+
+    public void setOnItemSelected(JavaScriptObject aValue) {
+        if (onItemSelected != aValue) {
+            if (selectedReg != null) {
+                selectedReg.removeHandler();
+                selectedReg = null;
+            }
+            onItemSelected = aValue;
+            if (onItemSelected != null) {
+                selectedReg = addSelectionHandler(new SelectionHandler<Widget>() {
+
+                    @Override
+                    public void onSelection(SelectionEvent<Widget> event) {
+                        if (onItemSelected != null) {
+                            try {
+                                JavaScriptObject jsItem = event.getSelectedItem() instanceof HasPublished ? ((HasPublished) event.getSelectedItem()).getPublished() : null;
+                                Utils.executeScriptEventVoid(published, onItemSelected, EventsPublisher.publishItemEvent(published, jsItem));
+                            } catch (Exception e) {
+                                Logger.severe(e);
+                            }
+                        }
+                    }
+
+                });
+            }
+        }
+    }
+
+    @Override
+    public String getJsName() {
+        return name;
+    }
+
+    @Override
+    public void setJsName(String aValue) {
+        name = aValue;
+    }
+
+    @Override
+    public JavaScriptObject getPublished() {
+        return published;
+    }
+
+    @Override
+    public void setPublished(JavaScriptObject aValue) {
+        if (published != aValue) {
+            published = aValue;
+            if (published != null) {
+                publish(this, aValue);
+            }
+        }
+    }
+
+    private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		published.add = function(toAdd){
 			if(toAdd && toAdd.unwrap) {
 				if(toAdd.buttonGroup == published)

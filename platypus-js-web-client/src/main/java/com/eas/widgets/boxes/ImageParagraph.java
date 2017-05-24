@@ -1,287 +1,270 @@
 package com.eas.widgets.boxes;
 
 import com.eas.ui.HasImageParagraph;
+import com.eas.ui.Widget;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.HasAllMouseHandlers;
-import com.google.gwt.event.dom.client.HasAllTouchHandlers;
-import com.google.gwt.event.dom.client.HasClickHandlers;
-import com.google.gwt.event.dom.client.HasDoubleClickHandlers;
-import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.Focusable;
-import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.HasText;
 
-public class ImageParagraph extends FocusWidget implements HasText, HasHTML, HasClickHandlers, HasDoubleClickHandlers, Focusable, HasEnabled, HasAllMouseHandlers, HasAllTouchHandlers,
-        HasImageParagraph {
+public abstract class ImageParagraph extends Widget implements HasText, HasHTML, HasImageParagraph {
 
-	// forms api
-	protected String text;
-	protected boolean html;
-	protected int horizontalTextPosition = RIGHT;
-	protected int verticalTextPosition = CENTER;
-	protected int iconTextGap = 4;
-	protected int horizontalAlignment = LEFT;
-	protected int verticalAlignment = CENTER;
-	protected ImageResource image;
-	protected Element container;
-	protected Element content;
-	protected Element aligner;
+    // forms api
+    protected String text;
+    protected boolean html;
+    protected int horizontalTextPosition = RIGHT;
+    protected int verticalTextPosition = CENTER;
+    protected int iconTextGap = 4;
+    protected int horizontalAlignment = LEFT;
+    protected int verticalAlignment = CENTER;
+    protected String image;
+    protected Element content;
+    protected Element aligner;
 
-	//
+    protected ImageParagraph(Element aContainer, String aTitle, boolean asHtml) {
+        this(aContainer, aTitle, asHtml, null);
+    }
 
-	protected ImageParagraph(Element aContainer, String aTitle, boolean asHtml) {
-		this(aContainer, aTitle, asHtml, null);
-	}
+    protected ImageParagraph(Element aContainer, String aTitle, boolean asHtml, String aImage) {
+        super(aContainer);
+        text = aTitle;
+        html = asHtml;
+        image = aImage;
+        element.getStyle().setPosition(Style.Position.RELATIVE);
+        element.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+        element.getStyle().setPadding(0, Unit.PX);
+        //
+        content = Document.get().createPElement();
+        content.getStyle().setMargin(0, Unit.PX);
+        content.getStyle().setPosition(Style.Position.RELATIVE);
+        content.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 
-	protected ImageParagraph(Element aContainer, String aTitle, boolean asHtml, ImageResource aImage) {
-		super();
-		text = aTitle;
-		html = asHtml;
-		image = aImage;
-		container = aContainer;
-		container.getStyle().setPosition(Style.Position.RELATIVE);
-		container.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-		container.getStyle().setPadding(0, Unit.PX);
-		//
-		content = Document.get().createPElement();
-		content.getStyle().setMargin(0, Unit.PX);
-		content.getStyle().setPosition(Style.Position.RELATIVE);
-		content.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+        aligner = Document.get().createDivElement();
+        aligner.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+        aligner.getStyle().setPosition(Style.Position.RELATIVE);
+        aligner.getStyle().setHeight(100, Style.Unit.PCT);
+        aligner.getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
+        aligner.getStyle().setVisibility(Style.Visibility.HIDDEN);
+        //
+        element.insertFirst(content);
+        // aligner must go after content because of Gecko's craziness.
+        element.insertAfter(aligner, content);
+    }
 
-		aligner = Document.get().createDivElement();
-		aligner.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-		aligner.getStyle().setPosition(Style.Position.RELATIVE);
-		aligner.getStyle().setHeight(100, Style.Unit.PCT);
-		aligner.getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
-		aligner.getStyle().setVisibility(Style.Visibility.HIDDEN);
+    @Override
+    public String getImageResource() {
+        return image;
+    }
 
-		//
-		container.insertFirst(content);
-		container.insertAfter(aligner, content);// aligner must go after content
-												// because of Gecko's craziness.
-		setElement(container);
-	}
+    private void format() {
+        if (isAttached()) {
+            organizeText();
+            organizeImage();
+            organizeHorizontalAlignment();
+            organizeVerticalAlignment();
+        }
+    }
 
-	@Override
-	public ImageResource getImageResource() {
-		return image;
-	}
+    protected void organizeHorizontalAlignment() {
+        final Style containerStyle = element.getStyle();
+        final Style contentStyle = content.getStyle();
+        switch (horizontalAlignment) {
+            case LEFT:
+            case LEADING:
+                contentStyle.setLeft(0, Unit.PX);
+                contentStyle.clearRight();
+                contentStyle.setTextAlign(Style.TextAlign.LEFT);
+                containerStyle.setTextAlign(Style.TextAlign.LEFT);
+                break;
+            case RIGHT:
+            case TRAILING:
+                contentStyle.clearLeft();
+                contentStyle.setRight(0, Unit.PX);
+                contentStyle.setTextAlign(Style.TextAlign.RIGHT);
+                containerStyle.setTextAlign(Style.TextAlign.RIGHT);
+                break;
+            case CENTER:
+                // contentStyle.setLeft(0, Style.Unit.PX);
+                // contentStyle.setRight(0, Style.Unit.PX);
+                contentStyle.setTextAlign(Style.TextAlign.CENTER);
+                containerStyle.setTextAlign(Style.TextAlign.CENTER);
+                break;
+        }
+    }
 
-	private void organize() {
-		if (isAttached()) {
-			//final Style contentStyle = content.getStyle();
-			organizeText();
-			organizeImage();
-			/*
-			if (isAttached() && (getParent() instanceof FlowPanel || getParent() instanceof RootPanel || getParent() instanceof ScrollPanel)) {
-				contentStyle.setPosition(Style.Position.RELATIVE);
-			} else {
-				contentStyle.setPosition(Style.Position.ABSOLUTE);
-			}
-			*/
-			organizeHorizontalAlignment();
-			organizeVerticalAlignment();
-		}
-	}
+    protected void organizeVerticalAlignment() {
+        final Style contentStyle = content.getStyle();
+        final Style alignerStyle = aligner.getStyle();
+        switch (verticalAlignment) {
+            case TOP:
+                contentStyle.setVerticalAlign(Style.VerticalAlign.TOP);
+                break;
+            case BOTTOM: {
+                contentStyle.setVerticalAlign(Style.VerticalAlign.BOTTOM);
+                break;
+            }
+            case CENTER: {
+                contentStyle.setVerticalAlign(Style.VerticalAlign.MIDDLE);
+                break;
+            }
+        }
+    }
 
-	protected void organizeHorizontalAlignment() {
-		final Style containerStyle = container.getStyle();
-		final Style contentStyle = content.getStyle();
-		switch (horizontalAlignment) {
-		case LEFT:
-		case LEADING:
-			contentStyle.setLeft(0, Unit.PX);
-			contentStyle.clearRight();
-			contentStyle.setTextAlign(Style.TextAlign.LEFT);
-			containerStyle.setTextAlign(Style.TextAlign.LEFT);
-			break;
-		case RIGHT:
-		case TRAILING:
-			contentStyle.clearLeft();
-			contentStyle.setRight(0, Unit.PX);
-			contentStyle.setTextAlign(Style.TextAlign.RIGHT);
-			containerStyle.setTextAlign(Style.TextAlign.RIGHT);
-			break;
-		case CENTER:
-			// contentStyle.setLeft(0, Style.Unit.PX);
-			// contentStyle.setRight(0, Style.Unit.PX);
-			contentStyle.setTextAlign(Style.TextAlign.CENTER);
-			containerStyle.setTextAlign(Style.TextAlign.CENTER);
-			break;
-		}
-	}
+    protected void organizeText() {
+        if (html) {
+            content.setInnerHTML(text != null ? text : "");
+        } else {
+            content.setInnerText(text != null ? text : "");
+        }
+    }
 
-	protected void organizeVerticalAlignment() {
-		final Style contentStyle = content.getStyle();
-		final Style alignerStyle = aligner.getStyle();
-		switch (verticalAlignment) {
-		case TOP:
-			contentStyle.setVerticalAlign(Style.VerticalAlign.TOP);
-			break;
-		case BOTTOM: {
-			contentStyle.setVerticalAlign(Style.VerticalAlign.BOTTOM);
-			break;
-		}
-		case CENTER: {
-			contentStyle.setVerticalAlign(Style.VerticalAlign.MIDDLE);
-			break;
-		}
-		}
-	}
+    protected void organizeImage() {
+        Style es = content.getStyle();
+        int textGap = text != null && !text.isEmpty() ? iconTextGap : 0;
+        if (image != null) {
+            if (horizontalTextPosition == LEFT || horizontalTextPosition == LEADING) {
+                /*
+                backgroundPosition = "right";
+                es.setPaddingLeft(0, Style.Unit.PX);
+                es.setPaddingRight(textGap + image.getWidth(), Style.Unit.PX);
+                */
+            } else if (horizontalTextPosition == RIGHT || horizontalTextPosition == TRAILING) {
+                /*
+                backgroundPosition = "left";
+                es.setPaddingLeft(textGap + image.getWidth(), Style.Unit.PX);
+                es.setPaddingRight(0, Style.Unit.PX);
+                */
+            } else {
+                if (text == null || text.isEmpty()) {
+                    /*
+                    int imageWidth = image.getWidth();
+                    es.setPaddingLeft(imageWidth / 2, Style.Unit.PX);
+                    es.setPaddingRight(imageWidth / 2, Style.Unit.PX);
+                    */
+                }
+                //backgroundPosition = "center";
+            }
+            //backgroundPosition += " ";
+            if (verticalTextPosition == TOP || verticalTextPosition == LEADING) {
+                /*
+                backgroundPosition += "bottom";
+                es.setPaddingTop(0, Style.Unit.PX);
+                es.setPaddingBottom(textGap + image.getHeight(), Style.Unit.PX);
+                */
+            } else if (verticalTextPosition == BOTTOM || verticalTextPosition == TRAILING) {
+                /*
+                backgroundPosition += "top";
+                es.setPaddingTop(textGap + image.getHeight(), Style.Unit.PX);
+                es.setPaddingBottom(0, Style.Unit.PX);
+                */
+            } else {
+                if (text == null || text.isEmpty()) {
+                    /*
+                    int imageHeight = image.getHeight();
+                    es.setPaddingTop(imageHeight / 2, Style.Unit.PX);
+                    es.setPaddingBottom(imageHeight / 2, Style.Unit.PX);
+                    */
+                }
+                //backgroundPosition += "center";
+            }
+            //es.setProperty("background", "url(" + image + ")" + " no-repeat " + backgroundPosition);
+        }
+    }
 
-	protected void organizeText() {
-		if (html) {
-			content.setInnerHTML(text != null ? text : "");
-		} else {
-			content.setInnerText(text != null ? text : "");
-		}
-	}
+    @Override
+    public int getVerticalAlignment() {
+        return verticalAlignment;
+    }
 
-	protected void organizeImage() {
-		Style contentStyle = content.getStyle();
-		contentStyle.setProperty("background", "");
-		contentStyle.clearPaddingLeft();
-		contentStyle.clearPaddingRight();
-		contentStyle.clearPaddingTop();
-		contentStyle.clearPaddingBottom();
-		int textGap = text != null && !text.isEmpty() ? iconTextGap : 0;
-		if (image != null) {
-			String backgroundPosition;
-			if (horizontalTextPosition == LEFT || horizontalTextPosition == LEADING) {
-				backgroundPosition = "right";
-				contentStyle.setPaddingLeft(0, Style.Unit.PX);
-				contentStyle.setPaddingRight(textGap + image.getWidth(), Style.Unit.PX);
-			} else if (horizontalTextPosition == RIGHT || horizontalTextPosition == TRAILING) {
-				backgroundPosition = "left";
-				contentStyle.setPaddingLeft(textGap + image.getWidth(), Style.Unit.PX);
-				contentStyle.setPaddingRight(0, Style.Unit.PX);
-			} else {
-				if (text == null || text.isEmpty()) {
-					int imageWidth = image.getWidth();
-					contentStyle.setPaddingLeft(imageWidth / 2, Style.Unit.PX);
-					contentStyle.setPaddingRight(imageWidth / 2, Style.Unit.PX);
-				}
-				backgroundPosition = "center";
-			}
-			backgroundPosition += " ";
-			if (verticalTextPosition == TOP || verticalTextPosition == LEADING) {
-				backgroundPosition += "bottom";
-				contentStyle.setPaddingTop(0, Style.Unit.PX);
-				contentStyle.setPaddingBottom(textGap + image.getHeight(), Style.Unit.PX);
-			} else if (verticalTextPosition == BOTTOM || verticalTextPosition == TRAILING) {
-				backgroundPosition += "top";
-				contentStyle.setPaddingTop(textGap + image.getHeight(), Style.Unit.PX);
-				contentStyle.setPaddingBottom(0, Style.Unit.PX);
-			} else {
-				if (text == null || text.isEmpty()) {
-					int imageHeight = image.getHeight();
-					contentStyle.setPaddingTop(imageHeight / 2, Style.Unit.PX);
-					contentStyle.setPaddingBottom(imageHeight / 2, Style.Unit.PX);
-				}
-				backgroundPosition += "center";
-			}
-			contentStyle.setProperty("background", "url(" + image.getSafeUri().asString() + ")" + " no-repeat " + backgroundPosition);
-		}
-	}
+    @Override
+    public void setVerticalAlignment(int aValue) {
+        if (verticalAlignment != aValue) {
+            verticalAlignment = aValue;
+            format();
+        }
+    }
 
-	public int getVerticalAlignment() {
-		return verticalAlignment;
-	}
+    @Override
+    public int getHorizontalAlignment() {
+        return horizontalAlignment;
+    }
 
-	public void setVerticalAlignment(int aValue) {
-		if (verticalAlignment != aValue) {
-			verticalAlignment = aValue;
-			organize();
-		}
-	}
+    @Override
+    public void setHorizontalAlignment(int aValue) {
+        if (horizontalAlignment != aValue) {
+            horizontalAlignment = aValue;
+            format();
+        }
+    }
 
-	public int getHorizontalAlignment() {
-		return horizontalAlignment;
-	}
+    @Override
+    public String getText() {
+        return !html ? text : null;
+    }
 
-	public void setHorizontalAlignment(int aValue) {
-		if (horizontalAlignment != aValue) {
-			horizontalAlignment = aValue;
-			organize();
-		}
-	}
+    @Override
+    public void setText(String aValue) {
+        html = false;
+        text = aValue;
+        format();
+    }
 
-	@Override
-	public String getText() {
-		return !html ? text : null;
-	}
+    @Override
+    public String getHTML() {
+        return html ? text : null;
+    }
 
-	@Override
-	public void setText(String aValue) {
-		html = false;
-		text = aValue;
-		organize();
-	}
+    @Override
+    public void setHTML(String aValue) {
+        html = true;
+        text = aValue;
+        format();
+    }
 
-	@Override
-	public String getHTML() {
-		return html ? text : null;
-	}
+    @Override
+    public int getIconTextGap() {
+        return iconTextGap;
+    }
 
-	@Override
-	public void setHTML(String aValue) {
-		html = true;
-		text = aValue;
-		organize();
-	}
+    @Override
+    public void setIconTextGap(int aValue) {
+        if (iconTextGap != aValue) {
+            iconTextGap = aValue;
+            format();
+        }
+    }
 
-	public int getIconTextGap() {
-		return iconTextGap;
-	}
+    @Override
+    public int getHorizontalTextPosition() {
+        return horizontalTextPosition;
+    }
 
-	public void setIconTextGap(int aValue) {
-		if (iconTextGap != aValue) {
-			iconTextGap = aValue;
-			organize();
-		}
-	}
+    @Override
+    public void setHorizontalTextPosition(int aValue) {
+        if (horizontalTextPosition != aValue) {
+            horizontalTextPosition = aValue;
+            format();
+        }
+    }
 
-	public int getHorizontalTextPosition() {
-		return horizontalTextPosition;
-	}
+    @Override
+    public int getVerticalTextPosition() {
+        return verticalTextPosition;
+    }
 
-	public void setHorizontalTextPosition(int aValue) {
-		if (horizontalTextPosition != aValue) {
-			horizontalTextPosition = aValue;
-			organize();
-		}
-	}
+    @Override
+    public void setVerticalTextPosition(int aValue) {
+        if (verticalTextPosition != aValue) {
+            verticalTextPosition = aValue;
+            format();
+        }
+    }
 
-	public int getVerticalTextPosition() {
-		return verticalTextPosition;
-	}
-
-	public void setVerticalTextPosition(int aValue) {
-		if (verticalTextPosition != aValue) {
-			verticalTextPosition = aValue;
-			organize();
-		}
-	}
-
-	@Override
-	public void setImageResource(ImageResource aValue) {
-		image = aValue;
-		organize();
-	}
-
-	@Override
-	protected void onAttach() {
-		super.onAttach();
-		organize();
-	}
-
-	@Override
-	protected void onDetach() {
-		super.onDetach();
-	}
+    @Override
+    public void setImageResource(String aValue) {
+        image = aValue;
+        format();
+    }
 }

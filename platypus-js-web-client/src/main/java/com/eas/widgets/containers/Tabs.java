@@ -1,6 +1,9 @@
 package com.eas.widgets.containers;
 
 import com.eas.core.HasPublished;
+import com.eas.core.Logger;
+import com.eas.core.Utils;
+import com.eas.ui.EventsPublisher;
 import com.eas.ui.HasChildrenPosition;
 import com.eas.ui.Widget;
 import com.eas.ui.events.ContainerEvent;
@@ -34,8 +37,15 @@ public class Tabs extends Borders implements HasSelectionHandlers<Widget>, HasCh
     }
 
     private final Toolbar tabs = new Toolbar();
-    private final Map<Widget, Widget> tabsOf = new HashMap<>();
     private final Cards content = new Cards(0, 0);
+    private final Map<Widget, Widget> tabsOf = new HashMap<>();
+    protected JavaScriptObject onItemSelected;
+
+    public Tabs() {
+        super();
+        setTopComponent(tabs, 30); // TODO: make content driven markup possible
+        setCenterComponent(content);
+    }
 
     private void addCaptionFor(Widget w, String title, String image, int beforeIndex) {
         if (title == null) {
@@ -147,6 +157,39 @@ public class Tabs extends Borders implements HasSelectionHandlers<Widget>, HasCh
     public int getLeft(Widget aWidget) {
         assert aWidget.getParent() == this : "widget should be a child of this container";
         return 0;
+    }
+
+    public JavaScriptObject getOnItemSelected() {
+        return onItemSelected;
+    }
+
+    private HandlerRegistration selectedReg;
+
+    public void setOnItemSelected(JavaScriptObject aValue) {
+        if (onItemSelected != aValue) {
+            if (selectedReg != null) {
+                selectedReg.removeHandler();
+                selectedReg = null;
+            }
+            onItemSelected = aValue;
+            if (onItemSelected != null) {
+                selectedReg = addSelectionHandler(new SelectionHandler<Widget>() {
+
+                    @Override
+                    public void onSelection(SelectionEvent<Widget> event) {
+                        if (onItemSelected != null) {
+                            try {
+                                JavaScriptObject jsItem = event.getSelectedItem() instanceof HasPublished ? ((HasPublished) event.getSelectedItem()).getPublished() : null;
+                                Utils.executeScriptEventVoid(published, onItemSelected, EventsPublisher.publishItemEvent(published, jsItem));
+                            } catch (Exception e) {
+                                Logger.severe(e);
+                            }
+                        }
+                    }
+
+                });
+            }
+        }
     }
 
     @Override

@@ -59,7 +59,12 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
     protected String name;
 
     public Widget() {
+        this(Document.get().createDivElement());
+    }
+
+    public Widget(Element element) {
         super();
+        this.element = element;
     }
 
     @Override
