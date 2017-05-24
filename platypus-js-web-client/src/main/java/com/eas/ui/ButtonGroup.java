@@ -47,17 +47,26 @@ public class ButtonGroup implements HasJsFacade, HasAddHandlers, HasRemoveHandle
 
     public void add(Widget w) {
         children.add(w);
+        if (w instanceof HasButtonGroup) {
+            ((HasButtonGroup) w).setButtonGroup(this);
+        }
         fireAdded(w);
     }
 
     public void add(Widget w, int beforeIndex) {
         children.add(beforeIndex, w);
+        if (w instanceof HasButtonGroup) {
+            ((HasButtonGroup) w).setButtonGroup(this);
+        }
         fireAdded(w);
     }
 
     public boolean remove(Widget w) {
         boolean removed = children.remove(w);
         if (removed) {
+            if (w instanceof HasButtonGroup) {
+                ((HasButtonGroup) w).setButtonGroup(null);
+            }
             fireRemoved(w);
         }
         return removed;
@@ -66,6 +75,9 @@ public class ButtonGroup implements HasJsFacade, HasAddHandlers, HasRemoveHandle
     public Widget remove(int index) {
         if (index >= 0 && index < children.size()) {
             Widget w = children.remove(index);
+            if (w instanceof HasButtonGroup) {
+                ((HasButtonGroup) w).setButtonGroup(null);
+            }
             fireRemoved(w);
             return w;
         } else {

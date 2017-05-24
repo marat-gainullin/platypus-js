@@ -175,11 +175,11 @@ public class MenuItemCheckBox extends MenuItem implements HasButtonGroup, HasAct
     public void mutateButtonGroup(ButtonGroup aGroup) {
         if (group != aGroup) {
             if (group != null) {
-                group.remove((HasPublished) this);
+                group.remove(this);
             }
             group = aGroup;
             if (group != null) {
-                group.add((HasPublished) this);
+                group.add(this);
             }
         }
     }
