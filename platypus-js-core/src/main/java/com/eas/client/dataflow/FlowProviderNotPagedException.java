@@ -15,8 +15,8 @@ public class FlowProviderNotPagedException extends FlowProviderFailedException {
     /**
      * {@inheritDoc}
      */
-    public FlowProviderNotPagedException(Exception aCause) {
-        super(aCause);
+    public FlowProviderNotPagedException(Exception aCause, String aEntityName) {
+        super(aCause, aEntityName);
     }
 
     /**
