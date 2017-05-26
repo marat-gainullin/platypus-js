@@ -91,14 +91,14 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
     @Override
     public Collection<Map<String, Object>> nextPage(Consumer<Collection<Map<String, Object>>> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (!isPaged() || lowLevelResults == null) {
-            throw new FlowProviderNotPagedException(BAD_NEXTPAGE_REFRESH_CHAIN_MSG);
+            throw new FlowProviderNotPagedException(BAD_NEXTPAGE_REFRESH_CHAIN_MSG + " while handling entity: " + getEntityName());
         } else {
             JdbcReader reader = obtainJdbcReader();
             Callable<Collection<Map<String, Object>>> doWork = () -> {
                 try {
                     return reader.readRowset(lowLevelResults, pageSize);
                 } catch (SQLException ex) {
-                    throw new FlowProviderFailedException(ex);
+                    throw new FlowProviderFailedException(ex, getEntityName());
                 } finally {
                     if (lowLevelResults.isClosed() || lowLevelResults.isAfterLast()) {
                         endPaging();
@@ -660,7 +660,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                                     return aResultSetProcessor.call(null);
                                 }
                             } catch (SQLException ex) {
-                                throw new FlowProviderFailedException(ex);
+                                throw new FlowProviderFailedException(ex, getEntityName());
                             } finally {
                                 assert dataSource != null; // since we've got a statement, dataSource must present.
                                 unprepareConnection(connection);
@@ -847,7 +847,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                 return aConnection.prepareStatement(aClause);
             }
         } catch (Exception ex) {
-            throw new FlowProviderFailedException(ex);
+            throw new FlowProviderFailedException(ex, getEntityName());
         }
     }
 }

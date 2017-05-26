@@ -50,7 +50,7 @@ public class PlatypusFlowProvider {
                 conn.<ExecuteQueryRequest.Response>enqueueRequest(request, aSpace, (ExecuteQueryRequest.Response aResponse) -> {
                     if (aResponse.getJson() == null) {
                         if (onFailure != null) {
-                            onFailure.accept(new FlowProviderFailedException(ROWSET_MISSING_IN_RESPONSE));
+                            onFailure.accept(new FlowProviderFailedException(ROWSET_MISSING_IN_RESPONSE + " while handling entity: " + getEntityName()));
                         }
                     } else {
                         onSuccess.accept((JSObject)aSpace.parseJsonWithDates(aResponse.getJson()));
@@ -62,17 +62,17 @@ public class PlatypusFlowProvider {
                 });
                 return null;
             } catch (Exception ex) {
-                throw new FlowProviderFailedException(ex);
+                throw new FlowProviderFailedException(ex, getEntityName());
             }
         } else {
             try {
                 ExecuteQueryRequest.Response response = conn.executeRequest(request);
                 if (response.getJson() == null) {
-                    throw new FlowProviderFailedException(ROWSET_MISSING_IN_RESPONSE);
+                    throw new FlowProviderFailedException(ROWSET_MISSING_IN_RESPONSE + " while handling entity: " + getEntityName());
                 }
                 return (JSObject)aSpace.parseJsonWithDates(response.getJson());
             } catch (Exception ex) {
-                throw new FlowProviderFailedException(ex);
+                throw new FlowProviderFailedException(ex, getEntityName());
             }
         }
     }

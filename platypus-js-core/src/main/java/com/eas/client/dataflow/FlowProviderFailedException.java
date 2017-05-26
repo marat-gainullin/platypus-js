@@ -17,8 +17,8 @@ public class FlowProviderFailedException extends Exception {
      *
      * @param aCause Exception, has caused this exception throwing.
      */
-    public FlowProviderFailedException(Exception aCause) {
-        super(aCause);
+    public FlowProviderFailedException(Exception aCause, String aEntityName) {
+        super("While handling entity: " + aEntityName, aCause);
     }
 
     /**
