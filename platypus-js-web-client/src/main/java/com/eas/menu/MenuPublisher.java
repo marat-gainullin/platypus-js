@@ -28,7 +28,7 @@ public class MenuPublisher {
 		return new constr(aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(PlatypusMenuBar aComponent)/*-{
+	public native static PublishedComponent publish(MenuBar aComponent)/*-{
 		var constr = @com.eas.menu.MenuPublisher::getPublisher(Ljava/lang/String;)('MenuBar');
 		return new constr(aComponent);
 	}-*/;
@@ -43,17 +43,17 @@ public class MenuPublisher {
 		return new constr(aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(PlatypusMenuItemImageText aComponent)/*-{
+	public native static PublishedComponent publish(MenuItemImageText aComponent)/*-{
 		var constr = @com.eas.menu.MenuPublisher::getPublisher(Ljava/lang/String;)('MenuItem');
 		return new constr(null, null, null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(PlatypusMenuItemCheckBox aComponent)/*-{
+	public native static PublishedComponent publish(MenuItemCheckBox aComponent)/*-{
 		var constr = @com.eas.menu.MenuPublisher::getPublisher(Ljava/lang/String;)('CheckMenuItem');
 		return new constr(null, null, null, aComponent);
 	}-*/;
 
-	public native static JavaScriptObject publish(PlatypusMenuItemRadioButton aComponent)/*-{
+	public native static JavaScriptObject publish(MenuItemRadioButton aComponent)/*-{
 		var constr = @com.eas.menu.MenuPublisher::getPublisher(Ljava/lang/String;)('RadioMenuItem');
 		return new constr(null, null, null, aComponent);
 	}-*/;

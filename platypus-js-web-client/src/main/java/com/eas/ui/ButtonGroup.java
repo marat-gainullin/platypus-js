@@ -8,19 +8,25 @@ import com.eas.ui.events.AddHandler;
 import com.eas.ui.events.HasAddHandlers;
 import com.eas.ui.events.HasRemoveHandlers;
 import com.eas.ui.events.HasSelectionHandlers;
+import com.eas.ui.events.HasValueChangeHandlers;
 import com.eas.ui.events.RemoveHandler;
 import com.eas.ui.events.SelectionEvent;
 import com.eas.ui.events.SelectionHandler;
+import com.eas.ui.events.ValueChangeEvent;
+import com.eas.ui.events.ValueChangeHandler;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.shared.HandlerRegistration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ButtonGroup implements HasJsFacade, HasAddHandlers, HasRemoveHandlers, HasSelectionHandlers<Widget> {
 
     protected final List<Widget> children = new ArrayList<>();
+    protected Map<Widget, HandlerRegistration> childrenValueHanlders = new HashMap<>();
     protected String name;
     protected JavaScriptObject published;
     protected JavaScriptObject onItemSelected;
@@ -106,6 +112,21 @@ public class ButtonGroup implements HasJsFacade, HasAddHandlers, HasRemoveHandle
     }
 
     private void fireAdded(Widget w) {
+        if (w instanceof HasValueChangeHandlers) {
+            childrenValueHanlders.put(w, ((HasValueChangeHandlers) w).addValueChangeHandler(new ValueChangeHandler() {
+                @Override
+                public void onValueChange(ValueChangeEvent event) {
+                    if (Boolean.TRUE.equals(event.getNewValue())) {
+                        for (int i = 0; i < children.size(); i++) {
+                            Widget ch = children.get(i);
+                            if (ch != w && ch instanceof HasJsValue) {
+                                ((HasJsValue) ch).setJsValue(Boolean.FALSE);
+                            }
+                        }
+                    }
+                }
+            }));
+        }
         ContainerEvent event = new ContainerEvent(this, w);
         for (AddHandler h : addHandlers) {
             h.onAdd(event);
@@ -126,6 +147,10 @@ public class ButtonGroup implements HasJsFacade, HasAddHandlers, HasRemoveHandle
     }
 
     private void fireRemoved(Widget w) {
+        HandlerRegistration childReg = childrenValueHanlders.remove(w);
+        if (childReg != null) {
+            childReg.removeHandler();
+        }
         ContainerEvent event = new ContainerEvent(this, w);
         for (RemoveHandler h : removeHandlers) {
             h.onRemove(event);

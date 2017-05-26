@@ -10,6 +10,7 @@ import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.shared.HandlerRegistration;
 import java.util.HashSet;
 import java.util.Set;
@@ -36,6 +37,7 @@ public class ImageButton extends ImageParagraph implements HasActionHandlers {
 
     protected Set<ActionHandler> actionHandlers = new HashSet<>();
     private HandlerRegistration clickReg;
+    private HandlerRegistration keyReg;
 
     @Override
     public HandlerRegistration addActionHandler(ActionHandler handler) {
@@ -50,6 +52,17 @@ public class ImageButton extends ImageParagraph implements HasActionHandlers {
                 }
 
             });
+            keyReg = element.<XElement>cast().addEventListener(BrowserEvents.KEYPRESS, new XElement.NativeHandler() {
+
+                @Override
+                public void on(NativeEvent event) {
+                    if (event.getKeyCode() == KeyCodes.KEY_ENTER || event.getKeyCode() == KeyCodes.KEY_SPACE) {
+                        event.stopPropagation();
+                        fireActionPerformed();
+                    }
+                }
+
+            });
 
         }
         return new HandlerRegistration() {
@@ -58,6 +71,7 @@ public class ImageButton extends ImageParagraph implements HasActionHandlers {
                 actionHandlers.remove(handler);
                 if (actionHandlers.isEmpty()) {
                     clickReg.removeHandler();
+                    keyReg.removeHandler();
                 }
             }
 

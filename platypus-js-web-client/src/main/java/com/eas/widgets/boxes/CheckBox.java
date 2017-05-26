@@ -3,38 +3,57 @@ package com.eas.widgets.boxes;
 import com.eas.core.HasPublished;
 import com.eas.core.XElement;
 import com.eas.ui.ButtonGroup;
+import com.eas.ui.events.HasActionHandlers;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.eas.ui.HasButtonGroup;
 import com.eas.ui.HasJsValue;
+import com.eas.ui.Widget;
+import com.eas.ui.events.ActionEvent;
+import com.eas.ui.events.ActionHandler;
 import com.eas.ui.events.HasValueChangeHandlers;
 import com.eas.ui.events.ValueChangeEvent;
 import com.eas.ui.events.ValueChangeHandler;
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- *
- * @author mg
- */
-public class ImageToggleButton extends ImageButton implements HasJsValue, HasValueChangeHandlers, HasButtonGroup {
+public class CheckBox extends Widget implements HasActionHandlers, HasButtonGroup, HasJsValue, HasValueChangeHandlers {
 
+    protected Element anchor = Document.get().createDivElement();
+    protected InputElement input;
+    protected Element label;
     protected Boolean value;
 
     protected ButtonGroup group;
-    
-    public ImageToggleButton(String aTitle, boolean asHtml) {
-        this(aTitle, asHtml, null);
+
+    public CheckBox() {
+        this(Document.get().createCheckInputElement(), Document.get().createLabelElement());
+        input.setClassName("check-box");
+        label.addClassName("check-label");
     }
 
-    public ImageToggleButton(String aTitle, boolean asHtml, String aImage) {
-        super(aTitle, asHtml, aImage);
+    protected CheckBox(InputElement aInput, Element aLabel) {
+        super();
+        input = aInput;
+        label = aLabel;
+        label.appendChild(input);
+        element.appendChild(label);
+        anchor.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+        anchor.getStyle().setPosition(Style.Position.RELATIVE);
+        anchor.getStyle().setHeight(100, Style.Unit.PCT);
+        anchor.getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
+        element.appendChild(anchor);
         element.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
             @Override
             public void on(NativeEvent evt) {
                 setJsValue(value != null ? !value : true);
+                fireActionPerformed();
             }
         });
     }
@@ -46,15 +65,13 @@ public class ImageToggleButton extends ImageButton implements HasJsValue, HasVal
 
     @Override
     public void setJsValue(Object aValue) {
-        if (aValue == null) {
-            aValue = Boolean.FALSE;
-        }
         Boolean oldValue = value;
         value = (Boolean) aValue;
-        if (value) {
-            element.setClassName("btn btn-active");
+        if (aValue == null) {
+            input.setPropertyBoolean("indeterminate", true);
         } else {
-            element.setClassName("btn btn-default");
+            input.setPropertyBoolean("indeterminate", false);
+            input.setChecked(Boolean.TRUE.equals(aValue));
         }
         fireValueChange(oldValue);
     }
@@ -77,6 +94,27 @@ public class ImageToggleButton extends ImageButton implements HasJsValue, HasVal
         ValueChangeEvent event = new ValueChangeEvent(this, oldValue, value);
         for (ValueChangeHandler h : valueChangeHandlers) {
             h.onValueChange(event);
+        }
+    }
+
+    protected Set<ActionHandler> actionHandlers = new HashSet<>();
+
+    @Override
+    public HandlerRegistration addActionHandler(ActionHandler handler) {
+        actionHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                actionHandlers.remove(handler);
+            }
+
+        };
+    }
+
+    protected void fireActionPerformed() {
+        ActionEvent event = new ActionEvent(this);
+        for (ActionHandler h : actionHandlers) {
+            h.onAction(event);
         }
     }
 
@@ -109,71 +147,24 @@ public class ImageToggleButton extends ImageButton implements HasJsValue, HasVal
     }
 
     private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
-        published.opaque = true;
-
         Object.defineProperty(published, "text", {
             get : function() {
-                return aWidget.@com.eas.widgets.PlatypusToggleButton::getText()();
+                return aWidget.@com.eas.widgets.PlatypusCheckBox::getText()();
             },
             set : function(aValue) {
-                aWidget.@com.eas.widgets.PlatypusToggleButton::setText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
-            }
-        });
-        Object.defineProperty(published, "icon", {
-            get : function() {
-                return aWidget.@com.eas.widgets.PlatypusToggleButton::getImageResource()();
-            },
-            set : function(aValue) {
-                aWidget.@com.eas.widgets.PlatypusToggleButton::setImageResource(Lcom/google/gwt/resources/client/ImageResource;)(aValue);
-            }
-        });
-        Object.defineProperty(published, "iconTextGap", {
-            get : function() {
-                return aWidget.@com.eas.widgets.PlatypusToggleButton::getIconTextGap()();
-            },
-            set : function(aValue) {
-                aWidget.@com.eas.widgets.PlatypusToggleButton::setIconTextGap(I)(aValue);
-            }
-        });
-        Object.defineProperty(published, "horizontalTextPosition", {
-            get : function() {
-                return aWidget.@com.eas.widgets.PlatypusToggleButton::getHorizontalTextPosition()();
-            },
-            set : function(aValue) {
-                aWidget.@com.eas.widgets.PlatypusToggleButton::setHorizontalTextPosition(I)(+aValue);
-            }
-        });
-        Object.defineProperty(published, "verticalTextPosition", {
-            get : function() {
-                return aWidget.@com.eas.widgets.PlatypusToggleButton::getVerticalTextPosition()();
-            },
-            set : function(aValue) {
-                aWidget.@com.eas.widgets.PlatypusToggleButton::setVerticalTextPosition(I)(+aValue);
-            }
-        });
-
-        Object.defineProperty(published, "horizontalAlignment", {
-            get : function() {
-                    return aWidget.@com.eas.widgets.PlatypusToggleButton::getHorizontalAlignment()();
-            },
-            set : function(aValue) {
-                    aWidget.@com.eas.widgets.PlatypusToggleButton::setHorizontalAlignment(I)(+aValue);
-            }
-        });
-        Object.defineProperty(published, "verticalAlignment", {
-            get : function() {
-                    return aWidget.@com.eas.widgets.PlatypusToggleButton::getVerticalAlignment()();
-            },
-            set : function(aValue) {
-                    aWidget.@com.eas.widgets.PlatypusToggleButton::setVerticalAlignment(I)(+aValue);
+                aWidget.@com.eas.widgets.PlatypusCheckBox::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
             }
         });
         Object.defineProperty(published, "selected", {
             get : function() {
-                    return aWidget.@com.eas.widgets.PlatypusToggleButton::getPlainValue()();
+                var value = aWidget.@com.eas.widgets.PlatypusCheckBox::getValue()();
+                if (value == null)
+                        return null;
+                else
+                        return aWidget.@com.eas.widgets.PlatypusCheckBox::getPlainValue()();
             },
             set : function(aValue) {
-                    aWidget.@com.eas.widgets.PlatypusToggleButton::setPlainValue(Z)(aValue!=null?aValue:false);
+                aWidget.@com.eas.widgets.PlatypusCheckBox::setPlainValue(Z)(aValue!=null && (false != aValue));
             }
         });
         Object.defineProperty(published, "buttonGroup", {

@@ -4,7 +4,6 @@ import com.eas.core.HasPublished;
 import com.eas.core.XElement;
 import com.eas.ui.ButtonGroup;
 import com.eas.ui.HasJsValue;
-import com.eas.ui.Widget;
 import com.eas.ui.events.ActionEvent;
 import com.eas.ui.events.ActionHandler;
 import com.eas.ui.events.HasActionHandlers;
@@ -33,7 +32,7 @@ public class MenuItemCheckBox extends MenuItem implements HasButtonGroup, HasAct
 
     protected Boolean value = Boolean.FALSE;
     protected Element leftMark;
-    protected InputElement inputElem;
+    protected InputElement input;
     protected Element field;
     protected ButtonGroup group;
 
@@ -47,11 +46,11 @@ public class MenuItemCheckBox extends MenuItem implements HasButtonGroup, HasAct
         leftMark.setClassName("menu-left-mark");
         leftMark.setInnerHTML("&nbsp;&nbsp;&nbsp;&nbsp;");
         element.appendChild(leftMark);
-        inputElem = Document.get().createCheckInputElement();
-        inputElem.getStyle().setPosition(Style.Position.ABSOLUTE);
-        inputElem.getStyle().setWidth(100, Style.Unit.PCT);
-        inputElem.setClassName("menu-left-check-radio");
-        leftMark.appendChild(inputElem);
+        input = Document.get().createCheckInputElement();
+        input.getStyle().setPosition(Style.Position.ABSOLUTE);
+        input.getStyle().setWidth(100, Style.Unit.PCT);
+        input.setClassName("menu-left-check-radio");
+        leftMark.appendChild(input);
         field = Document.get().createDivElement();
         field.getStyle().setDisplay(Style.Display.INLINE);
         field.getStyle().setWhiteSpace(Style.WhiteSpace.NOWRAP);
@@ -62,15 +61,8 @@ public class MenuItemCheckBox extends MenuItem implements HasButtonGroup, HasAct
         element.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
             @Override
             public void on(NativeEvent evt) {
-                fireActionPerformed();
                 setJsValue(value != null ? !value : true);
-            }
-        });
-        element.<XElement>cast().addEventListener(BrowserEvents.TOUCHSTART, new XElement.NativeHandler() {
-            @Override
-            public void on(NativeEvent evt) {
                 fireActionPerformed();
-                setJsValue(value != null ? !value : true);
             }
         });
     }
@@ -111,12 +103,15 @@ public class MenuItemCheckBox extends MenuItem implements HasButtonGroup, HasAct
 
     @Override
     public void setJsValue(Object aValue) {
-        if (aValue == null) {
-            aValue = Boolean.FALSE;
-        }
+        Boolean oldValue = value;
         value = (Boolean) aValue;
-        inputElem.setChecked(value);
-        fireValueChange();
+        if (aValue == null) {
+            input.setPropertyBoolean("indeterminate", true);
+        } else {
+            input.setPropertyBoolean("indeterminate", false);
+            input.setChecked(Boolean.TRUE.equals(aValue));
+        }
+        fireValueChange(oldValue);
     }
 
     protected final Set<ValueChangeHandler> valueChangeHandlers = new HashSet<>();
@@ -133,8 +128,8 @@ public class MenuItemCheckBox extends MenuItem implements HasButtonGroup, HasAct
         };
     }
 
-    protected void fireValueChange() {
-        ValueChangeEvent event = new ValueChangeEvent(this, !value, value);
+    protected void fireValueChange(Boolean oldValue) {
+        ValueChangeEvent event = new ValueChangeEvent(this, oldValue, value);
         for (ValueChangeHandler h : valueChangeHandlers) {
             h.onValueChange(event);
         }

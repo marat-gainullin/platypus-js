@@ -23,7 +23,6 @@ import com.eas.core.Utils.JsObject;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 
 /**
  * @author mg
@@ -1088,7 +1087,7 @@ public class Model implements HasPublished {
 	}
 
 	public void save(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) {
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 			// Scheduling is needed because of asynchronous nature of Object.observe's callback calling process.
 			@Override
 			public void execute() {

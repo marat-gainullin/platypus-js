@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.forms.menu;
 
 import com.eas.client.forms.HasChildren;
@@ -291,11 +287,7 @@ public class Menu extends JMenu implements HasPublished, HasContainerEvents, Has
     @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override
     public Widget getParentWidget() {
-        java.awt.Container parent = super.getParent();
-        if (parent instanceof JPopupMenu && ((JPopupMenu) parent).getInvoker() instanceof JMenu) {
-            parent = (java.awt.Container) ((JPopupMenu) parent).getInvoker();
-        }
-        return parent instanceof HasChildren ? (Widget) parent : null;
+        return null; // According to browser widgets
     }
 
     private static final String TEXT_JSDOC = ""

@@ -1,5 +1,6 @@
 package com.eas.widgets;
 
+import com.eas.widgets.boxes.CheckBox;
 import com.eas.widgets.containers.Desktop;
 import com.eas.widgets.containers.Anchors;
 import com.eas.core.Utils;
@@ -63,7 +64,7 @@ public class WidgetsFactory implements UiWidgetReader{
 			return buttonGroup;
 		case "cb":
 		case "CheckBox":
-			PlatypusCheckBox checkBox = new PlatypusCheckBox();
+			CheckBox checkBox = new CheckBox();
 			WidgetsPublisher.publish(checkBox);
 			aFactory.readGeneralProps(anElement, checkBox);
 			aFactory.readImageParagraph(anElement, checkBox);

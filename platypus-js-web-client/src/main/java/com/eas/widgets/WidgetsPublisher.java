@@ -1,5 +1,6 @@
 package com.eas.widgets;
 
+import com.eas.widgets.boxes.CheckBox;
 import com.eas.core.Utils;
 import com.eas.ui.ButtonGroup;
 import com.eas.ui.PublishedComponent;
@@ -41,7 +42,7 @@ public class WidgetsPublisher {
 		return new constr(null, null, null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(PlatypusCheckBox aComponent)/*-{
+	public native static PublishedComponent publish(CheckBox aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('CheckBox');
 		return new constr(null, null, null, aComponent);
 	}-*/;

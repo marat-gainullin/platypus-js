@@ -1,111 +1,157 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.widgets.boxes;
 
+import com.eas.core.HasPublished;
+import com.eas.core.XElement;
+import com.eas.menu.Menu;
 import com.eas.ui.CommonResources;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseDownEvent;
-import com.google.gwt.event.dom.client.MouseDownHandler;
-import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.MenuBar;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 
 /**
- * 
+ *
  * @author mg
  */
 public class DropDownButton extends ImageButton {
 
-	protected FlowPanel chevron = new FlowPanel();
-	protected SimplePanel chevronAnchor = new SimplePanel();
-	protected SimplePanel chevronMenu = new SimplePanel();
-	protected MenuBar menu;
+    protected Element chevron = Document.get().createDivElement();
+    protected Element splitter = Document.get().createDivElement();
+    protected Menu menu;
 
-	public DropDownButton() {
-		this("", false, null);
-	}
+    public DropDownButton() {
+        this("", false, null);
+    }
 
-	public DropDownButton(String aTitle, boolean asHtml, MenuBar aMenu) {
-		this(aTitle, asHtml, null, aMenu);
-	}
+    public DropDownButton(String aTitle, boolean asHtml, Menu aMenu) {
+        this(aTitle, asHtml, null, aMenu);
+    }
 
-	public DropDownButton(String aTitle, boolean asHtml, ImageResource aImage, MenuBar aMenu) {
-		super(Document.get().createDivElement(), aTitle, asHtml, aImage);
-		menu = aMenu;
+    public DropDownButton(String aTitle, boolean asHtml, String aImage, Menu aMenu) {
+        super(aTitle, asHtml, aImage);
+        menu = aMenu;
+        CommonResources.INSTANCE.commons().ensureInjected();
+        chevron.setClassName("dropdown");
+        menu.getElement().setClassName("dropdown-menu " + CommonResources.INSTANCE.commons().unselectable());
+        splitter.setClassName("dropdown-split " + CommonResources.INSTANCE.commons().unselectable());
+        chevron.appendChild(splitter);
+        element.insertFirst(chevron);
 
-		CommonResources.INSTANCE.commons().ensureInjected();
+        element.<XElement>cast().addEventListener(BrowserEvents.MOUSEDOWN, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                Element target = Element.as(event.getEventTarget());
+                if (target == chevron || target == splitter) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    showMenu();
+                }
+            }
+        });
+    }
 
-		chevron.getElement().addClassName("dropdown");
-		chevronMenu.getElement().addClassName("dropdown-menu");
-		chevronMenu.getElement().addClassName(CommonResources.INSTANCE.commons().unselectable());
-		chevronAnchor.getElement().addClassName("dropdown-split");
-		chevronAnchor.getElement().addClassName(CommonResources.INSTANCE.commons().unselectable());
-		chevron.add(chevronAnchor);
-		chevron.add(chevronMenu);
+    protected void showMenu() {
+        if (menu != null) {
+            /*
+            final PopupPanel pp = new PopupPanel();
+            pp.setAutoHideEnabled(true);
+            pp.setAutoHideOnHistoryEventsEnabled(true);
+            pp.setAnimationEnabled(true);
+            pp.setWidget(menu);
+            pp.showRelativeTo(chevronMenu);
+             */
+        }
+    }
 
-		getElement().insertFirst(chevron.getElement());
+    public Menu getMenu() {
+        return menu;
+    }
 
-		addMouseDownHandler(new MouseDownHandler() {
+    public void setMenu(Menu aMenu) {
+        if (menu != aMenu) {
+            if (menu != null) {
+                // menu.hide();
+            }
+            menu = aMenu;
+            splitter.getStyle().setDisplay(menu != null ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
+        }
+    }
 
-			@Override
-			public void onMouseDown(MouseDownEvent event) {
-			}
+    @Override
+    protected void publish(JavaScriptObject aValue) {
+        publish(this, aValue);
+    }
 
-		});
-		addClickHandler(new ClickHandler() {
+    private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
+        published.opaque = true;
 
-			@Override
-			public void onClick(ClickEvent event) {
-			}
+        Object.defineProperty(published, "text", {
+            get : function() {
+                return aWidget.@com.eas.widgets.PlatypusSplitButton::getText()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.widgets.PlatypusSplitButton::setText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+            }
+        });
+        Object.defineProperty(published, "icon", {
+            get : function() {
+                return aWidget.@com.eas.widgets.PlatypusSplitButton::getImageResource()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.widgets.PlatypusSplitButton::setImageResource(Lcom/google/gwt/resources/client/ImageResource;)(aValue);
+            }
+        });
+        Object.defineProperty(published, "iconTextGap", {
+            get : function() {
+                return aWidget.@com.eas.widgets.PlatypusSplitButton::getIconTextGap()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.widgets.PlatypusSplitButton::setIconTextGap(I)(aValue);
+            }
+        });
+        Object.defineProperty(published, "horizontalTextPosition", {
+            get : function() {
+                return aWidget.@com.eas.widgets.PlatypusSplitButton::getHorizontalTextPosition()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.widgets.PlatypusSplitButton::setHorizontalTextPosition(I)(+aValue);
+            }
+        });
+        Object.defineProperty(published, "verticalTextPosition", {
+            get : function() {
+                return aWidget.@com.eas.widgets.PlatypusSplitButton::getVerticalTextPosition()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.widgets.PlatypusSplitButton::setVerticalTextPosition(I)(+aValue);
+            }
+        });
 
-		});
-	}
-
-	@Override
-	public void onBrowserEvent(Event event) {
-		if (event.getTypeInt() == Event.ONCLICK || event.getTypeInt() == Event.ONMOUSEDOWN) {
-			Element target = Element.as(event.getEventTarget());
-			if (target == chevron.getElement() || target == chevronAnchor.getElement() || target == chevronMenu.getElement()) {
-				event.preventDefault();
-				event.stopPropagation();
-				showMenu();
-			} else {
-				super.onBrowserEvent(event);
-			}
-		} else
-			super.onBrowserEvent(event);
-	}
-
-	protected void showMenu() {
-		if (menu != null) {
-			final PopupPanel pp = new PopupPanel();
-			pp.setAutoHideEnabled(true);
-			pp.setAutoHideOnHistoryEventsEnabled(true);
-			pp.setAnimationEnabled(true);
-			pp.setWidget(menu);
-			pp.showRelativeTo(chevronMenu);
-		}
-	}
-
-	public MenuBar getMenu() {
-		return menu;
-	}
-
-	public void setMenu(MenuBar aMenu) {
-		if (menu != aMenu) {
-			menu = aMenu;
-			chevronAnchor.getElement().getStyle().setDisplay(menu != null ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
-			chevronMenu.getElement().getStyle().setDisplay(menu != null ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
-		}
-	}
+        Object.defineProperty(published, "horizontalAlignment", {
+            get : function() {
+                return aWidget.@com.eas.widgets.PlatypusSplitButton::getHorizontalAlignment()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.widgets.PlatypusSplitButton::setHorizontalAlignment(I)(+aValue);
+            }
+        });
+        Object.defineProperty(published, "verticalAlignment", {
+            get : function() {
+                return aWidget.@com.eas.widgets.PlatypusSplitButton::getVerticalAlignment()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.widgets.PlatypusSplitButton::setVerticalAlignment(I)(+aValue);
+            }
+        });
+        Object.defineProperty(published, "dropDownMenu", {
+            get : function(){
+                var menu = aWidget.@com.eas.widgets.PlatypusSplitButton::getMenu()();
+                return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(menu);
+            },
+            set : function(aValue){
+                aWidget.@com.eas.widgets.PlatypusSplitButton::setMenu(Lcom/google/gwt/user/client/ui/MenuBar;)(aValue != null ? aValue.unwrap() : null);
+            }
+        });
+    }-*/;
 }

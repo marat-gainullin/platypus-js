@@ -1,67 +1,24 @@
-/*
- * Copyright 2008 Google Inc.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 package com.eas.widgets.progress;
 
-import com.eas.core.XElement;
-import com.google.gwt.dom.client.Document;
+import com.eas.core.HasPublished;
+import com.eas.ui.HasJsValue;
+import com.eas.ui.Widget;
+import com.eas.ui.events.HasValueChangeHandlers;
+import com.eas.ui.events.ValueChangeEvent;
+import com.eas.ui.events.ValueChangeHandler;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.Widget;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A widget that displays progress on an arbitrary scale.
  *
- * <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-ProgressBar-shell { primary style } </li>
- * <li>.gwt-ProgressBar-shell .gwt-ProgressBar-bar { the actual progress bar }
- * </li>
- * <li>.gwt-ProgressBar-shell .gwt-ProgressBar-text { text on the bar } </li>
- * <li>.gwt-ProgressBar-shell .gwt-ProgressBar-text-firstHalf { applied to text
- * when progress is less than 50 percent } </li>
- * <li>.gwt-ProgressBar-shell .gwt-ProgressBar-text-secondHalf { applied to text
- * when progress is greater than 50 percent } </li>
- * </ul>
  */
-public class ProgressBar extends Widget implements RequiresResize, HasValue<Double> {
-
-    /**
-     * A formatter used to format the text displayed in the progress bar widget.
-     */
-    public interface TextFormatter {
-
-        /**
-         * Generate the text to display in the ProgressBar based on the current
-         * value.
-         *
-         * Override this method to change the text displayed within the
-         * ProgressBar.
-         *
-         * @param bar the progress bar
-         * @param curProgress the current progress
-         * @return the text to display in the progress bar
-         */
-        public String getText(ProgressBar bar, Double curProgress);
-    }
+public class ProgressBar extends Widget implements HasJsValue, HasValueChangeHandlers {
 
     /**
      * The bar element that displays the progress.
@@ -93,10 +50,7 @@ public class ProgressBar extends Widget implements RequiresResize, HasValue<Doub
      */
     private Element textElement;
 
-    /**
-     * The current text formatter.
-     */
-    private TextFormatter textFormatter;
+    protected String text;
 
     /**
      * Create a progress bar with default range of 0 to 100.
@@ -147,38 +101,37 @@ public class ProgressBar extends Widget implements RequiresResize, HasValue<Doub
      * @param aTextFormatter the text formatter
      */
     public ProgressBar(double aMinProgress, double aMaxProgress,
-            Double aValue, TextFormatter aTextFormatter) {
+            Double aValue, String aText) {
         super();
+        element.setClassName("progress");
         minProgress = aMinProgress;
         maxProgress = aMaxProgress;
         value = aValue;
-        setTextFormatter(aTextFormatter);
+        text = aText;
 
         // Create the outer shell
-        setElement(Document.get().createDivElement());
-        getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        getElement().getStyle().setPosition(Style.Position.RELATIVE);
+        element.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+        element.getStyle().setPosition(Style.Position.RELATIVE);
         // default preferred size
-        getElement().getStyle().setWidth(150, Style.Unit.PX);
-        getElement().getStyle().setHeight(16, Style.Unit.PX);
-        setStyleName("gwt-ProgressBar-shell");
+        element.getStyle().setWidth(150, Style.Unit.PX);
+        element.getStyle().setHeight(16, Style.Unit.PX);
 
         // Create the bar element
         barElement = DOM.createDiv();
-        getElement().appendChild(barElement);
+        element.appendChild(barElement);
         barElement.getStyle().setHeight(100, Style.Unit.PCT);
-        barElement.setClassName("gwt-ProgressBar-bar");
+        barElement.addClassName("progress-bar");
+        barElement.addClassName("progress-bar-default");
 
         // Create the text element
         textElement = DOM.createDiv();
-        DOM.appendChild(getElement(), textElement);
+        DOM.appendChild(element, textElement);
 
         textElement.getStyle().setPosition(Style.Position.ABSOLUTE);
         textElement.getStyle().setTop(0, Style.Unit.PX);
         textElement.setClassName("gwt-ProgressBar-text");
         // Set the current progress
-        setValue(aValue);
-		getElement().<XElement>cast().addResizingTransitionEnd(this);
+        setJsValue(aValue);
     }
 
     /**
@@ -222,7 +175,7 @@ public class ProgressBar extends Widget implements RequiresResize, HasValue<Doub
      * @return the current progress
      */
     @Override
-    public Double getValue() {
+    public Double getJsValue() {
         return value;
     }
 
@@ -231,8 +184,8 @@ public class ProgressBar extends Widget implements RequiresResize, HasValue<Doub
      *
      * @return the text formatter
      */
-    public TextFormatter getTextFormatter() {
-        return textFormatter;
+    public String getText() {
+        return text;
     }
 
     /**
@@ -245,35 +198,6 @@ public class ProgressBar extends Widget implements RequiresResize, HasValue<Doub
     }
 
     /**
-     * This method is called when the dimensions of the parent element change.
-     * Subclasses should override this method as needed.
-     *
-     * Move the text to the center of the progress bar.
-     *
-     */
-    @Override
-    public void onResize() {
-        if (textVisible) {
-            int width = getElement().getClientWidth();
-            int height = getElement().getClientHeight();
-            int textWidth = textElement.getOffsetWidth();
-            int textHeight = textElement.getOffsetHeight();
-            int left = (width / 2) - (textWidth / 2);
-            textElement.getStyle().setLeft(left, Style.Unit.PX);
-            textElement.getStyle().setTop((height - textHeight) / 2, Style.Unit.PX);
-        }
-    }
-
-    /**
-     * Redraw the progress bar when something changes the layout.
-     */
-    public void redraw() {
-        if (isAttached()) {
-            onResize();
-        }
-    }
-
-    /**
      * Set the maximum progress. If the minimum progress is more than the
      * current progress, the current progress is adjusted to be within the new
      * range.
@@ -283,7 +207,6 @@ public class ProgressBar extends Widget implements RequiresResize, HasValue<Doub
     public void setMaxProgress(double aValue) {
         maxProgress = aValue;
         value = Math.min((value != null ? value : 0), aValue);
-        resetProgress();
     }
 
     /**
@@ -296,7 +219,6 @@ public class ProgressBar extends Widget implements RequiresResize, HasValue<Doub
     public void setMinProgress(double aValue) {
         minProgress = aValue;
         value = Math.max((value != null ? value : 0), aValue);
-        resetProgress();
     }
 
     /**
@@ -305,8 +227,8 @@ public class ProgressBar extends Widget implements RequiresResize, HasValue<Doub
      * @param aValue the current aValue
      */
     @Override
-    public void setValue(Double aValue) {
-        setValue(aValue, false);
+    public void setJsValue(Object aValue) {
+        setValue((Double) aValue, false);
     }
 
     /**
@@ -315,8 +237,8 @@ public class ProgressBar extends Widget implements RequiresResize, HasValue<Doub
      * @param aValue the current aValue
      * @param fireEvents
      */
-    @Override
     public void setValue(Double aValue, boolean fireEvents) {
+        Double oldValue = value;
         value = aValue != null ? Math.max(minProgress, Math.min(maxProgress, aValue)) : null;
 
         // Calculate percent complete
@@ -326,22 +248,36 @@ public class ProgressBar extends Widget implements RequiresResize, HasValue<Doub
 
         // Set the style depending on the size of the bar
         if (percent < 50) {
-            textElement.removeClassName("gwt-ProgressBar-text-secondHalf");
-            textElement.addClassName("gwt-ProgressBar-text-firstHalf");
+            textElement.removeClassName("progress-bar-text-secondHalf");
+            textElement.addClassName("progress-bar-text-firstHalf");
         } else {
-            textElement.removeClassName("gwt-ProgressBar-text-firstHalf");
-            textElement.addClassName("gwt-ProgressBar-text-secondHalf");
+            textElement.removeClassName("progress-bar-text-firstHalf");
+            textElement.addClassName("progressBar-text-secondHalf");
         }
-        // Realign the text
-        redraw();
         if (fireEvents) {
-            ValueChangeEvent.fire(ProgressBar.this, getValue());
+            fireValueChange(oldValue);
         }
     }
 
+    protected final Set<ValueChangeHandler> valueChangeHandlers = new HashSet<>();
+
     @Override
-    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Double> handler) {
-        return addHandler(handler, ValueChangeEvent.getType());
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler handler) {
+        valueChangeHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                valueChangeHandlers.remove(handler);
+            }
+
+        };
+    }
+
+    protected void fireValueChange(Double oldValue) {
+        ValueChangeEvent event = new ValueChangeEvent(this, oldValue, value);
+        for (ValueChangeHandler h : valueChangeHandlers) {
+            h.onValueChange(event);
+        }
     }
 
     /**
@@ -349,11 +285,8 @@ public class ProgressBar extends Widget implements RequiresResize, HasValue<Doub
      *
      * @param aFormatter the text formatter
      */
-    public void setTextFormatter(TextFormatter aFormatter) {
-        textFormatter = aFormatter;
-        if(isAttached()){
-        	setValue(getValue());
-        }
+    public void setText(String aText) {
+        text = aText;
     }
 
     /**
@@ -365,7 +298,6 @@ public class ProgressBar extends Widget implements RequiresResize, HasValue<Doub
         textVisible = aValue;
         if (textVisible) {
             textElement.getStyle().clearDisplay();
-            redraw();
         } else {
             textElement.getStyle().setDisplay(Style.Display.NONE);
         }
@@ -380,8 +312,8 @@ public class ProgressBar extends Widget implements RequiresResize, HasValue<Doub
      * @return the text to display in the progress bar
      */
     protected String generateText(Double curProgress) {
-        if (textFormatter != null) {
-            return textFormatter.getText(this, curProgress);
+        if (text != null) {
+            return text;
         } else {
             return (int) (100 * getPercent()) + "%";
         }
@@ -406,15 +338,52 @@ public class ProgressBar extends Widget implements RequiresResize, HasValue<Doub
     }
 
     @Override
-    protected void onAttach() {
-        super.onAttach();
-        redraw();
+    protected void publish(JavaScriptObject aValue) {
+        publish(this, aValue);
     }
-
-    /**
-     * Reset the progress text based on the current min and max progress range.
-     */
-    protected void resetProgress() {
-        setValue(getValue());
-    }
+    
+    private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
+        Object.defineProperty(published, "value", {
+            get : function() {
+                var v = aWidget.@com.eas.widgets.PlatypusProgressBar::getValue()();
+                if (v != null) {
+                    return v.@java.lang.Number::doubleValue()();
+                } else
+                    return null;
+            },
+            set : function(aValue) {
+                if (aValue != null) {
+                    var v = +aValue;
+                    var d = @java.lang.Double::new(D)(v);
+                    aWidget.@com.eas.widgets.PlatypusProgressBar::setValue(Ljava/lang/Double;Z)(d, true);
+                } else {
+                    aWidget.@com.eas.widgets.PlatypusProgressBar::setValue(Ljava/lang/Double;Z)(null, true);
+                }
+            }
+        });
+        Object.defineProperty(published, "minimum", {
+            get : function() {
+                return aWidget.@com.eas.widgets.PlatypusProgressBar::getMinProgress()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.widgets.PlatypusProgressBar::setMinProgress(D)(aValue);
+            }
+        });
+        Object.defineProperty(published, "maximum", {
+            get : function() {
+                return aWidget.@com.eas.widgets.PlatypusProgressBar::getMaxProgress()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.widgets.PlatypusProgressBar::setMaxProgress(D)(aValue);
+            }
+        });
+        Object.defineProperty(published, "text", {
+            get : function() {
+                return aWidget.@com.eas.widgets.PlatypusProgressBar::getText()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.widgets.PlatypusProgressBar::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+            }
+        });
+    }-*/;
 }
