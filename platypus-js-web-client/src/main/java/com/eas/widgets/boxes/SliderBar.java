@@ -1,38 +1,31 @@
-/*
- * Copyright 2008 Google Inc.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
-package com.eas.widgets.progress;
+package com.eas.widgets.boxes;
 
+import com.eas.core.HasPublished;
 import com.eas.core.XElement;
+import com.eas.ui.HasJsValue;
+import com.eas.ui.Widget;
+import com.eas.ui.events.ActionEvent;
+import com.eas.ui.events.ActionHandler;
+import com.eas.ui.events.HasActionHandlers;
+import com.eas.ui.events.HasValueChangeHandlers;
+import com.eas.ui.events.ValueChangeHandler;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HasEnabled;
-import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.RequiresResize;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A widget that allows the user to select a value within a range of possible
@@ -52,19 +45,17 @@ import java.util.List;
  * </ul>
  * </p>
  *
- * <h3>CSS Style Rules</h3> <ul class='css'> <li>.slider-shell { primary
- * style }</li> <li>.slider-shell-focused { primary style when focused
- * }</li>
- * <li>.slider-shell slider-line { the line that the knob moves
- * along }</li> <li>.slider-shell slider-line-sliding { the line
- * that the knob moves along when sliding }</li> <li>.slider-shell
- * .slider-knob { the sliding knob }</li> <li>.slider-shell
- * .slider-knob-sliding { the sliding knob when sliding }</li> <li>
+ * <h3>CSS Style Rules</h3> <ul class='css'> <li>.slider-shell { primary style
+ * }</li> <li>.slider-shell-focused { primary style when focused }</li>
+ * <li>.slider-shell slider-line { the line that the knob moves along }</li>
+ * <li>.slider-shell slider-line-sliding { the line that the knob moves along
+ * when sliding }</li> <li>.slider-shell .slider-knob { the sliding knob }</li>
+ * <li>.slider-shell .slider-knob-sliding { the sliding knob when sliding }</li>
+ * <li>
  * .slider-shell .slider-tick { the ticks along the line }</li>
- * <li>.slider-shell .slider-label { the text labels along the
- * line }</li> </ul>
+ * <li>.slider-shell .slider-label { the text labels along the line }</li> </ul>
  */
-public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Double>, HasEnabled {
+public class SliderBar extends Widget implements HasJsValue, HasEnabled, HasActionHandlers, HasValueChangeHandlers {
 
     /**
      * The timer used to continue to shift the knob as the user holds down one
@@ -108,9 +99,9 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
 
             // Slide the slider bar
             if (shiftRight) {
-                setValue((value != null ? value : 0) + multiplier * stepSize);
+                setJsValue((value != null ? value : 0) + multiplier * stepSize);
             } else {
-                setValue((value != null ? value : 0) - multiplier * stepSize);
+                setJsValue((value != null ? value : 0) - multiplier * stepSize);
             }
 
             // Repeat this timer until cancelled by keyup event
@@ -226,11 +217,6 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     private boolean slidingMouse;
 
     /**
-     * A bit indicating whether or not the slider is enabled
-     */
-    private boolean enabled = true;
-
-    /**
      * The size of the increments between knob positions.
      */
     private double stepSize = 1.0;
@@ -240,6 +226,10 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * along the slider bar.
      */
     private final List<Element> tickElements = new ArrayList<>();
+
+    public SliderBar() {
+        this(0, 100);
+    }
 
     /**
      * Create a slider bar.
@@ -261,21 +251,22 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     public SliderBar(double aMinValue, double aMaxValue,
             LabelFormatter aLabelFormatter) {
         super();
+        element.setTabIndex(1);// TODO check all widgets against tabIndex property / Focusable implementation
         minValue = aMinValue;
         maxValue = aMaxValue;
         setLabelFormatter(aLabelFormatter);
 
         // Create the outer shell
-        getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        getElement().getStyle().setPosition(Style.Position.RELATIVE);
+        element.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+        element.getStyle().setPosition(Style.Position.RELATIVE);
         // default preferred size
-        getElement().getStyle().setWidth(150, Style.Unit.PX);
-        getElement().getStyle().setHeight(35, Style.Unit.PX);
-        setStyleName("slider-shell");
+        element.getStyle().setWidth(150, Style.Unit.PX);
+        element.getStyle().setHeight(35, Style.Unit.PX);
+        element.setClassName("slider-shell");
 
         // Create the line
         lineElement = DOM.createDiv();
-        getElement().appendChild(lineElement);
+        element.appendChild(lineElement);
         lineElement.getStyle().setPosition(Style.Position.ABSOLUTE);
         lineElement.setClassName("slider-line");
         coverElement = DOM.createDiv();
@@ -291,20 +282,126 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         knobElement.getStyle().setPosition(Style.Position.ABSOLUTE);
         knobElement.setClassName("slider-knob slider-knob-default");
         knobElement.addClassName("slider-knob-enabled");
-        getElement().appendChild(knobElement);
+        element.appendChild(knobElement);
 
-        sinkEvents(Event.MOUSEEVENTS | Event.KEYEVENTS | Event.FOCUSEVENTS);
-		getElement().<XElement>cast().addResizingTransitionEnd(this);
-    }
+        element.<XElement>cast().addEventListener(BrowserEvents.BLUR, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                // Unhighlight and cancel keyboard events
+                keyTimer.cancel();
+                if (slidingMouse) {
+                    DOM.releaseCapture(getElement());
+                    slidingMouse = false;
+                    slideKnob(event);
+                    stopSliding(true);
+                } else if (slidingKeyboard) {
+                    slidingKeyboard = false;
+                    stopSliding(true);
+                }
+                unhighlightFocus();
+            }
+        });
+        element.<XElement>cast().addEventListener(BrowserEvents.FOCUS, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                highlightFocus();
+            }
+        });
 
-    /**
-     * Return the current value.
-     *
-     * @return the current value
-     */
-    @Override
-    public Double getValue() {
-        return value;
+        element.<XElement>cast().addEventListener(BrowserEvents.MOUSEWHEEL, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                int velocityY = event.getMouseWheelVelocityY();
+                event.preventDefault();
+                if (velocityY > 0) {
+                    shiftRight(1);
+                } else {
+                    shiftLeft(1);
+                }
+            }
+        });
+
+        element.<XElement>cast().addEventListener(BrowserEvents.KEYDOWN, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                if (!slidingKeyboard) {
+                    int multiplier = 1;
+                    if (event.getCtrlKey()) {
+                        multiplier = (int) (getTotalRange() / stepSize / 10);
+                    }
+                    switch (event.getKeyCode()) {
+                        case KeyCodes.KEY_HOME:
+                            event.preventDefault();
+                            setJsValue(minValue);
+                            break;
+                        case KeyCodes.KEY_END:
+                            event.preventDefault();
+                            setJsValue(maxValue);
+                            break;
+                        case KeyCodes.KEY_LEFT:
+                            event.preventDefault();
+                            slidingKeyboard = true;
+                            startSliding(false);
+                            shiftLeft(multiplier);
+                            keyTimer.schedule(400, false, multiplier);
+                            break;
+                        case KeyCodes.KEY_RIGHT:
+                            event.preventDefault();
+                            slidingKeyboard = true;
+                            startSliding(false);
+                            shiftRight(multiplier);
+                            keyTimer.schedule(400, true, multiplier);
+                            break;
+                        case KeyCodes.KEY_SPACE:
+                            event.preventDefault();
+                            setJsValue(minValue + getTotalRange() / 2);
+                    }
+                }
+            }
+        });
+        element.<XElement>cast().addEventListener(BrowserEvents.KEYUP, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                // Stop shifting on key up
+                keyTimer.cancel();
+                if (slidingKeyboard) {
+                    slidingKeyboard = false;
+                    stopSliding(true);
+                }
+            }
+        });
+        element.<XElement>cast().addEventListener(BrowserEvents.MOUSEDOWN, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                element.focus();
+                highlightFocus();
+                slidingMouse = true;
+                DOM.setCapture(getElement());
+                startSliding(true);
+                event.preventDefault();
+                //slideKnob(event);
+            }
+        });
+
+        element.<XElement>cast().addEventListener(BrowserEvents.MOUSEUP, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                if (slidingMouse) {
+                    DOM.releaseCapture(getElement());
+                    slidingMouse = false;
+                    slideKnob(event);
+                    stopSliding(true);
+                }
+            }
+        });
+        element.<XElement>cast().addEventListener(BrowserEvents.MOUSEMOVE, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                if (slidingMouse) {
+                    slideKnob(event);
+                }
+            }
+        });
     }
 
     /**
@@ -375,133 +472,10 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     }
 
     /**
-     * @return Gets whether this widget is enabled
-     */
-    @Override
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    /**
-     * Listen for events that will move the knob.
-     *
-     * @param event the event that occurred
-     */
-    @Override
-    public void onBrowserEvent(Event event) {
-        super.onBrowserEvent(event);
-        if (enabled) {
-            switch (DOM.eventGetType(event)) {
-                // Unhighlight and cancel keyboard events
-                case Event.ONBLUR:
-                    keyTimer.cancel();
-                    if (slidingMouse) {
-                        DOM.releaseCapture(getElement());
-                        slidingMouse = false;
-                        slideKnob(event);
-                        stopSliding(true);
-                    } else if (slidingKeyboard) {
-                        slidingKeyboard = false;
-                        stopSliding(true);
-                    }
-                    unhighlightFocus();
-                    break;
-
-                // Highlight on focus
-                case Event.ONFOCUS:
-                    highlightFocus();
-                    break;
-
-                // Mousewheel events
-                case Event.ONMOUSEWHEEL:
-                    int velocityY = event.getMouseWheelVelocityY();
-                    event.preventDefault();
-                    if (velocityY > 0) {
-                        shiftRight(1);
-                    } else {
-                        shiftLeft(1);
-                    }
-                    break;
-
-                // Shift left or right on key press
-                case Event.ONKEYDOWN:
-                    if (!slidingKeyboard) {
-                        int multiplier = 1;
-                        if (event.getCtrlKey()) {
-                            multiplier = (int) (getTotalRange() / stepSize / 10);
-                        }
-
-                        switch (event.getKeyCode()) {
-                            case KeyCodes.KEY_HOME:
-                                event.preventDefault();
-                                setValue(minValue, true);
-                                break;
-                            case KeyCodes.KEY_END:
-                                event.preventDefault();
-                                setValue(maxValue, true);
-                                break;
-                            case KeyCodes.KEY_LEFT:
-                                event.preventDefault();
-                                slidingKeyboard = true;
-                                startSliding(false);
-                                shiftLeft(multiplier);
-                                keyTimer.schedule(400, false, multiplier);
-                                break;
-                            case KeyCodes.KEY_RIGHT:
-                                event.preventDefault();
-                                slidingKeyboard = true;
-                                startSliding(false);
-                                shiftRight(multiplier);
-                                keyTimer.schedule(400, true, multiplier);
-                                break;
-                            case KeyCodes.KEY_SPACE:
-                                event.preventDefault();
-                                setValue(minValue + getTotalRange() / 2, true);
-                                break;
-                        }
-                    }
-                    break;
-                // Stop shifting on key up
-                case Event.ONKEYUP:
-                    keyTimer.cancel();
-                    if (slidingKeyboard) {
-                        slidingKeyboard = false;
-                        stopSliding(true);
-                    }
-                    break;
-
-                // Mouse Events
-                case Event.ONMOUSEDOWN:
-                    setFocus(true);
-                    slidingMouse = true;
-                    DOM.setCapture(getElement());
-                    startSliding(true);
-                    event.preventDefault();
-                    //slideKnob(event);
-                    break;
-                case Event.ONMOUSEUP:
-                    if (slidingMouse) {
-                        DOM.releaseCapture(getElement());
-                        slidingMouse = false;
-                        slideKnob(event);
-                        stopSliding(true);
-                    }
-                    break;
-                case Event.ONMOUSEMOVE:
-                    if (slidingMouse) {
-                        slideKnob(event);
-                    }
-                    break;
-            }
-        }
-    }
-
-    /**
      * This method is called when the dimensions of the parent element change.
      * Subclasses should override this method as needed.
      */
-    @Override
-    public void onResize() {
+    public void redraw() {
         // Center the line in the shell
         int width = getElement().getClientWidth();
         //int height = getElement().getClientHeight();
@@ -518,33 +492,62 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         drawKnob();
     }
 
-    /**
-     * Redraw the progress bar when something changes the layout.
-     */
-    public void redraw() {
-        if (isAttached()) {
-            onResize();
+    protected final Set<ValueChangeHandler> valueChangeHandlers = new HashSet<>();
+
+    @Override
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler handler) {
+        valueChangeHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                valueChangeHandlers.remove(handler);
+            }
+
+        };
+    }
+
+    protected void fireValueChange(Object oldValue) {
+        com.eas.ui.events.ValueChangeEvent event = new com.eas.ui.events.ValueChangeEvent(this, oldValue, value);
+        for (com.eas.ui.events.ValueChangeHandler h : valueChangeHandlers) {
+            h.onValueChange(event);
         }
     }
 
-    /**
-     * Set the current value and fire the onValueChange event.
-     *
-     * @param aValue the current value
-     */
+    protected Set<ActionHandler> actionHandlers = new HashSet<>();
+
     @Override
-    public void setValue(Double aValue) {
-        setValue(aValue, false);
+    public HandlerRegistration addActionHandler(ActionHandler handler) {
+        actionHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                actionHandlers.remove(handler);
+            }
+
+        };
+    }
+
+    protected void fireActionPerformed() {
+        ActionEvent event = new ActionEvent(this);
+        for (ActionHandler h : actionHandlers) {
+            h.onAction(event);
+        }
+    }
+
+    @Override
+    public Object getJsValue() {
+        return value;
     }
 
     /**
      * Set the current value and optionally fire the ValueChangeEvent.
      *
      * @param aValue the current value
-     * @param fireEvents fire the onValue change events if true
      */
     @Override
-    public void setValue(Double aValue, boolean fireEvents) {
+    public void setJsValue(Object oValue) {
+        Object oldValue = value;
+        Double aValue = (Double) oValue;
         // Confine the value to the range
         value = Math.max(minValue, Math.min(maxValue, (aValue != null ? aValue : 0)));
         double remainder = (value - minValue) % stepSize;
@@ -560,14 +563,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         drawKnob();
 
         // Fire the onValueChange event
-        if (fireEvents) {
-            ValueChangeEvent.fire(SliderBar.this, getValue());
-        }
-    }
-
-    @Override
-    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Double> handler) {
-        return addHandler(handler, ValueChangeEvent.getType());
+        fireValueChange(oldValue);
     }
 
     /**
@@ -577,19 +573,22 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      */
     @Override
     public void setEnabled(boolean aValue) {
-        enabled = aValue;
-        if (aValue) {
-            knobElement.removeClassName("slider-knob-disabled");
-            lineElement.removeClassName("slider-line-disabled");
-            knobElement.addClassName("slider-knob-enabled");
-            lineElement.addClassName("slider-line-enabled");
-        } else {
-            knobElement.removeClassName("slider-knob-enabled");
-            lineElement.removeClassName("slider-line-enabled");
-            knobElement.addClassName("slider-knob-disabled");
-            lineElement.addClassName("slider-line-disabled");
+        if (enabled != aValue) {
+            super.setEnabled(aValue);
+            enabled = aValue;
+            if (aValue) {
+                knobElement.removeClassName("slider-knob-disabled");
+                lineElement.removeClassName("slider-line-disabled");
+                knobElement.addClassName("slider-knob-enabled");
+                lineElement.addClassName("slider-line-enabled");
+            } else {
+                knobElement.removeClassName("slider-knob-enabled");
+                lineElement.removeClassName("slider-line-enabled");
+                knobElement.addClassName("slider-knob-disabled");
+                lineElement.addClassName("slider-line-disabled");
+            }
+            redraw();
         }
-        redraw();
     }
 
     /**
@@ -683,8 +682,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * @param numSteps the number of steps to shift
      */
     public void shiftLeft(int numSteps) {
-        Double oldValue = getValue();
-        setValue((oldValue != null ? oldValue : 0) - numSteps * stepSize, true);
+        Double oldValue = (Double) getJsValue();
+        setJsValue((oldValue != null ? oldValue : 0) - numSteps * stepSize);
     }
 
     /**
@@ -693,8 +692,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * @param numSteps the number of steps to shift
      */
     public void shiftRight(int numSteps) {
-        Double oldValue = getValue();
-        setValue((oldValue != null ? oldValue : 0) + numSteps * stepSize, true);
+        Double oldValue = (Double) getJsValue();
+        setJsValue((oldValue != null ? oldValue : 0) + numSteps * stepSize);
     }
 
     /**
@@ -729,12 +728,6 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         } else {
             return 0;
         }
-    }
-
-    @Override
-    protected void onAttach() {
-        super.onAttach();
-        redraw();
     }
 
     /**
@@ -870,8 +863,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * Highlight this widget.
      */
     private void highlightFocus() {
-        String styleName = getStylePrimaryName();
-        getElement().addClassName(styleName + "-focused");
+        element.addClassName("slider-shell-focused");
     }
 
     /**
@@ -879,7 +871,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * redraw the knob as needed.
      */
     private void resetCurrentValue() {
-        setValue(getValue());
+        setJsValue(getJsValue());
     }
 
     /**
@@ -893,7 +885,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
             int lineWidth = lineElement.getOffsetWidth();
             int lineLeft = lineElement.getAbsoluteLeft();
             double percent = (double) (x - lineLeft) / lineWidth * 1.0;
-            setValue(getTotalRange() * percent + minValue, true);
+            setJsValue(getTotalRange() * percent + minValue);
         }
     }
 
@@ -927,7 +919,50 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * Unhighlight this widget.
      */
     private void unhighlightFocus() {
-        String styleName = getStylePrimaryName();
-        getElement().removeClassName(styleName + "-focused");
+        getElement().removeClassName("slider-shell-focused");
     }
+
+    @Override
+    protected void publish(JavaScriptObject aValue) {
+        publish(this, aValue);
+    }
+
+    private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
+        Object.defineProperty(published, "maximum", {
+            get : function() {
+                return aWidget.@com.eas.widgets.PlatypusSlider::getMaxValue()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.widgets.PlatypusSlider::setMaxValue(D)(aValue);
+            }
+        });
+        Object.defineProperty(published, "minimum", {
+            get : function() {
+                return aWidget.@com.eas.widgets.PlatypusSlider::getMinValue()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.widgets.PlatypusSlider::setMinValue(D)(aValue);
+            }
+        });
+        Object.defineProperty(published, "value", {
+            get : function() {
+                var value = aWidget.@com.eas.widgets.PlatypusSlider::getValue()();
+                return (value == null ? 0 :	value.@java.lang.Double::doubleValue()());
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.widgets.PlatypusSlider::setJsValue(Ljava/lang/Double;)(aValue != null ? @java.lang.Double::new(D)(+aValue) : null);
+            }
+        });
+        Object.defineProperty(published, "text", {
+            get : function() {
+                var v = published.value;
+                return v != null ? published.value + '' : '';
+            },
+            set : function(aValue) {
+                var v = parseFloat(aValue);
+                if(!isNaN(v))
+                    published.value = v;
+            }
+        });
+    }-*/;
 }

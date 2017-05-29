@@ -6,7 +6,7 @@
 package com.eas.grid.cells;
 
 import com.eas.bound.ModelCombo;
-import com.eas.widgets.boxes.StyledListBox;
+import com.eas.widgets.boxes.DropDownList;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class PlatypusLookupEditorCell extends RenderedEditorCell<Object> {
 
 	public PlatypusLookupEditorCell() {
-		super(new StyledListBox<Object>());
+		super(new DropDownList<Object>());
 	}
 
 	public PlatypusLookupEditorCell(Widget aEditor) {

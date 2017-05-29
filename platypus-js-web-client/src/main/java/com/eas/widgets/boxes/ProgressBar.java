@@ -1,4 +1,4 @@
-package com.eas.widgets.progress;
+package com.eas.widgets.boxes;
 
 import com.eas.core.HasPublished;
 import com.eas.ui.HasJsValue;

@@ -15,7 +15,7 @@ import com.eas.ui.events.ActionEvent;
 import com.eas.ui.events.ActionHandler;
 import com.eas.ui.events.HasActionHandlers;
 import com.eas.widgets.WidgetsUtils;
-import com.eas.widgets.boxes.StyledListBox;
+import com.eas.widgets.boxes.DropDownList;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -46,8 +46,8 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
     protected boolean list = true;
 
     public ModelCombo() {
-        super(new StyledListBox<JavaScriptObject>());
-        StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
+        super(new DropDownList<JavaScriptObject>());
+        DropDownList<JavaScriptObject> box = (DropDownList<JavaScriptObject>) decorated;
         box.addItem("...", keyForNullValue, null, "");
         nullOption = box.getItem(0);
         box.getElement().addClassName(CUSTOM_DROPDOWN_CLASS);
@@ -165,7 +165,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 
     protected void rebindList() {
         try {
-            StyledListBox<JavaScriptObject> listBox = (StyledListBox<JavaScriptObject>) decorated;
+            DropDownList<JavaScriptObject> listBox = (DropDownList<JavaScriptObject>) decorated;
             listBox.setSelectedIndex(-1);
             listBox.clear();
             listBox.addItem(calcLabel(null), keyForNullValue, null, "");
@@ -217,7 +217,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
     }
 
     public String getText() {
-        return list ? ((StyledListBox<JavaScriptObject>) decorated).getText() : nonListMask.getValue()/* value in nonListMask is exactly text */;
+        return list ? ((DropDownList<JavaScriptObject>) decorated).getText() : nonListMask.getValue()/* value in nonListMask is exactly text */;
     }
 
     @Override
@@ -307,7 +307,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
     public void setList(boolean aValue) {
         if (list != aValue) {
             list = aValue;
-            StyledListBox<JavaScriptObject> listBox = (StyledListBox<JavaScriptObject>) decorated;
+            DropDownList<JavaScriptObject> listBox = (DropDownList<JavaScriptObject>) decorated;
             if (list) {
                 listBox.getElement().addClassName(CUSTOM_DROPDOWN_CLASS);
                 listBox.getElement().getStyle().clearVisibility();

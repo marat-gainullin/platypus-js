@@ -1,5 +1,7 @@
 package com.eas.widgets;
 
+import com.eas.widgets.boxes.TextArea;
+import com.eas.widgets.boxes.TextField;
 import com.eas.widgets.boxes.CheckBox;
 import com.eas.widgets.containers.Desktop;
 import com.eas.widgets.containers.Anchors;
@@ -78,7 +80,7 @@ public class WidgetsFactory implements UiWidgetReader{
 			return checkBox;
 		case "ta":
 		case "TextArea":
-			PlatypusTextArea textArea = new PlatypusTextArea();
+			TextArea textArea = new TextArea();
 			WidgetsPublisher.publish(textArea);
 			aFactory.readGeneralProps(anElement, textArea);
 			if (Utils.hasAttribute(anElement, "tx", "text")) {
@@ -162,7 +164,7 @@ public class WidgetsFactory implements UiWidgetReader{
 			return slider;
 		case "tf":
 		case "TextField":
-			PlatypusTextField textField = new PlatypusTextField();
+			TextField textField = new TextField();
 			WidgetsPublisher.publish(textField);
 			aFactory.readGeneralProps(anElement, textField);
 			if (Utils.hasAttribute(anElement, "tx", "text")) {

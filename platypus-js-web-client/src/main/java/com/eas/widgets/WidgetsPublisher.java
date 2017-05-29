@@ -1,5 +1,7 @@
 package com.eas.widgets;
 
+import com.eas.widgets.boxes.TextArea;
+import com.eas.widgets.boxes.TextField;
 import com.eas.widgets.boxes.CheckBox;
 import com.eas.core.Utils;
 import com.eas.ui.ButtonGroup;
@@ -57,7 +59,7 @@ public class WidgetsPublisher {
 		return new constr(null, null, null, null, null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(PlatypusTextField aComponent)/*-{
+	public native static PublishedComponent publish(TextField aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('TextField');
 		return new constr(null, aComponent);
 	}-*/;
@@ -67,7 +69,7 @@ public class WidgetsPublisher {
 		return new constr(null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(PlatypusTextArea aComponent)/*-{
+	public native static PublishedComponent publish(TextArea aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('TextArea');
 		return new constr(null, aComponent);
 	}-*/;
