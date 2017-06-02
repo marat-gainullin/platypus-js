@@ -15,11 +15,11 @@ import java.util.Set;
 
 /**
  *
+ * TODO: Don't forget to add time button and date button and switching between them in decorated-date-time-field as well as in the picker.
  * @author mgainullin
  */
 public class DateTimePicker extends Widget implements HasJsValue, HasValueChangeHandlers {
 
-    // TODO: add localization features
     private static String[] weekDaysNames = new String[]{
         "week.monday",
         "week.tuesday",

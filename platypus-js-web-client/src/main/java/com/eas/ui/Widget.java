@@ -62,6 +62,17 @@ import java.util.Set;
 public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPopupMenu,
         HasShowHandlers, HasHideHandlers {
 
+    protected class EmptyHandlerRegistration implements HandlerRegistration {
+
+        public EmptyHandlerRegistration() {
+        }
+
+        @Override
+        public void removeHandler() {
+        }
+
+    }
+
     protected JavaScriptObject published;
     protected Element element;
     protected Container parent;

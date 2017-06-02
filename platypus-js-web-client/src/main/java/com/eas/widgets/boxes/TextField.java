@@ -43,7 +43,8 @@ public class TextField extends Widget implements HasActionHandlers, HasJsValue, 
             @Override
             public void on(NativeEvent evt) {
                 Object oldValue = value;
-                value = valueFromInput();
+                String text = element.<InputElement>cast().getValue();
+                value = parse(text);
                 // TODO: Check all widgets againts null to empty strings conversion
                 fireValueChange(oldValue);
                 // TODO: Check all widgets against value changes / action performed
@@ -53,12 +54,12 @@ public class TextField extends Widget implements HasActionHandlers, HasJsValue, 
         onChangeReg = element.<XElement>cast().addEventListener(BrowserEvents.CHANGE, onChange);
     }
 
-    protected Object valueFromInput() {
-        return element.<InputElement>cast().getValue();
+    protected Object parse(String aText) {
+        return aText;
     }
 
-    protected void valueToInput(Object aValue) {
-        element.<InputElement>cast().setValue(aValue != null ? aValue + "" : "");
+    protected String format(Object aValue) {
+        return aValue != null ? aValue + "" : "";
     }
 
     @Override
@@ -91,7 +92,8 @@ public class TextField extends Widget implements HasActionHandlers, HasJsValue, 
             onChangeReg.removeHandler();
             try {
                 // TODO: Check all widgets againts null to empty string conversion
-                valueToInput(value);
+                String text = format(value);
+                element.<InputElement>cast().setValue(text);
             } finally {
                 onChangeReg = element.<XElement>cast().addEventListener(BrowserEvents.CHANGE, onChange);
             }
