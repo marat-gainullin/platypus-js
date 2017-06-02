@@ -1,105 +1,145 @@
 package com.eas.widgets.boxes;
 
+import com.eas.ui.HasJsValue;
+import com.eas.ui.Widget;
+import com.eas.ui.events.HasValueChangeHandlers;
+import com.eas.ui.events.ValueChangeEvent;
+import com.eas.ui.events.ValueChangeHandler;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.dom.client.Style.Position;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.datepicker.client.DatePicker;
+import com.google.gwt.event.shared.HandlerRegistration;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
-public class DateTimePicker extends DatePicker {
+/**
+ *
+ * @author mgainullin
+ */
+public class DateTimePicker extends Widget implements HasJsValue, HasValueChangeHandlers {
 
-	TimePicker tmPicker;
-	FlowPanel timePickerCaller;
-	FlowPanel widgetContainer;
-	FlowPanel calendarContainer;
-	VerticalPanel panel;
-	Element triangle;
+    // TODO: add localization features
+    private static String[] weekDaysNames = new String[]{
+        "week.monday",
+        "week.tuesday",
+        "week.wensday",
+        "week.thursday",
+        "week.friday",
+        "week.saturday",
+        "week.sunday"
+    };
 
-	public DateTimePicker() {
-		super();
-	}
+    private Date value;
+    private TimePicker timePicker;
+    private Element prevYear = Document.get().createDivElement();
+    private Element prevMonth = Document.get().createDivElement();
+    private Element toToday = Document.get().createDivElement();
+    private Element nextYear = Document.get().createDivElement();
+    private Element nextMonth = Document.get().createDivElement();
+    private Element[] weekDays = new Element[7];
+    private Element[][] monthWeeks = new Element[6][];
+    private Element timeSelect = Document.get().createDivElement();
 
-	@Override
-	protected void setup() {
-		widgetContainer = new FlowPanel();
-		widgetContainer.setStyleName("date-time-picker");
-		triangle = Document.get().createDivElement();
-		triangle.addClassName("date-time-triangle");
-		widgetContainer.getElement().appendChild(triangle);
-		calendarContainer = new FlowPanel();
-		calendarContainer.getElement().getStyle().setPosition(Position.RELATIVE);
+    public DateTimePicker() {
+        super();
+        timePicker = new TimePicker();
+        element.setClassName("date-picker");
+        prevYear.setClassName("prev-year");
+        prevMonth.setClassName("prev-month");
+        toToday.setClassName("to-today");
+        nextMonth.setClassName("nextMonth");
+        nextYear.setClassName("next-year");
+        timeSelect.setClassName("time-select");
+        timeSelect.setTitle(Localization.get("time"));
+        element.appendChild(prevYear);
+        element.appendChild(prevMonth);
+        element.appendChild(toToday);
+        element.appendChild(nextMonth);
+        element.appendChild(nextYear);
+        for (int i = 0; i < weekDays.length; i++) {
+            Element weekDay = Document.get().createDivElement();
+            weekDays[i] = weekDay;
+            weekDay.setInnerText(Localization.get(weekDaysNames[i]));
+            weekDay.setClassName("week-day");
+            element.appendChild(weekDay);
+        }
+        for (int d = 0; d < monthWeeks.length; d++) {
+            monthWeeks[d] = new Element[weekDays.length];
+            for (int w = 0; w < weekDays.length; w++) {
+                Element monthDay = Document.get().createDivElement();
+                monthWeeks[d][w] = monthDay;
+                element.appendChild(monthDay);
+            }
+            Element weekEnd = Document.get().createBRElement();
+            element.appendChild(weekEnd);
+        }
+        element.appendChild(timeSelect);
+    }
 
-		initWidget(widgetContainer);
-		panel = new VerticalPanel();
-		setStyleName(panel.getElement(), "gwt-DatePicker");
+    @Override
+    public Date getJsValue() {
+        return value;
+    }
 
-		panel.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
-		panel.add(getMonthSelector());
-		panel.add(getView());
-		tmPicker = new TimePicker();
+    @Override
+    public void setJsValue(Object value) {
+        this.value = (Date) value;
+        format();
+    }
 
-		timePickerCaller = new FlowPanel();
-		timePickerCaller.getElement().getStyle().setWidth(100, Style.Unit.PCT);
-		timePickerCaller.getElement().getStyle().setHeight(20, Style.Unit.PX);
-		timePickerCaller.setStyleName("time-picker-button");
+    private void format() {
+        Date today = new Date();
+        Date valueToShow = value != null ? value : new Date();
+        int monthToShow = valueToShow.getMonth();
+        Date current = valueToShow;
+        // set start's day of month to 1st
+        // set start's day of week to 1st
+        for (int d = 0; d < monthWeeks.length; d++) {
+            for (int w = 0; w < monthWeeks[d].length; w++) {
+                //start.addOneDay();
+                int dayOfMonth = 1;//start.getDayOfMonth();
+                Element monthDay = monthWeeks[d][w];
+                monthDay.setClassName("month-day");
+                monthDay.setInnerText(dayOfMonth + "");
+                if (monthToShow == current.getMonth()) {
+                    monthDay.addClassName("in-month-day");
+                } else {
+                    monthDay.addClassName("non-month-day");
+                }
+                if (today.getYear() == current.getYear() && today.getMonth() == current.getMonth() && today.getDate() == current.getDate()) {
+                    monthDay.addClassName("today");
+                }
+                if (valueToShow.getYear() == current.getYear() && valueToShow.getMonth() == current.getMonth() && valueToShow.getDate() == current.getDate()) {
+                    monthDay.addClassName("picked-day");
+                }
+            }
+        }
+    }
 
-		calendarContainer.add(panel);
-		calendarContainer.add(tmPicker);
-		widgetContainer.add(calendarContainer);
-		widgetContainer.add(timePickerCaller);
+    protected final Set<ValueChangeHandler> valueChangeHandlers = new HashSet<>();
 
-		setDateAndTimeView();
+    @Override
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler handler) {
+        valueChangeHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                valueChangeHandlers.remove(handler);
+            }
 
-		timePickerCaller.addDomHandler(new ClickHandler() {
+        };
+    }
 
-			@Override
-			public void onClick(ClickEvent event) {
-				if (tmPicker.isShowing()) {
-					timePickerCaller.setStyleName("time-picker-button");
-					tmPicker.hide();
-				} else {
-					timePickerCaller.setStyleName("date-picker-button");
-					tmPicker.show();
-				}
-			}
-		}, ClickEvent.getType());
-	}
+    protected void fireValueChange(Object oldValue) {
+        ValueChangeEvent event = new ValueChangeEvent(this, oldValue, value);
+        for (ValueChangeHandler h : valueChangeHandlers) {
+            h.onValueChange(event);
+        }
+    }
 
-	public void setDateAndTimeView() {
-		tmPicker.setAbsolute();
-		panel.getElement().getStyle().setDisplay(Display.BLOCK);
-		timePickerCaller.getElement().getStyle().setDisplay(Display.BLOCK);
-		tmPicker.getElement().getStyle().setDisplay(Display.BLOCK);
-	}
-
-	public void setDateView() {
-		panel.getElement().getStyle().setDisplay(Display.BLOCK);
-		timePickerCaller.getElement().getStyle().setDisplay(Display.NONE);
-		tmPicker.getElement().getStyle().setDisplay(Display.NONE);
-	}
-
-	public void setTimeView() {
-		tmPicker.setRelative();
-		tmPicker.getElement().getStyle().setDisplay(Display.BLOCK);
-		panel.getElement().getStyle().setDisplay(Display.NONE);
-		timePickerCaller.getElement().getStyle().setDisplay(Display.NONE);
-	}
-
-	public TimePicker getTimePicker() {
-		return tmPicker;
-	}
-
-	public void shown(boolean onTheRight) {
-		if(onTheRight){
-			triangle.removeClassName("date-time-triangle-left");
-		}else{
-			triangle.addClassName("date-time-triangle-left");
-		}
+    @Override
+    protected void publish(JavaScriptObject aValue) {
     }
 
 }

@@ -25,6 +25,10 @@ public class ImageToggleButton extends ImageButton implements HasJsValue, HasVal
 
     protected ButtonGroup group;
     
+    public ImageToggleButton() {
+        this("", false);
+    }
+    
     public ImageToggleButton(String aTitle, boolean asHtml) {
         this(aTitle, asHtml, null);
     }

@@ -1,6 +1,7 @@
 package com.eas.ui.events;
 
-import com.google.gwt.dom.client.NativeEvent;
+import com.eas.ui.BlurEvent;
+
 
 /**
  *
@@ -8,5 +9,5 @@ import com.google.gwt.dom.client.NativeEvent;
  */
 public interface BlurHandler {
 
-    void onBlur(NativeEvent event);
+    void onBlur(BlurEvent event);
 }

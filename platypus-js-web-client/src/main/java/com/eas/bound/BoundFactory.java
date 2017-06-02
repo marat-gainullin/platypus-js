@@ -7,7 +7,7 @@ import com.eas.core.Utils;
 import com.eas.ui.UiReader;
 import com.eas.ui.UiWidgetReader;
 import com.eas.ui.Widget;
-import com.eas.widgets.boxes.ObjectFormat;
+import com.eas.widgets.format.ObjectFormat;
 import com.google.gwt.xml.client.Element;
 
 public class BoundFactory implements UiWidgetReader {

@@ -1,5 +1,6 @@
 package com.eas.widgets;
 
+import com.eas.widgets.boxes.RichTextArea;
 import com.eas.widgets.boxes.TextArea;
 import com.eas.widgets.boxes.TextField;
 import com.eas.widgets.boxes.CheckBox;
@@ -74,7 +75,7 @@ public class WidgetsPublisher {
 		return new constr(null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(PlatypusHtmlEditor aComponent)/*-{
+	public native static PublishedComponent publish(RichTextArea aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('HtmlArea');
 		return new constr(null, aComponent);
 	}-*/;

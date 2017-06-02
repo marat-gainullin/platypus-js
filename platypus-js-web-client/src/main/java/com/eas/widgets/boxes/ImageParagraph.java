@@ -5,7 +5,6 @@ import com.eas.ui.Widget;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.HasText;
 
@@ -34,10 +33,10 @@ public abstract class ImageParagraph extends Widget implements HasText, HasHTML,
         image = aImage;
         element.getStyle().setPosition(Style.Position.RELATIVE);
         element.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        element.getStyle().setPadding(0, Unit.PX);
+        element.getStyle().setPadding(0, Style.Unit.PX);
         //
         content = Document.get().createPElement();
-        content.getStyle().setMargin(0, Unit.PX);
+        content.getStyle().setMargin(0, Style.Unit.PX);
         content.getStyle().setPosition(Style.Position.RELATIVE);
         content.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 
@@ -73,7 +72,7 @@ public abstract class ImageParagraph extends Widget implements HasText, HasHTML,
         switch (horizontalAlignment) {
             case LEFT:
             case LEADING:
-                contentStyle.setLeft(0, Unit.PX);
+                contentStyle.setLeft(0, Style.Unit.PX);
                 contentStyle.clearRight();
                 contentStyle.setTextAlign(Style.TextAlign.LEFT);
                 containerStyle.setTextAlign(Style.TextAlign.LEFT);
@@ -81,7 +80,7 @@ public abstract class ImageParagraph extends Widget implements HasText, HasHTML,
             case RIGHT:
             case TRAILING:
                 contentStyle.clearLeft();
-                contentStyle.setRight(0, Unit.PX);
+                contentStyle.setRight(0, Style.Unit.PX);
                 contentStyle.setTextAlign(Style.TextAlign.RIGHT);
                 containerStyle.setTextAlign(Style.TextAlign.RIGHT);
                 break;

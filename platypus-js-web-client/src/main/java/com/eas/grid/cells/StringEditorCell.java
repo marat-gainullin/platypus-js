@@ -7,7 +7,7 @@ package com.eas.grid.cells;
 
 import java.text.ParseException;
 
-import com.eas.widgets.boxes.MaskFormat;
+import com.eas.widgets.format.MaskFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;

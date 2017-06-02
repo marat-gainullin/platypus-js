@@ -27,6 +27,18 @@ import com.eas.ui.events.KeyUpHandler;
 import com.eas.ui.events.SelectionEvent;
 import com.eas.ui.events.SelectionHandler;
 import com.eas.ui.events.ComponentEvent;
+import com.eas.ui.events.KeyDownEvent;
+import com.eas.ui.events.KeyPressEvent;
+import com.eas.ui.events.KeyUpEvent;
+import com.eas.ui.events.MouseClickHandler;
+import com.eas.ui.events.MouseDoubleClickHandler;
+import com.eas.ui.events.MouseUpHandler;
+import com.eas.ui.events.MouseDownHandler;
+import com.eas.ui.events.MouseEnterHandler;
+import com.eas.ui.events.MouseMoveHandler;
+import com.eas.ui.events.MouseEvent;
+import com.eas.ui.events.MouseExitHandler;
+import com.eas.ui.events.MouseWheelHandler;
 import com.eas.ui.events.ShowHandler;
 import com.eas.ui.events.ValueChangeEvent;
 import com.eas.ui.events.ValueChangeHandler;
@@ -65,6 +77,15 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
     public Widget(Element element) {
         super();
         this.element = element;
+        element.setPropertyObject("p-widget", this);
+    }
+
+    public String getTitle() {
+        return element.getTitle();
+    }
+
+    public void setTitle(String aValue) {
+        element.setTitle(aValue);
     }
 
     @Override
@@ -321,11 +342,11 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
             }
             mouseExited = aValue;
             if (mouseExited != null) {
-                mouseOutReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEOUT, new XElement.NativeHandler() {
+                mouseOutReg = addMouseExitHandler(new MouseExitHandler() {
                     @Override
-                    public void on(NativeEvent evt) {
+                    public void onMouseExit(MouseEvent evt) {
                         if (mouseExited != null) {
-                            evt.stopPropagation();
+                            evt.getEvent().stopPropagation();
                             executeEvent(mouseExited, EventsPublisher.publishMouseEvent(evt));
                         }
                     }
@@ -357,6 +378,78 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
         }
     }
 
+    public HandlerRegistration addMouseClickHandler(MouseClickHandler handler) {
+        return element.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent evt) {
+                handler.onMouseClick(new MouseEvent(Widget.this, evt));
+            }
+        });
+    }
+
+    public HandlerRegistration addMouseDoubleClickHandler(MouseDoubleClickHandler handler) {
+        return element.<XElement>cast().addEventListener(BrowserEvents.DBLCLICK, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent evt) {
+                handler.onMouseDoubleClick(new MouseEvent(Widget.this, evt));
+            }
+        });
+    }
+
+    public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
+        return element.<XElement>cast().addEventListener(BrowserEvents.MOUSEDOWN, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent evt) {
+                handler.onMouseDown(new MouseEvent(Widget.this, evt));
+            }
+        });
+    }
+
+    public HandlerRegistration addMouseUpHandler(MouseUpHandler handler) {
+        return element.<XElement>cast().addEventListener(BrowserEvents.MOUSEUP, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent evt) {
+                handler.onMouseUp(new MouseEvent(Widget.this, evt));
+            }
+        });
+    }
+
+    public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler) {
+        return element.<XElement>cast().addEventListener(BrowserEvents.MOUSEMOVE, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent evt) {
+                handler.onMouseMove(new MouseEvent(Widget.this, evt));
+            }
+        });
+    }
+
+    public HandlerRegistration addMouseEnterHandler(MouseEnterHandler handler) {
+        return element.<XElement>cast().addEventListener(BrowserEvents.MOUSEOVER, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent evt) {
+                handler.onMouseEnter(new MouseEvent(Widget.this, evt));
+            }
+        });
+    }
+
+    public HandlerRegistration addMouseExitHandler(MouseExitHandler handler) {
+        return element.<XElement>cast().addEventListener(BrowserEvents.MOUSEOUT, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent evt) {
+                handler.onMouseExit(new MouseEvent(Widget.this, evt));
+            }
+        });
+    }
+
+    public HandlerRegistration addMouseWheelHandler(MouseWheelHandler handler) {
+        return element.<XElement>cast().addEventListener(BrowserEvents.MOUSEWHEEL, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent evt) {
+                handler.onMouseWheel(new MouseEvent(Widget.this, evt));
+            }
+        });
+    }
+
     protected HandlerRegistration mouseClickedReg;
     protected HandlerRegistration mouseDblClickedReg;
 
@@ -372,21 +465,21 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
             }
             mouseClicked = aValue;
             if (mouseClicked != null) {
-                mouseClickedReg = element.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
+                mouseClickedReg = addMouseClickHandler(new MouseClickHandler() {
                     @Override
-                    public void on(NativeEvent evt) {
+                    public void onMouseClick(MouseEvent evt) {
                         if (mouseClicked != null) {
-                            evt.stopPropagation();
+                            evt.getEvent().stopPropagation();
                             executeEvent(mouseClicked, EventsPublisher.publishMouseEvent(evt));
                         }
                     }
 
                 });
-                mouseDblClickedReg = element.<XElement>cast().addEventListener(BrowserEvents.DBLCLICK, new XElement.NativeHandler() {
+                mouseDblClickedReg = addMouseDoubleClickHandler(new MouseDoubleClickHandler() {
                     @Override
-                    public void on(NativeEvent evt) {
+                    public void onMouseDoubleClick(MouseEvent evt) {
                         if (mouseClicked != null) {
-                            evt.stopPropagation();
+                            evt.getEvent().stopPropagation();
                             executeEvent(mouseClicked, EventsPublisher.publishMouseEvent(evt, 2));
                         }
                     }
@@ -406,11 +499,11 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
             }
             mousePressed = aValue;
             if (mousePressed != null) {
-                mouseDownReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEDOWN, new XElement.NativeHandler() {
+                mouseDownReg = addMouseDownHandler(new MouseDownHandler() {
                     @Override
-                    public void on(NativeEvent evt) {
+                    public void onMouseDown(MouseEvent evt) {
                         if (mousePressed != null) {
-                            evt.stopPropagation();
+                            evt.getEvent().stopPropagation();
                             executeEvent(mousePressed, EventsPublisher.publishMouseEvent(evt));
                         }
                     }
@@ -429,11 +522,11 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
             }
             mouseReleased = aValue;
             if (mouseReleased != null) {
-                mouseUpReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEUP, new XElement.NativeHandler() {
+                mouseUpReg = addMouseUpHandler(new MouseUpHandler() {
                     @Override
-                    public void on(NativeEvent evt) {
+                    public void onMouseUp(MouseEvent evt) {
                         if (mouseReleased != null) {
-                            evt.stopPropagation();
+                            evt.getEvent().stopPropagation();
                             executeEvent(mouseReleased, EventsPublisher.publishMouseEvent(evt));
                         }
                     }
@@ -452,11 +545,11 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
             }
             mouseMoved = aValue;
             if (mouseMoved != null) {
-                mouseMoveReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEMOVE, new XElement.NativeHandler() {
+                mouseMoveReg = addMouseMoveHandler(new MouseMoveHandler() {
                     @Override
-                    public void on(NativeEvent evt) {
+                    public void onMouseMove(MouseEvent evt) {
                         if (mouseMoved != null) {
-                            evt.stopPropagation();
+                            evt.getEvent().stopPropagation();
                             executeEvent(mouseDragged, EventsPublisher.publishMouseEvent(evt));
                         }
                     }
@@ -486,29 +579,29 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
             }
             mouseDragged = aValue;
             if (mouseDragged != null) {
-                mouseDownForDragReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEDOWN, new XElement.NativeHandler() {
+                mouseDownForDragReg = addMouseDownHandler(new MouseDownHandler() {
                     @Override
-                    public void on(NativeEvent evt) {
+                    public void onMouseDown(MouseEvent evt) {
                         DOM.setCapture(element);
                         mouseState = MOUSE.PRESSED;
                         executeEvent(mousePressed, EventsPublisher.publishMouseEvent(evt));
                     }
                 });
-                mouseUpForDragReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEUP, new XElement.NativeHandler() {
+                mouseUpForDragReg = addMouseUpHandler(new MouseUpHandler() {
                     @Override
-                    public void on(NativeEvent evt) {
-                        if(element == DOM.getCaptureElement()){
+                    public void onMouseUp(MouseEvent evt) {
+                        if (element == DOM.getCaptureElement()) {
                             DOM.releaseCapture(element);
                         }
-                        evt.stopPropagation();
+                        evt.getEvent().stopPropagation();
                         mouseState = MOUSE.NULL;
                     }
                 });
-                mouseMoveForDragReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEMOVE, new XElement.NativeHandler() {
+                mouseMoveForDragReg = addMouseMoveHandler(new MouseMoveHandler() {
                     @Override
-                    public void on(NativeEvent evt) {
+                    public void onMouseMove(MouseEvent evt) {
                         if (mouseDragged != null) {
-                            evt.stopPropagation();
+                            evt.getEvent().stopPropagation();
                             if (mouseState == MOUSE.PRESSED || mouseState == MOUSE.DRAGGED) {
                                 mouseState = MOUSE.DRAGGED;
                                 executeEvent(mouseDragged, EventsPublisher.publishMouseEvent(evt));
@@ -531,11 +624,11 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
             }
             mouseEntered = aValue;
             if (mouseEntered != null) {
-                mouseOverReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEOVER, new XElement.NativeHandler() {
+                mouseOverReg = addMouseEnterHandler(new MouseEnterHandler() {
                     @Override
-                    public void on(NativeEvent evt) {
+                    public void onMouseEnter(MouseEvent evt) {
                         if (mouseEntered != null) {
-                            evt.stopPropagation();
+                            evt.getEvent().stopPropagation();
                             executeEvent(mouseEntered, EventsPublisher.publishMouseEvent(evt));
                         }
                     }
@@ -555,11 +648,11 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
             }
             mouseWheelMoved = aValue;
             if (mouseWheelMoved != null) {
-                mouseWheelReg = element.<XElement>cast().addEventListener(BrowserEvents.MOUSEWHEEL, new XElement.NativeHandler() {
+                mouseWheelReg = addMouseWheelHandler(new MouseWheelHandler() {
                     @Override
-                    public void on(NativeEvent evt) {
+                    public void onMouseWheel(MouseEvent evt) {
                         if (mouseWheelMoved != null) {
-                            evt.stopPropagation();
+                            evt.getEvent().stopPropagation();
                             executeEvent(mouseWheelMoved, EventsPublisher.publishMouseEvent(evt));
                         }
                     }
@@ -625,7 +718,7 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
             if (focusGained != null && this instanceof HasFocusHandlers) {
                 focusReg = ((HasFocusHandlers) this).addFocusHandler(new FocusHandler() {
                     @Override
-                    public void onFocus(NativeEvent event) {
+                    public void onFocus(FocusEvent event) {
                         if (focusGained != null) {
                             executeEvent(focusGained, EventsPublisher.publishFocusEvent(event));
                         }
@@ -647,9 +740,9 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
             if (focusLost != null && this instanceof HasBlurHandlers) {
                 blurReg = ((HasBlurHandlers) this).addBlurHandler(new BlurHandler() {
                     @Override
-                    public void onBlur(NativeEvent event) {
+                    public void onBlur(BlurEvent event) {
                         if (focusLost != null) {
-                            executeEvent(focusLost, EventsPublisher.publishFocusEvent(event));
+                            executeEvent(focusLost, EventsPublisher.publishBlurEvent(event));
                         }
                         mouseState = MOUSE.NULL;
                     }
@@ -670,9 +763,9 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
             if (keyTyped != null && this instanceof HasKeyPressHandlers) {
                 keyTypedReg = ((HasKeyPressHandlers) this).addKeyPressHandler(new KeyPressHandler() {
                     @Override
-                    public void onKeyPress(NativeEvent event) {
+                    public void onKeyPress(KeyPressEvent event) {
                         if (keyTyped != null) {
-                            event.stopPropagation();
+                            event.getEvent().stopPropagation();
                             executeEvent(keyTyped, EventsPublisher.publishKeyEvent(event));
                         }
                     }
@@ -693,9 +786,9 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
             if (keyPressed != null && this instanceof HasKeyDownHandlers) {
                 keyDownReg = ((HasKeyDownHandlers) this).addKeyDownHandler(new KeyDownHandler() {
                     @Override
-                    public void onKeyDown(NativeEvent event) {
+                    public void onKeyDown(KeyDownEvent event) {
                         if (keyPressed != null) {
-                            event.stopPropagation();
+                            event.getEvent().stopPropagation();
                             executeEvent(keyPressed, EventsPublisher.publishKeyEvent(event));
                         }
                     }
@@ -716,9 +809,9 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
             if (keyReleased != null && this instanceof HasKeyUpHandlers) {
                 keyUpReg = ((HasKeyUpHandlers) this).addKeyUpHandler(new KeyUpHandler() {
                     @Override
-                    public void onKeyUp(NativeEvent event) {
+                    public void onKeyUp(KeyUpEvent event) {
                         if (keyReleased != null) {
-                            event.stopPropagation();
+                            event.getEvent().stopPropagation();
                             executeEvent(keyReleased, EventsPublisher.publishKeyEvent(event));
                         }
                     }

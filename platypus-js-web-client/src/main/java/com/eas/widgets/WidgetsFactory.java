@@ -1,5 +1,6 @@
 package com.eas.widgets;
 
+import com.eas.widgets.boxes.RichTextArea;
 import com.eas.widgets.boxes.TextArea;
 import com.eas.widgets.boxes.TextField;
 import com.eas.widgets.boxes.CheckBox;
@@ -11,7 +12,7 @@ import com.eas.ui.ButtonGroup;
 import com.eas.ui.Orientation;
 import com.eas.ui.UiReader;
 import com.eas.ui.UiWidgetReader;
-import com.eas.widgets.boxes.ObjectFormat;
+import com.eas.widgets.format.ObjectFormat;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Element;
@@ -89,7 +90,7 @@ public class WidgetsFactory implements UiWidgetReader{
 			return textArea;
 		case "ha":
 		case "HtmlArea":
-			PlatypusHtmlEditor htmlArea = new PlatypusHtmlEditor();
+			RichTextArea htmlArea = new RichTextArea();
 			WidgetsPublisher.publish(htmlArea);
 			aFactory.readGeneralProps(anElement, htmlArea);
 			if (Utils.hasAttribute(anElement, "tx", "text")) {

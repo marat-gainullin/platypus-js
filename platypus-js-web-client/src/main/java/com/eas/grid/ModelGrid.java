@@ -53,7 +53,6 @@ import com.eas.ui.events.ShowHandler;
 import com.eas.widgets.WidgetsUtils;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.Element;

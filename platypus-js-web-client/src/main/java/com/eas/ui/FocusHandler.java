@@ -1,6 +1,4 @@
-package com.eas.ui.events;
-
-import com.eas.ui.FocusEvent;
+package com.eas.ui;
 
 /**
  *

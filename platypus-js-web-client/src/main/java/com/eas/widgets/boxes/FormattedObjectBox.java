@@ -1,5 +1,6 @@
 package com.eas.widgets.boxes;
 
+import com.eas.widgets.format.ObjectFormat;
 import java.text.ParseException;
 
 import com.eas.client.converters.StringValueConverter;

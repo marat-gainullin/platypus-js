@@ -23,28 +23,42 @@ import java.util.Set;
 
 public class TextField extends Widget implements HasActionHandlers, HasJsValue, HasValueChangeHandlers, HasEmptyText {
 
+    // TODO: change most protected members to private
     protected String emptyText;
-    protected String value;
-    private boolean settingValue;
+    protected Object value;
+    private XElement.NativeHandler onChange;
+    private HandlerRegistration onChangeReg;
 
     public TextField() {
         this(Document.get().createTextInputElement());
     }
-    
+
     protected TextField(Element aElement) {
         super(aElement);
         element.setClassName("form-control");
+        // TODO: evict such injection from all sources
         CommonResources.INSTANCE.commons().ensureInjected();
         element.addClassName(CommonResources.INSTANCE.commons().borderSized());
-        element.<XElement>cast().addEventListener(BrowserEvents.CHANGE, new XElement.NativeHandler() {
+        onChange = new XElement.NativeHandler() {
             @Override
             public void on(NativeEvent evt) {
-                if (!settingValue) { // It is because of null to empty string conversion
-                    setJsValue(element.<InputElement>cast().getValue());
-                    fireActionPerformed(); // TODO: Check all widgets against value changes / action performed
-                }
+                Object oldValue = value;
+                value = valueFromInput();
+                // TODO: Check all widgets againts null to empty strings conversion
+                fireValueChange(oldValue);
+                // TODO: Check all widgets against value changes / action performed
+                fireActionPerformed();
             }
-        });
+        };
+        onChangeReg = element.<XElement>cast().addEventListener(BrowserEvents.CHANGE, onChange);
+    }
+
+    protected Object valueFromInput() {
+        return element.<InputElement>cast().getValue();
+    }
+
+    protected void valueToInput(Object aValue) {
+        element.<InputElement>cast().setValue(aValue != null ? aValue + "" : "");
     }
 
     @Override
@@ -72,14 +86,16 @@ public class TextField extends Widget implements HasActionHandlers, HasJsValue, 
     @Override
     public void setJsValue(Object aValue) {
         if (value != aValue) {
-            settingValue = true;
+            Object oldValue = value;
+            value = (String) aValue;
+            onChangeReg.removeHandler();
             try {
-                String oldValue = value;
-                element.<InputElement>cast().setValue(aValue != null ? aValue + "" : ""); // TODO: Check all widgets againts null to empty strings conversion
-                fireValueChange(oldValue);
+                // TODO: Check all widgets againts null to empty string conversion
+                valueToInput(value);
             } finally {
-                settingValue = false;
+                onChangeReg = element.<XElement>cast().addEventListener(BrowserEvents.CHANGE, onChange);
             }
+            fireValueChange(oldValue);
         }
     }
 
@@ -133,10 +149,10 @@ public class TextField extends Widget implements HasActionHandlers, HasJsValue, 
     private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
         Object.defineProperty(published, "value", {
             get : function() {
-                return aWidget.@com.eas.widgets.PlatypusTextField::getText()();
+                return aWidget.@com.eas.widgets.PlatypusTextField::getValue()();
             },
             set : function(aValue) {
-                aWidget.@com.eas.widgets.PlatypusTextField::setText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+                aWidget.@com.eas.widgets.PlatypusTextField::setValue(Ljava/lang/String;)(aValue!=null?''+aValue:null);
             }
         });
         Object.defineProperty(published, "text", {

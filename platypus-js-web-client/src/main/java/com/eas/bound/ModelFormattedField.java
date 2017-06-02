@@ -12,7 +12,7 @@ import com.eas.ui.events.ActionHandler;
 import com.eas.ui.events.HasActionHandlers;
 import com.eas.widgets.WidgetsUtils;
 import com.eas.widgets.boxes.FormattedObjectBox;
-import com.eas.widgets.boxes.ObjectFormat;
+import com.eas.widgets.format.ObjectFormat;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;

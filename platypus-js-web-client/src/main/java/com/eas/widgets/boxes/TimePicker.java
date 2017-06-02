@@ -1,478 +1,319 @@
 package com.eas.widgets.boxes;
 
+import com.eas.core.XElement;
+import com.eas.ui.HasJsValue;
+import com.eas.ui.Widget;
+import com.eas.ui.events.HasValueChangeHandlers;
+import com.eas.ui.events.ValueChangeEvent;
+import com.eas.ui.events.ValueChangeHandler;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.dom.client.NativeEvent;
 import java.util.Date;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.dom.client.Style.Overflow;
-import com.google.gwt.dom.client.Style.Position;
-import com.google.gwt.dom.client.Style.TextAlign;
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.dom.client.Style.VerticalAlign;
-import com.google.gwt.dom.client.Style.Visibility;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.IntegerBox;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
+import java.util.HashSet;
+import java.util.Set;
 
-public class TimePicker extends Composite implements HasValue<Date>, HasValueChangeHandlers<Date> {
+public class TimePicker extends Widget implements HasJsValue, HasValueChangeHandlers {
 
-	protected FlowPanel timePickerContainer = new FlowPanel();
-	FlowPanel dateBlock = new FlowPanel();
-	protected FlowPanel widgetContainer = new FlowPanel();
-	protected FlowPanel verticalAlign = new FlowPanel();
-	protected SimplePanel btnUpHour = new SimplePanel();
-	protected SimplePanel btnDownHour = new SimplePanel();
-	protected IntegerBox txtHour = new IntegerBox();
-	protected SimplePanel btnUpMinute = new SimplePanel();
-	protected SimplePanel btnDownMinute = new SimplePanel();
-	protected IntegerBox txtMinute = new IntegerBox();
-	protected SimplePanel btnUpSecond = new SimplePanel();
-	protected SimplePanel btnDownSecond = new SimplePanel();
-	protected IntegerBox txtSecond = new IntegerBox();
-	FlowPanel hCenter = new FlowPanel();
+    protected Element dateBlock = Document.get().createDivElement();
+    protected Element widgetContainer = Document.get().createDivElement();
+    protected Element verticalAlign = Document.get().createDivElement();
+    protected Element btnUpHour = Document.get().createDivElement();
+    protected Element btnDownHour = Document.get().createDivElement();
+    protected InputElement txtHour = Document.get().createTextInputElement();
+    protected Element btnUpMinute = Document.get().createDivElement();
+    protected Element btnDownMinute = Document.get().createDivElement();
+    protected InputElement txtMinute = Document.get().createTextInputElement();
+    protected Element btnUpSecond = Document.get().createDivElement();
+    protected Element btnDownSecond = Document.get().createDivElement();
+    protected InputElement txtSecond = Document.get().createTextInputElement();
 
-	SimplePanel separatorUp1 = new SimplePanel();
-	SimplePanel separatorUp2 = new SimplePanel();
-	SimplePanel separatorTime1 = new SimplePanel();
-	SimplePanel separatorTime2 = new SimplePanel();
-	SimplePanel separatorDown1 = new SimplePanel();
-	SimplePanel separatorDown2 = new SimplePanel();
+    protected Element separatorUp1 = Document.get().createDivElement();
+    protected Element separatorUp2 = Document.get().createDivElement();
+    protected Element separatorTime1 = Document.get().createDivElement();
+    protected Element separatorTime2 = Document.get().createDivElement();
+    protected Element separatorDown1 = Document.get().createDivElement();
+    protected Element separatorDown2 = Document.get().createDivElement();
 
-	private int hour;
-	private int minute;
-	private int second;
-	private int maxHourVal = 23;
-	private int maxMinuteVal = 59;
-	private int maxSecondVal = maxMinuteVal;
-	private int componentWidth = 25;
-	private int componentWidthRelative = 25;
-	private int separatorWidthRelative = 5;
-	private int separatorWidth = 10;
-	private int componentHeight = 20;
-	private int relativeWidth = 90;
-	private boolean showing;
-	private int marginLeft = 2;
-	private int marginRight = 2;
-	private Date currentDate;
+    private int hour;
+    private int minute;
+    private int second;
+    private int maxHourVal = 23;
+    private int maxMinuteVal = 59;
+    private int maxSecondVal = maxMinuteVal;
+    private boolean showing;
+    private Date currentDate;
 
-	protected static TimePickerConstants constants = GWT.create(TimePickerConstants.class);
+    public TimePicker() {
+        super();
+        dateBlock.setInnerText(Localization.get("date"));
+        dateBlock.setClassName("time-picker-date");
+        widgetContainer.appendChild(dateBlock);
 
-	public TimePicker() {
-		super();
-		dateBlock.getElement().setInnerText(constants.date());
-		dateBlock.getElement().setClassName("time-picker-date");
-		widgetContainer.add(dateBlock);
+        Element upperBtnBlock = Document.get().createDivElement();
+        upperBtnBlock.appendChild(btnUpHour);
+        upperBtnBlock.appendChild(separatorUp1);
+        upperBtnBlock.appendChild(btnUpMinute);
+        upperBtnBlock.appendChild(separatorUp2);
+        upperBtnBlock.appendChild(btnUpSecond);
+        widgetContainer.appendChild(upperBtnBlock);
 
-		FlowPanel upperBtnBlock = new FlowPanel();
-		upperBtnBlock.add(btnUpHour);
-		upperBtnBlock.add(separatorUp1);
-		upperBtnBlock.add(btnUpMinute);
-		upperBtnBlock.add(separatorUp2);
-		upperBtnBlock.add(btnUpSecond);
+        separatorTime1.setInnerText(":");
+        separatorTime1.setClassName("time-picker-separator");
+        separatorTime2.setInnerText(":");
+        separatorTime2.setClassName("time-picker-separator");
+        Element textBlock = Document.get().createDivElement();
+        textBlock.appendChild(txtHour);
+        textBlock.appendChild(separatorTime1);
+        textBlock.appendChild(txtMinute);
+        textBlock.appendChild(separatorTime2);
+        textBlock.appendChild(txtSecond);
+        textBlock.getStyle().setDisplay(Style.Display.BLOCK);
+        widgetContainer.appendChild(textBlock);
 
-		widgetContainer.add(upperBtnBlock);
+        Element lowerBtnBlock = Document.get().createDivElement();
+        lowerBtnBlock.appendChild(btnDownHour);
+        lowerBtnBlock.appendChild(separatorDown1);
+        lowerBtnBlock.appendChild(btnDownMinute);
+        lowerBtnBlock.appendChild(separatorDown2);
+        lowerBtnBlock.appendChild(btnDownSecond);
 
-		FlowPanel textBlock = new FlowPanel();
+        widgetContainer.appendChild(lowerBtnBlock);
+        element.appendChild(widgetContainer);
+        element.appendChild(verticalAlign);
 
-		textBlock.add(txtHour);
-		textBlock.add(separatorTime1);
-		textBlock.add(txtMinute);
-		textBlock.add(separatorTime2);
-		textBlock.add(txtSecond);
+        btnUpHour.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                Date oldValue = getJsValue();
+                hour = updateUpValue(txtHour, hour, maxHourVal);
+                fireValueChange(oldValue);
+            }
+        });
 
-		textBlock.getElement().getStyle().setDisplay(Style.Display.BLOCK);
-		widgetContainer.add(textBlock);
+        btnUpMinute.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                Date oldValue = getJsValue();
+                minute = updateUpValue(txtMinute, minute, maxMinuteVal);
+                fireValueChange(oldValue);
+            }
+        });
 
-		FlowPanel lowerBtnBlock = new FlowPanel();
-		lowerBtnBlock.add(btnDownHour);
-		lowerBtnBlock.add(separatorDown1);
-		lowerBtnBlock.add(btnDownMinute);
-		lowerBtnBlock.add(separatorDown2);
-		lowerBtnBlock.add(btnDownSecond);
+        btnUpSecond.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                Date oldValue = getJsValue();
+                second = updateUpValue(txtSecond, second, maxSecondVal);
+                fireValueChange(oldValue);
+            }
+        });
 
-		widgetContainer.add(lowerBtnBlock);
-		hCenter.add(widgetContainer);
-		hCenter.add(verticalAlign);
+        btnDownHour.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                Date oldValue = getJsValue();
+                hour = updateDownValue(txtHour, hour, maxHourVal);
+                fireValueChange(oldValue);
+            }
+        });
 
-		timePickerContainer.add(hCenter);
-		initWidget(timePickerContainer);
+        btnDownMinute.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                Date oldValue = getJsValue();
+                minute = updateDownValue(txtMinute, minute, maxMinuteVal);
+                fireValueChange(oldValue);
+            }
+        });
 
-		setAbsolute();
+        btnDownSecond.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                Date oldValue = getJsValue();
+                second = updateDownValue(txtSecond, second, maxSecondVal);
+                fireValueChange(oldValue);
+            }
+        });
 
-		btnUpHour.addDomHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				hour = updateUpValue(txtHour, hour, maxHourVal);
-				ValueChangeEvent.fire(TimePicker.this, getValue());
-			}
-		}, ClickEvent.getType());
+        txtHour.<XElement>cast().addEventListener(BrowserEvents.CHANGE, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                Date oldValue = getJsValue();
+                hour = updateValue(txtHour, hour, maxHourVal);
+                fireValueChange(oldValue);
+            }
+        });
+        txtMinute.<XElement>cast().addEventListener(BrowserEvents.CHANGE, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                Date oldValue = getJsValue();
+                minute = updateValue(txtMinute, minute, maxMinuteVal);
+                fireValueChange(oldValue);
+            }
+        });
+        txtSecond.<XElement>cast().addEventListener(BrowserEvents.CHANGE, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                Date oldValue = getJsValue();
+                second = updateValue(txtSecond, second, maxSecondVal);
+                fireValueChange(oldValue);
+            }
+        });
 
-		btnUpMinute.addDomHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				minute = updateUpValue(txtMinute, minute, maxMinuteVal);
-				ValueChangeEvent.fire(TimePicker.this, getValue());
-			}
-		}, ClickEvent.getType());
+        txtHour.<XElement>cast().addEventListener(BrowserEvents.KEYDOWN, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                Date oldValue = getJsValue();
+                if (event.getKeyCode() == KeyCodes.KEY_UP) {
+                    hour = updateUpValue(txtHour, hour, maxHourVal);
+                    fireValueChange(oldValue);
+                } else if (event.getKeyCode() == KeyCodes.KEY_DOWN) {
+                    hour = updateDownValue(txtHour, hour, maxHourVal);
+                    fireValueChange(oldValue);
+                }
+            }
+        });
 
-		btnUpSecond.addDomHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				second = updateUpValue(txtSecond, second, maxSecondVal);
-				ValueChangeEvent.fire(TimePicker.this, getValue());
-			}
-		}, ClickEvent.getType());
+        txtMinute.<XElement>cast().addEventListener(BrowserEvents.KEYDOWN, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                Date oldValue = getJsValue();
+                if (event.getKeyCode() == KeyCodes.KEY_UP) {
+                    minute = updateUpValue(txtMinute, minute, maxMinuteVal);
+                    fireValueChange(oldValue);
+                } else if (event.getKeyCode() == KeyCodes.KEY_DOWN) {
+                    minute = updateDownValue(txtMinute, minute, maxMinuteVal);
+                    fireValueChange(oldValue);
+                }
+            }
+        });
 
-		btnDownHour.addDomHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				hour = updateDownValue(txtHour, hour, maxHourVal);
-				ValueChangeEvent.fire(TimePicker.this, getValue());
-			}
-		}, ClickEvent.getType());
+        txtSecond.<XElement>cast().addEventListener(BrowserEvents.KEYDOWN, new XElement.NativeHandler() {
+            @Override
+            public void on(NativeEvent event) {
+                Date oldValue = getJsValue();
+                if (event.getKeyCode() == KeyCodes.KEY_UP) {
+                    second = updateUpValue(txtSecond, second, maxSecondVal);
+                    fireValueChange(oldValue);
+                } else if (event.getKeyCode() == KeyCodes.KEY_DOWN) {
+                    second = updateDownValue(txtSecond, second, maxSecondVal);
+                    fireValueChange(oldValue);
+                }
+            }
+        });
 
-		btnDownMinute.addDomHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				minute = updateDownValue(txtMinute, minute, maxMinuteVal);
-				ValueChangeEvent.fire(TimePicker.this, getValue());
-			}
-		}, ClickEvent.getType());
+    }
 
-		btnDownSecond.addDomHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				second = updateDownValue(txtSecond, second, maxSecondVal);
-				ValueChangeEvent.fire(TimePicker.this, getValue());
-			}
-		}, ClickEvent.getType());
+    public void show() {
+        DateTimeFormat fmt = DateTimeFormat.getFormat("dd:MM:yyyy");
+        if (currentDate == null) {
+            dateBlock.setInnerText(Localization.get("date"));
+        } else {
+            dateBlock.setInnerText(Localization.get("date") + fmt.format(currentDate));
+        }
+        element.getStyle().setHeight(100, Style.Unit.PCT);
+        showing = true;
+    }
 
-		txtHour.addValueChangeHandler(new ValueChangeHandler<Integer>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<Integer> event) {
-				hour = updateValue(txtHour, hour, maxHourVal);
-				ValueChangeEvent.fire(TimePicker.this, getValue());
-			}
-		});
-		txtMinute.addValueChangeHandler(new ValueChangeHandler<Integer>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<Integer> event) {
-				minute = updateValue(txtMinute, minute, maxMinuteVal);
-				ValueChangeEvent.fire(TimePicker.this, getValue());
-			}
-		});
-		txtSecond.addValueChangeHandler(new ValueChangeHandler<Integer>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<Integer> event) {
-				second = updateValue(txtSecond, second, maxSecondVal);
-				ValueChangeEvent.fire(TimePicker.this, getValue());
-			}
-		});
+    public void hide() {
+        element.getStyle().setHeight(0, Style.Unit.PCT);
+        showing = false;
+    }
 
-		txtHour.addKeyDownHandler(new KeyDownHandler() {
-			@Override
-			public void onKeyDown(KeyDownEvent event) {
-				if (event.isUpArrow()) {
-					hour = updateUpValue(txtHour, hour, maxHourVal);
-					ValueChangeEvent.fire(TimePicker.this, getValue());
-					return;
-				}
-				if (event.isDownArrow()) {
-					hour = updateDownValue(txtHour, hour, maxHourVal);
-					ValueChangeEvent.fire(TimePicker.this, getValue());
-					return;
-				}
-			}
-		});
+    public boolean isShowing() {
+        return showing;
+    }
 
-		txtMinute.addKeyDownHandler(new KeyDownHandler() {
-			@Override
-			public void onKeyDown(KeyDownEvent event) {
-				if (event.isUpArrow()) {
-					minute = updateUpValue(txtMinute, minute, maxMinuteVal);
-					ValueChangeEvent.fire(TimePicker.this, getValue());
-					return;
-				}
-				if (event.isDownArrow()) {
-					minute = updateDownValue(txtMinute, minute, maxMinuteVal);
-					ValueChangeEvent.fire(TimePicker.this, getValue());
-					return;
-				}
-			}
-		});
+    private int updateValue(InputElement aInput, int aVal, int maxVal) {
+        if (aInput.getValue() != null) {
+            int val = Integer.valueOf(aInput.getValue());
+            if (val > maxVal) {
+                val = maxVal;
+                aInput.setValue(val + "");
+            }
+            if (val < 0) {
+                val = 0;
+                aInput.setValue(val + "");
+            }
+            aVal = val;
+        }
+        return aVal;
+    }
 
-		txtSecond.addKeyDownHandler(new KeyDownHandler() {
-			@Override
-			public void onKeyDown(KeyDownEvent event) {
-				if (event.isUpArrow()) {
-					second = updateUpValue(txtSecond, second, maxSecondVal);
-					ValueChangeEvent.fire(TimePicker.this, getValue());
-					return;
-				}
-				if (event.isDownArrow()) {
-					second = updateDownValue(txtSecond, second, maxSecondVal);
-					ValueChangeEvent.fire(TimePicker.this, getValue());
-					return;
-				}
-			}
-		});
+    private int updateUpValue(InputElement aInput, int aVal, int maxVal) {
+        aVal += 1;
+        if (aVal > maxVal) {
+            aVal = 0;
+        }
+        aInput.setValue(aVal + "");
+        return aVal;
+    }
 
-	}
+    private int updateDownValue(InputElement aInput, int aVal, int maxVal) {
+        aVal -= 1;
+        if (aVal < 0) {
+            aVal = maxVal;
+        }
+        aInput.setValue(aVal + "");
+        return aVal;
+    }
 
-	public void setAbsolute() {
-		timePickerContainer.getElement().getStyle().setPosition(Position.ABSOLUTE);
-		timePickerContainer.getElement().getStyle().setHeight(0, Style.Unit.PX);
-		timePickerContainer.getElement().getStyle().setProperty("width", "auto");
-		timePickerContainer.getElement().getStyle().setBottom(0, Style.Unit.PCT);
-		timePickerContainer.getElement().getStyle().setOverflow(Overflow.HIDDEN);
+    protected final Set<ValueChangeHandler> valueChangeHandlers = new HashSet<>();
 
-		setStyleName(timePickerContainer.getElement(), "time-picker");
+    @Override
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler handler) {
+        valueChangeHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                valueChangeHandlers.remove(handler);
+            }
 
-		verticalAlign.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-		verticalAlign.getElement().getStyle().setWidth(0, Style.Unit.PCT);
+        };
+    }
 
-		widgetContainer.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
-		verticalAlign.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+    protected void fireValueChange(Object oldValue) {
+        ValueChangeEvent event = new ValueChangeEvent(this, oldValue, getJsValue());
+        for (ValueChangeHandler h : valueChangeHandlers) {
+            h.onValueChange(event);
+        }
+    }
 
-		dateBlock.getElement().getStyle().setDisplay(Display.BLOCK);
-		dateBlock.getElement().getStyle().setTextAlign(TextAlign.CENTER);
-		dateBlock.getElement().getStyle().setMarginBottom(10, Style.Unit.PCT);
+    @Override
+    public Date getJsValue() {
+        return new Date(hour * 60 * 60 * 1000 + minute * 60 * 1000 + second * 1000);
+    }
 
-		txtHour.getElement().getStyle().setWidth(componentWidth, Style.Unit.PCT);
-		txtHour.getElement().getStyle().setMarginLeft(marginLeft, Style.Unit.PX);
-		txtHour.getElement().getStyle().setTextAlign(TextAlign.CENTER);
-		txtHour.setStyleName("time-picker-text");
-		txtMinute.getElement().getStyle().setWidth(componentWidth, Style.Unit.PCT);
-		txtMinute.getElement().getStyle().setTextAlign(TextAlign.CENTER);
-		txtMinute.setStyleName("time-picker-text");
-		txtSecond.getElement().getStyle().setTextAlign(TextAlign.CENTER);
-		txtSecond.getElement().getStyle().setWidth(componentWidth, Style.Unit.PCT);
-		txtSecond.setStyleName("time-picker-text");
-		txtSecond.getElement().getStyle().setMarginRight(marginRight, Style.Unit.PX);
+    @Override
+    public void setJsValue(Object value) {
+        Date oldValue = getJsValue();
+        currentDate = (Date) value;
+        if (value == null) {
+            hour = 0;
+            minute = 0;
+            second = 0;
+        } else {
+            hour = currentDate.getHours();
+            minute = currentDate.getMinutes();
+            second = currentDate.getSeconds();
+        }
+        txtHour.setValue(hour + "");
+        txtMinute.setValue(minute + "");
+        txtSecond.setValue(second + "");
+        fireValueChange(oldValue);
+    }
 
-		widgetContainer.getElement().getStyle().setVerticalAlign(VerticalAlign.MIDDLE);
-		verticalAlign.getElement().getStyle().setVerticalAlign(VerticalAlign.MIDDLE);
-
-		hCenter.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-		hCenter.getElement().getStyle().setDisplay(Display.BLOCK);
-		hCenter.getElement().getStyle().setProperty("marginLeft", "auto");
-		hCenter.getElement().getStyle().setProperty("marginRight", "auto");
-
-		setButtonStyleAbsolute(btnUpHour, "time-picker-up");
-		btnUpHour.getElement().getStyle().setMarginLeft(marginLeft, Style.Unit.PX);
-		setButtonStyleAbsolute(btnUpMinute, "time-picker-up");
-		setButtonStyleAbsolute(btnUpSecond, "time-picker-up");
-		btnUpSecond.getElement().getStyle().setMarginRight(marginRight, Style.Unit.PX);
-
-		setButtonStyleAbsolute(btnDownHour, "time-picker-down");
-		btnDownHour.getElement().getStyle().setMarginLeft(marginLeft, Style.Unit.PX);
-		setButtonStyleAbsolute(btnDownMinute, "time-picker-down");
-		setButtonStyleAbsolute(btnDownSecond, "time-picker-down");
-		btnDownSecond.getElement().getStyle().setMarginRight(marginRight, Style.Unit.PX);
-
-		setSeparatorStyle(separatorUp1, true);
-		setSeparatorStyle(separatorUp2, true);
-		setSeparatorStyle(separatorTime1, false);
-		setSeparatorStyle(separatorTime2, false);
-		setSeparatorStyle(separatorDown1, true);
-		setSeparatorStyle(separatorDown2, true);
-	}
-
-	public void setRelative() {
-		timePickerContainer.getElement().getStyle().setPosition(Position.RELATIVE);
-		timePickerContainer.getElement().getStyle().setHeight(0, Style.Unit.PX);
-		timePickerContainer.getElement().getStyle().setBottom(0, Style.Unit.PCT);
-		timePickerContainer.getElement().getStyle().setOverflow(Overflow.HIDDEN);
-
-		setStyleName(timePickerContainer.getElement(), "time-picker");
-		timePickerContainer.getElement().getStyle().setWidth(relativeWidth, Style.Unit.PX);
-
-		verticalAlign.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-		verticalAlign.getElement().getStyle().setWidth(0, Style.Unit.PCT);
-		widgetContainer.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
-		verticalAlign.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
-
-		dateBlock.getElement().getStyle().setDisplay(Display.NONE);
-
-		txtHour.getElement().getStyle().setWidth(componentWidthRelative, Style.Unit.PX);
-		txtHour.getElement().getStyle().setMarginLeft(marginLeft, Style.Unit.PX);
-		txtHour.getElement().getStyle().setTextAlign(TextAlign.CENTER);
-		txtHour.setStyleName("time-picker-text");
-		txtMinute.getElement().getStyle().setWidth(componentWidthRelative, Style.Unit.PX);
-		txtMinute.getElement().getStyle().setTextAlign(TextAlign.CENTER);
-		txtMinute.setStyleName("time-picker-text");
-		txtSecond.getElement().getStyle().setTextAlign(TextAlign.CENTER);
-		txtSecond.getElement().getStyle().setWidth(componentWidthRelative, Style.Unit.PX);
-		txtSecond.setStyleName("time-picker-text");
-		txtSecond.getElement().getStyle().setMarginRight(marginRight, Style.Unit.PX);
-
-		widgetContainer.getElement().getStyle().setVerticalAlign(VerticalAlign.MIDDLE);
-		verticalAlign.getElement().getStyle().setVerticalAlign(VerticalAlign.MIDDLE);
-
-		hCenter.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-		hCenter.getElement().getStyle().setDisplay(Display.BLOCK);
-		hCenter.getElement().getStyle().setProperty("marginLeft", "auto");
-		hCenter.getElement().getStyle().setProperty("marginRight", "auto");
-
-		setButtonStyleRelative(btnUpHour, "time-picker-up");
-		btnUpHour.getElement().getStyle().setMarginLeft(marginLeft, Style.Unit.PX);
-		setButtonStyleRelative(btnUpMinute, "time-picker-up");
-		setButtonStyleRelative(btnUpSecond, "time-picker-up");
-		btnUpSecond.getElement().getStyle().setMarginRight(marginRight, Style.Unit.PX);
-
-		setButtonStyleRelative(btnDownHour, "time-picker-down");
-		btnDownHour.getElement().getStyle().setMarginLeft(marginLeft, Style.Unit.PX);
-		setButtonStyleRelative(btnDownMinute, "time-picker-down");
-		setButtonStyleRelative(btnDownSecond, "time-picker-down");
-		btnDownSecond.getElement().getStyle().setMarginRight(marginRight, Style.Unit.PX);
-
-		setSeparatorStyleRelative(separatorUp1, true);
-		setSeparatorStyleRelative(separatorUp2, true);
-		setSeparatorStyleRelative(separatorTime1, false);
-		setSeparatorStyleRelative(separatorTime2, false);
-		setSeparatorStyleRelative(separatorDown1, true);
-		setSeparatorStyleRelative(separatorDown2, true);
-		setHeight(100, Style.Unit.PCT);
-	}
-
-	private void setHeight(int aHeight, Unit aUnit) {
-		timePickerContainer.getElement().getStyle().setHeight(aHeight, aUnit);
-	}
-
-	public void show() {
-		DateTimeFormat fmt = DateTimeFormat.getFormat("dd:MM:yyyy");
-		if (currentDate == null) {
-			dateBlock.getElement().setInnerText(constants.date());
-		} else {
-			dateBlock.getElement().setInnerText(constants.date() + fmt.format(currentDate));
-		}
-		setHeight(100, Style.Unit.PCT);
-		showing = true;
-	}
-
-	public void hide() {
-		setHeight(0, Style.Unit.PCT);
-		showing = false;
-	}
-
-	public boolean isShowing() {
-		return showing;
-	}
-
-	public Date getValue() {
-		return new Date(hour * 60 * 60 * 1000 + minute * 60 * 1000 + second * 1000);
-	}
-
-	private int updateValue(IntegerBox aInput, int aVal, int maxVal) {
-		if (aInput.getValue() != null) {
-			int val = aInput.getValue();
-			if (val > maxVal) {
-				val = maxVal;
-				aInput.setValue(val);
-			}
-			if (val < 0) {
-				val = 0;
-				aInput.setValue(val);
-			}
-			aVal = val;
-		}
-		return aVal;
-	}
-
-	private int updateUpValue(IntegerBox aInput, int aVal, int maxVal) {
-		aVal += 1;
-		if (aVal > maxVal) {
-			aVal = 0;
-		}
-		aInput.setValue(aVal);
-		return aVal;
-	}
-
-	private int updateDownValue(IntegerBox aInput, int aVal, int maxVal) {
-		aVal -= 1;
-		if (aVal < 0) {
-			aVal = maxVal;
-		}
-		aInput.setValue(aVal);
-		return aVal;
-	}
-
-	private void setButtonStyleAbsolute(Widget aWidget, String divStyleName) {
-		aWidget.getElement().getStyle().setWidth(componentWidth, Style.Unit.PCT);
-		aWidget.getElement().getStyle().setHeight(componentHeight, Style.Unit.PX);
-		aWidget.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
-		aWidget.getElement().addClassName(divStyleName);
-	}
-
-	private void setButtonStyleRelative(Widget aWidget, String divStyleName) {
-		aWidget.getElement().getStyle().setWidth(componentWidthRelative, Style.Unit.PX);
-		aWidget.getElement().getStyle().setHeight(componentHeight, Style.Unit.PX);
-		aWidget.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
-		aWidget.getElement().addClassName(divStyleName);
-	}
-
-	private void setSeparatorStyle(Widget separator, boolean invisible) {
-		separator.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
-		separator.getElement().getStyle().setWidth(separatorWidth, Style.Unit.PCT);
-		separator.getElement().getStyle().setTextAlign(TextAlign.CENTER);
-		separator.getElement().setInnerText(":");
-		separator.setStyleName("time-picker-separator");
-		if (invisible) {
-			separator.getElement().getStyle().setVisibility(Visibility.HIDDEN);
-		}
-	}
-
-	private void setSeparatorStyleRelative(Widget separator, boolean invisible) {
-		separator.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
-		separator.getElement().getStyle().setWidth(separatorWidthRelative, Style.Unit.PX);
-		separator.getElement().getStyle().setTextAlign(TextAlign.CENTER);
-		separator.getElement().setInnerText(":");
-		separator.setStyleName("time-picker-separator");
-		if (invisible) {
-			separator.getElement().getStyle().setVisibility(Visibility.HIDDEN);
-		}
-	}
-
-	@Override
-	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Date> handler) {
-		return addHandler(handler, ValueChangeEvent.getType());
-	}
-
-	public void setValue(Date aDate) {
-		setValue(aDate, false);
-	}
-
-	@Override
-	public void setValue(Date value, boolean fireEvents) {
-		currentDate = value;
-		if (value == null) {
-			hour = 0;
-			minute = 0;
-			second = 0;
-		} else {
-			hour = value.getHours();
-			minute = value.getMinutes();
-			second = value.getSeconds();
-		}
-		txtHour.setValue(hour);
-		txtMinute.setValue(minute);
-		txtSecond.setValue(second);
-		if (fireEvents) {
-			ValueChangeEvent.fire(TimePicker.this, getValue());
-		}
-	}
+    @Override
+    protected void publish(JavaScriptObject aValue) {
+    }
 
 }

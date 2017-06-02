@@ -21,6 +21,10 @@ import java.util.Set;
  */
 public class ImageButton extends ImageParagraph implements HasActionHandlers {
 
+    public ImageButton() {
+        this("", false);
+    }
+
     public ImageButton(String aTitle, boolean asHtml, String aImage) {
         this(Document.get().createPushButtonElement(), aTitle, asHtml, aImage);
     }

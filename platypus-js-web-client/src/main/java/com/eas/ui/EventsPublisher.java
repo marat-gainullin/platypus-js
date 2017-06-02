@@ -4,6 +4,8 @@ import com.eas.core.Utils;
 import com.eas.ui.events.ActionEvent;
 import com.eas.ui.events.ContainerEvent;
 import com.eas.ui.events.ComponentEvent;
+import com.eas.ui.events.KeyEvent;
+import com.eas.ui.events.MouseEvent;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.NativeEvent;
 
@@ -46,22 +48,27 @@ public class EventsPublisher {
 		return new constr(aWindow);
 	}-*/;
 	
-	public native static JavaScriptObject publishMouseEvent(NativeEvent aEvent)/*-{
+	public native static JavaScriptObject publishMouseEvent(MouseEvent aEvent)/*-{
 		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('MouseEvent');
 		return new constr(aEvent);
 	}-*/;
 	
-	public native static JavaScriptObject publishMouseEvent(NativeEvent aEvent, int clickCount)/*-{
+	public native static JavaScriptObject publishMouseEvent(MouseEvent aEvent, int clickCount)/*-{
 		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('MouseEvent');
 		return new constr(aEvent, clickCount);
 	}-*/;
 	
-	public native static JavaScriptObject publishKeyEvent(NativeEvent aEvent)/*-{
+	public native static JavaScriptObject publishKeyEvent(KeyEvent aEvent)/*-{
 		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('KeyEvent');
 		return new constr(aEvent);
 	}-*/;
 	
-	public native static JavaScriptObject publishFocusEvent(NativeEvent aEvent)/*-{
+	public native static JavaScriptObject publishFocusEvent(FocusEvent aEvent)/*-{
+		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('FocusEvent');
+		return new constr(aEvent);
+	}-*/;
+        
+	public native static JavaScriptObject publishBlurEvent(BlurEvent aEvent)/*-{
 		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('FocusEvent');
 		return new constr(aEvent);
 	}-*/;

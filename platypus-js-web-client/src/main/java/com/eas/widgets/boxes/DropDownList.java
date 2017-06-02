@@ -11,6 +11,7 @@ import com.eas.ui.events.HasActionHandlers;
 import com.eas.ui.events.HasValueChangeHandlers;
 import com.eas.ui.events.ValueChangeEvent;
 import com.eas.ui.events.ValueChangeHandler;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.NativeEvent;
@@ -25,7 +26,7 @@ import java.util.Set;
  *
  * @author mg
  */
-public abstract class DropDownList extends Widget implements HasJsValue, HasValueChangeHandlers, HasActionHandlers, HasDecorationsWidth {
+public class DropDownList extends Widget implements HasJsValue, HasValueChangeHandlers, HasActionHandlers, HasDecorationsWidth {
 
     protected Object value;
 
@@ -154,6 +155,22 @@ public abstract class DropDownList extends Widget implements HasJsValue, HasValu
             element.<SelectElement>cast().setSelectedIndex(-1);
         }
     }
+    
+    @Override
+    public Object getJsValue() {
+        return value;
+    }
+
+    @Override
+    public void setJsValue(Object aValue) {
+        if (value != aValue) {
+            Object oldValue = value;
+            value = aValue;
+            int index = indexOf(aValue);
+            setSelectedIndex(index);
+            fireValueChange(oldValue);
+        }
+    }
 
     protected final Set<ValueChangeHandler> valueChangeHandlers = new HashSet<>();
 
@@ -197,20 +214,13 @@ public abstract class DropDownList extends Widget implements HasJsValue, HasValu
         }
     }
 
-    @Override
-    public Object getJsValue() {
-        return value;
+
+    public void setVisibleItemCount(int count) {
+        element.<SelectElement>cast().setSize(count);
     }
 
     @Override
-    public void setJsValue(Object aValue) {
-        if (value != aValue) {
-            Object oldValue = value;
-            value = aValue;
-            int index = indexOf(aValue);
-            setSelectedIndex(index);
-            fireValueChange(oldValue);
-        }
+    protected void publish(JavaScriptObject aValue) {
     }
 
 }

@@ -55,7 +55,7 @@ import java.util.Set;
  * .slider-shell .slider-tick { the ticks along the line }</li>
  * <li>.slider-shell .slider-label { the text labels along the line }</li> </ul>
  */
-public class SliderBar extends Widget implements HasJsValue, HasEnabled, HasActionHandlers, HasValueChangeHandlers {
+public class Slider extends Widget implements HasJsValue, HasEnabled, HasActionHandlers, HasValueChangeHandlers {
 
     /**
      * The timer used to continue to shift the knob as the user holds down one
@@ -140,7 +140,7 @@ public class SliderBar extends Widget implements HasJsValue, HasEnabled, HasActi
          * @param value the value the label displays
          * @return the text to display for the label
          */
-        String formatLabel(SliderBar slider, double value);
+        String formatLabel(Slider slider, double value);
     }
 
     /**
@@ -227,7 +227,7 @@ public class SliderBar extends Widget implements HasJsValue, HasEnabled, HasActi
      */
     private final List<Element> tickElements = new ArrayList<>();
 
-    public SliderBar() {
+    public Slider() {
         this(0, 100);
     }
 
@@ -237,7 +237,7 @@ public class SliderBar extends Widget implements HasJsValue, HasEnabled, HasActi
      * @param aMinValue the minimum value in the range
      * @param aMaxValue the maximum value in the range
      */
-    public SliderBar(double aMinValue, double aMaxValue) {
+    public Slider(double aMinValue, double aMaxValue) {
         this(aMinValue, aMaxValue, null);
     }
 
@@ -248,7 +248,7 @@ public class SliderBar extends Widget implements HasJsValue, HasEnabled, HasActi
      * @param aMaxValue the maximum value in the range
      * @param aLabelFormatter the label formatter
      */
-    public SliderBar(double aMinValue, double aMaxValue,
+    public Slider(double aMinValue, double aMaxValue,
             LabelFormatter aLabelFormatter) {
         super();
         element.setTabIndex(1);// TODO check all widgets against tabIndex property / Focusable implementation
