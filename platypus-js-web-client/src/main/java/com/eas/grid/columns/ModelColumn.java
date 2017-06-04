@@ -4,7 +4,7 @@ import java.util.Comparator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.bound.ModelCheck;
+import com.eas.widgets.boxes.BooleanDecoratorField;
 import com.eas.bound.ModelCombo;
 import com.eas.bound.ModelDecoratorBox;
 import com.eas.core.HasPublished;
@@ -332,7 +332,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 					});
 				}
 			}
-			if (editor instanceof ModelCheck) {
+			if (editor instanceof BooleanDecoratorField) {
 				((TreeExpandableCell<JavaScriptObject, Object>) getCell()).setCell(new CheckBoxCell() {
 					@Override
 					public void onBrowserEvent(com.google.gwt.cell.client.Cell.Context context, Element parent, Object value, NativeEvent event, ValueUpdater<Object> valueUpdater) {

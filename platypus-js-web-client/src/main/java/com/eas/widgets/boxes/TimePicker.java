@@ -296,6 +296,11 @@ public class TimePicker extends Widget implements HasJsValue, HasValueChangeHand
     @Override
     public void setJsValue(Object value) {
         Date oldValue = getJsValue();
+        updateJsValue(value);
+        fireValueChange(oldValue);
+    }
+    
+    public void updateJsValue(Object value) {
         currentDate = (Date) value;
         if (value == null) {
             hour = 0;
@@ -309,7 +314,6 @@ public class TimePicker extends Widget implements HasJsValue, HasValueChangeHand
         txtHour.setValue(hour + "");
         txtMinute.setValue(minute + "");
         txtSecond.setValue(second + "");
-        fireValueChange(oldValue);
     }
 
     @Override

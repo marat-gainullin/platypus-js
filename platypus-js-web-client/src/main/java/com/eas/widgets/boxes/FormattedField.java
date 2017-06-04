@@ -14,7 +14,7 @@ public class FormattedField extends TextField {
 
     public static final String DEFAULT_NUMBER_PATTERN = "#,##0.###";
     public static final String DEFAULT_DATE_PATTERN = "dd.MM.yyyy";
-    public static final String DEFAULT_TIME_PATTERN = "H:mm:ss";
+    public static final String DEFAULT_TIME_PATTERN = "HH:mm:ss";
     public static final String DEFAULT_PERCENT_PATTERN = "#,##0%";
     public static final String DEFAULT_CURRENCY_PATTERN = "#,##0.## ¤";
     public static final String DEFAULT_MASK_PATTERN = "###-####";
@@ -58,7 +58,12 @@ public class FormattedField extends TextField {
     private JavaScriptObject onParse;
 
     public FormattedField() {
+        this(TEXT);
+    }
+
+    public FormattedField(Integer valueType) {
         super();
+        this.valueType = valueType;
     }
 
     public JavaScriptObject getOnFormat() {
@@ -95,6 +100,14 @@ public class FormattedField extends TextField {
             valueType = NUMBER;
             pattern = DEFAULT_NUMBER_PATTERN;
         }
+    }
+
+    public String getPattern() {
+        return pattern;
+    }
+
+    public void setPattern(String pattern) {
+        this.pattern = pattern;
     }
 
     // TODO: Add using of date-format.js

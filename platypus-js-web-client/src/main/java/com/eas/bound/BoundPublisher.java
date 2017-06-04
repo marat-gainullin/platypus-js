@@ -1,5 +1,6 @@
 package com.eas.bound;
 
+import com.eas.widgets.boxes.BooleanDecoratorField;
 import com.eas.core.Utils;
 import com.eas.ui.PublishedComponent;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -23,7 +24,7 @@ public class BoundPublisher {
 		constructors.setJs(aClassName, aPublisher);
 	}
 	
-	public native static PublishedComponent publish(ModelCheck aComponent)/*-{
+	public native static PublishedComponent publish(BooleanDecoratorField aComponent)/*-{
 		var constr = @com.eas.bound.BoundPublisher::getPublisher(Ljava/lang/String;)('ModelCheckBox');
 		return new constr(null, aComponent);
 	}-*/;

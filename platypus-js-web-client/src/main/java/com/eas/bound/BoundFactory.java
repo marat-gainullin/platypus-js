@@ -1,5 +1,6 @@
 package com.eas.bound;
 
+import com.eas.widgets.boxes.BooleanDecoratorField;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,7 +25,7 @@ public class BoundFactory implements UiWidgetReader {
         switch (type) {
             case "mcb":
             case "ModelCheckBox":
-                ModelCheck modelCheckBox = new ModelCheck();
+                BooleanDecoratorField modelCheckBox = new BooleanDecoratorField();
                 BoundPublisher.publish(modelCheckBox);
                 readGeneralProps(anElement, modelCheckBox, aFactory);
                 if (Utils.hasAttribute(anElement, "tx", "text")) {

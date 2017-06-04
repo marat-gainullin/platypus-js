@@ -4,10 +4,12 @@ import com.eas.core.Logger;
 import com.eas.core.Utils;
 import com.eas.core.XElement;
 import com.eas.ui.BlurEvent;
+import com.eas.ui.CommonResources;
 import com.eas.ui.FocusEvent;
 import com.eas.ui.Focusable;
 import com.eas.ui.HasBinding;
 import com.eas.ui.HasCustomEditing;
+import com.eas.ui.HasEmptyText;
 import com.eas.ui.HasJsValue;
 import com.eas.ui.HasOnRender;
 import com.eas.ui.HasOnSelect;
@@ -49,9 +51,8 @@ import com.google.gwt.user.client.ui.HasText;
 public abstract class ValueDecoratorField extends Widget implements HasJsValue, Focusable, HasText,
         HasFocusHandlers, HasBlurHandlers, HasActionHandlers,
         HasKeyDownHandlers, HasKeyUpHandlers, HasKeyPressHandlers,
-        HasValueChangeHandlers,
-        HasOnRender, HasOnSelect, HasCustomEditing,
-        HasBinding {
+        HasValueChangeHandlers, HasBinding, HasEmptyText,
+        HasOnRender, HasOnSelect, HasCustomEditing {
 
     protected Widget decorated;
     protected boolean nullable = true;
@@ -69,10 +70,13 @@ public abstract class ValueDecoratorField extends Widget implements HasJsValue, 
     public ValueDecoratorField(Widget aDecorated) {
         super();
         // TODO: Check all widgets against element.setClassName() in derived classes
+        element.setClassName("form-control");
         element.addClassName("decorator");
         assert decorated instanceof HasJsValue;
         assert decorated instanceof HasValueChangeHandlers;
         decorated = aDecorated;
+        CommonResources.INSTANCE.commons().ensureInjected();
+        decorated.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
         ((HasValueChangeHandlers) decorated).addValueChangeHandler(new ValueChangeHandler() {
 
             @Override
@@ -111,6 +115,16 @@ public abstract class ValueDecoratorField extends Widget implements HasJsValue, 
 
     public Widget getDecorated() {
         return decorated;
+    }
+
+    @Override
+    public String getEmptyText() {
+        return decorated.getElement().getAttribute("placeholder");
+    }
+
+    @Override
+    public void setEmptyText(String aValue) {
+        decorated.getElement().setAttribute("placeholder", aValue);
     }
 
     @Override
@@ -326,9 +340,13 @@ public abstract class ValueDecoratorField extends Widget implements HasJsValue, 
         }
     }
 
-    protected abstract void setReadonly(boolean aValue);
+    public void setReadonly(boolean aValue) {
+        decorated.getElement().setPropertyBoolean("readOnly", aValue);
+    }
 
-    protected abstract boolean isReadonly();
+    public boolean isReadonly() {
+        return decorated.getElement().getPropertyBoolean("readOnly");
+    }
 
     @Override
     public boolean isEditable() {

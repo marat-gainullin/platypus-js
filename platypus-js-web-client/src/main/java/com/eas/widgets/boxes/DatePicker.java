@@ -18,7 +18,7 @@ import java.util.Set;
  * TODO: Don't forget to add time button and date button and switching between them in decorated-date-time-field as well as in the picker.
  * @author mgainullin
  */
-public class DateTimePicker extends Widget implements HasJsValue, HasValueChangeHandlers {
+public class DatePicker extends Widget implements HasJsValue, HasValueChangeHandlers {
 
     private static String[] weekDaysNames = new String[]{
         "week.monday",
@@ -31,7 +31,6 @@ public class DateTimePicker extends Widget implements HasJsValue, HasValueChange
     };
 
     private Date value;
-    private TimePicker timePicker;
     private Element prevYear = Document.get().createDivElement();
     private Element prevMonth = Document.get().createDivElement();
     private Element toToday = Document.get().createDivElement();
@@ -41,9 +40,8 @@ public class DateTimePicker extends Widget implements HasJsValue, HasValueChange
     private Element[][] monthWeeks = new Element[6][];
     private Element timeSelect = Document.get().createDivElement();
 
-    public DateTimePicker() {
+    public DatePicker() {
         super();
-        timePicker = new TimePicker();
         element.setClassName("date-picker");
         prevYear.setClassName("prev-year");
         prevMonth.setClassName("prev-month");
@@ -84,6 +82,12 @@ public class DateTimePicker extends Widget implements HasJsValue, HasValueChange
 
     @Override
     public void setJsValue(Object value) {
+        Date oldValue = getJsValue();
+        updateJsValue(value);
+        fireValueChange(oldValue);
+    }
+    
+    public void updateJsValue(Object value) {
         this.value = (Date) value;
         format();
     }
