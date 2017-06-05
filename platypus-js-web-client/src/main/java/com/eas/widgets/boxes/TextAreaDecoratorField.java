@@ -5,9 +5,9 @@ import com.eas.ui.HasScroll;
 import com.eas.ui.HorizontalScrollFiller;
 import com.eas.ui.VerticalScrollFiller;
 
-public class TextAreaDecorator extends ValueDecoratorField implements HasScroll, HorizontalScrollFiller, VerticalScrollFiller {
+public class TextAreaDecoratorField extends ValueDecoratorField implements HasScroll, HorizontalScrollFiller, VerticalScrollFiller {
 
-    public TextAreaDecorator() {
+    public TextAreaDecoratorField() {
         super(new TextArea());
         //((TextArea) decorated).getElement().getStyle().setProperty("wordWrap", "normal");
         ((TextArea) decorated).getElement().getStyle().setProperty("resize", "none");
@@ -18,7 +18,7 @@ public class TextAreaDecorator extends ValueDecoratorField implements HasScroll,
         publish(this, aValue);
     }
 
-    protected native static void publish(TextAreaDecorator aWidget, JavaScriptObject aPublished)/*-{
+    protected native static void publish(TextAreaDecoratorField aWidget, JavaScriptObject aPublished)/*-{
         aPublished.redraw = function(){
             aWidget.@com.eas.bound.ModelTextArea::rebind()();
         };

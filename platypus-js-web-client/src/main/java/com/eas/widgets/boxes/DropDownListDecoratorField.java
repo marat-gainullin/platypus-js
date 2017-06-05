@@ -289,5 +289,59 @@ public class DropDownListDecoratorField extends ValueDecoratorField {
         publish(this, aValue);
     }
 
-    private native static void publish(DropDownListDecoratorField aWidget, JavaScriptObject aPublished);
+    private native static void publish(DropDownListDecoratorField aWidget, JavaScriptObject aPublished)/*-{
+        var B = @com.eas.core.Predefine::boxing;
+            aPublished.redraw = function() {
+            aWidget.@com.eas.bound.ModelCombo::rebind()();
+        };
+        Object.defineProperty(aPublished, "emptyText", {
+            get : function() {
+               return aWidget.@com.eas.ui.HasEmptyText::getEmptyText()();
+            },
+            set : function(aValue) {
+               aWidget.@com.eas.ui.HasEmptyText::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+            }
+        });
+        Object.defineProperty(aPublished, "value", {
+            get : function() {
+                return B.boxAsJs(aWidget.@com.eas.bound.ModelCombo::getJsValue()());
+            },
+            set : function(aValue) {
+                if (aValue != null) {
+                    aWidget.@com.eas.bound.ModelCombo::setJsValue(Ljava/lang/Object;)(B.boxAsJava(aValue));
+                } else {
+                    aWidget.@com.eas.bound.ModelCombo::setJsValue(Ljava/lang/Object;)(null);
+                }
+            }
+        });
+        Object.defineProperty(aPublished, "text", {
+            get : function() {
+                return aWidget.@com.eas.bound.ModelCombo::getText()();
+            }
+        });
+        Object.defineProperty(aPublished, "displayList", {
+            get : function() {
+                return aWidget.@com.eas.bound.ModelCombo::getDisplayList()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.bound.ModelCombo::setDisplayList(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "displayField", {
+            get : function() {
+                return aWidget.@com.eas.bound.ModelCombo::getDisplayField()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.bound.ModelCombo::setDisplayField(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+            }
+        });
+        Object.defineProperty(aPublished, "list", {
+            get : function() {
+                return aWidget.@com.eas.bound.ModelCombo::isList()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.bound.ModelCombo::setList(Z)(false != aValue);
+            }
+        });
+    }-*/;
 }

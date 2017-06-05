@@ -1,8 +1,8 @@
 package com.eas.bound;
 
 import com.eas.widgets.boxes.DropDownListDecoratorField;
-import com.eas.widgets.boxes.FormattedFieldDecoratorField;
-import com.eas.widgets.boxes.TextAreaDecorator;
+import com.eas.widgets.boxes.FormattedDecoratorField;
+import com.eas.widgets.boxes.TextAreaDecoratorField;
 import com.eas.widgets.boxes.BooleanDecoratorField;
 import com.eas.core.Utils;
 import com.eas.ui.PublishedComponent;
@@ -32,15 +32,9 @@ public class BoundPublisher {
 		return new constr(null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(FormattedFieldDecoratorField aComponent)/*-{
-		var constr = @com.eas.bound.BoundPublisher::getPublisher(Ljava/lang/String;)('ModelFormattedField');
-		return new constr(aComponent);
-	}-*/;
+	public native static PublishedComponent publish(FormattedDecoratorField aComponent);
 
-	public native static PublishedComponent publish(TextAreaDecorator aComponent)/*-{
-		var constr = @com.eas.bound.BoundPublisher::getPublisher(Ljava/lang/String;)('ModelTextArea');
-		return new constr(aComponent);
-	}-*/;
+	public native static PublishedComponent publish(TextAreaDecoratorField aComponent);
 
 	public native static PublishedComponent publish(ModelDate aComponent)/*-{
 		var constr = @com.eas.bound.BoundPublisher::getPublisher(Ljava/lang/String;)('ModelDate');

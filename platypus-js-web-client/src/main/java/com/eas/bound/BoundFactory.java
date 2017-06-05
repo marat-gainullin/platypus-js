@@ -1,8 +1,8 @@
 package com.eas.bound;
 
 import com.eas.widgets.boxes.DropDownListDecoratorField;
-import com.eas.widgets.boxes.FormattedFieldDecoratorField;
-import com.eas.widgets.boxes.TextAreaDecorator;
+import com.eas.widgets.boxes.FormattedDecoratorField;
+import com.eas.widgets.boxes.TextAreaDecoratorField;
 import com.eas.widgets.boxes.BooleanDecoratorField;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -75,7 +75,7 @@ public class BoundFactory implements UiWidgetReader {
                 return modelDate;
             case "mff":
             case "ModelFormattedField":
-                FormattedFieldDecoratorField modelFormattedField = new FormattedFieldDecoratorField();
+                FormattedDecoratorField modelFormattedField = new FormattedDecoratorField();
                 BoundPublisher.publish(modelFormattedField);
                 readGeneralProps(anElement, modelFormattedField, aFactory);
                 try {
@@ -114,7 +114,7 @@ public class BoundFactory implements UiWidgetReader {
                 return modelSpin;
             case "mta":
             case "ModelTextArea":
-                TextAreaDecorator modelTextArea = new TextAreaDecorator();
+                TextAreaDecoratorField modelTextArea = new TextAreaDecoratorField();
                 BoundPublisher.publish(modelTextArea);
                 readGeneralProps(anElement, modelTextArea, aFactory);
                 if (Utils.hasAttribute(anElement, "tx", "text")) {
