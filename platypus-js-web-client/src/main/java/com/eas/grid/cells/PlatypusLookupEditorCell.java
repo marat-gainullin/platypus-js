@@ -5,7 +5,7 @@
  */
 package com.eas.grid.cells;
 
-import com.eas.bound.ModelCombo;
+import com.eas.widgets.boxes.DropDownListDecoratorField;
 import com.eas.widgets.boxes.DropDownList;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Widget;

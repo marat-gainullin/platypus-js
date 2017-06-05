@@ -26,6 +26,7 @@ import java.util.Set;
  *
  * @author mg
  */
+// TODO: Investigate empty text and selectedIndex == -1 state of <select> tag
 public class DropDownList extends Widget implements HasJsValue, HasValueChangeHandlers, HasActionHandlers, HasDecorationsWidth {
 
     protected Object value;

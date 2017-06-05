@@ -3,6 +3,7 @@ package com.eas.widgets.boxes;
 import com.eas.core.Utils;
 import com.eas.core.XElement;
 import com.eas.ui.CommonResources;
+import com.eas.ui.HasNumberValue;
 import com.eas.ui.Widget;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.BrowserEvents;
@@ -67,35 +68,35 @@ public class NumberDecoratorField extends ValueDecoratorField {
     }
 
     public void increment() {
-        ((NumberField) decorated).increment();
+        ((HasNumberValue) decorated).increment();
     }
 
     public void decrement() {
-        ((NumberField) decorated).decrement();
+        ((HasNumberValue) decorated).decrement();
     }
 
     public Double getMin() {
-        return ((NumberField) decorated).getMin();
+        return ((HasNumberValue) decorated).getMin();
     }
 
     public void setMin(Double aValue) {
-        ((NumberField) decorated).setMin(aValue);
+        ((HasNumberValue) decorated).setMin(aValue);
     }
 
     public Double getMax() {
-        return ((NumberField) decorated).getMax();
+        return ((HasNumberValue) decorated).getMax();
     }
 
     public void setMax(Double aValue) {
-        ((NumberField) decorated).setMax(aValue);
+        ((HasNumberValue) decorated).setMax(aValue);
     }
 
     public Double getStep() {
-        return ((NumberField) decorated).getStep();
+        return ((HasNumberValue) decorated).getStep();
     }
 
     public void setStep(Double aValue) {
-        ((NumberField) decorated).setStep(aValue);
+        ((HasNumberValue) decorated).setStep(aValue);
     }
 
     @Override

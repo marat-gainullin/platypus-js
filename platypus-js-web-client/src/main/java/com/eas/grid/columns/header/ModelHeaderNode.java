@@ -1,7 +1,7 @@
 package com.eas.grid.columns.header;
 
 import com.eas.bound.ModelDecoratorBox;
-import com.eas.bound.ModelFormattedField;
+import com.eas.widgets.boxes.FormattedFieldDecoratorField;
 import com.eas.core.HasPublished;
 import com.eas.grid.DraggableHeader;
 import com.eas.grid.columns.ModelColumn;
@@ -18,7 +18,7 @@ public class ModelHeaderNode extends HeaderNode<JavaScriptObject> implements Has
 	public ModelHeaderNode() {
 		super();
 		column = new ModelColumn();
-		((ModelColumn)column).setEditor(new ModelFormattedField());
+		((ModelColumn)column).setEditor(new FormattedFieldDecoratorField());
 		header = new DraggableHeader<JavaScriptObject>("", null, column, this);
 	}
 

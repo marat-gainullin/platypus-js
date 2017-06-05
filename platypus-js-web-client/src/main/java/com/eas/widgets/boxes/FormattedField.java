@@ -2,6 +2,7 @@ package com.eas.widgets.boxes;
 
 import com.eas.core.HasPublished;
 import com.eas.core.Utils.JsObject;
+import com.eas.ui.HasNumberValue;
 import com.eas.widgets.format.MaskFormat;
 import com.google.gwt.core.client.JavaScriptObject;
 import java.util.Date;
@@ -10,7 +11,7 @@ import java.util.Date;
  *
  * @author mgainullin
  */
-public class FormattedField extends TextField {
+public class FormattedField extends TextField implements HasNumberValue {
 
     public static final String DEFAULT_NUMBER_PATTERN = "#,##0.###";
     public static final String DEFAULT_DATE_PATTERN = "dd.MM.yyyy";
@@ -18,6 +19,11 @@ public class FormattedField extends TextField {
     public static final String DEFAULT_PERCENT_PATTERN = "#,##0%";
     public static final String DEFAULT_CURRENCY_PATTERN = "#,##0.## ¤";
     public static final String DEFAULT_MASK_PATTERN = "###-####";
+
+    // Used if valueType is NUMBER
+    protected double step = 1.0;
+    protected Double min;
+    protected Double max;
 
     /**
      * Number format (type).
@@ -225,6 +231,50 @@ public class FormattedField extends TextField {
             setValueTypeByValue(value);
         }
         super.setJsValue(value);
+    }
+
+    public void increment() {
+        if (valueType == NUMBER) {
+            Double oldValue = (Double) getJsValue();
+            Double newValue = (oldValue != null ? oldValue : 0) + step;
+            if (max == null || newValue <= max) {
+                setJsValue(newValue);
+            }
+        }
+    }
+
+    public void decrement() {
+        if (valueType == NUMBER) {
+            Double oldValue = (Double) getJsValue();
+            Double newValue = (oldValue != null ? oldValue : 0) - step;
+            if (min == null || newValue >= min) {
+                setJsValue(newValue);
+            }
+        }
+    }
+
+    public Double getMin() {
+        return min;
+    }
+
+    public void setMin(Double aValue) {
+        min = aValue;
+    }
+
+    public Double getMax() {
+        return max;
+    }
+
+    public void setMax(Double aValue) {
+        max = aValue;
+    }
+
+    public Double getStep() {
+        return step;
+    }
+
+    public void setStep(Double aValue) {
+        step = aValue;
     }
 
     @Override

@@ -13,6 +13,7 @@ import com.eas.ui.HasEmptyText;
 import com.eas.ui.HasJsValue;
 import com.eas.ui.HasOnRender;
 import com.eas.ui.HasOnSelect;
+import com.eas.ui.HasReadonly;
 import com.eas.ui.PublishedCell;
 import com.eas.ui.Widget;
 import com.eas.ui.events.ActionEvent;
@@ -52,7 +53,7 @@ public abstract class ValueDecoratorField extends Widget implements HasJsValue, 
         HasFocusHandlers, HasBlurHandlers, HasActionHandlers,
         HasKeyDownHandlers, HasKeyUpHandlers, HasKeyPressHandlers,
         HasValueChangeHandlers, HasBinding, HasEmptyText,
-        HasOnRender, HasOnSelect, HasCustomEditing {
+        HasOnRender, HasOnSelect, HasCustomEditing, HasReadonly {
 
     protected Widget decorated;
     protected boolean nullable = true;
@@ -96,6 +97,7 @@ public abstract class ValueDecoratorField extends Widget implements HasJsValue, 
         clearButton.getStyle().setPosition(Style.Position.RELATIVE);
         clearButton.getStyle().setZIndex(1); // FireFox hides this in ModelCombo without such setting
 
+        // TODO: Ensure action event occurs when user clicks on select or on clear button.
         selectButton.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
 
             @Override
@@ -340,10 +342,12 @@ public abstract class ValueDecoratorField extends Widget implements HasJsValue, 
         }
     }
 
+    @Override
     public void setReadonly(boolean aValue) {
         decorated.getElement().setPropertyBoolean("readOnly", aValue);
     }
 
+    @Override
     public boolean isReadonly() {
         return decorated.getElement().getPropertyBoolean("readOnly");
     }

@@ -1,12 +1,13 @@
 package com.eas.widgets.boxes;
 
+import com.eas.ui.HasNumberValue;
 import com.google.gwt.dom.client.Document;
 
 /**
  *
  * @author mgainullin
  */
-public class NumberField extends TextField {
+public class NumberField extends TextField implements HasNumberValue {
 
     protected double step = 1.0;
     protected Double min;
@@ -27,7 +28,7 @@ public class NumberField extends TextField {
         return format.parse(aText);
     }
 
-    protected void increment() {
+    public void increment() {
         Double oldValue = (Double) getJsValue();
         Double newValue = (oldValue != null ? oldValue : 0) + step;
         if (max == null || newValue <= max) {
@@ -35,7 +36,7 @@ public class NumberField extends TextField {
         }
     }
 
-    protected void decrement() {
+    public void decrement() {
         Double oldValue = (Double) getJsValue();
         Double newValue = (oldValue != null ? oldValue : 0) - step;
         if (min == null || newValue >= min) {

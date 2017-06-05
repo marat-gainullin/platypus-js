@@ -1,5 +1,8 @@
 package com.eas.bound;
 
+import com.eas.widgets.boxes.DropDownListDecoratorField;
+import com.eas.widgets.boxes.FormattedFieldDecoratorField;
+import com.eas.widgets.boxes.TextAreaDecorator;
 import com.eas.widgets.boxes.BooleanDecoratorField;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,7 +37,7 @@ public class BoundFactory implements UiWidgetReader {
                 return modelCheckBox;
             case "mc":
             case "ModelCombo":
-                ModelCombo modelCombo = new ModelCombo();
+                DropDownListDecoratorField modelCombo = new DropDownListDecoratorField();
                 BoundPublisher.publish(modelCombo);
                 readGeneralProps(anElement, modelCombo, aFactory);
                 boolean list = Utils.getBooleanAttribute(anElement, "ls", "list", Boolean.TRUE);
@@ -72,7 +75,7 @@ public class BoundFactory implements UiWidgetReader {
                 return modelDate;
             case "mff":
             case "ModelFormattedField":
-                ModelFormattedField modelFormattedField = new ModelFormattedField();
+                FormattedFieldDecoratorField modelFormattedField = new FormattedFieldDecoratorField();
                 BoundPublisher.publish(modelFormattedField);
                 readGeneralProps(anElement, modelFormattedField, aFactory);
                 try {
@@ -111,7 +114,7 @@ public class BoundFactory implements UiWidgetReader {
                 return modelSpin;
             case "mta":
             case "ModelTextArea":
-                ModelTextArea modelTextArea = new ModelTextArea();
+                TextAreaDecorator modelTextArea = new TextAreaDecorator();
                 BoundPublisher.publish(modelTextArea);
                 readGeneralProps(anElement, modelTextArea, aFactory);
                 if (Utils.hasAttribute(anElement, "tx", "text")) {

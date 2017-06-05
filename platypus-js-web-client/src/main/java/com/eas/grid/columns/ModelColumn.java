@@ -5,7 +5,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.eas.widgets.boxes.BooleanDecoratorField;
-import com.eas.bound.ModelCombo;
+import com.eas.widgets.boxes.DropDownListDecoratorField;
 import com.eas.bound.ModelDecoratorBox;
 import com.eas.core.HasPublished;
 import com.eas.core.Utils;
@@ -313,16 +313,16 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 			if (editor != null) {
 				editor.setOnRender(null);
 				editor.setOnSelect(null);
-				if (editor instanceof ModelCombo) {
-					((ModelCombo) editor).setOnRedraw(null);
+				if (editor instanceof DropDownListDecoratorField) {
+					((DropDownListDecoratorField) editor).setOnRedraw(null);
 				}
 			}
 			editor = aEditor;
 			if (editor != null) {
 				editor.setOnRender(onRender);
 				editor.setOnSelect(onSelect);
-				if (editor instanceof ModelCombo) {
-					((ModelCombo) editor).setOnRedraw(new Runnable() {
+				if (editor instanceof DropDownListDecoratorField) {
+					((DropDownListDecoratorField) editor).setOnRedraw(new Runnable() {
 
 						@Override
 						public void run() {

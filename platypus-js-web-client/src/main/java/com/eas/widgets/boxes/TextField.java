@@ -18,10 +18,11 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.HasText;
 import java.util.HashSet;
 import java.util.Set;
 
-public class TextField extends Widget implements HasActionHandlers, HasJsValue, HasValueChangeHandlers, HasEmptyText {
+public class TextField extends Widget implements HasActionHandlers, HasJsValue, HasValueChangeHandlers, HasText, HasEmptyText {
 
     // TODO: change most protected members to private
     protected String emptyText;
@@ -45,13 +46,26 @@ public class TextField extends Widget implements HasActionHandlers, HasJsValue, 
                 Object oldValue = value;
                 String text = element.<InputElement>cast().getValue();
                 value = parse(text);
-                // TODO: Check all widgets againts null to empty strings conversion
+                // TODO: Check all widgets against null to empty strings conversion
                 fireValueChange(oldValue);
                 // TODO: Check all widgets against value changes / action performed
                 fireActionPerformed();
             }
         };
         onChangeReg = element.<XElement>cast().addEventListener(BrowserEvents.CHANGE, onChange);
+    }
+
+    @Override
+    public String getText() {
+        return element.<InputElement>cast().getValue();
+    }
+
+    @Override
+    public void setText(String text) {
+        Object oldValue = value;
+        value = parse(text);
+        // TODO: Check all widgets against null to empty strings conversion
+        fireValueChange(oldValue);
     }
 
     protected Object parse(String aText) {
