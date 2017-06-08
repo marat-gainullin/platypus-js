@@ -25,7 +25,7 @@ public class Tabs extends Borders implements HasSelectionHandlers<Widget>, HasCh
 
     private class TabCaption extends Widget {
 
-        public TabCaption(String title, String image) {
+        public TabCaption(String title, String image, String toolTip) {
             super();
         }
 
@@ -47,11 +47,11 @@ public class Tabs extends Borders implements HasSelectionHandlers<Widget>, HasCh
         setCenterComponent(content);
     }
 
-    private void addCaptionFor(Widget w, String title, String image, int beforeIndex) {
+    private void addCaptionFor(Widget w, String title, String toolTip, String image, int beforeIndex) {
         if (title == null) {
             title = w.getJsName() != null && !w.getJsName().isEmpty() ? w.getJsName() : "Unnamed - " + tabs.getCount();
         }
-        TabCaption label = new TabCaption(title, image);
+        TabCaption label = new TabCaption(title, image, toolTip);
         tabs.add(label, beforeIndex);
         tabsOf.put(w, label);
     }
@@ -60,26 +60,32 @@ public class Tabs extends Borders implements HasSelectionHandlers<Widget>, HasCh
     public void add(Widget w) {
         content.add(w);
         w.setParent(this);
-        addCaptionFor(w, null, null, tabs.getCount());
+        addCaptionFor(w, null, null, null, tabs.getCount());
     }
 
     @Override
     public void add(Widget w, int beforeIndex) {
         content.add(w, beforeIndex);
         w.setParent(this);
-        addCaptionFor(w, null, null, beforeIndex);
+        addCaptionFor(w, null, null, null, beforeIndex);
     }
 
     public void add(Widget w, String title, String image) {
         content.add(w);
         w.setParent(this);
-        addCaptionFor(w, title, image, tabs.getCount());
+        addCaptionFor(w, title, null, image, tabs.getCount());
+    }
+
+    public void add(Widget w, String title, String toolTip, String image) {
+        content.add(w);
+        w.setParent(this);
+        addCaptionFor(w, title, toolTip, image, tabs.getCount());
     }
 
     public void add(Widget w, int beforeIndex, String title, String image) {
         content.add(w, beforeIndex);
         w.setParent(this);
-        addCaptionFor(w, title, image, beforeIndex);
+        addCaptionFor(w, title, null, image, beforeIndex);
     }
 
     @Override

@@ -1,32 +1,35 @@
 package com.eas.grid.columns;
 
-import com.eas.grid.ModelGrid;
-import com.eas.grid.cells.TreeExpandableCell;
-import com.eas.grid.cells.rowmarker.RowMarkerCell;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.TableCellElement;
 
-public class UsualServiceColumn extends ModelColumn {
+public class UsualServiceColumn extends Column {
 
-	public UsualServiceColumn() {
-		super();
-		designedWidth = 22;
-		minWidth = designedWidth;
-		maxWidth = designedWidth;
-		((TreeExpandableCell<JavaScriptObject, Object>) getCell()).setCell(new RowMarkerCell() {
-			@Override
-			public String getCursorProperty() {
-				return ((ModelGrid) grid).getCursorProperty();
-			}
+    public UsualServiceColumn() {
+        super();
+        width = 22;
+        minWidth = width;
+        maxWidth = width;
+    }
 
-			@Override
-			public JavaScriptObject getRowsData() {
-				return ((ModelGrid) grid).getData();
-			}
-		});
-	}
+    @Override
+    public void render(int viewIndex, JavaScriptObject dataRow, TableCellElement viewCell) {
+        // TODO: Add data cursor and data changes driven data rendering
+        JavaScriptObject rows = getRowsData();
+        boolean currentRow = rows != null && rows.<JsObject>cast().getJs(getCursorProperty()) == value;
+        if (currentRow) {
+            content.appendHtmlConstant("<div class=\"grid-marker-cell-cursor\"></div>");
+        }
+        /*
+		if (value.isInserted())
+			content.appendHtmlConstant("<div class=\"grid-marker-inserted\"></div>");
+		else if (value.isUpdated())
+			content.appendHtmlConstant("<div class=\"grid-marker-cell-dirty\"></div>");
+         */
+    }
 
-	@Override
-	public JavaScriptObject getValue(JavaScriptObject anElement) {
-		return anElement;
-	}
+    @Override
+    public JavaScriptObject getValue(JavaScriptObject anElement) {
+        return anElement;
+    }
 }

@@ -10,11 +10,9 @@ import com.eas.core.HasPublished;
 import com.eas.core.Utils;
 import com.eas.core.XElement;
 import com.eas.core.Utils.JsObject;
-import com.eas.grid.builders.RenderedTableCellBuilder;
 import com.eas.grid.builders.ThemedHeaderOrFooterBuilder;
-import com.eas.grid.cells.TreeExpandableCell;
 import com.eas.grid.columns.CheckServiceColumn;
-import com.eas.grid.columns.ModelColumn;
+import com.eas.grid.columns.Column;
 import com.eas.grid.columns.RadioServiceColumn;
 import com.eas.grid.columns.UsualServiceColumn;
 import com.eas.grid.columns.header.HeaderAnalyzer;
@@ -30,26 +28,19 @@ import com.eas.grid.rows.JsDataContainer;
 import com.eas.grid.selection.CheckBoxesEventTranslator;
 import com.eas.grid.selection.HasSelectionLead;
 import com.eas.grid.selection.MultiJavaScriptObjectSelectionModel;
-import com.eas.menu.HasComponentPopupMenu;
-import com.eas.menu.PlatypusPopupMenu;
 import com.eas.ui.HasBinding;
-import com.eas.ui.HasEventsExecutor;
-import com.eas.ui.HasJsFacade;
-import com.eas.ui.HasJsName;
 import com.eas.ui.HasOnRender;
 import com.eas.ui.JavaScriptObjectKeyProvider;
 import com.eas.ui.PublishedCell;
 import com.eas.ui.PublishedComponent;
 import com.eas.ui.EventsPublisher;
 import com.eas.ui.events.CollapsedHandler;
-import com.eas.ui.events.EventsExecutor;
 import com.eas.ui.events.ExpandedHandler;
-import com.eas.ui.events.HasHideHandlers;
-import com.eas.ui.events.HasShowHandlers;
-import com.eas.ui.events.HideEvent;
-import com.eas.ui.events.HideHandler;
-import com.eas.ui.events.ComponentEvent;
-import com.eas.ui.events.ShowHandler;
+import com.eas.ui.events.HasFocusHandlers;
+import com.eas.ui.events.HasBlurHandlers;
+import com.eas.ui.events.HasKeyPressHandlers;
+import com.eas.ui.events.HasKeyUpHandlers;
+import com.eas.ui.events.HasKeyDownHandlers;
 import com.eas.widgets.WidgetsUtils;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
@@ -57,41 +48,18 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.TableCellElement;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ContextMenuEvent;
-import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.dom.client.DragStartEvent;
 import com.google.gwt.event.dom.client.DragStartHandler;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.FocusHandler;
-import com.google.gwt.event.dom.client.HasBlurHandlers;
-import com.google.gwt.event.dom.client.HasFocusHandlers;
-import com.google.gwt.event.dom.client.HasKeyDownHandlers;
-import com.google.gwt.event.dom.client.HasKeyPressHandlers;
-import com.google.gwt.event.dom.client.HasKeyUpHandlers;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.ui.Focusable;
-import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.ListDataProvider;
@@ -101,88 +69,74 @@ import com.google.gwt.view.client.SetSelectionModel;
 
 /**
  * Class intended to wrap a grid or tree grid. It also contains grid API.
- * 
+ *
  * @author mg
- * 
+ *
  */
-public class ModelGrid extends Grid<JavaScriptObject>
-		implements HasJsFacade, HasOnRender, HasComponentPopupMenu, HasEventsExecutor, HasEnabled, HasShowHandlers,
-		HasHideHandlers, HasResizeHandlers, HasBinding, HasSelectionHandlers<JavaScriptObject>, HasFocusHandlers,
-		HasBlurHandlers, Focusable, HasKeyDownHandlers, HasKeyPressHandlers, HasKeyUpHandlers, JsDataContainer {
+public class ModelGrid extends Grid
+        implements HasOnRender, HasBinding, HasSelectionHandlers<JavaScriptObject>, HasFocusHandlers,
+        HasBlurHandlers, Focusable, HasKeyDownHandlers, HasKeyPressHandlers, HasKeyUpHandlers, JsDataContainer {
 
-	protected boolean enabled = true;
-	protected EventsExecutor eventsExecutor;
-	protected PlatypusPopupMenu menu;
-	protected String name;
-	//
-	protected String parentField;
-	protected String childrenField;
-	//
-	protected JavaScriptObject data;
-	protected String field;
-	protected HandlerRegistration boundToData;
-	protected HandlerRegistration boundToCursor;
-	protected String cursorProperty = "cursor";
-	protected JavaScriptObject onRender;
-	protected JavaScriptObject onAfterRender;
-	protected JavaScriptObject onExpand;
-	protected JavaScriptObject onCollapse;
-	protected PublishedComponent published;
-	protected FindWindow finder;
-	protected String groupName = "group-name-" + Document.get().createUniqueId();
-	protected List<HeaderNode<JavaScriptObject>> header = new ArrayList<>();
-	// runtime
-	protected Widget activeEditor;
-	protected ListHandler<JavaScriptObject> sortHandler;
-	protected HandlerRegistration sortHandlerReg;
-	protected HandlerRegistration positionSelectionHandler;
-	protected HandlerRegistration onSelectEventSelectionHandler;
-	protected boolean editable = true;
-	protected boolean deletable = true;
-	protected boolean insertable = true;
-	protected boolean draggableRows;
+    //
+    protected String parentField;
+    protected String childrenField;
+    //
+    protected JavaScriptObject data;
+    protected String field;
+    protected HandlerRegistration boundToData;
+    protected HandlerRegistration boundToCursor;
+    protected String cursorProperty = "cursor";
+    protected JavaScriptObject onRender;
+    protected JavaScriptObject onAfterRender;
+    protected JavaScriptObject onExpand;
+    protected JavaScriptObject onCollapse;
+    protected List<HeaderNode> header = new ArrayList<>();
+    // runtime
+    protected Widget activeEditor;
+    protected ListHandler<JavaScriptObject> sortHandler;
+    protected HandlerRegistration sortHandlerReg;
+    protected HandlerRegistration positionSelectionHandler;
+    protected HandlerRegistration onSelectEventSelectionHandler;
+    protected boolean editable = true;
+    protected boolean deletable = true;
+    protected boolean insertable = true;
+    protected boolean draggableRows;
 
-	public ModelGrid() {
-		super(new JavaScriptObjectKeyProvider());
-		addDomHandler(new DragStartHandler() {
+    public ModelGrid() {
+        super();
+        addDomHandler(new DragStartHandler() {
 
-			@Override
-			public void onDragStart(DragStartEvent event) {
-				if (draggableRows) {
-					EventTarget et = event.getNativeEvent().getEventTarget();
-					Element targetElement = Element.as(et);
-					if ("tr".equalsIgnoreCase(targetElement.getTagName())) {
-						event.stopPropagation();
-						int viewIndex = Integer.valueOf(targetElement.getAttribute("__gwt_row"));
-						if (sortHandler != null && sortHandler.getList() != null) {
-							List<JavaScriptObject> sorted = sortHandler.getList();
-							if (viewIndex >= 0 && viewIndex < sorted.size()) {
-								JavaScriptObject dragged = sorted.get(viewIndex);
-								if (ModelGrid.this.data != null) {
-									Utils.JsObject dataArray = ModelGrid.this.data.cast();
-									int dataIndex = dataArray.indexOf(dragged);
-									event.getDataTransfer().setData("text/modelgrid-row",
-											"{\"gridName\":\"" + name + "\", \"dataIndex\": " + dataIndex + "}");
-								}
-							}
-						}
-					}
-				}
-			}
+            @Override
+            public void onDragStart(DragStartEvent event) {
+                if (draggableRows) {
+                    EventTarget et = event.getNativeEvent().getEventTarget();
+                    Element targetElement = Element.as(et);
+                    if ("tr".equalsIgnoreCase(targetElement.getTagName())) {
+                        event.stopPropagation();
+                        JavaScriptObject dragged = targetElement.getPropertyJSO(GridSection.JS_ROW_NAME);
+                        if (ModelGrid.this.data != null) {
+                            Utils.JsObject dataArray = ModelGrid.this.data.cast();
+                            int dataIndex = dataArray.indexOf(dragged);
+                            event.getDataTransfer().setData("text/modelgrid-row",
+                                    "{\"gridName\":\"" + name + "\", \"dataIndex\": " + dataIndex + "}");
+                        }
+                    }
+                }
+            }
 
-		}, DragStartEvent.getType());
-		addDomHandler(new KeyUpHandler() {
+        }, DragStartEvent.getType());
+        addDomHandler(new KeyUpHandler() {
 
-			@Override
-			public void onKeyUp(KeyUpEvent event) {
-				Object oData = data != null && field != null && !field.isEmpty() ? Utils.getPathData(data, field)
-						: data;
-				JsObject jsData = oData instanceof JavaScriptObject ? ((JavaScriptObject) oData).<JsObject> cast()
-						: null;
-				if (jsData != null) {
-					if (activeEditor == null && getSelectionModel() instanceof SetSelectionModel<?>) {
-						final SetSelectionModel<JavaScriptObject> rowsSelection = (SetSelectionModel<JavaScriptObject>) getSelectionModel();
-						if (event.getNativeKeyCode() == KeyCodes.KEY_DELETE && deletable) {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                Object oData = data != null && field != null && !field.isEmpty() ? Utils.getPathData(data, field)
+                        : data;
+                JsObject jsData = oData instanceof JavaScriptObject ? ((JavaScriptObject) oData).<JsObject>cast()
+                        : null;
+                if (jsData != null) {
+                    if (activeEditor == null && getSelectionModel() instanceof SetSelectionModel<?>) {
+                        final SetSelectionModel<JavaScriptObject> rowsSelection = (SetSelectionModel<JavaScriptObject>) getSelectionModel();
+                        if (event.getNativeKeyCode() == KeyCodes.KEY_DELETE && deletable) {
                             final List<JavaScriptObject> viewElements = dataProvider.getList();
                             if (!viewElements.isEmpty() && rowsSelection.getSelectedSet() != null
                                     && !rowsSelection.getSelectedSet().isEmpty()) {
@@ -205,140 +159,113 @@ public class ModelGrid extends Grid<JavaScriptObject>
                                     }
                                 }
                                 final int viewIndexToSelect = lastSelectedViewIndex;
-                                if(deletedAt > -1){
-                                    afterRender(new Runnable(){
-    
+                                if (deletedAt > -1) {
+                                    afterRender(new Runnable() {
+
                                         @Override
                                         public void run() {
                                             int vIndex = viewIndexToSelect;
                                             if (vIndex >= 0 && !viewElements.isEmpty()) {
-                                                if (vIndex >= viewElements.size())
+                                                if (vIndex >= viewElements.size()) {
                                                     vIndex = viewElements.size() - 1;
+                                                }
                                                 JavaScriptObject toSelect = viewElements.get(vIndex);
                                                 makeVisible(toSelect, true);
                                             } else {
                                                 ModelGrid.this.setFocus(true);
                                             }
                                         }
-                                        
+
                                     });
                                 }
                             }
-						} else if (event.getNativeKeyCode() == KeyCodes.KEY_INSERT && insertable) {
-							int insertAt = -1;
-							if (rowsSelection instanceof HasSelectionLead<?>
-									&& dataProvider instanceof IndexOfProvider<?>) {
-								JavaScriptObject lead = ((HasSelectionLead<JavaScriptObject>) rowsSelection).getLead();
-								insertAt = ((IndexOfProvider<JavaScriptObject>) dataProvider).indexOf(lead);
-								insertAt++;
-								JavaScriptObject oElementClass = jsData.getJs("elementClass");
-								JsObject elementClass = oElementClass != null ? oElementClass.<JsObject> cast() : null;
-								final JavaScriptObject inserted = elementClass != null ? elementClass.newObject()
-										: JavaScriptObject.createObject();
-								jsData.splice(insertAt, 0, inserted);
-                                afterRender(new Runnable(){
-                                    
+                        } else if (event.getNativeKeyCode() == KeyCodes.KEY_INSERT && insertable) {
+                            int insertAt = -1;
+                            if (rowsSelection instanceof HasSelectionLead<?>
+                                    && dataProvider instanceof IndexOfProvider<?>) {
+                                JavaScriptObject lead = ((HasSelectionLead<JavaScriptObject>) rowsSelection).getLead();
+                                insertAt = ((IndexOfProvider<JavaScriptObject>) dataProvider).indexOf(lead);
+                                insertAt++;
+                                JavaScriptObject oElementClass = jsData.getJs("elementClass");
+                                JsObject elementClass = oElementClass != null ? oElementClass.<JsObject>cast() : null;
+                                final JavaScriptObject inserted = elementClass != null ? elementClass.newObject()
+                                        : JavaScriptObject.createObject();
+                                jsData.splice(insertAt, 0, inserted);
+                                afterRender(new Runnable() {
+
                                     @Override
                                     public void run() {
                                         makeVisible(inserted, true);
                                     }
-                                }); 							
+                                });
                             }
-						}
-					}
-				}
-			}
+                        }
+                    }
+                }
+            }
 
-		}, KeyUpEvent.getType());
-		addDomHandler(new KeyDownHandler() {
+        }, KeyUpEvent.getType());
+        applyRows();
+    }
 
-			@Override
-			public void onKeyDown(KeyDownEvent event) {
-				if ((event.isMetaKeyDown() || event.isControlKeyDown()) && event.getNativeKeyCode() == KeyCodes.KEY_F) {
-					event.stopPropagation();
-					event.preventDefault();
-					ModelGrid.this.find();
-				} else if (event.getNativeKeyCode() == KeyCodes.KEY_F3) {
-					event.stopPropagation();
-					event.preventDefault();
-					if (finder != null) {
-						finder.findNext();
-					}
-				}
-			}
-		}, KeyDownEvent.getType());
-		applyRows();
-	}
+    public boolean isDraggableRows() {
+        return draggableRows;
+    }
 
-	public boolean isDraggableRows() {
-		return draggableRows;
-	}
+    public void setDraggableRows(boolean aValue) {
+        if (draggableRows != aValue) {
+            draggableRows = aValue;
+            for (GridSection section : new GridSection[]{frozenLeft, frozenRight, scrollableLeft, scrollableRight}) {
+                section.setDraggableRows(aValue);
+            }
+        }
+    }
 
-	public void setDraggableRows(boolean aValue) {
-		if (draggableRows != aValue) {
-			draggableRows = aValue;
-			for (GridSection<?> section : new GridSection<?>[] { frozenLeft, frozenRight, scrollableLeft,
-					scrollableRight }) {
-				GridSection<JavaScriptObject> gSection = (GridSection<JavaScriptObject>) section;
-				gSection.setDraggableRows(aValue);
-			}
-		}
-	}
+    public Widget getActiveEditor() {
+        return activeEditor;
+    }
 
-	public Widget getActiveEditor() {
-		return activeEditor;
-	}
+    public void setActiveEditor(Widget aWidget) {
+        activeEditor = aWidget;
+    }
 
-	public void setActiveEditor(Widget aWidget) {
-		activeEditor = aWidget;
-	}
+    public String getGroupName() {
+        return groupName;
+    }
 
-	public String getGroupName() {
-		return groupName;
-	}
+    protected boolean serviceColumnsRedrawQueued;
 
-	protected void installCellBuilders() {
-		for (GridSection<?> section : new GridSection<?>[] { frozenLeft, frozenRight, scrollableLeft,
-				scrollableRight }) {
-			GridSection<JavaScriptObject> gSection = (GridSection<JavaScriptObject>) section;
-			gSection.setTableBuilder(new RenderedTableCellBuilder<>(gSection, dynamicTDClassName, dynamicCellClassName,
-					dynamicOddRowsClassName, dynamicEvenRowsClassName));
-		}
-	}
+    protected void enqueueServiceColumnsRedraw() {
+        serviceColumnsRedrawQueued = true;
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
-	protected boolean serviceColumnsRedrawQueued;
+            @Override
+            public void execute() {
+                if (serviceColumnsRedrawQueued) {
+                    serviceColumnsRedrawQueued = false;
+                    if (getColumnCount() > 0) {
+                        for (int i = 0; i < getColumnCount(); i++) {
+                            Column col = (Column) getDataColumn(i);
+                            if (col instanceof UsualServiceColumn) {
+                                if (i < frozenColumns) {
+                                    frozenLeft.redrawAllRowsInColumn(i, dataProvider);
+                                    scrollableLeft.redrawAllRowsInColumn(i, dataProvider);
+                                } else {
+                                    frozenRight.redrawAllRowsInColumn(i - frozenColumns, dataProvider);
+                                    scrollableRight.redrawAllRowsInColumn(i - frozenColumns, dataProvider);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
 
-	protected void enqueueServiceColumnsRedraw() {
-		serviceColumnsRedrawQueued = true;
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+    protected ScheduledCommand redrawQueued;
 
-			@Override
-			public void execute() {
-				if (serviceColumnsRedrawQueued) {
-					serviceColumnsRedrawQueued = false;
-					if (getDataColumnCount() > 0) {
-						for (int i = 0; i < getDataColumnCount(); i++) {
-							ModelColumn col = (ModelColumn) getDataColumn(i);
-							if (col instanceof UsualServiceColumn) {
-								if (i < frozenColumns) {
-									frozenLeft.redrawAllRowsInColumn(i, dataProvider);
-									scrollableLeft.redrawAllRowsInColumn(i, dataProvider);
-								} else {
-									frozenRight.redrawAllRowsInColumn(i - frozenColumns, dataProvider);
-									scrollableRight.redrawAllRowsInColumn(i - frozenColumns, dataProvider);
-								}
-							}
-						}
-					}
-				}
-			}
-		});
-	}
-
-	protected ScheduledCommand redrawQueued;
-
-	private void enqueueRedraw() {
-		redrawQueued = new ScheduledCommand() {
+    private void enqueueRedraw() {
+        redrawQueued = new ScheduledCommand() {
 
             @Override
             public void execute() {
@@ -348,730 +275,632 @@ public class ModelGrid extends Grid<JavaScriptObject>
                 }
             }
         };
-		Scheduler.get().scheduleDeferred(redrawQueued);
-	}
+        Scheduler.get().scheduleDeferred(redrawQueued);
+    }
 
-	protected void applyRows() {
-		unbindCursor();
-		if (sortHandlerReg != null)
-			sortHandlerReg.removeHandler();
-		Runnable onResize = new Runnable() {
-			@Override
-			public void run() {
-				setupVisibleRanges();
-				if (dataProvider instanceof IndexOfProvider<?>)
-					((IndexOfProvider<?>) dataProvider).rescan();
-				sortHandler.setList(dataProvider != null ? dataProvider.getList() : new ArrayList<JavaScriptObject>());
-				if (sortList.size() > 0) {
-					sortList.clear();
-					redrawHeaders();
-				}
-				if(dataProvider == null || dataProvider.getList() == null || dataProvider.getList().isEmpty()){
-				    clearSelection();
-				}
-			}
+    protected void applyRows() {
+        unbindCursor();
+        if (sortHandlerReg != null) {
+            sortHandlerReg.removeHandler();
+        }
+        Runnable onResize = new Runnable() {
+            @Override
+            public void run() {
+                setupVisibleRanges();
+                if (dataProvider instanceof IndexOfProvider<?>) {
+                    ((IndexOfProvider<?>) dataProvider).rescan();
+                }
+                sortHandler.setList(dataProvider != null ? dataProvider.getList() : new ArrayList<JavaScriptObject>());
+                if (sortList.size() > 0) {
+                    sortList.clear();
+                    redrawHeaders();
+                }
+                if (dataProvider == null || dataProvider.getList() == null || dataProvider.getList().isEmpty()) {
+                    clearSelection();
+                }
+            }
 
-		};
-		Runnable onChange = new Runnable() {
-			@Override
-			public void run() {
-				ModelGrid.this.redraw();
-			}
+        };
+        Runnable onChange = new Runnable() {
+            @Override
+            public void run() {
+                ModelGrid.this.redraw();
+            }
 
-		};
-		Runnable onSort = new Runnable() {
-			@Override
-			public void run() {
-				if (dataProvider instanceof IndexOfProvider<?>)
-					((IndexOfProvider<?>) dataProvider).rescan();
-			}
+        };
+        Runnable onSort = new Runnable() {
+            @Override
+            public void run() {
+                if (dataProvider instanceof IndexOfProvider<?>) {
+                    ((IndexOfProvider<?>) dataProvider).rescan();
+                }
+            }
 
-		};
-		Object oData = data != null && field != null && !field.isEmpty() ? Utils.getPathData(data, field) : data;
-		JavaScriptObject jsData = oData instanceof JavaScriptObject ? (JavaScriptObject) oData : null;
-		if (jsData != null) {
-			if (isTreeConfigured()) {
-				JsArrayTreeDataProvider treeDataProvider = new JsArrayTreeDataProvider(parentField, childrenField,
-						onResize);
-				setDataProvider(treeDataProvider);
-				sortHandler = new TreeMultiSortHandler<>(treeDataProvider, onSort);
-				treeDataProvider.addExpandedHandler(new ExpandedHandler<JavaScriptObject>() {
-					@Override
-					public void expanded(JavaScriptObject anElement) {
-						ColumnSortEvent.fire(ModelGrid.this, sortList);
-						if (onExpand != null) {
-							JavaScriptObject jsEvent = EventsPublisher.publishItemEvent(ModelGrid.this.published,
-									anElement);
-							try {
-								Utils.executeScriptEventVoid(ModelGrid.this.published, onExpand, jsEvent);
-							} catch (Exception e) {
-								Logger.getLogger(EventsExecutor.class.getName()).log(Level.SEVERE, null, e);
-							}
-						}
-					}
+        };
+        Object oData = data != null && field != null && !field.isEmpty() ? Utils.getPathData(data, field) : data;
+        JavaScriptObject jsData = oData instanceof JavaScriptObject ? (JavaScriptObject) oData : null;
+        if (jsData != null) {
+            if (isTreeConfigured()) {
+                JsArrayTreeDataProvider treeDataProvider = new JsArrayTreeDataProvider(parentField, childrenField,
+                        onResize);
+                setDataProvider(treeDataProvider);
+                sortHandler = new TreeMultiSortHandler<>(treeDataProvider, onSort);
+                treeDataProvider.addExpandedHandler(new ExpandedHandler<JavaScriptObject>() {
+                    @Override
+                    public void expanded(JavaScriptObject anElement) {
+                        ColumnSortEvent.fire(ModelGrid.this, sortList);
+                        if (onExpand != null) {
+                            JavaScriptObject jsEvent = EventsPublisher.publishItemEvent(ModelGrid.this.published,
+                                    anElement);
+                            try {
+                                Utils.executeScriptEventVoid(ModelGrid.this.published, onExpand, jsEvent);
+                            } catch (Exception e) {
+                                Logger.getLogger(EventsExecutor.class.getName()).log(Level.SEVERE, null, e);
+                            }
+                        }
+                    }
 
-				});
-				treeDataProvider.addCollapsedHandler(new CollapsedHandler<JavaScriptObject>() {
-					@Override
-					public void collapsed(JavaScriptObject anElement) {
-						ColumnSortEvent.fire(ModelGrid.this, sortList);
-						if (onCollapse != null) {
-							JavaScriptObject jsEvent = EventsPublisher.publishItemEvent(ModelGrid.this.published,
-									anElement);
-							try {
-								Utils.executeScriptEventVoid(ModelGrid.this.published, onCollapse, jsEvent);
-							} catch (Exception e) {
-								Logger.getLogger(EventsExecutor.class.getName()).log(Level.SEVERE, null, e);
-							}
-						}
-					}
+                });
+                treeDataProvider.addCollapsedHandler(new CollapsedHandler<JavaScriptObject>() {
+                    @Override
+                    public void collapsed(JavaScriptObject anElement) {
+                        ColumnSortEvent.fire(ModelGrid.this, sortList);
+                        if (onCollapse != null) {
+                            JavaScriptObject jsEvent = EventsPublisher.publishItemEvent(ModelGrid.this.published,
+                                    anElement);
+                            try {
+                                Utils.executeScriptEventVoid(ModelGrid.this.published, onCollapse, jsEvent);
+                            } catch (Exception e) {
+                                Logger.getLogger(EventsExecutor.class.getName()).log(Level.SEVERE, null, e);
+                            }
+                        }
+                    }
 
-				});
-			} else {
-				setDataProvider(new JsArrayListDataProvider(onResize, onChange, null));
-				sortHandler = new ListMultiSortHandler<>(dataProvider.getList(), onSort);
-			}
-			for (int colIndex = 0; colIndex < getDataColumnCount(); colIndex++) {
-				ModelColumn modelCol = (ModelColumn) getDataColumn(colIndex);
-				sortHandler.setComparator(modelCol, modelCol.getComparator());
-			}
-			sortHandlerReg = addColumnSortHandler(sortHandler);
-			((JsDataContainer) getDataProvider()).setData(jsData);
-			boundToCursor = Utils.listenPath(jsData, cursorProperty, new Utils.OnChangeHandler() {
+                });
+            } else {
+                setDataProvider(new JsArrayListDataProvider(onResize, onChange, null));
+                sortHandler = new ListMultiSortHandler<>(dataProvider.getList(), onSort);
+            }
+            for (int colIndex = 0; colIndex < getColumnCount(); colIndex++) {
+                Column modelCol = (Column) getDataColumn(colIndex);
+                sortHandler.setComparator(modelCol, modelCol.getComparator());
+            }
+            sortHandlerReg = addColumnSortHandler(sortHandler);
+            ((JsDataContainer) getDataProvider()).setData(jsData);
+            boundToCursor = Utils.listenPath(jsData, cursorProperty, new Utils.OnChangeHandler() {
 
-				@Override
-				public void onChange(JavaScriptObject anEvent) {
-					enqueueServiceColumnsRedraw();
-				}
+                @Override
+                public void onChange(JavaScriptObject anEvent) {
+                    enqueueServiceColumnsRedraw();
+                }
 
-			});
-		} else {
-			setDataProvider(null);
-		}
-	}
+            });
+        } else {
+            setDataProvider(null);
+        }
+    }
 
-	@Override
-	public void setDataProvider(ListDataProvider<JavaScriptObject> aDataProvider) {
-	    if(getDataProvider() != null){
-	        ((JsDataContainer) getDataProvider()).setData(null);
-	    }
-		super.setDataProvider(aDataProvider);
-		checkTreeIndicatorColumnDataProvider();
-	}
+    @Override
+    public void setDataProvider(ListDataProvider<JavaScriptObject> aDataProvider) {
+        if (getDataProvider() != null) {
+            ((JsDataContainer) getDataProvider()).setData(null);
+        }
+        super.setDataProvider(aDataProvider);
+        checkTreeIndicatorColumnDataProvider();
+    }
 
-	@Override
-	public void changedItems(JavaScriptObject anItems){
-		((JsDataContainer) getDataProvider()).changedItems(anItems);
-	}
-	
-	@Override	
-	public void addedItems(JavaScriptObject anItems){
-		((JsDataContainer) getDataProvider()).addedItems(anItems);
-	}
-	
-	@Override
-	public void removedItems(JavaScriptObject anItems){
-		((JsDataContainer) getDataProvider()).removedItems(anItems);
-	}
-	
-	public void redraw() {
-		super.redraw();
-		pingGWTFinallyCommands();
-	}
+    @Override
+    public void changedItems(JavaScriptObject anItems) {
+        ((JsDataContainer) getDataProvider()).changedItems(anItems);
+    }
 
-	public void rebind() {
-		unbind();
-		bind();
-		pingGWTFinallyCommands();
-	}
+    @Override
+    public void addedItems(JavaScriptObject anItems) {
+        ((JsDataContainer) getDataProvider()).addedItems(anItems);
+    }
 
-	private void pingGWTFinallyCommands() {
-		// Dirty hack of GWT Scgeduler.get().scheduleFinally();
-		// Finally commands occasionally not been executed without user
-		// interaction for a while.
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+    @Override
+    public void removedItems(JavaScriptObject anItems) {
+        ((JsDataContainer) getDataProvider()).removedItems(anItems);
+    }
 
-			@Override
-			public void execute() {
-				Logger.getLogger(ModelGrid.class.getName()).log(Level.FINE, "ping GWT Finally commands");
-			}
-		});
-	}
+    public void rebind() {
+        unbind();
+        bind();
+    }
 
-	protected void bind() {
-		if (data != null) {
-			applyRows();
-			setSelectionModel(new MultiJavaScriptObjectSelectionModel(this));
-			if (field != null && !field.isEmpty()) {
-				boundToData = Utils.listenPath(data, field, new Utils.OnChangeHandler() {
+    protected void bind() {
+        if (data != null) {
+            applyRows();
+            setSelectionModel(new MultiJavaScriptObjectSelectionModel(this));
+            if (field != null && !field.isEmpty()) {
+                boundToData = Utils.listenPath(data, field, new Utils.OnChangeHandler() {
 
-					@Override
-					public void onChange(JavaScriptObject anEvent) {
-						applyRows();
-						setSelectionModel(new MultiJavaScriptObjectSelectionModel(ModelGrid.this));
-					}
-				});
-			}
-		} else {
-			applyRows();
-			setSelectionModel(null);
-		}
-	}
+                    @Override
+                    public void onChange(JavaScriptObject anEvent) {
+                        applyRows();
+                        setSelectionModel(new MultiJavaScriptObjectSelectionModel(ModelGrid.this));
+                    }
+                });
+            }
+        } else {
+            applyRows();
+            setSelectionModel(null);
+        }
+    }
 
-	protected void unbind() {
-		if (boundToData != null) {
-			boundToData.removeHandler();
-			boundToData = null;
-		}
-		unbindCursor();
-	}
+    protected void unbind() {
+        if (boundToData != null) {
+            boundToData.removeHandler();
+            boundToData = null;
+        }
+        unbindCursor();
+    }
 
-	protected void unbindCursor() {
-		if (boundToCursor != null) {
-			boundToCursor.removeHandler();
-			boundToCursor = null;
-		}
-	}
+    protected void unbindCursor() {
+        if (boundToCursor != null) {
+            boundToCursor.removeHandler();
+            boundToCursor = null;
+        }
+    }
 
-	@Override
-	public JavaScriptObject getData() {
-		return data;
-	}
+    @Override
+    public JavaScriptObject getData() {
+        return data;
+    }
 
-	@Override
-	public void setData(JavaScriptObject aValue) {
-		if (data != aValue) {
-			unbind();
-			data = aValue;
-			bind();
-		}
-	}
+    @Override
+    public void setData(JavaScriptObject aValue) {
+        if (data != aValue) {
+            unbind();
+            data = aValue;
+            bind();
+        }
+    }
 
-	@Override
-	public String getField() {
-		return field;
-	}
+    @Override
+    public String getField() {
+        return field;
+    }
 
-	@Override
-	public void setField(String aValue) {
-		if (field == null ? aValue != null : !field.equals(aValue)) {
-			unbind();
-			field = aValue;
-			bind();
-		}
-	}
+    @Override
+    public void setField(String aValue) {
+        if (field == null ? aValue != null : !field.equals(aValue)) {
+            unbind();
+            field = aValue;
+            bind();
+        }
+    }
 
-	public String getParentField() {
-		return parentField;
-	}
+    public String getParentField() {
+        return parentField;
+    }
 
-	public void setParentField(String aValue) {
-		if (parentField == null ? aValue != null : !parentField.equals(aValue)) {
-			boolean wasTree = isTreeConfigured();
-			parentField = aValue;
-			boolean isTree = isTreeConfigured();
-			if (wasTree != isTree) {
-				applyRows();
-			}
-		}
-	}
+    public void setParentField(String aValue) {
+        if (parentField == null ? aValue != null : !parentField.equals(aValue)) {
+            boolean wasTree = isTreeConfigured();
+            parentField = aValue;
+            boolean isTree = isTreeConfigured();
+            if (wasTree != isTree) {
+                applyRows();
+            }
+        }
+    }
 
-	public String getChildrenField() {
-		return childrenField;
-	}
+    public String getChildrenField() {
+        return childrenField;
+    }
 
-	public void setChildrenField(String aValue) {
-		if (childrenField == null ? aValue != null : !childrenField.equals(aValue)) {
-			boolean wasTree = isTreeConfigured();
-			childrenField = aValue;
-			boolean isTree = isTreeConfigured();
-			if (wasTree != isTree) {
-				applyRows();
-			}
-		}
-	}
+    public void setChildrenField(String aValue) {
+        if (childrenField == null ? aValue != null : !childrenField.equals(aValue)) {
+            boolean wasTree = isTreeConfigured();
+            childrenField = aValue;
+            boolean isTree = isTreeConfigured();
+            if (wasTree != isTree) {
+                applyRows();
+            }
+        }
+    }
 
-	public final boolean isTreeConfigured() {
-		return parentField != null && !parentField.isEmpty() && childrenField != null && !childrenField.isEmpty();
-	}
+    public final boolean isTreeConfigured() {
+        return parentField != null && !parentField.isEmpty() && childrenField != null && !childrenField.isEmpty();
+    }
 
-	private List<Runnable> onAfterRenderTasks = new ArrayList<>();
-	
-	protected void afterRender(Runnable aTask){
-		onAfterRenderTasks.add(aTask);
-	}
-	
-	@Override
-	protected void renderingCompleted() {
-		super.renderingCompleted();
-		for(final Runnable task : onAfterRenderTasks){
-			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-				
-				@Override
-				public void execute() {
-					task.run();
-				}
-			});
-		}
-		onAfterRenderTasks.clear();
-		if (onAfterRender != null) {
-			final Utils.JsObject event = JavaScriptObject.createObject().cast();
-			event.setJs("source", published);
-			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-				
-				@Override
-				public void execute() {
-					if (onAfterRender != null) {
-						onAfterRender.<Utils.JsObject> cast().call(published, event);
-					}
-				}
-			});
-		}
-	}
+    private List<Runnable> onAfterRenderTasks = new ArrayList<>();
 
-	public ListHandler<JavaScriptObject> getSortHandler() {
-		return sortHandler;
-	}
+    protected void afterRender(Runnable aTask) {
+        onAfterRenderTasks.add(aTask);
+    }
 
-	@Override
-	public HandlerRegistration addResizeHandler(ResizeHandler handler) {
-		return addHandler(handler, ResizeEvent.getType());
-	}
+    @Override
+    protected void renderingCompleted() {
+        super.renderingCompleted();
+        for (final Runnable task : onAfterRenderTasks) {
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
-	@Override
-	public HandlerRegistration addHideHandler(HideHandler handler) {
-		return addHandler(handler, HideEvent.getType());
-	}
+                @Override
+                public void execute() {
+                    task.run();
+                }
+            });
+        }
+        onAfterRenderTasks.clear();
+        if (onAfterRender != null) {
+            final Utils.JsObject event = JavaScriptObject.createObject().cast();
+            event.setJs("source", published);
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
-	@Override
-	public HandlerRegistration addShowHandler(ShowHandler handler) {
-		return addHandler(handler, ComponentEvent.getType());
-	}
+                @Override
+                public void execute() {
+                    if (onAfterRender != null) {
+                        onAfterRender.<Utils.JsObject>cast().call(published, event);
+                    }
+                }
+            });
+        }
+    }
 
-	public HandlerRegistration addSelectionHandler(SelectionHandler<JavaScriptObject> handler) {
-		return addHandler(handler, SelectionEvent.getType());
-	}
+    public ListHandler<JavaScriptObject> getSortHandler() {
+        return sortHandler;
+    }
 
-	@Override
-	public HandlerRegistration addFocusHandler(FocusHandler handler) {
-		return addDomHandler(handler, FocusEvent.getType());
-	}
+    public HandlerRegistration addSelectionHandler(SelectionHandler<JavaScriptObject> handler) {
+        return addHandler(handler, SelectionEvent.getType());
+    }
 
-	@Override
-	public HandlerRegistration addBlurHandler(BlurHandler handler) {
-		return addDomHandler(handler, BlurEvent.getType());
-	}
+    @Override
+    public HandlerRegistration addFocusHandler(FocusHandler handler) {
+        return addDomHandler(handler, FocusEvent.getType());
+    }
 
-	@Override
-	public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
-		return addDomHandler(handler, KeyDownEvent.getType());
-	}
+    @Override
+    public HandlerRegistration addBlurHandler(BlurHandler handler) {
+        return addDomHandler(handler, BlurEvent.getType());
+    }
 
-	@Override
-	public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {
-		return addDomHandler(handler, KeyPressEvent.getType());
-	}
+    @Override
+    public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
+        return addDomHandler(handler, KeyDownEvent.getType());
+    }
 
-	public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
-		return addDomHandler(handler, KeyUpEvent.getType());
-	};
+    @Override
+    public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {
+        return addDomHandler(handler, KeyPressEvent.getType());
+    }
 
-	@Override
-	public void setVisible(boolean visible) {
-		boolean oldValue = isVisible();
-		super.setVisible(visible);
-		if (oldValue != visible) {
-			if (visible) {
-				ComponentEvent.fire(this, this);
-			} else {
-				HideEvent.fire(this, this);
-			}
-		}
-	}
+    public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
+        return addDomHandler(handler, KeyUpEvent.getType());
+    }
 
-	@Override
-	public EventsExecutor getEventsExecutor() {
-		return eventsExecutor;
-	}
+    public List<HeaderNode> getHeader() {
+        return header;
+    }
 
-	@Override
-	public void setEventsExecutor(EventsExecutor aExecutor) {
-		eventsExecutor = aExecutor;
-	}
+    public void setHeader(List<HeaderNode> aHeader) {
+        if (header != aHeader) {
+            unpublishColumnNodes(header);
+            header = aHeader;
+            if (autoRefreshHeader) {
+                applyColumns();
+            }
+            publishColumnNodes(header);
+        }
+    }
 
-	@Override
-	public boolean isEnabled() {
-		return enabled;
-	}
+    public boolean removeColumnNode(HeaderNode<JavaScriptObject> aNode) {
+        boolean res = header.remove(aNode);
+        if (autoRefreshHeader) {
+            applyColumns();
+        }
+        return res;
+    }
 
-	@Override
-	public void setEnabled(boolean aValue) {
-		boolean oldValue = enabled;
-		enabled = aValue;
-		if (!oldValue && enabled) {
-			getElement().<XElement> cast().unmask();
-		} else if (oldValue && !enabled) {
-			getElement().<XElement> cast().disabledMask();
-		}
-	}
+    public void addColumnNode(HeaderNode<JavaScriptObject> aNode) {
+        header.add(aNode);
+        if (autoRefreshHeader) {
+            applyColumns();
+        }
+    }
 
-	@Override
-	public PlatypusPopupMenu getPlatypusPopupMenu() {
-		return menu;
-	}
+    public void insertColumnNode(int aIndex, HeaderNode<JavaScriptObject> aNode) {
+        header.add(aIndex, aNode);
+        if (autoRefreshHeader) {
+            applyColumns();
+        }
+    }
 
-	protected HandlerRegistration menuTriggerReg;
+    @Override
+    public void moveColumnNode(HeaderNode<JavaScriptObject> aSubject, HeaderNode<JavaScriptObject> aInsertBefore) {
+        if (aSubject != null && aInsertBefore != null && aSubject.getParent() == aInsertBefore.getParent()) {
+            List<HeaderNode<JavaScriptObject>> neighbours = aSubject.getParent() != null
+                    ? aSubject.getParent().getChildren() : header;
+            boolean removed = neighbours.remove(aSubject);
+            assert removed;
+            int insertAt = neighbours.indexOf(aInsertBefore);
+            neighbours.add(insertAt, aSubject);
+            applyColumns();
+            onResize();
+        }
+    }
 
-	@Override
-	public void setPlatypusPopupMenu(PlatypusPopupMenu aMenu) {
-		if (menu != aMenu) {
-			if (menuTriggerReg != null)
-				menuTriggerReg.removeHandler();
-			menu = aMenu;
-			if (menu != null) {
-				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
-
-					@Override
-					public void onContextMenu(ContextMenuEvent event) {
-						event.preventDefault();
-						event.stopPropagation();
-						menu.setPopupPosition(event.getNativeEvent().getClientX(), event.getNativeEvent().getClientY());
-						menu.show();
-					}
-				}, ContextMenuEvent.getType());
-			}
-		}
-	}
-
-	@Override
-	public String getJsName() {
-		return name;
-	}
-
-	@Override
-	public void setJsName(String aValue) {
-		name = aValue;
-	}
-
-	public List<HeaderNode<JavaScriptObject>> getHeader() {
-		return header;
-	}
-
-	public void setHeader(List<HeaderNode<JavaScriptObject>> aHeader) {
-		if (header != aHeader) {
-			unpublishColumnNodes(header);
-			header = aHeader;
-			if (autoRefreshHeader) {
-				applyColumns();
-			}
-			publishColumnNodes(header);
-		}
-	}
-
-	public boolean removeColumnNode(HeaderNode<JavaScriptObject> aNode) {
-		boolean res = header.remove(aNode);
-		if (autoRefreshHeader) {
-			applyColumns();
-		}
-		return res;
-	}
-
-	public void addColumnNode(HeaderNode<JavaScriptObject> aNode) {
-		header.add(aNode);
-		if (autoRefreshHeader) {
-			applyColumns();
-		}
-	}
-
-	public void insertColumnNode(int aIndex, HeaderNode<JavaScriptObject> aNode) {
-		header.add(aIndex, aNode);
-		if (autoRefreshHeader) {
-			applyColumns();
-		}
-	}
-
-	@Override
-	public void moveColumnNode(HeaderNode<JavaScriptObject> aSubject, HeaderNode<JavaScriptObject> aInsertBefore) {
-		if (aSubject != null && aInsertBefore != null && aSubject.getParent() == aInsertBefore.getParent()) {
-			List<HeaderNode<JavaScriptObject>> neighbours = aSubject.getParent() != null
-					? aSubject.getParent().getChildren() : header;
-			boolean removed = neighbours.remove(aSubject);
-			assert removed;
-			int insertAt = neighbours.indexOf(aInsertBefore);
-			neighbours.add(insertAt, aSubject);
-			applyColumns();
-			onResize();
-		}
-	}
-
-	/*
+    /*
 	 * Indicates that subsequent changes will take no effect in general columns
 	 * collection and header. They will affect only underlying grid sections
-	 */
-	protected boolean columnsAjusting;
+     */
+    protected boolean columnsAjusting;
 
-	public boolean isColumnsAjusting() {
-		return columnsAjusting;
-	}
+    public boolean isColumnsAjusting() {
+        return columnsAjusting;
+    }
 
-	public void setColumnsAjusting(boolean aValue) {
-		columnsAjusting = aValue;
-	}
+    public void setColumnsAjusting(boolean aValue) {
+        columnsAjusting = aValue;
+    }
 
-	@Override
-	protected void refreshColumns() {
-		// no op since hierarchical header processing
-	}
+    @Override
+    protected void refreshColumns() {
+        // no op since hierarchical header processing
+    }
 
-	@Override
-	public void moveColumn(int aFromIndex, int aToIndex) {
-		if (aFromIndex < frozenColumns && aToIndex < frozenColumns
-				|| aFromIndex >= frozenColumns && aToIndex >= frozenColumns) {
-			Column<JavaScriptObject, ?> movedColumn = getColumn(aFromIndex);
-		}
-	}
+    @Override
+    public void moveColumn(int aFromIndex, int aToIndex) {
+        if (aFromIndex < frozenColumns && aToIndex < frozenColumns
+                || aFromIndex >= frozenColumns && aToIndex >= frozenColumns) {
+            Column<JavaScriptObject, ?> movedColumn = getColumn(aFromIndex);
+        }
+    }
 
-	protected ModelColumn treeIndicatorColumn;
+    protected Column treeIndicatorColumn;
 
-	@Override
-	public void addColumn(int aIndex, Column<JavaScriptObject, ?> aColumn, String aWidth, Header<?> aHeader,
-			Header<?> aFooter, boolean hidden) {
-		((ModelColumn) aColumn).setGrid(this);
-		super.addColumn(aIndex, aColumn, aWidth, aHeader, aFooter, hidden);
-	}
+    @Override
+    public void addColumn(int aIndex, Column<JavaScriptObject, ?> aColumn, String aWidth, Header<?> aHeader,
+            Header<?> aFooter, boolean hidden) {
+        ((Column) aColumn).setGrid(this);
+        super.addColumn(aIndex, aColumn, aWidth, aHeader, aFooter, hidden);
+    }
 
-	private void checkTreeIndicatorColumnDataProvider() {
-		if (dataProvider instanceof TreeDataProvider<?>) {
-			if (treeIndicatorColumn == null) {
-				int treeIndicatorIndex = 0;
-				while (treeIndicatorIndex < getDataColumnCount()) {
-					Column<JavaScriptObject, ?> indicatorColumn = getDataColumn(treeIndicatorIndex);
-					if (indicatorColumn instanceof UsualServiceColumn || indicatorColumn instanceof RadioServiceColumn
-							|| indicatorColumn instanceof CheckServiceColumn) {
-						treeIndicatorIndex++;
-					} else if (indicatorColumn instanceof ModelColumn) {
-						treeIndicatorColumn = (ModelColumn) indicatorColumn;
-						break;
-					}
-				}
-			}
-			if (treeIndicatorColumn != null && treeIndicatorColumn.getCell() instanceof TreeExpandableCell<?, ?>) {
-				TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) treeIndicatorColumn
-						.getCell();
-				treeCell.setDataProvider((TreeDataProvider<JavaScriptObject>) dataProvider);
-			}
-		} else {
-			if (treeIndicatorColumn != null && treeIndicatorColumn.getCell() instanceof TreeExpandableCell<?, ?>) {
-				TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) treeIndicatorColumn
-						.getCell();
-				treeCell.setDataProvider(null);
-			}
-			treeIndicatorColumn = null;
-		}
-	}
+    private void checkTreeIndicatorColumnDataProvider() {
+        if (dataProvider instanceof TreeDataProvider<?>) {
+            if (treeIndicatorColumn == null) {
+                int treeIndicatorIndex = 0;
+                while (treeIndicatorIndex < getColumnCount()) {
+                    Column<JavaScriptObject, ?> indicatorColumn = getDataColumn(treeIndicatorIndex);
+                    if (indicatorColumn instanceof UsualServiceColumn || indicatorColumn instanceof RadioServiceColumn
+                            || indicatorColumn instanceof CheckServiceColumn) {
+                        treeIndicatorIndex++;
+                    } else if (indicatorColumn instanceof Column) {
+                        treeIndicatorColumn = (Column) indicatorColumn;
+                        break;
+                    }
+                }
+            }
+            if (treeIndicatorColumn != null && treeIndicatorColumn.getCell() instanceof TreeExpandableCell<?, ?>) {
+                TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) treeIndicatorColumn
+                        .getCell();
+                treeCell.setDataProvider((TreeDataProvider<JavaScriptObject>) dataProvider);
+            }
+        } else {
+            if (treeIndicatorColumn != null && treeIndicatorColumn.getCell() instanceof TreeExpandableCell<?, ?>) {
+                TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) treeIndicatorColumn
+                        .getCell();
+                treeCell.setDataProvider(null);
+            }
+            treeIndicatorColumn = null;
+        }
+    }
 
-	@Override
-	public void removeColumn(int aIndex) {
-		Column<JavaScriptObject, ?> toDel = getDataColumn(aIndex);
-		ModelColumn mCol = (ModelColumn) toDel;
-		if (mCol == treeIndicatorColumn) {
-			TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) mCol.getCell();
-			treeCell.setDataProvider(null);
-			treeIndicatorColumn = null;
-		}
-		super.removeColumn(aIndex);
-		mCol.setGrid(null);
-	}
+    @Override
+    public void removeColumn(int aIndex) {
+        Column<JavaScriptObject, ?> toDel = getDataColumn(aIndex);
+        Column mCol = (Column) toDel;
+        if (mCol == treeIndicatorColumn) {
+            TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) mCol.getCell();
+            treeCell.setDataProvider(null);
+            treeIndicatorColumn = null;
+        }
+        super.removeColumn(aIndex);
+        mCol.setGrid(null);
+    }
 
-	@Override
-	public void setColumnWidthFromHeaderDrag(Column<JavaScriptObject, ?> aColumn, double aWidth, Unit aUnit) {
-		ModelColumn modelCol = (ModelColumn) aColumn;
-		if (aWidth <= modelCol.getMinWidth())
-			aWidth = modelCol.getMinWidth();
-		if (aWidth >= modelCol.getMaxWidth())
-			aWidth = modelCol.getMaxWidth();
-		super.setColumnWidth(aColumn, aWidth, aUnit);
-		modelCol.setWidth(aWidth);
-		propagateHeightButScrollable();
-	}
+    @Override
+    public void setColumnWidthFromHeaderDrag(Column<JavaScriptObject, ?> aColumn, double aWidth, Style.Unit aUnit) {
+        Column modelCol = (Column) aColumn;
+        if (aWidth <= modelCol.getMinWidth()) {
+            aWidth = modelCol.getMinWidth();
+        }
+        if (aWidth >= modelCol.getMaxWidth()) {
+            aWidth = modelCol.getMaxWidth();
+        }
+        super.setColumnWidth(aColumn, aWidth, aUnit);
+        modelCol.setWidth(aWidth);
+        propagateHeightButScrollable();
+    }
 
-	@Override
-	public void setColumnWidth(Column<JavaScriptObject, ?> aColumn, double aWidth, Unit aUnit) {
-		ModelColumn modelCol = (ModelColumn) aColumn;
-		if (aWidth <= modelCol.getMinWidth())
-			aWidth = modelCol.getMinWidth();
-		if (aWidth >= modelCol.getMaxWidth())
-			aWidth = modelCol.getMaxWidth();
-		super.setColumnWidth(aColumn, aWidth, aUnit);
-		modelCol.updateWidth(aWidth);
-	}
+    @Override
+    public void setColumnWidth(Column<JavaScriptObject, ?> aColumn, double aWidth, Unit aUnit) {
+        Column modelCol = (Column) aColumn;
+        if (aWidth <= modelCol.getMinWidth()) {
+            aWidth = modelCol.getMinWidth();
+        }
+        if (aWidth >= modelCol.getMaxWidth()) {
+            aWidth = modelCol.getMaxWidth();
+        }
+        super.setColumnWidth(aColumn, aWidth, aUnit);
+        modelCol.updateWidth(aWidth);
+    }
 
-	@Override
-	public void showColumn(Column<JavaScriptObject, ?> aColumn) {
-		super.showColumn(aColumn);
-		ModelColumn colFacade = (ModelColumn) aColumn;
-		colFacade.updateVisible(true);
-		enqueueRedraw(); // because of AbstractCellTable.isInteractive crazy
-							// updating while rendering instead of updating it
-							// while show/hide columns
-	}
+    @Override
+    public void showColumn(Column<JavaScriptObject, ?> aColumn) {
+        super.showColumn(aColumn);
+        Column colFacade = (Column) aColumn;
+        colFacade.updateVisible(true);
+        enqueueRedraw(); // because of AbstractCellTable.isInteractive crazy
+        // updating while rendering instead of updating it
+        // while show/hide columns
+    }
 
-	public void hideColumn(Column<JavaScriptObject, ?> aColumn) {
-		super.hideColumn(aColumn);
-		ModelColumn colFacade = (ModelColumn) aColumn;
-		colFacade.updateVisible(false);
-	}
+    public void hideColumn(Column<JavaScriptObject, ?> aColumn) {
+        super.hideColumn(aColumn);
+        Column colFacade = (Column) aColumn;
+        colFacade.updateVisible(false);
+    }
 
-	@Override
-	public void setFrozenColumns(int aValue) {
-		if (aValue >= 0 && frozenColumns != aValue) {
-			frozenColumns = aValue;
-			if (autoRefreshHeader && getDataColumnCount() > 0 && aValue <= getDataColumnCount()) {
-				applyColumns();
-			}
-		}
-	}
+    @Override
+    public void setFrozenColumns(int aValue) {
+        if (aValue >= 0 && frozenColumns != aValue) {
+            frozenColumns = aValue;
+            if (autoRefreshHeader && getColumnCount() > 0 && aValue <= getColumnCount()) {
+                applyColumns();
+            }
+        }
+    }
 
-	protected boolean autoRefreshHeader = true;
+    protected boolean autoRefreshHeader = true;
 
-	public boolean isAutoRefreshHeader() {
-		return autoRefreshHeader;
-	}
+    public boolean isAutoRefreshHeader() {
+        return autoRefreshHeader;
+    }
 
-	public void setAutoRefreshHeader(boolean aValue) {
-		autoRefreshHeader = aValue;
-	}
+    public void setAutoRefreshHeader(boolean aValue) {
+        autoRefreshHeader = aValue;
+    }
 
-	protected void clearColumns() {
-		for (int i = getDataColumnCount() - 1; i >= 0; i--) {
-			Column<JavaScriptObject, ?> toDel = getDataColumn(i);
-			ModelColumn mCol = (ModelColumn) toDel;
-			if (mCol == treeIndicatorColumn) {
-				TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) mCol
-						.getCell();
-				treeCell.setDataProvider(null);
-				treeIndicatorColumn = null;
-			}
-			mCol.setGrid(null);
-		}
-		for (int i = headerRight.getColumnCount() - 1; i >= 0; i--) {
-			headerRight.removeColumn(i);
-		}
-		for (int i = headerLeft.getColumnCount() - 1; i >= 0; i--) {
-			headerLeft.removeColumn(i);
-		}
-	}
+    protected void clearColumns() {
+        for (int i = getColumnCount() - 1; i >= 0; i--) {
+            Column<JavaScriptObject, ?> toDel = getDataColumn(i);
+            Column mCol = (Column) toDel;
+            if (mCol == treeIndicatorColumn) {
+                TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) mCol
+                        .getCell();
+                treeCell.setDataProvider(null);
+                treeIndicatorColumn = null;
+            }
+            mCol.setGrid(null);
+        }
+        for (int i = headerRight.getColumnCount() - 1; i >= 0; i--) {
+            headerRight.removeColumn(i);
+        }
+        for (int i = headerLeft.getColumnCount() - 1; i >= 0; i--) {
+            headerLeft.removeColumn(i);
+        }
+    }
 
-	public void applyColumns() {
-		clearColumns();
-		List<HeaderNode<JavaScriptObject>> leaves = new ArrayList<>();
-		HeaderAnalyzer.achieveLeaves(header, leaves);
-		for (HeaderNode<JavaScriptObject> leaf : leaves) {
-			Header<String> header = leaf.getHeader();
-			ModelColumn column = (ModelColumn) leaf.getColumn();
-			column.setGrid(this);
-			addColumn(column, column.getWidth() + "px", header, null, !column.isVisible());
-		}
-		ThemedHeaderOrFooterBuilder<JavaScriptObject> leftBuilder = (ThemedHeaderOrFooterBuilder<JavaScriptObject>) headerLeft
-				.getHeaderBuilder();
-		ThemedHeaderOrFooterBuilder<JavaScriptObject> rightBuilder = (ThemedHeaderOrFooterBuilder<JavaScriptObject>) headerRight
-				.getHeaderBuilder();
-		List<HeaderNode<JavaScriptObject>> leftHeader = HeaderSplitter.split(header, 0, frozenColumns - 1);
-		leftBuilder.setHeaderNodes(leftHeader);
-		List<HeaderNode<JavaScriptObject>> rightHeader = HeaderSplitter.split(header, frozenColumns,
-				getDataColumnCount());
-		rightBuilder.setHeaderNodes(rightHeader);
-		checkTreeIndicatorColumnDataProvider();
-		redrawHeaders();
-	}
+    public void applyColumns() {
+        clearColumns();
+        List<HeaderNode<JavaScriptObject>> leaves = new ArrayList<>();
+        HeaderAnalyzer.achieveLeaves(header, leaves);
+        for (HeaderNode<JavaScriptObject> leaf : leaves) {
+            Header<String> header = leaf.getHeader();
+            Column column = (Column) leaf.getColumn();
+            column.setGrid(this);
+            addColumn(column, column.getWidth() + "px", header, null, !column.isVisible());
+        }
+        ThemedHeaderOrFooterBuilder<JavaScriptObject> leftBuilder = (ThemedHeaderOrFooterBuilder<JavaScriptObject>) headerLeft
+                .getHeaderBuilder();
+        ThemedHeaderOrFooterBuilder<JavaScriptObject> rightBuilder = (ThemedHeaderOrFooterBuilder<JavaScriptObject>) headerRight
+                .getHeaderBuilder();
+        List<HeaderNode<JavaScriptObject>> leftHeader = HeaderSplitter.split(header, 0, frozenColumns - 1);
+        leftBuilder.setHeaderNodes(leftHeader);
+        List<HeaderNode<JavaScriptObject>> rightHeader = HeaderSplitter.split(header, frozenColumns,
+                getColumnCount());
+        rightBuilder.setHeaderNodes(rightHeader);
+        checkTreeIndicatorColumnDataProvider();
+        redrawHeaders();
+    }
 
-	@Override
-	public void setSelectionModel(final SelectionModel<JavaScriptObject> aValue) {
-		SelectionModel<? super JavaScriptObject> oldValue = getSelectionModel();
-		if (aValue != oldValue) {
-			if (positionSelectionHandler != null)
-				positionSelectionHandler.removeHandler();
-			if (onSelectEventSelectionHandler != null)
-				onSelectEventSelectionHandler.removeHandler();
-			CellPreviewEvent.Handler<JavaScriptObject> eventsManager = GridSelectionEventManager
-					.<JavaScriptObject> create(new CheckBoxesEventTranslator<JavaScriptObject>());
-			headerLeft.setSelectionModel(aValue, eventsManager);
-			headerRight.setSelectionModel(aValue, eventsManager);
-			frozenLeft.setSelectionModel(aValue, eventsManager);
-			frozenRight.setSelectionModel(aValue, eventsManager);
-			scrollableLeft.setSelectionModel(aValue, eventsManager);
-			scrollableRight.setSelectionModel(aValue, eventsManager);
-			if (aValue != null) {
-				Object oData = field != null && !field.isEmpty() ? Utils.getPathData(data, field) : data;
-				if (oData instanceof JavaScriptObject) {
-					positionSelectionHandler = aValue.addSelectionChangeHandler(
-							new CursorPropertySelectionReflector((JavaScriptObject) oData, aValue));
-					onSelectEventSelectionHandler = aValue
-							.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-								@Override
-								public void onSelectionChange(SelectionChangeEvent event) {
-									if (aValue instanceof HasSelectionLead<?>) {
-										try {
-											JavaScriptObject lead = ((HasSelectionLead<JavaScriptObject>) aValue)
-													.getLead();
-											SelectionEvent.fire(ModelGrid.this, lead);
-										} catch (Exception e) {
-											Logger.getLogger(CursorPropertySelectionReflector.class.getName())
-													.log(Level.SEVERE, e.getMessage());
-										}
-									}
-								}
-							});
-				}
-			}
-		}
-	}
+    @Override
+    public void setSelectionModel(final SelectionModel<JavaScriptObject> aValue) {
+        SelectionModel<? super JavaScriptObject> oldValue = getSelectionModel();
+        if (aValue != oldValue) {
+            if (positionSelectionHandler != null) {
+                positionSelectionHandler.removeHandler();
+            }
+            if (onSelectEventSelectionHandler != null) {
+                onSelectEventSelectionHandler.removeHandler();
+            }
+            CellPreviewEvent.Handler<JavaScriptObject> eventsManager = GridSelectionEventManager
+                    .<JavaScriptObject>create(new CheckBoxesEventTranslator<JavaScriptObject>());
+            headerLeft.setSelectionModel(aValue, eventsManager);
+            headerRight.setSelectionModel(aValue, eventsManager);
+            frozenLeft.setSelectionModel(aValue, eventsManager);
+            frozenRight.setSelectionModel(aValue, eventsManager);
+            scrollableLeft.setSelectionModel(aValue, eventsManager);
+            scrollableRight.setSelectionModel(aValue, eventsManager);
+            if (aValue != null) {
+                Object oData = field != null && !field.isEmpty() ? Utils.getPathData(data, field) : data;
+                if (oData instanceof JavaScriptObject) {
+                    positionSelectionHandler = aValue.addSelectionChangeHandler(
+                            new CursorPropertySelectionReflector((JavaScriptObject) oData, aValue));
+                    onSelectEventSelectionHandler = aValue
+                            .addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+                                @Override
+                                public void onSelectionChange(SelectionChangeEvent event) {
+                                    if (aValue instanceof HasSelectionLead<?>) {
+                                        try {
+                                            JavaScriptObject lead = ((HasSelectionLead<JavaScriptObject>) aValue)
+                                                    .getLead();
+                                            SelectionEvent.fire(ModelGrid.this, lead);
+                                        } catch (Exception e) {
+                                            Logger.getLogger(CursorPropertySelectionReflector.class.getName())
+                                                    .log(Level.SEVERE, e.getMessage());
+                                        }
+                                    }
+                                }
+                            });
+                }
+            }
+        }
+    }
 
-	protected void applyColorsFontCursor() {
-		if (published.isBackgroundSet() && published.isOpaque())
-			WidgetsUtils.applyBackground(this, published.getBackground());
-		if (published.isForegroundSet())
-			WidgetsUtils.applyForeground(this, published.getForeground());
-		if (published.isFontSet())
-			WidgetsUtils.applyFont(this, published.getFont());
-		if (published.isCursorSet())
-			WidgetsUtils.applyCursor(this, published.getCursor());
-	}
+    protected void applyColorsFontCursor() {
+        if (published.isBackgroundSet() && published.isOpaque()) {
+            WidgetsUtils.applyBackground(this, published.getBackground());
+        }
+        if (published.isForegroundSet()) {
+            WidgetsUtils.applyForeground(this, published.getForeground());
+        }
+        if (published.isFontSet()) {
+            WidgetsUtils.applyFont(this, published.getFont());
+        }
+        if (published.isCursorSet()) {
+            WidgetsUtils.applyCursor(this, published.getCursor());
+        }
+    }
 
-	public JavaScriptObject getPublished() {
-		return published;
-	}
+    public JavaScriptObject getPublished() {
+        return published;
+    }
 
-	public void setPublished(JavaScriptObject aValue) {
-		published = aValue != null ? aValue.<PublishedComponent> cast() : null;
-		if (published != null) {
-			publish(this, published);
-			publishColumnNodes(header);
-		}
-	}
+    public void setPublished(JavaScriptObject aValue) {
+        published = aValue != null ? aValue.<PublishedComponent>cast() : null;
+        if (published != null) {
+            publish(this, published);
+            publishColumnNodes(header);
+        }
+    }
 
-	protected void unpublishColumnNodes(List<HeaderNode<JavaScriptObject>> aNodes) {
-		for (HeaderNode<JavaScriptObject> node : aNodes) {
-			String jsName = ((HasJsName) node).getJsName();
-			if (jsName != null && !jsName.isEmpty()) {
-				published.<JsObject> cast().deleteProperty(jsName);
-			}
-			unpublishColumnNodes(node.getChildren());
-		}
-	}
+    protected void unpublishColumnNodes(List<HeaderNode<JavaScriptObject>> aNodes) {
+        for (HeaderNode<JavaScriptObject> node : aNodes) {
+            String jsName = ((HasJsName) node).getJsName();
+            if (jsName != null && !jsName.isEmpty()) {
+                published.<JsObject>cast().deleteProperty(jsName);
+            }
+            unpublishColumnNodes(node.getChildren());
+        }
+    }
 
-	protected void publishColumnNodes(List<HeaderNode<JavaScriptObject>> aNodes) {
-		for (HeaderNode<JavaScriptObject> node : aNodes) {
-			String jsName = ((HasJsName) node).getJsName();
-			if (jsName != null && !jsName.isEmpty()) {
-				HasPublished pCol = (HasPublished) node;
-				published.<JsObject> cast().inject(jsName, pCol.getPublished(), true);
-			}
-			publishColumnNodes(node.getChildren());
-		}
-	}
+    protected void publishColumnNodes(List<HeaderNode<JavaScriptObject>> aNodes) {
+        for (HeaderNode<JavaScriptObject> node : aNodes) {
+            String jsName = ((HasJsName) node).getJsName();
+            if (jsName != null && !jsName.isEmpty()) {
+                HasPublished pCol = (HasPublished) node;
+                published.<JsObject>cast().inject(jsName, pCol.getPublished(), true);
+            }
+            publishColumnNodes(node.getChildren());
+        }
+    }
 
-	private native static void publish(ModelGrid aWidget, JavaScriptObject aPublished)/*-{
+    private native static void publish(ModelGrid aWidget, JavaScriptObject aPublished)/*-{
         aPublished.select = function(aRow) {
             if (aRow != null && aRow != undefined)
                 aWidget.@com.eas.grid.ModelGrid::selectElement(Lcom/google/gwt/core/client/JavaScriptObject;)(aRow);
@@ -1357,248 +1186,193 @@ public class ModelGrid extends Grid<JavaScriptObject>
 		});
     }-*/;
 
-	public JavaScriptObject getOnRender() {
-		return onRender;
-	}
+    public JavaScriptObject getOnRender() {
+        return onRender;
+    }
 
-	public void setOnRender(JavaScriptObject aValue) {
-		onRender = aValue;
-	}
+    public void setOnRender(JavaScriptObject aValue) {
+        onRender = aValue;
+    }
 
-	public JavaScriptObject getOnAfterRender() {
-		return onAfterRender;
-	}
+    public JavaScriptObject getOnAfterRender() {
+        return onAfterRender;
+    }
 
-	public void setOnAfterRender(JavaScriptObject aValue) {
-		onAfterRender = aValue;
-	}
+    public void setOnAfterRender(JavaScriptObject aValue) {
+        onAfterRender = aValue;
+    }
 
-	public JavaScriptObject getOnExpand() {
-		return onExpand;
-	}
+    public JavaScriptObject getOnExpand() {
+        return onExpand;
+    }
 
-	public void setOnExpand(JavaScriptObject aValue) {
-		onExpand = aValue;
-	}
+    public void setOnExpand(JavaScriptObject aValue) {
+        onExpand = aValue;
+    }
 
-	public JavaScriptObject getOnCollapse() {
-		return onCollapse;
-	}
+    public JavaScriptObject getOnCollapse() {
+        return onCollapse;
+    }
 
-	public void setOnCollapse(JavaScriptObject aValue) {
-		onCollapse = aValue;
-	}
+    public void setOnCollapse(JavaScriptObject aValue) {
+        onCollapse = aValue;
+    }
 
-	public String getCursorProperty() {
-		return cursorProperty;
-	}
+    public String getCursorProperty() {
+        return cursorProperty;
+    }
 
-	public void setCursorProperty(String aValue) {
-		if (aValue != null && !cursorProperty.equals(aValue)) {
-			unbind();
-			cursorProperty = aValue;
-			bind();
-		}
-	}
+    public void setCursorProperty(String aValue) {
+        if (aValue != null && !cursorProperty.equals(aValue)) {
+            unbind();
+            cursorProperty = aValue;
+            bind();
+        }
+    }
 
-	public void selectElement(JavaScriptObject aElement) {
-		getSelectionModel().setSelected(aElement, true);
-		pingGWTFinallyCommands();
-	}
+    public void selectElement(JavaScriptObject aElement) {
+        getSelectionModel().setSelected(aElement, true);
+        pingGWTFinallyCommands();
+    }
 
-	public void unselectElement(JavaScriptObject anElement) {
-		getSelectionModel().setSelected(anElement, false);
-		pingGWTFinallyCommands();
-	}
+    public void unselectElement(JavaScriptObject anElement) {
+        getSelectionModel().setSelected(anElement, false);
+        pingGWTFinallyCommands();
+    }
 
-	public List<JavaScriptObject> getJsSelected() throws Exception {
+    public List<JavaScriptObject> getJsSelected() throws Exception {
         SetSelectionModel<? super JavaScriptObject> sm = getSelectionModel();
-        return new ArrayList<JavaScriptObject>((Collection<JavaScriptObject>)sm.getSelectedSet());
-	}
+        return new ArrayList<JavaScriptObject>((Collection<JavaScriptObject>) sm.getSelectedSet());
+    }
 
-	public void clearSelection() {
-		SetSelectionModel<? super JavaScriptObject> sm = getSelectionModel();
-		sm.clear();
-		pingGWTFinallyCommands();
-	}
+    public void clearSelection() {
+        SetSelectionModel<? super JavaScriptObject> sm = getSelectionModel();
+        sm.clear();
+        pingGWTFinallyCommands();
+    }
 
-	public boolean isEditable() {
-		return editable;
-	}
+    public boolean isEditable() {
+        return editable;
+    }
 
-	public void setEditable(boolean aValue) {
-		editable = aValue;
-	}
+    public void setEditable(boolean aValue) {
+        editable = aValue;
+    }
 
-	public boolean isDeletable() {
-		return deletable;
-	}
+    public boolean isDeletable() {
+        return deletable;
+    }
 
-	public void setDeletable(boolean aValue) {
-		deletable = aValue;
-	}
+    public void setDeletable(boolean aValue) {
+        deletable = aValue;
+    }
 
-	public boolean isInsertable() {
-		return insertable;
-	}
+    public boolean isInsertable() {
+        return insertable;
+    }
 
-	public void setInsertable(boolean aValue) {
-		insertable = aValue;
-	}
+    public void setInsertable(boolean aValue) {
+        insertable = aValue;
+    }
 
-	public boolean expanded(JavaScriptObject anElement) {
-		if (getDataProvider() instanceof JsArrayTreeDataProvider) {
-			JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider) getDataProvider();
-			return treeDataProvider.isExpanded(anElement);
-		} else {
-			return false;
-		}
-	}
+    public boolean expanded(JavaScriptObject anElement) {
+        if (getDataProvider() instanceof JsArrayTreeDataProvider) {
+            JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider) getDataProvider();
+            return treeDataProvider.isExpanded(anElement);
+        } else {
+            return false;
+        }
+    }
 
-	public void expand(JavaScriptObject anElement) {
-		if (getDataProvider() instanceof JsArrayTreeDataProvider) {
-			JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider) getDataProvider();
-			treeDataProvider.expand(anElement);
-		}
-	}
+    public void expand(JavaScriptObject anElement) {
+        if (getDataProvider() instanceof JsArrayTreeDataProvider) {
+            JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider) getDataProvider();
+            treeDataProvider.expand(anElement);
+        }
+    }
 
-	public void collapse(JavaScriptObject anElement) {
-		if (getDataProvider() instanceof JsArrayTreeDataProvider) {
-			JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider) getDataProvider();
-			treeDataProvider.collapse(anElement);
-		}
-	}
+    public void collapse(JavaScriptObject anElement) {
+        if (getDataProvider() instanceof JsArrayTreeDataProvider) {
+            JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider) getDataProvider();
+            treeDataProvider.collapse(anElement);
+        }
+    }
 
-	public void toggle(JavaScriptObject anElement) {
-		if (getDataProvider() instanceof JsArrayTreeDataProvider) {
-			JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider) getDataProvider();
-			if (treeDataProvider.isExpanded(anElement)) {
-				treeDataProvider.collapse(anElement);
-			} else {
-				treeDataProvider.expand(anElement);
-			}
-		}
-	}
+    public void toggle(JavaScriptObject anElement) {
+        if (getDataProvider() instanceof JsArrayTreeDataProvider) {
+            JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider) getDataProvider();
+            if (treeDataProvider.isExpanded(anElement)) {
+                treeDataProvider.collapse(anElement);
+            } else {
+                treeDataProvider.expand(anElement);
+            }
+        }
+    }
 
-	public void willBeVisible(final JavaScriptObject anElement, final boolean aNeedToSelect){
-	    redraw(); // force rendering request to avoid makeVisible() deferring on an undefined moment in the future. 
-	    afterRender(new Runnable(){
+    public void willBeVisible(final JavaScriptObject anElement, final boolean aNeedToSelect) {
+        redraw(); // force rendering request to avoid makeVisible() deferring on an undefined moment in the future. 
+        afterRender(new Runnable() {
 
             @Override
             public void run() {
                 makeVisible(anElement, aNeedToSelect);
             }
-	        
-	    });
-	}
-	
-	public boolean makeVisible(JavaScriptObject anElement, boolean aNeedToSelect) {
-		IndexOfProvider<JavaScriptObject> indexOfProvider = (IndexOfProvider<JavaScriptObject>) dataProvider;
-		int index = indexOfProvider.indexOf(anElement);
-		if (index > -1) {
-			if (index >= 0 && index < frozenRows) {
-				TableCellElement leftCell = frozenLeft.getCell(index, 0);
-				if (leftCell != null) {
-					leftCell.scrollIntoView();
-				} else {
-					TableCellElement rightCell = frozenRight.getCell(index, 0);
-					if (rightCell != null)
-						rightCell.scrollIntoView();
-				}
-			} else {
-				TableCellElement leftCell = scrollableLeft.getCell(index, 0);
-				if (leftCell != null) {
-					leftCell.scrollIntoView();
-				} else {
-					TableCellElement rightCell = scrollableRight.getCell(index, 0);
-					if (rightCell != null)
-						rightCell.scrollIntoView();
-				}
-			}
-			if (aNeedToSelect) {
-				clearSelection();
-				selectElement(anElement);
-				if (index >= 0 && index < frozenRows) {
-					frozenLeft.setKeyboardSelectedRow(index, true);
-					frozenRight.setKeyboardSelectedRow(index, true);
-				} else {
-					scrollableLeft.setKeyboardSelectedRow(index - frozenRows, true);
-					scrollableRight.setKeyboardSelectedRow(index - frozenRows, true);
-				}
-			}
-			pingGWTFinallyCommands();
-			return true;
-		} else
-			return false;
-	}
 
-	public void find() {
-		if (finder == null) {
-			finder = new FindWindow(ModelGrid.this);
-		}
-		finder.show();
-	}
+        });
+    }
 
-	@Override
-	protected void onDetach() {
-		super.onDetach();
-		if (finder != null) {
-			finder.close();
-		}
-	}
+    public boolean makeVisible(JavaScriptObject anElement, boolean aNeedToSelect) {
+        IndexOfProvider<JavaScriptObject> indexOfProvider = (IndexOfProvider<JavaScriptObject>) dataProvider;
+        int index = indexOfProvider.indexOf(anElement);
+        if (index > -1) {
+            if (index >= 0 && index < frozenRows) {
+                TableCellElement leftCell = frozenLeft.getViewCell(index, 0);
+                if (leftCell != null) {
+                    leftCell.scrollIntoView();
+                } else {
+                    TableCellElement rightCell = frozenRight.getViewCell(index, 0);
+                    if (rightCell != null) {
+                        rightCell.scrollIntoView();
+                    }
+                }
+            } else {
+                TableCellElement leftCell = scrollableLeft.getViewCell(index, 0);
+                if (leftCell != null) {
+                    leftCell.scrollIntoView();
+                } else {
+                    TableCellElement rightCell = scrollableRight.getViewCell(index, 0);
+                    if (rightCell != null) {
+                        rightCell.scrollIntoView();
+                    }
+                }
+            }
+            if (aNeedToSelect) {
+                clearSelection();
+                selectElement(anElement);
+                if (index >= 0 && index < frozenRows) {
+                    frozenLeft.setKeyboardSelectedRow(index, true);
+                    frozenRight.setKeyboardSelectedRow(index, true);
+                } else {
+                    scrollableLeft.setKeyboardSelectedRow(index - frozenRows, true);
+                    scrollableRight.setKeyboardSelectedRow(index - frozenRows, true);
+                }
+            }
+            pingGWTFinallyCommands();
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-	@Override
-	protected void onColumnsResize() {
-		if (isAttached()) {
-			double prevError = 0;
-			double error = distributeColumnsWidths();
-			while (Math.abs(error) > 0.8 && Math.abs(error - prevError) > 2) {
-				prevError = error;
-				error = distributeColumnsWidths();
-			}
-		}
-	}
-
-	protected double distributeColumnsWidths() {
-		List<ModelColumn> availableColumns = new ArrayList<>();
-		double commonWidth = 0;
-		for (int i = 0; i < getDataColumnCount(); i++) {
-			Column<JavaScriptObject, ?> column = getDataColumn(i);
-			ModelColumn mCol = (ModelColumn) column;
-			if (mCol.isVisible()) {
-				commonWidth += mCol.getWidth();
-				availableColumns.add(mCol);
-			}
-		}
-		double widthError = 0;
-		double delta = (scrollableLeftContainer.getElement().getClientWidth()
-				+ scrollableRightContainer.getElement().getClientWidth()) - 1 - commonWidth;
-		for (ModelColumn mCol : availableColumns) {
-			double coef = mCol.getWidth() / commonWidth;
-			double newWidth = mCol.getWidth() + delta * coef;
-			setColumnWidth(mCol, newWidth, Style.Unit.PX);
-			widthError += Math.abs(mCol.getWidth() - newWidth);
-		}
-		return widthError;
-	}
-
-	@Override
-	public void onResize() {
-		super.onResize();
-		if (isAttached()) {
-			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
-		}
-	}
-
-	public void complementPublishedStyle(PublishedCell aComplemented) {
-		if (published.isBackgroundSet()) {
-			aComplemented.setBackground(published.getBackground());
-		}
-		if (published.isForegroundSet()) {
-			aComplemented.setForeground(published.getForeground());
-		}
-		if (published.isFontSet()) {
-			aComplemented.setFont(published.getFont());
-		}
-	}
+    public void complementPublishedStyle(PublishedCell aComplemented) {
+        if (published.isBackgroundSet()) {
+            aComplemented.setBackground(published.getBackground());
+        }
+        if (published.isForegroundSet()) {
+            aComplemented.setForeground(published.getForeground());
+        }
+        if (published.isFontSet()) {
+            aComplemented.setFont(published.getFont());
+        }
+    }
 }

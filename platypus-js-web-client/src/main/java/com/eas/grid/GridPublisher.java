@@ -1,9 +1,8 @@
 package com.eas.grid;
 
 import com.eas.core.Utils;
-import com.eas.grid.ModelGrid;
 import com.eas.grid.columns.header.CheckHeaderNode;
-import com.eas.grid.columns.header.ModelHeaderNode;
+import com.eas.grid.columns.header.HeaderNode;
 import com.eas.grid.columns.header.RadioHeaderNode;
 import com.eas.grid.columns.header.ServiceHeaderNode;
 import com.eas.ui.PublishedComponent;
@@ -48,7 +47,7 @@ public class GridPublisher {
 		return new constr(aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(ModelHeaderNode aComponent)/*-{
+	public native static PublishedComponent publish(HeaderNode aComponent)/*-{
 		var constr = @com.eas.grid.GridPublisher::getPublisher(Ljava/lang/String;)('ModelGridColumn');
 		return new constr(aComponent);
 	}-*/;

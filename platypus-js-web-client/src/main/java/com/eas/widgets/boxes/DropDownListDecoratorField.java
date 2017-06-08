@@ -56,8 +56,8 @@ public class DropDownListDecoratorField extends ValueDecoratorField {
 
         getElement().insertFirst(nonListMask);
 
-        selectButton.addClassName("decorator-select-combo");
-        clearButton.addClassName("decorator-clear-combo");
+        btnSelect.addClassName("decorator-select-combo");
+        btnClear.addClassName("decorator-clear-combo");
     }
 
     @Override
@@ -179,15 +179,15 @@ public class DropDownListDecoratorField extends ValueDecoratorField {
                 listBox.getElement().addClassName(CUSTOM_DROPDOWN_CLASS);
                 listBox.getElement().getStyle().clearVisibility();
                 nonListMask.getStyle().setDisplay(Style.Display.NONE);
-                selectButton.addClassName("decorator-select-combo");
-                clearButton.addClassName("decorator-clear-combo");
+                btnSelect.addClassName("decorator-select-combo");
+                btnClear.addClassName("decorator-clear-combo");
                 nonListMask.removeClassName("form-control");
             } else {
                 listBox.getElement().removeClassName(CUSTOM_DROPDOWN_CLASS);
                 listBox.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
                 nonListMask.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-                selectButton.removeClassName("decorator-select-combo");
-                clearButton.removeClassName("decorator-clear-combo");
+                btnSelect.removeClassName("decorator-select-combo");
+                btnClear.removeClassName("decorator-clear-combo");
                 nonListMask.addClassName("form-control");
             }
             rebindList();

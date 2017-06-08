@@ -11,24 +11,24 @@ import com.google.gwt.view.client.SelectionModel;
 
 public class CursorPropertySelectionReflector implements SelectionChangeEvent.Handler {
 
-	protected SelectionModel<JavaScriptObject> selectionModel;
-	protected JavaScriptObject rowsSource;
+    protected SelectionModel<JavaScriptObject> selectionModel;
+    protected JavaScriptObject rowsSource;
 
-	public CursorPropertySelectionReflector(JavaScriptObject aRowsSource, SelectionModel<JavaScriptObject> aSelectionModel) {
-		super();
-		selectionModel = aSelectionModel;
-		rowsSource = aRowsSource;
-	}
+    public CursorPropertySelectionReflector(JavaScriptObject aRowsSource, SelectionModel<JavaScriptObject> aSelectionModel) {
+        super();
+        selectionModel = aSelectionModel;
+        rowsSource = aRowsSource;
+    }
 
-	@Override
-	public void onSelectionChange(SelectionChangeEvent event) {
-		if (rowsSource != null && selectionModel instanceof HasSelectionLead<?>) {
-			try {
-				JavaScriptObject lead = ((HasSelectionLead<JavaScriptObject>) selectionModel).getLead();
-				rowsSource.<Utils.JsObject>cast().setJs("cursor", lead);
-			} catch (Exception e) {
-				Logger.getLogger(CursorPropertySelectionReflector.class.getName()).log(Level.SEVERE, e.getMessage());
-			}
-		}
-	}
+    @Override
+    public void onSelectionChange(SelectionChangeEvent event) {
+        if (rowsSource != null && selectionModel instanceof HasSelectionLead<?>) {
+            try {
+                JavaScriptObject lead = ((HasSelectionLead<JavaScriptObject>) selectionModel).getLead();
+                rowsSource.<Utils.JsObject>cast().setJs("cursor", lead);
+            } catch (Exception e) {
+                Logger.getLogger(CursorPropertySelectionReflector.class.getName()).log(Level.SEVERE, e.getMessage());
+            }
+        }
+    }
 }

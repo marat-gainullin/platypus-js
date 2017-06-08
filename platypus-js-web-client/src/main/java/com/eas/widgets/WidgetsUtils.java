@@ -1,6 +1,5 @@
 package com.eas.widgets;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,25 +10,20 @@ import com.eas.core.XElement;
 import com.eas.menu.MenuItem;
 import com.eas.menu.MenuItemSeparator;
 import com.eas.ui.HasCustomParent;
-import com.eas.ui.MarginConstraints;
 import com.eas.ui.PublishedCell;
 import com.eas.ui.PublishedColor;
 import com.eas.ui.PublishedComponent;
 import com.eas.ui.PublishedFont;
 import com.eas.ui.EventsPublisher;
-import com.eas.ui.StandaloneRootPanel;
-import com.eas.ui.MarginConstraints.Margin;
 import com.eas.ui.Widget;
-import com.eas.widgets.containers.AnchorsContainer;
-import com.eas.widgets.containers.Borders;
 import com.eas.widgets.containers.Container;
-import com.eas.widgets.containers.Split;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.TableCellElement;
 
 public class WidgetsUtils {
 
@@ -95,124 +89,125 @@ public class WidgetsUtils {
     }
 
     public native static PublishedCell publishCell(Object aData, String aDisplay)/*-{
-		var published = {
-			data : aData
-		};
-		var _display = aDisplay;
-		var _background = null;
-		var _foreground = null;
-		var _font = null;
-		var _align = null;
-		var _icon = null;
-		var _folderIcon = null;
-		var _openFolderIcon = null;
-		var _leafIcon = null;
-		
-		function displayChanged(){
-			if (published.displayCallback != null)
-				published.displayCallback.@java.lang.Runnable::run()();
-		}
-		
-		function iconsChanged(){
-			if (published.iconCallback)
-				published.iconCallback.@java.lang.Runnable::run()();
-		}
-		
-		Object.defineProperty(published, "display", {
-			get : function() {
-				return _display;
-			},
-			set : function(aValue) {
-				_display = aValue;
-				displayChanged();
-			}
-		});
-		Object.defineProperty(published, "background", {
-			get : function() {
-				return _background;
-			},
-			set : function(aValue) {
-				_background = aValue;
-				displayChanged();
-			}
-		});
-		Object.defineProperty(published, "foreground", {
-			get : function() {
-				return _foreground;
-			},
-			set : function(aValue) {
-				_foreground = aValue;
-				displayChanged();
-			}
-		});
-		Object.defineProperty(published, "font", {
-			get : function() {
-				return _font;
-			},
-			set : function(aValue) {
-				_font = aValue;
-				displayChanged();
-			}
-		});
-		Object.defineProperty(published, "align", {
-			get : function() {
-				return _align;
-			},
-			set : function(aValue) {
-				_align = aValue;
-				displayChanged();
-			}
-		});
-		Object.defineProperty(published, "icon", {
-			get : function() {
-				return _icon;
-			},
-			set : function(aValue) {
-				_icon = aValue;
-				iconsChanged();
-			}
-		});
-		Object.defineProperty(published, "folderIcon", {
-			get : function() {
-				return _folderIcon;
-			},
-			set : function(aValue) {
-				_folderIcon = aValue;
-				iconsChanged();
-			}
-		});
-		Object.defineProperty(published, "openFolderIcon", {
-			get : function() {
-				return _openFolderIcon;
-			},
-			set : function(aValue) {
-				_openFolderIcon = aValue;
-				iconsChanged();
-			}
-		});
-		Object.defineProperty(published, "leafIcon", {
-			get : function() {
-				return _leafIcon;
-			},
-			set : function(aValue) {
-				_leafIcon = aValue;
-				iconsChanged();
-			}
-		});
-		return published;
-	}-*/;
+        var published = {
+                data : aData
+        };
+        var _display = aDisplay;
+        var _background = null;
+        var _foreground = null;
+        var _font = null;
+        var _align = null;
+        var _icon = null;
+        var _folderIcon = null;
+        var _openFolderIcon = null;
+        var _leafIcon = null;
 
-    /**
-     * Calculates a published cell for stand-alone model-aware controls against
-     * row aRow.
-     *
-     * @param aEventThis
-     * @param cellFunction
-     * @param aData
-     * @param aModelElement
-     * @return
-     * @throws Exception
-     */
+        function displayChanged(){
+            if (published.displayCallback != null)
+                published.displayCallback.@java.lang.Runnable::run()();
+        }
+
+        function iconsChanged(){
+            if (published.iconCallback)
+                published.iconCallback.@java.lang.Runnable::run()();
+        }
+
+        Object.defineProperty(published, "display", {
+            get : function() {
+                    return _display;
+            },
+            set : function(aValue) {
+                    _display = aValue;
+                    displayChanged();
+            }
+        });
+        Object.defineProperty(published, "background", {
+            get : function() {
+                    return _background;
+            },
+            set : function(aValue) {
+                    _background = aValue;
+                    displayChanged();
+            }
+        });
+        Object.defineProperty(published, "foreground", {
+            get : function() {
+                    return _foreground;
+            },
+            set : function(aValue) {
+                    _foreground = aValue;
+                    displayChanged();
+            }
+        });
+        Object.defineProperty(published, "font", {
+            get : function() {
+                    return _font;
+            },
+            set : function(aValue) {
+                    _font = aValue;
+                    displayChanged();
+            }
+        });
+        Object.defineProperty(published, "align", {
+            get : function() {
+                return _align;
+            },
+            set : function(aValue) {
+                _align = aValue;
+                displayChanged();
+            }
+        });
+        Object.defineProperty(published, "icon", {
+            get : function() {
+                return _icon;
+            },
+            set : function(aValue) {
+                _icon = aValue;
+                iconsChanged();
+            }
+        });
+        Object.defineProperty(published, "folderIcon", {
+            get : function() {
+                return _folderIcon;
+            },
+            set : function(aValue) {
+                _folderIcon = aValue;
+                iconsChanged();
+            }
+        });
+        Object.defineProperty(published, "openFolderIcon", {
+            get : function() {
+                return _openFolderIcon;
+            },
+            set : function(aValue) {
+                _openFolderIcon = aValue;
+                iconsChanged();
+            }
+        });
+        Object.defineProperty(published, "leafIcon", {
+            get : function() {
+                return _leafIcon;
+            },
+            set : function(aValue) {
+                _leafIcon = aValue;
+                iconsChanged();
+            }
+        });
+        return published;
+    }-*/;
+
+    public static PublishedCell calcGridPublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, JavaScriptObject aData, String aField, String aDisplay,
+            TableCellElement viewCell, int viewIndex, PublishedCell aAlreadyCell) throws Exception {
+        if (aEventThis != null && aField != null && !aField.isEmpty() && cellFunction != null) {
+            if (aData != null) {
+                PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : publishCell(Utils.getPathData(aData, aField), aDisplay);
+                Utils.executeScriptEventVoid(aEventThis, cellFunction, EventsPublisher.publishOnRenderEvent(aEventThis, viewIndex, viewCell, aData, cell));
+                return cell;
+            }
+        }
+        return null;
+    }
+
     public static PublishedCell calcStandalonePublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, JavaScriptObject aData, String aField, String aDisplay,
             PublishedCell aAlreadyCell) throws Exception {
         if (aEventThis != null && aField != null && !aField.isEmpty() && cellFunction != null) {
@@ -352,37 +347,6 @@ public class WidgetsUtils {
         return parent != null ? ((HasPublished) parent).getPublished() : null;
     }
 
-    public static void addWidgetTo(Widget aWidet, String aElementId) {
-        addWidgetTo(aWidet, RootPanel.get(aElementId));
-    }
-
-    public static void addWidgetTo(Widget aWidet, Element aElement) {
-        addWidgetTo(aWidet, new StandaloneRootPanel(aElement));
-    }
-
-    public static void addWidgetTo(Widget aWidet, Container aContainer) {
-        if (aContainer != null) {
-            aWidet.setVisible(true);
-            aContainer.clear();
-            if (aContainer instanceof Borders) {
-                ((Borders) aContainer).add(aWidet);
-            } else if (aContainer instanceof AnchorsContainer) {
-                MarginConstraints mc = new MarginConstraints();
-                mc.setTop(new Margin(0, Style.Unit.PX));
-                mc.setBottom(new Margin(0, Style.Unit.PX));
-                mc.setLeft(new Margin(0, Style.Unit.PX));
-                mc.setRight(new Margin(0, Style.Unit.PX));
-                ((AnchorsContainer) aContainer).add(aWidet, mc);
-            } else if (aContainer instanceof Split) {
-                ((Split) aContainer).setFirstWidget(aWidet);
-            } else if (aContainer instanceof RootPanel) {
-                aContainer.add(aWidet);
-            } else {
-                aContainer.add(aWidet);
-            }
-        }
-    }
-
     public static void applyEmptyText(Element aElement, String aValue) {
         NodeList<Element> nodes = aElement.getElementsByTagName("input");
         for (int i = 0; i < nodes.getLength(); i++) {
@@ -404,12 +368,6 @@ public class WidgetsUtils {
             for (int i = 0; i < widgets.getCount(); i++) {
                 walk(widgets.get(i), aObserver);
             }
-        }
-    }
-
-    public static void focus(Widget aWidget) {
-        if (aWidget instanceof Focusable) {
-            ((Focusable) aWidget).setFocus(true);
         }
     }
 }

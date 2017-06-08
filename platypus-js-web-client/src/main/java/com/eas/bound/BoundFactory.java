@@ -11,18 +11,22 @@ import com.eas.core.Utils;
 import com.eas.ui.UiReader;
 import com.eas.ui.UiWidgetReader;
 import com.eas.ui.Widget;
-import com.eas.widgets.format.ObjectFormat;
+import com.eas.widgets.boxes.DateDecoratorField;
+import com.eas.widgets.boxes.FormattedField;
+import com.eas.widgets.boxes.NumberDecoratorField;
+import com.eas.widgets.boxes.ValueDecoratorField;
 import com.google.gwt.xml.client.Element;
 
 public class BoundFactory implements UiWidgetReader {
 
-    private static void readGeneralProps(final Element anElement, final UIObject aTarget, final UiReader aFactory) throws Exception {
+    private static void readGeneralProps(final Element anElement, final Widget aTarget, final UiReader aFactory) throws Exception {
         aFactory.readGeneralProps(anElement, aTarget);
-        if (Utils.hasAttribute(anElement, "nl", "nullable") && aTarget instanceof ModelDecoratorBox<?>) {
-            ((ModelDecoratorBox<?>) aTarget).setNullable(Utils.getBooleanAttribute(anElement, "nl", "nullable", true));
+        if (Utils.hasAttribute(anElement, "nl", "nullable") && aTarget instanceof ValueDecoratorField) {
+            ((ValueDecoratorField) aTarget).setNullable(Utils.getBooleanAttribute(anElement, "nl", "nullable", true));
         }
     }
 
+    @Override
     public Widget readWidget(Element anElement, final UiReader aFactory) throws Exception {
         String type = anElement.getTagName();
         switch (type) {
@@ -53,24 +57,24 @@ public class BoundFactory implements UiWidgetReader {
                 return modelCombo;
             case "md":
             case "ModelDate":
-                ModelDate modelDate = new ModelDate();
+                DateDecoratorField modelDate = new DateDecoratorField();
                 BoundPublisher.publish(modelDate);
                 readGeneralProps(anElement, modelDate, aFactory);
                 if (Utils.hasAttribute(anElement, "fr", "format")) {
                     String dateFormat = Utils.getAttribute(anElement, "fr", "format", null);
                     try {
-                        modelDate.setFormat(dateFormat);
+                        modelDate.setFormatPattern(dateFormat);
                     } catch (Exception ex) {
                         Logger.getLogger(BoundFactory.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
                 if (Utils.hasAttribute(anElement, "dtp", "datePicker")) {
                     boolean selected = Utils.getBooleanAttribute(anElement, "dtp", "datePicker", Boolean.FALSE);
-                    modelDate.setDateShown(selected);
+                    modelDate.setDateVisible(selected);
                 }
                 if (Utils.hasAttribute(anElement, "tmp", "timePicker")) {
                     boolean selected = Utils.getBooleanAttribute(anElement, "tmp", "timePicker", Boolean.FALSE);
-                    modelDate.setTimeShown(selected);
+                    modelDate.setTimeVisible(selected);
                 }
                 return modelDate;
             case "mff":
@@ -80,7 +84,7 @@ public class BoundFactory implements UiWidgetReader {
                 readGeneralProps(anElement, modelFormattedField, aFactory);
                 try {
                     String format = Utils.getAttribute(anElement, "fr", "format", null);
-                    int valueType = Utils.getIntegerAttribute(anElement, "vt", "valueType", ObjectFormat.REGEXP);
+                    int valueType = Utils.getIntegerAttribute(anElement, "vt", "valueType", FormattedField.REGEXP);
                     modelFormattedField.setValueType(valueType);
                     modelFormattedField.setFormat(format);
                     if (Utils.hasAttribute(anElement, "tx", "text")) {
@@ -92,7 +96,7 @@ public class BoundFactory implements UiWidgetReader {
                 return modelFormattedField;
             case "msp":
             case "ModelSpin":
-                ModelSpin modelSpin = new ModelSpin();
+                NumberDecoratorField modelSpin = new NumberDecoratorField();
                 BoundPublisher.publish(modelSpin);
                 readGeneralProps(anElement, modelSpin, aFactory);
                 Double min = null;
@@ -118,7 +122,7 @@ public class BoundFactory implements UiWidgetReader {
                 BoundPublisher.publish(modelTextArea);
                 readGeneralProps(anElement, modelTextArea, aFactory);
                 if (Utils.hasAttribute(anElement, "tx", "text")) {
-                    modelTextArea.setValue(Utils.getAttribute(anElement, "tx", "text", null));
+                    modelTextArea.setJsValue(Utils.getAttribute(anElement, "tx", "text", null));
                 }
                 return modelTextArea;
             default:

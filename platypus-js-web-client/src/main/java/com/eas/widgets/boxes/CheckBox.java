@@ -20,10 +20,11 @@ import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.HasText;
 import java.util.HashSet;
 import java.util.Set;
 
-public class CheckBox extends Widget implements HasActionHandlers, HasButtonGroup, HasJsValue, HasValueChangeHandlers {
+public class CheckBox extends Widget implements HasActionHandlers, HasButtonGroup, HasJsValue, HasValueChangeHandlers, HasText {
 
     protected Element anchor = Document.get().createDivElement();
     protected InputElement input;
@@ -116,6 +117,16 @@ public class CheckBox extends Widget implements HasActionHandlers, HasButtonGrou
         for (ActionHandler h : actionHandlers) {
             h.onAction(event);
         }
+    }
+
+    @Override
+    public String getText() {
+        return label.getInnerText();
+    }
+
+    @Override
+    public void setText(String text) {
+        label.setInnerText(text);
     }
 
     @Override

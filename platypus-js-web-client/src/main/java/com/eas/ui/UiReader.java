@@ -26,6 +26,8 @@ public abstract class UiReader {
     public abstract void addResolver(Runnable aResolver);
 
     public abstract Map<String, Widget> getWidgets();
+    
+    public abstract Map<String, ButtonGroup> getButtonGroups();
 
     public abstract void readImageParagraph(Element anElement, Widget aTarget) throws Exception;
 

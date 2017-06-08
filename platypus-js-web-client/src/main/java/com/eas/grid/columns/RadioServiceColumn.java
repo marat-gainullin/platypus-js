@@ -1,29 +1,24 @@
 package com.eas.grid.columns;
 
-import com.eas.grid.ModelGrid;
-import com.eas.grid.cells.CheckBoxCell;
-import com.eas.grid.cells.TreeExpandableCell;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.TableCellElement;
 
-public class RadioServiceColumn extends ModelColumn {
+public class RadioServiceColumn extends Column {
 
-	public RadioServiceColumn() {
-		super(new TreeExpandableCell<JavaScriptObject, Object>(new CheckBoxCell("")));
-		designedWidth = 22;
-		minWidth = designedWidth;
-		maxWidth = designedWidth;
-	}
+    public RadioServiceColumn() {
+        super();
+        width = 22;
+        minWidth = width;
+        maxWidth = width;
+    }
 
-	@Override
-	public Boolean getValue(JavaScriptObject object) {
-		return grid.getSelectionModel().isSelected(object);
-	}
+    @Override
+    public void render(int viewIndex, JavaScriptObject dataRow, TableCellElement viewCell) {
+        // TODO: Add grid.isSelected() driven rendering
+    }
 
-	@Override
-	public void setGrid(ModelGrid aValue) {
-		((CheckBoxCell) getTargetCell()).setGroupName("");
-		super.setGrid(aValue);
-		if (aValue != null)
-			((CheckBoxCell) getTargetCell()).setGroupName(aValue.getGroupName());
-	}
+    @Override
+    public Boolean getValue(JavaScriptObject object) {
+        return grid.isSelected(object);
+    }
 }

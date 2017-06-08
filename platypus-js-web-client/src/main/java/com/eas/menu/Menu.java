@@ -3,6 +3,7 @@ package com.eas.menu;
 import com.eas.core.HasPublished;
 import com.eas.widgets.containers.Container;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.touch.client.Point;
 import com.google.gwt.user.client.ui.HasText;
 
@@ -34,6 +35,9 @@ public class Menu extends Container implements HasText {
     }
 
     public void show(int hostX, int hostY, int hostWidth, int hostHeight) {
+    }
+    
+    public void showRelativeTo(Element aAnchor){
     }
     
     private Point calcHorizontal(int hostX, int hostY, int hostWidth, int hostHeight){

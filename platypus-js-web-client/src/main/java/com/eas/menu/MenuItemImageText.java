@@ -2,12 +2,9 @@ package com.eas.menu;
 
 import com.eas.core.HasPublished;
 import com.eas.core.XElement;
-import com.eas.ui.Widget;
 import com.eas.ui.events.ActionEvent;
 import com.eas.ui.events.ActionHandler;
 import com.eas.ui.events.HasActionHandlers;
-import com.eas.ui.events.HasHideHandlers;
-import com.eas.ui.events.HasShowHandlers;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Document;
@@ -31,6 +28,10 @@ public class MenuItemImageText extends MenuItem implements HasActionHandlers, Ha
     protected Element leftMark;
     protected Element field;
 
+    public MenuItemImageText() {
+        this("", false, null);
+    }
+    
     public MenuItemImageText(String aText, boolean asHtml, String aImageUri) {
         super();
         element.setClassName("menu-item");

@@ -1,21 +1,25 @@
 package com.eas.grid.columns;
 
-import com.eas.grid.cells.CheckBoxCell;
-import com.eas.grid.cells.TreeExpandableCell;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.TableCellElement;
 
-public class CheckServiceColumn extends ModelColumn {
+public class CheckServiceColumn extends Column {
 
-	public CheckServiceColumn() {
-	    super(new TreeExpandableCell<JavaScriptObject, Object>(new CheckBoxCell()));
-		designedWidth = 22;
-		minWidth = designedWidth;
-		maxWidth = designedWidth;
+    public CheckServiceColumn() {
+        super();
+        width = 22;
+        minWidth = width;
+        maxWidth = width;
     }
 
-	@Override
+    @Override
+    public void render(int viewIndex, JavaScriptObject dataRow, TableCellElement viewCell) {
+        // TODO: Add grid.isSelected() driven rendering
+    }
+
+    @Override
     public Boolean getValue(JavaScriptObject object) {
-	    return grid.getSelectionModel().isSelected(object);
+        return grid.isSelected(object);
     }
 
 }

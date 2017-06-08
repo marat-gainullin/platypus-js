@@ -7,6 +7,15 @@ import com.eas.widgets.boxes.CheckBox;
 import com.eas.core.Utils;
 import com.eas.ui.ButtonGroup;
 import com.eas.ui.PublishedComponent;
+import com.eas.widgets.boxes.DropDownButton;
+import com.eas.widgets.boxes.FormattedField;
+import com.eas.widgets.boxes.ImageButton;
+import com.eas.widgets.boxes.ImageLabel;
+import com.eas.widgets.boxes.ImageToggleButton;
+import com.eas.widgets.boxes.PasswordField;
+import com.eas.widgets.boxes.ProgressBar;
+import com.eas.widgets.boxes.RadioButton;
+import com.eas.widgets.boxes.Slider;
 import com.eas.widgets.containers.Absolute;
 import com.eas.widgets.containers.Anchors;
 import com.eas.widgets.containers.Borders;
@@ -40,7 +49,7 @@ public class WidgetsPublisher {
 		constructors.setJs(aClassName, aPublisher);
 	}
 	
-	public native static PublishedComponent publish(PlatypusRadioButton aComponent)/*-{
+	public native static PublishedComponent publish(RadioButton aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('RadioButton');
 		return new constr(null, null, null, aComponent);
 	}-*/;
@@ -50,12 +59,12 @@ public class WidgetsPublisher {
 		return new constr(null, null, null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(PlatypusSlider aComponent)/*-{
+	public native static PublishedComponent publish(Slider aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('Slider');
 		return new constr(null, null, null, null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(PlatypusToggleButton aComponent)/*-{
+	public native static PublishedComponent publish(ImageToggleButton aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('ToggleButton');
 		return new constr(null, null, null, null, null, aComponent);
 	}-*/;
@@ -65,7 +74,7 @@ public class WidgetsPublisher {
 		return new constr(null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(PlatypusFormattedTextField aComponent)/*-{
+	public native static PublishedComponent publish(FormattedField aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('FormattedField');
 		return new constr(null, aComponent);
 	}-*/;
@@ -80,27 +89,27 @@ public class WidgetsPublisher {
 		return new constr(null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(PlatypusProgressBar aComponent)/*-{
+	public native static PublishedComponent publish(ProgressBar aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('ProgressBar');
 		return new constr(null, null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(PlatypusPasswordField aComponent)/*-{
+	public native static PublishedComponent publish(PasswordField aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('PasswordField');
 		return new constr(null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(PlatypusButton aComponent)/*-{
+	public native static PublishedComponent publish(ImageButton aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('Button');
 		return new constr(null, null, null, null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(PlatypusSplitButton aComponent)/*-{
+	public native static PublishedComponent publish(DropDownButton aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('DropDownButton');
 		return new constr(null, null, null, null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(PlatypusLabel aComponent)/*-{
+	public native static PublishedComponent publish(ImageLabel aComponent)/*-{
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('Label');
 		return new constr(null, null, null, aComponent);
 	}-*/;

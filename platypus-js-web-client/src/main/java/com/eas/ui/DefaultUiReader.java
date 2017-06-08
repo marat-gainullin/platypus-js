@@ -7,10 +7,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.client.CallbackAdapter;
 import com.eas.core.HasPublished;
 import com.eas.core.Utils;
-import com.eas.form.Form;
 import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.Menu;
 import com.eas.menu.MenuBar;
@@ -28,7 +26,7 @@ import com.eas.widgets.containers.Split;
 import com.eas.widgets.containers.Tabs;
 import com.eas.widgets.containers.Toolbar;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.xml.client.Element;
@@ -45,6 +43,7 @@ public class DefaultUiReader extends UiReader {
     protected String rootContainerName;
     protected Element element;
     protected Map<String, Widget> widgets = new HashMap<>();
+    protected Map<String, ButtonGroup> buttonGroups = new HashMap<>();
     protected List<Widget> widgetsList = new ArrayList<>();
     protected List<Runnable> resolvers = new ArrayList<>();
     protected Widget viewWidget;
@@ -61,6 +60,10 @@ public class DefaultUiReader extends UiReader {
         return widgets;
     }
 
+    public Map<String, ButtonGroup> getButtonGroups() {
+        return buttonGroups;
+    }
+
     public List<Widget> getWidgetsList() {
         return widgetsList;
     }
@@ -73,13 +76,14 @@ public class DefaultUiReader extends UiReader {
             Node childNode = element.getFirstChild();
             while (childNode != null) {
                 if (childNode instanceof Element) {
-                    Widget widget = readWidget((Element) childNode);
+                    Element childElement = (Element) childNode;
+                    Widget widget = readWidget(childElement);
                     if (widget != null) {
                         String wName = ((HasJsName) widget).getJsName();
                         assert wName != null && !wName.isEmpty() : "A widget is expected to be a named item.";
                         widgets.put(wName, widget);
                         widgetsList.add(widget);
-                    } else {
+                    } else if(!"ButtonGroup".equals(childElement.getTagName())) {
                         Logger.getLogger(DefaultUiReader.class.getName()).log(Level.WARNING, "Unknown widget tag name: " + ((Element) childNode).getTagName() + ". skipping.");
                     }
                 }
@@ -93,7 +97,8 @@ public class DefaultUiReader extends UiReader {
         viewWidget = widgets.get(rootContainerName);
         if (viewWidget == null) {
             viewWidget = new Anchors();
-            viewWidget.setSize(400 + "px", 300 + "px");
+            viewWidget.getElement().getStyle().setWidth(400, Style.Unit.PX);
+            viewWidget.getElement().getStyle().setHeight(300, Style.Unit.PX);
             Logger.getLogger(DefaultUiReader.class.getName()).log(Level.WARNING, "view widget missing. Falling back to AnchrosPane.");
         }
     }
@@ -139,17 +144,7 @@ public class DefaultUiReader extends UiReader {
     public void readImageParagraph(Element anElement, final Widget aImageParagraph) throws Exception {
         if (Utils.hasAttribute(anElement, "i", "icon") && aImageParagraph instanceof HasImageResource) {
             String iconImage = Utils.getAttribute(anElement, "i", "icon", null);
-            PlatypusImageResource.load(iconImage, new CallbackAdapter<ImageResource, String>() {
-                @Override
-                protected void doWork(ImageResource aResult) throws Exception {
-                    ((HasImageResource) aImageParagraph).setImageResource(aResult);
-                }
-
-                @Override
-                public void onFailure(String reason) {
-                    Logger.getLogger(Form.class.getName()).log(Level.SEVERE, "Factory failed to load button icon. " + reason);
-                }
-            });
+            ((HasImageResource) aImageParagraph).setImageResource(iconImage);
         }
         if (Utils.hasAttribute(anElement, "tx", "text") && aImageParagraph instanceof HasText) {
             ((HasText) aImageParagraph).setText(Utils.getAttribute(anElement, "tx", "text", null));
@@ -249,11 +244,8 @@ public class DefaultUiReader extends UiReader {
                 resolvers.add(new Runnable() {
                     @Override
                     public void run() {
-                        Widget buttonGroup = buttonGroups.get(buttonGroupName);
-                        if (buttonGroup instanceof ButtonGroup) {
-                            ButtonGroup bg = (ButtonGroup) buttonGroup;
-                            bg.add((HasValue<Boolean>) aTarget);
-                        }
+                        ButtonGroup bg = buttonGroups.get(buttonGroupName);
+                        bg.add(aTarget);
                     }
                 });
             }
@@ -323,7 +315,7 @@ public class DefaultUiReader extends UiReader {
             String tabTitle = Utils.getAttribute(constraintsElement, "tt", "tabTitle", null);
             String tabIconName = Utils.getAttribute(constraintsElement, "ti", "tabIcon", null);
             String tabTooltipText = Utils.getAttribute(constraintsElement, "ttp", "tabTooltipText", null);
-            ((Tabs) parent).add((Widget) aTarget, tabTitle, false, null);
+            ((Tabs) parent).add(aTarget, tabTitle, tabTooltipText, tabIconName);
             // ((TabbedPane) parent).add(aTarget, tabTitle,
             // resolveIcon(tabIconName));
         } else if (parent instanceof Split) {

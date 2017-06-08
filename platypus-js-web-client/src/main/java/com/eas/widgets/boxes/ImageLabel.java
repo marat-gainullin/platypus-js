@@ -20,6 +20,10 @@ public class ImageLabel extends ImageParagraph {
         this(aTitle, asHtml, null);
     }
 
+    public ImageLabel() {
+        this("", false);
+    }
+
     @Override
     protected void publish(JavaScriptObject aValue) {
         publish(this, aValue);

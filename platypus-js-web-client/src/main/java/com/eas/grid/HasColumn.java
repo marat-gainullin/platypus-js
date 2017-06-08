@@ -1,8 +1,8 @@
 package com.eas.grid;
 
-import com.google.gwt.user.cellview.client.Column;
+import com.eas.grid.columns.Column;
 
-public interface HasColumn<T> {
+public interface HasColumn {
 
-	public Column<T, ?> getColumn();
+    public Column getColumn();
 }

@@ -7,7 +7,7 @@ import com.eas.ui.events.ComponentEvent;
 import com.eas.ui.events.KeyEvent;
 import com.eas.ui.events.MouseEvent;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.TableCellElement;
 
 public class EventsPublisher {
 
@@ -37,10 +37,10 @@ public class EventsPublisher {
 		return new constr(aSource, aItem);
 	}-*/;	
 	
-	public native static JavaScriptObject publishOnRenderEvent(JavaScriptObject aSource, Object aRowId, Object aColumnId, JavaScriptObject aRendered, PublishedCell aCell)/*-{
+	public native static JavaScriptObject publishOnRenderEvent(JavaScriptObject aSource, Object viewIndex, TableCellElement cellElement, JavaScriptObject aRendered, PublishedCell aCell)/*-{
 		var B = @com.eas.core.Predefine::boxing;
 		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('CellRenderEvent');
-		return new constr(aSource, B.boxAsJs(aRowId), B.boxAsJs(aColumnId), aRendered, aCell);
+		return new constr(aSource, viewIndex, cellElement, aRendered, aCell);
 	}-*/;
 	
 	public native static JavaScriptObject publishWindowEvent(Object aEvent, JavaScriptObject aWindow)/*-{

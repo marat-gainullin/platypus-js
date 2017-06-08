@@ -159,20 +159,20 @@ public class JsUi {
 		}
 		
 		predefine([], 'forms/cell-render-event', function(){
-			function CellRenderEvent(aSource, aRowId, aColumnId, aRendered, aCell){
+			function CellRenderEvent(aSource, viewIndex, element, aRendered, aCell){
 				Object.defineProperty(this, "source", {
 					get : function(){
 						return aSource;
 					}
 				});
-				Object.defineProperty(this, "id", {
+				Object.defineProperty(this, "viewIndex", {
 					get : function(){
-						return aRowId;
+						return viewIndex;
 					}
 				});
-				Object.defineProperty(this, "columnId", {
+				Object.defineProperty(this, "element", {
 					get : function(){
-						return aColumnId;
+						return element;
 					}
 				});
 				Object.defineProperty(this, "object", {

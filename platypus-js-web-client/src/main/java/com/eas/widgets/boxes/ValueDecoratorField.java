@@ -58,8 +58,8 @@ public abstract class ValueDecoratorField extends Widget implements HasJsValue, 
     protected Widget decorated;
     protected boolean nullable = true;
     protected boolean editable = true;
-    protected Element selectButton = Document.get().createDivElement();
-    protected Element clearButton = Document.get().createDivElement();
+    protected Element btnSelect = Document.get().createDivElement();
+    protected Element btnClear = Document.get().createDivElement();
     protected JavaScriptObject onRender;
     protected JavaScriptObject onSelect;
     protected boolean selectOnly;
@@ -86,26 +86,26 @@ public abstract class ValueDecoratorField extends Widget implements HasJsValue, 
             }
         });
 
-        selectButton.setClassName("decorator-select");
-        selectButton.getStyle().setDisplay(Style.Display.NONE);
-        selectButton.getStyle().setHeight(100, Style.Unit.PCT);
-        selectButton.getStyle().setPosition(Style.Position.RELATIVE);
-        selectButton.getStyle().setZIndex(1); // FireFox hides this in ModelCombo without such setting
-        clearButton.setClassName("decorator-clear");
-        clearButton.getStyle().setDisplay(Style.Display.NONE);
-        clearButton.getStyle().setHeight(100, Style.Unit.PCT);
-        clearButton.getStyle().setPosition(Style.Position.RELATIVE);
-        clearButton.getStyle().setZIndex(1); // FireFox hides this in ModelCombo without such setting
+        btnSelect.setClassName("decorator-select");
+        btnSelect.getStyle().setDisplay(Style.Display.NONE);
+        btnSelect.getStyle().setHeight(100, Style.Unit.PCT);
+        btnSelect.getStyle().setPosition(Style.Position.RELATIVE);
+        btnSelect.getStyle().setZIndex(1); // FireFox hides this in ModelCombo without such setting
+        btnClear.setClassName("decorator-clear");
+        btnClear.getStyle().setDisplay(Style.Display.NONE);
+        btnClear.getStyle().setHeight(100, Style.Unit.PCT);
+        btnClear.getStyle().setPosition(Style.Position.RELATIVE);
+        btnClear.getStyle().setZIndex(1); // FireFox hides this in ModelCombo without such setting
 
         // TODO: Ensure action event occurs when user clicks on select or on clear button.
-        selectButton.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
+        btnSelect.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
 
             @Override
             public void on(NativeEvent event) {
                 selectValue();
             }
         });
-        clearButton.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
+        btnClear.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
 
             @Override
             public void on(NativeEvent event) {
@@ -228,29 +228,29 @@ public abstract class ValueDecoratorField extends Widget implements HasJsValue, 
     }
 
     protected boolean isSelectButtonVisible() {
-        return !Style.Display.NONE.getCssName().equalsIgnoreCase(selectButton.getStyle().getDisplay());
+        return !Style.Display.NONE.getCssName().equalsIgnoreCase(btnSelect.getStyle().getDisplay());
     }
 
     protected void setSelectButtonVisible(boolean aValue) {
         if (isSelectButtonVisible() != aValue) {
             if (aValue) {
-                selectButton.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+                btnSelect.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
             } else {
-                selectButton.getStyle().setDisplay(Style.Display.NONE);
+                btnSelect.getStyle().setDisplay(Style.Display.NONE);
             }
         }
     }
 
     protected boolean isClearButtonVisible() {
-        return !Style.Display.NONE.getCssName().equalsIgnoreCase(clearButton.getStyle().getDisplay());
+        return !Style.Display.NONE.getCssName().equalsIgnoreCase(btnClear.getStyle().getDisplay());
     }
 
     protected void setClearButtonVisible(boolean aValue) {
         if (isClearButtonVisible() != aValue) {
             if (aValue) {
-                clearButton.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+                btnClear.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
             } else {
-                clearButton.getStyle().setDisplay(Style.Display.NONE);
+                btnClear.getStyle().setDisplay(Style.Display.NONE);
             }
         }
     }

@@ -29,258 +29,260 @@ import com.google.gwt.core.client.Scheduler;
  */
 public class Model implements HasPublished {
 
-	protected AppClient client;
-	protected Set<Relation> relations = new HashSet<Relation>();
-	protected Set<ReferenceRelation> referenceRelations = new HashSet<ReferenceRelation>();
-	protected Map<String, Entity> entities = new HashMap<String, Entity>();
-	protected JsObject changeLog = JavaScriptObject.createArray().cast();
-	//
-	protected RequeryProcess process;
-	protected JavaScriptObject jsPublished;
+    protected AppClient client;
+    protected Set<Relation> relations = new HashSet<Relation>();
+    protected Set<ReferenceRelation> referenceRelations = new HashSet<ReferenceRelation>();
+    protected Map<String, Entity> entities = new HashMap<String, Entity>();
+    protected JsObject changeLog = JavaScriptObject.createArray().cast();
+    //
+    protected RequeryProcess process;
+    protected JavaScriptObject jsPublished;
 
-	public static class RequeryProcess {
-		public Map<Entity, String> errors = new HashMap<Entity, String>();
-		public Callback<JavaScriptObject, String> callback;
+    public static class RequeryProcess {
 
-		public RequeryProcess(Callback<JavaScriptObject, String> aCallback) {
-			super();
-			callback = aCallback;
-			assert callback != null : "aCallback argument is required.";
-		}
+        public Map<Entity, String> errors = new HashMap<Entity, String>();
+        public Callback<JavaScriptObject, String> callback;
 
-		protected String assembleErrors() {
-			if (errors != null && !errors.isEmpty()) {
-				StringBuilder sb = new StringBuilder();
-				for (Entity entity : errors.keySet()) {
-					if (sb.length() > 0)
-						sb.append("\n");
-					sb.append(errors.get(entity)).append(" (").append(entity.getName()).append("[ ").append(entity.getTitle()).append("])");
-				}
-				return sb.toString();
-			}
-			return null;
-		}
+        public RequeryProcess(Callback<JavaScriptObject, String> aCallback) {
+            super();
+            callback = aCallback;
+            assert callback != null : "aCallback argument is required.";
+        }
 
-		public void cancel() throws Exception {
-			callback.onFailure("Canceled");
-		}
+        protected String assembleErrors() {
+            if (errors != null && !errors.isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                for (Entity entity : errors.keySet()) {
+                    if (sb.length() > 0) {
+                        sb.append("\n");
+                    }
+                    sb.append(errors.get(entity)).append(" (").append(entity.getName()).append("[ ").append(entity.getTitle()).append("])");
+                }
+                return sb.toString();
+            }
+            return null;
+        }
 
-		public void success() {
-			callback.onSuccess(null);
-		}
+        public void cancel() throws Exception {
+            callback.onFailure("Canceled");
+        }
 
-		public void failure() {
-			callback.onFailure(assembleErrors());
-		}
+        public void success() {
+            callback.onSuccess(null);
+        }
 
-		public void end() {
-			if (errors.isEmpty()) {
-				success();
-			} else {
-				failure();
-			}
-		}
-	}
+        public void failure() {
+            callback.onFailure(assembleErrors());
+        }
 
-	public static class SimpleEntry implements Entry<Entity, Integer> {
+        public void end() {
+            if (errors.isEmpty()) {
+                success();
+            } else {
+                failure();
+            }
+        }
+    }
 
-		protected Entity key;
-		protected Integer value;
+    public static class SimpleEntry implements Entry<Entity, Integer> {
 
-		private SimpleEntry(Entity aKey, Integer aValue) {
-			super();
-			key = aKey;
-			value = aValue;
-		}
+        protected Entity key;
+        protected Integer value;
 
-		@Override
-		public Entity getKey() {
-			return key;
-		}
+        private SimpleEntry(Entity aKey, Integer aValue) {
+            super();
+            key = aKey;
+            value = aValue;
+        }
 
-		@Override
-		public Integer getValue() {
-			return value;
-		}
+        @Override
+        public Entity getKey() {
+            return key;
+        }
 
-		@Override
-		public Integer setValue(Integer aValue) {
-			Integer oldValue = value;
-			value = aValue;
-			return oldValue;
-		}
-	}
+        @Override
+        public Integer getValue() {
+            return value;
+        }
 
-	public Model copy() throws Exception {
-		Model copied = new Model(client);
-		for (Entity entity : entities.values()) {
-			copied.addEntity(entity.copy());
-		}
-		for (Relation relation : relations) {
-			Relation rcopied = relation.copy();
-			resolveCopiedRelation(rcopied, copied);
-			copied.addRelation(rcopied);
-		}
-		for (ReferenceRelation relation : referenceRelations) {
-			ReferenceRelation rcopied = (ReferenceRelation) relation.copy();
-			resolveCopiedRelation(rcopied, copied);
-			copied.addRelation(rcopied);
-		}
-		return copied;
-	}
+        @Override
+        public Integer setValue(Integer aValue) {
+            Integer oldValue = value;
+            value = aValue;
+            return oldValue;
+        }
+    }
 
-	protected void resolveCopiedRelation(Relation aRelation, Model aModel) throws Exception {
-		if (aRelation.getLeftEntity() != null) {
-			aRelation.setLeftEntity(aModel.getEntityById(aRelation.getLeftEntity().getEntityId()));
-		}
-		if (aRelation.getRightEntity() != null) {
-			aRelation.setRightEntity(aModel.getEntityById(aRelation.getRightEntity().getEntityId()));
-		}
-		if (aRelation.getLeftField() != null) {
-			if (aRelation.getLeftEntity() != null) {
-				if (aRelation.isLeftParameter() && aRelation.getLeftEntity().getQueryName() != null) {
-					aRelation.setLeftField(aRelation.getLeftEntity().getQuery().getParameters().get(aRelation.getLeftField().getName()));
-				} else {
-					aRelation.setLeftField(aRelation.getLeftEntity().getFields().get(aRelation.getLeftField().getName()));
-				}
-			} else {
-				aRelation.setLeftField(null);
-			}
-		}
-		if (aRelation.getRightField() != null) {
-			if (aRelation.getRightEntity() != null) {
-				if (aRelation.isRightParameter() && aRelation.getRightEntity().getQueryName() != null) {
-					aRelation.setRightField(aRelation.getRightEntity().getQuery().getParameters().get(aRelation.getRightField().getName()));
-				} else {
-					aRelation.setRightField(aRelation.getRightEntity().getFields().get(aRelation.getRightField().getName()));
-				}
-			} else {
-				aRelation.setRightField(null);
-			}
-		}
-	}
+    public Model copy() throws Exception {
+        Model copied = new Model(client);
+        for (Entity entity : entities.values()) {
+            copied.addEntity(entity.copy());
+        }
+        for (Relation relation : relations) {
+            Relation rcopied = relation.copy();
+            resolveCopiedRelation(rcopied, copied);
+            copied.addRelation(rcopied);
+        }
+        for (ReferenceRelation relation : referenceRelations) {
+            ReferenceRelation rcopied = (ReferenceRelation) relation.copy();
+            resolveCopiedRelation(rcopied, copied);
+            copied.addRelation(rcopied);
+        }
+        return copied;
+    }
 
-	public void checkRelationsIntegrity() {
-		List<Relation> toDel = new ArrayList<Relation>();
-		for (Relation rel : relations) {
-			if (rel.getLeftEntity() == null || (rel.getLeftField() == null && rel.getLeftParameter() == null) || rel.getRightEntity() == null
-			        || (rel.getRightField() == null && rel.getRightParameter() == null)) {
-				toDel.add(rel);
-			}
-		}
-		for (Relation rel : toDel) {
-			removeRelation(rel);
-		}
-		checkReferenceRelationsIntegrity();
-	}
+    protected void resolveCopiedRelation(Relation aRelation, Model aModel) throws Exception {
+        if (aRelation.getLeftEntity() != null) {
+            aRelation.setLeftEntity(aModel.getEntityById(aRelation.getLeftEntity().getEntityId()));
+        }
+        if (aRelation.getRightEntity() != null) {
+            aRelation.setRightEntity(aModel.getEntityById(aRelation.getRightEntity().getEntityId()));
+        }
+        if (aRelation.getLeftField() != null) {
+            if (aRelation.getLeftEntity() != null) {
+                if (aRelation.isLeftParameter() && aRelation.getLeftEntity().getQueryName() != null) {
+                    aRelation.setLeftField(aRelation.getLeftEntity().getQuery().getParameters().get(aRelation.getLeftField().getName()));
+                } else {
+                    aRelation.setLeftField(aRelation.getLeftEntity().getFields().get(aRelation.getLeftField().getName()));
+                }
+            } else {
+                aRelation.setLeftField(null);
+            }
+        }
+        if (aRelation.getRightField() != null) {
+            if (aRelation.getRightEntity() != null) {
+                if (aRelation.isRightParameter() && aRelation.getRightEntity().getQueryName() != null) {
+                    aRelation.setRightField(aRelation.getRightEntity().getQuery().getParameters().get(aRelation.getRightField().getName()));
+                } else {
+                    aRelation.setRightField(aRelation.getRightEntity().getFields().get(aRelation.getRightField().getName()));
+                }
+            } else {
+                aRelation.setRightField(null);
+            }
+        }
+    }
 
-	protected void checkReferenceRelationsIntegrity() {
-		List<ReferenceRelation> toDel = new ArrayList<ReferenceRelation>();
-		for (ReferenceRelation rel : referenceRelations) {
-			if (rel.getLeftEntity() == null || (rel.getLeftField() == null && rel.getLeftParameter() == null) || rel.getRightEntity() == null
-			        || (rel.getRightField() == null && rel.getRightParameter() == null)) {
-				toDel.add(rel);
-			}
-		}
-		for (ReferenceRelation rel : toDel) {
-			referenceRelations.remove(rel);
-		}
-	}
+    public void checkRelationsIntegrity() {
+        List<Relation> toDel = new ArrayList<Relation>();
+        for (Relation rel : relations) {
+            if (rel.getLeftEntity() == null || (rel.getLeftField() == null && rel.getLeftParameter() == null) || rel.getRightEntity() == null
+                    || (rel.getRightField() == null && rel.getRightParameter() == null)) {
+                toDel.add(rel);
+            }
+        }
+        for (Relation rel : toDel) {
+            removeRelation(rel);
+        }
+        checkReferenceRelationsIntegrity();
+    }
 
-	/**
-	 * Base model constructor.
-	 */
-	protected Model() {
-		super();
-	}
+    protected void checkReferenceRelationsIntegrity() {
+        List<ReferenceRelation> toDel = new ArrayList<ReferenceRelation>();
+        for (ReferenceRelation rel : referenceRelations) {
+            if (rel.getLeftEntity() == null || (rel.getLeftField() == null && rel.getLeftParameter() == null) || rel.getRightEntity() == null
+                    || (rel.getRightField() == null && rel.getRightParameter() == null)) {
+                toDel.add(rel);
+            }
+        }
+        for (ReferenceRelation rel : toDel) {
+            referenceRelations.remove(rel);
+        }
+    }
 
-	/**
-	 * Constructor of datamodel. Used in designers.
-	 * 
-	 * @param aClient
-	 *            C instance all queries to be sent to.
-	 * @see AppClient
-	 */
-	public Model(AppClient aClient) {
-		this();
-		client = aClient;
-	}
+    /**
+     * Base model constructor.
+     */
+    protected Model() {
+        super();
+    }
 
-	public AppClient getClient() {
-		return client;
-	}
+    /**
+     * Constructor of datamodel. Used in designers.
+     *
+     * @param aClient C instance all queries to be sent to.
+     * @see AppClient
+     */
+    public Model(AppClient aClient) {
+        this();
+        client = aClient;
+    }
 
-	public void setClient(AppClient aValue) {
-		client = aValue;
-	}
+    public AppClient getClient() {
+        return client;
+    }
 
-	public Set<ReferenceRelation> getReferenceRelations() {
-		return Collections.unmodifiableSet(referenceRelations);
-	}
+    public void setClient(AppClient aValue) {
+        client = aValue;
+    }
 
-	public boolean isPending() {
-		for (Entity entity : entities.values()) {
-			if (entity.isPending())
-				return true;
-		}
-		return false;
-	}
+    public Set<ReferenceRelation> getReferenceRelations() {
+        return Collections.unmodifiableSet(referenceRelations);
+    }
 
-	public void addRelation(Relation aRel) {
-		if (aRel instanceof ReferenceRelation) {
-			referenceRelations.add((ReferenceRelation) aRel);
-		} else {
-			relations.add(aRel);
-			Entity lEntity = aRel.getLeftEntity();
-			Entity rEntity = aRel.getRightEntity();
-			if (lEntity != null && rEntity != null) {
-				lEntity.addOutRelation(aRel);
-				rEntity.addInRelation(aRel);
-			}
-		}
-	}
+    public boolean isPending() {
+        for (Entity entity : entities.values()) {
+            if (entity.isPending()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	public Set<Relation> collectRelationsByEntity(Entity aEntity) {
-		return aEntity.getInOutRelations();
-	}
+    public void addRelation(Relation aRel) {
+        if (aRel instanceof ReferenceRelation) {
+            referenceRelations.add((ReferenceRelation) aRel);
+        } else {
+            relations.add(aRel);
+            Entity lEntity = aRel.getLeftEntity();
+            Entity rEntity = aRel.getRightEntity();
+            if (lEntity != null && rEntity != null) {
+                lEntity.addOutRelation(aRel);
+                rEntity.addInRelation(aRel);
+            }
+        }
+    }
 
-	@Override
-	public JavaScriptObject getPublished() {
-		return jsPublished;
-	}
+    public Set<Relation> collectRelationsByEntity(Entity aEntity) {
+        return aEntity.getInOutRelations();
+    }
 
-	@Override
-	public void setPublished(JavaScriptObject aValue) {
-		if (jsPublished != aValue) {
-			jsPublished = aValue;
-			publish();
-		}
-	}
+    @Override
+    public JavaScriptObject getPublished() {
+        return jsPublished;
+    }
 
-	private void publish() {
-		try {
-			publishTopLevelFacade(jsPublished, this);
-			publishEntities();
-		} catch (Exception ex) {
-			Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
-		}
-	}
+    @Override
+    public void setPublished(JavaScriptObject aValue) {
+        if (jsPublished != aValue) {
+            jsPublished = aValue;
+            publish();
+        }
+    }
 
-	private void publishEntities() throws Exception {
-		assert jsPublished != null : "JavaScript facade object has to be already installed while publishing rowsets facades.";
-		validateQueries();
-		//
-		for (Entity entity : entities.values()) {
-			if (entity.getName() != null && !entity.getName().isEmpty()) {
-				JavaScriptObject publishedEntity = publishEntity(entity);
-				entity.setPublished(publishedEntity);
-				jsPublished.<JsObject> cast().inject(entity.getName(), publishedEntity, true, false);
-			}
-		}
-		//
-		for (ReferenceRelation aRelation : referenceRelations) {
-			String scalarPropertyName = aRelation.getScalarPropertyName();
-			String collectionPropertyName = aRelation.getCollectionPropertyName();
+    private void publish() {
+        try {
+            publishTopLevelFacade(jsPublished, this);
+            publishEntities();
+        } catch (Exception ex) {
+            Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void publishEntities() throws Exception {
+        assert jsPublished != null : "JavaScript facade object has to be already installed while publishing rowsets facades.";
+        validateQueries();
+        //
+        for (Entity entity : entities.values()) {
+            if (entity.getName() != null && !entity.getName().isEmpty()) {
+                JavaScriptObject publishedEntity = publishEntity(entity);
+                entity.setPublished(publishedEntity);
+                jsPublished.<JsObject>cast().inject(entity.getName(), publishedEntity, true, false);
+            }
+        }
+        //
+        for (ReferenceRelation aRelation : referenceRelations) {
+            String scalarPropertyName = aRelation.getScalarPropertyName();
+            String collectionPropertyName = aRelation.getCollectionPropertyName();
             if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
                 aRelation.getLeftEntity().putOrmScalarDefinition(
                         scalarPropertyName,
@@ -297,10 +299,10 @@ public class Model implements HasPublished {
                                 aRelation.getRightField().getName(),
                                 aRelation.getLeftField().getName())));
             }
-		}
-	}
+        }
+    }
 
-	protected native JavaScriptObject publishEntity(Entity nEntity)/*-{
+    protected native JavaScriptObject publishEntity(Entity nEntity)/*-{
 		var B = @com.eas.core.Predefine::boxing;
 		var Logger = @com.eas.core.Predefine::logger;
 		var M = @com.eas.model.JsModel::managed;
@@ -832,16 +834,16 @@ public class Model implements HasPublished {
         });
         @com.eas.core.Utils::listenable(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
         return published;
-	}-*/; 
-	
-	private static DefinitionsContainer ormPropertiesDefiner = DefinitionsContainer.init();
+	}-*/;
 
-	private static final class DefinitionsContainer extends JavaScriptObject {
+    private static DefinitionsContainer ormPropertiesDefiner = DefinitionsContainer.init();
 
-		protected DefinitionsContainer() {
-		}
+    private static final class DefinitionsContainer extends JavaScriptObject {
 
-		public native static DefinitionsContainer init()/*-{
+        protected DefinitionsContainer() {
+        }
+
+        public native static DefinitionsContainer init()/*-{
 			var Logger = @com.eas.core.Predefine::logger;
 			var M = @com.eas.model.JsModel::managed;
 			return {
@@ -889,18 +891,18 @@ public class Model implements HasPublished {
 			}
 		}-*/;
 
-		public native JavaScriptObject scalar(JavaScriptObject targetEntity, String targetFieldName, String sourceFieldName)/*-{
+        public native JavaScriptObject scalar(JavaScriptObject targetEntity, String targetFieldName, String sourceFieldName)/*-{
 			var constr = this.scalarDef;
 			return new constr(targetEntity, targetFieldName, sourceFieldName);
 		}-*/;
 
-		public native JavaScriptObject collection(JavaScriptObject sourceEntity, String targetFieldName, String sourceFieldName)/*-{
+        public native JavaScriptObject collection(JavaScriptObject sourceEntity, String targetFieldName, String sourceFieldName)/*-{
 			var constr = this.collectionDef;
 			return new constr(sourceEntity, targetFieldName, sourceFieldName);
 		}-*/;
-	}
+    }
 
-	public native static void publishTopLevelFacade(JavaScriptObject aTarget, Model aModel) throws Exception/*-{
+    public native static void publishTopLevelFacade(JavaScriptObject aTarget, Model aModel) throws Exception/*-{
 		var Logger = @com.eas.core.Predefine::logger;
 		var publishedModel = aTarget;
 		Object.defineProperty(publishedModel, "createQuery", {
@@ -965,275 +967,280 @@ public class Model implements HasPublished {
 		});
 	}-*/;
 
-	public void removeRelation(Relation aRelation) {
-		relations.remove(aRelation);
-		Entity lEntity = aRelation.getLeftEntity();
-		Entity rEntity = aRelation.getRightEntity();
-		if (lEntity != null && rEntity != null) {
-			lEntity.removeOutRelation(aRelation);
-			rEntity.removeInRelation(aRelation);
-		}
-	}
+    public void removeRelation(Relation aRelation) {
+        relations.remove(aRelation);
+        Entity lEntity = aRelation.getLeftEntity();
+        Entity rEntity = aRelation.getRightEntity();
+        if (lEntity != null && rEntity != null) {
+            lEntity.removeOutRelation(aRelation);
+            rEntity.removeInRelation(aRelation);
+        }
+    }
 
-	public void addEntity(Entity aEntity) {
-		entities.put(aEntity.getEntityId(), aEntity);
-		aEntity.setModel(this);
-	}
+    public void addEntity(Entity aEntity) {
+        entities.put(aEntity.getEntityId(), aEntity);
+        aEntity.setModel(this);
+    }
 
-	public boolean removeEntity(Entity aEnt) {
-		if (aEnt != null) {
-			return (removeEntity(aEnt.getEntityId()) != null);
-		}
-		return false;
-	}
+    public boolean removeEntity(Entity aEnt) {
+        if (aEnt != null) {
+            return (removeEntity(aEnt.getEntityId()) != null);
+        }
+        return false;
+    }
 
-	public Entity removeEntity(String aEntId) {
-		Entity lent = entities.get(aEntId);
-		if (lent != null) {
-			entities.remove(aEntId);
-		}
-		return lent;
-	}
+    public Entity removeEntity(String aEntId) {
+        Entity lent = entities.get(aEntId);
+        if (lent != null) {
+            entities.remove(aEntId);
+        }
+        return lent;
+    }
 
-	public Map<String, Entity> getEntities() {
-		return entities;
-	}
+    public Map<String, Entity> getEntities() {
+        return entities;
+    }
 
-	public Entity getEntityById(String aId) {
-		return entities.get(aId);
-	}
+    public Entity getEntityById(String aId) {
+        return entities.get(aId);
+    }
 
-	public void setEntities(Map<String, Entity> aValue) {
-		entities = aValue;
-	}
+    public void setEntities(Map<String, Entity> aValue) {
+        entities = aValue;
+    }
 
-	public Set<Relation> getRelations() {
-		return relations;
-	}
+    public Set<Relation> getRelations() {
+        return relations;
+    }
 
-	public void setRelations(Set<Relation> aRelations) {
-		relations = aRelations;
-	}
+    public void setRelations(Set<Relation> aRelations) {
+        relations = aRelations;
+    }
 
-	public void executeEntities(boolean refresh, Set<Entity> toExecute) throws Exception {
-		if (refresh) {
-			for (Entity entity : toExecute) {
-				entity.invalidate();
-			}
-		}
-		for (Entity entity : toExecute) {
-			entity.internalExecute(null);
-		}
-	}
+    public void executeEntities(boolean refresh, Set<Entity> toExecute) throws Exception {
+        if (refresh) {
+            for (Entity entity : toExecute) {
+                entity.invalidate();
+            }
+        }
+        for (Entity entity : toExecute) {
+            entity.internalExecute(null);
+        }
+    }
 
-	private Set<Entity> rootEntities() {
-		final Set<Entity> rootEntities = new HashSet<>();
-		for (Entity entity : entities.values()) {
-			if (entity.getInRelations().isEmpty())
-				rootEntities.add(entity);
-		}
-		return rootEntities;
-	}
+    private Set<Entity> rootEntities() {
+        final Set<Entity> rootEntities = new HashSet<>();
+        for (Entity entity : entities.values()) {
+            if (entity.getInRelations().isEmpty()) {
+                rootEntities.add(entity);
+            }
+        }
+        return rootEntities;
+    }
 
-	public RequeryProcess getProcess() {
-		return process;
-	}
+    public RequeryProcess getProcess() {
+        return process;
+    }
 
-	public void setProcess(RequeryProcess aValue) {
-		process = aValue;
-	}
+    public void setProcess(RequeryProcess aValue) {
+        process = aValue;
+    }
 
-	public void terminateProcess(Entity aSource, String aErrorMessage) {
-		if (process != null) {
-			if (aErrorMessage != null) {
-				process.errors.put(aSource, aErrorMessage);
-			}
-			if (!isPending()) {
-				RequeryProcess pr = process;
-				process = null;
-				pr.end();
-			}
-		}
-	}
+    public void terminateProcess(Entity aSource, String aErrorMessage) {
+        if (process != null) {
+            if (aErrorMessage != null) {
+                process.errors.put(aSource, aErrorMessage);
+            }
+            if (!isPending()) {
+                RequeryProcess pr = process;
+                process = null;
+                pr.end();
+            }
+        }
+    }
 
-	public boolean isTypeSupported(int type) throws Exception {
-		return true;
-	}
+    public boolean isTypeSupported(int type) throws Exception {
+        return true;
+    }
 
-	public boolean isNamePresent(String aName, Collection<Entity> aEntities, Entity toExclude, Field field2Exclude) {
-		if (aEntities != null && aName != null) {
-			for (Entity ent : aEntities) {
-				if (ent != null && ent != toExclude) {
-					String lName = ent.getName();
-					if (lName != null && aName.equals(lName)) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
+    public boolean isNamePresent(String aName, Collection<Entity> aEntities, Entity toExclude, Field field2Exclude) {
+        if (aEntities != null && aName != null) {
+            for (Entity ent : aEntities) {
+                if (ent != null && ent != toExclude) {
+                    String lName = ent.getName();
+                    if (lName != null && aName.equals(lName)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
-	public JavaScriptObject getChangeLog() {
-		return changeLog;
-	}
+    public JavaScriptObject getChangeLog() {
+        return changeLog;
+    }
 
-	public void accept(ModelVisitor visitor) {
-		visitor.visit(this);
-	}
+    public void accept(ModelVisitor visitor) {
+        visitor.visit(this);
+    }
 
-	public boolean isModified() throws Exception {
-		return changeLog.length() > 0;
-	}
+    public boolean isModified() throws Exception {
+        return changeLog.length() > 0;
+    }
 
-	public void save(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) {
-		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-			// Scheduling is needed because of asynchronous nature of Object.observe's callback calling process.
-			@Override
-			public void execute() {
-				try {
-					client.requestCommit(changeLog, new CallbackAdapter<Void, String>() {
+    public void save(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) {
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            // Scheduling is needed because of asynchronous nature of Object.observe's callback calling process.
+            @Override
+            public void execute() {
+                try {
+                    client.requestCommit(changeLog, new CallbackAdapter<Void, String>() {
 
-						@Override
-						protected void doWork(Void aVoid) throws Exception {
-							commited();
-							if (onSuccess != null)
-								Utils.invokeJsFunction(onSuccess);
-						}
+                        @Override
+                        protected void doWork(Void aVoid) throws Exception {
+                            commited();
+                            if (onSuccess != null) {
+                                Utils.invokeJsFunction(onSuccess);
+                            }
+                        }
 
-						@Override
-						public void onFailure(String aReason) {
-							try {
-								rolledback();
-								if (onFailure != null)
-									Utils.executeScriptEventVoid(jsPublished, onFailure, aReason);
-							} catch (Exception ex) {
-								Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
-							}
-						}
+                        @Override
+                        public void onFailure(String aReason) {
+                            try {
+                                rolledback();
+                                if (onFailure != null) {
+                                    Utils.executeScriptEventVoid(jsPublished, onFailure, aReason);
+                                }
+                            } catch (Exception ex) {
+                                Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
 
-					});
-				} catch (Exception ex) {
-					Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			}
+                    });
+                } catch (Exception ex) {
+                    Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
 
-		});
-	}
+        });
+    }
 
-	public void revert() throws Exception {
-		changeLog.splice(0, changeLog.length());
-		for(Entity e : entities.values()){
+    public void revert() throws Exception {
+        changeLog.splice(0, changeLog.length());
+        for (Entity e : entities.values()) {
             e.applyLastSnapshot();
-		}
-	}
+        }
+    }
 
-	public void commited() throws Exception {
-		changeLog.splice(0, changeLog.length());
-		for(Entity e : entities.values()){
+    public void commited() throws Exception {
+        changeLog.splice(0, changeLog.length());
+        for (Entity e : entities.values()) {
             e.takeSnapshot();
-		}
-	}
+        }
+    }
 
-	public void rolledback() throws Exception {
-		Logger.getLogger(Model.class.getName()).log(Level.SEVERE, "rolled back");
-	}
+    public void rolledback() throws Exception {
+        Logger.getLogger(Model.class.getName()).log(Level.SEVERE, "rolled back");
+    }
 
-	public void requery(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
-		requery(new CallbackAdapter<JavaScriptObject, String>() {
-			@Override
-			protected void doWork(JavaScriptObject aRowset) throws Exception {
-				if (onSuccess != null)
-					Utils.invokeJsFunction(onSuccess);
-			}
+    public void requery(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
+        requery(new CallbackAdapter<JavaScriptObject, String>() {
+            @Override
+            protected void doWork(JavaScriptObject aRowset) throws Exception {
+                if (onSuccess != null) {
+                    Utils.invokeJsFunction(onSuccess);
+                }
+            }
 
-			@Override
-			public void onFailure(String reason) {
-				if (onFailure != null) {
-					try {
-						Utils.executeScriptEventVoid(jsPublished, onFailure, reason);
-					} catch (Exception ex) {
-						Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
-					}
-				}
-			}
-		});
-	}
+            @Override
+            public void onFailure(String reason) {
+                if (onFailure != null) {
+                    try {
+                        Utils.executeScriptEventVoid(jsPublished, onFailure, reason);
+                    } catch (Exception ex) {
+                        Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        });
+    }
 
-	public void requery(Callback<JavaScriptObject, String> aCallback) throws Exception {
-		inNewProcess(new Callable(){
-			@Override
-			public void call() throws Exception {
-				revert();
-				executeEntities(true, rootEntities());
-			}
+    public void requery(Callback<JavaScriptObject, String> aCallback) throws Exception {
+        inNewProcess(new Callable() {
+            @Override
+            public void call() throws Exception {
+                revert();
+                executeEntities(true, rootEntities());
+            }
 
-		}, aCallback);
-	}
+        }, aCallback);
+    }
 
-	public void execute(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
-		execute(new CallbackAdapter<JavaScriptObject, String>() {
-			@Override
-			protected void doWork(JavaScriptObject aRowset) throws Exception {
-				if (onSuccess != null)
-					Utils.invokeJsFunction(onSuccess);
-			}
+    public void execute(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
+        execute(new CallbackAdapter<JavaScriptObject, String>() {
+            @Override
+            protected void doWork(JavaScriptObject aRowset) throws Exception {
+                if (onSuccess != null) {
+                    Utils.invokeJsFunction(onSuccess);
+                }
+            }
 
-			@Override
-			public void onFailure(String reason) {
-				if (onFailure != null) {
-					try {
-						Utils.executeScriptEventVoid(jsPublished, onFailure, reason);
-					} catch (Exception ex) {
-						Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
-					}
-				}
-			}
-		});
-	}
+            @Override
+            public void onFailure(String reason) {
+                if (onFailure != null) {
+                    try {
+                        Utils.executeScriptEventVoid(jsPublished, onFailure, reason);
+                    } catch (Exception ex) {
+                        Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        });
+    }
 
-	public void execute(Callback<JavaScriptObject, String> aCallback) throws Exception {
-		inNewProcess(new Callable(){
-			@Override
-			public void call() throws Exception {
-				executeEntities(false, rootEntities());
-			}
-		}, aCallback);
-	}
+    public void execute(Callback<JavaScriptObject, String> aCallback) throws Exception {
+        inNewProcess(new Callable() {
+            @Override
+            public void call() throws Exception {
+                executeEntities(false, rootEntities());
+            }
+        }, aCallback);
+    }
 
-	public void inNewProcess(Callable aAction, Callback<JavaScriptObject, String> aCallback) throws Exception {
-		if (process != null) {
-			process.cancel();
-			process = null;
-		}
-		if (aCallback != null) {
-			process = new RequeryProcess(aCallback);
-		}
-		aAction.call();
-		if (!isPending() && process != null) {
-			process.end();
-			process = null;
-		}
-	}
+    public void inNewProcess(Callable aAction, Callback<JavaScriptObject, String> aCallback) throws Exception {
+        if (process != null) {
+            process.cancel();
+            process = null;
+        }
+        if (aCallback != null) {
+            process = new RequeryProcess(aCallback);
+        }
+        aAction.call();
+        if (!isPending() && process != null) {
+            process.end();
+            process = null;
+        }
+    }
 
-	public void validateQueries() throws Exception {
-		for (Entity entity : entities.values()) {
-			entity.validateQuery();
-		}
-	}
+    public void validateQueries() throws Exception {
+        for (Entity entity : entities.values()) {
+            entity.validateQuery();
+        }
+    }
 
-	protected static final String USER_DATASOURCE_NAME = "userEntity";
+    protected static final String USER_DATASOURCE_NAME = "userEntity";
 
-	public Object jsLoadEntity(String aQueryName) throws Exception {
-		if (client == null) {
-			throw new NullPointerException("Null client detected while creating an entity");
-		}
-		Entity entity = new Entity(this);
-		entity.setName(USER_DATASOURCE_NAME);
-		entity.setQueryName(aQueryName);
-		entity.validateQuery();
-		// addEntity(entity); To avoid memory leaks you should not add the
-		// entity to the model!
-		return publishEntity(entity);
-	}
+    public Object jsLoadEntity(String aQueryName) throws Exception {
+        if (client == null) {
+            throw new NullPointerException("Null client detected while creating an entity");
+        }
+        Entity entity = new Entity(this);
+        entity.setName(USER_DATASOURCE_NAME);
+        entity.setQueryName(aQueryName);
+        entity.validateQuery();
+        // addEntity(entity); To avoid memory leaks you should not add the
+        // entity to the model!
+        return publishEntity(entity);
+    }
 }

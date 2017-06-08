@@ -36,6 +36,10 @@ public class MenuItemCheckBox extends MenuItem implements HasButtonGroup, HasAct
     protected Element field;
     protected ButtonGroup group;
 
+    public MenuItemCheckBox() {
+        this(false, "", false);
+    }
+
     public MenuItemCheckBox(Boolean aValue, String aText, boolean asHtml) {
         super();
         element.setClassName("menu-item");

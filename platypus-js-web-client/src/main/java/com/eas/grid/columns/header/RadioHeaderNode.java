@@ -1,35 +1,33 @@
 package com.eas.grid.columns.header;
 
-import com.eas.bound.ModelDecoratorBox;
-import com.eas.grid.DraggableHeader;
+import com.eas.grid.HeaderView;
 import com.eas.grid.columns.RadioServiceColumn;
-import com.google.gwt.core.client.JavaScriptObject;
+import com.eas.ui.Widget;
 
-public class RadioHeaderNode extends ModelHeaderNode {
+public class RadioHeaderNode extends HeaderNode {
 
-	public RadioHeaderNode() {
-		super();
-		column = new RadioServiceColumn();
-		header = new DraggableHeader<JavaScriptObject>("\\", null, column, this);
-		setResizable(false);
-	}
-	
-	@Override
-	public RadioHeaderNode lightCopy(){
-		RadioHeaderNode copied = new RadioHeaderNode();
-		copied.setColumn(column);
-		copied.setHeader(header);
-		return copied;
-	}
-	
+    public RadioHeaderNode() {
+        super();
+        column = new RadioServiceColumn();
+        header = new HeaderView("\\", null, this);
+        setResizable(false);
+    }
 
-	@Override
-	public JavaScriptObject getJsEditor() {
-		return null;
-	}
+    @Override
+    public RadioHeaderNode lightCopy() {
+        RadioHeaderNode copied = new RadioHeaderNode();
+        copied.setColumn(column);
+        copied.setHeader(header);
+        return copied;
+    }
 
-	@Override
-	public void setEditor(ModelDecoratorBox<?> aEditor) {
-		// no op since node type
-	}
+    @Override
+    public Widget getEditor() {
+        return null;
+    }
+
+    @Override
+    public void setEditor(Widget aWidget) {
+        // no op 
+    }
 }
