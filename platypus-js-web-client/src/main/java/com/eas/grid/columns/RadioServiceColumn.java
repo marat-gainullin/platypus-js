@@ -13,6 +13,23 @@ public class RadioServiceColumn extends Column {
     }
 
     @Override
+    public void setWidth(double aValue) {
+        super.setWidth(aValue);
+        minWidth = width;
+        maxWidth = width;
+    }
+
+    @Override
+    public void setMinWidth(double aValue) {
+        // no op
+    }
+
+    @Override
+    public void setMaxWidth(double aValue) {
+        // no op
+    }
+
+    @Override
     public void render(int viewIndex, JavaScriptObject dataRow, TableCellElement viewCell) {
         // TODO: Add grid.isSelected() driven rendering
     }

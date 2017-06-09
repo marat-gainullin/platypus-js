@@ -3,7 +3,7 @@ package com.eas.grid;
 import com.google.gwt.dom.client.Element;
 
 /**
- * Хранилище состояния операции перетаскивания
+ * Состояние операции перетаскивания
  * @author mg
  */
 public class ColumnDrag {
@@ -11,18 +11,16 @@ public class ColumnDrag {
     public static ColumnDrag instance;
 
     protected HeaderView header;
-    protected GridSection table;
-    protected Element cellElement;
+    protected Element decorationElement;
     
-    protected ColumnDrag(HeaderView aHeader, GridSection aSection, Element aCellElement) {
+    protected ColumnDrag(HeaderView aHeader, Element aDecorationElement) {
         super();
         header = aHeader;
-        table = aSection;
-        cellElement = aCellElement;
+        decorationElement = aDecorationElement;
     }
 
     public boolean isResize() {
-        return cellElement.getClassName().contains("header-resizer");
+        return decorationElement.getClassName().contains("header-resizer");
     }
 
     public boolean isMove() {
@@ -33,12 +31,8 @@ public class ColumnDrag {
         return header;
     }
 
-    public GridSection getSection() {
-        return table;
-    }
-
-    public Element getCellElement() {
-        return cellElement;
+    public Element getDecorationElement() {
+        return decorationElement;
     }
 
 }

@@ -9,7 +9,7 @@ public class CheckHeaderNode extends HeaderNode {
     public CheckHeaderNode() {
         super();
         column = new CheckServiceColumn();
-        header = new HeaderView("\\", null, this);
+        header = new HeaderView("\\", this);
         setResizable(false);
     }
 

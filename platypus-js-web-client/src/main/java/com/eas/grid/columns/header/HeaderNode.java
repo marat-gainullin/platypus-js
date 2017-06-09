@@ -12,11 +12,23 @@ import com.eas.ui.Widget;
 import com.eas.widgets.boxes.FormattedDecoratorField;
 import com.google.gwt.core.client.JavaScriptObject;
 
+/**
+ * If this header node is not a leaf, its column is reserved for further
+ * structure changes, wich may make the node a leaf.
+ *
+ * @author mgainullin
+ */
 public class HeaderNode implements HasJsName {
 
     protected String name;
-    protected Column column; // assigned only if this header node is a leaf
-    protected HeaderView header; // visual part of this header node
+    /**
+     * Data part of this header node.
+     */
+    protected Column column;
+    /**
+     * Visual part of this header node.
+     */
+    protected HeaderView header;
     protected HeaderNode parent;
     protected List<HeaderNode> children = new ArrayList<>();
 
@@ -26,8 +38,8 @@ public class HeaderNode implements HasJsName {
     public HeaderNode() {
         super();
         column = new Column();
-        ((Column) column).setEditor(new FormattedDecoratorField());
-        header = new HeaderView("", null, this);
+        column.setEditor(new FormattedDecoratorField());
+        header = new HeaderView("", this);
     }
 
     public HeaderNode lightCopy() {
@@ -93,10 +105,10 @@ public class HeaderNode implements HasJsName {
         }
     }
 
-    public HeaderNode[] getColumnNodes(){
+    public HeaderNode[] getColumnNodes() {
         return children.toArray(new HeaderNode[]{});
     }
-    
+
     public int getDepthRemainder() {
         return depthRemainder;
     }
@@ -108,7 +120,7 @@ public class HeaderNode implements HasJsName {
     public boolean isLeaf() {
         return children.isEmpty();
     }
-    
+
     @Override
     public String getJsName() {
         return name;
@@ -120,159 +132,160 @@ public class HeaderNode implements HasJsName {
     }
 
     public PublishedColor getBackground() {
-        return ((HeaderView) header).getBackground();
+        return header.getBackground();
     }
 
     public void setBackground(PublishedColor aValue) {
-        ((HeaderView) header).setBackground(aValue);
+        header.setBackground(aValue);
     }
 
     public PublishedColor getForeground() {
-        return ((HeaderView) header).getForeground();
+        return header.getForeground();
     }
 
     public void setForeground(PublishedColor aValue) {
-        ((HeaderView) header).setForeground(aValue);
+        header.setForeground(aValue);
     }
 
     public PublishedFont getFont() {
-        return ((HeaderView) header).getFont();
+        return header.getFont();
     }
 
     public void setFont(PublishedFont aValue) {
-        ((HeaderView) header).setFont(aValue);
+        header.setFont(aValue);
     }
 
     public double getMinWidth() {
-        return ((Column) column).getMinWidth();
+        return column.getMinWidth();
     }
 
     public void setMinWidth(double aValue) {
-        ((Column) column).setMinWidth(aValue);
+        column.setMinWidth(aValue);
     }
 
     public double getMaxWidth() {
-        return ((Column) column).getMaxWidth();
+        return column.getMaxWidth();
     }
 
     public void setMaxWidth(double aValue) {
-        ((Column) column).setMaxWidth(aValue);
+        column.setMaxWidth(aValue);
     }
 
     public double getPreferredWidth() {
-        return ((Column) column).getDesignedWidth();
+        return column.getDesignedWidth();
     }
 
     public void setPreferredWidth(double aValue) {
-        ((Column) column).setWidth(aValue);
+        column.setWidth(aValue);
     }
 
     public String getField() {
-        return ((Column) column).getField();
+        return column.getField();
     }
 
     public void setField(String aValue) {
-        ((Column) column).setField(aValue);
+        column.setField(aValue);
     }
 
     public String getTitle() {
-        return ((HeaderView) header).getTitle();
+        return header.getText();
     }
 
     public void setTitle(String aValue) {
-        ((HeaderView) header).setTitle(aValue);
+        header.setText(aValue);
     }
 
     public boolean isResizable() {
-        return ((HeaderView) header).isResizable();
+        return header.isResizable();
     }
 
     public void setResizable(boolean aValue) {
-        ((HeaderView) header).setResizable(aValue);
+        header.setResizable(aValue);
     }
 
     public boolean isMoveable() {
-        return ((HeaderView) header).isMoveable();
+        return header.isMoveable();
     }
 
     public void setMoveable(boolean aValue) {
-        ((HeaderView) header).setMoveable(aValue);
+        header.setMoveable(aValue);
     }
 
     public boolean isVisible() {
-        return ((Column) column).isVisible();
+        return column.isVisible();
     }
 
     public void setVisible(boolean aValue) {
-        ((Column) column).setVisible(aValue);
+        column.setVisible(aValue);
     }
 
     public double getWidth() {
-        return ((Column) column).getWidth();
+        return column.getWidth();
     }
 
     public void setWidth(double aValue) {
-        ((Column) column).setWidth(aValue);
+        column.setWidth(aValue);
     }
 
     public boolean isReadonly() {
-        return ((Column) column).isReadonly();
+        return column.isReadonly();
     }
 
     public void setReadonly(boolean aValue) {
-        ((Column) column).setReadonly(aValue);
+        column.setReadonly(aValue);
     }
 
     public boolean isSortable() {
-        return ((Column) column).isSortable();
+        return column.isSortable();
     }
 
     public String getSortField() {
-        return ((Column) column).getSortField();
+        return column.getSortField();
     }
 
     public void setSortField(String aValue) {
-        ((Column) column).setSortField(aValue);
+        column.setSortField(aValue);
     }
 
     public void setSortable(boolean aValue) {
-        ((Column) column).setSortable(aValue);
+        column.setSortable(aValue);
     }
 
     public JavaScriptObject getOnRender() {
-        return ((Column) column).getOnRender();
+        return column.getOnRender();
     }
 
     public void setOnRender(JavaScriptObject aValue) {
-        ((Column) column).setOnRender(aValue);
+        column.setOnRender(aValue);
     }
 
     public JavaScriptObject getOnSelect() {
-        return ((Column) column).getOnSelect();
+        return column.getOnSelect();
     }
 
     public void setOnSelect(JavaScriptObject aValue) {
-        ((Column) column).setOnSelect(aValue);
+        column.setOnSelect(aValue);
     }
 
     public void sort() {
-        ((Column) column).sort();
+        column.sort();
     }
 
     public void sortDesc() {
-        ((Column) column).sortDesc();
+        column.sortDesc();
     }
 
     public void unsort() {
-        ((Column) column).unsort();
+        column.unsort();
     }
-    
-    public Widget getEditor(){
+
+    public Widget getEditor() {
         return column != null ? column.getEditor() : null;
     }
-    
-    public void setEditor(Widget aWidget){
-        if(column != null)
+
+    public void setEditor(Widget aWidget) {
+        if (column != null) {
             column.setEditor(aWidget);
+        }
     }
 }

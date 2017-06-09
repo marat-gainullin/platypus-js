@@ -6,21 +6,12 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.core.HasPublished;
 import com.eas.core.Utils;
-import com.eas.core.XElement;
 import com.eas.core.Utils.JsObject;
-import com.eas.grid.builders.ThemedHeaderOrFooterBuilder;
-import com.eas.grid.columns.CheckServiceColumn;
 import com.eas.grid.columns.Column;
-import com.eas.grid.columns.RadioServiceColumn;
 import com.eas.grid.columns.UsualServiceColumn;
-import com.eas.grid.columns.header.HeaderAnalyzer;
-import com.eas.grid.columns.header.HeaderNode;
-import com.eas.grid.columns.header.HeaderSplitter;
 import com.eas.grid.processing.IndexOfProvider;
 import com.eas.grid.processing.ListMultiSortHandler;
-import com.eas.grid.processing.TreeDataProvider;
 import com.eas.grid.processing.TreeMultiSortHandler;
 import com.eas.grid.rows.JsArrayListDataProvider;
 import com.eas.grid.rows.JsArrayTreeDataProvider;
@@ -30,7 +21,6 @@ import com.eas.grid.selection.HasSelectionLead;
 import com.eas.grid.selection.MultiJavaScriptObjectSelectionModel;
 import com.eas.ui.HasBinding;
 import com.eas.ui.HasOnRender;
-import com.eas.ui.JavaScriptObjectKeyProvider;
 import com.eas.ui.PublishedCell;
 import com.eas.ui.PublishedComponent;
 import com.eas.ui.EventsPublisher;
@@ -41,13 +31,10 @@ import com.eas.ui.events.HasBlurHandlers;
 import com.eas.ui.events.HasKeyPressHandlers;
 import com.eas.ui.events.HasKeyUpHandlers;
 import com.eas.ui.events.HasKeyDownHandlers;
-import com.eas.widgets.WidgetsUtils;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.DragStartEvent;
 import com.google.gwt.event.dom.client.DragStartHandler;
@@ -90,7 +77,6 @@ public class ModelGrid extends Grid
     protected JavaScriptObject onAfterRender;
     protected JavaScriptObject onExpand;
     protected JavaScriptObject onCollapse;
-    protected List<HeaderNode> header = new ArrayList<>();
     // runtime
     protected Widget activeEditor;
     protected ListHandler<JavaScriptObject> sortHandler;
@@ -229,10 +215,6 @@ public class ModelGrid extends Grid
         activeEditor = aWidget;
     }
 
-    public String getGroupName() {
-        return groupName;
-    }
-
     protected boolean serviceColumnsRedrawQueued;
 
     protected void enqueueServiceColumnsRedraw() {
@@ -362,7 +344,7 @@ public class ModelGrid extends Grid
                 sortHandler = new ListMultiSortHandler<>(dataProvider.getList(), onSort);
             }
             for (int colIndex = 0; colIndex < getColumnCount(); colIndex++) {
-                Column modelCol = (Column) getDataColumn(colIndex);
+                Column modelCol = getColumn(colIndex);
                 sortHandler.setComparator(modelCol, modelCol.getComparator());
             }
             sortHandlerReg = addColumnSortHandler(sortHandler);
@@ -549,266 +531,6 @@ public class ModelGrid extends Grid
     }
 
     @Override
-    public HandlerRegistration addFocusHandler(FocusHandler handler) {
-        return addDomHandler(handler, FocusEvent.getType());
-    }
-
-    @Override
-    public HandlerRegistration addBlurHandler(BlurHandler handler) {
-        return addDomHandler(handler, BlurEvent.getType());
-    }
-
-    @Override
-    public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
-        return addDomHandler(handler, KeyDownEvent.getType());
-    }
-
-    @Override
-    public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {
-        return addDomHandler(handler, KeyPressEvent.getType());
-    }
-
-    public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
-        return addDomHandler(handler, KeyUpEvent.getType());
-    }
-
-    public List<HeaderNode> getHeader() {
-        return header;
-    }
-
-    public void setHeader(List<HeaderNode> aHeader) {
-        if (header != aHeader) {
-            unpublishColumnNodes(header);
-            header = aHeader;
-            if (autoRefreshHeader) {
-                applyColumns();
-            }
-            publishColumnNodes(header);
-        }
-    }
-
-    public boolean removeColumnNode(HeaderNode<JavaScriptObject> aNode) {
-        boolean res = header.remove(aNode);
-        if (autoRefreshHeader) {
-            applyColumns();
-        }
-        return res;
-    }
-
-    public void addColumnNode(HeaderNode<JavaScriptObject> aNode) {
-        header.add(aNode);
-        if (autoRefreshHeader) {
-            applyColumns();
-        }
-    }
-
-    public void insertColumnNode(int aIndex, HeaderNode<JavaScriptObject> aNode) {
-        header.add(aIndex, aNode);
-        if (autoRefreshHeader) {
-            applyColumns();
-        }
-    }
-
-    @Override
-    public void moveColumnNode(HeaderNode<JavaScriptObject> aSubject, HeaderNode<JavaScriptObject> aInsertBefore) {
-        if (aSubject != null && aInsertBefore != null && aSubject.getParent() == aInsertBefore.getParent()) {
-            List<HeaderNode<JavaScriptObject>> neighbours = aSubject.getParent() != null
-                    ? aSubject.getParent().getChildren() : header;
-            boolean removed = neighbours.remove(aSubject);
-            assert removed;
-            int insertAt = neighbours.indexOf(aInsertBefore);
-            neighbours.add(insertAt, aSubject);
-            applyColumns();
-            onResize();
-        }
-    }
-
-    /*
-	 * Indicates that subsequent changes will take no effect in general columns
-	 * collection and header. They will affect only underlying grid sections
-     */
-    protected boolean columnsAjusting;
-
-    public boolean isColumnsAjusting() {
-        return columnsAjusting;
-    }
-
-    public void setColumnsAjusting(boolean aValue) {
-        columnsAjusting = aValue;
-    }
-
-    @Override
-    protected void refreshColumns() {
-        // no op since hierarchical header processing
-    }
-
-    @Override
-    public void moveColumn(int aFromIndex, int aToIndex) {
-        if (aFromIndex < frozenColumns && aToIndex < frozenColumns
-                || aFromIndex >= frozenColumns && aToIndex >= frozenColumns) {
-            Column<JavaScriptObject, ?> movedColumn = getColumn(aFromIndex);
-        }
-    }
-
-    protected Column treeIndicatorColumn;
-
-    @Override
-    public void addColumn(int aIndex, Column<JavaScriptObject, ?> aColumn, String aWidth, Header<?> aHeader,
-            Header<?> aFooter, boolean hidden) {
-        ((Column) aColumn).setGrid(this);
-        super.addColumn(aIndex, aColumn, aWidth, aHeader, aFooter, hidden);
-    }
-
-    private void checkTreeIndicatorColumnDataProvider() {
-        if (dataProvider instanceof TreeDataProvider<?>) {
-            if (treeIndicatorColumn == null) {
-                int treeIndicatorIndex = 0;
-                while (treeIndicatorIndex < getColumnCount()) {
-                    Column<JavaScriptObject, ?> indicatorColumn = getDataColumn(treeIndicatorIndex);
-                    if (indicatorColumn instanceof UsualServiceColumn || indicatorColumn instanceof RadioServiceColumn
-                            || indicatorColumn instanceof CheckServiceColumn) {
-                        treeIndicatorIndex++;
-                    } else if (indicatorColumn instanceof Column) {
-                        treeIndicatorColumn = (Column) indicatorColumn;
-                        break;
-                    }
-                }
-            }
-            if (treeIndicatorColumn != null && treeIndicatorColumn.getCell() instanceof TreeExpandableCell<?, ?>) {
-                TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) treeIndicatorColumn
-                        .getCell();
-                treeCell.setDataProvider((TreeDataProvider<JavaScriptObject>) dataProvider);
-            }
-        } else {
-            if (treeIndicatorColumn != null && treeIndicatorColumn.getCell() instanceof TreeExpandableCell<?, ?>) {
-                TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) treeIndicatorColumn
-                        .getCell();
-                treeCell.setDataProvider(null);
-            }
-            treeIndicatorColumn = null;
-        }
-    }
-
-    @Override
-    public void removeColumn(int aIndex) {
-        Column<JavaScriptObject, ?> toDel = getDataColumn(aIndex);
-        Column mCol = (Column) toDel;
-        if (mCol == treeIndicatorColumn) {
-            TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) mCol.getCell();
-            treeCell.setDataProvider(null);
-            treeIndicatorColumn = null;
-        }
-        super.removeColumn(aIndex);
-        mCol.setGrid(null);
-    }
-
-    @Override
-    public void setColumnWidthFromHeaderDrag(Column<JavaScriptObject, ?> aColumn, double aWidth, Style.Unit aUnit) {
-        Column modelCol = (Column) aColumn;
-        if (aWidth <= modelCol.getMinWidth()) {
-            aWidth = modelCol.getMinWidth();
-        }
-        if (aWidth >= modelCol.getMaxWidth()) {
-            aWidth = modelCol.getMaxWidth();
-        }
-        super.setColumnWidth(aColumn, aWidth, aUnit);
-        modelCol.setWidth(aWidth);
-        propagateHeightButScrollable();
-    }
-
-    @Override
-    public void setColumnWidth(Column<JavaScriptObject, ?> aColumn, double aWidth, Unit aUnit) {
-        Column modelCol = (Column) aColumn;
-        if (aWidth <= modelCol.getMinWidth()) {
-            aWidth = modelCol.getMinWidth();
-        }
-        if (aWidth >= modelCol.getMaxWidth()) {
-            aWidth = modelCol.getMaxWidth();
-        }
-        super.setColumnWidth(aColumn, aWidth, aUnit);
-        modelCol.updateWidth(aWidth);
-    }
-
-    @Override
-    public void showColumn(Column<JavaScriptObject, ?> aColumn) {
-        super.showColumn(aColumn);
-        Column colFacade = (Column) aColumn;
-        colFacade.updateVisible(true);
-        enqueueRedraw(); // because of AbstractCellTable.isInteractive crazy
-        // updating while rendering instead of updating it
-        // while show/hide columns
-    }
-
-    public void hideColumn(Column<JavaScriptObject, ?> aColumn) {
-        super.hideColumn(aColumn);
-        Column colFacade = (Column) aColumn;
-        colFacade.updateVisible(false);
-    }
-
-    @Override
-    public void setFrozenColumns(int aValue) {
-        if (aValue >= 0 && frozenColumns != aValue) {
-            frozenColumns = aValue;
-            if (autoRefreshHeader && getColumnCount() > 0 && aValue <= getColumnCount()) {
-                applyColumns();
-            }
-        }
-    }
-
-    protected boolean autoRefreshHeader = true;
-
-    public boolean isAutoRefreshHeader() {
-        return autoRefreshHeader;
-    }
-
-    public void setAutoRefreshHeader(boolean aValue) {
-        autoRefreshHeader = aValue;
-    }
-
-    protected void clearColumns() {
-        for (int i = getColumnCount() - 1; i >= 0; i--) {
-            Column<JavaScriptObject, ?> toDel = getDataColumn(i);
-            Column mCol = (Column) toDel;
-            if (mCol == treeIndicatorColumn) {
-                TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) mCol
-                        .getCell();
-                treeCell.setDataProvider(null);
-                treeIndicatorColumn = null;
-            }
-            mCol.setGrid(null);
-        }
-        for (int i = headerRight.getColumnCount() - 1; i >= 0; i--) {
-            headerRight.removeColumn(i);
-        }
-        for (int i = headerLeft.getColumnCount() - 1; i >= 0; i--) {
-            headerLeft.removeColumn(i);
-        }
-    }
-
-    public void applyColumns() {
-        clearColumns();
-        List<HeaderNode<JavaScriptObject>> leaves = new ArrayList<>();
-        HeaderAnalyzer.achieveLeaves(header, leaves);
-        for (HeaderNode<JavaScriptObject> leaf : leaves) {
-            Header<String> header = leaf.getHeader();
-            Column column = (Column) leaf.getColumn();
-            column.setGrid(this);
-            addColumn(column, column.getWidth() + "px", header, null, !column.isVisible());
-        }
-        ThemedHeaderOrFooterBuilder<JavaScriptObject> leftBuilder = (ThemedHeaderOrFooterBuilder<JavaScriptObject>) headerLeft
-                .getHeaderBuilder();
-        ThemedHeaderOrFooterBuilder<JavaScriptObject> rightBuilder = (ThemedHeaderOrFooterBuilder<JavaScriptObject>) headerRight
-                .getHeaderBuilder();
-        List<HeaderNode<JavaScriptObject>> leftHeader = HeaderSplitter.split(header, 0, frozenColumns - 1);
-        leftBuilder.setHeaderNodes(leftHeader);
-        List<HeaderNode<JavaScriptObject>> rightHeader = HeaderSplitter.split(header, frozenColumns,
-                getColumnCount());
-        rightBuilder.setHeaderNodes(rightHeader);
-        checkTreeIndicatorColumnDataProvider();
-        redrawHeaders();
-    }
-
-    @Override
     public void setSelectionModel(final SelectionModel<JavaScriptObject> aValue) {
         SelectionModel<? super JavaScriptObject> oldValue = getSelectionModel();
         if (aValue != oldValue) {
@@ -852,21 +574,6 @@ public class ModelGrid extends Grid
         }
     }
 
-    protected void applyColorsFontCursor() {
-        if (published.isBackgroundSet() && published.isOpaque()) {
-            WidgetsUtils.applyBackground(this, published.getBackground());
-        }
-        if (published.isForegroundSet()) {
-            WidgetsUtils.applyForeground(this, published.getForeground());
-        }
-        if (published.isFontSet()) {
-            WidgetsUtils.applyFont(this, published.getFont());
-        }
-        if (published.isCursorSet()) {
-            WidgetsUtils.applyCursor(this, published.getCursor());
-        }
-    }
-
     public JavaScriptObject getPublished() {
         return published;
     }
@@ -876,27 +583,6 @@ public class ModelGrid extends Grid
         if (published != null) {
             publish(this, published);
             publishColumnNodes(header);
-        }
-    }
-
-    protected void unpublishColumnNodes(List<HeaderNode<JavaScriptObject>> aNodes) {
-        for (HeaderNode<JavaScriptObject> node : aNodes) {
-            String jsName = ((HasJsName) node).getJsName();
-            if (jsName != null && !jsName.isEmpty()) {
-                published.<JsObject>cast().deleteProperty(jsName);
-            }
-            unpublishColumnNodes(node.getChildren());
-        }
-    }
-
-    protected void publishColumnNodes(List<HeaderNode<JavaScriptObject>> aNodes) {
-        for (HeaderNode<JavaScriptObject> node : aNodes) {
-            String jsName = ((HasJsName) node).getJsName();
-            if (jsName != null && !jsName.isEmpty()) {
-                HasPublished pCol = (HasPublished) node;
-                published.<JsObject>cast().inject(jsName, pCol.getPublished(), true);
-            }
-            publishColumnNodes(node.getChildren());
         }
     }
 

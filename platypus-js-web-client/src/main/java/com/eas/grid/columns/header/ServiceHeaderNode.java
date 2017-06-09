@@ -9,7 +9,7 @@ public class ServiceHeaderNode extends HeaderNode {
     public ServiceHeaderNode() {
         super();
         column = new UsualServiceColumn();
-        header = new HeaderView("\\", null, this);
+        header = new HeaderView("\\", this);
         setResizable(false);
     }
 

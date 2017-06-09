@@ -22,25 +22,14 @@ public class HeaderView implements HasColumn, HasText {
     protected PublishedColor background;
     protected PublishedColor foreground;
     protected PublishedFont font;
-    protected GridSection section;
-    protected Element hostElement;
     protected HeaderNode headerNode;
     protected boolean moveable = true;
     protected boolean resizable = true;
 
-    public HeaderView(String aTitle, GridSection aSection, HeaderNode aHeaderNode) {
-        this(aTitle, aSection, aColumn, aSection != null ? aSection.getElement() : null, aHeaderNode);
-    }
-
-    protected HeaderView(String aTitle, GridSection aSection, Element aHostElement, HeaderNode aHeaderNode) {
+    public HeaderView(String aTitle, HeaderNode aHeaderNode) {
         super();
-        if (aTitle == null || aColumn == null) {
-            throw new NullPointerException();
-        }
         element.setPropertyObject(HEADER_VIEW, this);
         element.setInnerText(aTitle);
-        section = aSection;
-        hostElement = aHostElement;
         headerNode = aHeaderNode;
         headerNode.setHeader(this);
         element.<XElement>cast().addEventListener(BrowserEvents.DRAGSTART, new XElement.NativeHandler() {
@@ -50,14 +39,11 @@ public class HeaderView implements HasColumn, HasText {
                 event.stopPropagation();
                 EventTarget et = event.getEventTarget();
                 if (Element.is(et)) {
-                    int columnIndex = section.getColumnIndex(column);
-                    ColumnDrag col = new ColumnDrag(column, HeaderView.this, columnIndex, section, Element.as(et));
+                    ColumnDrag col = new ColumnDrag(HeaderView.this, Element.as(et));
                     if ((col.isMove() && moveable) || (col.isResize() && resizable)) {
                         event.getDataTransfer().<XDataTransfer>cast().setEffectAllowed("move");
                         ColumnDrag.instance = col;
-                        event.getDataTransfer().setData("Text",
-                                (section != null ? "grid-section-" + section.hashCode() : "not leaf") + "; column-" + (ColumnDrag.instance.isMove() ? "moved" : "resized")
-                                + (section != null ? ":" + columnIndex : ""));
+                        event.getDataTransfer().setData("Text", "column-" + (ColumnDrag.instance.isMove() ? "moved" : "resized"));
                     } else {
                         event.getDataTransfer().<XDataTransfer>cast().setEffectAllowed("none");
                     }
@@ -88,23 +74,6 @@ public class HeaderView implements HasColumn, HasText {
 
     public HeaderNode getHeaderNode() {
         return headerNode;
-    }
-
-    public GridSection getTable() {
-        return section;
-    }
-
-    public void setTable(GridSection aValue) {
-        section = aValue;
-        hostElement = section != null ? section.getElement() : null;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String aValue) {
-        title = aValue;
     }
 
     public PublishedColor getBackground() {

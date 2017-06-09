@@ -3,6 +3,7 @@ package com.eas.grid;
 import com.eas.bound.JsArrayList;
 import com.eas.core.XElement;
 import com.eas.grid.columns.Column;
+import com.eas.grid.columns.header.HeaderNode;
 import java.util.List;
 
 import com.google.gwt.core.client.JavaScriptObject;
@@ -30,6 +31,7 @@ public class GridSection<T> {
 
     private TableElement table = Document.get().createTableElement();
     private TableColElement colgroup = Document.get().createColGroupElement();
+    private List<HeaderNode> header;
     private Element keyboardSelectedElement;
     protected String dynamicCellClassName;
     protected String dynamicOddRowsClassName;
@@ -104,12 +106,22 @@ public class GridSection<T> {
     }
 
     public void addColumn(Column aColumn) {
+        addColumn(aColumn, true);
+    }
+
+    public void addColumn(Column aColumn, boolean needRedraw) {
         columns.add(aColumn);
         colgroup.appendChild(aColumn.getElement());
-        redraw();
+        if (needRedraw) {
+            redraw();
+        }
     }
 
     public void addColumn(int index, Column aColumn) {
+        addColumn(index, aColumn, true);
+    }
+
+    public void addColumn(int index, Column aColumn, boolean needRedraw) {
         if (index >= 0 && index <= columns.size()) { // It is all about insertBefore
             if (index < columns.size()) { // It is all about insertBefore
                 columns.add(index, aColumn);
@@ -118,16 +130,24 @@ public class GridSection<T> {
             } else {
                 addColumn(aColumn);
             }
-            redraw();
+            if (needRedraw) {
+                redraw();
+            }
         }
     }
 
     public Column removeColumn(int index) {
+        return removeColumn(index, true);
+    }
+
+    public Column removeColumn(int index, boolean needRedraw) {
         if (index >= 0 && index < columns.size()) {
             Column removed = columns.remove(index);
             removed.getElement().removeFromParent();
             removed.getColumnRule().removeFromParent();
-            redraw();
+            if (needRedraw) {
+                redraw();
+            }
             return removed;
         } else {
             return null;
@@ -187,37 +207,42 @@ public class GridSection<T> {
     }
 
     public void drawBody() {
-        TableSectionElement tbody = table.getTBodies().getItem(0);
-        for (int i = viewStart; i < viewEnd; i++) {
-            JavaScriptObject dataRow = data.get(i);
-            TableRowElement viewRow = Document.get().createTRElement();
-            if ((i + 1) % 2 == 0) {
-                viewRow.addClassName(dynamicEvenRowsClassName);
-            } else {
-                viewRow.addClassName(dynamicOddRowsClassName);
-            }
-            viewRow.addClassName("selected-row");
-            viewRow.setPropertyJSO(JS_ROW_NAME, dataRow);
-            tbody.appendChild(viewRow);
-            for (int c = 0; c < columns.size(); c++) {
-                Column column = columns.get(c);
-                TableCellElement viewCell = Document.get().createTDElement();
-                // TODO: Check alignment of the cell
-                viewCell.addClassName(dynamicCellClassName);
-                viewRow.appendChild(viewCell);
-                column.render(i, dataRow, viewCell);
+        if (!columns.isEmpty()) {
+            TableSectionElement tbody = table.getTBodies().getItem(0);
+            for (int i = viewStart; i < viewEnd; i++) {
+                JavaScriptObject dataRow = data.get(i);
+                TableRowElement viewRow = Document.get().createTRElement();
+                if ((i + 1) % 2 == 0) {
+                    viewRow.addClassName(dynamicEvenRowsClassName);
+                } else {
+                    viewRow.addClassName(dynamicOddRowsClassName);
+                }
+                viewRow.addClassName("selected-row");
+                viewRow.setPropertyJSO(JS_ROW_NAME, dataRow);
+                tbody.appendChild(viewRow);
+                for (int c = 0; c < columns.size(); c++) {
+                    Column column = columns.get(c);
+                    TableCellElement viewCell = Document.get().createTDElement();
+                    // TODO: Check alignment of the cell
+                    // TODO: Check image decoration of the cell and decoration styles
+                    viewCell.addClassName(dynamicCellClassName);
+                    viewRow.appendChild(viewCell);
+                    column.render(i, dataRow, viewCell);
+                }
             }
         }
     }
 
     public void redrawHeaders() {
-        TableSectionElement tbody = table.getTHead();
-        tbody.removeFromParent();
+        TableSectionElement thead = table.getTHead();
+        thead.removeFromParent();
         table.appendChild(Document.get().createTHeadElement());
         drawHeaders();
     }
 
     public void drawHeaders() {
+        if (!columns.isEmpty()) {
+        }
     }
 
     public void redrawFooters() {
@@ -228,6 +253,8 @@ public class GridSection<T> {
     }
 
     public void drawFooters() {
+        if (!columns.isEmpty()) {
+        }
     }
 
     public void redrawRow(int index) {
@@ -256,6 +283,33 @@ public class GridSection<T> {
                 }
                 column.render(i, dataRow, viewCell);
             }
+        }
+    }
+
+    public void setHeaderNodes(List<HeaderNode> aHeader) {
+        setHeaderNodes(aHeader, true);
+    }
+
+    public void setHeaderNodes(List<HeaderNode> aHeader, boolean needReadraw) {
+        header = aHeader;
+        if (needReadraw) {
+            redrawHeaders();
+        }
+    }
+
+    public void clearColumnsAndHeader() {
+        clearColumnsAndHeader(true);
+    }
+
+    public void clearColumnsAndHeader(boolean needRedraw) {
+        for (int i = columns.size() - 1; i >= 0; i--) {
+            Column removed = columns.remove(i);
+            removed.getElement().removeFromParent();
+            removed.getColumnRule().removeFromParent();
+        }
+        header = new ArrayList<>();
+        if (needRedraw) {
+            redraw();
         }
     }
 }

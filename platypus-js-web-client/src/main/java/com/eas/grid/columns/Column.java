@@ -11,7 +11,6 @@ import com.eas.widgets.WidgetsUtils;
 import com.eas.widgets.boxes.BooleanDecoratorField;
 import com.eas.widgets.boxes.CheckBox;
 import com.eas.widgets.boxes.RadioButton;
-import com.eas.widgets.boxes.ValueDecoratorField;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.InputElement;
@@ -21,6 +20,7 @@ import com.google.gwt.dom.client.TableColElement;
 import com.google.gwt.user.client.ui.HasText;
 import com.eas.core.Logger;
 import com.eas.core.XElement;
+import com.eas.grid.Grid;
 import com.eas.grid.HeaderView;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.NativeEvent;
@@ -38,7 +38,13 @@ public class Column implements ChangesHost, HasPublished {
     protected String field;
     protected String sortField;
     protected Widget editor;
+    /**
+     * Minimum column width while resizing by user.
+     */
     protected double minWidth = 15;
+    /**
+     * Maximum column width while resizing by user.
+     */
     protected double maxWidth = Integer.MAX_VALUE;
     protected double width = 75;
     protected boolean readonly;
@@ -49,12 +55,13 @@ public class Column implements ChangesHost, HasPublished {
     private Runnable onSortDirectionChanged;
     private Runnable onSortFieldChanged;
     private StyleElement columnRule = Document.get().createStyleElement();
-    private String radioGroup = "group-"+Document.get().createUniqueId();
+    private String radioGroup = "group-" + Document.get().createUniqueId();
     private HeaderView header;
     protected Comparator<JavaScriptObject> comparator;
     protected JavaScriptObject published;
     protected JavaScriptObject onRender;
     protected JavaScriptObject onSelect;
+    protected Grid grid;
 
     public Column() {
         super();
@@ -71,6 +78,14 @@ public class Column implements ChangesHost, HasPublished {
 
     public void setHeader(HeaderView header) {
         this.header = header;
+    }
+
+    public Grid getGrid() {
+        return grid;
+    }
+
+    public void setGrid(Grid grid) {
+        this.grid = grid;
     }
 
     public void setOnSortDirectionChanged(Runnable onSortDirectionChanged) {
@@ -263,9 +278,7 @@ public class Column implements ChangesHost, HasPublished {
     }
 
     public void setWidth(double aValue) {
-        if (width != aValue) {
-            width = aValue;
-        }
+        width = aValue;
     }
 
     public boolean isReadonly() {

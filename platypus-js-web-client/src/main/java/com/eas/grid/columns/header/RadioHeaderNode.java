@@ -9,7 +9,7 @@ public class RadioHeaderNode extends HeaderNode {
     public RadioHeaderNode() {
         super();
         column = new RadioServiceColumn();
-        header = new HeaderView("\\", null, this);
+        header = new HeaderView("\\", this);
         setResizable(false);
     }
 

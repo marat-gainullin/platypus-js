@@ -4,9 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.eas.core.XElement;
+import com.eas.grid.columns.CheckServiceColumn;
 import com.eas.grid.columns.Column;
+import com.eas.grid.columns.RadioServiceColumn;
+import com.eas.grid.columns.UsualServiceColumn;
 import com.eas.grid.columns.header.HasSortList;
+import com.eas.grid.columns.header.HeaderAnalyzer;
+import com.eas.grid.columns.header.HeaderSplitter;
 import com.eas.grid.columns.header.HeaderNode;
+import com.eas.grid.processing.TreeDataProvider;
 import com.eas.menu.MenuItemCheckBox;
 import com.eas.ui.Focusable;
 import com.eas.ui.PublishedColor;
@@ -39,6 +45,7 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
     public static final int MINIMUM_COLUMN_WIDTH = 15;
     //
     protected StyleElement cellsStyleElement = Document.get().createStyleElement();
+    protected StyleElement rowsStyleElement = Document.get().createStyleElement();
     protected StyleElement oddRowsStyleElement = Document.get().createStyleElement();
     protected StyleElement evenRowsStyleElement = Document.get().createStyleElement();
     protected StyleElement headerRowsStyleElement = Document.get().createStyleElement();
@@ -66,6 +73,7 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
     protected Element ghostColumn;
     protected ColumnDrag targetDraggedColumn;
 
+    protected List<HeaderNode> header = new ArrayList<>();
     //
     protected Element columnsChevron = Document.get().createDivElement();
     //
@@ -96,6 +104,7 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
         footerRightContainer.setClassName("grid-section-footer-right");
         columnsChevron.addClassName("grid-columns-chevron");
         element.appendChild(cellsStyleElement);
+        element.appendChild(rowsStyleElement);
         element.appendChild(oddRowsStyleElement);
         element.appendChild(evenRowsStyleElement);
         element.appendChild(headerLeftContainer);
@@ -267,9 +276,11 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
                         HeaderView header = source.getHeader();
                         if (header.isResizable()) {
                             int newWidth = Math.max(
-                                    event.getClientX() - source.getCellElement().getAbsoluteLeft(),
+                                    event.getClientX() - source.getDecorationElement().getAbsoluteLeft(),
                                     MINIMUM_COLUMN_WIDTH);
-                            setColumnWidthFromHeaderDrag(header.getColumn(), newWidth, Style.Unit.PX);
+                            if (newWidth >= header.getColumn().getMinWidth() && newWidth <= header.getColumn().getMaxWidth()) {
+                                header.getColumn().setWidth(newWidth);
+                            }
                         }
                     }
                 }
@@ -413,9 +424,9 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
                     currentTarget = currentTarget.getParentElement();
                 }
                 if (targetSection != null && targetCell != null) {
-                    HeaderView header = (HeaderView)targetCell.getPropertyObject(HeaderView.HEADER_VIEW);
+                    HeaderView header = (HeaderView) targetCell.getPropertyObject(HeaderView.HEADER_VIEW);
                     if (header != null) {
-                        return new ColumnDrag(header, targetSection, targetCell);
+                        return new ColumnDrag(header, targetCell);
                     } else {
                         return null;
                     }
@@ -436,7 +447,7 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
     protected void showColumnMoveDecorations(ColumnDrag target) {
         targetDraggedColumn = target;
         Element hostElement = getElement();
-        Element thtdElement = target.getCellElement();
+        Element thtdElement = target.getDecorationElement();
         int thLeft = thtdElement.getAbsoluteLeft();
         thLeft = thLeft - element.getAbsoluteLeft() + hostElement.getScrollLeft();
         ghostLine.getStyle().setLeft(thLeft, Style.Unit.PX);
@@ -526,7 +537,7 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
     }
 
     protected void regenerateDynamicRowsStyles() {
-        headerRowsStyleElement.setInnerHTML("." + dynamicCellClassName + "{ height: " + headerRowsHeight + "px;");
+        rowsStyleElement.setInnerHTML("." + dynamicCellClassName + "{ height: " + headerRowsHeight + "px;");
     }
 
     public void setRowsHeight(int aValue) {
@@ -537,7 +548,7 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
     }
 
     protected void regenerateDynamicHeaderRowsStyles() {
-        cellsStyleElement.setInnerHTML("." + dynamicCellClassName + "{ height: " + rowsHeight + "px;");
+        headerRowsStyleElement.setInnerHTML("." + dynamicCellClassName + "{ height: " + rowsHeight + "px;");
     }
 
     public boolean isHeaderVisible() {
@@ -565,9 +576,7 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
         if (aValue >= 0 && frozenColumns != aValue) {
             if (aValue >= 0) {
                 frozenColumns = aValue;
-                if (getColumnCount() > 0 && aValue <= getColumnCount()) {
-                    refreshColumns();
-                }
+                applyColumnsNodes();
             }
         }
     }
@@ -671,144 +680,116 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
         hive.getRowFormatter().setVisible(3, false);
     }
 
-    public void addColumn(Column<T, ?> aColumn, String aWidth, HeaderView<?> aHeader, HeaderView<?> aFooter, boolean hidden) {
-        addColumn(false, getColumnCount(), aColumn, aWidth, aHeader, aFooter, hidden);
-    }
+    protected Column treeIndicatorColumn;
 
-    public void addColumn(int aIndex, Column<T, ?> aColumn, String aWidth, HeaderView<?> aHeader, HeaderView<?> aFooter,
-            boolean hidden) {
-        addColumn(true, aIndex, aColumn, aWidth, aHeader, aFooter, hidden);
-    }
-
-    public void addColumn(boolean forceRefreshColumns, int aIndex, Column<T, ?> aColumn, String aWidth,
-            HeaderView<?> aHeader, HeaderView<?> aFooter, boolean hidden) {
-        /*
-		 * if (aHeader instanceof DraggableHeader<?>) { DraggableHeader<T> h =
-		 * (DraggableHeader<T>) aHeader; h.setColumn(aColumn); } WARNING! Before
-		 * uncomment, answer the question: DraggableHeader can change its
-		 * column?
-         */
-        if (aIndex < frozenColumns) {
-            if (aHeader instanceof HeaderView<?>) {
-                HeaderView<T> h = (HeaderView<T>) aHeader;
-                h.setTable(headerLeft);
-            }
-            headerLeft.insertColumn(aIndex, aColumn, aHeader);
-            frozenLeft.insertColumn(aIndex, aColumn);
-            scrollableLeft.insertColumn(aIndex, aColumn);
-            footerLeft.insertColumn(aIndex, aColumn, null, aFooter);
-            headerLeft.setColumnWidth(aColumn, aWidth);// column partners will
-            // take care of width
-            // seetings in other
-            // sections
-            //
-            if (forceRefreshColumns) {
-                refreshColumns();
+    private void checkTreeIndicatorColumn() {
+        if (dataProvider instanceof TreeDataProvider<?>) {
+            if (treeIndicatorColumn == null) {
+                int treeIndicatorIndex = 0;
+                while (treeIndicatorIndex < getColumnCount()) {
+                    Column indicatorColumn = getColumn(treeIndicatorIndex);
+                    if (indicatorColumn instanceof UsualServiceColumn || indicatorColumn instanceof RadioServiceColumn
+                            || indicatorColumn instanceof CheckServiceColumn) {
+                        treeIndicatorIndex++;
+                    } else if (indicatorColumn instanceof Column) {
+                        treeIndicatorColumn = indicatorColumn;
+                        break;
+                    }
+                }
             }
         } else {
-            if (aHeader instanceof HeaderView<?>) {
-                HeaderView<T> h = (HeaderView<T>) aHeader;
-                h.setTable(headerRight);
+            treeIndicatorColumn = null;
+        }
+    }
+
+    protected void clearColumnsNodes() {
+        clearColumnsNodes(true);
+    }
+    
+    protected void clearColumnsNodes(boolean needRedraw) {
+        for (int i = getColumnCount() - 1; i >= 0; i--) {
+            Column toDel = getColumn(i);
+            Column mCol = (Column) toDel;
+            if (mCol == treeIndicatorColumn) {
+                treeIndicatorColumn = null;
             }
-            headerRight.insertColumn(aIndex - frozenColumns, aColumn, aHeader);
-            frozenRight.insertColumn(aIndex - frozenColumns, aColumn);
-            scrollableRight.insertColumn(aIndex - frozenColumns, aColumn);
-            footerRight.insertColumn(aIndex - frozenColumns, aColumn, null, aFooter);
-            headerRight.setColumnWidth(aColumn, aWidth);// column partners will
-            // take care of width
-            // seetings in other
-            // sections
-            //
+            mCol.setGrid(null);
         }
-        if (hidden) {
-            hideColumn(aColumn);
+        headerLeft.clearColumnsAndHeader(needRedraw);
+        headerRight.clearColumnsAndHeader(needRedraw);
+    }
+
+    public void applyColumnsNodes() {
+        clearColumnsNodes(false);
+        List<HeaderNode> leaves = HeaderAnalyzer.toLeaves(header);
+        for (HeaderNode leaf : leaves) { // linear list of columner header nodes
+            addColumnToSections(leaf.getColumn());
+        }
+        checkTreeIndicatorColumn();
+        headerLeft.setHeaderNodes(HeaderSplitter.split(header, 0, frozenColumns - 1), false);
+        headerRight.setHeaderNodes(HeaderSplitter.split(header, frozenColumns, getColumnCount()), false);
+        redraw();
+    }
+
+    public List<HeaderNode> getHeader() {
+        return header;
+    }
+
+    public void setHeader(List<HeaderNode> aHeader) {
+        if (header != aHeader) {
+            header = aHeader;
+            applyColumnsNodes();
         }
     }
 
-    public void moveColumnNode(HeaderNode aNode, HeaderNode aInsertBefore) {
-        List<HeaderNode> nodes = aNode.getParent() != null ? aNode.getParent().getChildren() : header;
-        HeaderNode parent = aInsertBefore.getParent();
-        int idx = parent.getChildren().indexOf(aInsertBefore);
-        parent.getChildren().add(idx, aNode);
-    }
-
-    /*
-	 * public void insertColumn(int aIndex, Column<T, ?> aColumn, String
-	 * aHeaderValue, Header<?> aFooter) { if (aIndex < frozenColumns) {
-	 * headerLeft.insertColumn(aIndex, aColumn, new
-	 * DraggableHeader<T>(aHeaderValue, headerLeft, aColumn, getElement()));
-	 * frozenLeft.insertColumn(aIndex, aColumn);
-	 * scrollableLeft.insertColumn(aIndex, aColumn);
-	 * footerLeft.insertColumn(aIndex, aColumn, null, aFooter);
-	 * refreshColumns(); } else { headerRight.insertColumn(aIndex, aColumn, new
-	 * DraggableHeader<T>(aHeaderValue, headerRight, aColumn, getElement()));
-	 * frozenRight.insertColumn(aIndex, aColumn);
-	 * scrollableRight.insertColumn(aIndex, aColumn);
-	 * footerRight.insertColumn(aIndex, aColumn, null, aFooter); } }
-     */
-    public void removeColumn(int aIndex) {
-        if (aIndex < frozenColumns) {
-            headerLeft.removeColumn(aIndex);// ColumnsRemover will care about columns sharing
-            refreshColumns();
+    public boolean removeColumnNode(HeaderNode aNode) {
+        boolean res = header.remove(aNode);
+        if (res) {
+            aNode.getColumn().setGrid(null);
+            if (treeIndicatorColumn == aNode.getColumn()) {
+                treeIndicatorColumn = null;
+            }
+            applyColumnsNodes();
+            return true;
         } else {
-            headerRight.removeColumn(aIndex - frozenColumns);// ColumnsRemover will care about columns sharing
+            return false;
         }
     }
 
-    protected void refreshColumns() {
-        List<Column> cols = new ArrayList<>();
-        List<HeaderView> headers = new ArrayList<>();
-        List<HeaderView> footers = new ArrayList<>();
-        List<String> widths = new ArrayList<>();
-        List<Boolean> hidden = new ArrayList<>();
-        for (int i = headerRight.getColumnCount() - 1; i >= 0; i--) {
-            Column col = headerRight.getColumn(i);
-            cols.add(0, col);
-            widths.add(0, headerRight.getColumnWidth(col, true));
-            headers.add(0, headerRight.getHeader(i));
-            footers.add(0, footerRight.getFooter(i));
-            hidden.add(0, headerRight.isColumnHidden(col));
-            headerRight.removeColumn(i);// ColumnsRemover will care about
-            // columns sharing
-        }
-        for (int i = headerLeft.getColumnCount() - 1; i >= 0; i--) {
-            Column col = headerLeft.getColumn(i);
-            cols.add(0, col);
-            widths.add(0, headerLeft.getColumnWidth(col, true));
-            headers.add(0, headerLeft.getHeader(i));
-            footers.add(0, footerLeft.getFooter(i));
-            hidden.add(0, headerLeft.isColumnHidden(col));
-            headerLeft.removeColumn(i);// ColumnsRemover will care about
-            // columns sharing
-        }
-        for (int i = 0; i < cols.size(); i++) {
-            Column col = cols.get(i);
-            HeaderView h = headers.get(i);
-            HeaderView f = footers.get(i);
-            String w = widths.get(i);
-            Boolean b = hidden.get(i);
-            addColumn(col, w, h, f, b);
+    public void addColumnNode(HeaderNode aNode) {
+        header.add(aNode);
+        aNode.getColumn().setGrid(this);
+        applyColumnsNodes();
+    }
+
+    public void insertColumnNode(int aIndex, HeaderNode aNode) {
+        header.add(aIndex, aNode);
+        aNode.getColumn().setGrid(this);
+        applyColumnsNodes();
+    }
+
+    public void moveColumnNode(HeaderNode aSubject, HeaderNode aInsertBefore) {
+        if (aSubject != null && aInsertBefore != null && aSubject.getParent() == aInsertBefore.getParent()) {
+            List<HeaderNode> neighbours = aSubject.getParent() != null
+                    ? aSubject.getParent().getChildren() : header;
+            neighbours.remove(aSubject);
+            int insertAt = neighbours.indexOf(aInsertBefore);
+            neighbours.add(insertAt, aSubject);
+            applyColumnsNodes();
         }
     }
 
-    public void setColumnWidthFromHeaderDrag(Column<T, ?> aColumn, double aWidth, Style.Unit aUnit) {
-        setColumnWidth(aColumn, aWidth, aUnit);
-    }
-
-    public void setColumnWidth(Column<T, ?> aColumn, double aWidth, Style.Unit aUnit) {
-        if (headerLeft.getColumnIndex(aColumn) != -1) {
-            headerLeft.setColumnWidth(aColumn, aWidth, aUnit);
-            frozenLeft.setColumnWidth(aColumn, aWidth, aUnit);
-            scrollableLeft.setColumnWidth(aColumn, aWidth, aUnit);
-            footerLeft.setColumnWidth(aColumn, aWidth, aUnit);
-        } else if (headerRight.getColumnIndex(aColumn) != -1) {
-            headerRight.setColumnWidth(aColumn, aWidth, aUnit);
-            frozenRight.setColumnWidth(aColumn, aWidth, aUnit);
-            scrollableRight.setColumnWidth(aColumn, aWidth, aUnit);
-            footerRight.setColumnWidth(aColumn, aWidth, aUnit);
+    private void addColumnToSections(Column aColumn) {
+        if (headerLeft.getColumnCount() < frozenColumns) {
+            headerLeft.addColumn(aColumn, false);
+            frozenLeft.addColumn(aColumn, false);
+            scrollableLeft.addColumn(aColumn, false);
+            footerLeft.addColumn(aColumn, false);
         } else {
-            // Logger.getLogger(Grid.class.getName()).log(Level.WARNING,
-            // "Unknown column is met while setting column width");
+            headerRight.addColumn(aColumn, false);
+            frozenRight.addColumn(aColumn, false);
+            scrollableRight.addColumn(aColumn, false);
+            footerRight.addColumn(aColumn, false);
         }
     }
 
@@ -848,24 +829,6 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
         if (aIndex >= 0 && aIndex < getColumnCount()) {
             return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getColumn(aIndex)
                     : headerRight.getColumn(aIndex - headerLeft.getColumnCount());
-        } else {
-            return null;
-        }
-    }
-
-    public HeaderView getColumnHeader(int aIndex) {
-        if (aIndex >= 0 && aIndex < getColumnCount()) {
-            return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getHeader(aIndex)
-                    : headerRight.getHeader(aIndex - headerLeft.getColumnCount());
-        } else {
-            return null;
-        }
-    }
-
-    public HeaderView getColumnFooter(int aIndex) {
-        if (aIndex >= 0 && aIndex < getColumnCount()) {
-            return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getFooter(aIndex)
-                    : headerRight.getFooter(aIndex - headerLeft.getColumnCount());
         } else {
             return null;
         }
