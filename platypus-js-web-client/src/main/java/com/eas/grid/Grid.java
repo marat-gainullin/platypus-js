@@ -1,5 +1,6 @@
 package com.eas.grid;
 
+import com.eas.core.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,37 +9,41 @@ import com.eas.grid.columns.CheckServiceColumn;
 import com.eas.grid.columns.Column;
 import com.eas.grid.columns.RadioServiceColumn;
 import com.eas.grid.columns.UsualServiceColumn;
-import com.eas.grid.columns.header.HasSortList;
 import com.eas.grid.columns.header.HeaderAnalyzer;
 import com.eas.grid.columns.header.HeaderSplitter;
 import com.eas.grid.columns.header.HeaderNode;
 import com.eas.grid.processing.TreeDataProvider;
 import com.eas.menu.MenuItemCheckBox;
+import com.eas.menu.Menu;
 import com.eas.ui.Focusable;
 import com.eas.ui.PublishedColor;
 import com.eas.ui.Widget;
 import com.eas.ui.XDataTransfer;
-import com.eas.menu.Menu;
+import com.eas.ui.events.HasSelectionHandlers;
+import com.eas.ui.events.SelectionEvent;
+import com.eas.ui.events.SelectionHandler;
 import com.eas.ui.events.ValueChangeEvent;
 import com.eas.ui.events.ValueChangeHandler;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.StyleElement;
 import com.google.gwt.dom.client.TableCellElement;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.Range;
-import com.google.gwt.view.client.SelectionModel;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
  * @author mg
  */
-public abstract class Grid extends Widget implements HasSortList, Focusable {
+public class Grid extends Widget implements Focusable, HasSelectionHandlers<JavaScriptObject> {
 
     public static final String RULER_STYLE = "grid-ruler";
     public static final String COLUMN_PHANTOM_STYLE = "grid-column-phantom";
@@ -77,7 +82,6 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
     //
     protected Element columnsChevron = Document.get().createDivElement();
     //
-    protected final ColumnSortList sortList = new ColumnSortList();
     private int headerRowsHeight = 30;
     protected int rowsHeight = 30;
     protected boolean showHorizontalLines = true;
@@ -86,10 +90,31 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
     protected PublishedColor gridColor;
     protected PublishedColor oddRowsColor = PublishedColor.create(241, 241, 241, 255);
 
-    protected ListDataProvider dataProvider;
+    private Set<JavaScriptObject> selected = new HashSet<>();
 
     protected int frozenColumns;
     protected int frozenRows;
+    protected String parentField;
+    protected String childrenField;
+    //
+    protected JavaScriptObject data;
+    protected String field;
+    protected HandlerRegistration boundToData;
+    protected HandlerRegistration boundToCursor;
+    protected String cursorProperty = "cursor";
+    protected JavaScriptObject onRender;
+    protected JavaScriptObject onAfterRender;
+    protected JavaScriptObject onExpand;
+    protected JavaScriptObject onCollapse;
+    // runtime
+    protected Widget activeEditor;
+    protected HandlerRegistration sortHandlerReg;
+    protected HandlerRegistration positionSelectionHandler;
+    protected HandlerRegistration onSelectEventSelectionHandler;
+    protected boolean editable = true;
+    protected boolean deletable = true;
+    protected boolean insertable = true;
+    protected boolean draggableRows;
 
     public Grid() {
         super();
@@ -173,6 +198,28 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
         ghostColumn.addClassName(COLUMN_PHANTOM_STYLE);
         ghostColumn.getStyle().setPosition(Style.Position.ABSOLUTE);
         ghostColumn.getStyle().setTop(0, Style.Unit.PX);
+
+        element.<XElement>cast().addEventListener(BrowserEvents.DRAGSTART, new XElement.NativeHandler() {
+
+            @Override
+            public void on(NativeEvent event) {
+                if (draggableRows) {
+                    EventTarget et = event.getEventTarget();
+                    Element targetElement = Element.as(et);
+                    if ("tr".equalsIgnoreCase(targetElement.getTagName())) {
+                        event.stopPropagation();
+                        JavaScriptObject dragged = targetElement.getPropertyJSO(GridSection.JS_ROW_NAME);
+                        if (Grid.this.data != null) {
+                            Utils.JsObject dataArray = Grid.this.data.cast();
+                            int dataIndex = dataArray.indexOf(dragged);
+                            event.getDataTransfer().setData("text/modelgrid-row",
+                                    "{\"gridName\":\"" + name + "\", \"dataIndex\": " + dataIndex + "}");
+                        }
+                    }
+                }
+            }
+
+        });
         element.<XElement>cast().addEventListener(BrowserEvents.DRAGENTER, new XElement.NativeHandler() {
             @Override
             public void on(NativeEvent event) {
@@ -320,69 +367,107 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
 
         });
 
-        ColumnSortEvent.Handler sectionSortHandler = new ColumnSortEvent.Handler() {
-
-            @Override
-            public void onColumnSort(ColumnSortEvent event) {
-                boolean isCtrlKey = ((GridSection<?>) event.getSource()).isCtrlKey();
-                boolean contains = false;
-                int containsAt = -1;
-                for (int i = 0; i < sortList.size(); i++) {
-                    if (sortList.get(i).getColumn() == event.getColumn()) {
-                        contains = true;
-                        containsAt = i;
-                        break;
-                    }
-                }
-                if (!contains) {
-                    if (!isCtrlKey) {
-                        sortList.clear();
-                    }
-                    sortList.insert(sortList.size(), new ColumnSortList.ColumnSortInfo(event.getColumn(), true));
-                } else {
-                    boolean wasAscending = sortList.get(containsAt).isAscending();
-                    if (!isCtrlKey) {
-                        sortList.clear();
-                        if (wasAscending) {
-                            sortList.push(new ColumnSortList.ColumnSortInfo(event.getColumn(), false));
-                        }
-                    } else {
-                        sortList.remove(sortList.get(containsAt));
-                        if (wasAscending) {
-                            sortList.insert(containsAt, new ColumnSortList.ColumnSortInfo(event.getColumn(), false));
-                        }
-                    }
-                }
-                ColumnSortEvent.fire(Grid.this, sortList);
-            }
-        };
-        headerLeft.getColumnSortList().setLimit(1);
-        headerLeft.addColumnSortHandler(sectionSortHandler);
-        headerRight.getColumnSortList().setLimit(1);
-        headerRight.addColumnSortHandler(sectionSortHandler);
         gridColor = PublishedColor.create(211, 211, 211, 255);
         regenerateDynamicHeaderRowsStyles();
         regenerateDynamicRowsStyles();
         regenerateDynamicOddRowsStyles();
         regenerateDynamicCellsStyles();
+
+        element.<XElement>cast().addEventListener(BrowserEvents.KEYUP, new XElement.NativeHandler() {
+
+            @Override
+            public void on(NativeEvent event) {
+                Object oData = data != null && field != null && !field.isEmpty() ? Utils.getPathData(data, field)
+                        : data;
+                Utils.JsObject jsData = oData instanceof JavaScriptObject ? ((JavaScriptObject) oData).<Utils.JsObject>cast()
+                        : null;
+                if (jsData != null) {
+                    if (activeEditor == null) {
+                        if (event.getKeyCode() == KeyCodes.KEY_DELETE && deletable) {
+                            // TODO: Check if viewElements is completely same as rows
+                            if (!viewElements.isEmpty() && data.<JsArray>cast().length() > 0) {
+                                // calculate some view sugar
+                                int lastSelectedViewIndex = -1;
+                                for (int i = viewElements.size() - 1; i >= 0; i--) {
+                                    JavaScriptObject element = viewElements.get(i);
+                                    if (isSelected(element)) {
+                                        lastSelectedViewIndex = i;
+                                        break;
+                                    }
+                                }
+                                // actually delete selected elements
+                                int deletedAt = -1;
+                                for (int i = jsData.length() - 1; i >= 0; i--) {
+                                    JavaScriptObject element = jsData.getSlot(i);
+                                    if (isSelected(element)) {
+                                        jsData.splice(i, 1);
+                                        deletedAt = i;
+                                    }
+                                }
+                                final int viewIndexToSelect = lastSelectedViewIndex;
+                                if (deletedAt > -1) {
+                                    // TODO: Check if Invoke.Later is an option
+                                    int vIndex = viewIndexToSelect;
+                                    if (vIndex >= 0 && !viewElements.isEmpty()) {
+                                        if (vIndex >= viewElements.size()) {
+                                            vIndex = viewElements.size() - 1;
+                                        }
+                                        JavaScriptObject toSelect = viewElements.get(vIndex);
+                                        makeVisible(toSelect, true);
+                                    } else {
+                                        Grid.this.setFocus(true);
+                                    }
+                                }
+                            }
+                        } else if (event.getKeyCode() == KeyCodes.KEY_INSERT && insertable) {
+                            int insertAt = -1;
+                            JavaScriptObject lead = selectionLead;
+                            insertAt = data.<JsArray>cast().indexOf(lead);
+                            insertAt++;
+                            JavaScriptObject oElementClass = jsData.getJs("elementClass");
+                            Utils.JsObject elementClass = oElementClass != null ? oElementClass.<Utils.JsObject>cast() : null;
+                            final JavaScriptObject inserted = elementClass != null ? elementClass.newObject()
+                                    : JavaScriptObject.createObject();
+                            jsData.splice(insertAt, 0, inserted);
+                            // TODO: Check if Invoke.Later is an option
+                            makeVisible(inserted, true);
+                        }
+                    }
+                }
+            }
+
+        });
     }
 
-    public ColumnSortList getSortList() {
-        return sortList;
+    public boolean isSelected(JavaScriptObject item) {
+        return selected.contains(item);
     }
 
-    /**
-     * Add a handler to handle {@link ColumnSortEvent}s.
-     *
-     * @param handler the {@link ColumnSortEvent.Handler} to add
-     * @return a {@link HandlerRegistration} to remove the handler
-     */
-    public HandlerRegistration addColumnSortHandler(ColumnSortEvent.Handler handler) {
-        return addHandler(handler, ColumnSortEvent.getType());
+    public void select(JavaScriptObject item) {
+        selected.add(item);
+        fireSelected(item);
     }
 
-    public ListDataProvider getDataProvider() {
-        return dataProvider;
+    public boolean unselect(JavaScriptObject item) {
+        return selected.remove(item);
+    }
+
+    private final Set<SelectionHandler<JavaScriptObject>> selectionHandlers = new HashSet<>();
+
+    @Override
+    public HandlerRegistration addSelectionHandler(SelectionHandler<JavaScriptObject> handler) {
+        selectionHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                selectionHandlers.remove(handler);
+            }
+        };
+    }
+
+    public void fireSelected(JavaScriptObject item) {
+        SelectionEvent<JavaScriptObject> event = new SelectionEvent<>(this, item);
+        selectionHandlers.forEach(sh -> sh.onSelection(event));
     }
 
     protected ColumnDrag findTargetDraggedColumn(JavaScriptObject aEventTarget) {
@@ -588,9 +673,7 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
     public void setFrozenRows(int aValue) {
         if (aValue >= 0 && frozenRows != aValue) {
             frozenRows = aValue;
-            if (dataProvider != null && aValue <= dataProvider.getList().size()) {
-                setupVisibleRanges();
-            }
+            setupRanges();
         }
     }
 
@@ -605,85 +688,249 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
         }
     }
 
-    /**
-     *
-     * @param sModel
-     */
-    public void setSelectionModel(SelectionModel sModel) {
-        headerLeft.setSelectionModel(sModel);
-        headerRight.setSelectionModel(sModel);
-        frozenLeft.setSelectionModel(sModel);
-        frozenRight.setSelectionModel(sModel);
-        scrollableLeft.setSelectionModel(sModel);
-        scrollableRight.setSelectionModel(sModel);
+    public boolean isDraggableRows() {
+        return draggableRows;
     }
 
-    /**
-     * @param aDataProvider
-     */
-    public void setDataProvider(ListDataProvider aDataProvider) {
-        if (dataProvider != aDataProvider) {
-            unbindDataProvider();
-            dataProvider = aDataProvider;
-            bindDataProvider();
-            setupVisibleRanges();
+    public void setDraggableRows(boolean aValue) {
+        if (draggableRows != aValue) {
+            draggableRows = aValue;
+            for (GridSection section : new GridSection[]{frozenLeft, frozenRight, scrollableLeft, scrollableRight}) {
+                section.setDraggableRows(aValue);
+            }
         }
     }
 
-    protected void unbindDataProvider() {
-        if (dataProvider != null) {
-            dataProvider.removeDataDisplay(headerLeft);
-            dataProvider.removeDataDisplay(headerRight);
-            dataProvider.removeDataDisplay(frozenLeft);
-            dataProvider.removeDataDisplay(frozenRight);
-            dataProvider.removeDataDisplay(scrollableLeft);
-            dataProvider.removeDataDisplay(scrollableRight);
-            dataProvider.removeDataDisplay(footerLeft);
-            dataProvider.removeDataDisplay(footerRight);
-        }
+    public Widget getActiveEditor() {
+        return activeEditor;
     }
 
-    protected void bindDataProvider() {
-        if (dataProvider != null) {
-            dataProvider.addDataDisplay(headerLeft);
-            dataProvider.addDataDisplay(headerRight);
-            dataProvider.addDataDisplay(frozenLeft);
-            dataProvider.addDataDisplay(frozenRight);
-            dataProvider.addDataDisplay(scrollableLeft);
-            dataProvider.addDataDisplay(scrollableRight);
-            dataProvider.addDataDisplay(footerLeft);
-            dataProvider.addDataDisplay(footerRight);
-        }
+    public void setActiveEditor(Widget aWidget) {
+        activeEditor = aWidget;
     }
 
-    public void setupVisibleRanges() {
-        List<T> list = dataProvider != null ? dataProvider.getList() : null;
-        int generalLength = list != null ? list.size() : 0;
-        int lfrozenRows = generalLength >= frozenRows ? frozenRows : generalLength;
-        if (lfrozenRows == 0) {
-            hive.getRowFormatter().setVisible(1, false);
+    protected void applyRows() {
+        unbindCursor();
+        if (sortHandlerReg != null) {
+            sortHandlerReg.removeHandler();
+        }
+        Runnable onResize = new Runnable() {
+            @Override
+            public void run() {
+                setupRanges();
+                if (dataProvider instanceof IndexOfProvider<?>) {
+                    ((IndexOfProvider<?>) dataProvider).rescan();
+                }
+                sortHandler.setList(dataProvider != null ? dataProvider.getList() : new ArrayList<JavaScriptObject>());
+                if (sortList.size() > 0) {
+                    sortList.clear();
+                    redrawHeaders();
+                }
+                if (dataProvider == null || dataProvider.getList() == null || dataProvider.getList().isEmpty()) {
+                    clearSelection();
+                }
+            }
+
+        };
+        Runnable onChange = new Runnable() {
+            @Override
+            public void run() {
+                ModelGrid.this.redraw();
+            }
+
+        };
+        Runnable onSort = new Runnable() {
+            @Override
+            public void run() {
+                if (dataProvider instanceof IndexOfProvider<?>) {
+                    ((IndexOfProvider<?>) dataProvider).rescan();
+                }
+            }
+
+        };
+        Object oData = data != null && field != null && !field.isEmpty() ? Utils.getPathData(data, field) : data;
+        JavaScriptObject jsData = oData instanceof JavaScriptObject ? (JavaScriptObject) oData : null;
+        if (jsData != null) {
+            if (isTreeConfigured()) {
+                JsArrayTreeDataProvider treeDataProvider = new JsArrayTreeDataProvider(parentField, childrenField,
+                        onResize);
+                setDataProvider(treeDataProvider);
+                sortHandler = new TreeMultiSortHandler<>(treeDataProvider, onSort);
+                treeDataProvider.addExpandedHandler(new ExpandedHandler<JavaScriptObject>() {
+                    @Override
+                    public void expanded(JavaScriptObject anElement) {
+                        ColumnSortEvent.fire(ModelGrid.this, sortList);
+                        if (onExpand != null) {
+                            JavaScriptObject jsEvent = EventsPublisher.publishItemEvent(ModelGrid.this.published,
+                                    anElement);
+                            try {
+                                Utils.executeScriptEventVoid(ModelGrid.this.published, onExpand, jsEvent);
+                            } catch (Exception e) {
+                                Logger.getLogger(EventsExecutor.class.getName()).log(Level.SEVERE, null, e);
+                            }
+                        }
+                    }
+
+                });
+                treeDataProvider.addCollapsedHandler(new CollapsedHandler<JavaScriptObject>() {
+                    @Override
+                    public void collapsed(JavaScriptObject anElement) {
+                        ColumnSortEvent.fire(ModelGrid.this, sortList);
+                        if (onCollapse != null) {
+                            JavaScriptObject jsEvent = EventsPublisher.publishItemEvent(ModelGrid.this.published,
+                                    anElement);
+                            try {
+                                Utils.executeScriptEventVoid(ModelGrid.this.published, onCollapse, jsEvent);
+                            } catch (Exception e) {
+                                Logger.getLogger(EventsExecutor.class.getName()).log(Level.SEVERE, null, e);
+                            }
+                        }
+                    }
+
+                });
+            } else {
+                setDataProvider(new JsArrayListDataProvider(onResize, onChange, null));
+                sortHandler = new ListMultiSortHandler<>(dataProvider.getList(), onSort);
+            }
+            for (int colIndex = 0; colIndex < getColumnCount(); colIndex++) {
+                Column modelCol = getColumn(colIndex);
+                sortHandler.setComparator(modelCol, modelCol.getComparator());
+            }
+            sortHandlerReg = addColumnSortHandler(sortHandler);
+            ((JsDataContainer) getDataProvider()).setData(jsData);
+            bindCursor();
         } else {
-            hive.getRowFormatter().setVisible(1, true);
+            setDataProvider(null);
         }
-        int scrollableRowCount = generalLength - lfrozenRows;
-        //
-        headerLeft.setVisibleRange(new Range(0, 0));
-        headerRight.setVisibleRange(new Range(0, 0));
-        frozenLeft.setVisibleRange(new Range(0, lfrozenRows));
-        frozenRight.setVisibleRange(new Range(0, lfrozenRows));
-        scrollableLeft.setVisibleRange(new Range(lfrozenRows, scrollableRowCount >= 0 ? scrollableRowCount : 0));
-        scrollableRight.setVisibleRange(new Range(lfrozenRows, scrollableRowCount >= 0 ? scrollableRowCount : 0));
-        footerLeft.setVisibleRange(new Range(0, 0));
-        footerRight.setVisibleRange(new Range(0, 0));
-        //Since footerLeft and footerRight have bpth zero range,
-        //hide them entirely
-        hive.getRowFormatter().setVisible(3, false);
+    }
+
+    public void rebind() {
+        unbind();
+        bind();
+    }
+
+    protected void bind() {
+        if (data != null) {
+            applyRows();
+            if (field != null && !field.isEmpty()) {
+                boundToData = Utils.listenPath(data, field, new Utils.OnChangeHandler() {
+
+                    @Override
+                    public void onChange(JavaScriptObject anEvent) {
+                        applyRows();
+                    }
+                });
+            }
+        } else {
+            applyRows();
+            selected.clear();
+        }
+        setupRanges();
+    }
+
+    protected void unbind() {
+        if (boundToData != null) {
+            boundToData.removeHandler();
+            boundToData = null;
+        }
+        unbindCursor();
+    }
+
+    protected void bindCursor() {
+        boundToCursor = Utils.listenPath(data, cursorProperty, new Utils.OnChangeHandler() {
+
+            @Override
+            public void onChange(JavaScriptObject anEvent) {
+                enqueueServiceColumnsRedraw();
+            }
+
+        });
+    }
+
+    protected void unbindCursor() {
+        if (boundToCursor != null) {
+            boundToCursor.removeHandler();
+            boundToCursor = null;
+        }
+    }
+
+    @Override
+    public JavaScriptObject getData() {
+        return data;
+    }
+
+    @Override
+    public void setData(JavaScriptObject aValue) {
+        if (data != aValue) {
+            unbind();
+            data = aValue;
+            bind();
+        }
+    }
+
+    @Override
+    public String getField() {
+        return field;
+    }
+
+    @Override
+    public void setField(String aValue) {
+        if (field == null ? aValue != null : !field.equals(aValue)) {
+            unbind();
+            field = aValue;
+            bind();
+        }
+    }
+
+    public String getParentField() {
+        return parentField;
+    }
+
+    public void setParentField(String aValue) {
+        if (parentField == null ? aValue != null : !parentField.equals(aValue)) {
+            boolean wasTree = isTreeConfigured();
+            parentField = aValue;
+            boolean isTree = isTreeConfigured();
+            if (wasTree != isTree) {
+                applyRows();
+            }
+        }
+    }
+
+    public String getChildrenField() {
+        return childrenField;
+    }
+
+    public void setChildrenField(String aValue) {
+        if (childrenField == null ? aValue != null : !childrenField.equals(aValue)) {
+            boolean wasTree = isTreeConfigured();
+            childrenField = aValue;
+            boolean isTree = isTreeConfigured();
+            if (wasTree != isTree) {
+                applyRows();
+            }
+        }
+    }
+
+    public final boolean isTreeConfigured() {
+        return parentField != null && !parentField.isEmpty() && childrenField != null && !childrenField.isEmpty();
+    }
+
+    public void setupRanges() {
+        frozenLeft.setRange(0, frozenRows);
+        frozenRight.setRange(0, frozenRows);
+        scrollableLeft.setRange(frozenRows, getDataRowsCount()/* rows.length */);
+        scrollableRight.setRange(frozenRows, getDataRowsCount()/* rows.length */);
+    }
+
+    private int getDataRowsCount() {
+        return 0;
     }
 
     protected Column treeIndicatorColumn;
 
     private void checkTreeIndicatorColumn() {
-        if (dataProvider instanceof TreeDataProvider<?>) {
+        if (isTreeConfigured()) {
             if (treeIndicatorColumn == null) {
                 int treeIndicatorIndex = 0;
                 while (treeIndicatorIndex < getColumnCount()) {
@@ -705,7 +952,7 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
     protected void clearColumnsNodes() {
         clearColumnsNodes(true);
     }
-    
+
     protected void clearColumnsNodes(boolean needRedraw) {
         for (int i = getColumnCount() - 1; i >= 0; i--) {
             Column toDel = getColumn(i);
@@ -870,53 +1117,42 @@ public abstract class Grid extends Widget implements HasSortList, Focusable {
         targetSection.focusCell(aRow, aCol);
     }
 
+    public void sort() {
+        sort(true);
+    }
+
+    public void sort(boolean needRedraw) {
+        // rows = data.splice(0, data.length);
+        // rows.sort(function(i1, i2){
+        //     var res = 0;
+        //     var index = 0;
+        //     while(res === 0 && index < getColumnsCount()){
+        //         var column = getColumn(index++);
+        //         if(column.comparator != null){
+        //             res = column.comparator(i1, i2);
+        //         }
+        //     }
+        //     return res;
+        // });
+        // if(needRedraw){
+        //     redraw();
+        //     fireRowsSorted();
+        // }
+    }
+
     public void unsort() {
-        sortList.clear();
-        ColumnSortEvent.fire(Grid.this, sortList);
-        redrawHeaders();
+        unsort(true);
     }
 
-    public void addSort(Column aColumn, boolean isAscending) {
-        if (aColumn.isSortable()) {
-            boolean contains = false;
-            int containsAt = -1;
-            for (int i = 0; i < sortList.size(); i++) {
-                if (sortList.get(i).getColumn() == aColumn) {
-                    contains = true;
-                    containsAt = i;
-                    break;
-                }
-            }
-            if (contains) {
-                boolean wasAscending = sortList.get(containsAt).isAscending();
-                if (wasAscending == isAscending) {
-                    return;
-                }
-
-            }
-            sortList.insert(sortList.size(), new ColumnSortList.ColumnSortInfo(aColumn, isAscending));
-            ColumnSortEvent.fire(Grid.this, sortList);
-            redrawHeaders();
+    public void unsort(boolean needRedraw) {
+        for (int i = 0; i < getColumnCount(); i++) {
+            Column column = getColumn(i);
+            column.unsort(false);
         }
-    }
-
-    public void unsortColumn(Column aColumn) {
-        if (aColumn.isSortable()) {
-            boolean contains = false;
-            int containsAt = -1;
-            for (int i = 0; i < sortList.size(); i++) {
-                if (sortList.get(i).getColumn() == aColumn) {
-                    contains = true;
-                    containsAt = i;
-                    break;
-                }
-            }
-            if (contains) {
-                sortList.remove(sortList.get(containsAt));
-                ColumnSortEvent.fire(Grid.this, sortList);
-                redrawHeaders();
-            }
-        }
+        // if(needRedraw){
+        //     redraw();
+        //     fireRowsSorted();
+        // }
     }
 
     protected int tabIndex;

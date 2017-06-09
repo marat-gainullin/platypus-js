@@ -26,15 +26,11 @@ import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.NativeEvent;
 
 // TODO: Check tree expandable cell decorations
-public class Column implements ChangesHost, HasPublished {
-
-    public enum SortDirection {
-        ASC,
-        DESC,
-        NONE
-    }
+public class Column implements HasPublished {
 
     private TableColElement element = Document.get().createColElement();
+    private String radioGroup = "group-" + Document.get().createUniqueId();
+    private StyleElement columnRule = Document.get().createStyleElement();
     protected String field;
     protected String sortField;
     protected Widget editor;
@@ -51,13 +47,8 @@ public class Column implements ChangesHost, HasPublished {
     protected boolean visible = true;
     protected boolean selectOnly;
     protected boolean sortable;
-    private SortDirection sortDirection = SortDirection.ASC;
-    private Runnable onSortDirectionChanged;
-    private Runnable onSortFieldChanged;
-    private StyleElement columnRule = Document.get().createStyleElement();
-    private String radioGroup = "group-" + Document.get().createUniqueId();
+    protected PathComparator comparator;
     private HeaderView header;
-    protected Comparator<JavaScriptObject> comparator;
     protected JavaScriptObject published;
     protected JavaScriptObject onRender;
     protected JavaScriptObject onSelect;
@@ -65,7 +56,6 @@ public class Column implements ChangesHost, HasPublished {
 
     public Column() {
         super();
-        setPublished(JavaScriptObject.createObject());
     }
 
     public TableColElement getElement() {
@@ -88,39 +78,45 @@ public class Column implements ChangesHost, HasPublished {
         this.grid = grid;
     }
 
-    public void setOnSortDirectionChanged(Runnable onSortDirectionChanged) {
-        this.onSortDirectionChanged = onSortDirectionChanged;
-    }
-
-    public void setOnSortFieldChanged(Runnable onSortFieldChanged) {
-        this.onSortFieldChanged = onSortFieldChanged;
-    }
-
     public StyleElement getColumnRule() {
         return columnRule;
     }
 
-    public Comparator<JavaScriptObject> getComparator() {
+    public PathComparator getComparator() {
         return comparator;
     }
 
-    public SortDirection getSortDirection() {
-        return sortDirection;
+    public void sort() {
+        sort(true);
     }
 
-    public void sort() {
-        sortDirection = SortDirection.ASC;
-        onSortDirectionChanged.run();
+    public void sort(boolean fireEvent) {
+        comparator = new PathComparator(sortField != null && !sortField.isEmpty() ? sortField : field, true);
+        if (fireEvent) {
+            grid.sort();
+        }
     }
 
     public void sortDesc() {
-        sortDirection = SortDirection.DESC;
-        onSortDirectionChanged.run();
+        sortDesc(true);
+    }
+
+    public void sortDesc(boolean fireEvent) {
+        comparator = new PathComparator(sortField != null && !sortField.isEmpty() ? sortField : field, false);
+        if (fireEvent) {
+            grid.sort();
+        }
     }
 
     public void unsort() {
-        sortDirection = SortDirection.NONE;
-        onSortDirectionChanged.run();
+        unsort(true);
+    }
+
+    public void unsort(boolean fireEvent) {
+        comparator = null;
+        if (fireEvent) {
+            grid.sort();
+        }
     }
 
     public String getField() {
@@ -130,8 +126,6 @@ public class Column implements ChangesHost, HasPublished {
     public void setField(String aValue) {
         if (field == null ? aValue != null : !field.equals(aValue)) {
             field = aValue;
-            comparator = new PathComparator(sortField != null && !sortField.isEmpty() ? sortField : field, true);
-            onSortFieldChanged.run();
         }
     }
 
@@ -142,8 +136,6 @@ public class Column implements ChangesHost, HasPublished {
     public void setSortField(String aValue) {
         if (sortField == null ? aValue != null : !sortField.equals(aValue)) {
             sortField = aValue;
-            comparator = new PathComparator(sortField != null && !sortField.isEmpty() ? sortField : field, true);
-            onSortFieldChanged.run();
         }
     }
 
@@ -161,11 +153,6 @@ public class Column implements ChangesHost, HasPublished {
 
     public void setMaxWidth(double aValue) {
         maxWidth = aValue;
-    }
-
-    @Override
-    public boolean isChanged(JavaScriptObject anElement) {
-        return false;
     }
 
     public Object getValue(JavaScriptObject anElement) {

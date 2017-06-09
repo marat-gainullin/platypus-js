@@ -23,15 +23,14 @@ import java.util.ArrayList;
 /**
  *
  * @author mg
- * @param <T>
  */
-public class GridSection<T> {
+public class GridSection {
 
     public static final String JS_ROW_NAME = "js-row";
 
     private TableElement table = Document.get().createTableElement();
     private TableColElement colgroup = Document.get().createColGroupElement();
-    private List<HeaderNode> header;
+    private List<HeaderNode> header = new ArrayList<>();
     private Element keyboardSelectedElement;
     protected String dynamicCellClassName;
     protected String dynamicOddRowsClassName;
@@ -42,8 +41,11 @@ public class GridSection<T> {
     private int keyboardSelectedColumn = -1;
     private int rowsPerPage = 30; // Only for PageDown or PageUp keys handling
     private JsArrayList data; // Already sorted
-    private int viewStart; // Inclusive
-    private int viewEnd; // Exclusive
+    /**
+     * Already sorted data array indices;
+     */
+    private int startRow; // Inclusive
+    private int endRow; // Exclusive
     private List<Column> columns = new ArrayList<>();
 
     public GridSection(String aDynamicCellClassName, String aDynamicOddRowsClassName, String aDynamicEvenRowsClassName, String aDynamicHeaderRowClassName) {
@@ -172,7 +174,7 @@ public class GridSection<T> {
 
     public TableCellElement getViewCell(int aRow, int aCol) {
         NodeList<TableRowElement> viewRows = table.getTBodies().getItem(0).getRows();
-        if (aRow - viewStart >= 0 && aRow - viewStart < viewRows.getLength()) {
+        if (aRow - startRow >= 0 && aRow - startRow < viewRows.getLength()) {
             TableRowElement viewRow = viewRows.getItem(aRow);
             NodeList<TableCellElement> cells = viewRow.getCells();
             if (aCol >= 0 && aCol < cells.getLength()) {
@@ -208,28 +210,66 @@ public class GridSection<T> {
 
     public void drawBody() {
         if (!columns.isEmpty()) {
-            TableSectionElement tbody = table.getTBodies().getItem(0);
-            for (int i = viewStart; i < viewEnd; i++) {
-                JavaScriptObject dataRow = data.get(i);
-                TableRowElement viewRow = Document.get().createTRElement();
-                if ((i + 1) % 2 == 0) {
-                    viewRow.addClassName(dynamicEvenRowsClassName);
-                } else {
-                    viewRow.addClassName(dynamicOddRowsClassName);
-                }
-                viewRow.addClassName("selected-row");
-                viewRow.setPropertyJSO(JS_ROW_NAME, dataRow);
+            drawBodyPortion(startRow, endRow);
+        }
+    }
+
+    private void drawBodyPortion(int start, int end) {
+        TableSectionElement tbody = table.getTBodies().getItem(0);
+        for (int i = start; i < end; i++) {
+            JavaScriptObject dataRow = data.get(i);
+            TableRowElement viewRow = Document.get().createTRElement();
+            if ((i + 1) % 2 == 0) {
+                viewRow.addClassName(dynamicEvenRowsClassName);
+            } else {
+                viewRow.addClassName(dynamicOddRowsClassName);
+            }
+            viewRow.addClassName("selected-row");
+            viewRow.setPropertyJSO(JS_ROW_NAME, dataRow);
+            if (i < startRow) {
+                tbody.insertFirst(viewRow);
+            } else {
                 tbody.appendChild(viewRow);
-                for (int c = 0; c < columns.size(); c++) {
-                    Column column = columns.get(c);
-                    TableCellElement viewCell = Document.get().createTDElement();
-                    // TODO: Check alignment of the cell
-                    // TODO: Check image decoration of the cell and decoration styles
-                    viewCell.addClassName(dynamicCellClassName);
-                    viewRow.appendChild(viewCell);
-                    column.render(i, dataRow, viewCell);
+            }
+            for (int c = 0; c < columns.size(); c++) {
+                Column column = columns.get(c);
+                TableCellElement viewCell = Document.get().createTDElement();
+                // TODO: Check alignment of the cell
+                // TODO: Check image decoration of the cell and decoration styles
+                viewCell.addClassName(dynamicCellClassName);
+                viewRow.appendChild(viewCell);
+                column.render(i, dataRow, viewCell);
+            }
+        }
+    }
+
+    public void setRange(int aStartRow, int aEndRow) {
+        startRow = aStartRow;
+        endRow = aEndRow;
+        redrawBody();
+    }
+
+    public void shiftRange(int aStartRow, int aEndRow) {
+        if (aStartRow >= endRow || aEndRow < startRow) {
+            setRange(aStartRow, aEndRow);
+        } else {
+            TableSectionElement tbody = table.getTBodies().getItem(0);
+            if (aStartRow < startRow) {
+                drawBodyPortion(aStartRow, startRow);
+            } else if (aStartRow > startRow) {
+                for (int i = startRow; i < aStartRow; i++) {
+                    tbody.getRows().getItem(0).removeFromParent();
                 }
             }
+            startRow = aStartRow;
+            if (aEndRow < endRow) {
+                for (int i = endRow - 1; i >= aEndRow; i--) {
+                    tbody.getRows().getItem(tbody.getRows().getLength() - 1).removeFromParent();
+                }
+            } else if (aEndRow > endRow) {
+                drawBodyPortion(endRow, aEndRow);
+            }
+            endRow = aEndRow;
         }
     }
 
@@ -259,8 +299,8 @@ public class GridSection<T> {
 
     public void redrawRow(int index) {
         TableSectionElement tbody = table.getTBodies().getItem(0);
-        if (index - viewStart >= 0 && index - viewStart < tbody.getRows().getLength()) {
-            TableRowElement viewRow = (TableRowElement) tbody.getRows().getItem(index - viewStart);
+        if (index - startRow >= 0 && index - startRow < tbody.getRows().getLength()) {
+            TableRowElement viewRow = (TableRowElement) tbody.getRows().getItem(index - startRow);
             JavaScriptObject dataRow = data.get(index);
             for (int c = 0; c < columns.size(); c++) {
                 Column column = columns.get(c);
@@ -274,9 +314,9 @@ public class GridSection<T> {
         if (aIndex >= 0 && aIndex < columns.size()) {
             Column column = columns.get(aIndex);
             TableSectionElement tbody = table.getTBodies().getItem(0);
-            for (int i = viewStart; i < viewEnd; i++) {
+            for (int i = startRow; i < endRow; i++) {
                 JavaScriptObject dataRow = data.get(i);
-                TableRowElement viewRow = (TableRowElement) tbody.getRows().getItem(i - viewStart);
+                TableRowElement viewRow = (TableRowElement) tbody.getRows().getItem(i - startRow);
                 TableCellElement viewCell = (TableCellElement) viewRow.getCells().getItem(aIndex);
                 while (viewCell.getFirstChildElement() != null) {
                     viewCell.getFirstChildElement().removeFromParent();
