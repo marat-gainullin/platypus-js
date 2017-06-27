@@ -6,7 +6,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.eas.core.Utils;
-import com.eas.grid.columns.Column;
 import com.eas.grid.columns.header.CheckHeaderNode;
 import com.eas.grid.columns.header.HeaderNode;
 import com.eas.grid.columns.header.RadioHeaderNode;
@@ -27,7 +26,7 @@ public class GridFactory implements UiWidgetReader {
         switch (type) {
             case "mg":
             case "ModelGrid": {
-                ModelGrid grid = new ModelGrid();
+                Grid grid = new Grid();
                 GridPublisher.publish(grid);
                 aFactory.readGeneralProps(anElement, grid);
                 int frozenColumns = Utils.getIntegerAttribute(anElement, "frc", "frozenColumns", 0);

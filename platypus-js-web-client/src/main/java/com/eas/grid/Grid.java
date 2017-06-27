@@ -13,19 +13,39 @@ import com.eas.grid.columns.header.HeaderAnalyzer;
 import com.eas.grid.columns.header.HeaderSplitter;
 import com.eas.grid.columns.header.HeaderNode;
 import com.eas.grid.processing.TreeDataProvider;
+import com.eas.grid.rows.JsArrayTreeDataProvider;
+import com.eas.grid.rows.JsDataContainer;
 import com.eas.menu.MenuItemCheckBox;
 import com.eas.menu.Menu;
+import com.eas.ui.BlurEvent;
+import com.eas.ui.FocusEvent;
 import com.eas.ui.Focusable;
+import com.eas.ui.HasBinding;
+import com.eas.ui.HasOnRender;
 import com.eas.ui.PublishedColor;
 import com.eas.ui.Widget;
 import com.eas.ui.XDataTransfer;
+import com.eas.ui.events.BlurHandler;
+import com.eas.ui.events.FocusHandler;
+import com.eas.ui.events.HasBlurHandlers;
+import com.eas.ui.events.HasFocusHandlers;
 import com.eas.ui.events.HasSelectionHandlers;
 import com.eas.ui.events.SelectionEvent;
 import com.eas.ui.events.SelectionHandler;
 import com.eas.ui.events.ValueChangeEvent;
 import com.eas.ui.events.ValueChangeHandler;
+import com.eas.ui.events.HasKeyDownHandlers;
+import com.eas.ui.events.HasKeyUpHandlers;
+import com.eas.ui.events.HasKeyPressHandlers;
+import com.eas.ui.events.KeyDownEvent;
+import com.eas.ui.events.KeyDownHandler;
+import com.eas.ui.events.KeyPressEvent;
+import com.eas.ui.events.KeyPressHandler;
+import com.eas.ui.events.KeyUpEvent;
+import com.eas.ui.events.KeyUpHandler;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -43,7 +63,9 @@ import java.util.Set;
  *
  * @author mg
  */
-public class Grid extends Widget implements Focusable, HasSelectionHandlers<JavaScriptObject> {
+public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObject>, HasSelectionLead, HasOnRender, HasBinding, Focusable, HasFocusHandlers, HasBlurHandlers,
+        HasKeyDownHandlers, HasKeyPressHandlers, HasKeyUpHandlers,
+        JsDataContainer {
 
     public static final String RULER_STYLE = "grid-ruler";
     public static final String COLUMN_PHANTOM_STYLE = "grid-column-phantom";
@@ -59,21 +81,21 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
     protected String dynamicEvenRowsClassName = "grid-even-row-" + Document.get().createUniqueId();
     protected String dynamicHeaderRowClassName = "grid-heder-row-" + Document.get().createUniqueId();
     protected Element headerLeftContainer = Document.get().createDivElement();
-    protected GridSection headerLeft = new GridSection(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
+    protected Section headerLeft = new Section(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
     protected Element headerRightContainer = Document.get().createDivElement();
-    protected GridSection headerRight = new GridSection(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
+    protected Section headerRight = new Section(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
     protected Element frozenLeftContainer = Document.get().createDivElement();
-    protected GridSection frozenLeft = new GridSection(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
+    protected Section frozenLeft = new Section(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
     protected Element frozenRightContainer = Document.get().createDivElement();
-    protected GridSection frozenRight = new GridSection(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
+    protected Section frozenRight = new Section(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
     protected Element scrollableLeftContainer = Document.get().createDivElement();
-    protected GridSection scrollableLeft = new GridSection(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
+    protected Section scrollableLeft = new Section(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
     protected Element scrollableRightContainer = Document.get().createDivElement();
-    protected GridSection scrollableRight = new GridSection(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
+    protected Section scrollableRight = new Section(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
     protected Element footerLeftContainer = Document.get().createDivElement();
-    protected GridSection footerLeft = new GridSection(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
+    protected Section footerLeft = new Section(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
     protected Element footerRightContainer = Document.get().createDivElement();
-    protected GridSection footerRight = new GridSection(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
+    protected Section footerRight = new Section(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
     protected Element ghostLine = Document.get().createDivElement();
     protected Element ghostColumn;
     protected ColumnDrag targetDraggedColumn;
@@ -91,13 +113,15 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
     protected PublishedColor oddRowsColor = PublishedColor.create(241, 241, 241, 255);
 
     private Set<JavaScriptObject> selected = new HashSet<>();
+    private JavaScriptObject selectionLead;
 
     protected int frozenColumns;
     protected int frozenRows;
     protected String parentField;
     protected String childrenField;
     //
-    protected JavaScriptObject data;
+    protected JavaScriptObject data; // bounded data. this is not rows source. rows source is data['field' property path]
+    protected JavaScriptObject sortedRows; // rows in view. subject of sorting. subject of collapse / expand in tree.
     protected String field;
     protected HandlerRegistration boundToData;
     protected HandlerRegistration boundToCursor;
@@ -148,6 +172,7 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
                 // TODO: Add ajacent sections movement logic
             }
         });
+
         /*
             @Override
             public void onScroll(ScrollEvent event) {
@@ -208,9 +233,10 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
                     Element targetElement = Element.as(et);
                     if ("tr".equalsIgnoreCase(targetElement.getTagName())) {
                         event.stopPropagation();
-                        JavaScriptObject dragged = targetElement.getPropertyJSO(GridSection.JS_ROW_NAME);
-                        if (Grid.this.data != null) {
-                            Utils.JsObject dataArray = Grid.this.data.cast();
+                        JavaScriptObject dragged = targetElement.getPropertyJSO(Section.JS_ROW_NAME);
+                        JavaScriptObject rows = getRows();
+                        if (rows != null) {
+                            Utils.JsObject dataArray = rows.cast();
                             int dataIndex = dataArray.indexOf(dragged);
                             event.getDataTransfer().setData("text/modelgrid-row",
                                     "{\"gridName\":\"" + name + "\", \"dataIndex\": " + dataIndex + "}");
@@ -344,7 +370,7 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
                 columnsMenu.showRelativeTo(columnsChevron);
             }
 
-            private void fillColumns(Menu aTarget, final GridSection aSection) {
+            private void fillColumns(Menu aTarget, final Section aSection) {
                 for (int i = 0; i < aSection.getColumnCount(); i++) {
                     final Column column = aSection.getColumn(i);
                     MenuItemCheckBox miCheck = new MenuItemCheckBox(column.isVisible(),
@@ -377,19 +403,15 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
 
             @Override
             public void on(NativeEvent event) {
-                Object oData = data != null && field != null && !field.isEmpty() ? Utils.getPathData(data, field)
-                        : data;
-                Utils.JsObject jsData = oData instanceof JavaScriptObject ? ((JavaScriptObject) oData).<Utils.JsObject>cast()
-                        : null;
-                if (jsData != null) {
+                JavaScriptObject rows = getRows();
+                if (rows != null) {
                     if (activeEditor == null) {
                         if (event.getKeyCode() == KeyCodes.KEY_DELETE && deletable) {
-                            // TODO: Check if viewElements is completely same as rows
-                            if (!viewElements.isEmpty() && data.<JsArray>cast().length() > 0) {
+                            if (sortedRows.<JsArray>cast().length() > 0) {
                                 // calculate some view sugar
                                 int lastSelectedViewIndex = -1;
-                                for (int i = viewElements.size() - 1; i >= 0; i--) {
-                                    JavaScriptObject element = viewElements.get(i);
+                                for (int i = sortedRows.<JsArray>cast().length() - 1; i >= 0; i--) {
+                                    JavaScriptObject element = sortedRows.<JsArray>cast().get(i);
                                     if (isSelected(element)) {
                                         lastSelectedViewIndex = i;
                                         break;
@@ -397,10 +419,10 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
                                 }
                                 // actually delete selected elements
                                 int deletedAt = -1;
-                                for (int i = jsData.length() - 1; i >= 0; i--) {
-                                    JavaScriptObject element = jsData.getSlot(i);
+                                for (int i = rows.<JsArray>cast().length() - 1; i >= 0; i--) {
+                                    JavaScriptObject element = rows.<JsArray>cast().get(i);
                                     if (isSelected(element)) {
-                                        jsData.splice(i, 1);
+                                        rows.<Utils.JsObject>cast().splice(i, 1);
                                         deletedAt = i;
                                     }
                                 }
@@ -408,11 +430,11 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
                                 if (deletedAt > -1) {
                                     // TODO: Check if Invoke.Later is an option
                                     int vIndex = viewIndexToSelect;
-                                    if (vIndex >= 0 && !viewElements.isEmpty()) {
-                                        if (vIndex >= viewElements.size()) {
-                                            vIndex = viewElements.size() - 1;
+                                    if (vIndex >= 0 && sortedRows.<JsArray>cast().length() > 0) {
+                                        if (vIndex >= sortedRows.<JsArray>cast().length()) {
+                                            vIndex = sortedRows.<JsArray>cast().length() - 1;
                                         }
-                                        JavaScriptObject toSelect = viewElements.get(vIndex);
+                                        JavaScriptObject toSelect = sortedRows.<JsArray>cast().get(vIndex);
                                         makeVisible(toSelect, true);
                                     } else {
                                         Grid.this.setFocus(true);
@@ -422,13 +444,13 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
                         } else if (event.getKeyCode() == KeyCodes.KEY_INSERT && insertable) {
                             int insertAt = -1;
                             JavaScriptObject lead = selectionLead;
-                            insertAt = data.<JsArray>cast().indexOf(lead);
+                            insertAt = rows.<Utils.JsObject>cast().indexOf(lead);
                             insertAt++;
-                            JavaScriptObject oElementClass = jsData.getJs("elementClass");
+                            JavaScriptObject oElementClass = rows.<Utils.JsObject>cast().getJs("elementClass");
                             Utils.JsObject elementClass = oElementClass != null ? oElementClass.<Utils.JsObject>cast() : null;
                             final JavaScriptObject inserted = elementClass != null ? elementClass.newObject()
                                     : JavaScriptObject.createObject();
-                            jsData.splice(insertAt, 0, inserted);
+                            rows.<Utils.JsObject>cast().splice(insertAt, 0, inserted);
                             // TODO: Check if Invoke.Later is an option
                             makeVisible(inserted, true);
                         }
@@ -439,17 +461,52 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
         });
     }
 
+    public JavaScriptObject getRows() {
+        return data != null && field != null && !field.isEmpty() ? Utils.getPathData(data, field)
+                : data;
+    }
+
+    @Override
+    public void removedItems(JavaScriptObject anArray) {
+    }
+
+    @Override
+    public void addedItems(JavaScriptObject anArray) {
+    }
+
+    @Override
+    public void changedItems(JavaScriptObject anArray) {
+    }
+
+    @Override
+    public JavaScriptObject getLead() {
+        return selectionLead;
+    }
+
     public boolean isSelected(JavaScriptObject item) {
         return selected.contains(item);
     }
 
     public void select(JavaScriptObject item) {
         selected.add(item);
+        selectionLead = item;
+        JavaScriptObject rows = getRows();
+        rows.<Utils.JsObject>cast().setJs(cursorProperty, selectionLead);
         fireSelected(item);
     }
 
     public boolean unselect(JavaScriptObject item) {
+        if(selectionLead == item){
+            selectionLead = null;
+        }
         return selected.remove(item);
+    }
+
+    public void clearSelection() {
+        selected.clear(); // TODO: Think about related event.
+        if(selected.contains(selectionLead)){
+            selectionLead = null;
+        }
     }
 
     private final Set<SelectionHandler<JavaScriptObject>> selectionHandlers = new HashSet<>();
@@ -470,9 +527,114 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
         selectionHandlers.forEach(sh -> sh.onSelection(event));
     }
 
+    private Set<FocusHandler> focusHandlers = new HashSet<>();
+
+    @Override
+    public HandlerRegistration addFocusHandler(FocusHandler handler) {
+        focusHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                focusHandlers.remove(handler);
+            }
+
+        };
+    }
+
+    private void fireFocus() {
+        FocusEvent event = new FocusEvent(this);
+        for (FocusHandler h : focusHandlers) {
+            h.onFocus(event);
+        }
+    }
+
+    private Set<BlurHandler> blurHandlers = new HashSet<>();
+
+    @Override
+    public HandlerRegistration addBlurHandler(BlurHandler handler) {
+        blurHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                blurHandlers.remove(handler);
+            }
+
+        };
+    }
+
+    private void fireBlur() {
+        BlurEvent event = new BlurEvent(this);
+        for (BlurHandler h : blurHandlers) {
+            h.onBlur(event);
+        }
+    }
+
+    private Set<KeyUpHandler> keyUpHandlers = new HashSet<>();
+
+    @Override
+    public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
+        keyUpHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                keyUpHandlers.remove(handler);
+            }
+
+        };
+    }
+
+    private void fireKeyUp(NativeEvent nevent) {
+        KeyUpEvent event = new KeyUpEvent(this, nevent);
+        for (KeyUpHandler h : keyUpHandlers) {
+            h.onKeyUp(event);
+        }
+    }
+
+    private Set<KeyDownHandler> keyDownHandlers = new HashSet<>();
+
+    @Override
+    public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
+        keyDownHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                keyDownHandlers.remove(handler);
+            }
+
+        };
+    }
+
+    private void fireKeyDown(NativeEvent nevent) {
+        KeyDownEvent event = new KeyDownEvent(this, nevent);
+        for (KeyDownHandler h : keyDownHandlers) {
+            h.onKeyDown(event);
+        }
+    }
+
+    private Set<KeyPressHandler> keyPressHandlers = new HashSet<>();
+
+    @Override
+    public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {
+        keyPressHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                keyPressHandlers.remove(handler);
+            }
+
+        };
+    }
+
+    private void fireKeyPress(NativeEvent nevent) {
+        KeyPressEvent event = new KeyPressEvent(this, nevent);
+        for (KeyPressHandler h : keyPressHandlers) {
+            h.onKeyPress(event);
+        }
+    }
+
     protected ColumnDrag findTargetDraggedColumn(JavaScriptObject aEventTarget) {
         if (Element.is(aEventTarget)) {
-            GridSection targetSection = null;
+            Section targetSection = null;
             Element targetCell = null;
             Element currentTarget = Element.as(aEventTarget);
             if (COLUMN_PHANTOM_STYLE.equals(currentTarget.getClassName())
@@ -695,7 +857,7 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
     public void setDraggableRows(boolean aValue) {
         if (draggableRows != aValue) {
             draggableRows = aValue;
-            for (GridSection section : new GridSection[]{frozenLeft, frozenRight, scrollableLeft, scrollableRight}) {
+            for (Section section : new Section[]{frozenLeft, frozenRight, scrollableLeft, scrollableRight}) {
                 section.setDraggableRows(aValue);
             }
         }
@@ -707,6 +869,152 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
 
     public void setActiveEditor(Widget aWidget) {
         activeEditor = aWidget;
+    }
+
+    public JavaScriptObject getOnRender() {
+        return onRender;
+    }
+
+    public void setOnRender(JavaScriptObject aValue) {
+        onRender = aValue;
+    }
+
+    public JavaScriptObject getOnAfterRender() {
+        return onAfterRender;
+    }
+
+    public void setOnAfterRender(JavaScriptObject aValue) {
+        onAfterRender = aValue;
+    }
+
+    public JavaScriptObject getOnExpand() {
+        return onExpand;
+    }
+
+    public void setOnExpand(JavaScriptObject aValue) {
+        onExpand = aValue;
+    }
+
+    public JavaScriptObject getOnCollapse() {
+        return onCollapse;
+    }
+
+    public void setOnCollapse(JavaScriptObject aValue) {
+        onCollapse = aValue;
+    }
+
+    public String getCursorProperty() {
+        return cursorProperty;
+    }
+
+    public void setCursorProperty(String aValue) {
+        if (aValue != null && !cursorProperty.equals(aValue)) {
+            unbind();
+            cursorProperty = aValue;
+            bind();
+        }
+    }
+
+    public boolean isEditable() {
+        return editable;
+    }
+
+    public void setEditable(boolean aValue) {
+        editable = aValue;
+    }
+
+    public boolean isDeletable() {
+        return deletable;
+    }
+
+    public void setDeletable(boolean aValue) {
+        deletable = aValue;
+    }
+
+    public boolean isInsertable() {
+        return insertable;
+    }
+
+    public void setInsertable(boolean aValue) {
+        insertable = aValue;
+    }
+
+    protected boolean serviceColumnsRedrawQueued;
+
+    protected void enqueueServiceColumnsRedraw() {
+        serviceColumnsRedrawQueued = true;
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+
+            @Override
+            public void execute() {
+                if (serviceColumnsRedrawQueued) {
+                    serviceColumnsRedrawQueued = false;
+                    if (getColumnCount() > 0) {
+                        for (int i = 0; i < getColumnCount(); i++) {
+                            Column col = getColumn(i);
+                            if (col instanceof UsualServiceColumn) {
+                                if (i < frozenColumns) {
+                                    frozenLeft.redrawColumn(i);
+                                    scrollableLeft.redrawColumn(i);
+                                } else {
+                                    frozenRight.redrawColumn(i - frozenColumns);
+                                    scrollableRight.redrawColumn(i - frozenColumns);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    protected Scheduler.ScheduledCommand redrawQueued;
+
+    private void enqueueRedraw() {
+        redrawQueued = new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                if (redrawQueued == this) {
+                    redrawQueued = null;
+                    redraw();
+                }
+            }
+        };
+        Scheduler.get().scheduleDeferred(redrawQueued);
+    }
+
+    public boolean expanded(JavaScriptObject anElement) {
+        if (getDataProvider() instanceof JsArrayTreeDataProvider) {
+            JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider) getDataProvider();
+            return treeDataProvider.isExpanded(anElement);
+        } else {
+            return false;
+        }
+    }
+
+    public void expand(JavaScriptObject anElement) {
+        if (getDataProvider() instanceof JsArrayTreeDataProvider) {
+            JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider) getDataProvider();
+            treeDataProvider.expand(anElement);
+        }
+    }
+
+    public void collapse(JavaScriptObject anElement) {
+        if (getDataProvider() instanceof JsArrayTreeDataProvider) {
+            JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider) getDataProvider();
+            treeDataProvider.collapse(anElement);
+        }
+    }
+
+    public void toggle(JavaScriptObject anElement) {
+        if (getDataProvider() instanceof JsArrayTreeDataProvider) {
+            JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider) getDataProvider();
+            if (treeDataProvider.isExpanded(anElement)) {
+                treeDataProvider.collapse(anElement);
+            } else {
+                treeDataProvider.expand(anElement);
+            }
+        }
     }
 
     protected void applyRows() {
@@ -735,7 +1043,7 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
         Runnable onChange = new Runnable() {
             @Override
             public void run() {
-                ModelGrid.this.redraw();
+                Grid.this.redraw();
             }
 
         };
@@ -801,6 +1109,48 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
             bindCursor();
         } else {
             setDataProvider(null);
+        }
+    }
+
+    public boolean makeVisible(JavaScriptObject anElement, boolean aNeedToSelect) {
+        IndexOfProvider<JavaScriptObject> indexOfProvider = (IndexOfProvider<JavaScriptObject>) dataProvider;
+        int index = indexOfProvider.indexOf(anElement);
+        if (index > -1) {
+            if (index >= 0 && index < frozenRows) {
+                TableCellElement leftCell = frozenLeft.getViewCell(index, 0);
+                if (leftCell != null) {
+                    leftCell.scrollIntoView();
+                } else {
+                    TableCellElement rightCell = frozenRight.getViewCell(index, 0);
+                    if (rightCell != null) {
+                        rightCell.scrollIntoView();
+                    }
+                }
+            } else {
+                TableCellElement leftCell = scrollableLeft.getViewCell(index, 0);
+                if (leftCell != null) {
+                    leftCell.scrollIntoView();
+                } else {
+                    TableCellElement rightCell = scrollableRight.getViewCell(index, 0);
+                    if (rightCell != null) {
+                        rightCell.scrollIntoView();
+                    }
+                }
+            }
+            if (aNeedToSelect) {
+                clearSelection();
+                select(anElement);
+                if (index >= 0 && index < frozenRows) {
+                    frozenLeft.setKeyboardSelectedRow(index, true);
+                    frozenRight.setKeyboardSelectedRow(index, true);
+                } else {
+                    scrollableLeft.setKeyboardSelectedRow(index - frozenRows, true);
+                    scrollableRight.setKeyboardSelectedRow(index - frozenRows, true);
+                }
+            }
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -1082,7 +1432,7 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
     }
 
     public TableCellElement getViewCell(int aRow, int aCol) {
-        GridSection targetSection;
+        Section targetSection;
         if (aRow < frozenRows) {
             if (aCol < frozenColumns) {
                 targetSection = frozenLeft;
@@ -1100,7 +1450,7 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
     }
 
     public void focusViewCell(int aRow, int aCol) {
-        GridSection targetSection;
+        Section targetSection;
         if (aRow < frozenRows) {
             if (aCol < frozenColumns) {
                 targetSection = frozenLeft;
@@ -1122,8 +1472,9 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
     }
 
     public void sort(boolean needRedraw) {
-        // rows = data.splice(0, data.length);
-        // rows.sort(function(i1, i2){
+        // var rows = getRows();
+        // sortedRows = rows.slice(0, data.length);
+        // sortedRows.sort(function(i1, i2){
         //     var res = 0;
         //     var index = 0;
         //     while(res === 0 && index < getColumnsCount()){
@@ -1196,4 +1547,295 @@ public class Grid extends Widget implements Focusable, HasSelectionHandlers<Java
         Element focusedElement = calcFocusedElement();
         focusedElement.setTabIndex(tabIndex);
     }
+
+    @Override
+    protected void publish(JavaScriptObject aValue) {
+        publish(this, aValue);
+    }
+
+    private native static void publish(Grid aWidget, JavaScriptObject aPublished)/*-{
+        aPublished.select = function(aRow) {
+            if (aRow != null && aRow != undefined)
+                aWidget.@com.eas.grid.ModelGrid::selectElement(Lcom/google/gwt/core/client/JavaScriptObject;)(aRow);
+            };
+        aPublished.unselect = function(aRow) {
+            if (aRow != null && aRow != undefined)
+                aWidget.@com.eas.grid.ModelGrid::unselectElement(Lcom/google/gwt/core/client/JavaScriptObject;)(aRow);
+        };
+        aPublished.clearSelection = function() {
+            aWidget.@com.eas.grid.ModelGrid::clearSelection()();
+        };
+        aPublished.find = function() {
+            aWidget.@com.eas.grid.ModelGrid::find()();
+        };
+        aPublished.findSomething = function() {
+            aPublished.find();
+        };
+        aPublished.makeVisible = function(aInstance, needToSelect) {
+            var need2Select = arguments.length > 1 ? !!needToSelect : false;
+            if (aInstance != null){
+            	// We have to use willBeVisible() instead of makeVisible(), because of
+            	// asynchronous nature of grid's cells rendering.
+            	// Imagine, that someone requested cells re-rendering already.
+            	// In such situation, results of makeVisible call is a zombie.
+                aWidget.@com.eas.grid.ModelGrid::willBeVisible(Lcom/google/gwt/core/client/JavaScriptObject;Z)(aInstance, need2Select);
+            }
+        };
+          
+        aPublished.expanded = function(aInstance) {
+            return aWidget.@com.eas.grid.ModelGrid::expanded(Lcom/google/gwt/core/client/JavaScriptObject;)(aInstance);
+        };
+          
+        aPublished.expand = function(aInstance) {
+            aWidget.@com.eas.grid.ModelGrid::expand(Lcom/google/gwt/core/client/JavaScriptObject;)(aInstance);
+        };
+          
+        aPublished.collapse = function(aInstance) {
+            aWidget.@com.eas.grid.ModelGrid::collapse(Lcom/google/gwt/core/client/JavaScriptObject;)(aInstance);
+        };
+          
+        aPublished.toggle = function(aInstance) {
+            aWidget.@com.eas.grid.ModelGrid::toggle(Lcom/google/gwt/core/client/JavaScriptObject;)(aInstance);
+        };
+          
+        aPublished.unsort = function() {
+            aWidget.@com.eas.grid.ModelGrid::unsort()();
+        };
+          
+        aPublished.redraw = function() {
+            // ModelGrid.redraw() is used as a rebinder in applications.
+            // Because applications don't care about grid's dataProviders' internal
+            // data structures, such as JsArrayDataProvider and its internal list of elements.
+          	// So, redraw grid through rebinding of its data.
+            aWidget.@com.eas.grid.ModelGrid::rebind()();
+        };
+        aPublished.changed = function(aItems){
+            if(!$wnd.Array.isArray(aItems))
+                aItems = [aItems];
+            aWidget.@com.eas.grid.ModelGrid::changedItems(Lcom/google/gwt/core/client/JavaScriptObject;)(aItems);
+        };
+        aPublished.added = function(aItems){
+            if(!$wnd.Array.isArray(aItems))
+                aItems = [aItems];
+            aWidget.@com.eas.grid.ModelGrid::addedItems(Lcom/google/gwt/core/client/JavaScriptObject;)(aItems);
+        };
+        aPublished.removed = function(aItems){
+            if(!$wnd.Array.isArray(aItems))
+                aItems = [aItems];
+            aWidget.@com.eas.grid.ModelGrid::removedItems(Lcom/google/gwt/core/client/JavaScriptObject;)(aItems);
+        };
+          
+        aPublished.removeColumnNode = function(aColumnFacade){
+            if(aColumnFacade && aColumnFacade.unwrap)
+                return aWidget.@com.eas.grid.ModelGrid::removeColumnNode(Lcom/eas/grid/columns/header/HeaderNode;)(aColumnFacade.unwrap());
+            else
+              return false;
+        };
+        aPublished.addColumnNode = function(aColumnFacade){
+            if(aColumnFacade && aColumnFacade.unwrap)
+                aWidget.@com.eas.grid.ModelGrid::addColumnNode(Lcom/eas/grid/columns/header/HeaderNode;)(aColumnFacade.unwrap());
+        };
+        aPublished.insertColumnNode = function(aIndex, aColumnFacade){
+            if(aColumnFacade && aColumnFacade.unwrap)
+                aWidget.@com.eas.grid.ModelGrid::insertColumnNode(ILcom/eas/grid/columns/header/HeaderNode;)(aIndex, aColumnFacade.unwrap());
+        };
+        aPublished.columnNodes = function(){
+            var headerRoots = aWidget.@com.eas.grid.ModelGrid::getHeader()();
+            var rootsCount = headerRoots.@java.util.List::size()();
+            var res = [];
+            for(var r = 0; r < rootsCount; r++){
+                var nNode = headerRoots.@java.util.List::get(I)(r);
+                var jsNode = nNode.@com.eas.core.HasPublished::getPublished()();
+                res.push(jsNode);
+            }
+            return res;
+        };
+        Object.defineProperty(aPublished, "headerVisible", {
+            get : function() {
+              return aWidget.@com.eas.grid.ModelGrid::isHeaderVisible()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setHeaderVisible(Z)(!!aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "draggableRows", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::isDraggableRows()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setDraggableRows(Z)(!!aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "frozenRows", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getFrozenRows()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setFrozenRows(I)(+aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "frozenColumns", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getFrozenColumns()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setFrozenColumns(I)(+aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "rowsHeight", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getRowsHeight()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setRowsHeight(I)(aValue * 1);
+            }
+        });
+        Object.defineProperty(aPublished, "showHorizontalLines", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::isShowHorizontalLines()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setShowHorizontalLines(Z)(!!aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "showVerticalLines", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::isShowVerticalLines()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setShowVerticalLines(Z)(!!aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "showOddRowsInOtherColor", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::isShowOddRowsInOtherColor()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setShowOddRowsInOtherColor(Z)(!!aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "gridColor", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getGridColor()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setGridColor(Lcom/eas/ui/PublishedColor;)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "oddRowsColor", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getOddRowsColor()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setOddRowsColor(Lcom/eas/ui/PublishedColor;)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "cursorProperty", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getCursorProperty()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setCursorProperty(Ljava/lang/String;)(aValue ? '' + aValue : null);
+            }
+        });
+        
+        Object.defineProperty(aPublished, "onRender", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getOnRender()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setOnRender(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "onAfterRender", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getOnAfterRender()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setOnAfterRender(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "onExpand", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getOnExpand()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setOnExpand(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "onCollapse", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getOnCollapse()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setOnCollapse(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+            }
+          });
+        Object.defineProperty(aPublished, "selected", {
+            get : function() {
+                var selectionList = aWidget.@com.eas.grid.ModelGrid::getJsSelected()();
+                var selectionArray = [];
+                for ( var i = 0; i < selectionList.@java.util.List::size()(); i++) {
+                    selectionArray[selectionArray.length] = selectionList.@java.util.List::get(I)(i);
+                }
+                return selectionArray;
+            }
+        });
+        Object.defineProperty(aPublished, "editable", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::isEditable()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setEditable(Z)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "deletable", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::isDeletable()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setDeletable(Z)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "insertable", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::isInsertable()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setInsertable(Z)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "data", {
+            get : function() {
+                return aWidget.@com.eas.ui.HasBinding::getData()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.ui.HasBinding::setData(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+            }
+        });
+        Object.defineProperty(aPublished, "field", {
+            get : function() {
+                return aWidget.@com.eas.ui.HasBinding::getField()();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.ui.HasBinding::setField(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+            }
+        });
+        Object.defineProperty(aPublished, "parentField", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getParentField();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setParentField(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+            }
+        });
+        Object.defineProperty(aPublished, "childrenField", {
+            get : function() {
+                return aWidget.@com.eas.grid.ModelGrid::getChildrenField();
+            },
+            set : function(aValue) {
+                aWidget.@com.eas.grid.ModelGrid::setChildrenField(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+            }
+        });
+    }-*/;
 }

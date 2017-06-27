@@ -8,9 +8,8 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import java.util.List;
 
 /**
- * Interface that serves as tree model. Unlike swing TreeModel it has a few
- * methods, informing library implementation about data structure.
- *
+ * Interface that serves as tree model.
+ * 
  * @author mg
  * @param <T>
  */

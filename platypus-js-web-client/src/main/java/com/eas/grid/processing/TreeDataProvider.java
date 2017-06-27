@@ -114,9 +114,9 @@ public class TreeDataProvider<T> extends ListDataProvider<T> implements IndexOfP
 
 			@Override
 			public void changed(T aSubject) {
+                                List<T> targetList = getList();
 				int idx = indexOf(aSubject);
 				if (idx != -1) {
-					List<T> targetList = getList();
 					targetList.set(idx, targetList.get(idx));
 				}
 			}

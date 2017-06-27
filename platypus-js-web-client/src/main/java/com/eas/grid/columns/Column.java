@@ -1,6 +1,5 @@
 package com.eas.grid.columns;
 
-import java.util.Comparator;
 import com.eas.core.HasPublished;
 import com.eas.core.Utils;
 import com.eas.grid.rows.PathComparator;

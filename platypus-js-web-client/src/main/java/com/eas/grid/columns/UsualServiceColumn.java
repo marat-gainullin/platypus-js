@@ -4,6 +4,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.TableCellElement;
+import com.eas.core.Utils;
 
 public class UsualServiceColumn extends Column {
 
@@ -17,8 +18,8 @@ public class UsualServiceColumn extends Column {
     @Override
     public void render(int viewIndex, JavaScriptObject dataRow, TableCellElement viewCell) {
         // TODO: Add data cursor and data changes driven data rendering
-        JavaScriptObject rows = grid.getRowsData();
-        boolean currentRow = rows != null && rows.<JsObject>cast().getJs(grid.getCursorProperty()) == value;
+        JavaScriptObject rows = grid.getRows();
+        boolean currentRow = rows != null && rows.<Utils.JsObject>cast().getJs(grid.getCursorProperty()) == dataRow;
         if (currentRow) {
             Element content = Document.get().createDivElement();
             content.setClassName("grid-marker-cell-cursor");

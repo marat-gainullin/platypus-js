@@ -577,7 +577,7 @@ public class Utils {
         return m;
     }-*/;
 
-	public static native Object getPathData(JavaScriptObject anElement, String aPath)/*-{
+	public static native JavaScriptObject getPathData(JavaScriptObject anElement, String aPath)/*-{
 		if (anElement != null && aPath != null && aPath != '') {
 			var target = anElement;
 			var path = aPath.split('.');
@@ -599,7 +599,7 @@ public class Utils {
 			return null;
 	}-*/;
 
-	public static native void setPathData(JavaScriptObject anElement, String aPath, Object aValue)/*-{
+	public static native void setPathData(JavaScriptObject anElement, String aPath, JavaScriptObject aValue)/*-{
 		if (aPath != null && aPath != '') {
 			var target = anElement;
 			var path = aPath.split('.');

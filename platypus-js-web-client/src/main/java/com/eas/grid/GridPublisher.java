@@ -27,7 +27,7 @@ public class GridPublisher {
 		constructors.setJs(aClassName, aPublisher);
 	}
 	
-	public native static PublishedComponent publish(ModelGrid aComponent)/*-{
+	public native static PublishedComponent publish(Grid aComponent)/*-{
 		var constr = @com.eas.grid.GridPublisher::getPublisher(Ljava/lang/String;)('ModelGrid');
 		return new constr(aComponent);
 	}-*/;

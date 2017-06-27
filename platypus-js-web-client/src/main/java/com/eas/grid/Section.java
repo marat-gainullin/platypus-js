@@ -24,7 +24,7 @@ import java.util.ArrayList;
  *
  * @author mg
  */
-public class GridSection {
+public class Section {
 
     public static final String JS_ROW_NAME = "js-row";
 
@@ -48,7 +48,7 @@ public class GridSection {
     private int endRow; // Exclusive
     private List<Column> columns = new ArrayList<>();
 
-    public GridSection(String aDynamicCellClassName, String aDynamicOddRowsClassName, String aDynamicEvenRowsClassName, String aDynamicHeaderRowClassName) {
+    public Section(String aDynamicCellClassName, String aDynamicOddRowsClassName, String aDynamicEvenRowsClassName, String aDynamicHeaderRowClassName) {
         super();
         this.dynamicCellClassName = aDynamicCellClassName;
         this.dynamicOddRowsClassName = aDynamicOddRowsClassName;
@@ -61,8 +61,8 @@ public class GridSection {
         table.<XElement>cast().addEventListener(BrowserEvents.KEYDOWN, new XElement.NativeHandler() {
             @Override
             public void on(NativeEvent event) {
-                int oldRow = GridSection.this.keyboardSelectedRow;
-                int oldColumn = GridSection.this.keyboardSelectedColumn;
+                int oldRow = Section.this.keyboardSelectedRow;
+                int oldColumn = Section.this.keyboardSelectedColumn;
                 int keyCode = event.getKeyCode();
                 if (keyCode == KeyCodes.KEY_LEFT) {
                 } else if (keyCode == KeyCodes.KEY_RIGHT) {
