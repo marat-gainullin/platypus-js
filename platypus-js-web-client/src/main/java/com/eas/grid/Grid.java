@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.eas.core.XElement;
+import com.eas.core.Logger;
 import com.eas.grid.columns.CheckServiceColumn;
 import com.eas.grid.columns.Column;
 import com.eas.grid.columns.RadioServiceColumn;
@@ -12,11 +13,9 @@ import com.eas.grid.columns.UsualServiceColumn;
 import com.eas.grid.columns.header.HeaderAnalyzer;
 import com.eas.grid.columns.header.HeaderSplitter;
 import com.eas.grid.columns.header.HeaderNode;
-import com.eas.grid.processing.TreeDataProvider;
-import com.eas.grid.rows.JsArrayTreeDataProvider;
-import com.eas.grid.rows.JsDataContainer;
 import com.eas.menu.MenuItemCheckBox;
 import com.eas.menu.Menu;
+import com.eas.ui.EventsPublisher;
 import com.eas.ui.BlurEvent;
 import com.eas.ui.FocusEvent;
 import com.eas.ui.Focusable;
@@ -64,8 +63,7 @@ import java.util.Set;
  * @author mg
  */
 public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObject>, HasSelectionLead, HasOnRender, HasBinding, Focusable, HasFocusHandlers, HasBlurHandlers,
-        HasKeyDownHandlers, HasKeyPressHandlers, HasKeyUpHandlers,
-        JsDataContainer {
+        HasKeyDownHandlers, HasKeyPressHandlers, HasKeyUpHandlers {
 
     public static final String RULER_STYLE = "grid-ruler";
     public static final String COLUMN_PHANTOM_STYLE = "grid-column-phantom";
@@ -112,7 +110,7 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
     protected PublishedColor gridColor;
     protected PublishedColor oddRowsColor = PublishedColor.create(241, 241, 241, 255);
 
-    private Set<JavaScriptObject> selected = new HashSet<>();
+    private Set<JavaScriptObject> selectedRows = new HashSet<>();
     private JavaScriptObject selectionLead;
 
     protected int frozenColumns;
@@ -122,8 +120,10 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
     //
     protected JavaScriptObject data; // bounded data. this is not rows source. rows source is data['field' property path]
     protected JavaScriptObject sortedRows; // rows in view. subject of sorting. subject of collapse / expand in tree.
+    protected Set<JavaScriptObject> expandedRows = new HashSet<>();
     protected String field;
     protected HandlerRegistration boundToData;
+    protected HandlerRegistration boundToElements;
     protected HandlerRegistration boundToCursor;
     protected String cursorProperty = "cursor";
     protected JavaScriptObject onRender;
@@ -132,9 +132,6 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
     protected JavaScriptObject onCollapse;
     // runtime
     protected Widget activeEditor;
-    protected HandlerRegistration sortHandlerReg;
-    protected HandlerRegistration positionSelectionHandler;
-    protected HandlerRegistration onSelectEventSelectionHandler;
     protected boolean editable = true;
     protected boolean deletable = true;
     protected boolean insertable = true;
@@ -235,12 +232,9 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
                         event.stopPropagation();
                         JavaScriptObject dragged = targetElement.getPropertyJSO(Section.JS_ROW_NAME);
                         JavaScriptObject rows = getRows();
-                        if (rows != null) {
-                            Utils.JsObject dataArray = rows.cast();
-                            int dataIndex = dataArray.indexOf(dragged);
-                            event.getDataTransfer().setData("text/modelgrid-row",
-                                    "{\"gridName\":\"" + name + "\", \"dataIndex\": " + dataIndex + "}");
-                        }
+                        int dataIndex = rows.<Utils.JsObject>cast().indexOf(dragged);
+                        event.getDataTransfer().setData("text/modelgrid-row",
+                                "{\"gridName\":\"" + name + "\", \"dataIndex\": " + dataIndex + "}");
                     }
                 }
             }
@@ -404,56 +398,54 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
             @Override
             public void on(NativeEvent event) {
                 JavaScriptObject rows = getRows();
-                if (rows != null) {
-                    if (activeEditor == null) {
-                        if (event.getKeyCode() == KeyCodes.KEY_DELETE && deletable) {
-                            if (sortedRows.<JsArray>cast().length() > 0) {
-                                // calculate some view sugar
-                                int lastSelectedViewIndex = -1;
-                                for (int i = sortedRows.<JsArray>cast().length() - 1; i >= 0; i--) {
-                                    JavaScriptObject element = sortedRows.<JsArray>cast().get(i);
-                                    if (isSelected(element)) {
-                                        lastSelectedViewIndex = i;
-                                        break;
-                                    }
-                                }
-                                // actually delete selected elements
-                                int deletedAt = -1;
-                                for (int i = rows.<JsArray>cast().length() - 1; i >= 0; i--) {
-                                    JavaScriptObject element = rows.<JsArray>cast().get(i);
-                                    if (isSelected(element)) {
-                                        rows.<Utils.JsObject>cast().splice(i, 1);
-                                        deletedAt = i;
-                                    }
-                                }
-                                final int viewIndexToSelect = lastSelectedViewIndex;
-                                if (deletedAt > -1) {
-                                    // TODO: Check if Invoke.Later is an option
-                                    int vIndex = viewIndexToSelect;
-                                    if (vIndex >= 0 && sortedRows.<JsArray>cast().length() > 0) {
-                                        if (vIndex >= sortedRows.<JsArray>cast().length()) {
-                                            vIndex = sortedRows.<JsArray>cast().length() - 1;
-                                        }
-                                        JavaScriptObject toSelect = sortedRows.<JsArray>cast().get(vIndex);
-                                        makeVisible(toSelect, true);
-                                    } else {
-                                        Grid.this.setFocus(true);
-                                    }
+                if (activeEditor == null) {
+                    if (event.getKeyCode() == KeyCodes.KEY_DELETE && deletable) {
+                        if (sortedRows.<JsArray>cast().length() > 0) {
+                            // calculate some view sugar
+                            int lastSelectedViewIndex = -1;
+                            for (int i = sortedRows.<JsArray>cast().length() - 1; i >= 0; i--) {
+                                JavaScriptObject element = sortedRows.<JsArray>cast().get(i);
+                                if (isSelected(element)) {
+                                    lastSelectedViewIndex = i;
+                                    break;
                                 }
                             }
-                        } else if (event.getKeyCode() == KeyCodes.KEY_INSERT && insertable) {
-                            int insertAt = -1;
-                            JavaScriptObject lead = selectionLead;
-                            insertAt = rows.<Utils.JsObject>cast().indexOf(lead);
-                            insertAt++;
-                            JavaScriptObject oElementClass = rows.<Utils.JsObject>cast().getJs("elementClass");
-                            Utils.JsObject elementClass = oElementClass != null ? oElementClass.<Utils.JsObject>cast() : null;
-                            final JavaScriptObject inserted = elementClass != null ? elementClass.newObject()
-                                    : JavaScriptObject.createObject();
-                            rows.<Utils.JsObject>cast().splice(insertAt, 0, inserted);
-                            // TODO: Check if Invoke.Later is an option
-                            makeVisible(inserted, true);
+                            // actually delete selected elements
+                            int deletedAt = -1;
+                            for (int i = rows.<JsArray>cast().length() - 1; i >= 0; i--) {
+                                JavaScriptObject element = rows.<JsArray>cast().get(i);
+                                if (isSelected(element)) {
+                                    rows.<Utils.JsObject>cast().splice(i, 1);
+                                    deletedAt = i;
+                                }
+                            }
+                            final int viewIndexToSelect = lastSelectedViewIndex;
+                            if (deletedAt > -1) {
+                                // TODO: Check if Invoke.Later is an option
+                                int vIndex = viewIndexToSelect;
+                                if (vIndex >= 0 && sortedRows.<JsArray>cast().length() > 0) {
+                                    if (vIndex >= sortedRows.<JsArray>cast().length()) {
+                                        vIndex = sortedRows.<JsArray>cast().length() - 1;
+                                    }
+                                    JavaScriptObject toSelect = sortedRows.<JsArray>cast().get(vIndex);
+                                    makeVisible(toSelect, true);
+                                } else {
+                                    Grid.this.setFocus(true);
+                                }
+                            }
                         }
+                    } else if (event.getKeyCode() == KeyCodes.KEY_INSERT && insertable) {
+                        int insertAt = -1;
+                        JavaScriptObject lead = selectionLead;
+                        insertAt = rows.<Utils.JsObject>cast().indexOf(lead);
+                        insertAt++;
+                        JavaScriptObject oElementClass = rows.<Utils.JsObject>cast().getJs("elementClass");
+                        Utils.JsObject elementClass = oElementClass != null ? oElementClass.<Utils.JsObject>cast() : null;
+                        final JavaScriptObject inserted = elementClass != null ? elementClass.newObject()
+                                : JavaScriptObject.createObject();
+                        rows.<Utils.JsObject>cast().splice(insertAt, 0, inserted);
+                        // TODO: Check if Invoke.Later is an option
+                        makeVisible(inserted, true);
                     }
                 }
             }
@@ -462,20 +454,23 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
     }
 
     public JavaScriptObject getRows() {
-        return data != null && field != null && !field.isEmpty() ? Utils.getPathData(data, field)
+        JavaScriptObject rows = data != null && field != null && !field.isEmpty() ? Utils.getPathData(data, field)
                 : data;
+        return rows != null ? rows : JavaScriptObject.createArray();
     }
 
-    @Override
     public void removedItems(JavaScriptObject anArray) {
+        rebindElements();
+        redraw();
     }
 
-    @Override
     public void addedItems(JavaScriptObject anArray) {
+        rebindElements();
+        redraw();
     }
 
-    @Override
     public void changedItems(JavaScriptObject anArray) {
+        redraw();
     }
 
     @Override
@@ -484,11 +479,11 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
     }
 
     public boolean isSelected(JavaScriptObject item) {
-        return selected.contains(item);
+        return selectedRows.contains(item);
     }
 
     public void select(JavaScriptObject item) {
-        selected.add(item);
+        selectedRows.add(item);
         selectionLead = item;
         JavaScriptObject rows = getRows();
         rows.<Utils.JsObject>cast().setJs(cursorProperty, selectionLead);
@@ -496,17 +491,35 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
     }
 
     public boolean unselect(JavaScriptObject item) {
-        if(selectionLead == item){
+        if (selectionLead == item) {
             selectionLead = null;
         }
-        return selected.remove(item);
+        return selectedRows.remove(item);
     }
 
     public void clearSelection() {
-        selected.clear(); // TODO: Think about related event.
-        if(selected.contains(selectionLead)){
+        selectedRows.clear();
+        if (selectedRows.contains(selectionLead)) {
             selectionLead = null;
         }
+        fireSelected(null);
+    }
+
+    private final Set<SortHandler> sortHandlers = new HashSet<>();
+
+    public HandlerRegistration addSortHandler(SortHandler handler) {
+        sortHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                sortHandlers.remove(handler);
+            }
+        };
+    }
+
+    public void fireRowsSorted() {
+        SortEvent event = new SortEvent(this);
+        sortHandlers.forEach(sh -> sh.onSort(event));
     }
 
     private final Set<SelectionHandler<JavaScriptObject>> selectionHandlers = new HashSet<>();
@@ -983,138 +996,142 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
         Scheduler.get().scheduleDeferred(redrawQueued);
     }
 
-    public boolean expanded(JavaScriptObject anElement) {
-        if (getDataProvider() instanceof JsArrayTreeDataProvider) {
-            JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider) getDataProvider();
-            return treeDataProvider.isExpanded(anElement);
+    public void fireExpanded(JavaScriptObject anElement) {
+        fireRowsSorted();
+        if (onExpand != null) {
+            JavaScriptObject jsEvent = EventsPublisher.publishItemEvent(Grid.this.published, anElement);
+            try {
+                Utils.executeScriptEventVoid(Grid.this.published, onExpand, jsEvent);
+            } catch (Exception e) {
+                Logger.severe(e);
+            }
+        }
+    }
+
+    public void fireCollapsed(JavaScriptObject anElement) {
+        fireRowsSorted();
+        if (onCollapse != null) {
+            JavaScriptObject jsEvent = EventsPublisher.publishItemEvent(Grid.this.published, anElement);
+            try {
+                Utils.executeScriptEventVoid(Grid.this.published, onCollapse, jsEvent);
+            } catch (Exception e) {
+                Logger.severe(e);
+            }
+        }
+    }
+
+    public boolean isExpanded(JavaScriptObject anElement) {
+        if (isTreeConfigured()) {
+            return expandedRows.contains(anElement);
         } else {
             return false;
         }
     }
 
     public void expand(JavaScriptObject anElement) {
-        if (getDataProvider() instanceof JsArrayTreeDataProvider) {
-            JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider) getDataProvider();
-            treeDataProvider.expand(anElement);
+        if (isTreeConfigured()) {
+            if (!expandedRows.contains(anElement)) {
+                JavaScriptObject children = getChildrenOf(anElement);
+                if (children != null && children.<JsArray>cast().length() > 0) {
+                    expandedRows.add(anElement);
+                    regenerateSortedRows(false);
+                    sortSortedRows(true);
+                    fireExpanded(anElement);
+                }
+            }
         }
     }
 
     public void collapse(JavaScriptObject anElement) {
-        if (getDataProvider() instanceof JsArrayTreeDataProvider) {
-            JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider) getDataProvider();
-            treeDataProvider.collapse(anElement);
+        if (isTreeConfigured()) {
+            if (expandedRows.contains(anElement)) {
+                expandedRows.remove(anElement);
+                regenerateSortedRows(false);
+                sortSortedRows(true);
+                fireCollapsed(anElement);
+            }
         }
     }
 
     public void toggle(JavaScriptObject anElement) {
-        if (getDataProvider() instanceof JsArrayTreeDataProvider) {
-            JsArrayTreeDataProvider treeDataProvider = (JsArrayTreeDataProvider) getDataProvider();
-            if (treeDataProvider.isExpanded(anElement)) {
-                treeDataProvider.collapse(anElement);
+        if (isTreeConfigured()) {
+            if (isExpanded(anElement)) {
+                collapse(anElement);
             } else {
-                treeDataProvider.expand(anElement);
+                expand(anElement);
             }
         }
     }
 
-    protected void applyRows() {
-        unbindCursor();
-        if (sortHandlerReg != null) {
-            sortHandlerReg.removeHandler();
-        }
-        Runnable onResize = new Runnable() {
-            @Override
-            public void run() {
-                setupRanges();
-                if (dataProvider instanceof IndexOfProvider<?>) {
-                    ((IndexOfProvider<?>) dataProvider).rescan();
-                }
-                sortHandler.setList(dataProvider != null ? dataProvider.getList() : new ArrayList<JavaScriptObject>());
-                if (sortList.size() > 0) {
-                    sortList.clear();
-                    redrawHeaders();
-                }
-                if (dataProvider == null || dataProvider.getList() == null || dataProvider.getList().isEmpty()) {
-                    clearSelection();
-                }
-            }
+    // Tree structure
+    public boolean isLeaf(JavaScriptObject anElement) {
+        return !hasRowChildren(anElement);
+    }
 
-        };
-        Runnable onChange = new Runnable() {
-            @Override
-            public void run() {
-                Grid.this.redraw();
-            }
+    protected boolean hasRowChildren(JavaScriptObject parent) {
+        JavaScriptObject children = findChildren(parent);
+        return children != null && children.<JsArray>cast().length() > 0;
+    }
 
-        };
-        Runnable onSort = new Runnable() {
-            @Override
-            public void run() {
-                if (dataProvider instanceof IndexOfProvider<?>) {
-                    ((IndexOfProvider<?>) dataProvider).rescan();
+    protected JavaScriptObject findChildren(JavaScriptObject aParent) {
+        if (aParent == null) {
+            JavaScriptObject rows = getRows();
+            JavaScriptObject roots = JavaScriptObject.createArray();
+            for (int i = 0; i < rows.<JsArray>cast().length(); i++) {
+                JavaScriptObject item = rows.<JsArray>cast().get(i);
+                if (item != null && item.<Utils.JsObject>cast().getJs(parentField) == null) {
+                    roots.<JsArray>cast().push(item);
                 }
             }
-
-        };
-        Object oData = data != null && field != null && !field.isEmpty() ? Utils.getPathData(data, field) : data;
-        JavaScriptObject jsData = oData instanceof JavaScriptObject ? (JavaScriptObject) oData : null;
-        if (jsData != null) {
-            if (isTreeConfigured()) {
-                JsArrayTreeDataProvider treeDataProvider = new JsArrayTreeDataProvider(parentField, childrenField,
-                        onResize);
-                setDataProvider(treeDataProvider);
-                sortHandler = new TreeMultiSortHandler<>(treeDataProvider, onSort);
-                treeDataProvider.addExpandedHandler(new ExpandedHandler<JavaScriptObject>() {
-                    @Override
-                    public void expanded(JavaScriptObject anElement) {
-                        ColumnSortEvent.fire(ModelGrid.this, sortList);
-                        if (onExpand != null) {
-                            JavaScriptObject jsEvent = EventsPublisher.publishItemEvent(ModelGrid.this.published,
-                                    anElement);
-                            try {
-                                Utils.executeScriptEventVoid(ModelGrid.this.published, onExpand, jsEvent);
-                            } catch (Exception e) {
-                                Logger.getLogger(EventsExecutor.class.getName()).log(Level.SEVERE, null, e);
-                            }
-                        }
-                    }
-
-                });
-                treeDataProvider.addCollapsedHandler(new CollapsedHandler<JavaScriptObject>() {
-                    @Override
-                    public void collapsed(JavaScriptObject anElement) {
-                        ColumnSortEvent.fire(ModelGrid.this, sortList);
-                        if (onCollapse != null) {
-                            JavaScriptObject jsEvent = EventsPublisher.publishItemEvent(ModelGrid.this.published,
-                                    anElement);
-                            try {
-                                Utils.executeScriptEventVoid(ModelGrid.this.published, onCollapse, jsEvent);
-                            } catch (Exception e) {
-                                Logger.getLogger(EventsExecutor.class.getName()).log(Level.SEVERE, null, e);
-                            }
-                        }
-                    }
-
-                });
-            } else {
-                setDataProvider(new JsArrayListDataProvider(onResize, onChange, null));
-                sortHandler = new ListMultiSortHandler<>(dataProvider.getList(), onSort);
-            }
-            for (int colIndex = 0; colIndex < getColumnCount(); colIndex++) {
-                Column modelCol = getColumn(colIndex);
-                sortHandler.setComparator(modelCol, modelCol.getComparator());
-            }
-            sortHandlerReg = addColumnSortHandler(sortHandler);
-            ((JsDataContainer) getDataProvider()).setData(jsData);
-            bindCursor();
+            return roots;
         } else {
-            setDataProvider(null);
+            return aParent.<Utils.JsObject>cast().getJs(childrenField);
         }
+    }
+
+    public JavaScriptObject getParentOf(JavaScriptObject anElement) {
+        return anElement.<Utils.JsObject>cast().getJs(parentField);
+    }
+
+    public JavaScriptObject getChildrenOf(JavaScriptObject anElement) {
+        JavaScriptObject found = findChildren(anElement);
+        return found != null ? found : JavaScriptObject.createArray();
+    }
+
+    /**
+     * Builds path to specified element if the element belongs to the model.
+     *
+     * @param anElement Element to build path to.
+     * @return List<JavaScriptObject> of elements comprising the path, excluding
+     * root null. So for the roots of the forest path will be a list with one
+     * element.
+     */
+    public List<JavaScriptObject> buildPathTo(JavaScriptObject anElement) {
+        List<JavaScriptObject> path = new ArrayList<>();
+        if (anElement != null) {
+            JavaScriptObject currentParent = anElement;
+            Set<JavaScriptObject> added = new HashSet<>();
+            path.add(currentParent);
+            added.add(currentParent);
+            while (currentParent != null) {
+                currentParent = getParentOf(currentParent);
+                if (added.contains(currentParent)) {
+                    break;
+                }
+                if (currentParent != null) {
+                    path.add(0, currentParent);
+                    added.add(currentParent);
+                }
+            }
+        }
+        return path;
     }
 
     public boolean makeVisible(JavaScriptObject anElement, boolean aNeedToSelect) {
-        IndexOfProvider<JavaScriptObject> indexOfProvider = (IndexOfProvider<JavaScriptObject>) dataProvider;
-        int index = indexOfProvider.indexOf(anElement);
+        // TODO: refactor indexof to something else
+        // TODO: think about tree data model and path to item expanding
+        //IndexOfProvider<JavaScriptObject> indexOfProvider = (IndexOfProvider<JavaScriptObject>) dataProvider;
+        int index = -1;//indexOfProvider.indexOf(anElement);
         if (index > -1) {
             if (index >= 0 && index < frozenRows) {
                 TableCellElement leftCell = frozenLeft.getViewCell(index, 0);
@@ -1141,11 +1158,11 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
                 clearSelection();
                 select(anElement);
                 if (index >= 0 && index < frozenRows) {
-                    frozenLeft.setKeyboardSelectedRow(index, true);
-                    frozenRight.setKeyboardSelectedRow(index, true);
+                    frozenLeft.setKeyboardSelectedRow(index);
+                    frozenRight.setKeyboardSelectedRow(index);
                 } else {
-                    scrollableLeft.setKeyboardSelectedRow(index - frozenRows, true);
-                    scrollableRight.setKeyboardSelectedRow(index - frozenRows, true);
+                    scrollableLeft.setKeyboardSelectedRow(index - frozenRows);
+                    scrollableRight.setKeyboardSelectedRow(index - frozenRows);
                 }
             }
             return true;
@@ -1160,41 +1177,66 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
     }
 
     protected void bind() {
-        if (data != null) {
-            applyRows();
-            if (field != null && !field.isEmpty()) {
-                boundToData = Utils.listenPath(data, field, new Utils.OnChangeHandler() {
+        if (data != null && field != null && !field.isEmpty()) {
+            boundToData = Utils.listenPath(data, field, new Utils.OnChangeHandler() {
 
-                    @Override
-                    public void onChange(JavaScriptObject anEvent) {
-                        applyRows();
-                    }
-                });
-            }
-        } else {
-            applyRows();
-            selected.clear();
+                @Override
+                public void onChange(JavaScriptObject anEvent) {
+                    rebind();
+                    redraw();
+                }
+            });
+            bindElements();
+            bindCursor();
         }
-        setupRanges();
+    }
+
+    protected void bindElements() {
+        JavaScriptObject rows = getRows();
+        boundToElements = Utils.listenElements(rows, new Utils.OnChangeHandler() {
+
+            @Override
+            public void onChange(JavaScriptObject anEvent) {
+                redraw();
+            }
+        });
+    }
+
+    protected void unbindElements() {
+        if (boundToElements != null) {
+            boundToElements.removeHandler();
+            boundToElements = null;
+        }
+    }
+    
+    protected void rebindElements(){
+        unbindElements();
+        bindElements();
     }
 
     protected void unbind() {
+        selectedRows.clear();
+        expandedRows.clear();
         if (boundToData != null) {
             boundToData.removeHandler();
             boundToData = null;
         }
+        unbindElements();
         unbindCursor();
     }
 
     protected void bindCursor() {
-        boundToCursor = Utils.listenPath(data, cursorProperty, new Utils.OnChangeHandler() {
+        if (data != null) {
+            JavaScriptObject rows = getRows();
+            boundToCursor = Utils.listenPath(rows, cursorProperty, new Utils.OnChangeHandler() {
 
-            @Override
-            public void onChange(JavaScriptObject anEvent) {
-                enqueueServiceColumnsRedraw();
-            }
+                @Override
+                public void onChange(JavaScriptObject anEvent) {
+                    enqueueServiceColumnsRedraw();
+                }
 
-        });
+            });
+        }
     }
 
     protected void unbindCursor() {
@@ -1242,7 +1284,9 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
             parentField = aValue;
             boolean isTree = isTreeConfigured();
             if (wasTree != isTree) {
-                applyRows();
+                expandedRows.clear();
+                regenerateSortedRows(false);
+                sortSortedRows(true);
             }
         }
     }
@@ -1257,7 +1301,9 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
             childrenField = aValue;
             boolean isTree = isTreeConfigured();
             if (wasTree != isTree) {
-                applyRows();
+                expandedRows.clear();
+                regenerateSortedRows(false);
+                sortSortedRows(true);
             }
         }
     }
@@ -1288,7 +1334,7 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
                     if (indicatorColumn instanceof UsualServiceColumn || indicatorColumn instanceof RadioServiceColumn
                             || indicatorColumn instanceof CheckServiceColumn) {
                         treeIndicatorIndex++;
-                    } else if (indicatorColumn instanceof Column) {
+                    } else {
                         treeIndicatorColumn = indicatorColumn;
                         break;
                     }
@@ -1468,23 +1514,74 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
     }
 
     public void sort() {
-        sort(true);
+        regenerateSortedRows(false);
+        sortSortedRows(true);
     }
 
-    public void sort(boolean needRedraw) {
+    public void regenerateSortedRows(boolean needRedraw) {
         // var rows = getRows();
-        // sortedRows = rows.slice(0, data.length);
-        // sortedRows.sort(function(i1, i2){
-        //     var res = 0;
-        //     var index = 0;
-        //     while(res === 0 && index < getColumnsCount()){
-        //         var column = getColumn(index++);
-        //         if(column.comparator != null){
-        //             res = column.comparator(i1, i2);
-        //         }
+        if (isTreeConfigured()) {
+            // sortedRows = [];
+            // var children = getChildrenOf(null);
+            // Array.prototype.push.apply(sortedRows, children);
+            // var i = 0;
+            // while (i < sortedRows.length) {
+            //     if (expanded.contains(sortedRows[i])) {
+            //         var children1 = getChildrenOf(sortedRows[i]);
+            //         var spliceArgs = children1; spliceArgs.unshift(0); spliceArgs.unshift(i + 1);
+            //         Array.prototype.splice.apply(sortedRows, spliceArgs); // splice(i + 1, 0, flattern -> children1);
+            //     }
+            //     ++i;
+            // }
+        } else {
+            // sortedRows = rows.slice(0, rows.length);
+        }
+        // if(needRedraw){
+        //     redraw();
+        //     fireRowsSorted();
+        // }
+    }
+
+    public void sortSortedRows(boolean needRedraw) {
+        // var sortedColumns = 0;
+        // for(int i = 0; i < getColumnsCount(); i++){
+        //     var column = getColumn(i);
+        //     if(column.comparator != null){
+        //         sortedColumns++;
         //     }
-        //     return res;
-        // });
+        // }
+        // if(sortedColumns > 0){
+        //     sortedRows.sort(function(o1, o2){
+        //         if (isTreeConfigured() && getParentOf(o1) != getParentOf(o2)) {
+        //             var path1 = buildPathTo(o1);
+        //             var path2 = buildPathTo(o2);
+        //             if (path2.contains(o1)) {
+        //                 // o1 is parent of o2
+        //                 return -1;
+        //             }
+        //             if (path1.contains(o2)) {
+        //                 // o2 is parent of o1
+        //                 return 1;
+        //             }
+        //             for (int i = 0; i < Math.min(path1.size(), path2.size()); i++) {
+        //                 if (path1.get(i) != path2.get(i)) {
+        //                     o1 = path1.get(i);
+        //                     o2 = path2.get(i);
+        //                     break;
+        //                 }
+        //             }
+        //         }        
+        //         var res = 0;
+        //         var index = 0;
+        //         while(res === 0 && index < getColumnsCount()){
+        //             var column = getColumn(index++);
+        //             if(column.comparator != null){
+        //                 res = column.comparator(o1, o2);
+        //             }
+        //         }
+        //         return res;
+        //     });
+        // }
         // if(needRedraw){
         //     redraw();
         //     fireRowsSorted();
@@ -1500,10 +1597,7 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
             Column column = getColumn(i);
             column.unsort(false);
         }
-        // if(needRedraw){
-        //     redraw();
-        //     fireRowsSorted();
-        // }
+        regenerateSortedRows(true);
     }
 
     protected int tabIndex;
@@ -1583,7 +1677,7 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
         };
           
         aPublished.expanded = function(aInstance) {
-            return aWidget.@com.eas.grid.ModelGrid::expanded(Lcom/google/gwt/core/client/JavaScriptObject;)(aInstance);
+            return aWidget.@com.eas.grid.ModelGrid::isExpanded(Lcom/google/gwt/core/client/JavaScriptObject;)(aInstance);
         };
           
         aPublished.expand = function(aInstance) {

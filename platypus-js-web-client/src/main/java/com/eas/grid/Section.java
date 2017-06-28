@@ -30,7 +30,7 @@ public class Section {
 
     private TableElement table = Document.get().createTableElement();
     private TableColElement colgroup = Document.get().createColGroupElement();
-    private List<HeaderNode> header = new ArrayList<>();
+    private List<HeaderNode> headerNodes = new ArrayList<>();
     private Element keyboardSelectedElement;
     protected String dynamicCellClassName;
     protected String dynamicOddRowsClassName;
@@ -282,7 +282,24 @@ public class Section {
 
     public void drawHeaders() {
         if (!columns.isEmpty()) {
+            List<HeaderNode> nextLayer = headerNodes;
+            while (!nextLayer.isEmpty()) {
+                nextLayer = drawHeaderRow(nextLayer);
+            }
         }
+    }
+
+    private List<HeaderNode> drawHeaderRow(List<HeaderNode> layer) {
+        List<HeaderNode> children = new ArrayList<>();
+        TableSectionElement thead = table.getTHead();
+        layer.addAll(headerNodes);
+        TableRowElement tr = Document.get().createTRElement();
+        layer.forEach(hn -> {
+            tr.appendChild(hn.getHeader().getElement());
+            children.addAll(hn.getChildren());
+        });
+        thead.appendChild(tr);
+        return children;
     }
 
     public void redrawFooters() {
@@ -331,7 +348,7 @@ public class Section {
     }
 
     public void setHeaderNodes(List<HeaderNode> aHeader, boolean needReadraw) {
-        header = aHeader;
+        headerNodes = aHeader;
         if (needReadraw) {
             redrawHeaders();
         }
@@ -347,7 +364,7 @@ public class Section {
             removed.getElement().removeFromParent();
             removed.getColumnRule().removeFromParent();
         }
-        header = new ArrayList<>();
+        headerNodes = new ArrayList<>();
         if (needRedraw) {
             redraw();
         }

@@ -24,6 +24,8 @@ public class HeaderAnalyzer {
         }
         for (int i = 0; i < aForest.size(); i++) {
             HeaderNode n = aForest.get(i);
+            n.setDepthRemainder(0);
+            n.setLeavesCount(0);
             if (!n.getChildren().isEmpty()) {
                 maxDepth(n.getChildren(), aDepth);
             }
@@ -38,12 +40,12 @@ public class HeaderAnalyzer {
             if (!n.isLeaf()) {
                 leavesCount += mine(n.getChildren(), aDepth, n);
             } else {
-                n.depthRemainder = depth - aDepth;
+                n.setDepthRemainder(depth - aDepth);
                 leavesCount += 1;
             }
         }
         if (aParent != null) {
-            aParent.leavesCount = leavesCount;
+            aParent.setLeavesCount(leavesCount);
         }
         return leavesCount;
     }

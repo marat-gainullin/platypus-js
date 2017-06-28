@@ -21,19 +21,13 @@ import com.google.gwt.core.client.JavaScriptObject;
 public class HeaderNode implements HasJsName {
 
     protected String name;
-    /**
-     * Data part of this header node.
-     */
     protected Column column;
-    /**
-     * Visual part of this header node.
-     */
     protected HeaderView header;
     protected HeaderNode parent;
     protected List<HeaderNode> children = new ArrayList<>();
 
-    protected int leavesCount;
-    protected int depthRemainder;
+    private int leavesCount;
+    private int depthRemainder;
 
     public HeaderNode() {
         super();
@@ -287,5 +281,15 @@ public class HeaderNode implements HasJsName {
         if (column != null) {
             column.setEditor(aWidget);
         }
+    }
+
+    public void setDepthRemainder(int aValue) {
+        depthRemainder = aValue;
+        header.getElement().setAttribute("rowspan", (aValue + 1) + "");
+    }
+
+    public void setLeavesCount(int aValue) {
+        leavesCount = aValue;
+        header.getElement().setAttribute("colspan", aValue + "");
     }
 }

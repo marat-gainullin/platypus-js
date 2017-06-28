@@ -2,7 +2,7 @@ package com.eas.grid.columns;
 
 import com.eas.core.HasPublished;
 import com.eas.core.Utils;
-import com.eas.grid.rows.PathComparator;
+import com.eas.grid.PathComparator;
 import com.eas.ui.HasJsValue;
 import com.eas.ui.PublishedCell;
 import com.eas.ui.Widget;
@@ -23,8 +23,9 @@ import com.eas.grid.Grid;
 import com.eas.grid.HeaderView;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.NativeEvent;
+import java.util.List;
 
-// TODO: Check tree expandable cell decorations
+// TODO: Check tree expandable cell decorations like left paddnig according to deepness and plus / minus icon and open / closed folder icons
 public class Column implements HasPublished {
 
     private TableColElement element = Document.get().createColElement();
@@ -34,11 +35,11 @@ public class Column implements HasPublished {
     protected String sortField;
     protected Widget editor;
     /**
-     * Minimum column width while resizing by user.
+     * Minimum column width while resizing by a user.
      */
     protected double minWidth = 15;
     /**
-     * Maximum column width while resizing by user.
+     * Maximum column width while resizing by a user.
      */
     protected double maxWidth = Integer.MAX_VALUE;
     protected double width = 75;
@@ -46,6 +47,7 @@ public class Column implements HasPublished {
     protected boolean visible = true;
     protected boolean selectOnly;
     protected boolean sortable;
+    protected int indent = 24;
     protected PathComparator comparator;
     private HeaderView header;
     protected JavaScriptObject published;
@@ -164,11 +166,13 @@ public class Column implements HasPublished {
 
     public void update(JavaScriptObject anElement, JavaScriptObject value) {
         if (anElement != null && field != null && !field.isEmpty() && !readonly) {
-            Utils.setPathData(anElement, field, Utils.toJs(value));
+            Utils.setPathData(anElement, field, value);
         }
     }
 
     public void render(int viewIndex, JavaScriptObject dataRow, TableCellElement viewCell) {
+        List<JavaScriptObject> path = grid.buildPathTo(dataRow);
+        int padding = indent * path.size();
         Object value = getValue(dataRow);
         String text;
         if (value == null) {
@@ -189,7 +193,7 @@ public class Column implements HasPublished {
                     checkbox.<XElement>cast().addEventListener(BrowserEvents.CHANGE, new XElement.NativeHandler() {
                         @Override
                         public void on(NativeEvent evt) {
-                            update(dataRow, !!!value);
+                            update(dataRow, !Boolean.TRUE.equals(value)); //  !!!value
                         }
 
                     });
@@ -217,10 +221,10 @@ public class Column implements HasPublished {
                 }
             }
         }
-        if (onRender != null) { // User's rendering for all values, including null
+        if (onRender != null || grid.getOnRender() != null) { // User's rendering for all values, including null
             try {
                 // TODO: Check if abstract 'cell' object is needed at all  
-                PublishedCell cellToRender = WidgetsUtils.calcGridPublishedCell(published, onRender, dataRow, field, text, viewCell, viewIndex, null);
+                PublishedCell cellToRender = WidgetsUtils.calcGridPublishedCell(published, onRender != null ? onRender : grid.getOnRender(), dataRow, field, text, viewCell, viewIndex, null);
                 if (cellToRender != null) {
                     if (cellToRender.getDisplayCallback() == null) {
                         cellToRender.setDisplayCallback(new Runnable() {

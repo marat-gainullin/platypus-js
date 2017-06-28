@@ -1,4 +1,4 @@
-package com.eas.grid.rows;
+package com.eas.grid;
 
 import java.util.Comparator;
 
