@@ -312,11 +312,11 @@ public class RichTextArea extends Widget implements HasScroll, HorizontalScrollF
             @Override
             public void onAction(ActionEvent event) {
                 /*
-				String url = prompt(constants.linkUrl(), "http://");
-				if (url != null) {
-                                        document.execCommand('createLink', null, url);
-				}
-                 */
+                    String url = prompt(constants.linkUrl(), "http://");
+                    if (url != null) {
+                        document.execCommand('createLink', null, url);
+                    }
+                */
             }
         });
 
@@ -331,11 +331,11 @@ public class RichTextArea extends Widget implements HasScroll, HorizontalScrollF
             @Override
             public void onAction(ActionEvent event) {
                 /*
-				String url = prompt(constants.imageUrl(), "http://");
-				if (url != null) {
-                                        document.execCommand('insertImage', null, url);
-				}
-                 */
+                    String url = prompt(constants.imageUrl(), "http://");
+                    if (url != null) {
+                            document.execCommand('insertImage', null, url);
+                    }
+                */
             }
         });
 
@@ -363,7 +363,7 @@ public class RichTextArea extends Widget implements HasScroll, HorizontalScrollF
 												}
 											}
 										} catch (Exception ex) {
-											Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
+											Logger.severe(ex);
 										}
 									}
 

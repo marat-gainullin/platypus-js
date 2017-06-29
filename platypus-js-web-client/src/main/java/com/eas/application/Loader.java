@@ -9,8 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.eas.bound.BoundFactory;
 import com.eas.bound.JsBound;
@@ -20,6 +18,7 @@ import com.eas.client.CumulativeCallbackAdapter;
 import com.eas.client.queries.Query;
 import com.eas.client.xhr.UrlQueryProcessor;
 import com.eas.core.Cancellable;
+import com.eas.core.Logger;
 import com.eas.core.Predefine;
 import com.eas.core.Utils;
 import com.eas.facade.JsFacade;
@@ -520,7 +519,7 @@ public class Loader {
 
                                 }, new HashSet<String>());
                             } catch (Exception ex) {
-                                Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
+                                com.eas.core.Logger.severe(ex);
                             }
                         }
                     }
@@ -528,7 +527,7 @@ public class Loader {
                     @Override
                     public void onFailure(Exception aReason) {
                         notifyScriptFailed(aJsResource, Arrays.asList(new String[]{aReason.getMessage()}));
-                        Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, "Script [" + aJsResource + "] is not loaded. Cause is: " + aReason.getMessage());
+                        Logger.severe("Script [" + aJsResource + "] is not loaded. Cause is: " + aReason.getMessage());
                     }
 
                 }).setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).inject();
@@ -715,7 +714,7 @@ public class Loader {
                         }
                     });
                 } else if (aCyclic.contains(moduleName)) {
-                    Logger.getLogger(Loader.class.getName()).log(Level.WARNING, "Cyclic dependency detected: " + moduleName);
+                    Logger.severe("Cyclic dependency detected: " + moduleName);
                     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 
                         @Override
@@ -775,7 +774,7 @@ public class Loader {
 
                     @Override
                     public void onFailure(String reason) {
-                        Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, reason);
+                        Logger.severe(reason);
                         process.onFailure(reason);
                     }
                 }));
@@ -819,7 +818,7 @@ public class Loader {
 
                     @Override
                     public void onFailure(String reason) {
-                        Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, reason);
+                        Logger.severe(reason);
                         process.onFailure(reason);
                     }
                 }));

@@ -1,10 +1,8 @@
 package com.eas.widgets;
 
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.eas.core.HasPublished;
+import com.eas.core.Logger;
 import com.eas.core.Utils;
 import com.eas.core.XElement;
 import com.eas.menu.MenuItem;
@@ -82,7 +80,7 @@ public class WidgetsUtils {
                 try {
                     Utils.executeScriptEventVoid(aThis, selectFunction, aPublishedField);
                 } catch (Exception ex) {
-                    Logger.getLogger(WidgetsUtils.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                    Logger.severe(ex);
                 }
             }
         };
@@ -226,7 +224,7 @@ public class WidgetsUtils {
             try {
                 Utils.executeScriptEventVoid(aEventThis, cellFunction, EventsPublisher.publishOnRenderEvent(aEventThis, null, null, null, cell));
             } catch (Exception ex) {
-                Logger.getLogger(WidgetsUtils.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.severe(ex);
             }
             return cell;
         } else {

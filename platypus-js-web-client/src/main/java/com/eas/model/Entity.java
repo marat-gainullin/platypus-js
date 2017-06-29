@@ -3,9 +3,8 @@ package com.eas.model;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import com.eas.core.Logger;
 import com.eas.client.CallbackAdapter;
 import com.eas.client.IdGenerator;
 import com.eas.client.metadata.Field;
@@ -70,8 +69,7 @@ public class Entity implements HasPublished {
             if (!defs.containsKey(aName)) {
                 getFields().putOrmScalarDefinition(aName, aDefinition);
             } else {
-                Logger.getLogger(Entity.class.getName()).log(
-                        Level.FINE,
+                Logger.fine(
                         "ORM property " + aName + " redefinition attempt on entity " + name != null && !name.isEmpty() ? name : "" + " " + title != null && !title.isEmpty() ? "[" + title + "]" : ""
                         + ".");
             }
@@ -88,8 +86,7 @@ public class Entity implements HasPublished {
             if (!defs.containsKey(aName)) {
                 getFields().putOrmCollectionDefinition(aName, aDefinition);
             } else {
-                Logger.getLogger(Entity.class.getName()).log(
-                        Level.FINE,
+                Logger.fine(
                         "ORM property " + aName + " redefinition attempt on entity " + name != null && !name.isEmpty() ? name : "" + " " + title != null && !title.isEmpty() ? "[" + title + "]" : ""
                         + ".");
             }
@@ -101,58 +98,58 @@ public class Entity implements HasPublished {
     }
 
     private static native JavaScriptObject publishFacade(Entity nEntity, JavaScriptObject aTarget)/*-{
-		Object.defineProperty(aTarget, 'elementClass', {
-			get : function() {
-				return nEntity.@com.eas.model.Entity::getElementClass()();
-			},
-			set : function(aValue) {
-				nEntity.@com.eas.model.Entity::setElementClass(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-			}
-		});
-		Object.defineProperty(aTarget, 'onRequeried', {
-			get : function() {
-				return nEntity.@com.eas.model.Entity::getOnRequeried()();
-			},
-			set : function(aValue) {
-				nEntity.@com.eas.model.Entity::setOnRequeried(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-			}
-		});
-		Object.defineProperty(aTarget, 'enqueueUpdate', {
-			value : function(aParams) {
-				nEntity.@com.eas.model.Entity::enqueueUpdate(Lcom/google/gwt/core/client/JavaScriptObject;)(aParams);
-			}
-		});
-		Object.defineProperty(aTarget, 'executeUpdate', {
-			value : function(onSuccess, onFailure) {
-				nEntity.@com.eas.model.Entity::executeUpdate(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
-			}
-		});
-		Object.defineProperty(aTarget, 'execute', {
-			value : function(onSuccess, onFailure) {
-				nEntity.@com.eas.model.Entity::execute(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
-			}
-		});
-		Object.defineProperty(aTarget, 'query', {
-                        value : function(params, onSuccess, onFailure) {
-                                nEntity.@com.eas.model.Entity::query(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(params, onSuccess, onFailure);
-                        }
-                });
-		Object.defineProperty(aTarget, 'requery', {
-			value : function(onSuccess, onFailure) {
-				nEntity.@com.eas.model.Entity::requery(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
-			}
-		});
-		Object.defineProperty(aTarget, 'append', {
-			value : function(aData) {
-				nEntity.@com.eas.model.Entity::append(Lcom/google/gwt/core/client/JavaScriptObject;)(aData);
-			}
-		});
-		Object.defineProperty(aTarget, 'update', {
-                        value : function(params, onSuccess, onFailure) {
-                                nEntity.@com.eas.model.Entity::update(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(params, onSuccess, onFailure);
-                        }
-                });
-	}-*/;
+        Object.defineProperty(aTarget, 'elementClass', {
+            get : function() {
+                return nEntity.@com.eas.model.Entity::getElementClass()();
+            },
+            set : function(aValue) {
+                nEntity.@com.eas.model.Entity::setElementClass(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+            }
+        });
+        Object.defineProperty(aTarget, 'onRequeried', {
+            get : function() {
+                return nEntity.@com.eas.model.Entity::getOnRequeried()();
+            },
+            set : function(aValue) {
+                nEntity.@com.eas.model.Entity::setOnRequeried(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+            }
+        });
+        Object.defineProperty(aTarget, 'enqueueUpdate', {
+            value : function(aParams) {
+                nEntity.@com.eas.model.Entity::enqueueUpdate(Lcom/google/gwt/core/client/JavaScriptObject;)(aParams);
+            }
+        });
+        Object.defineProperty(aTarget, 'executeUpdate', {
+            value : function(onSuccess, onFailure) {
+                nEntity.@com.eas.model.Entity::executeUpdate(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
+            }
+        });
+        Object.defineProperty(aTarget, 'execute', {
+            value : function(onSuccess, onFailure) {
+                nEntity.@com.eas.model.Entity::execute(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
+            }
+        });
+        Object.defineProperty(aTarget, 'query', {
+            value : function(params, onSuccess, onFailure) {
+                nEntity.@com.eas.model.Entity::query(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(params, onSuccess, onFailure);
+            }
+        });
+        Object.defineProperty(aTarget, 'requery', {
+            value : function(onSuccess, onFailure) {
+                nEntity.@com.eas.model.Entity::requery(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
+            }
+        });
+        Object.defineProperty(aTarget, 'append', {
+            value : function(aData) {
+                nEntity.@com.eas.model.Entity::append(Lcom/google/gwt/core/client/JavaScriptObject;)(aData);
+            }
+        });
+        Object.defineProperty(aTarget, 'update', {
+            value : function(params, onSuccess, onFailure) {
+                nEntity.@com.eas.model.Entity::update(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(params, onSuccess, onFailure);
+            }
+        });
+}-*/;
 
     public Fields getFields() {
         if (query != null) {
@@ -185,7 +182,7 @@ public class Entity implements HasPublished {
                 Query lquery = getQuery();
                 ltitle = lquery.getTitle();
             } catch (Exception ex) {
-                Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.severe(ex);
                 ltitle = "";
             }
             setTitle(ltitle);
@@ -325,7 +322,7 @@ public class Entity implements HasPublished {
                             event.setJs("source", jsPublished);
                             onRequeried.<Utils.JsObject>cast().call(jsPublished, event);
                         } catch (Exception ex) {
-                            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.severe(ex);
                         }
                     }
                     if (aCallback != null) {
@@ -483,7 +480,7 @@ public class Entity implements HasPublished {
                         Utils.executeScriptEventVoid(jsPublished, onFailure, aReason);
                     }
                 } catch (Exception ex) {
-                    Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.severe(ex);
                 }
             }
 
@@ -530,7 +527,7 @@ public class Entity implements HasPublished {
                         Utils.executeScriptEventVoid(jsPublished, aOnFailure, aReason);
                     }
                 } catch (Exception ex) {
-                    Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.severe(ex);
                 }
             }
 
@@ -557,7 +554,7 @@ public class Entity implements HasPublished {
                     try {
                         Utils.executeScriptEventVoid(jsPublished, onFailure, reason);
                     } catch (Exception ex) {
-                        Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.severe(ex);
                     }
                 }
             }
@@ -702,9 +699,7 @@ public class Entity implements HasPublished {
                                     pValue = leftParameter.getDefaultValue();
                                 }
                             } else {
-                                Logger.getLogger(Entity.class.getName()).log(
-                                        Level.SEVERE,
-                                        "Parameter of left query must present (Relation points to query parameter in entity: " + getTitle() + " [" + getEntityId()
+                                Logger.severe("Parameter of left query must present (Relation points to query parameter in entity: " + getTitle() + " [" + getEntityId()
                                         + "], but query parameter is absent)");
                             }
                         }
@@ -716,7 +711,7 @@ public class Entity implements HasPublished {
                             }
                         }
                     } else {
-                        Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Relation has no left entity");
+                        Logger.severe("Relation has no left entity");
                     }
                 }
             }
@@ -747,7 +742,7 @@ public class Entity implements HasPublished {
                     try {
                         internalExecuteChildren(false);
                     } catch (Exception ex) {
-                        Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.severe(ex);
                     }
                 }
             });
@@ -787,7 +782,7 @@ public class Entity implements HasPublished {
                             resignOnCursor();
                             internalExecuteChildren(false);
                         } catch (Exception ex) {
-                            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.severe(ex);
                         }
                     }
                 });

@@ -4,15 +4,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Formatter;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import com.eas.core.Logger;
 import com.eas.client.AppClient;
 import com.eas.client.CallbackAdapter;
 import com.eas.client.GroupingHandlerRegistration;
-import com.eas.client.PlatypusLogFormatter;
 import com.eas.core.Predefine;
 import com.eas.core.Utils;
 import com.eas.ui.JsUi;
@@ -38,25 +34,18 @@ public class Application {
 
         @Override
         public void started(String anItemName) {
-            final String message = "Loading... " + anItemName;
-            Predefine.platypusApplicationLogger.log(Level.INFO, message);
+            Logger.info("Loading... " + anItemName);
         }
 
         @Override
         public void loaded(String anItemName) {
-            final String message = anItemName + " - Loaded";
-            Predefine.platypusApplicationLogger.log(Level.INFO, message);
+            Logger.info(anItemName + " - Loaded");
         }
     }
 
     protected static GroupingHandlerRegistration loaderHandlerRegistration = new GroupingHandlerRegistration();
 
     public static void run() throws Exception {
-        Formatter f = new PlatypusLogFormatter(true);
-        Handler[] handlers = Logger.getLogger("").getHandlers();
-        for (Handler h : handlers) {
-            h.setFormatter(f);
-        }
         Predefine.init();
         JsApi.init();
         JsUi.init();
@@ -97,7 +86,7 @@ public class Application {
                 ScriptInjector.fromUrl(AppClient.relativeUri() + AppClient.getSourcePath() + init).setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).setCallback(new Callback<Void, Exception>() {
                     @Override
                     public void onFailure(Exception reason) {
-                        Logger.getLogger(Application.class.getName()).log(Level.SEVERE, "Error while initializing modules loader", reason);
+                        Logger.severe("Error while initializing modules loader", reason);
                     }
 
                     @Override
@@ -109,7 +98,7 @@ public class Application {
                 ScriptInjector.fromUrl(AppClient.relativeUri() + AppClient.getSourcePath() + entryPoint).setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).inject();
             }
         } else {
-            Logger.getLogger(Application.class.getName()).log(Level.SEVERE, "\"entry-point\" attribute missing while initializing modules loader");
+            Logger.severe("\"entry-point\" attribute missing while initializing modules loader");
         }
     }
 
@@ -145,10 +134,10 @@ public class Application {
                     try {
                         Utils.executeScriptEventString(aOnFailure, aOnFailure, reason);
                     } catch (Exception ex) {
-                        Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.severe(ex);
                     }
                 } else {
-                    Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require failed and callback is missing. Required modules are: " + aDeps.toString());
+                    Logger.warning("Require failed and callback is missing. Required modules are: " + aDeps.toString());
                 }
             }
 
@@ -158,7 +147,7 @@ public class Application {
                     JavaScriptObject resolved = lookupResolved(deps);
                     aOnSuccess.apply(null, resolved);
                 } else {
-                    Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require succeded, but callback is missing. Required modules are: " + aDeps.toString());
+                    Logger.warning("Require succeded, but callback is missing. Required modules are: " + aDeps.toString());
                 }
             }
         }, new HashSet<String>());

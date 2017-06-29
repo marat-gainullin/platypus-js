@@ -11,6 +11,9 @@ public class Logger {
 
     public static void severe(Exception e) {
     }
+    
+    public static void severe(String msg, Exception reason) {
+    }
 
     public static void severe(String msg) {
     }

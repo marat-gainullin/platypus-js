@@ -2,9 +2,8 @@ package com.eas.grid;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import com.eas.core.Logger;
 import com.eas.core.Utils;
 import com.eas.grid.columns.header.CheckHeaderNode;
 import com.eas.grid.columns.header.HeaderNode;
@@ -74,8 +73,7 @@ public class GridFactory implements UiWidgetReader {
                     try {
                         grid.setData(aFactory.resolveEntity(entityName));
                     } catch (Exception ex) {
-                        Logger.getLogger(GridFactory.class.getName()).log(Level.SEVERE,
-                                "While setting data to named model's property " + entityName + " to widget " + grid.getJsName() + " exception occured: " + ex.getMessage());
+                        Logger.severe("While setting data to named model's property " + entityName + " to widget " + grid.getJsName() + " exception occured: " + ex.getMessage());
                     }
                 }
                 if (Utils.hasAttribute(anElement, "f", "field")) {

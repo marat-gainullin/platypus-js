@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import com.eas.core.Logger;
 import com.eas.core.HasPublished;
 import com.eas.core.Utils;
 import com.eas.menu.HasComponentPopupMenu;
@@ -84,7 +83,7 @@ public class DefaultUiReader extends UiReader {
                         widgets.put(wName, widget);
                         widgetsList.add(widget);
                     } else if(!"ButtonGroup".equals(childElement.getTagName())) {
-                        Logger.getLogger(DefaultUiReader.class.getName()).log(Level.WARNING, "Unknown widget tag name: " + ((Element) childNode).getTagName() + ". skipping.");
+                        Logger.warning("Unknown widget tag name: " + ((Element) childNode).getTagName() + ". skipping.");
                     }
                 }
                 childNode = childNode.getNextSibling();
@@ -99,7 +98,7 @@ public class DefaultUiReader extends UiReader {
             viewWidget = new Anchors();
             viewWidget.getElement().getStyle().setWidth(400, Style.Unit.PX);
             viewWidget.getElement().getStyle().setHeight(300, Style.Unit.PX);
-            Logger.getLogger(DefaultUiReader.class.getName()).log(Level.WARNING, "view widget missing. Falling back to AnchrosPane.");
+            Logger.warning("view widget missing. Falling back to AnchrosPane.");
         }
     }
 
@@ -182,7 +181,7 @@ public class DefaultUiReader extends UiReader {
                 try {
                     ((HasBinding) aTarget).setField(fieldPath);
                 } catch (Exception ex) {
-                    Logger.getLogger(DefaultUiReader.class.getName()).log(Level.SEVERE, "While setting field (" + fieldPath + ") to widget " + widgetName + " exception occured: " + ex.getMessage());
+                    Logger.severe("While setting field (" + fieldPath + ") to widget " + widgetName + " exception occured: " + ex.getMessage());
                 }
             }
             if (Utils.hasAttribute(anElement, "d", "data")) {
@@ -190,8 +189,7 @@ public class DefaultUiReader extends UiReader {
                 try {
                     ((HasBinding) aTarget).setData(resolveEntity(entityName));
                 } catch (Exception ex) {
-                    Logger.getLogger(DefaultUiReader.class.getName()).log(Level.SEVERE,
-                            "While setting data to named model's property (" + entityName + ") to widget " + widgetName + " exception occured: " + ex.getMessage());
+                    Logger.severe("While setting data to named model's property (" + entityName + ") to widget " + widgetName + " exception occured: " + ex.getMessage());
                 }
             }
         }
@@ -260,7 +258,7 @@ public class DefaultUiReader extends UiReader {
                         try {
                             addToParent(anElement, aTarget, parent);
                         } catch (Exception ex) {
-                            Logger.getLogger(DefaultUiReader.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.severe(ex);
                         }
                     }
                 });

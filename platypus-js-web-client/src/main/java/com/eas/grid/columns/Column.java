@@ -371,7 +371,7 @@ public class Column implements HasPublished {
                             aValue = modelEditor.convert(Utils.toJava(aValue));
                             super.render(context, aValue, sb);
                         } catch (Exception ex) {
-                            Logger.getLogger(Column.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.severe(ex);
                         }
                     }
 
@@ -385,7 +385,7 @@ public class Column implements HasPublished {
                             value = modelEditor.convert(Utils.toJava(value));
                             super.renderCell(context, value, sb);
                         } catch (Exception ex) {
-                            Logger.getLogger(Column.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.severe(ex);
                         }
                     }
 
@@ -398,7 +398,7 @@ public class Column implements HasPublished {
                             grid.setActiveEditor(getEditor());
                             super.startEditing(context, aBoxPositionTemplate, aBoxParent, value, valueUpdater, onEditorClose);
                         } catch (Exception ex) {
-                            Logger.getLogger(Column.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.severe(ex);
                         }
                     }
                 });

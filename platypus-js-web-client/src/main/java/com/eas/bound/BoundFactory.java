@@ -1,11 +1,10 @@
 package com.eas.bound;
 
+import com.eas.core.Logger;
 import com.eas.widgets.boxes.DropDownListDecoratorField;
 import com.eas.widgets.boxes.FormattedDecoratorField;
 import com.eas.widgets.boxes.TextAreaDecoratorField;
 import com.eas.widgets.boxes.BooleanDecoratorField;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.eas.core.Utils;
 import com.eas.ui.UiReader;
@@ -65,7 +64,7 @@ public class BoundFactory implements UiWidgetReader {
                     try {
                         modelDate.setFormatPattern(dateFormat);
                     } catch (Exception ex) {
-                        Logger.getLogger(BoundFactory.class.getName()).log(Level.SEVERE, null, ex);
+                        com.eas.core.Logger.severe(ex);
                     }
                 }
                 if (Utils.hasAttribute(anElement, "dtp", "datePicker")) {
@@ -91,7 +90,7 @@ public class BoundFactory implements UiWidgetReader {
                         modelFormattedField.setText(Utils.getAttribute(anElement, "tx", "text", null));
                     }
                 } catch (Exception ex) {
-                    Logger.getLogger(BoundFactory.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.severe(ex);
                 }
                 return modelFormattedField;
             case "msp":
@@ -113,7 +112,7 @@ public class BoundFactory implements UiWidgetReader {
                     modelSpin.setMax(max);
                     modelSpin.setStep(step);
                 } catch (Exception ex) {
-                    Logger.getLogger(BoundFactory.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.severe(ex);
                 }
                 return modelSpin;
             case "mta":

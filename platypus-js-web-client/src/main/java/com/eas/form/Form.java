@@ -2,10 +2,9 @@ package com.eas.form;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.eas.client.AppClient;
+import com.eas.core.Logger;
 import com.eas.core.HasPublished;
 import com.eas.core.Predefine;
 import com.eas.core.Utils;
@@ -76,7 +75,7 @@ public class Form extends WindowPanel implements HasPublished {
             try {
                 Utils.executeScriptEventVoid(Predefine.prerequire("forms/form"), onChange, EventsPublisher.publishSourcedEvent(aSource));
             } catch (Exception ex) {
-                Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.severe(ex);
             }
         }
     }
@@ -181,7 +180,7 @@ public class Form extends WindowPanel implements HasPublished {
                         Utils.executeScriptEventVoid(aOnSuccess, aOnSuccess, aRequest);
                     }
                 } catch (Exception ex) {
-                    Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.severe(ex);
                 }
             }
 
@@ -192,7 +191,7 @@ public class Form extends WindowPanel implements HasPublished {
                         Utils.executeScriptEventVoid(aOnFailure, aOnFailure, aRequest);
                     }
                 } catch (Exception ex) {
-                    Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.severe(ex);
                 }
             }
         }));
@@ -265,7 +264,7 @@ public class Form extends WindowPanel implements HasPublished {
                     try {
                         Utils.executeScriptEventVoid(published, windowOpened, EventsPublisher.publishWindowEvent(event, published));
                     } catch (Exception ex) {
-                        Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                        Logger.severe(ex);
                     }
                 }
                 shownFormsChanged(published);
@@ -285,7 +284,7 @@ public class Form extends WindowPanel implements HasPublished {
                     try {
                         Utils.executeScriptEventVoid(published, windowActivated, EventsPublisher.publishWindowEvent(event, published));
                     } catch (Exception ex) {
-                        Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                        Logger.severe(ex);
                     }
                 }
             }
@@ -299,7 +298,7 @@ public class Form extends WindowPanel implements HasPublished {
                     try {
                         Utils.executeScriptEventVoid(published, windowDeactivated, EventsPublisher.publishWindowEvent(event, published));
                     } catch (Exception ex) {
-                        Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                        Logger.severe(ex);
                     }
                 }
             }
@@ -313,7 +312,7 @@ public class Form extends WindowPanel implements HasPublished {
                     try {
                         Utils.executeScriptEventVoid(published, windowMinimized, EventsPublisher.publishWindowEvent(event, published));
                     } catch (Exception ex) {
-                        Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                        Logger.severe(ex);
                     }
                 }
             }
@@ -327,7 +326,7 @@ public class Form extends WindowPanel implements HasPublished {
                     try {
                         Utils.executeScriptEventVoid(published, windowMaximized, EventsPublisher.publishWindowEvent(event, published));
                     } catch (Exception ex) {
-                        Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                        Logger.severe(ex);
                     }
                 }
             }
@@ -341,7 +340,7 @@ public class Form extends WindowPanel implements HasPublished {
                     try {
                         Utils.executeScriptEventVoid(published, windowRestored, EventsPublisher.publishWindowEvent(event, published));
                     } catch (Exception ex) {
-                        Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                        Logger.severe(ex);
                     }
                 }
             }
@@ -358,7 +357,7 @@ public class Form extends WindowPanel implements HasPublished {
                             anEvent.setCancelled(true);
                         }
                     } catch (Exception ex) {
-                        Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                        Logger.severe(ex);
                     }
                 }
             }
@@ -372,7 +371,7 @@ public class Form extends WindowPanel implements HasPublished {
                     try {
                         Utils.executeScriptEventVoid(published, windowClosed, EventsPublisher.publishWindowEvent(event, published));
                     } catch (Exception ex) {
-                        Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                        Logger.severe(ex);
                     }
                 }
                 shownFormsChanged(published);
