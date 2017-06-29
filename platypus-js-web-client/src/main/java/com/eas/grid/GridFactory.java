@@ -73,7 +73,7 @@ public class GridFactory implements UiWidgetReader {
                     try {
                         grid.setData(aFactory.resolveEntity(entityName));
                     } catch (Exception ex) {
-                        Logger.severe("While setting data to named model's property " + entityName + " to widget " + grid.getJsName() + " exception occured: " + ex.getMessage());
+                        Logger.severe("While setting data to named model's property " + entityName + " to widget " + grid.getName() + " exception occured: " + ex.getMessage());
                     }
                 }
                 if (Utils.hasAttribute(anElement, "f", "field")) {
@@ -167,7 +167,7 @@ public class GridFactory implements UiWidgetReader {
     }
 
     private static void readColumnNode(HeaderNode aNode, Element anElement, UiReader aFactory) throws Exception {
-        aNode.setJsName(Utils.getAttribute(anElement, "n", "name", null));
+        aNode.setName(Utils.getAttribute(anElement, "n", "name", null));
         if (Utils.hasAttribute(anElement, "tl", "title")) {
             aNode.setTitle(Utils.getAttribute(anElement, "tl", "title", null));
         }

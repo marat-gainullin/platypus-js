@@ -2,26 +2,20 @@ package com.eas.menu;
 
 import com.eas.core.HasPublished;
 import com.eas.core.XElement;
-import com.eas.ui.events.ActionEvent;
-import com.eas.ui.events.ActionHandler;
-import com.eas.ui.events.HasActionHandlers;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.HasText;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  *
  * @author mg
  */
-public class MenuItemImageText extends MenuItem implements HasActionHandlers, HasText, HasHTML {
+public class MenuItemImageText extends MenuItem implements HasText, HasHTML {
 
     protected String imageUri;
     //
@@ -100,27 +94,6 @@ public class MenuItemImageText extends MenuItem implements HasActionHandlers, Ha
         } else {
             leftMark.getStyle().clearBackgroundImage();
             leftMark.getStyle().clearProperty("background-repeat");
-        }
-    }
-
-    protected Set<ActionHandler> actionHandlers = new HashSet<>();
-
-    @Override
-    public HandlerRegistration addActionHandler(ActionHandler handler) {
-        actionHandlers.add(handler);
-        return new HandlerRegistration() {
-            @Override
-            public void removeHandler() {
-                actionHandlers.remove(handler);
-            }
-
-        };
-    }
-
-    protected void fireActionPerformed() {
-        ActionEvent event = new ActionEvent(this);
-        for (ActionHandler h : actionHandlers) {
-            h.onAction(event);
         }
     }
 

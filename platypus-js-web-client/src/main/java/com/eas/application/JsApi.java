@@ -7,7 +7,7 @@ public class JsApi {
     public static JavaScriptObject sourcedEventConstructor;
 
     public native static void init()/*-{
-        // Fix Function#name on browsers that do not support it (IE):
+        // Polyfill of Function#name on browsers that do not support it (IE):
         if (!(function f() {}).name) {
             Object.defineProperty($wnd.Function.prototype, 'name', {
                 get: function() {

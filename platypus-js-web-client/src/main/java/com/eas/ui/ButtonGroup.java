@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class ButtonGroup implements HasJsFacade, HasAddHandlers, HasRemoveHandlers, HasSelectionHandlers<Widget> {
+public class ButtonGroup implements HasPublished, HasName, HasAddHandlers, HasRemoveHandlers, HasSelectionHandlers<Widget> {
 
     protected final List<Widget> children = new ArrayList<>();
     protected Map<Widget, HandlerRegistration> childrenValueHanlders = new HashMap<>();
@@ -119,8 +119,8 @@ public class ButtonGroup implements HasJsFacade, HasAddHandlers, HasRemoveHandle
                     if (Boolean.TRUE.equals(event.getNewValue())) {
                         for (int i = 0; i < children.size(); i++) {
                             Widget ch = children.get(i);
-                            if (ch != w && ch instanceof HasJsValue) {
-                                ((HasJsValue) ch).setJsValue(Boolean.FALSE);
+                            if (ch != w && ch instanceof HasValue) {
+                                ((HasValue) ch).setValue(Boolean.FALSE);
                             }
                         }
                     }
@@ -268,12 +268,12 @@ public class ButtonGroup implements HasJsFacade, HasAddHandlers, HasRemoveHandle
     }
 
     @Override
-    public String getJsName() {
+    public String getName() {
         return name;
     }
 
     @Override
-    public void setJsName(String aValue) {
+    public void setName(String aValue) {
         name = aValue;
     }
 

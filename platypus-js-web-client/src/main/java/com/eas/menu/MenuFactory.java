@@ -38,7 +38,7 @@ public class MenuFactory implements UiWidgetReader {
                 aFactory.readImageParagraph(anElement, checkMenuItem);
                 if (Utils.hasAttribute(anElement, "st", "selected")) {
                     boolean selected = Utils.getBooleanAttribute(anElement, "st", "selected", Boolean.FALSE);
-                    checkMenuItem.setJsValue(selected);
+                    checkMenuItem.setValue(selected);
                 }
                 if (Utils.hasAttribute(anElement, "tx", "text")) {
                     checkMenuItem.setText(Utils.getAttribute(anElement, "tx", "text", null));
@@ -52,7 +52,7 @@ public class MenuFactory implements UiWidgetReader {
                 aFactory.readImageParagraph(anElement, radioMenuItem);
                 if (Utils.hasAttribute(anElement, "st", "selected")) {
                     boolean selected = Utils.getBooleanAttribute(anElement, "st", "selected", Boolean.FALSE);
-                    radioMenuItem.setJsValue(selected);
+                    radioMenuItem.setValue(selected);
                 }
                 if (Utils.hasAttribute(anElement, "tx", "text")) {
                     radioMenuItem.setText(Utils.getAttribute(anElement, "tx", "text", null));

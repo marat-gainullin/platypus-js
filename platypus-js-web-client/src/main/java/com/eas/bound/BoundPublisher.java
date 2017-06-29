@@ -1,13 +1,13 @@
 package com.eas.bound;
 
-import com.eas.widgets.boxes.DropDownListDecoratorField;
-import com.eas.widgets.boxes.FormattedDecoratorField;
-import com.eas.widgets.boxes.TextAreaDecoratorField;
-import com.eas.widgets.boxes.BooleanDecoratorField;
+import com.eas.widgets.DropDownListDecoratorField;
+import com.eas.widgets.FormattedDecoratorField;
+import com.eas.widgets.TextAreaDecoratorField;
+import com.eas.widgets.BooleanDecoratorField;
 import com.eas.core.Utils;
 import com.eas.ui.PublishedComponent;
-import com.eas.widgets.boxes.DateDecoratorField;
-import com.eas.widgets.boxes.NumberDecoratorField;
+import com.eas.widgets.DateDecoratorField;
+import com.eas.widgets.NumberDecoratorField;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class BoundPublisher {

@@ -1,5 +1,6 @@
 package com.eas.ui;
 
+import com.eas.ui.events.BlurEvent;
 import com.eas.core.Utils;
 import com.eas.ui.events.ActionEvent;
 import com.eas.ui.events.ContainerEvent;

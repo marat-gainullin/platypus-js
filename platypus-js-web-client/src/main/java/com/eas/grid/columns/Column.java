@@ -3,13 +3,12 @@ package com.eas.grid.columns;
 import com.eas.core.HasPublished;
 import com.eas.core.Utils;
 import com.eas.grid.PathComparator;
-import com.eas.ui.HasJsValue;
 import com.eas.ui.PublishedCell;
 import com.eas.ui.Widget;
 import com.eas.widgets.WidgetsUtils;
-import com.eas.widgets.boxes.BooleanDecoratorField;
-import com.eas.widgets.boxes.CheckBox;
-import com.eas.widgets.boxes.RadioButton;
+import com.eas.widgets.BooleanDecoratorField;
+import com.eas.widgets.CheckBox;
+import com.eas.widgets.RadioButton;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.InputElement;
@@ -24,6 +23,7 @@ import com.eas.grid.HeaderView;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.NativeEvent;
 import java.util.List;
+import com.eas.ui.HasValue;
 
 // TODO: Check tree expandable cell decorations like left paddnig according to deepness and plus / minus icon and open / closed folder icons
 public class Column implements HasPublished {
@@ -180,7 +180,7 @@ public class Column implements HasPublished {
         } else {
             text = String.valueOf(value);
             if (editor != null) {
-                ((HasJsValue) editor).setJsValue(value);
+                ((HasValue) editor).setValue(value);
                 if (editor instanceof BooleanDecoratorField || editor instanceof CheckBox) {
                     InputElement checkbox = Document.get().createCheckInputElement();
                     if (Boolean.TRUE.equals(value)) {

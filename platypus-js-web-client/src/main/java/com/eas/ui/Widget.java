@@ -1,5 +1,6 @@
 package com.eas.ui;
 
+import com.eas.ui.events.BlurEvent;
 import com.eas.core.HasPublished;
 import com.eas.core.Logger;
 import com.eas.core.Utils;
@@ -59,8 +60,8 @@ import java.util.Set;
  *
  * @author mgainullin
  */
-public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPopupMenu,
-        HasShowHandlers, HasHideHandlers {
+public abstract class Widget implements HasPublished, HasName, HasEnabled, HasComponentPopupMenu,
+        HasShowHandlers, HasHideHandlers, HasActionHandlers {
 
     protected class EmptyHandlerRegistration implements HandlerRegistration {
 
@@ -127,6 +128,27 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
         }
     }
 
+    protected Set<ActionHandler> actionHandlers = new HashSet<>();
+
+    @Override
+    public HandlerRegistration addActionHandler(ActionHandler handler) {
+        actionHandlers.add(handler);
+        return new HandlerRegistration() {
+            @Override
+            public void removeHandler() {
+                actionHandlers.remove(handler);
+            }
+
+        };
+    }
+
+    protected void fireActionPerformed() {
+        ActionEvent event = new ActionEvent(this);
+        for (ActionHandler h : actionHandlers) {
+            h.onAction(event);
+        }
+    }
+
     @Override
     public boolean isEnabled() {
         return enabled;
@@ -144,12 +166,12 @@ public abstract class Widget implements HasJsFacade, HasEnabled, HasComponentPop
     }
 
     @Override
-    public String getJsName() {
+    public String getName() {
         return name;
     }
 
     @Override
-    public void setJsName(String aValue) {
+    public void setName(String aValue) {
         name = aValue;
     }
 

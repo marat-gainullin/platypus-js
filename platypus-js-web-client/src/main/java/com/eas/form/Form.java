@@ -201,7 +201,7 @@ public class Form extends WindowPanel implements HasPublished {
         for (int i = 0; i < aContainer.getCount(); i++) {
             Widget w = aContainer.get(i);
             if (w instanceof HasValue<?>) {
-                String name = w.getJsName();
+                String name = w.getName();
                 Object value = ((HasValue<Object>) w).getValue();
                 if (name != null && !name.isEmpty() && (value == null || value instanceof String || value instanceof Number)) {
                     aFormData.put(name, value != null ? value.toString() : null);

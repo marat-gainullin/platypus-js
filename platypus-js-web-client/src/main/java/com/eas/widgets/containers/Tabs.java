@@ -49,7 +49,7 @@ public class Tabs extends Borders implements HasSelectionHandlers<Widget>, HasCh
 
     private void addCaptionFor(Widget w, String title, String toolTip, String image, int beforeIndex) {
         if (title == null) {
-            title = w.getJsName() != null && !w.getJsName().isEmpty() ? w.getJsName() : "Unnamed - " + tabs.getCount();
+            title = w.getName() != null && !w.getName().isEmpty() ? w.getName() : "Unnamed - " + tabs.getCount();
         }
         TabCaption label = new TabCaption(title, image, toolTip);
         tabs.add(label, beforeIndex);

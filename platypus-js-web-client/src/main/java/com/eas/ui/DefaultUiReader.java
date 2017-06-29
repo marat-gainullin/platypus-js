@@ -13,8 +13,8 @@ import com.eas.menu.Menu;
 import com.eas.menu.MenuBar;
 import com.eas.menu.PopupMenu;
 import com.eas.widgets.containers.Anchors;
-import com.eas.widgets.boxes.DropDownButton;
-import com.eas.widgets.boxes.ImageButton;
+import com.eas.widgets.DropDownButton;
+import com.eas.widgets.ImageButton;
 import com.eas.widgets.containers.Borders;
 import com.eas.widgets.containers.Box;
 import com.eas.widgets.containers.Cards;
@@ -78,7 +78,7 @@ public class DefaultUiReader extends UiReader {
                     Element childElement = (Element) childNode;
                     Widget widget = readWidget(childElement);
                     if (widget != null) {
-                        String wName = ((HasJsName) widget).getJsName();
+                        String wName = ((HasName) widget).getName();
                         assert wName != null && !wName.isEmpty() : "A widget is expected to be a named item.";
                         widgets.put(wName, widget);
                         widgetsList.add(widget);
@@ -162,9 +162,9 @@ public class DefaultUiReader extends UiReader {
     @Override
     public void readGeneralProps(final Element anElement, final Widget aTarget) throws Exception {
         String widgetName = "";
-        if (Utils.hasAttribute(anElement, "n", "name") && aTarget instanceof HasJsName) {
+        if (Utils.hasAttribute(anElement, "n", "name") && aTarget instanceof HasName) {
             widgetName = Utils.getAttribute(anElement, "n", "name", null);
-            ((HasJsName) aTarget).setJsName(widgetName);
+            ((HasName) aTarget).setName(widgetName);
         }
         /*
 		 * if (Utils.hasAttribute(anElement, "e", "editable") && aTarget

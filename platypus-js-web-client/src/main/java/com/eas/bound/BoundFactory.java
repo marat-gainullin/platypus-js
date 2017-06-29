@@ -1,19 +1,19 @@
 package com.eas.bound;
 
 import com.eas.core.Logger;
-import com.eas.widgets.boxes.DropDownListDecoratorField;
-import com.eas.widgets.boxes.FormattedDecoratorField;
-import com.eas.widgets.boxes.TextAreaDecoratorField;
-import com.eas.widgets.boxes.BooleanDecoratorField;
+import com.eas.widgets.DropDownListDecoratorField;
+import com.eas.widgets.FormattedDecoratorField;
+import com.eas.widgets.TextAreaDecoratorField;
+import com.eas.widgets.BooleanDecoratorField;
 
 import com.eas.core.Utils;
 import com.eas.ui.UiReader;
 import com.eas.ui.UiWidgetReader;
 import com.eas.ui.Widget;
-import com.eas.widgets.boxes.DateDecoratorField;
-import com.eas.widgets.boxes.FormattedField;
-import com.eas.widgets.boxes.NumberDecoratorField;
-import com.eas.widgets.boxes.ValueDecoratorField;
+import com.eas.widgets.DateDecoratorField;
+import com.eas.widgets.FormattedField;
+import com.eas.widgets.NumberDecoratorField;
+import com.eas.widgets.ValueDecoratorField;
 import com.google.gwt.xml.client.Element;
 
 public class BoundFactory implements UiWidgetReader {
@@ -121,7 +121,7 @@ public class BoundFactory implements UiWidgetReader {
                 BoundPublisher.publish(modelTextArea);
                 readGeneralProps(anElement, modelTextArea, aFactory);
                 if (Utils.hasAttribute(anElement, "tx", "text")) {
-                    modelTextArea.setJsValue(Utils.getAttribute(anElement, "tx", "text", null));
+                    modelTextArea.setValue(Utils.getAttribute(anElement, "tx", "text", null));
                 }
                 return modelTextArea;
             default:

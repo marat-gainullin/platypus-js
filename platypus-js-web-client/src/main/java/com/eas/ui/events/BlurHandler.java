@@ -1,7 +1,5 @@
 package com.eas.ui.events;
 
-import com.eas.ui.BlurEvent;
-
 
 /**
  *

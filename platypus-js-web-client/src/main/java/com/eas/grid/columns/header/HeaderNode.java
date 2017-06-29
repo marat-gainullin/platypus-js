@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.eas.grid.columns.Column;
-import com.eas.ui.HasJsName;
 import com.eas.ui.PublishedColor;
 import com.eas.ui.PublishedFont;
 import com.eas.ui.Widget;
-import com.eas.widgets.boxes.FormattedDecoratorField;
+import com.eas.widgets.FormattedDecoratorField;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.eas.ui.HasName;
 
 /**
  * If this header node is not a leaf, its column is reserved for further
@@ -18,7 +18,7 @@ import com.google.gwt.core.client.JavaScriptObject;
  *
  * @author mgainullin
  */
-public class HeaderNode implements HasJsName {
+public class HeaderNode implements HasName {
 
     protected String name;
     protected Column column;
@@ -116,12 +116,12 @@ public class HeaderNode implements HasJsName {
     }
 
     @Override
-    public String getJsName() {
+    public String getName() {
         return name;
     }
 
     @Override
-    public void setJsName(String aValue) {
+    public void setName(String aValue) {
         name = aValue;
     }
 

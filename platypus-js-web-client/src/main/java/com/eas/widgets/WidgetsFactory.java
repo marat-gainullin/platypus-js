@@ -1,9 +1,5 @@
 package com.eas.widgets;
 
-import com.eas.widgets.boxes.RichTextArea;
-import com.eas.widgets.boxes.TextArea;
-import com.eas.widgets.boxes.TextField;
-import com.eas.widgets.boxes.CheckBox;
 import com.eas.widgets.containers.Desktop;
 import com.eas.widgets.containers.Anchors;
 import com.eas.core.Utils;
@@ -12,18 +8,9 @@ import com.eas.ui.ButtonGroup;
 import com.eas.ui.Orientation;
 import com.eas.ui.UiReader;
 import com.eas.ui.UiWidgetReader;
-import com.eas.widgets.boxes.ImageLabel;
-import com.eas.widgets.boxes.ImageButton;
-import com.eas.widgets.boxes.DropDownButton;
 import com.eas.widgets.containers.Tabs;
 import com.eas.widgets.containers.Toolbar;
 import com.eas.ui.Widget;
-import com.eas.widgets.boxes.FormattedField;
-import com.eas.widgets.boxes.ImageToggleButton;
-import com.eas.widgets.boxes.PasswordField;
-import com.eas.widgets.boxes.RadioButton;
-import com.eas.widgets.boxes.Slider;
-import com.eas.widgets.boxes.ProgressBar;
 import com.eas.widgets.containers.Flow;
 import com.eas.widgets.containers.Split;
 import com.eas.widgets.containers.Scroll;
@@ -78,8 +65,8 @@ public class WidgetsFactory implements UiWidgetReader {
                 ButtonGroup buttonGroup = new ButtonGroup();
                 WidgetsPublisher.publish(buttonGroup);
                 if (Utils.hasAttribute(anElement, "n", "name")) {
-                    buttonGroup.setJsName(Utils.getAttribute(anElement, "n", "name", null));
-                    aFactory.getButtonGroups().put(buttonGroup.getJsName(), buttonGroup);
+                    buttonGroup.setName(Utils.getAttribute(anElement, "n", "name", null));
+                    aFactory.getButtonGroups().put(buttonGroup.getName(), buttonGroup);
                 }
                 return null;
             case "cb":
@@ -90,7 +77,7 @@ public class WidgetsFactory implements UiWidgetReader {
                 aFactory.readImageParagraph(anElement, checkBox);
                 if (Utils.hasAttribute(anElement, "st", "selected")) {
                     boolean selected = Utils.getBooleanAttribute(anElement, "st", "selected", Boolean.FALSE);
-                    checkBox.setJsValue(selected);
+                    checkBox.setValue(selected);
                 }
                 if (Utils.hasAttribute(anElement, "tx", "text")) {
                     checkBox.setText(Utils.getAttribute(anElement, "tx", "text", null));
@@ -112,7 +99,7 @@ public class WidgetsFactory implements UiWidgetReader {
                 aFactory.readGeneralProps(anElement, htmlArea);
                 if (Utils.hasAttribute(anElement, "tx", "text")) {
                     String text = Utils.getAttribute(anElement, "tx", "text", null);
-                    htmlArea.setJsValue(text);
+                    htmlArea.setValue(text);
                 }
                 return htmlArea;
             case "ff":
@@ -148,7 +135,7 @@ public class WidgetsFactory implements UiWidgetReader {
                 int maximum = Utils.getIntegerAttribute(anElement, "mx", "maximum", 100);
                 progressBar.setMinProgress(minimum);
                 progressBar.setMaxProgress(maximum);
-                progressBar.setJsValue((double) value);
+                progressBar.setValue((double) value);
                 if (Utils.hasAttribute(anElement, "tx", "text")) {
                     progressBar.setText(Utils.getAttribute(anElement, "tx", "text", null));
                 }
@@ -162,7 +149,7 @@ public class WidgetsFactory implements UiWidgetReader {
                 aFactory.readImageParagraph(anElement, radio);
                 if (Utils.hasAttribute(anElement, "st", "selected")) {
                     boolean selected = Utils.getBooleanAttribute(anElement, "st", "selected", Boolean.FALSE);
-                    radio.setJsValue(selected);
+                    radio.setValue(selected);
                 }
                 if (Utils.hasAttribute(anElement, "tx", "text")) {
                     radio.setText(Utils.getAttribute(anElement, "tx", "text", null));
@@ -178,7 +165,7 @@ public class WidgetsFactory implements UiWidgetReader {
                 int maximum = Utils.getIntegerAttribute(anElement, "mx", "maximum", 100);
                 slider.setMinValue(minimum);
                 slider.setMaxValue(maximum);
-                slider.setJsValue((double) value);
+                slider.setValue((double) value);
                 return slider;
             case "tf":
             case "TextField":
@@ -197,7 +184,7 @@ public class WidgetsFactory implements UiWidgetReader {
                 aFactory.readImageParagraph(anElement, toggle);
                 if (Utils.hasAttribute(anElement, "st", "selected")) {
                     boolean selected = Utils.getBooleanAttribute(anElement, "st", "selected", Boolean.FALSE);
-                    toggle.setJsValue(selected);
+                    toggle.setValue(selected);
                 }
                 return toggle;
             case "dp":

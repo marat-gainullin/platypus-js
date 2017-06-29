@@ -1,21 +1,8 @@
 package com.eas.widgets;
 
-import com.eas.widgets.boxes.RichTextArea;
-import com.eas.widgets.boxes.TextArea;
-import com.eas.widgets.boxes.TextField;
-import com.eas.widgets.boxes.CheckBox;
 import com.eas.core.Utils;
 import com.eas.ui.ButtonGroup;
 import com.eas.ui.PublishedComponent;
-import com.eas.widgets.boxes.DropDownButton;
-import com.eas.widgets.boxes.FormattedField;
-import com.eas.widgets.boxes.ImageButton;
-import com.eas.widgets.boxes.ImageLabel;
-import com.eas.widgets.boxes.ImageToggleButton;
-import com.eas.widgets.boxes.PasswordField;
-import com.eas.widgets.boxes.ProgressBar;
-import com.eas.widgets.boxes.RadioButton;
-import com.eas.widgets.boxes.Slider;
 import com.eas.widgets.containers.Absolute;
 import com.eas.widgets.containers.Anchors;
 import com.eas.widgets.containers.Borders;

@@ -16,7 +16,7 @@ import com.eas.grid.columns.header.HeaderNode;
 import com.eas.menu.MenuItemCheckBox;
 import com.eas.menu.Menu;
 import com.eas.ui.EventsPublisher;
-import com.eas.ui.BlurEvent;
+import com.eas.ui.events.BlurEvent;
 import com.eas.ui.FocusEvent;
 import com.eas.ui.Focusable;
 import com.eas.ui.HasBinding;
@@ -62,7 +62,8 @@ import java.util.Set;
  *
  * @author mg
  */
-public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObject>, HasSelectionLead, HasOnRender, HasBinding, Focusable, HasFocusHandlers, HasBlurHandlers,
+public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObject>, HasSelectionLead, HasOnRender, HasBinding, 
+        Focusable, HasFocusHandlers, HasBlurHandlers,
         HasKeyDownHandlers, HasKeyPressHandlers, HasKeyUpHandlers {
 
     public static final String RULER_STYLE = "grid-ruler";

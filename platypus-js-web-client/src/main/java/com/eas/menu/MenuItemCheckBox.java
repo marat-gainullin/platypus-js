@@ -3,10 +3,6 @@ package com.eas.menu;
 import com.eas.core.HasPublished;
 import com.eas.core.XElement;
 import com.eas.ui.ButtonGroup;
-import com.eas.ui.HasJsValue;
-import com.eas.ui.events.ActionEvent;
-import com.eas.ui.events.ActionHandler;
-import com.eas.ui.events.HasActionHandlers;
 import com.eas.ui.events.HasValueChangeHandlers;
 import com.eas.ui.events.ValueChangeEvent;
 import com.eas.ui.events.ValueChangeHandler;
@@ -23,12 +19,13 @@ import com.google.gwt.user.client.ui.HasText;
 import java.util.HashSet;
 import java.util.Set;
 import com.eas.ui.HasButtonGroup;
+import com.eas.ui.HasValue;
 
 /**
  *
  * @author mg
  */
-public class MenuItemCheckBox extends MenuItem implements HasButtonGroup, HasActionHandlers, HasJsValue, HasValueChangeHandlers, HasText, HasHTML {
+public class MenuItemCheckBox extends MenuItem implements HasButtonGroup, HasValue, HasValueChangeHandlers, HasText, HasHTML {
 
     protected Boolean value = Boolean.FALSE;
     protected Element leftMark;
@@ -61,11 +58,11 @@ public class MenuItemCheckBox extends MenuItem implements HasButtonGroup, HasAct
         field.setClassName("menu-field");
         setText(aText, asHtml);
         element.appendChild(field);
-        setJsValue(aValue);
+        setValue(aValue);
         element.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
             @Override
             public void on(NativeEvent evt) {
-                setJsValue(value != null ? !value : true);
+                setValue(value != null ? !value : true);
                 fireActionPerformed();
             }
         });
@@ -101,12 +98,12 @@ public class MenuItemCheckBox extends MenuItem implements HasButtonGroup, HasAct
     }
 
     @Override
-    public Object getJsValue() {
+    public Object getValue() {
         return value;
     }
 
     @Override
-    public void setJsValue(Object aValue) {
+    public void setValue(Object aValue) {
         Boolean oldValue = value;
         value = (Boolean) aValue;
         if (aValue == null) {
@@ -136,27 +133,6 @@ public class MenuItemCheckBox extends MenuItem implements HasButtonGroup, HasAct
         ValueChangeEvent event = new ValueChangeEvent(this, oldValue, value);
         for (ValueChangeHandler h : valueChangeHandlers) {
             h.onValueChange(event);
-        }
-    }
-
-    protected Set<ActionHandler> actionHandlers = new HashSet<>();
-
-    @Override
-    public HandlerRegistration addActionHandler(ActionHandler handler) {
-        actionHandlers.add(handler);
-        return new HandlerRegistration() {
-            @Override
-            public void removeHandler() {
-                actionHandlers.remove(handler);
-            }
-
-        };
-    }
-
-    protected void fireActionPerformed() {
-        ActionEvent event = new ActionEvent(this);
-        for (ActionHandler h : actionHandlers) {
-            h.onAction(event);
         }
     }
 
