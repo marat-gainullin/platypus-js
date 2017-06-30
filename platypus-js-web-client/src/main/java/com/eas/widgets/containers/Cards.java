@@ -25,7 +25,7 @@ import java.util.Set;
  */
 public class Cards extends Container implements HasSelectionHandlers<Widget>, HasChildrenPosition {
 
-    private final Map<String, Widget> cards = new HashMap<>();
+    private final Map<String, Widget> cards = new Map();
     protected Widget visibleWidget;
 
     private int hgap;
@@ -87,7 +87,7 @@ public class Cards extends Container implements HasSelectionHandlers<Widget>, Ha
 
     public void add(Widget w, String aCardName) {
         format(w);
-        if (cards.containsKey(aCardName)) {
+        if (cards.has(aCardName)) {
             super.remove(cards.get(aCardName));
         }
         super.add(w);
@@ -165,7 +165,7 @@ public class Cards extends Container implements HasSelectionHandlers<Widget>, Ha
     }
 
     public void show(String aCardName) {
-        if (cards.containsKey(aCardName)) {
+        if (cards.has(aCardName)) {
             Widget toShow = cards.get(aCardName);
             showWidget(toShow);
         }
@@ -196,7 +196,7 @@ public class Cards extends Container implements HasSelectionHandlers<Widget>, Ha
         w.setVisible(false);
     }
 
-    private final Set<SelectionHandler<Widget>> selectionHandlers = new HashSet<>();
+    private final Set<SelectionHandler<Widget>> selectionHandlers = new Set();
 
     @Override
     public HandlerRegistration addSelectionHandler(SelectionHandler<Widget> handler) {

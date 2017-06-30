@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public abstract class AnchorsContainer extends Container implements HasChildrenPosition, HasLayers {
 
-    protected Map<Widget, MarginConstraints> constraints = new HashMap<>();
+    protected Map<Widget, MarginConstraints> constraints = new Map();
 
     public AnchorsContainer() {
         super();

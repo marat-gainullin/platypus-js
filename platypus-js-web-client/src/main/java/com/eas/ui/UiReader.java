@@ -9,7 +9,7 @@ import com.google.gwt.xml.client.Element;
 
 public abstract class UiReader {
 
-    private static Set<UiWidgetReader> factories = new HashSet<>();
+    private static Set<UiWidgetReader> factories = new Set();
 
     public static void addFactory(UiWidgetReader aReader) {
         factories.add(aReader);

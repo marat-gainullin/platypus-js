@@ -41,8 +41,8 @@ public class DefaultUiReader extends UiReader {
 
     protected String rootContainerName;
     protected Element element;
-    protected Map<String, Widget> widgets = new HashMap<>();
-    protected Map<String, ButtonGroup> buttonGroups = new HashMap<>();
+    protected Map<String, Widget> widgets = new Map();
+    protected Map<String, ButtonGroup> buttonGroups = new Map();
     protected List<Widget> widgetsList = new ArrayList<>();
     protected List<Runnable> resolvers = new ArrayList<>();
     protected Widget viewWidget;

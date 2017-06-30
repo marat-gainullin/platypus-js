@@ -115,7 +115,7 @@ public class MenuItemCheckBox extends MenuItem implements HasButtonGroup, HasVal
         fireValueChange(oldValue);
     }
 
-    protected final Set<ValueChangeHandler> valueChangeHandlers = new HashSet<>();
+    protected final Set<ValueChangeHandler> valueChangeHandlers = new Set();
 
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler handler) {

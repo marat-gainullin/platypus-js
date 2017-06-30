@@ -82,7 +82,7 @@ public class DropDownList extends ValueWidget implements HasDecorationsWidth,
         element.setTabIndex(index);
     }
     
-    private Set<FocusHandler> focusHandlers = new HashSet<>();
+    private Set<FocusHandler> focusHandlers = new Set();
 
     @Override
     public HandlerRegistration addFocusHandler(FocusHandler handler) {
@@ -103,7 +103,7 @@ public class DropDownList extends ValueWidget implements HasDecorationsWidth,
         }
     }
 
-    private Set<BlurHandler> blurHandlers = new HashSet<>();
+    private Set<BlurHandler> blurHandlers = new Set();
 
     @Override
     public HandlerRegistration addBlurHandler(BlurHandler handler) {
@@ -124,7 +124,7 @@ public class DropDownList extends ValueWidget implements HasDecorationsWidth,
         }
     }
 
-    private Set<KeyUpHandler> keyUpHandlers = new HashSet<>();
+    private Set<KeyUpHandler> keyUpHandlers = new Set();
 
     @Override
     public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
@@ -145,7 +145,7 @@ public class DropDownList extends ValueWidget implements HasDecorationsWidth,
         }
     }
 
-    private Set<KeyDownHandler> keyDownHandlers = new HashSet<>();
+    private Set<KeyDownHandler> keyDownHandlers = new Set();
 
     @Override
     public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
@@ -166,7 +166,7 @@ public class DropDownList extends ValueWidget implements HasDecorationsWidth,
         }
     }
 
-    private Set<KeyPressHandler> keyPressHandlers = new HashSet<>();
+    private Set<KeyPressHandler> keyPressHandlers = new Set();
 
     @Override
     public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {

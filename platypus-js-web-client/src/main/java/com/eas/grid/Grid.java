@@ -111,7 +111,7 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
     protected PublishedColor gridColor;
     protected PublishedColor oddRowsColor = PublishedColor.create(241, 241, 241, 255);
 
-    private Set<JavaScriptObject> selectedRows = new HashSet<>();
+    private Set<JavaScriptObject> selectedRows = new Set();
     private JavaScriptObject selectionLead;
 
     protected int frozenColumns;
@@ -121,7 +121,7 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
     //
     protected JavaScriptObject data; // bounded data. this is not rows source. rows source is data['field' property path]
     protected JavaScriptObject sortedRows; // rows in view. subject of sorting. subject of collapse / expand in tree.
-    protected Set<JavaScriptObject> expandedRows = new HashSet<>();
+    protected Set<JavaScriptObject> expandedRows = new Set();
     protected String field;
     protected HandlerRegistration boundToData;
     protected HandlerRegistration boundToElements;
@@ -506,7 +506,7 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
         fireSelected(null);
     }
 
-    private final Set<SortHandler> sortHandlers = new HashSet<>();
+    private final Set<SortHandler> sortHandlers = new Set();
 
     public HandlerRegistration addSortHandler(SortHandler handler) {
         sortHandlers.add(handler);
@@ -523,7 +523,7 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
         sortHandlers.forEach(sh -> sh.onSort(event));
     }
 
-    private final Set<SelectionHandler<JavaScriptObject>> selectionHandlers = new HashSet<>();
+    private final Set<SelectionHandler<JavaScriptObject>> selectionHandlers = new Set();
 
     @Override
     public HandlerRegistration addSelectionHandler(SelectionHandler<JavaScriptObject> handler) {
@@ -541,7 +541,7 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
         selectionHandlers.forEach(sh -> sh.onSelection(event));
     }
 
-    private Set<FocusHandler> focusHandlers = new HashSet<>();
+    private Set<FocusHandler> focusHandlers = new Set();
 
     @Override
     public HandlerRegistration addFocusHandler(FocusHandler handler) {
@@ -562,7 +562,7 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
         }
     }
 
-    private Set<BlurHandler> blurHandlers = new HashSet<>();
+    private Set<BlurHandler> blurHandlers = new Set();
 
     @Override
     public HandlerRegistration addBlurHandler(BlurHandler handler) {
@@ -583,7 +583,7 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
         }
     }
 
-    private Set<KeyUpHandler> keyUpHandlers = new HashSet<>();
+    private Set<KeyUpHandler> keyUpHandlers = new Set();
 
     @Override
     public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
@@ -604,7 +604,7 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
         }
     }
 
-    private Set<KeyDownHandler> keyDownHandlers = new HashSet<>();
+    private Set<KeyDownHandler> keyDownHandlers = new Set();
 
     @Override
     public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
@@ -625,7 +625,7 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
         }
     }
 
-    private Set<KeyPressHandler> keyPressHandlers = new HashSet<>();
+    private Set<KeyPressHandler> keyPressHandlers = new Set();
 
     @Override
     public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {
@@ -1111,7 +1111,7 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
         List<JavaScriptObject> path = new ArrayList<>();
         if (anElement != null) {
             JavaScriptObject currentParent = anElement;
-            Set<JavaScriptObject> added = new HashSet<>();
+            Set<JavaScriptObject> added = new Set();
             path.add(currentParent);
             added.add(currentParent);
             while (currentParent != null) {

@@ -26,7 +26,7 @@ import java.util.Set;
 public class ButtonGroup implements HasPublished, HasName, HasAddHandlers, HasRemoveHandlers, HasSelectionHandlers<Widget> {
 
     protected final List<Widget> children = new ArrayList<>();
-    protected Map<Widget, HandlerRegistration> childrenValueHanlders = new HashMap<>();
+    protected Map<Widget, HandlerRegistration> childrenValueHanlders = new Map();
     protected String name;
     protected JavaScriptObject published;
     protected JavaScriptObject onItemSelected;
@@ -98,7 +98,7 @@ public class ButtonGroup implements HasPublished, HasName, HasAddHandlers, HasRe
         children.clear();
     }
 
-    private final Set<AddHandler> addHandlers = new HashSet<>();
+    private final Set<AddHandler> addHandlers = new Set();
 
     @Override
     public HandlerRegistration addAddHandler(AddHandler handler) {
@@ -133,7 +133,7 @@ public class ButtonGroup implements HasPublished, HasName, HasAddHandlers, HasRe
         }
     }
 
-    private final Set<RemoveHandler> removeHandlers = new HashSet<>();
+    private final Set<RemoveHandler> removeHandlers = new Set();
 
     @Override
     public HandlerRegistration addRemoveHandler(RemoveHandler handler) {
@@ -157,7 +157,7 @@ public class ButtonGroup implements HasPublished, HasName, HasAddHandlers, HasRe
         }
     }
 
-    private Set<SelectionHandler<Widget>> selectionHandlers = new HashSet<>();
+    private Set<SelectionHandler<Widget>> selectionHandlers = new Set();
 
     @Override
     public HandlerRegistration addSelectionHandler(SelectionHandler<Widget> handler) {

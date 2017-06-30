@@ -128,7 +128,7 @@ public abstract class Widget implements HasPublished, HasName, HasEnabled, HasCo
         }
     }
 
-    protected Set<ActionHandler> actionHandlers = new HashSet<>();
+    protected Set<ActionHandler> actionHandlers = new Set();
 
     @Override
     public HandlerRegistration addActionHandler(ActionHandler handler) {
@@ -238,7 +238,7 @@ public abstract class Widget implements HasPublished, HasName, HasEnabled, HasCo
 
     protected abstract void publish(JavaScriptObject aValue);
 
-    private final Set<HideHandler> hideHandlers = new HashSet<>();
+    private final Set<HideHandler> hideHandlers = new Set();
 
     @Override
     public HandlerRegistration addHideHandler(HideHandler handler) {
@@ -251,7 +251,7 @@ public abstract class Widget implements HasPublished, HasName, HasEnabled, HasCo
         };
     }
 
-    private final Set<ShowHandler> showHandlers = new HashSet<>();
+    private final Set<ShowHandler> showHandlers = new Set();
 
     @Override
     public HandlerRegistration addShowHandler(ShowHandler handler) {

@@ -7,7 +7,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 
 public class GroupingHandlerRegistration implements HandlerRegistration{
 
-	protected Set<HandlerRegistration> registrations = new HashSet<>();
+	protected Set<HandlerRegistration> registrations = new Set();
 
 	public GroupingHandlerRegistration() {
 		super();

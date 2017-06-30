@@ -38,7 +38,7 @@ public class Tabs extends Borders implements HasSelectionHandlers<Widget>, HasCh
 
     private final Toolbar tabs = new Toolbar();
     private final Cards content = new Cards(0, 0);
-    private final Map<Widget, Widget> tabsOf = new HashMap<>();
+    private final Map<Widget, Widget> tabsOf = new Map();
     protected JavaScriptObject onItemSelected;
 
     public Tabs() {

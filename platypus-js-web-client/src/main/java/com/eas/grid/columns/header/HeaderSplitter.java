@@ -35,7 +35,7 @@ public class HeaderSplitter {
 
     protected List<HeaderNode> toRoots() {
         List<HeaderNode> res = new ArrayList<>();
-        Set<HeaderNode> met = new HashSet<>();
+        Set<HeaderNode> met = new Set();
         for (int i = 0; i < splittedLeaves.size(); i++) {
             HeaderNode leaf = splittedLeaves.get(i);
             HeaderNode parent = leaf;

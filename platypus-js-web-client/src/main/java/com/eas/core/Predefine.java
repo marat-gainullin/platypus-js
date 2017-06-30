@@ -9,7 +9,7 @@ public class Predefine {
 
     private static JavaScriptObject boxing;
     private static JavaScriptObject logger;
-    protected static Map<String, JavaScriptObject> defined = new HashMap<>();
+    protected static Map<String, JavaScriptObject> defined = new Map();
 
     public static boolean isNumber(Object aValue) {
         return aValue instanceof Number;

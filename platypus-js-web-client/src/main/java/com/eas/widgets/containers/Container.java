@@ -91,7 +91,7 @@ public abstract class Container extends Widget implements HasAddHandlers, HasRem
         children.clear();
     }
 
-    private final Set<AddHandler> addHandlers = new HashSet<>();
+    private final Set<AddHandler> addHandlers = new Set();
 
     @Override
     public HandlerRegistration addAddHandler(AddHandler handler) {
@@ -111,7 +111,7 @@ public abstract class Container extends Widget implements HasAddHandlers, HasRem
         }
     }
 
-    private final Set<RemoveHandler> removeHandlers = new HashSet<>();
+    private final Set<RemoveHandler> removeHandlers = new Set();
 
     @Override
     public HandlerRegistration addRemoveHandler(RemoveHandler handler) {

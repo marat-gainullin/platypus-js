@@ -55,9 +55,9 @@ public class Fields {
 	protected Map<String, Integer> fieldsHash;
 	//
     protected JavaScriptObject instanceConstructor;
-    protected Map<String, OrmDef> ormScalarDefinitions = new HashMap<>();
-    protected Map<String, OrmDef> ormCollectionsDefinitions = new HashMap<>();
-    protected Map<String, Set<OrmDef>> ormScalarExpandings = new HashMap<>();
+    protected Map<String, OrmDef> ormScalarDefinitions = new Map();
+    protected Map<String, OrmDef> ormCollectionsDefinitions = new Map();
+    protected Map<String, Set<OrmDef>> ormScalarExpandings = new Map();
     
 	/**
 	 * The default constructor.
@@ -102,11 +102,11 @@ public class Fields {
 
     public void putOrmScalarDefinition(String aName, OrmDef aDefinition) {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
-            if (!ormScalarDefinitions.containsKey(aName)) {
+            if (!ormScalarDefinitions.has(aName)) {
                 ormScalarDefinitions.put(aName, aDefinition);
                 Set<OrmDef> expandings = ormScalarExpandings.get(aDefinition.getBaseName());
                 if(expandings == null){
-                    expandings = new HashSet<>();
+                    expandings = new Set();
                     ormScalarExpandings.put(aDefinition.getBaseName(), expandings);
                 }
                 expandings.add(aDefinition);
@@ -133,7 +133,7 @@ public class Fields {
     
     public void putOrmCollectionDefinition(String aName, OrmDef aDefinition) {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
-            if (!ormCollectionsDefinitions.containsKey(aName)) {
+            if (!ormCollectionsDefinitions.has(aName)) {
                 ormCollectionsDefinitions.put(aName, aDefinition);
             }
         }
@@ -148,7 +148,7 @@ public class Fields {
 	 */
 	protected void validateFieldsHash() {
 		if (fieldsHash == null) {
-			fieldsHash = new HashMap<>();
+			fieldsHash = new Map();
 			for (int i = 0; i < fields.size(); i++) {
 				String fieldName = fields.get(i).getName();
 				if (fieldName != null) {

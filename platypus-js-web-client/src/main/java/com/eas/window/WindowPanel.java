@@ -528,7 +528,7 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
         }
     }
 
-    protected Set<OpenHandler> openHandlers = new HashSet<>();
+    protected Set<OpenHandler> openHandlers = new Set();
 
     @Override
     public HandlerRegistration addOpenHandler(OpenHandler handler) {
@@ -549,7 +549,7 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
         }
     }
 
-    protected Set<ClosedHandler> closedHandlers = new HashSet<>();
+    protected Set<ClosedHandler> closedHandlers = new Set();
 
     @Override
     public HandlerRegistration addClosedHandler(ClosedHandler handler) {
@@ -570,7 +570,7 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
         }
     }
 
-    protected Set<BeforeCloseHandler> beforeCloseHandlers = new HashSet<>();
+    protected Set<BeforeCloseHandler> beforeCloseHandlers = new Set();
 
     @Override
     public HandlerRegistration addBeforeCloseHandler(BeforeCloseHandler handler) {
@@ -595,7 +595,7 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
         return true;
     }
 
-    protected Set<ActivateHandler> activateHandlers = new HashSet<>();
+    protected Set<ActivateHandler> activateHandlers = new Set();
 
     @Override
     public HandlerRegistration addActivateHandler(ActivateHandler handler) {
@@ -616,7 +616,7 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
         }
     }
 
-    protected Set<DeactivateHandler> deactivateHandlers = new HashSet<>();
+    protected Set<DeactivateHandler> deactivateHandlers = new Set();
 
     @Override
     public HandlerRegistration addDeactivateHandler(DeactivateHandler handler) {
@@ -637,7 +637,7 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
         }
     }
 
-    protected Set<MinimizeHandler> minimizeHandlers = new HashSet<>();
+    protected Set<MinimizeHandler> minimizeHandlers = new Set();
 
     @Override
     public HandlerRegistration addMinimizeHandler(MinimizeHandler handler) {
@@ -658,7 +658,7 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
         }
     }
 
-    protected Set<MaximizeHandler> maximizeHandlers = new HashSet<>();
+    protected Set<MaximizeHandler> maximizeHandlers = new Set();
 
     @Override
     public HandlerRegistration addMaximizeHandler(MaximizeHandler handler) {
@@ -679,7 +679,7 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
         }
     }
 
-    protected Set<RestoreHandler> restoreHandlers = new HashSet<>();
+    protected Set<RestoreHandler> restoreHandlers = new Set();
 
     @Override
     public HandlerRegistration addRestoreHandler(RestoreHandler handler) {
@@ -700,7 +700,7 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
         }
     }
 
-    protected Set<MoveHandler> moveHandlers = new HashSet<>();
+    protected Set<MoveHandler> moveHandlers = new Set();
 
     @Override
     public HandlerRegistration addMoveHandler(MoveHandler handler) {

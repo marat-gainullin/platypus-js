@@ -1,19 +1,13 @@
 package com.eas.client;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import com.eas.application.Loader;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.published.PublishedFile;
-import com.eas.client.queries.Query;
 import com.eas.client.serial.QueryJSONReader;
 import com.eas.client.xhr.FormData;
 import com.eas.client.xhr.ProgressEvent;
@@ -24,13 +18,11 @@ import com.eas.core.Cancellable;
 import com.eas.core.Logger;
 import com.eas.core.Utils;
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.http.client.RequestBuilder;
@@ -44,9 +36,7 @@ import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.xhr.client.ReadyStateChangeHandler;
 import com.google.gwt.xhr.client.XMLHttpRequest;
-import com.google.gwt.xhr.client.XMLHttpRequest.ResponseType;
 import com.google.gwt.xml.client.Document;
-import com.google.gwt.xml.client.XMLParser;
 
 /**
  *
@@ -56,26 +46,16 @@ public class AppClient {
 
     //
     private static final RegExp httpPrefixPattern = RegExp.compile("https?://.*");
-    public static final String APPLICATION_URI = "/application";
-    private static String sourcePath = "/";
-    private static boolean simpleModules;
     public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
-    //
-    private static AppClient appClient;
-    private boolean cacheBustEnabled;
-    private String apiUrl;
-    private String principal;
-    private Map<String, Document> documents = new HashMap<String, Document>();
-    private Map<String, ModuleStructure> modulesStructures = new HashMap<String, ModuleStructure>();
-    private Map<String, Query> queries = new HashMap<String, Query>();
-    private Map<String, Object> serverModules = new HashMap<>();
 
+    private String principal;
+    /*
     public static class ModuleStructure {
 
-        protected Set<String> structure = new HashSet<>();
-        protected Set<String> clientDependencies = new HashSet<>();
-        protected Set<String> serverDependencies = new HashSet<>();
-        protected Set<String> queriesDependencies = new HashSet<>();
+        protected Set<String> structure = new Set();
+        protected Set<String> clientDependencies = new Set();
+        protected Set<String> serverDependencies = new Set();
+        protected Set<String> queriesDependencies = new Set();
 
         public ModuleStructure(String aRelativeFileName) {
             super();
@@ -130,66 +110,8 @@ public class AppClient {
             return Collections.unmodifiableSet(serverDependencies);
         }
     }
-
-    public static String remoteApiUri() {
-        NodeList<com.google.gwt.dom.client.Element> metas = com.google.gwt.dom.client.Document.get().getHead().getElementsByTagName("meta");
-        for (int i = 0; i < metas.getLength(); i++) {
-            com.google.gwt.dom.client.Element meta = metas.getItem(i);
-            if ("platypus-server".equalsIgnoreCase(meta.getAttribute("name"))) {
-                return meta.getAttribute("content");
-            }
-        }
-        return relativeUri();
-    }
-
-    public static String relativeUri() {
-        String pageUrl = GWT.getHostPageBaseURL();
-        pageUrl = pageUrl.substring(0, pageUrl.length() - 1);
-        return pageUrl;
-    }
-
-    public static AppClient getInstance() {
-        if (appClient == null) {
-            appClient = new AppClient(remoteApiUri() + APPLICATION_URI);
-        }
-        return appClient;
-    }
-
-    /**
-     * Only for tests! Don't call this method from application code!
-     *
-     * @param aClient
-     */
-    public static void setInstance(AppClient aClient) {
-        appClient = aClient;
-    }
-
-    public static boolean isSimpleModules() {
-        return simpleModules;
-    }
-
-    public static void setSimpleModules(boolean aValue) {
-        simpleModules = aValue;
-    }
-
-    public static String getSourcePath() {
-        return sourcePath;
-    }
-
-    public static void setSourcePath(String aValue) {
-        if (aValue != null && !aValue.isEmpty()) {
-            sourcePath = aValue;
-            if (!sourcePath.endsWith("/")) {
-                sourcePath = sourcePath + "/";
-            }
-            if (!sourcePath.startsWith("/")) {
-                sourcePath = "/" + sourcePath;
-            }
-        } else {
-            sourcePath = "/";
-        }
-    }
-
+    */
+    
     public SafeUri getResourceUri(final String aResourceName) {
         return new SafeUri() {
 
@@ -228,13 +150,13 @@ public class AppClient {
         final String callerDir = Utils.lookupCallerJsDir();
         SafeUri uri = AppClient.getInstance().getResourceUri(aResourceName.startsWith("./") || aResourceName.startsWith("../") ? toFilyAppModuleId(aResourceName, callerDir) : aResourceName);
         if (onSuccess != null) {
-            AppClient.getInstance().startRequest(uri, aBinary ? ResponseType.ArrayBuffer : ResponseType.Default, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+            AppClient.getInstance().startRequest(uri, aBinary ? XMLHttpRequest.ResponseType.ArrayBuffer : XMLHttpRequest.ResponseType.Default, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
                 @Override
                 protected void doWork(XMLHttpRequest aResult) throws Exception {
                     if (aResult.getStatus() == Response.SC_OK) {
                         String responseType = aResult.getResponseType();
-                        if (ResponseType.ArrayBuffer.getResponseTypeString().equalsIgnoreCase(responseType)) {
+                        if (XMLHttpRequest.ResponseType.ArrayBuffer.getResponseTypeString().equalsIgnoreCase(responseType)) {
                             Utils.JsObject buffer = (Utils.JsObject) Utils.toJs(aResult.getResponseArrayBuffer());
                             int length = buffer.getInteger("byteLength");
                             buffer.setInteger("length", length);
@@ -263,11 +185,11 @@ public class AppClient {
 
             });
         } else {
-            XMLHttpRequest2 executed = AppClient.getInstance().syncRequest(uri.asString(), ResponseType.Default);
+            XMLHttpRequest2 executed = AppClient.getInstance().syncRequest(uri.asString(), XMLHttpRequest.ResponseType.Default);
             if (executed != null) {
                 if (executed.getStatus() == Response.SC_OK) {
                     String responseType = executed.getResponseType();
-                    if (ResponseType.ArrayBuffer.getResponseTypeString().equalsIgnoreCase(responseType)) {
+                    if (XMLHttpRequest.ResponseType.ArrayBuffer.getResponseTypeString().equalsIgnoreCase(responseType)) {
                         Utils.JsObject buffer = (Utils.JsObject) executed.getResponseArrayBuffer();
                         int length = buffer.getInteger("byteLength");
                         buffer.setInteger("length", length);
@@ -328,7 +250,7 @@ public class AppClient {
 
     public Cancellable startUploadRequest(final PublishedFile aFile, String aName, final Callback<ProgressEvent, String> aCallback) {
         final XMLHttpRequest2 req = XMLHttpRequest.create().<XMLHttpRequest2>cast();
-        req.open("post", apiUrl);
+        req.open("post", remoteApiUri() + APPLICATION_URI);
         final ProgressHandler handler = new ProgressHandlerAdapter() {
             @Override
             public void onProgress(ProgressEvent aEvent) {
@@ -473,26 +395,8 @@ public class AppClient {
         };
     }
 
-    public static String param(String aName, String aValue) {
-        return aName + "=" + (aValue != null ? URL.encodePathSegment(aValue) : "");
-    }
-
-    public static String params(String... aParams) {
-        String res = "";
-        for (int i = 0; i < aParams.length; i++) {
-            if (aParams[i] != null && !aParams[i].isEmpty()) {
-                if (!res.isEmpty()) {
-                    res += "&";
-                }
-                res += aParams[i];
-            }
-        }
-        return res;
-    }
-
-    public AppClient(String aApiUrl) {
+    public AppClient() {
         super();
-        apiUrl = aApiUrl;
     }
 
     public Document getModelDocument(String aModuleName) {
@@ -562,90 +466,7 @@ public class AppClient {
 
         });
     }
-
-    public Cancellable startApiRequest(String aUrlPrefix, final String aUrlQuery, String aBody, RequestBuilder.Method aMethod, String aContentType, Callback<XMLHttpRequest, XMLHttpRequest> aCallback)
-            throws Exception {
-        String url = apiUrl + (aUrlPrefix != null ? aUrlPrefix : "") + (aUrlQuery != null ? "?" + aUrlQuery : "");
-        final XMLHttpRequest req = XMLHttpRequest.create();
-        req.open(aMethod.toString(), url);
-        if (aContentType != null && !aContentType.isEmpty()) {
-            req.setRequestHeader("Content-Type", aContentType);
-        }
-        interceptRequest(req);
-        req.setRequestHeader("Pragma", "no-cache");
-        return startRequest(req, aBody, aCallback);
-    }
-
-    public Cancellable startRequest(SafeUri aUri, ResponseType aResponseType, Callback<XMLHttpRequest, XMLHttpRequest> aCallback) throws Exception {
-        final XMLHttpRequest req = XMLHttpRequest.create();
-        req.open(RequestBuilder.GET.toString(), aUri.asString());
-        interceptRequest(req);
-        if (aResponseType != null && aResponseType != ResponseType.Default) {
-            req.setResponseType(aResponseType);
-        }
-        req.setRequestHeader("Pragma", "no-cache");
-        return startRequest(req, null, aCallback);
-    }
-
-    public Cancellable startRequest(SafeUri aUri, Callback<XMLHttpRequest, XMLHttpRequest> aCallback) throws Exception {
-        return startRequest(aUri, ResponseType.Default, aCallback);
-    }
-
-    public Cancellable startRequest(final XMLHttpRequest req, String aBody, final Callback<XMLHttpRequest, XMLHttpRequest> aCallback) throws Exception {
-        // Must set the onreadystatechange handler before calling send().
-        req.setOnReadyStateChange(new ReadyStateChangeHandler() {
-            public void onReadyStateChange(XMLHttpRequest xhr) {
-                if (xhr.getReadyState() == XMLHttpRequest.DONE) {
-                    xhr.clearOnReadyStateChange();
-                    /*
-					 * We cannot use cancel here because it would clear the
-					 * contents of the JavaScript XmlHttpRequest object so we
-					 * manually null out our reference to the JavaScriptObject
-                     */
-                    String errorMsg = XMLHttpRequest2.getBrowserSpecificFailure(xhr);
-                    if (errorMsg != null) {
-                        Logger.severe(errorMsg);
-                        try {
-                            if (aCallback != null) {
-                                aCallback.onFailure(xhr);
-                            }
-                        } catch (Exception ex) {
-                            Logger.severe(ex);
-                        }
-                    } else {
-                        try {
-                            if (xhr.getStatus() == Response.SC_OK) {
-                                if (aCallback != null) {
-                                    aCallback.onSuccess(xhr);
-                                }
-                            } else {
-                                if (aCallback != null) {
-                                    aCallback.onFailure(xhr);
-                                }
-                            }
-                        } catch (Exception ex) {
-                            Logger.severe(ex);
-                        }
-                    }
-                }
-            }
-        });
-
-        if (aBody != null && !aBody.isEmpty()) {
-            req.send(aBody);
-        } else {
-            req.send();
-        }
-        return new Cancellable() {
-
-            @Override
-            public void cancel() {
-                req.clearOnReadyStateChange();
-                req.abort();
-            }
-        };
-    }
-
+    
     public void startDownloadRequest(String aUrlPrefix, final int aRequestType, Map<String, String> aParams, RequestBuilder.Method aMethod) throws Exception {
         final Frame frame = new Frame();
         frame.setVisible(false);
@@ -669,11 +490,11 @@ public class AppClient {
             query += param(ent.getKey(), ent.getValue()) + "&";
         }
         query += param(PlatypusHttpRequestParams.TYPE, String.valueOf(aRequestType));
-        frame.setUrl(apiUrl + aUrlPrefix + "?" + query);
+        frame.setUrl(remoteApiUri() + APPLICATION_URI + aUrlPrefix + "?" + query);
         RootPanel.get().add(frame);
     }
 
-    public XMLHttpRequest2 syncRequest(String aUrl, ResponseType aResponseType) throws Exception {
+    public XMLHttpRequest2 syncRequest(String aUrl, XMLHttpRequest.ResponseType aResponseType) throws Exception {
         final XMLHttpRequest2 req = syncRequest(aUrl, aResponseType, null, RequestBuilder.GET);
         if (req.getStatus() == Response.SC_OK) {
             return req;
@@ -682,8 +503,8 @@ public class AppClient {
         }
     }
 
-    public XMLHttpRequest2 syncApiRequest(String aUrlPrefix, final String aUrlQuery, ResponseType aResponseType) throws Exception {
-        String url = apiUrl + (aUrlPrefix != null ? aUrlPrefix : "") + "?" + aUrlQuery;
+    public XMLHttpRequest2 syncApiRequest(String aUrlPrefix, final String aUrlQuery, XMLHttpRequest.ResponseType aResponseType) throws Exception {
+        String url = remoteApiUri() + APPLICATION_URI + (aUrlPrefix != null ? aUrlPrefix : "") + "?" + aUrlQuery;
         final XMLHttpRequest2 req = syncRequest(url, aResponseType, null, RequestBuilder.GET);
         if (req.getStatus() == Response.SC_OK) {
             return req;
@@ -692,15 +513,14 @@ public class AppClient {
         }
     }
 
-    public XMLHttpRequest2 syncRequest(String aUrl, ResponseType aResponseType, String aBody, RequestBuilder.Method aMethod) throws Exception {
+    public XMLHttpRequest2 syncRequest(String aUrl, XMLHttpRequest.ResponseType aResponseType, String aBody, RequestBuilder.Method aMethod) throws Exception {
         final XMLHttpRequest2 req = XMLHttpRequest.create().<XMLHttpRequest2>cast();
         aUrl = Loader.URL_QUERY_PROCESSOR.process(aUrl);
         req.open(aMethod.toString(), aUrl, false);
-        interceptRequest(req);
         /*
-		 * Since W3C standard about sync XmlHttpRequest and response type. if
-		 * (aResponseType != null && aResponseType != ResponseType.Default)
-		 * req.setResponseType(aResponseType);
+         * Since W3C standard about sync XmlHttpRequest and response type. if
+         * (aResponseType != null && aResponseType != ResponseType.Default)
+         * req.setResponseType(aResponseType);
          */
         req.setRequestHeader("Pragma", "no-cache");
         if (aBody != null) {
@@ -713,10 +533,6 @@ public class AppClient {
         } else {
             throw new Exception(req.getStatus() + " " + req.getStatusText());
         }
-    }
-
-    protected void interceptRequest(XMLHttpRequest req) {
-        // No-op here. Some implementation is in the tests.
     }
 
     public Cancellable requestCommit(final JavaScriptObject changeLog, final Callback<Void, String> aCallback) throws Exception {
@@ -810,251 +626,9 @@ public class AppClient {
         }
     }
 
-    public ModuleStructure getModuleStructure(String aModuleName) {
-        return modulesStructures.get(aModuleName);
-    }
-
-    public ModuleStructure putModuleStructure(String aModuleName, ModuleStructure aStructure) {
-        return modulesStructures.put(aModuleName, aStructure);
-    }
-
-    private native static void checkModulesIndex(AppClient aClient)/*-{
-		if ($wnd.define) {
-			var index = $wnd.define['modules-index'];
-			for ( var fileName in index) {
-				var structure = index[fileName];
-				var mstructure = @com.eas.client.AppClient.ModuleStructure::new(Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JsArrayString;)(fileName, structure.prefetched, structure['global-deps'], structure.rpc, structure.entities);
-				var defaultModuleName = fileName;
-				if (defaultModuleName.endsWith('.js')) {
-					defaultModuleName = defaultModuleName.substring(0, defaultModuleName.length - 3);
-				}
-				aClient.@com.eas.client.AppClient::putModuleStructure(Ljava/lang/String;Lcom/eas/client/AppClient$ModuleStructure;)(defaultModuleName, mstructure);
-				if (structure.modules) {
-					for ( var i = 0; i < structure.modules.length; i++) {
-						aClient.@com.eas.client.AppClient::putModuleStructure(Ljava/lang/String;Lcom/eas/client/AppClient$ModuleStructure;)(structure.modules[i], mstructure);
-					}
-				}
-			}
-			$wnd.define['modules-index'] = {};
-		}
-	}-*/;
-
-    public Cancellable requestModuleStructure(final String aModuleName, final Callback<ModuleStructure, XMLHttpRequest> aCallback) throws Exception {
-        checkModulesIndex(this);
-        if (modulesStructures.containsKey(aModuleName)) {
-            if (aCallback != null) {
-                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-
-                    @Override
-                    public void execute() {
-                        aCallback.onSuccess(modulesStructures.get(aModuleName));
-                    }
-                });
-            }
-            return new Cancellable() {
-                @Override
-                public void cancel() {
-                }
-            };
-        } else if (simpleModules) {
-            if (aCallback != null) {
-                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-
-                    @Override
-                    public void execute() {
-                        String fakeRelativeFileName = aModuleName;
-                        if (!fakeRelativeFileName.toLowerCase().endsWith(".js")) {
-                            fakeRelativeFileName = fakeRelativeFileName + ".js";
-                        }
-                        ModuleStructure s = new ModuleStructure(fakeRelativeFileName);
-                        aCallback.onSuccess(s);
-                    }
-                });
-            }
-            return new Cancellable() {
-                @Override
-                public void cancel() {
-                }
-            };
-        } else {
-            String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqModuleStructure)), param(PlatypusHttpRequestParams.MODULE_NAME, aModuleName));
-            query = Loader.URL_QUERY_PROCESSOR.process(query);
-            return startApiRequest(null, query, "", RequestBuilder.GET, null, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
-
-                @Override
-                public void doWork(XMLHttpRequest aResponse) throws Exception {
-                    if (isJsonResponse(aResponse)) {
-                        // Some post processing
-                        String text = aResponse.getResponseText();
-                        JavaScriptObject _doc = text != null && !text.isEmpty() ? Utils.JsObject.parseJSON(text) : null;
-                        Utils.JsObject doc = _doc.cast();
-                        //
-                        Set<String> structure = new HashSet<String>();
-                        Set<String> clientDependencies = new HashSet<String>();
-                        Set<String> queryDependencies = new HashSet<String>();
-                        Set<String> serverModuleDependencies = new HashSet<String>();
-                        Utils.JsObject jsStructure = doc.getJs("structure").cast();
-                        Utils.JsObject jsClientDependencies = doc.getJs("clientDependencies").cast();
-                        Utils.JsObject jsQueryDependencies = doc.getJs("queryDependencies").cast();
-                        Utils.JsObject jsServerDependencies = doc.getJs("serverDependencies").cast();
-                        for (int i = 0; i < jsStructure.length(); i++) {
-                            structure.add(jsStructure.getStringSlot(i));
-                        }
-                        for (int i = 0; i < jsClientDependencies.length(); i++) {
-                            clientDependencies.add(jsClientDependencies.getStringSlot(i));
-                        }
-                        for (int i = 0; i < jsQueryDependencies.length(); i++) {
-                            queryDependencies.add(jsQueryDependencies.getStringSlot(i));
-                        }
-                        for (int i = 0; i < jsServerDependencies.length(); i++) {
-                            serverModuleDependencies.add(jsServerDependencies.getStringSlot(i));
-                        }
-                        ModuleStructure moduleStructure = new ModuleStructure(structure, clientDependencies, serverModuleDependencies, queryDependencies);
-                        modulesStructures.put(aModuleName, moduleStructure);
-                        if (aCallback != null) {
-                            aCallback.onSuccess(moduleStructure);
-                        }
-                    } else {
-                        if (aCallback != null) {
-                            aCallback.onFailure(aResponse);
-                        }
-                    }
-                }
-
-                @Override
-                public void onFailure(XMLHttpRequest reason) {
-                    if (aCallback != null) {
-                        aCallback.onFailure(reason);
-                    }
-                }
-            });
-        }
-    }
-
-    public Cancellable requestDocument(final String aResourceName, final Callback<Document, XMLHttpRequest> aCallback) throws Exception {
-        if (documents.containsKey(aResourceName)) {
-            final Document doc = documents.get(aResourceName);
-            // doc may be null, because of application elements without a
-            // xml-dom, plain scripts for example.
-            if (aCallback != null) {
-                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-
-                    @Override
-                    public void execute() {
-                        aCallback.onSuccess(doc);
-                    }
-                });
-            }
-            return new Cancellable() {
-
-                @Override
-                public void cancel() {
-                    // no op here because of no request have been sent
-                }
-            };
-        } else {
-            SafeUri documentUri = new SafeUri() {
-
-                @Override
-                public String asString() {
-                    return checkedCacheBust(relativeUri() + getSourcePath() + aResourceName);
-                }
-
-            };
-            return startRequest(documentUri, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
-
-                @Override
-                public void doWork(XMLHttpRequest aResponse) throws Exception {
-                    // Some post processing
-                    String text = aResponse.getResponseText();
-                    Document doc = text != null && !text.isEmpty() ? XMLParser.parse(text) : null;
-                    documents.put(aResourceName, doc);
-                    //
-                    if (aCallback != null) {
-                        aCallback.onSuccess(doc);
-                    }
-                }
-
-                @Override
-                public void onFailure(XMLHttpRequest reason) {
-                    if (aCallback != null) {
-                        aCallback.onFailure(reason);
-                    }
-                }
-            });
-        }
-    }
-
-    public Cancellable requestServerModule(final String aModuleName, final Callback<Void, String> aCallback) throws Exception {
-        if (isServerModule(aModuleName)) {
-            if (aCallback != null) {
-                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-
-                    @Override
-                    public void execute() {
-                        aCallback.onSuccess(null);
-                    }
-                });
-            }
-            return new Cancellable() {
-
-                @Override
-                public void cancel() {
-                    // no op here because of no request have been sent
-                }
-            };
-        } else {
-            String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqCreateServerModule)), param(PlatypusHttpRequestParams.MODULE_NAME, aModuleName));
-            return startApiRequest(null, query, "", RequestBuilder.GET, null, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
-
-                @Override
-                public void doWork(XMLHttpRequest aResponse) throws Exception {
-                    // Some post processing
-                    if (isJsonResponse(aResponse)) {
-                        addServerModule(aModuleName, aResponse.getResponseText());
-                        if (aCallback != null) {
-                            aCallback.onSuccess(null);
-                        }
-                    } else {
-                        onFailure(aResponse);
-                    }
-                }
-
-                @Override
-                public void onFailure(XMLHttpRequest aResponse) {
-                    if (aCallback != null) {
-                        String responseText = aResponse.getResponseText();
-                        aCallback.onFailure(responseText != null && !responseText.isEmpty() ? responseText : aResponse.getStatusText());
-                    }
-                }
-
-            });
-        }
-    }
-
-    public Object getServerModule(String aModuleName) {
-        return serverModules.get(aModuleName);
-    }
-
-    public void addServerModule(String aModuleName, String aStructure) throws Exception {
-        serverModules.put(aModuleName, Utils.jsonParse(aStructure));
-    }
-
-    public boolean isServerModule(String aModuleName) throws Exception {
-        return serverModules.containsKey(aModuleName);
-    }
-
     public static native JavaScriptObject createReport(JavaScriptObject Report, String reportLocation)/*-{
-		return new Report(reportLocation);
-	}-*/;
-
-    public boolean isCacheBustEnabled() {
-        return cacheBustEnabled;
-    }
-
-    public void setCacheBustEnabled(boolean aValue) {
-        cacheBustEnabled = aValue;
-    }
+        return new Report(reportLocation);
+    }-*/;
 
     public Object requestServerMethodExecution(final String aModuleName, final String aMethodName, final JsArrayString aParams, final JavaScriptObject onSuccess, final JavaScriptObject onFailure,
             final JavaScriptObject aReportConstructor) throws Exception {
@@ -1099,7 +673,7 @@ public class AppClient {
             });
             return null;
         } else {
-            XMLHttpRequest2 executed = syncApiRequest(null, query, ResponseType.Default);
+            XMLHttpRequest2 executed = syncApiRequest(null, query, XMLHttpRequest.ResponseType.Default);
             if (executed != null) {
                 if (executed.getStatus() == Response.SC_OK) {
                     String responseType = executed.getResponseHeader("content-type");
@@ -1125,70 +699,16 @@ public class AppClient {
             }
         }
     }
-
-    public Cancellable requestAppQuery(final String queryName, final Callback<Query, String> aCallback) throws Exception {
-        final Query alreadyQuery = queries.get(queryName);
-        if (alreadyQuery != null) {
-            if (aCallback != null) {
-                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-
-                    @Override
-                    public void execute() {
-                        aCallback.onSuccess(alreadyQuery);
-                    }
-                });
-            }
-            return new Cancellable() {
-
-                @Override
-                public void cancel() {
-                    // no op here because of no request have been sent
-                }
-            };
+    
+    function getCachedAppQuery(aQueryName) {
+        var queryBody = queries.get(aQueryName);
+        if (queryBody) {
+            var query = QueryJSONReader.read(queryBody);
+            query.setClient(this);
+            return query;
         } else {
-            String urlQuery = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppQuery)), param(PlatypusHttpRequestParams.QUERY_ID, queryName));
-            return startApiRequest(null, urlQuery, "", RequestBuilder.GET, null, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
-
-                @Override
-                public void doWork(XMLHttpRequest aResponse) throws Exception {
-                    if (isJsonResponse(aResponse)) {
-                        // Some post processing
-                        Query query = readQuery(aResponse);
-                        query.setClient(AppClient.this);
-                        //
-                        queries.put(queryName, query);
-                        if (aCallback != null) {
-                            aCallback.onSuccess(query);
-                        }
-                    } else {
-                        if (aCallback != null) {
-                            aCallback.onFailure(aResponse.getResponseText());
-                        }
-                    }
-                }
-
-                private Query readQuery(XMLHttpRequest aResponse) throws Exception {
-                    return QueryJSONReader.read(Utils.JsObject.parseJSON(aResponse.getResponseText()));
-                }
-
-                @Override
-                public void onFailure(XMLHttpRequest aResponse) {
-                    if (aCallback != null) {
-                        aCallback.onFailure(aResponse.getStatusText());
-                    }
-                }
-            });
+            return null;
         }
-    }
-
-    public Query getCachedAppQuery(String aQueryId) {
-        Query query = queries.get(aQueryId);
-        if (query != null) {
-            AppClient client = query.getClient();
-            query = query.copy();
-            query.setClient(client);
-        }
-        return query;
     }
 
     public Cancellable requestData(String aQueryName, Parameters aParams, final Fields aExpectedFields, final Callback<JavaScriptObject, String> aCallback) throws Exception {
@@ -1224,20 +744,6 @@ public class AppClient {
                 }
             }
         });
-    }
-
-    public String checkedCacheBust(String aUrl) {
-        return cacheBustEnabled ? aUrl + "?" + PlatypusHttpRequestParams.CACHE_BUSTER + "=" + IdGenerator.genId() : aUrl;
-    }
-
-    private boolean isJsonResponse(XMLHttpRequest aResponse) {
-        String responseType = aResponse.getResponseHeader("content-type");
-        if (responseType != null) {
-            responseType = responseType.toLowerCase();
-            return responseType.contains("application/json") || responseType.contains("application/javascript") || responseType.contains("text/json") || responseType.contains("text/javascript");
-        } else {
-            return false;
-        }
     }
 
     private boolean isReportResponse(XMLHttpRequest aResponse) {

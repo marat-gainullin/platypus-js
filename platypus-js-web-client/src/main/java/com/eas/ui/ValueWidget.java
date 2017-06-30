@@ -36,7 +36,7 @@ public abstract class ValueWidget extends Widget implements HasValue, HasValueCh
         fireValueChange(oldValue);
     }
 
-    protected final Set<ValueChangeHandler> valueChangeHandlers = new HashSet<>();
+    protected final Set<ValueChangeHandler> valueChangeHandlers = new Set();
 
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler handler) {

@@ -62,7 +62,7 @@ public class Localization {
     };
 
     public static String get(String key) {
-        if (data.containsKey(key)) {
+        if (data.has(key)) {
             return data.get(key);
         } else {
             return key;

@@ -1,7 +1,5 @@
 package com.eas.client.queries;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,15 +23,15 @@ import com.google.gwt.core.client.JavaScriptObject;
 public class Query {
 
     protected AppClient client;
-    // parameters propagation. ParamName - DsName, ParamName
-    protected Map<String, Map<String, String>> parametersBinds = new HashMap<>();
     protected Fields fields = new Fields();
     protected Parameters params = new Parameters();
     protected String title;
     protected String entityName;
+    // parameters propagation. ParamName - DsName, ParamName
+    protected Map<String, Map<String, String>> parametersBinds = new Map();
     protected boolean procedure;
-    protected Set<String> readRoles = new HashSet<>();
-    protected Set<String> writeRoles = new HashSet<>();
+    protected Set<String> readRoles = new Set();
+    protected Set<String> writeRoles = new Set();
 
     /**
      * Creates an instance of Query with empty SQL query text and parameters.
@@ -90,7 +88,7 @@ public class Query {
                                         if (lpEntries != null) {
                                             Iterator<Entry<String, String>> lpEntIt = lpEntries.iterator();
                                             if (lpEntIt != null) {
-                                                Map<String, String> lparamBinds = new HashMap<>();
+                                                Map<String, String> lparamBinds = new Map();
                                                 parametersBinds.put(new String(parName.toCharArray()), lparamBinds);
                                                 while (lpEntIt.hasNext()) {
                                                     Entry<String, String> lpEnt = lpEntIt.next();

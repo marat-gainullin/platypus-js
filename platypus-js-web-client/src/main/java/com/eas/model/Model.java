@@ -1028,7 +1028,7 @@ public class Model implements HasPublished {
     }
 
     private Set<Entity> rootEntities() {
-        final Set<Entity> rootEntities = new HashSet<>();
+        final Set<Entity> rootEntities = new Set();
         for (Entity entity : entities.values()) {
             if (entity.getInRelations().isEmpty()) {
                 rootEntities.add(entity);

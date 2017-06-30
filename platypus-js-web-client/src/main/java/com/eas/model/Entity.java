@@ -46,8 +46,8 @@ public class Entity implements HasPublished {
     protected String queryName;
     protected Model model;
     protected Query query;
-    protected Set<Relation> inRelations = new HashSet<>();
-    protected Set<Relation> outRelations = new HashSet<>();
+    protected Set<Relation> inRelations = new Set();
+    protected Set<Relation> outRelations = new Set();
 
     public Entity() {
         super();
@@ -66,7 +66,7 @@ public class Entity implements HasPublished {
     public void putOrmScalarDefinition(String aName, Fields.OrmDef aDefinition) {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
             Map<String, Fields.OrmDef> defs = getFields().getOrmScalarDefinitions();
-            if (!defs.containsKey(aName)) {
+            if (!defs.has(aName)) {
                 getFields().putOrmScalarDefinition(aName, aDefinition);
             } else {
                 Logger.fine(
@@ -83,7 +83,7 @@ public class Entity implements HasPublished {
     public void putOrmCollectionDefinition(String aName, Fields.OrmDef aDefinition) {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
             Map<String, Fields.OrmDef> defs = getFields().getOrmCollectionsDefinitions();
-            if (!defs.containsKey(aName)) {
+            if (!defs.has(aName)) {
                 getFields().putOrmCollectionDefinition(aName, aDefinition);
             } else {
                 Logger.fine(
@@ -636,7 +636,7 @@ public class Entity implements HasPublished {
     protected void internalExecuteChildren(boolean refresh) throws Exception {
         Set<Relation> rels = getOutRelations();
         if (rels != null) {
-            Set<Entity> toExecute = new HashSet<>();
+            Set<Entity> toExecute = new Set();
             for (Relation outRel : rels) {
                 if (outRel != null) {
                     Entity rEntity = outRel.getRightEntity();
@@ -653,7 +653,7 @@ public class Entity implements HasPublished {
         Set<Relation> rels = getOutRelations();
         if (rels != null) {
             Field onlyField = getFields().get(aOnlyFieldIndex);
-            Set<Entity> toExecute = new HashSet<>();
+            Set<Entity> toExecute = new Set();
             for (Relation outRel : rels) {
                 if (outRel != null) {
                     Entity rEntity = outRel.getRightEntity();

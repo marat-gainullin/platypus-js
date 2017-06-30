@@ -85,7 +85,7 @@ public class TextField extends ValueWidget implements HasText, HasEmptyText,
         element.setTabIndex(index);
     }
     
-    private Set<FocusHandler> focusHandlers = new HashSet<>();
+    private Set<FocusHandler> focusHandlers = new Set();
 
     @Override
     public HandlerRegistration addFocusHandler(FocusHandler handler) {
@@ -106,7 +106,7 @@ public class TextField extends ValueWidget implements HasText, HasEmptyText,
         }
     }
 
-    private Set<BlurHandler> blurHandlers = new HashSet<>();
+    private Set<BlurHandler> blurHandlers = new Set();
 
     @Override
     public HandlerRegistration addBlurHandler(BlurHandler handler) {
@@ -127,7 +127,7 @@ public class TextField extends ValueWidget implements HasText, HasEmptyText,
         }
     }
 
-    private Set<KeyUpHandler> keyUpHandlers = new HashSet<>();
+    private Set<KeyUpHandler> keyUpHandlers = new Set();
 
     @Override
     public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
@@ -148,7 +148,7 @@ public class TextField extends ValueWidget implements HasText, HasEmptyText,
         }
     }
 
-    private Set<KeyDownHandler> keyDownHandlers = new HashSet<>();
+    private Set<KeyDownHandler> keyDownHandlers = new Set();
 
     @Override
     public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
@@ -169,7 +169,7 @@ public class TextField extends ValueWidget implements HasText, HasEmptyText,
         }
     }
 
-    private Set<KeyPressHandler> keyPressHandlers = new HashSet<>();
+    private Set<KeyPressHandler> keyPressHandlers = new Set();
 
     @Override
     public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {

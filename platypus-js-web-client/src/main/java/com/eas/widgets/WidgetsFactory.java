@@ -50,7 +50,7 @@ public class WidgetsFactory implements UiWidgetReader {
                     final String dropDownMenuName = Utils.getAttribute(anElement, "ddm", "dropDownMenu", null);
                     aFactory.addResolver(new Runnable() {
                         public void run() {
-                            if (aFactory.getWidgets().containsKey(dropDownMenuName)) {
+                            if (aFactory.getWidgets().has(dropDownMenuName)) {
                                 Widget compMenu = aFactory.getWidgets().get(dropDownMenuName);
                                 if (compMenu instanceof PopupMenu) {
                                     dropDownButton.setMenu((PopupMenu) compMenu);

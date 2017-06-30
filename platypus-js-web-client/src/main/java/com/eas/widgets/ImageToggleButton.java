@@ -63,7 +63,7 @@ public class ImageToggleButton extends ImageButton implements HasValue, HasValue
         fireValueChange(oldValue);
     }
 
-    protected final Set<ValueChangeHandler> valueChangeHandlers = new HashSet<>();
+    protected final Set<ValueChangeHandler> valueChangeHandlers = new Set();
 
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler handler) {
