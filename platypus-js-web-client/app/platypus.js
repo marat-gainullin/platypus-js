@@ -2,32 +2,49 @@
     var INJECTED_SCRIPT_CLASS_NAME = "platypus-injected-script";
     var SERVER_MODULE_TOUCHED_NAME = "Proxy-";
     var SERVER_ENTITY_TOUCHED_NAME = "Entity-";
+    var MODULES_INDEX = "modules-index"; // Map module name -> script file with this module
+    var TYPE_JAVASCRIPT = "text/javascript";
+    // TODO: Check whether these constants are needed in other parts of code
     var MODEL_TAG_NAME = "datamodel";
     var ENTITY_TAG_NAME = "entity";
     var QUERY_ID_ATTR_NAME = "queryId";
-    var TYPE_JAVASCRIPT = "text/javascript";
 
-    var APPLICATION_URI = "/application";
-    var sourcePath = "/";
-
-    function getSourcePath() {
-        return sourcePath;
-    }
-
-    function setSourcePath(aValue) {
-        if (aValue) {
-            sourcePath = aValue;
-            if (!sourcePath.endsWith("/")) {
-                sourcePath = sourcePath + "/";
+    var config = {prefetch: false};
+    (function(){
+        var sourcePath = "/";
+        var apiUri = "/application";
+        Object.defineProperty(config, 'sourcePath', {
+            get: function(){
+                return sourcePath;
+            },
+            set: function(aValue){
+                if (aValue) {
+                    sourcePath = aValue;
+                    if (!sourcePath.endsWith("/")) {
+                        sourcePath = sourcePath + "/";
+                    }
+                    if (!sourcePath.startsWith("/")) {
+                        sourcePath = "/" + sourcePath;
+                    }
+                } else {
+                    sourcePath = "/";
+                }
             }
-            if (!sourcePath.startsWith("/")) {
-                sourcePath = "/" + sourcePath;
+        });
+        Object.defineProperty(config, 'apiUri', {
+            get: function(){
+                return apiUri;
+            },
+            set: function(aValue){
+                if(!aValue.startsWith('/'))
+                    aValue = '/' + aValue;
+                if(aValue.endsWith('/'))
+                    aValue = aValue.substring(0, aValue.length - 1);
+                apiUri = aValue;
             }
-        } else {
-            sourcePath = "/";
-        }
-    }
-
+        });
+    }());
+    
     function hostPageBaseURL() {
         var s = document.location.href;
 
@@ -62,7 +79,7 @@
     }
 
     function relativeUri() {
-        var pageUrl = getHostPageBaseURL();
+        var pageUrl = hostPageBaseURL();
         pageUrl = pageUrl.substring(0, pageUrl.length() - 1);
         return pageUrl;
     }
@@ -74,7 +91,6 @@
     var pendingsOnModule = new Map();
     var pendingsOnScript = new Map();
     var defined = new Map();
-    var simpleModules = false;
 
     function later(action) {
         var timeout = setTimeout(function () {
@@ -101,6 +117,7 @@
         info(anItemName + " - Loaded");
     }
 
+    // TODO: Check whether this class is needed in other parts of code
     function LoadProcess(expected, onSuccess, onFailure) {
         var calls = 0;
         var loaded = new Set();
@@ -228,64 +245,67 @@
             notifyModuleFailed(aModuleName, [reason.status + ": " + reason.statusText]);
         });
     }
-    ;
 
+    function inject(jsUrl, onSuccess, onFailure) {
+        var scriptElement = document.createElement('script');
+        scriptElement.type = TYPE_JAVASCRIPT;
+        scriptElement.src = jsUrl;
+        scriptElement.className = INJECTED_SCRIPT_CLASS_NAME;
+        scriptElement.onloaded = function () {
+            try {
+                onSuccess();
+            } finally {
+                scriptElement.removeFromParent();
+            }
+        };
+        scriptElement.onerror = scriptElement.onabort = function (reason) {
+            try {
+                onFailure(reason);
+            } finally {
+                scriptElement.removeFromParent();
+            }
+        };
+        document.body.appendChild(scriptElement);
+    }
 
     function loadScriptFormServer(/*Set*/aPrefetchedResources, aJsResource, /*Set*/ aClientGlobalDependencies, /*Set*/ aQueriesDependencies,
             /*Set*/ aServerModulesDependencies, /*Set*/aCyclic) {
         var scriptProcess = new Process(aPrefetchedResources.size() === 0 ? 1 : 2, function () {
-            var jsURL = checkedCacheBust(relativeUri() + sourcePath + aJsResource);
-            var scriptElement = document.createElement('script');
-            scriptElement.type = TYPE_JAVASCRIPT;
-            scriptElement.src = jsURL;
-            scriptElement.className = INJECTED_SCRIPT_CLASS_NAME;
-            scriptElement.onloaded = function () {
-                try {
-                    var amdDefines = consumeAmdDefines();
-                    var amdModulesOfScript = new Set();
-                    amdDefines.forEach(function (amdDefine) {
-                        amdModulesOfScript.add(amdDefine.moduleName);
-                    });
-                    loadedScripts.set(aJsResource, amdModulesOfScript);
-                    notifyScriptLoaded(aJsResource);
-                    // Amd in action ...
-                    amdDefines.forEach(function (amdDefine) {
-                        var amdModuleName = amdDefine.moduleName;
-                        var amdDependencies = amdDefine.dependencies;
-                        var amdModuleDefiner = amdDefine.moduleDefiner;
-                        try {
-                            load(amdDependencies, {
-                                'onSuccess': function () {
-                                    amdModuleDefiner(amdModuleName);
-                                    // If module is still not defined because of buggy definer in script,
-                                    // we have to put it definition as null by hand.
-                                    if (!defined.has(amdModuleName)) {
-                                        defined.set(amdModuleName, null);
-                                    }
-                                    fireLoaded(amdModuleName);
-                                    notifyModuleLoaded(amdModuleName);
-                                },
-                                'onFailure': function (aReason) {
-                                    notifyModuleFailed(amdModuleName, [aReason]);
-                                }
-                            }, new Set());
-                        } catch (ex) {
-                            severe(ex);
-                        }
-                    });
-                } finally {
-                    scriptElement.removeFromParent();
-                }
-            };
-            scriptElement.onerror = scriptElement.onabort = function (reason) {
-                try {
-                    notifyScriptFailed(aJsResource, [reason]);
-                    severe("Script [" + aJsResource + "] is not loaded. Cause is: " + reason);
-                } finally {
-                    scriptElement.removeFromParent();
-                }
-            };
-            document.body.appendChild(scriptElement);
+            var jsUrl = checkedCacheBust(relativeUri() + config.sourcePath + aJsResource);
+            inject(jsUrl, function () {
+                var amdDefines = consumeAmdDefines();
+                var amdModulesOfScript = new Set();
+                amdDefines.forEach(function (amdDefine) {
+                    amdModulesOfScript.add(amdDefine.moduleName);
+                });
+                loadedScripts.set(aJsResource, amdModulesOfScript);
+                notifyScriptLoaded(aJsResource);
+                // Amd in action ...
+                amdDefines.forEach(function (amdDefine) {
+                    var amdModuleName = amdDefine.moduleName;
+                    var amdDependencies = amdDefine.dependencies;
+                    var amdModuleDefiner = amdDefine.moduleDefiner;
+                    try {
+                        load(amdDependencies, new Set(), function () {
+                            amdModuleDefiner(amdModuleName);
+                            // If module is still not defined because of buggy definer in script,
+                            // we have to put it definition as null by hand.
+                            if (!defined.has(amdModuleName)) {
+                                defined.set(amdModuleName, null);
+                            }
+                            fireLoaded(amdModuleName);
+                            notifyModuleLoaded(amdModuleName);
+                        }, function (aReason) {
+                            notifyModuleFailed(amdModuleName, [aReason]);
+                        });
+                    } catch (ex) {
+                        severe(ex);
+                    }
+                });
+            }, function (reason) {
+                notifyScriptFailed(aJsResource, [reason]);
+                severe("Script [" + aJsResource + "] is not loaded. Cause is: " + reason);
+            });
         }, function (aReasons) {
             notifyScriptFailed(aJsResource, aReasons);
         });
@@ -307,7 +327,11 @@
         }, function (aReasons) {
             scriptProcess.onFailure(aReasons);
         });
-        load(aClientGlobalDependencies, dependenciesProcess, aCyclic);
+        load(aClientGlobalDependencies, aCyclic, function () {
+            dependenciesProcess.onSuccess();
+        }, function () {
+            dependenciesProcess.onFailure();
+        });
         loadQueries(aQueriesDependencies, dependenciesProcess);
         loadServerModules(aServerModulesDependencies, dependenciesProcess);
     }
@@ -386,13 +410,13 @@
         return window[aModuleName];
     }
 
-    function load(aModulesNames, parentProcess, aCyclic) {
+    function load(aModulesNames, aCyclic, onSuccess, onFailure) {
         var modulesNames = aModulesNames ? new Set(aModulesNames) : null;
         if (modulesNames && modulesNames.size > 0) {
             var process = new Process(modulesNames.length, function () {
-                parentProcess.onSuccess();
+                onSuccess();
             }, function (aReasons) {
-                parentProcess.onFailure();
+                onFailure();
             });
             modulesNames.forEach(function (moduleName) {
                 if (defined.has(moduleName)) {
@@ -416,11 +440,10 @@
             });
         } else {
             later(function () {
-                parentProcess.onSuccess();
+                onSuccess();
             });
         }
     }
-
 
     function loadServerModules(aServerModulesNames, parentProcess) {
         if (aServerModulesNames.length > 0) {
@@ -474,11 +497,11 @@
 
     function jsLoadQueries(aQueriesNames, onSuccess, onFailure) {
         loadQueries(aQueriesNames, {
-            'onSuccess': function () {
+            onSuccess: function () {
                 if (onSuccess)
                     onSuccess();
             },
-            'onFailure': function (reasons) {
+            onFailure: function (reasons) {
                 if (onFailure)
                     onFailure(reasons);
             }
@@ -547,7 +570,7 @@
                     // no op here because of no request
                 }
             };
-        } else if (simpleModules) {
+        } else if (!config.prefetch) {
             if (onSuccess) {
                 later(function () {
                     var fakeRelativeFileName = aModuleName;
@@ -693,7 +716,7 @@
     }
 
     function startApiRequest(aUrlPrefix, aUrlQuery, aBody, aMethod, aContentType, onSuccess, onFailure) {
-        var url = remoteApiUri() + APPLICATION_URI + (aUrlPrefix ? aUrlPrefix : "") + (aUrlQuery ? "?" + aUrlQuery : "");
+        var url = remoteApiUri() + config.apiUri + (aUrlPrefix ? aUrlPrefix : "") + (aUrlQuery ? "?" + aUrlQuery : "");
         var req = new XMLHttpRequest();
         req.open(aMethod, url);
         if (aContentType) {
@@ -770,7 +793,7 @@
                 }
             };
         } else {
-            var documentUrl = checkedCacheBust(relativeUri() + getSourcePath() + aResourceName);
+            var documentUrl = checkedCacheBust(relativeUri() + config.sourcePath + aResourceName);
             return startUrlRequest(documentUrl, function (aResponse) {
                 var doc = aResponse.responseXML;
                 documents.set(aResourceName, doc);
@@ -820,4 +843,232 @@
             });
         }
     }
+
+    // Polyfill of Function#name on browsers that do not support it (IE):
+    if (!(function f() {}).name) {
+        Object.defineProperty(window.Function.prototype, 'name', {
+            get: function () {
+                var name = this.toString().match(/function\s*(\S*)\s*\(/)[1];
+                // For better performance only parse once, and then cache the
+                // result through a new accessor for repeated access.
+                Object.defineProperty(this, 'name', {value: name});
+                return name;
+            }
+        });
+    }
+
+    function toFilyAppModuleId(aRelative, aStartPoint) {
+        var moduleIdNormalizer = document.createElement('div');
+        moduleIdNormalizer.setInnerHTML("<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>");
+        // TODO: check if decodeURIComponent is applicable instead of decodeURI.
+        var mormalizedAbsoluteModuleUrl = decodeURI(moduleIdNormalizer.firstChildElement.href);
+        var hostContextPrefix = relativeUri() + config.sourcePath;
+        var hostContextNormalizer = document.createElement('div');
+        hostContextNormalizer.setInnerHTML("<a href=\"" + hostContextPrefix + "\">o</a>");
+        var mormalizedHostContextPrefix = decodeURI(hostContextNormalizer.firstChildElement.href);
+        return mormalizedAbsoluteModuleUrl.substring(mormalizedHostContextPrefix.length());
+    }
+
+    function lookupCallerJsDir() {
+        var calledFromFile = lookupCallerJsFile();
+        if (calledFromFile) {
+            var lastSlashIndex = calledFromFile.lastIndexOf('/');
+            return calledFromFile.substring(0, lastSlashIndex);
+        } else {
+            return null;
+        }
+    }
+
+    function extractFileName(aFrame) {
+        var fileName = aFrame.fileName;
+        if (fileName) {
+            var atIndex = fileName.indexOf("@");
+            if (atIndex !== -1) {
+                fileName = fileName.substring(0, atIndex);
+            }
+            return fileName;
+        } else {
+            return null;
+        }
+    }
+
+    function lookupCallerJsFile() {
+        var calledFromFile = null;
+        try {
+            throw new Error("Current file test");
+        } catch (ex) {
+            var stack = ex.stack;
+            var firstFileName = extractFileName(stack[0]);
+            if (firstFileName) {
+                for (var frameIdx = 1; frameIdx < stack.length; frameIdx++) {
+                    var fileName = extractFileName(stack[frameIdx]);
+                    if (fileName && fileName !== firstFileName) {
+                        calledFromFile = fileName;
+                        var lastQuestionIndex = calledFromFile.lastIndexOf('?');// case of cache busting
+                        return lastQuestionIndex !== -1 ? calledFromFile.substring(0, lastQuestionIndex) : calledFromFile;
+                    }
+                }
+            }
+        }
+        return calledFromFile;
+    }
+
+    function lookupResolved(deps) {
+        var resolved = [];
+        for (var d = 0; d < deps.length; d++) {
+            var mName = deps[d];
+            var m = defined.get(mName);
+            resolved.push(m ? m : lookupInGlobal(mName));
+        }
+        return resolved;
+    }
+
+    function require(aDeps, aOnSuccess, aOnFailure) {
+        if (!Array.isArray(aDeps))
+            aDeps = [aDeps];
+
+        var calledFromDir = lookupCallerJsDir();
+        var deps = [];
+        for (var i = 0; i < aDeps.length; i++) {
+            var dep = aDeps[i];
+            if (calledFromDir && dep.startsWith("./") || dep.startsWith("../")) {
+                dep = toFilyAppModuleId(dep, calledFromDir);
+            }
+            if (dep.toLowerCase().endsWith(".js")) {
+                dep = dep.substring(0, dep.length - 3);
+            }
+            deps.push(dep);
+        }
+        load(deps, new Set(), function () {
+            if (aOnSuccess) {
+                aOnSuccess.apply(null, lookupResolved(deps));
+            } else {
+                warning("platypujs.require succeded, but callback is missing. Required modules are: " + aDeps);
+            }
+        }, function (reason) {
+            if (aOnFailure) {
+                try {
+                    aOnFailure(reason);
+                } catch (ex) {
+                    severe(ex);
+                }
+            } else {
+                warning("platypujs.require failed and callback is missing. Required modules are: " + aDeps);
+            }
+        });
+        var resolved = lookupResolved(deps);
+        return resolved.length === 1 ? resolved[0] : resolved;
+    }
+
+    function define() {
+        if (arguments.length === 1 ||
+                arguments.length === 2 || arguments.length === 3) {
+            var aModuleName = arguments.length === 3 ? arguments[0] : null;
+            aModuleName = aModuleName ? aModuleName + '' : null;
+            var aDeps = arguments.length === 3 ? arguments[1] : arguments.length === 2 ? arguments[0] : [];
+            if (!Array.isArray(aDeps))
+                aDeps = [aDeps];
+            var _aModuleDefiner = arguments.length === 3 ? arguments[2] : arguments.length === 2 ? arguments[1] : arguments[0];
+            var aModuleDefiner = function () {
+                return typeof _aModuleDefiner === 'function' ? _aModuleDefiner.apply(null, arguments) : _aModuleDefiner;
+            };
+
+            var calledFromFile = lookupCallerJsFile();
+            var lastSlashIndex = calledFromFile.lastIndexOf('/');
+            var calledFromDir = calledFromFile.substring(0, lastSlashIndex);
+            var calledFromFileShort = calledFromFile.substring(lastSlashIndex + 1, calledFromFile.length());
+            var deps = [];
+            for (var i = 0; i < aDeps.length; i++) {
+                var dep = aDeps.getString(i);
+                if (calledFromDir && dep.startsWith("./") || dep.startsWith("../")) {
+                    dep = toFilyAppModuleId(dep, calledFromDir);
+                }
+                if (dep.endsWith(".js")) {
+                    dep = dep.substring(0, dep.length() - 3);
+                }
+                deps.add(dep);
+            }
+            if (!aModuleName) {
+                aModuleName = toFilyAppModuleId("./" + calledFromFileShort, calledFromDir);
+                if (aModuleName.endsWith(".js")) {
+                    aModuleName = aModuleName.substring(0, aModuleName.length() - 3);
+                }
+            }
+            addAmdDefine(aModuleName, deps, function (aModuleName) {
+                var resolved = [];
+                for (var d = 0; d < deps.length; d++) {
+                    var mName = deps[d];
+                    var m = defined.get(mName);
+                    resolved.push(m ? m : lookupInGlobal(mName));
+                }
+                resolved.push(aModuleName);
+                var module = aModuleDefiner.apply(null, resolved);
+                defined.set(aModuleName, module);
+            });
+
+        } else {
+            throw 'platypusjs.define() arguments mismatch';
+        }
+    }
+
+    function init() {
+        define.amd = {}; // AMD compliance
+        var platypusjs = {require, define, config}; // es6 object literal
+        Object.seal(platypusjs);
+        window.platypusjs = platypusjs;
+        window.require = require;
+        window.define = define;
+
+        var scriptTags = document.getElementsByTagName("script");
+        var index = null;
+        var entryPoint = null;
+        for (var s = 0; s < scriptTags.getLength(); s++) {
+            var script = scriptTags.getItem(s);
+            if (script.src.endsWith("platypus.js")) {
+                if (script.hasAttribute(MODULES_INDEX)) {
+                    index = script.getAttribute(MODULES_INDEX);
+                    if (!index.toLowerCase().endsWith(".js")) {
+                        index += ".js";
+                    }
+                }
+                if (script.hasAttribute("entry-point")) {
+                    entryPoint = script.getAttribute("entry-point");
+                    if (!entryPoint.toLowerCase().endsWith(".js")) {
+                        entryPoint += ".js";
+                    }
+                }
+                if (script.hasAttribute("source-path")) {
+                    config.sourcePath = script.getAttribute("source-path").toLowerCase();
+                }
+                if (script.hasAttribute("api-uri")) {
+                    config.apiUri = script.getAttribute("api-uri").toLowerCase();
+                }
+                config.prefetch = script.hasAttribute("prefetch-model-layout");
+                break;
+            }
+        }
+        if (entryPoint) {
+            if (index) {
+                inject(relativeUri() + config.sourcePath + index, function () {
+                    info('Platypus.js modules index initialized');                    
+                    inject(relativeUri() + config.sourcePath + entryPoint, function () {
+                        info('Platypus.js modules initialized');
+                    }, function (reason) {
+                        severe("Error while initializing modules loader.\n" + reason);
+                    });
+                }, function (reason) {
+                    severe("Error while applying modules index.\n" + reason);
+                });
+            } else {
+                inject(relativeUri() + config.sourcePath + entryPoint, function () {
+                    info('Platypus.js modules initialized');
+                }, function (reason) {
+                    severe("Error while initializing modules loader.\n" + reason);
+                });
+            }
+        } else {
+            severe("\"entry-point\" attribute missing while initializing modules loader");
+        }
+    }
+    init();
 }());

@@ -7,45 +7,6 @@ public class JsApi {
     public static JavaScriptObject sourcedEventConstructor;
 
     public native static void init()/*-{
-        // Polyfill of Function#name on browsers that do not support it (IE):
-        if (!(function f() {}).name) {
-            Object.defineProperty($wnd.Function.prototype, 'name', {
-                get: function() {
-                    var name = this.toString().match(/function\s*(\S*)\s*\(/)[1];
-                    // For better performance only parse once, and then cache the
-                    // result through a new accessor for repeated access.
-                    Object.defineProperty(this, 'name', { value: name });
-                    return name;
-                }
-            });
-        }
-        $wnd.platypusjs = {};
-        $wnd.platypusjs.require = function (aDeps, aOnSuccess, aOnFailure) {
-            if (!Array.isArray(aDeps))
-                aDeps = [aDeps];
-                        var resolved = @com.eas.application.Application::require(Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;)(aDeps, aOnSuccess, aOnFailure);
-                        return resolved.length === 1 ? resolved[0] : resolved; 
-        };
-        $wnd.platypusjs.define = function () {
-            if (arguments.length === 1 ||
-                    arguments.length === 2 || arguments.length === 3) {
-                var aModuleName = arguments.length === 3 ? arguments[0] : null;
-                var aDeps = arguments.length === 3 ? arguments[1] : arguments.length === 2 ? arguments[0] : [];
-                var aModuleDefiner = arguments.length === 3 ? arguments[2] : arguments.length === 2 ? arguments[1] : arguments[0];
-                if (!Array.isArray(aDeps))
-                    aDeps = [aDeps];
-                @com.eas.application.Application::define(Ljava/lang/String;Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;)(aModuleName ? aModuleName + '' : null, aDeps, function(){
-                    return typeof aModuleDefiner === 'function' ? aModuleDefiner.apply(null, arguments) : aModuleDefiner;
-                });
-            } else {
-                throw 'Module definition arguments mismatch';
-            }
-        };
-        $wnd.Object.seal($wnd.platypusjs);
-        $wnd.require = $wnd.platypusjs.require;
-        $wnd.define = $wnd.platypusjs.define;
-        $wnd.define.amd = {};
-
         function predefine(aDeps, aName, aDefiner){
                 @com.eas.core.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);
         }
@@ -381,15 +342,15 @@ public class JsApi {
         });
 
         predefine([], 'id', function(){
-        var module = {};
+            var module = {};
 
-                function generate(){
-                        return @com.eas.client.IdGenerator::genId()();
-                }
+            function generate(){
+                    return @com.eas.client.IdGenerator::genId()();
+            }
 
-                function generateLong(){
-                        return @com.eas.client.IdGenerator::genLongId()();
-                }
+            function generateLong(){
+                    return @com.eas.client.IdGenerator::genLongId()();
+            }
 
             Object.defineProperty(module, 'generate', {
                 enumerable: true,
@@ -400,33 +361,33 @@ public class JsApi {
                 enumerable: true,
                 value: generateLong
             });
-        return module;
+            return module;
         });
 
         predefine(['boxing'], 'resource', function(B){
-                var module = {};
-                Object.defineProperty(module, 'upload', {
-                    enumerable: true,
-                        value : function(aFile, aName, aCompleteCallback, aProgressCallback, aAbortCallback) {
-                                return @com.eas.client.AppClient::jsUpload(Lcom/eas/client/published/PublishedFile;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aFile, aName, aCompleteCallback, aProgressCallback, aAbortCallback);
-                        }
-                });
-                Object.defineProperty(module, 'load', {
-                    enumerable: true,
-                        value : function(aResName, onSuccess, onFailure){
-                                var loaded = B.boxAsJs(@com.eas.client.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, onSuccess, onFailure));
-                                if(loaded)
-                                        loaded.length = loaded.byteLength; 
-                                return loaded;
-                        }
-                });
-                Object.defineProperty(module, 'loadText', {
-                    enumerable: true,
-                        value : function(aResName, onSuccess, onFailure){
-                                return B.boxAsJs(@com.eas.client.AppClient::jsLoadText(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, onSuccess, onFailure));
-                        }
-                });
-                return module;
+            var module = {};
+            Object.defineProperty(module, 'upload', {
+                enumerable: true,
+                    value : function(aFile, aName, aCompleteCallback, aProgressCallback, aAbortCallback) {
+                            return @com.eas.client.AppClient::jsUpload(Lcom/eas/client/published/PublishedFile;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aFile, aName, aCompleteCallback, aProgressCallback, aAbortCallback);
+                    }
+            });
+            Object.defineProperty(module, 'load', {
+                enumerable: true,
+                    value : function(aResName, onSuccess, onFailure){
+                            var loaded = B.boxAsJs(@com.eas.client.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, onSuccess, onFailure));
+                            if(loaded)
+                                    loaded.length = loaded.byteLength; 
+                            return loaded;
+                    }
+            });
+            Object.defineProperty(module, 'loadText', {
+                enumerable: true,
+                    value : function(aResName, onSuccess, onFailure){
+                            return B.boxAsJs(@com.eas.client.AppClient::jsLoadText(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, onSuccess, onFailure));
+                    }
+            });
+            return module;
         });		
 
         predefine([], 'security', function(){
