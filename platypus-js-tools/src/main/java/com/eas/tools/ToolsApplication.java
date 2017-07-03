@@ -495,8 +495,8 @@ public class ToolsApplication {
                             return false;
                         });
                         walker.walk();
-                        Set<String> queryDependencies = new HashSet<>(walker.getQueryDependencies());
                         List<String> resources = new ArrayList<>();
+                        Set<String> queryDependencies = new HashSet<>(walker.getQueryDependencies());
                         File modelFile = FileUtils.findBrother(file, PlatypusFiles.MODEL_EXTENSION);
                         if (modelFile != null && modelFile.exists()) {
                             String relativeModelResourceName = appFolder.relativize(Paths.get(modelFile.toURI())).toString().replace(File.separator, "/");
@@ -543,7 +543,7 @@ public class ToolsApplication {
         });
         StringBuilder jsonModules = JsonUtils.o(modules.toArray(new StringBuilder[]{}));
         StringBuilder js = new StringBuilder();
-        js.append("define[\"modules-index\"] = ");
+        js.append("define.amd[\"modules-index\"] = ");
         js.append(jsonModules);
         js.append(";");
         if (!aIndexedModules.exists()) {

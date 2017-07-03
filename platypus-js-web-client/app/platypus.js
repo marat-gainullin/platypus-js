@@ -67,20 +67,13 @@
         return s.length > 0 ? s + "/" : "";
     }
 
-    function remoteApiUri() {
-        var metas = document.head.getElementsByTagName("meta");
-        for (var i = 0; i < metas.getLength(); i++) {
-            var meta = metas.getItem(i);
-            if ("platypus-server".equalsIgnoreCase(meta.getAttribute("name"))) {
-                return meta.getAttribute("content");
-            }
-        }
-        return relativeUri();
+    function remoteApi() {
+        return config.remoteApi ? config.remoteApi : relativeUri();
     }
 
     function relativeUri() {
         var pageUrl = hostPageBaseURL();
-        pageUrl = pageUrl.substring(0, pageUrl.length() - 1);
+        pageUrl = pageUrl.substring(0, pageUrl.length - 1);
         return pageUrl;
     }
 
@@ -101,12 +94,17 @@
 
     function severe(message) {
         if (console)
-            console.log("SEVERE - " + message);
+            console.log("SEVERE " + message);
     }
 
     function info(message) {
         if (console)
-            console.log("INFO - " + message);
+            console.log("INFO " + message);
+    }
+
+    function warning(message) {
+        if (console)
+            console.log("WARNING " + message);
     }
 
     function fireStarted(anItemName) {
@@ -147,7 +145,7 @@
 
         function complete() {
             if (++calls === expectedCalls) {
-                if (reasons.isEmpty()) {
+                if (reasons.length === 0) {
                     succeded(singleResult);
                 } else {
                     failed(reasons);
@@ -160,32 +158,32 @@
                 if (!singleResult) {
                     singleResult = result;
                 } else {
-                    throw new IllegalStateException("CumulativeCallbackAdapter supports only one result");
+                    throw new IllegalStateException("Process supports only one result");
                 }
             }
             complete();
         };
 
         this.onFailure = function (reason) {
-            reasons.add(reason);
+            reasons.push(reason);
             complete();
         };
     }
 
     function AmdDefine(moduleName, dependencies, moduleDefiner) {
-        Object.defineProperty('moduleName', {
+        Object.defineProperty(this, 'moduleName', {
             get: function () {
                 return moduleName;
             }
         });
 
-        Object.defineProperty('dependencies', {
+        Object.defineProperty(this, 'dependencies', {
             get: function () {
                 return dependencies;
             }
         });
 
-        Object.defineProperty('moduleDefiner', {
+        Object.defineProperty(this, 'moduleDefiner', {
             get: function () {
                 return moduleDefiner;
             }
@@ -193,7 +191,7 @@
     }
 
     function addAmdDefine(aModuleName, aDependencies, aModuleDefiner) {
-        amdDefines.add(new AmdDefine(aModuleName, aDependencies, aModuleDefiner));
+        amdDefines.push(new AmdDefine(aModuleName, aDependencies, aModuleDefiner));
     }
 
     function consumeAmdDefines() {
@@ -236,8 +234,8 @@
                 }, function (aReason) {
                     notifyModuleFailed(aModuleName, [aReason]);
                 });
-                if (!startedScripts.contains(jsResource)) {
-                    loadScriptFormServer(prefetchedResources, jsResource, aStructure.clientDependencies, aStructure.queriesDependencies, aStructure.serverDependencies, aCyclic);
+                if (!startedScripts.has(jsResource)) {
+                    loadScriptFormServer(prefetchedResources, jsResource, aStructure.clientDependencies ? aStructure.clientDependencies : [], aStructure.queriesDependencies ? aStructure.queriesDependencies : [], aStructure.serverDependencies ? aStructure.serverDependencies : [], aCyclic);
                     startedScripts.add(jsResource);
                 }
             }
@@ -251,26 +249,20 @@
         scriptElement.type = TYPE_JAVASCRIPT;
         scriptElement.src = jsUrl;
         scriptElement.className = INJECTED_SCRIPT_CLASS_NAME;
-        scriptElement.onloaded = function () {
-            try {
-                onSuccess();
-            } finally {
-                scriptElement.removeFromParent();
-            }
+        scriptElement.onload = function () {
+            scriptElement.parentElement.removeChild(scriptElement);
+            onSuccess();
         };
         scriptElement.onerror = scriptElement.onabort = function (reason) {
-            try {
-                onFailure(reason);
-            } finally {
-                scriptElement.removeFromParent();
-            }
+            scriptElement.parentElement.removeChild(scriptElement);
+            onFailure(reason);
         };
         document.body.appendChild(scriptElement);
     }
 
     function loadScriptFormServer(/*Set*/aPrefetchedResources, aJsResource, /*Set*/ aClientGlobalDependencies, /*Set*/ aQueriesDependencies,
             /*Set*/ aServerModulesDependencies, /*Set*/aCyclic) {
-        var scriptProcess = new Process(aPrefetchedResources.size() === 0 ? 1 : 2, function () {
+        var scriptProcess = new Process(aPrefetchedResources.size === 0 ? 1 : 2, function () {
             var jsUrl = checkedCacheBust(relativeUri() + config.sourcePath + aJsResource);
             inject(jsUrl, function () {
                 var amdDefines = consumeAmdDefines();
@@ -309,7 +301,7 @@
         }, function (aReasons) {
             notifyScriptFailed(aJsResource, aReasons);
         });
-        var prefetchProcess = new Process(aPrefetchedResources.size(), function () {
+        var prefetchProcess = new Process(aPrefetchedResources.size, function () {
             scriptProcess.onSuccess();
         }, function (aReasons) {
             scriptProcess.onFailure(aReasons);
@@ -342,10 +334,9 @@
         if (interestedPendings) {
             interestedPendings.forEach(function (interestedPending) {
                 later(function () {
-                    interestedPending.onFailure(aReasons);
+                    interestedPending(aReasons);
                 });
             });
-            interestedPendings.clear();
         }
     }
 
@@ -353,12 +344,7 @@
         var interestedPendings = pendingsOnScript.get(aScriptName);
         pendingsOnScript.delete(aScriptName);
         if (interestedPendings) {
-            interestedPendings.forEach(function (interestedPending) {
-                later(function () {
-                    interestedPending.onSuccess();
-                });
-            });
-            interestedPendings.clear();
+            interestedPendings.forEach(later);
         }
     }
 
@@ -366,7 +352,7 @@
         var pendingOnScript = pendingsOnScript.get(aScriptName);
         if (!pendingOnScript) {
             pendingOnScript = [];
-            pendingsOnScript.put(aScriptName, pendingOnScript);
+            pendingsOnScript.set(aScriptName, pendingOnScript);
         }
         pendingOnScript.push(aPending);
     }
@@ -380,7 +366,6 @@
                     interestedPending.onFailure(aReasons);
                 });
             });
-            interestedPendings.clear();
         }
     }
 
@@ -393,7 +378,6 @@
                     interestedPending.onSuccess();
                 });
             });
-            interestedPendings.clear();
         }
     }
 
@@ -413,7 +397,7 @@
     function load(aModulesNames, aCyclic, onSuccess, onFailure) {
         var modulesNames = aModulesNames ? new Set(aModulesNames) : null;
         if (modulesNames && modulesNames.size > 0) {
-            var process = new Process(modulesNames.length, function () {
+            var process = new Process(modulesNames.size, function () {
                 onSuccess();
             }, function (aReasons) {
                 onFailure();
@@ -534,31 +518,9 @@
         }
     }
 
-    // TODO: Check how localmodules index works
-    var modulesIndex = new Map();
-    function checkModulesLocalIndex() {
-        if (modulesIndex.size > 0) {
-            for (var [fileName, structure] of modulesIndex) {
-                var defaultModuleName = fileName;
-                if (defaultModuleName.endsWith('.js')) {
-                    defaultModuleName = defaultModuleName.substring(0, defaultModuleName.length - 3);
-                }
-                modulesStructures.set(defaultModuleName, structure);
-                if (structure.modules) {
-                    for (var i = 0; i < structure.modules.length; i++) {
-                        modulesStructures.set(structure.modules[i], structure);
-                    }
-                    delete structure.modules;
-                }
-            }
-            modulesIndex = new Map();
-        }
-    }
-
     var modulesStructures = new Map();
 
     function requestModuleStructure(aModuleName, onSuccess, onFailure) {
-        checkModulesLocalIndex();
         if (modulesStructures.has(aModuleName)) {
             if (onSuccess) {
                 later(function () {
@@ -716,7 +678,7 @@
     }
 
     function startApiRequest(aUrlPrefix, aUrlQuery, aBody, aMethod, aContentType, onSuccess, onFailure) {
-        var url = remoteApiUri() + config.apiUri + (aUrlPrefix ? aUrlPrefix : "") + (aUrlQuery ? "?" + aUrlQuery : "");
+        var url = remoteApi() + config.apiUri + (aUrlPrefix ? aUrlPrefix : "") + (aUrlQuery ? "?" + aUrlQuery : "");
         var req = new XMLHttpRequest();
         req.open(aMethod, url);
         if (aContentType) {
@@ -859,18 +821,18 @@
 
     function toFilyAppModuleId(aRelative, aStartPoint) {
         var moduleIdNormalizer = document.createElement('div');
-        moduleIdNormalizer.setInnerHTML("<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>");
+        moduleIdNormalizer.innerHTML = "<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>";
         // TODO: check if decodeURIComponent is applicable instead of decodeURI.
-        var mormalizedAbsoluteModuleUrl = decodeURI(moduleIdNormalizer.firstChildElement.href);
+        var mormalizedAbsoluteModuleUrl = decodeURI(moduleIdNormalizer.firstChild.href);
         var hostContextPrefix = relativeUri() + config.sourcePath;
         var hostContextNormalizer = document.createElement('div');
-        hostContextNormalizer.setInnerHTML("<a href=\"" + hostContextPrefix + "\">o</a>");
-        var mormalizedHostContextPrefix = decodeURI(hostContextNormalizer.firstChildElement.href);
-        return mormalizedAbsoluteModuleUrl.substring(mormalizedHostContextPrefix.length());
+        hostContextNormalizer.innerHTML = "<a href=\"" + hostContextPrefix + "\">o</a>";
+        var mormalizedHostContextPrefix = decodeURI(hostContextNormalizer.firstChild.href);
+        return mormalizedAbsoluteModuleUrl.substring(mormalizedHostContextPrefix.length);
     }
 
-    function lookupCallerJsDir() {
-        var calledFromFile = lookupCallerJsFile();
+    function lookupCallerApplicationJsDir() {
+        var calledFromFile = lookupCallerApplicationJsFile();
         if (calledFromFile) {
             var lastSlashIndex = calledFromFile.lastIndexOf('/');
             return calledFromFile.substring(0, lastSlashIndex);
@@ -880,25 +842,39 @@
     }
 
     function extractFileName(aFrame) {
-        var fileName = aFrame.fileName;
-        if (fileName) {
-            var atIndex = fileName.indexOf("@");
-            if (atIndex !== -1) {
-                fileName = fileName.substring(0, atIndex);
+        if (aFrame) {
+             // This is for Chrome stack traces
+            var matched = aFrame.match(/(https?:\/\/.+):\d+:\d+/);
+            if(matched){
+                return matched[1];
+            } else {
+                matched = aFrame.match(/(file:\/\/.+):\d+:\d+/);
+                if(matched)
+                    return matched[1];
+                else
+                    return null;
             }
-            return fileName;
         } else {
             return null;
         }
     }
 
     function lookupCallerJsFile() {
-        var calledFromFile = null;
         try {
             throw new Error("Current file test");
         } catch (ex) {
-            var stack = ex.stack;
-            var firstFileName = extractFileName(stack[0]);
+            var stack = ex.stack.split('\n');
+            return extractFileName(stack[1]);// On Chrome the first line is a error text
+        }
+    }
+    
+    function lookupCallerApplicationJsFile() {
+        var calledFromFile = null;
+        try {
+            throw new Error("Current application file test");
+        } catch (ex) {
+            var stack = ex.stack.split('\n');
+            var firstFileName = extractFileName(stack[1]);// On Chrome the first line is a error text
             if (firstFileName) {
                 for (var frameIdx = 1; frameIdx < stack.length; frameIdx++) {
                     var fileName = extractFileName(stack[frameIdx]);
@@ -927,7 +903,7 @@
         if (!Array.isArray(aDeps))
             aDeps = [aDeps];
 
-        var calledFromDir = lookupCallerJsDir();
+        var calledFromDir = lookupCallerApplicationJsDir();
         var deps = [];
         for (var i = 0; i < aDeps.length; i++) {
             var dep = aDeps[i];
@@ -973,25 +949,25 @@
                 return typeof _aModuleDefiner === 'function' ? _aModuleDefiner.apply(null, arguments) : _aModuleDefiner;
             };
 
-            var calledFromFile = lookupCallerJsFile();
+            var calledFromFile = lookupCallerApplicationJsFile();
             var lastSlashIndex = calledFromFile.lastIndexOf('/');
             var calledFromDir = calledFromFile.substring(0, lastSlashIndex);
-            var calledFromFileShort = calledFromFile.substring(lastSlashIndex + 1, calledFromFile.length());
+            var calledFromFileShort = calledFromFile.substring(lastSlashIndex + 1, calledFromFile.length);
             var deps = [];
             for (var i = 0; i < aDeps.length; i++) {
-                var dep = aDeps.getString(i);
+                var dep = aDeps[i];
                 if (calledFromDir && dep.startsWith("./") || dep.startsWith("../")) {
                     dep = toFilyAppModuleId(dep, calledFromDir);
                 }
                 if (dep.endsWith(".js")) {
-                    dep = dep.substring(0, dep.length() - 3);
+                    dep = dep.substring(0, dep.length - 3);
                 }
-                deps.add(dep);
+                deps.push(dep);
             }
             if (!aModuleName) {
                 aModuleName = toFilyAppModuleId("./" + calledFromFileShort, calledFromDir);
                 if (aModuleName.endsWith(".js")) {
-                    aModuleName = aModuleName.substring(0, aModuleName.length() - 3);
+                    aModuleName = aModuleName.substring(0, aModuleName.length - 3);
                 }
             }
             addAmdDefine(aModuleName, deps, function (aModuleName) {
@@ -1019,12 +995,13 @@
         window.require = require;
         window.define = define;
 
+        var thisScriptFile = lookupCallerJsFile();
         var scriptTags = document.getElementsByTagName("script");
         var index = null;
         var entryPoint = null;
-        for (var s = 0; s < scriptTags.getLength(); s++) {
-            var script = scriptTags.getItem(s);
-            if (script.src.endsWith("platypus.js")) {
+        for (var s = 0; s < scriptTags.length; s++) {
+            var script = scriptTags[s];
+            if (script.src.endsWith(thisScriptFile)) {
                 if (script.hasAttribute(MODULES_INDEX)) {
                     index = script.getAttribute(MODULES_INDEX);
                     if (!index.toLowerCase().endsWith(".js")) {
@@ -1037,19 +1014,34 @@
                         entryPoint += ".js";
                     }
                 }
+                if (script.hasAttribute("remote-api")) {
+                    config.remoteApi = script.getAttribute("remote-api"); // urls have case sensitive parts
+                }
                 if (script.hasAttribute("source-path")) {
                     config.sourcePath = script.getAttribute("source-path").toLowerCase();
                 }
                 if (script.hasAttribute("api-uri")) {
                     config.apiUri = script.getAttribute("api-uri").toLowerCase();
                 }
-                config.prefetch = script.hasAttribute("prefetch-model-layout");
+                config.prefetch = script.hasAttribute("prefetch");
                 break;
             }
         }
         if (entryPoint) {
             if (index) {
                 inject(relativeUri() + config.sourcePath + index, function () {
+                    var modulesIndex = define.amd['modules-index'];
+                    for(var filyName in modulesIndex){
+                        var fileContent = modulesIndex[filyName];
+                        fileContent.modules.forEach(function(moduleName){
+                            modulesStructures.set(moduleName, {
+                                structure: fileContent.prefetched,
+                                clientDependencies: fileContent['global-deps'],
+                                serverDependencies: fileContent.rpc,
+                                queryDependencies: fileContent.entities
+                            });
+                        });
+                    }
                     info('Platypus.js modules index initialized');                    
                     inject(relativeUri() + config.sourcePath + entryPoint, function () {
                         info('Platypus.js modules initialized');
@@ -1067,7 +1059,7 @@
                 });
             }
         } else {
-            severe("\"entry-point\" attribute missing while initializing modules loader");
+            warning("\"entry-point\" attribute missing. Hope application is launched in some other way.");
         }
     }
     init();
