@@ -1,0 +1,5 @@
+function CycleA() {
+}
+(function(){
+   CycleB(); 
+}());

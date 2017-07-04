@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.tools;
 
 import com.eas.client.DatabasesClient;
@@ -515,6 +511,7 @@ public class ToolsApplication {
                             moduleNamesAndProps.add(new StringBuilder("entities"));
                             moduleNamesAndProps.add(JsonUtils.as(queryDependencies.toArray(new String[]{})));
                         }
+                        // TODO: Ensure, that default module name is added to "modules" array if there is a one argument define call.
                         if (!scriptDoc.getModules().isEmpty()) {
                             moduleNamesAndProps.add(new StringBuilder("modules"));
                             moduleNamesAndProps.add(JsonUtils.as(scriptDoc.getModules().keySet().toArray(new String[]{})));
@@ -528,7 +525,7 @@ public class ToolsApplication {
                             moduleNamesAndProps.add(JsonUtils.as(walker.getDependencies().toArray(new String[]{})));
                         }
                         if (!walker.getServerDependencies().isEmpty()) {
-                            moduleNamesAndProps.add(new StringBuilder("rpc"));
+                            moduleNamesAndProps.add(new StringBuilder("rpc-stubs"));
                             moduleNamesAndProps.add(JsonUtils.as(walker.getServerDependencies().toArray(new String[]{})));
                         }
                         StringBuilder module = JsonUtils.o(moduleNamesAndProps.toArray(new StringBuilder[]{}));

@@ -10,14 +10,14 @@
     var QUERY_ID_ATTR_NAME = "queryId";
 
     var config = {prefetch: false};
-    (function(){
+    (function () {
         var sourcePath = "/";
         var apiUri = "/application";
         Object.defineProperty(config, 'sourcePath', {
-            get: function(){
+            get: function () {
                 return sourcePath;
             },
-            set: function(aValue){
+            set: function (aValue) {
                 if (aValue) {
                     sourcePath = aValue;
                     if (!sourcePath.endsWith("/")) {
@@ -32,19 +32,19 @@
             }
         });
         Object.defineProperty(config, 'apiUri', {
-            get: function(){
+            get: function () {
                 return apiUri;
             },
-            set: function(aValue){
-                if(!aValue.startsWith('/'))
+            set: function (aValue) {
+                if (!aValue.startsWith('/'))
                     aValue = '/' + aValue;
-                if(aValue.endsWith('/'))
+                if (aValue.endsWith('/'))
                     aValue = aValue.substring(0, aValue.length - 1);
                 apiUri = aValue;
             }
         });
     }());
-    
+
     function hostPageBaseURL() {
         var s = document.location.href;
 
@@ -210,7 +210,7 @@
         }
     }
 
-    function loadModuleFromServer(aModuleName, /*Set*/aCyclic) {
+    function startLoadModule(aModuleName, /*Set*/aCyclic) {
         requestModuleStructure(aModuleName, function (aStructure) {
             if (aStructure.structure.size === 0)
                 throw "Module [" + aModuleName + "] structure should contain at least one element.";
@@ -235,7 +235,7 @@
                     notifyModuleFailed(aModuleName, [aReason]);
                 });
                 if (!startedScripts.has(jsResource)) {
-                    loadScriptFormServer(prefetchedResources, jsResource, aStructure.clientDependencies ? aStructure.clientDependencies : [], aStructure.queriesDependencies ? aStructure.queriesDependencies : [], aStructure.serverDependencies ? aStructure.serverDependencies : [], aCyclic);
+                    startLoadScript(prefetchedResources, jsResource, aStructure.clientDependencies ? aStructure.clientDependencies : [], aStructure.queriesDependencies ? aStructure.queriesDependencies : [], aStructure.serverDependencies ? aStructure.serverDependencies : [], aCyclic);
                     startedScripts.add(jsResource);
                 }
             }
@@ -253,14 +253,17 @@
             scriptElement.parentElement.removeChild(scriptElement);
             onSuccess();
         };
-        scriptElement.onerror = scriptElement.onabort = function (reason) {
+        scriptElement.onerror = scriptElement.onabort = function (/*ErrorEvent reason*/) {
             scriptElement.parentElement.removeChild(scriptElement);
-            onFailure(reason);
+            onFailure(jsUrl + ' has failed to load.'); // Error events are hard to dereference. Detail error code is quite useless.
         };
-        document.body.appendChild(scriptElement);
+        if (document.body)
+            document.body.appendChild(scriptElement);
+        else
+            document.head.appendChild(scriptElement);
     }
 
-    function loadScriptFormServer(/*Set*/aPrefetchedResources, aJsResource, /*Set*/ aClientGlobalDependencies, /*Set*/ aQueriesDependencies,
+    function startLoadScript(/*Set*/aPrefetchedResources, aJsResource, /*Set*/ aClientGlobalDependencies, /*Set*/ aQueriesDependencies,
             /*Set*/ aServerModulesDependencies, /*Set*/aCyclic) {
         var scriptProcess = new Process(aPrefetchedResources.size === 0 ? 1 : 2, function () {
             var jsUrl = checkedCacheBust(relativeUri() + config.sourcePath + aJsResource);
@@ -296,7 +299,7 @@
                 });
             }, function (reason) {
                 notifyScriptFailed(aJsResource, [reason]);
-                severe("Script [" + aJsResource + "] is not loaded. Cause is: " + reason);
+                severe("Script [" + aJsResource + "] is not loaded. Cause is: \n" + reason);
             });
         }, function (aReasons) {
             notifyScriptFailed(aJsResource, aReasons);
@@ -328,54 +331,34 @@
         loadServerModules(aServerModulesDependencies, dependenciesProcess);
     }
 
-    function notifyScriptFailed(aScriptName, aReasons) {
-        var interestedPendings = pendingsOnScript.get(aScriptName);
-        pendingsOnScript.delete(aScriptName);
-        if (interestedPendings) {
-            interestedPendings.forEach(function (interestedPending) {
-                later(function () {
-                    interestedPending(aReasons);
-                });
-            });
+    function pendOnScript(aScriptName, onSuccess, onFailure) {
+        var pendingOnScript = pendingsOnScript.get(aScriptName);
+        if (!pendingOnScript) {
+            pendingOnScript = [];
+            pendingsOnScript.set(aScriptName, pendingOnScript);
         }
+        pendingOnScript.push({onSuccess, onFailure});
     }
 
     function notifyScriptLoaded(aScriptName) {
         var interestedPendings = pendingsOnScript.get(aScriptName);
         pendingsOnScript.delete(aScriptName);
         if (interestedPendings) {
-            interestedPendings.forEach(later);
-        }
-    }
-
-    function pendOnScript(aScriptName, aPending) {
-        var pendingOnScript = pendingsOnScript.get(aScriptName);
-        if (!pendingOnScript) {
-            pendingOnScript = [];
-            pendingsOnScript.set(aScriptName, pendingOnScript);
-        }
-        pendingOnScript.push(aPending);
-    }
-
-    function notifyModuleFailed(aModuleName, /*Array*/aReasons) {
-        var interestedPendings = pendingsOnModule.get(aModuleName);
-        pendingsOnModule.delete(aModuleName);
-        if (interestedPendings) {
             interestedPendings.forEach(function (interestedPending) {
                 later(function () {
-                    interestedPending.onFailure(aReasons);
+                    interestedPending.onSuccess();
                 });
             });
         }
     }
 
-    function notifyModuleLoaded(aModuleName) {
-        var interestedPendings = pendingsOnModule.get(aModuleName);
-        pendingsOnModule.delete(aModuleName);
+    function notifyScriptFailed(aScriptName, aReasons) {
+        var interestedPendings = pendingsOnScript.get(aScriptName);
+        pendingsOnScript.delete(aScriptName);
         if (interestedPendings) {
             interestedPendings.forEach(function (interestedPending) {
                 later(function () {
-                    interestedPending.onSuccess();
+                    interestedPending.onFailure(aReasons);
                 });
             });
         }
@@ -390,6 +373,30 @@
         pendingOnModule.push(aPending);
     }
 
+    function notifyModuleLoaded(aModuleName) {
+        var interestedPendings = pendingsOnModule.get(aModuleName);
+        pendingsOnModule.delete(aModuleName);
+        if (interestedPendings) {
+            interestedPendings.forEach(function (interestedPending) {
+                later(function () {
+                    interestedPending.onSuccess();
+                });
+            });
+        }
+    }
+
+    function notifyModuleFailed(aModuleName, /*Array*/aReasons) {
+        var interestedPendings = pendingsOnModule.get(aModuleName);
+        pendingsOnModule.delete(aModuleName);
+        if (interestedPendings) {
+            interestedPendings.forEach(function (interestedPending) {
+                later(function () {
+                    interestedPending.onFailure(aReasons);
+                });
+            });
+        }
+    }
+
     function lookupInGlobal(aModuleName) {
         return window[aModuleName];
     }
@@ -400,7 +407,7 @@
             var process = new Process(modulesNames.size, function () {
                 onSuccess();
             }, function (aReasons) {
-                onFailure();
+                onFailure(aReasons);
             });
             modulesNames.forEach(function (moduleName) {
                 if (defined.has(moduleName)) {
@@ -408,7 +415,7 @@
                         process.onSuccess();
                     });
                 } else if (aCyclic.has(moduleName)) {
-                    severe("Cyclic dependency detected: " + moduleName);
+                    warning("Cyclic dependency detected: " + moduleName);
                     later(function () {
                         process.onSuccess();
                     });
@@ -416,7 +423,7 @@
                     aCyclic.add(moduleName);
                     pendOnModule(moduleName, process);
                     if (!startedModules.has(moduleName)) {
-                        loadModuleFromServer(moduleName, aCyclic);
+                        startLoadModule(moduleName, aCyclic);
                         startedModules.add(moduleName);
                         fireStarted(moduleName);
                     }
@@ -640,7 +647,7 @@
             }
             return {
                 cancel: function () {
-                    // no op here because of no request have been sent
+                    // no op here because no request has been sent
                 }
             };
         } else {
@@ -725,7 +732,7 @@
         var req = new XMLHttpRequest();
         req.open(Methods.GET, aUrl);
         if (aResponseType) {
-            req.setResponseType(aResponseType);
+            req.responseType = aResponseType;
         }
         req.setRequestHeader("Pragma", "no-cache");
         return startRequest(req, null, onSuccess, onFailure);
@@ -751,12 +758,12 @@
             }
             return {
                 cancel: function () {
-                    // no op here because of no request have been sent
+                    // no op here because no request has been sent
                 }
             };
         } else {
             var documentUrl = checkedCacheBust(relativeUri() + config.sourcePath + aResourceName);
-            return startUrlRequest(documentUrl, function (aResponse) {
+            return startUrlRequest(documentUrl, "document", function (aResponse) {
                 var doc = aResponse.responseXML;
                 documents.set(aResourceName, doc);
                 if (onSuccess) {
@@ -782,7 +789,7 @@
             }
             return {
                 cancel: function () {
-                    // no op here because of no request have been sent
+                    // no op here because no request has been sent
                 }
             };
         } else {
@@ -843,13 +850,13 @@
 
     function extractFileName(aFrame) {
         if (aFrame) {
-             // This is for Chrome stack traces
+            // This is for Chrome stack traces
             var matched = aFrame.match(/(https?:\/\/.+):\d+:\d+/);
-            if(matched){
+            if (matched) {
                 return matched[1];
             } else {
                 matched = aFrame.match(/(file:\/\/.+):\d+:\d+/);
-                if(matched)
+                if (matched)
                     return matched[1];
                 else
                     return null;
@@ -867,7 +874,7 @@
             return extractFileName(stack[1]);// On Chrome the first line is a error text
         }
     }
-    
+
     function lookupCallerApplicationJsFile() {
         var calledFromFile = null;
         try {
@@ -987,9 +994,13 @@
         }
     }
 
+    var NO_ENTRY_POINT_MSG = '"entry-point" attribute missing. Hope application is initialized in some other way.';
+    var APPLICATION_INITIALIZED_MSG = 'Platypus.js application initialized';
+    var APPLICATION_INITIALIZATION_ERROR_MSG = 'Error while initializing application.\n';
+
     function init() {
         define.amd = {}; // AMD compliance
-        var platypusjs = {require, define, config}; // es6 object literal
+        var platypusjs = {require, define, config, documents};
         Object.seal(platypusjs);
         window.platypusjs = platypusjs;
         window.require = require;
@@ -997,15 +1008,15 @@
 
         var thisScriptFile = lookupCallerJsFile();
         var scriptTags = document.getElementsByTagName("script");
-        var index = null;
+        var modulesIndexResource = null;
         var entryPoint = null;
         for (var s = 0; s < scriptTags.length; s++) {
             var script = scriptTags[s];
             if (script.src.endsWith(thisScriptFile)) {
                 if (script.hasAttribute(MODULES_INDEX)) {
-                    index = script.getAttribute(MODULES_INDEX);
-                    if (!index.toLowerCase().endsWith(".js")) {
-                        index += ".js";
+                    modulesIndexResource = script.getAttribute(MODULES_INDEX);
+                    if (!modulesIndexResource.toLowerCase().endsWith(".js")) {
+                        modulesIndexResource += ".js";
                     }
                 }
                 if (script.hasAttribute("entry-point")) {
@@ -1027,39 +1038,45 @@
                 break;
             }
         }
-        if (entryPoint) {
-            if (index) {
-                inject(relativeUri() + config.sourcePath + index, function () {
-                    var modulesIndex = define.amd['modules-index'];
-                    for(var filyName in modulesIndex){
-                        var fileContent = modulesIndex[filyName];
-                        fileContent.modules.forEach(function(moduleName){
-                            modulesStructures.set(moduleName, {
-                                structure: fileContent.prefetched,
-                                clientDependencies: fileContent['global-deps'],
-                                serverDependencies: fileContent.rpc,
-                                queryDependencies: fileContent.entities
-                            });
-                        });
+        if (modulesIndexResource) {
+            inject(relativeUri() + config.sourcePath + modulesIndexResource, function () {
+                var modulesIndex = define.amd['modules-index'];
+                for (var resourceName in modulesIndex) {
+                    var resourceIndex = modulesIndex[resourceName];
+                    var resourceStructure = {
+                        structure: resourceIndex.prefetched ? resourceIndex.prefetched.slice(0, resourceIndex.prefetched.length) : [],
+                        clientDependencies: resourceIndex['global-deps'],
+                        serverDependencies: resourceIndex['rpc-stubs'],
+                        queryDependencies: resourceIndex.entities
                     }
-                    info('Platypus.js modules index initialized');                    
-                    inject(relativeUri() + config.sourcePath + entryPoint, function () {
-                        info('Platypus.js modules initialized');
-                    }, function (reason) {
-                        severe("Error while initializing modules loader.\n" + reason);
+                    resourceStructure.structure.unshift(resourceName);
+                    resourceIndex.modules.forEach(function (moduleName) {
+                        modulesStructures.set(moduleName, resourceStructure);
                     });
+                }
+                info('Platypus.js modules index applied');
+                if (entryPoint) {
+                    inject(relativeUri() + config.sourcePath + entryPoint, function () {
+                        info(APPLICATION_INITIALIZED_MSG);
+                    }, function (reason) {
+                        severe(APPLICATION_INITIALIZATION_ERROR_MSG + reason);
+                    });
+                } else {
+                    warning(NO_ENTRY_POINT_MSG);
+                }
+            }, function (reason) {
+                severe("Error while applying modules index.\n" + reason);
+            });
+        } else {
+            if (entryPoint) {
+                inject(relativeUri() + config.sourcePath + entryPoint, function () {
+                    info(APPLICATION_INITIALIZED_MSG);
                 }, function (reason) {
-                    severe("Error while applying modules index.\n" + reason);
+                    severe(APPLICATION_INITIALIZATION_ERROR_MSG + reason);
                 });
             } else {
-                inject(relativeUri() + config.sourcePath + entryPoint, function () {
-                    info('Platypus.js modules initialized');
-                }, function (reason) {
-                    severe("Error while initializing modules loader.\n" + reason);
-                });
+                warning(NO_ENTRY_POINT_MSG);
             }
-        } else {
-            warning("\"entry-point\" attribute missing. Hope application is launched in some other way.");
         }
     }
     init();

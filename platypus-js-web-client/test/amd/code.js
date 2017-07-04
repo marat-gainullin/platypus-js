@@ -1,6 +1,6 @@
-/* global expect */
-describe('', function () {
-    it('Three simple modules', function (done) {
+/* global expect, GlobalA, CycleA */
+describe('AMD loader tests', function () {
+    it('Simple modules', function (done) {
         require(['a', 'b'], function(a, b){
             expect(a).toBeDefined();
             expect(a.moduleName).toEqual('a module');
@@ -34,7 +34,15 @@ describe('', function () {
             done();
         });
     });
-    /*
+    it('Absent modules', function (done) {
+        require(['absent-m1', 'absent-m2'], function(am1, am2){
+            fail("Absent module success callback shouldn't be called");
+            done();
+        }, function(reasons){
+            expect(reasons).toBeDefined();
+            done();
+        });
+    });
     it('Multiple modules in one file', function (done) {
         require(['short-name-m1', 'short-name-m2'], function(snm1, snm2){
             expect(snm1).toBeDefined();
@@ -42,29 +50,38 @@ describe('', function () {
             done();
         });
     });
+    it('AMD cyclic dependencies', function (done) {
+        pending('Till cycles in AMD dependencies analysis');
+        require(['cyclic-amd-dependencies/a'], function(a){
+            fail("Success callback of module from AMD dependencies cycle shouldn't be called");
+            done();
+        }, function(reasons){
+            expect(reasons).toBeDefined();
+            done();
+        });
+    });
     it('Prefetched resources of modules', function (done) {
-        require([''], function(snm1){
-            expect(snm2).toBeDefined();
+        pending('Till tests with http server');
+        require(['prefetched/a'], function(pa){
+            expect(pa).toBeDefined();
+            expect(pa.model).toBeTruthy();
+            expect(pa.layout).toBeTruthy();
             done();
         });
     });
-    it('Global modules client dependencies', function (done) {
-        require([''], function(snm1){
-            expect(snm2).toBeDefined();
+    it('Global dependencies', function (done) {
+        require(['GlobalA'], function(ga){
+            expect(ga).toBeDefined();
+            expect(GlobalA).toBeDefined();
+            expect(ga).toEqual(GlobalA);
             done();
         });
     });
-    it('Global modules server dependencies', function (done) {
-        require([''], function(snm1){
-            expect(snm2).toBeDefined();
+    it('Global cyclic dependencies', function (done) {
+        require(['CycleA'], function(ca){
+            expect(ca).toBeTruthy();
+            expect(CycleA).toBeTruthy();
             done();
         });
     });
-    it('Global modules entity dependencies', function (done) {
-        require([''], function(snm1){
-            expect(snm2).toBeDefined();
-            done();
-        });
-    });
-    */
 });
