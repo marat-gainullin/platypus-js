@@ -1,7 +1,7 @@
 define(function () {
     var releaseName = '-platypus-orm-release-func';
-    /**
-     * Substitutes properties of anObject with observable properties using Object.defineProperty().
+    /** 
+     * Substitutes properties of anObject with observable properties using Object.defineProperty()
      * @param anObject An object to be reorganized.
      * @param aOnChange a callback called on every change of properties.
      * @param aOnBeforeChange a callback called on before every change of properties.
@@ -168,15 +168,15 @@ define(function () {
     var module = {};
     Object.defineProperty(module, 'manageObject', {
         enumerable: true,
-        value : manageObject
+        value: manageObject
     });
     Object.defineProperty(module, 'unmanageObject', {
         enumerable: true,
-        value : unmanageObject
+        value: unmanageObject
     });
     Object.defineProperty(module, 'manageArray', {
         enumerable: true,
-        value : manageArray
+        value: manageArray
     });
     return module;
 });

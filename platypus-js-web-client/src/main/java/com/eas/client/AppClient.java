@@ -49,68 +49,6 @@ public class AppClient {
     public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
 
     private String principal;
-    /*
-    public static class ModuleStructure {
-
-        protected Set<String> structure = new Set();
-        protected Set<String> clientDependencies = new Set();
-        protected Set<String> serverDependencies = new Set();
-        protected Set<String> queriesDependencies = new Set();
-
-        public ModuleStructure(String aRelativeFileName) {
-            super();
-            structure.add(aRelativeFileName);
-        }
-
-        public ModuleStructure(Set<String> aStructure, Set<String> aClientDependencies, Set<String> aServerDependencies, Set<String> aQueriesDependencies) {
-            super();
-            structure.addAll(aStructure);
-            clientDependencies.addAll(aClientDependencies);
-            serverDependencies.addAll(aServerDependencies);
-            queriesDependencies.addAll(aQueriesDependencies);
-        }
-
-        public ModuleStructure(String aRelativeFileName, JsArrayString prefetchedResources, JsArrayString autoDependencies, JsArrayString rpcDependencies, JsArrayString entitiesDependencies) {
-            this(aRelativeFileName);
-            if (prefetchedResources != null) {
-                for (int i = 0; i < prefetchedResources.length(); i++) {
-                    structure.add(prefetchedResources.get(i));
-                }
-            }
-            if (autoDependencies != null) {
-                for (int i = 0; i < autoDependencies.length(); i++) {
-                    clientDependencies.add(autoDependencies.get(i));
-                }
-            }
-            if (rpcDependencies != null) {
-                for (int i = 0; i < rpcDependencies.length(); i++) {
-                    serverDependencies.add(rpcDependencies.get(i));
-                }
-            }
-            if (entitiesDependencies != null) {
-                for (int i = 0; i < entitiesDependencies.length(); i++) {
-                    queriesDependencies.add(entitiesDependencies.get(i));
-                }
-            }
-        }
-
-        public Set<String> getStructure() {
-            return Collections.unmodifiableSet(structure);
-        }
-
-        public Set<String> getClientDependencies() {
-            return Collections.unmodifiableSet(clientDependencies);
-        }
-
-        public Set<String> getQueriesDependencies() {
-            return Collections.unmodifiableSet(queriesDependencies);
-        }
-
-        public Set<String> getServerDependencies() {
-            return Collections.unmodifiableSet(serverDependencies);
-        }
-    }
-    */
     
     public SafeUri getResourceUri(final String aResourceName) {
         return new SafeUri() {

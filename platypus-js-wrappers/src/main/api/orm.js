@@ -746,19 +746,29 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                 };
                 return aTarget;
             }
+            function loadModel(aModuleName, aTarget) {
+                Logger.warning("'loadModel' is deprecated. Use 'createModel' instead.");
+                return createModel(aModuleName, aTarget);
+            }
             /**
              * Locates a prefetched resource by module name and reads a model from it.
              * @param {String} aModuleName Name of module that is the owner of prefetched resource (*.model file).
+             * If it is absent, than, new fresh model is created.
              * @param {Object} aTarget Object, the model properties and methods will be defined on. Default value is new Object. (Optional).
              * @returns {Model}
              */
-            function loadModel(aModuleName, aTarget) {
-                var file = FileUtils.findBrother(ScriptedResourceClass.getApp().getModules().nameToFile(aModuleName), "model");
-                if (file) {
-                    var modelDocument = ScriptedResourceClass.getApp().getModels().get(file.getAbsolutePath(), file);
-                    return loadModelDocument(modelDocument, aModuleName, aTarget);
+            function createModel(aModuleName, aTarget) {
+                if(arguments.length > 0){
+                    var file = FileUtils.findBrother(ScriptedResourceClass.getApp().getModules().nameToFile(aModuleName), "model");
+                    if (file) {
+                        var modelDocument = ScriptedResourceClass.getApp().getModels().get(file.getAbsolutePath(), file);
+                        return loadModelDocument(modelDocument, aModuleName, aTarget);
+                    } else {
+                        throw "Model definition for module '" + aModuleName + "' is not found.";
+                    }
                 } else {
-                    throw "Model definition for module '" + aModuleName + "' is not found.";
+                    var modelDocument = Source2XmlDom.transform('<?xml version="1.0" encoding="UTF-8"?><datamodel></datamodel>');
+                    return loadModelDocument(modelDocument, null, null);
                 }
             }
 
@@ -771,15 +781,6 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
             function readModel(aContent, aTarget) {
                 var modelDocument = Source2XmlDom.transform(aContent);
                 return loadModelDocument(modelDocument, null, aTarget);
-            }
-
-            /**
-             * Creates fresh empty model.
-             * @returns {Model}
-             */
-            function createModel() {
-                var modelDocument = Source2XmlDom.transform('<?xml version="1.0" encoding="UTF-8"?><datamodel></datamodel>');
-                return loadModelDocument(modelDocument, null, null);
             }
 
             /**
@@ -799,7 +800,7 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                         entities = [];
                         var pattern = /queryId="(.+?)"/ig;
                         var groups;
-                        while ((groups = pattern.exec(aModelDefinition)) != null) {
+                        while ((groups = pattern.exec(aModelDefinition))) {
                             if (groups.length > 1) {
                                 entities.push(groups[1]);
                             }
@@ -814,10 +815,10 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
             }
 
             var module = {
-                loadModel: loadModel,
+                createModel: createModel,
                 readModel: readModel,
                 requireEntities: requireEntities
-            }
+            };
             Object.defineProperty(module, 'loadModel', {
                 enumerable: true,
                 value: loadModel

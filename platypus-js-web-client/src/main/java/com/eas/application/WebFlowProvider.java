@@ -18,21 +18,21 @@ import com.google.gwt.core.client.JavaScriptObject;
  */
 public class WebFlowProvider implements FlowProvider {
 
-	protected String entityId;
+	protected String entityName;
 	protected Fields expectedFields;
 	protected AppClient client;
 	protected boolean procedure;
 	protected List<Change> changeLog = new ArrayList<Change>();
 
-	public WebFlowProvider(AppClient aClient, String aEntityId, Fields aExpectedFields) {
+	public WebFlowProvider(AppClient aClient, String aEntityName, Fields aExpectedFields) {
 		client = aClient;
-		entityId = aEntityId;
+		entityName = aEntityName;
 		expectedFields = aExpectedFields;
 	}
 
 	@Override
 	public String getEntityName() {
-		return entityId;
+		return entityName;
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class WebFlowProvider implements FlowProvider {
 
 	@Override
 	public Cancellable refresh(Parameters aParams, Callback<JavaScriptObject, String> aCallback) throws Exception {
-		return client.requestData(entityId, aParams, expectedFields, aCallback);
+		return client.requestData(entityName, aParams, expectedFields, aCallback);
 	}
 
 	@Override
