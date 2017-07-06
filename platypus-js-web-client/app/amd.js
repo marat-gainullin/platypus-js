@@ -1,13 +1,35 @@
 (function () {
     var INJECTED_SCRIPT_CLASS_NAME = "platypus-injected-script";
-    var SERVER_MODULE_TOUCHED_NAME = "Proxy-";
-    var SERVER_ENTITY_TOUCHED_NAME = "Entity-";
     var MODULES_INDEX = "modules-index"; // Map module name -> script file with this module
     var TYPE_JAVASCRIPT = "text/javascript";
+    
     // TODO: Check whether these constants are needed in other parts of code
     var MODEL_TAG_NAME = "datamodel";
     var ENTITY_TAG_NAME = "entity";
     var QUERY_ID_ATTR_NAME = "queryId";
+    
+    // TODO: Check whether this class is needed in other parts of code
+    function LoadProcess(expected, onSuccess, onFailure) {
+        var calls = 0;
+        var loaded = new Set();
+        var failures = new Set();
+
+        this.complete = function (aLoaded, aFailure) {
+            if (aLoaded) {
+                loaded.add(aLoaded);
+            }
+            if (aFailure) {
+                failures.add(aFailure);
+            }
+            if (++calls === expected) {
+                if (failures.size === 0) {
+                    onSuccess();
+                } else {
+                    onFailure();
+                }
+            }
+        };
+    }
 
     var config = {prefetch: false};
     (function () {
@@ -115,52 +137,21 @@
         info(anItemName + " - Loaded");
     }
 
-    // TODO: Check whether this class is needed in other parts of code
-    function LoadProcess(expected, onSuccess, onFailure) {
-        var calls = 0;
-        var loaded = new Set();
-        var failures = new Set();
-
-        this.complete = function (aLoaded, aFailure) {
-            if (aLoaded) {
-                loaded.add(aLoaded);
-            }
-            if (aFailure) {
-                failures.add(aFailure);
-            }
-            if (++calls === expected) {
-                if (failures.size === 0) {
-                    onSuccess();
-                } else {
-                    onFailure();
-                }
-            }
-        };
-    }
-
     function Process(expectedCalls, succeded, failed) {
         var reasons = [];
-        var singleResult;
         var calls = 0;
 
         function complete() {
             if (++calls === expectedCalls) {
                 if (reasons.length === 0) {
-                    succeded(singleResult);
+                    succeded();
                 } else {
                     failed(reasons);
                 }
             }
         }
 
-        this.onSuccess = function (result) {
-            if (result) {
-                if (!singleResult) {
-                    singleResult = result;
-                } else {
-                    throw new IllegalStateException("Process supports only one result");
-                }
-            }
+        this.onSuccess = function () {
             complete();
         };
 
@@ -235,7 +226,7 @@
                     notifyModuleFailed(aModuleName, [aReason]);
                 });
                 if (!startedScripts.has(jsResource)) {
-                    startLoadScript(prefetchedResources, jsResource, aStructure.clientDependencies ? aStructure.clientDependencies : [], aStructure.queriesDependencies ? aStructure.queriesDependencies : [], aStructure.serverDependencies ? aStructure.serverDependencies : [], aCyclic);
+                    startLoadScript(prefetchedResources, jsResource, aStructure.clientDependencies ? aStructure.clientDependencies : [], aCyclic);
                     startedScripts.add(jsResource);
                 }
             }
@@ -263,8 +254,7 @@
             document.head.appendChild(scriptElement);
     }
 
-    function startLoadScript(/*Set*/aPrefetchedResources, aJsResource, /*Set*/ aClientGlobalDependencies, /*Set*/ aQueriesDependencies,
-            /*Set*/ aServerModulesDependencies, /*Set*/aCyclic) {
+    function startLoadScript(/*Set*/aPrefetchedResources, aJsResource, /*Set*/ aGlobalDependencies, /*Set*/aCyclic) {
         var scriptProcess = new Process(aPrefetchedResources.size === 0 ? 1 : 2, function () {
             var jsUrl = checkedCacheBust(relativeUri() + config.sourcePath + aJsResource);
             inject(jsUrl, function () {
@@ -317,18 +307,11 @@
                 prefetchProcess.onFailure(reason.status + " : " + reason.statusText);
             });
         });
-        var dependenciesProcess = new Process(3, function () {
+        load(aGlobalDependencies, aCyclic, function () {
             scriptProcess.onSuccess();
         }, function (aReasons) {
             scriptProcess.onFailure(aReasons);
         });
-        load(aClientGlobalDependencies, aCyclic, function () {
-            dependenciesProcess.onSuccess();
-        }, function () {
-            dependenciesProcess.onFailure();
-        });
-        loadQueries(aQueriesDependencies, dependenciesProcess);
-        loadServerModules(aServerModulesDependencies, dependenciesProcess);
     }
 
     function pendOnScript(aScriptName, onSuccess, onFailure) {
@@ -436,82 +419,6 @@
         }
     }
 
-    function loadServerModules(aServerModulesNames, parentProcess) {
-        if (aServerModulesNames.length > 0) {
-            var process = new Process(aServerModulesNames.size(), function () {
-                parentProcess.onSuccess();
-            }, function (aReasons) {
-                parentProcess.onFailure(aReasons);
-            });
-            var startLoadings = [];
-            aServerModulesNames.forEach(function (appElementName) {
-                startLoadings.push(requestServerModule(appElementName, function (aDoc) {
-                    fireLoaded(SERVER_MODULE_TOUCHED_NAME + appElementName);
-                    process.onSuccess(aDoc);
-                }, function (reason) {
-                    severe(reason);
-                    process.onFailure(reason);
-                }));
-                fireStarted(SERVER_MODULE_TOUCHED_NAME + appElementName);
-            });
-        } else {
-            later(function () {
-                parentProcess.onSuccess();
-            });
-        }
-    }
-
-    function loadQueries(aQueriesNames, parentProcess) {
-        if (aQueriesNames.length > 0) {
-            var process = new Process(aQueriesNames.size(), function () {
-                parentProcess.onSuccess();
-            }, function (aReasons) {
-                parentProcess.onFailure(aReasons);
-            });
-            var startLoadings = [];
-            aQueriesNames.forEach(function (queryName) {
-                startLoadings.add(requestAppQuery(queryName, function (aQuery) {
-                    fireLoaded(SERVER_ENTITY_TOUCHED_NAME + queryName);
-                    process.onSuccess();
-                }, function (reason) {
-                    severe(reason);
-                    process.onFailure(reason);
-                }));
-                fireStarted(SERVER_ENTITY_TOUCHED_NAME + queryName);
-            });
-        } else {
-            later(function () {
-                parentProcess.onSuccess();
-            });
-        }
-    }
-
-    function jsLoadQueries(aQueriesNames, onSuccess, onFailure) {
-        loadQueries(aQueriesNames, {
-            onSuccess: function () {
-                if (onSuccess)
-                    onSuccess();
-            },
-            onFailure: function (reasons) {
-                if (onFailure)
-                    onFailure(reasons);
-            }
-        });
-    }
-
-    function jsLoadServerModules(aModulesNames, onSuccess, onFailure) {
-        loadServerModules(aModulesNames, {
-            'onSuccess': function () {
-                if (onSuccess)
-                    onSuccess();
-            },
-            'onFailure': function (reasons) {
-                if (onFailure)
-                    onFailure(reasons);
-            }
-        });
-    }
-
     function isJsonResponse(aResponse) {
         var responseType = aResponse.getResponseHeader("content-type");
         if (responseType) {
@@ -526,6 +433,25 @@
     }
 
     var modulesStructures = new Map();
+    
+    function getModelDocument(aModuleName) {
+        return getDocumentByModule(aModuleName, ".model");
+    }
+    
+    function getFormDocument(aModuleName) {
+        return getDocumentByModule(aModuleName, ".layout");
+    }
+    
+    function getDocumentByModule(aModuleName, aSuffix) {
+        var doc = null;
+        var structure = modulesStructures.get(aModuleName);
+        structure.structure.forEach(function(part) {
+            if (part.toLowerCase().endsWith(".model")) {
+                doc = documents.get(part);
+            }
+        });
+        return doc;
+    }
 
     function requestModuleStructure(aModuleName, onSuccess, onFailure) {
         if (modulesStructures.has(aModuleName)) {
@@ -557,8 +483,8 @@
                 }
             };
         } else {
-            var query = params(param(PlatypusRequestParams.TYPE, Requests.rqModuleStructure + ''), param(PlatypusRequestParams.MODULE_NAME, aModuleName));
-            return startApiRequest(null, query, "", Methods.GET, null, function (aResponse) {
+            var query = params(param('__type'/*RequestParams.TYPE*/, '19'/*RequestTypes.rqModuleStructure*/), param('__moduleName'/*RequestParams.MODULE_NAME*/, aModuleName));
+            return startApiRequest(null, query, "", "GET", null, function (aResponse) {
                 if (isJsonResponse(aResponse)) {
                     // Some post processing
                     var structure = aResponse.responseJSON;
@@ -579,46 +505,6 @@
         }
     }
 
-    var Requests = {
-        rqCredential: 5,
-        rqModuleStructure: 19,
-        rqResource: 20,
-        rqAppQuery: 6,
-        rqExecuteQuery: 7,
-        rqCommit: 8,
-        rqCreateServerModule: 12,
-        rqDisposeServerModule: 13,
-        rqExecuteServerModuleMethod: 14,
-        rqLogout: 18
-    };
-
-    var PlatypusRequestParams = {
-        CACHE_BUSTER: "__cb",
-        QUERY_ID: "__queryId",
-        TYPE: "__type",
-        //ENTITY_ID: "__entityId",
-        MODULE_NAME: "__moduleName",
-        METHOD_NAME: "__methodName",
-        //APP_ELEMENT_NAME: "__appElementName",
-        PARAMS_ARRAY: "__param[]"
-    };
-
-    var Methods = {
-        GET: 'GET',
-        PUT: 'PUT',
-        POST: 'POST',
-        HEAD: 'HEAD',
-        DELETE: 'DELETE'
-    };
-
-    var RequestState = {
-        UNSENT: 0,
-        OPENED: 1,
-        HEADERS_RECEIVED: 2,
-        LOADING: 3,
-        DONE: 4
-    };
-
     function param(aName, aValue) {
         return aName + "=" + (aValue ? encodeURIComponent(aValue) : "");
     }
@@ -636,53 +522,6 @@
         return res;
     }
 
-    var serverModules = new Map();
-
-    function requestServerModule(aModuleName, onSuccess, onFailure) {
-        if (serverModules.has(aModuleName)) {
-            if (onSuccess) {
-                later(function () {
-                    onSuccess();
-                });
-            }
-            return {
-                cancel: function () {
-                    // no op here because no request has been sent
-                }
-            };
-        } else {
-            var query = params(param(PlatypusRequestParams.TYPE, Requests.rqCreateServerModule + ''), param(PlatypusRequestParams.MODULE_NAME, aModuleName));
-            return startApiRequest(null, query, "", Methods.GET, null, function (aResponse) {
-                // Some post processing
-                if (isJsonResponse(aResponse)) {
-                    addServerModule(aModuleName, aResponse.responseText);
-                    if (onSuccess) {
-                        onSuccess();
-                    }
-                } else {
-                    if (onFailure)
-                        onFailure(aResponse);
-                }
-            }, function (aResponse) {
-                if (onFailure) {
-                    onFailure(aResponse.responseText ? aResponse.responseText : aResponse.statusText);
-                }
-            });
-        }
-    }
-
-    function getServerModule(aModuleName) {
-        return serverModules.get(aModuleName);
-    }
-
-    function addServerModule(aModuleName, aStructure) {
-        serverModules.set(aModuleName, JSON.parse(aStructure));
-    }
-
-    function isServerModule(aModuleName) {
-        return serverModules.has(aModuleName);
-    }
-
     function startApiRequest(aUrlPrefix, aUrlQuery, aBody, aMethod, aContentType, onSuccess, onFailure) {
         var url = remoteApi() + config.apiUri + (aUrlPrefix ? aUrlPrefix : "") + (aUrlQuery ? "?" + aUrlQuery : "");
         var req = new XMLHttpRequest();
@@ -697,7 +536,7 @@
     function startRequest(xhr, aBody, onSuccess, onFailure) {
         // Must set the onreadystatechange handler before calling send().
         xhr.onreadystatechange = function () {
-            if (xhr.readyState === RequestState.DONE) {
+            if (xhr.readyState === 4/*RequestState.DONE*/) {
                 xhr.onreadystatechange = null;
                 try {
                     if (200 <= xhr.status && xhr.status < 300) {
@@ -729,7 +568,7 @@
 
     function startUrlRequest(aUrl, aResponseType, onSuccess, onFailure) {
         var req = new XMLHttpRequest();
-        req.open(Methods.GET, aUrl);
+        req.open('GET', aUrl);
         if (aResponseType) {
             req.responseType = aResponseType;
         }
@@ -740,7 +579,7 @@
     var cacheBustEnabled = false;
 
     function checkedCacheBust(aUrl) {
-        return cacheBustEnabled ? aUrl + "?" + PlatypusRequestParams.CACHE_BUSTER + "=" + new Date().valueOf() : aUrl;
+        return cacheBustEnabled ? aUrl + "?" + '__cb'/*RequestParams.CACHE_BUSTER*/ + "=" + new Date().valueOf() : aUrl;
     }
 
     var documents = new Map();
@@ -771,42 +610,6 @@
             }, function (reason) {
                 if (onFailure) {
                     onFailure(reason);
-                }
-            });
-        }
-    }
-
-    var queries = new Map();// Map of plain query structure data, not queries by thierselfs.
-
-    function requestAppQuery(queryName, onSuccess, onFailure) {
-        var alreadyQuery = queries.get(queryName);
-        if (alreadyQuery) {
-            if (onSuccess) {
-                later(function () {
-                    onSuccess(alreadyQuery);
-                });
-            }
-            return {
-                cancel: function () {
-                    // no op here because no request has been sent
-                }
-            };
-        } else {
-            var urlQuery = params(param(PlatypusRequestParams.TYPE, Requests.rqAppQuery + ''), param(PlatypusRequestParams.QUERY_ID, queryName));
-            return startApiRequest(null, urlQuery, "", Methods.GET, null, function (aResponse) {
-                if (isJsonResponse(aResponse)) {
-                    queries.set(queryName, aResponse.responseJSON);
-                    if (onSuccess) {
-                        onSuccess();
-                    }
-                } else {
-                    if (onFailure) {
-                        onFailure(aResponse.responseText);
-                    }
-                }
-            }, function (aResponse) {
-                if (onFailure) {
-                    onFailure(aResponse.getStatusText());
                 }
             });
         }
@@ -998,8 +801,10 @@
 
     function init() {
         define.amd = {}; // AMD compliance
-        var platypusjs = {require, define, config, documents};
+    
+        var platypusjs = {require, define, config, documents, getModelDocument, getFormDocument};
         Object.seal(platypusjs);
+        
         window.platypusjs = platypusjs;
         window.require = require;
         window.define = define;
@@ -1046,7 +851,7 @@
                         clientDependencies: resourceIndex['global-deps'],
                         serverDependencies: resourceIndex['rpc-stubs'],
                         queryDependencies: resourceIndex.entities
-                    }
+                    };
                     resourceStructure.structure.unshift(resourceName);
                     resourceIndex.modules.forEach(function (moduleName) {
                         modulesStructures.set(moduleName, resourceStructure);

@@ -85,7 +85,7 @@ public class DependenciesWalker {
                                     if (lastAccess.getBase() instanceof IdentNode) {
                                         //String baseName = ((IdentNode) lastAccess.getBase()).getName();
                                         if (LOAD_ENTITY.equals(funcName)) {
-                                            queryDependencies.add(value);
+                                            putQueryDependence(value);
                                         }
                                     }
                                     break;
@@ -112,6 +112,10 @@ public class DependenciesWalker {
 
     public Set<String> getQueryDependencies() {
         return queryDependencies;
+    }
+    
+    public void putQueryDependence(String value) {
+        queryDependencies.add(value);
     }
 
     public Set<String> getDependencies() {

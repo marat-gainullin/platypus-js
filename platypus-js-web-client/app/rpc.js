@@ -1,18 +1,13 @@
-define(['core/report'], function (Report) {
-    //var nativeClient = @com.eas.client.AppClient::getInstance()();
+define(['core/report', 'invoke', 'client', 'internals'], function (Report, Invoke, Client, Utils) {
     function requireRemotes(aRemotesNames, aOnSuccess, aOnFailure) {
         var remotesNames = Array.isArray(aRemotesNames) ? aRemotesNames : [aRemotesNames];
-        /*@com.eas.application.Loader::*/jsLoadServerModules(remotesNames, function () {
-            try {
-                var proxies = [];
-                for (var r = 0; r < remotesNames.length; r++) {
-                    proxies.push(new RpcProxy(remotesNames[r]));
-                }
-                aOnSuccess.apply(null, proxies);
-            } catch (ex) {
-                aOnFailure(ex); // This is because of exceptions in RpcProxy constructor. They are related to server response and so, they are should be passed to failure callback.
-            }
-        }, aOnFailure);
+        var proxies = [];
+        for (var r = 0; r < remotesNames.length; r++) {
+            proxies.push(new RpcProxy(remotesNames[r]));
+        }
+        Invoke.later(function () {
+            aOnSuccess(proxies);
+        });
     }
     function generateFunction(aModuleName, aFunctionName) {
         return function () {
@@ -40,7 +35,7 @@ define(['core/report'], function (Report) {
                 }
             }
             if (onSuccess) {
-                /*nativeClient.@com.eas.client.AppClient::*/requestServerMethodExecution(aModuleName, aFunctionName, params,
+                Client.requestServerMethodExecution(aModuleName, aFunctionName, params,
                         function (aResult) {
                             if (typeof aResult === 'object' && aResult instanceof Report)
                                 onSuccess(aResult);
@@ -55,12 +50,12 @@ define(['core/report'], function (Report) {
                             }
                         }, onFailure, Report);
             } else {
-                var result = /*nativeClient.@com.eas.client.AppClient::*/requestServerMethodExecution(aModuleName, aFunctionName, params, null, null, Report);
+                var result = Client.requestServerMethodExecution(aModuleName, aFunctionName, params, null, null, Report);
                 if (typeof result === 'object' && result instanceof Report)
                     return result;
                 else {
                     try {
-                        return JSON.parse(result, /*@com.eas.core.Utils.JsObject::*/dateReviver());
+                        return JSON.parse(result, Utils.dateReviver);
                     } catch (ex) {
                         return result;
                     }
@@ -68,19 +63,27 @@ define(['core/report'], function (Report) {
             }
         };
     }
+
+    function isValidFunctionName(name) {
+        var matched = name.match(/[_a-zA-Z][_a-zA-Z0-9]+/);
+        return matched && matched[0] === name;
+    }
+
     function RpcProxy(aModuleName) {
         if (!(this instanceof RpcProxy))
             throw 'use new Rpc.Proxy() please.';
-        var moduleData = /*nativeClient.@com.eas.client.AppClient::*/getServerModule('' + aModuleName);
-        if (!moduleData)
-            throw 'No server module proxy for module: ' + aModuleName;
-        if (!moduleData.isPermitted)
-            throw "Access to server module '" + aModuleName + "' functions list is not permitted.";
         var self = this;
-        for (var i = 0; i < moduleData.functions.length; i++) {
-            var funcName = moduleData.functions[i];
-            self[funcName] = generateFunction(aModuleName, funcName);
-        }
+        return new Proxy(this, {
+            has: function (name) {
+                return name in self || isValidFunctionName(name);
+            },
+            get: function (name) {
+                if (!(name in self) && isValidFunctionName(name)) {
+                    self.name = generateFunction(aModuleName, name);
+                }
+                return self.name;
+            }
+        });
     }
     var module = {};
     Object.defineProperty(module, "Proxy", {
