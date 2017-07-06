@@ -1,10 +1,13 @@
-define(function () {
+define(['logger'], function (Logger) {
     var HTML5 = "HTML5 client";
     var J2SE = "Java SE environment";
 
     function cacheBust(aValue) {
-        //var appClient = @com.eas.client.AppClient::getInstance()();
-        /*appClient.@com.eas.client.AppClient::*/setCacheBustEnabled(!!aValue);
+        if (window.platypusjs && window.platypusjs.config) {
+            window.platypusjs.config.cacheBust = !!aValue;
+        } else {
+            Logger.severe("Can't setup cache busting. Platypus.js missing.");
+        }
     }
 
     var module = {};

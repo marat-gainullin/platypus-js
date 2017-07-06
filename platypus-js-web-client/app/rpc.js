@@ -65,8 +65,7 @@ define(['core/report', 'invoke', 'client', 'internals'], function (Report, Invok
     }
 
     function isValidFunctionName(name) {
-        var matched = name.match(/[_a-zA-Z][_a-zA-Z0-9]+/);
-        return matched && matched[0] === name;
+        return /^[_a-zA-Z][_a-zA-Z0-9]+$/.test(name);
     }
 
     function RpcProxy(aModuleName) {

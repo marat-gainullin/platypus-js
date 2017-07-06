@@ -1,4 +1,4 @@
-define(function () {
+define(['client'], function (Client) {
     function Principal(aName) {
         Object.defineProperty(this, "name", {get: function () {
                 return aName;
@@ -7,15 +7,13 @@ define(function () {
                 return true;
             }});
         Object.defineProperty(this, "logout", {value: function (onSuccess, onFailure) {
-                //var appClient = @com.eas.client.AppClient::getInstance()();
-                return /*appClient.@com.eas.client.AppClient::*/jsLogout(onSuccess, onFailure);
+                return Client.requestLogout(onSuccess, onFailure);
             }});
     }
     var module = {};
     Object.defineProperty(module, 'principal', {
         value: function (aOnSuccess, aOnFailure) {
-            //var appClient = @com.eas.client.AppClient::getInstance()();
-            /*appClient.@com.eas.client.AppClient::*/jsLoggedInUser(aOnSuccess ? function (aPrincipalName) {
+            Client.requestLoggedInUser(aOnSuccess ? function (aPrincipalName) {
                 aOnSuccess(new Principal(aPrincipalName));
             } : null, aOnFailure);
         }

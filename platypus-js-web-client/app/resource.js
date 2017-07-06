@@ -1,127 +1,20 @@
 define(['logger', 'internals'], function (Logger, Utils) {
-    if (!window.platypusjs) {
-        var config = {};
-        (function () {
-            var sourcePath = "/";
-            var apiUri = "/application";
-            Object.defineProperty(config, 'sourcePath', {
-                get: function () {
-                    return sourcePath;
-                },
-                set: function (aValue) {
-                    if (aValue) {
-                        sourcePath = aValue;
-                        if (!sourcePath.endsWith("/")) {
-                            sourcePath = sourcePath + "/";
-                        }
-                        if (!sourcePath.startsWith("/")) {
-                            sourcePath = "/" + sourcePath;
-                        }
-                    } else {
-                        sourcePath = "/";
-                    }
-                }
-            });
-            Object.defineProperty(config, 'apiUri', {
-                get: function () {
-                    return apiUri;
-                },
-                set: function (aValue) {
-                    if (!aValue.startsWith('/'))
-                        aValue = '/' + aValue;
-                    if (aValue.endsWith('/'))
-                        aValue = aValue.substring(0, aValue.length - 1);
-                    apiUri = aValue;
-                }
-            });
-        }());
-        
-        window.platypusjs = {config};
-        Object.seal(window.platypusjs);
-    }
     
     function lookupCallerApplicationJsFile() {
-        var calledFromFile = null;
         try {
             throw new Error("Current application file test");
         } catch (ex) {
-            var stack = ex.stack.split('\n');
-            var firstFileName = extractFileName(stack[1]);// On Chrome the first line is a error text
-            if (firstFileName) {
-                for (var frameIdx = 1; frameIdx < stack.length; frameIdx++) {
-                    var fileName = extractFileName(stack[frameIdx]);
-                    if (fileName && fileName !== firstFileName) {
-                        calledFromFile = fileName;
-                        var lastQuestionIndex = calledFromFile.lastIndexOf('?');// case of cache busting
-                        return lastQuestionIndex !== -1 ? calledFromFile.substring(0, lastQuestionIndex) : calledFromFile;
-                    }
-                }
-            }
+            return Utils.lookupCallerApplicationJsFile(ex);
         }
-        return calledFromFile;
     }
-
+    
     function lookupCallerApplicationJsDir() {
-        var calledFromFile = lookupCallerApplicationJsFile();
-        if (calledFromFile) {
-            var lastSlashIndex = calledFromFile.lastIndexOf('/');
-            return calledFromFile.substring(0, lastSlashIndex);
-        } else {
-            return null;
-        }
-    }
-
-    function hostPageBaseURL() {
-        var s = document.location.href;
-
-        // Pull off any hash.
-        var i = s.indexOf('#');
-        if (i !== -1)
-            s = s.substring(0, i);
-
-        // Pull off any query string.
-        i = s.indexOf('?');
-        if (i !== -1)
-            s = s.substring(0, i);
-
-        // Rip off everything after the last slash.
-        i = s.lastIndexOf('/');
-        if (i !== -1)
-            s = s.substring(0, i);
-
-        // Ensure a final slash if non-empty.
-        return s.length > 0 ? s + "/" : "";
+        return Utils.lookupCallerApplicationJsDir(lookupCallerApplicationJsFile());
     }
     
-    function relativeUri() {
-        var pageUrl = hostPageBaseURL();
-        pageUrl = pageUrl.substring(0, pageUrl.length - 1);
-        return pageUrl;
-    }
-    
-    function toFilyAppModuleId(aRelative, aStartPoint) {
-        var moduleIdNormalizer = document.createElement('div');
-        moduleIdNormalizer.innerHTML = "<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>";
-        // TODO: check if decodeURIComponent is applicable instead of decodeURI.
-        var mormalizedAbsoluteModuleUrl = decodeURI(moduleIdNormalizer.firstChild.href);
-        var hostContextPrefix = relativeUri() + window.platypusjs.config.sourcePath;
-        var hostContextNormalizer = document.createElement('div');
-        hostContextNormalizer.innerHTML = "<a href=\"" + hostContextPrefix + "\">o</a>";
-        var mormalizedHostContextPrefix = decodeURI(hostContextNormalizer.firstChild.href);
-        return mormalizedAbsoluteModuleUrl.substring(mormalizedHostContextPrefix.length);
-    }
-
-    function resourceUri(aResourceName){
-        if(/https?:\//.test(aResourceName))
-            return aResourceName;
-        else {
-            return relativeUri() + window.platypusjs.config.sourcePath + aResourceName;        
-        }
-    }
-
     function load(aResourceName, aBinary, onSuccess, onFailure) {
         var callerDir = lookupCallerApplicationJsDir();
-        var uri = resourceUri(aResourceName.startsWith("./") || aResourceName.startsWith("../") ? toFilyAppModuleId(aResourceName, callerDir) : aResourceName);
+        var uri = Utils.resourceUri(aResourceName.startsWith("./") || aResourceName.startsWith("../") ? Utils.toFilyAppModuleId(aResourceName, callerDir) : aResourceName);
         if (onSuccess) {
             startRequest(uri, aBinary ? 'arraybuffer' : '', function (aResult) {
                 if (200 <= aResult.status && aResult.status < 300) {
@@ -197,7 +90,7 @@ define(['logger', 'internals'], function (Logger, Utils) {
 
     function startUploadRequest(aFile, aName, onComplete, onProgress, onFailure) {
         var req = new XMLHttpRequest();
-        req.open("post", remoteApi() + window.platypusjs.config.apiUri);
+        req.open("post", Utils.remoteApi() + window.platypusjs.config.apiUri);
         if (req.upload) {
             req.upload.onprogress = function (aProgressEvent) {
                 try {

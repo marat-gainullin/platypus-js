@@ -42,11 +42,14 @@ define(function () {
                         delete anObject[p];
                         anObject[p] = pValue;
                     }
-                }});
+                }
+            });
         }
-        return {release: function () {
+        return {
+            release: function () {
                 anObject[releaseName]();
-            }};
+            }
+        };
     }
 
     function unmanageObject(anObject) {

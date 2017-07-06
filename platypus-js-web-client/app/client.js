@@ -34,36 +34,21 @@ define(['logger', 'invoke', 'id', 'core/report', 'internals'], function (Logger,
         DELETE: 'DELETE'
     };
     
-    function hostPageBaseURL() {
-        var s = document.location.href;
-
-        // Pull off any hash.
-        var i = s.indexOf('#');
-        if (i !== -1)
-            s = s.substring(0, i);
-
-        // Pull off any query string.
-        i = s.indexOf('?');
-        if (i !== -1)
-            s = s.substring(0, i);
-
-        // Rip off everything after the last slash.
-        i = s.lastIndexOf('/');
-        if (i !== -1)
-            s = s.substring(0, i);
-
-        // Ensure a final slash if non-empty.
-        return s.length > 0 ? s + "/" : "";
-    }
-    
-    function remoteApi() {
-        return window.platypusjs.config.remoteApi ? window.platypusjs.remoteApi : relativeUri();
+    function param(aName, aValue) {
+        return aName + "=" + (aValue ? encodeURIComponent(aValue) : "");
     }
 
-    function relativeUri() {
-        var pageUrl = hostPageBaseURL();
-        pageUrl = pageUrl.substring(0, pageUrl.length - 1);
-        return pageUrl;
+    function params() {
+        var res = "";
+        for (var i = 0; i < arguments.length; i++) {
+            if (arguments[i]) {
+                if (res.length > 0) {
+                    res += "&";
+                }
+                res += arguments[i];
+            }
+        }
+        return res;
     }
     
     function submitForm(aAction, aMethod, aContentType, aFormData, onSuccess, onFailure) {
@@ -116,7 +101,7 @@ define(['logger', 'invoke', 'id', 'core/report', 'internals'], function (Logger,
     }
     
     function startApiRequest(aUrlPrefix, aUrlQuery, aBody, aMethod, aContentType, onSuccess, onFailure) {
-        var url = remoteApi() + window.platypusjs.config.apiUri + (aUrlPrefix ? aUrlPrefix : "") + (aUrlQuery ? "?" + aUrlQuery : "");
+        var url = Utils.remoteApi() + window.platypusjs.config.apiUri + (aUrlPrefix ? aUrlPrefix : "") + (aUrlQuery ? "?" + aUrlQuery : "");
         var req = new XMLHttpRequest();
         req.open(aMethod, url);
         if (aContentType) {
@@ -160,7 +145,7 @@ define(['logger', 'invoke', 'id', 'core/report', 'internals'], function (Logger,
     }
 
     function syncApiRequest(aUrlPrefix, aUrlQuery, aResponseType) {
-        var url = remoteApi() + window.platypusjs.config.apiUri + (aUrlPrefix ? aUrlPrefix : "") + "?" + aUrlQuery;
+        var url = Utils.remoteApi() + window.platypusjs.config.apiUri + (aUrlPrefix ? aUrlPrefix : "") + "?" + aUrlQuery;
         var req = syncRequest(url, aResponseType, null, Methods.GET);
         if (200 <= req.status && req.status < 300) {
             return req;
@@ -399,6 +384,13 @@ define(['logger', 'invoke', 'id', 'core/report', 'internals'], function (Logger,
         }
     });
     
+    Object.defineProperty(module, 'submitForm', {
+        enumerable: true,
+        get: function(){
+            return submitForm;
+        }
+    });
+    
     Object.defineProperty(module, 'params', {
         enumerable: true,
         get: function(){
@@ -410,6 +402,27 @@ define(['logger', 'invoke', 'id', 'core/report', 'internals'], function (Logger,
         enumerable: true,
         get: function(){
             return param;
+        }
+    });
+    
+    Object.defineProperty(module, 'param', {
+        enumerable: true,
+        get: function(){
+            return param;
+        }
+    });
+    
+    Object.defineProperty(module, 'RequestTypes', {
+        enumerable: true,
+        get: function(){
+            return RequestTypes;
+        }
+    });
+    
+    Object.defineProperty(module, 'RequestParams', {
+        enumerable: true,
+        get: function(){
+            return RequestParams;
         }
     });
     

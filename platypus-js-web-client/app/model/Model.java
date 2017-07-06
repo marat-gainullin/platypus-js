@@ -29,59 +29,8 @@ import com.google.gwt.core.client.Scheduler;
 public class Model implements HasPublished {
 
     protected AppClient client;
-    protected Set<Relation> relations = new HashSet<Relation>();
-    protected Set<ReferenceRelation> referenceRelations = new HashSet<ReferenceRelation>();
-    protected Map<String, Entity> entities = new HashMap<String, Entity>();
-    protected JsObject changeLog = JavaScriptObject.createArray().cast();
     //
-    protected RequeryProcess process;
     protected JavaScriptObject jsPublished;
-
-    public static class RequeryProcess {
-
-        public Map<Entity, String> errors = new HashMap<Entity, String>();
-        public Callback<JavaScriptObject, String> callback;
-
-        public RequeryProcess(Callback<JavaScriptObject, String> aCallback) {
-            super();
-            callback = aCallback;
-            assert callback != null : "aCallback argument is required.";
-        }
-
-        protected String assembleErrors() {
-            if (errors != null && !errors.isEmpty()) {
-                StringBuilder sb = new StringBuilder();
-                for (Entity entity : errors.keySet()) {
-                    if (sb.length() > 0) {
-                        sb.append("\n");
-                    }
-                    sb.append(errors.get(entity)).append(" (").append(entity.getName()).append("[ ").append(entity.getTitle()).append("])");
-                }
-                return sb.toString();
-            }
-            return null;
-        }
-
-        public void cancel() throws Exception {
-            callback.onFailure("Canceled");
-        }
-
-        public void success() {
-            callback.onSuccess(null);
-        }
-
-        public void failure() {
-            callback.onFailure(assembleErrors());
-        }
-
-        public void end() {
-            if (errors.isEmpty()) {
-                success();
-            } else {
-                failure();
-            }
-        }
-    }
 
     public static class SimpleEntry implements Entry<Entity, Integer> {
 

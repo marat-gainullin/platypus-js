@@ -31,7 +31,7 @@
         };
     }
 
-    var config = {prefetch: false};
+    var config = {prefetch: false, cacheBust: false};
     (function () {
         var sourcePath = "/";
         var apiUri = "/application";
@@ -576,10 +576,8 @@
         return startRequest(req, null, onSuccess, onFailure);
     }
 
-    var cacheBustEnabled = false;
-
     function checkedCacheBust(aUrl) {
-        return cacheBustEnabled ? aUrl + "?" + '__cb'/*RequestParams.CACHE_BUSTER*/ + "=" + new Date().valueOf() : aUrl;
+        return config.cacheBust ? aUrl + "?" + '__cb'/*RequestParams.CACHE_BUSTER*/ + "=" + new Date().valueOf() : aUrl;
     }
 
     var documents = new Map();
@@ -627,6 +625,7 @@
         });
     }
 
+    // TODO: Check if changes are made to this function both in resource.js and here
     function toFilyAppModuleId(aRelative, aStartPoint) {
         var moduleIdNormalizer = document.createElement('div');
         moduleIdNormalizer.innerHTML = "<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>";
@@ -639,6 +638,7 @@
         return mormalizedAbsoluteModuleUrl.substring(mormalizedHostContextPrefix.length);
     }
 
+    // TODO: Check if changes are made to this function both in resource.js and here
     function lookupCallerApplicationJsDir() {
         var calledFromFile = lookupCallerApplicationJsFile();
         if (calledFromFile) {
@@ -649,33 +649,7 @@
         }
     }
 
-    function extractFileName(aFrame) {
-        if (aFrame) {
-            // This is for Chrome stack traces
-            var matched = aFrame.match(/(https?:\/\/.+):\d+:\d+/);
-            if (matched) {
-                return matched[1];
-            } else {
-                matched = aFrame.match(/(file:\/\/.+):\d+:\d+/);
-                if (matched)
-                    return matched[1];
-                else
-                    return null;
-            }
-        } else {
-            return null;
-        }
-    }
-
-    function lookupCallerJsFile() {
-        try {
-            throw new Error("Current file test");
-        } catch (ex) {
-            var stack = ex.stack.split('\n');
-            return extractFileName(stack[1]);// On Chrome the first line is a error text
-        }
-    }
-
+    // TODO: Check if changes are made to this function both in resource.js and here
     function lookupCallerApplicationJsFile() {
         var calledFromFile = null;
         try {
@@ -695,6 +669,33 @@
             }
         }
         return calledFromFile;
+    }
+
+    function lookupCallerJsFile() {
+        try {
+            throw new Error("Current file test");
+        } catch (ex) {
+            var stack = ex.stack.split('\n');
+            return extractFileName(stack[1]);// On Chrome the first line is a error text
+        }
+    }
+
+    function extractFileName(aFrame) {
+        if (aFrame) {
+            // This is for Chrome stack traces
+            var matched = aFrame.match(/(https?:\/\/.+):\d+:\d+/);
+            if (matched) {
+                return matched[1];
+            } else {
+                matched = aFrame.match(/(file:\/\/.+):\d+:\d+/);
+                if (matched)
+                    return matched[1];
+                else
+                    return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     function lookupResolved(deps) {

@@ -1,6 +1,6 @@
 define(['logger', 'client', 'internals'], function (Logger, Client, Utils) {
 
-    var SERVER_ENTITY_TOUCHED_NAME = "Entity-";
+    var SERVER_ENTITY_TOUCHED_NAME = "Entity ";
 
     var loadedEntities = new Map();
 
@@ -12,7 +12,7 @@ define(['logger', 'client', 'internals'], function (Logger, Client, Utils) {
                 onFailure(aReasons);
             });
             aQueriesNames.forEach(function (queryName) {
-                var urlQuery = Client.params(Client.param(Client.PlatypusRequestParams.TYPE, Client.Requests.rqAppQuery + ''), Client.param(Client.PlatypusRequestParams.QUERY_ID, queryName));
+                var urlQuery = Client.params(Client.param(Client.RequestParams.TYPE, Client.RequestTypess.rqAppQuery), Client.param(Client.RequestParams.QUERY_ID, queryName));
                 return Client.startApiRequest(null, urlQuery, "", Client.Methods.GET, null, function (aResponse) {
                     if (Client.isJsonResponse(aResponse)) {
                         loadedEntities.set(queryName, aResponse.responseJSON);
@@ -25,7 +25,7 @@ define(['logger', 'client', 'internals'], function (Logger, Client, Utils) {
                     Logger.severe(aResponse.responseText);
                     process.onFailure(aResponse.responseText);
                 });
-                Logger.info('Loading ' + SERVER_ENTITY_TOUCHED_NAME + queryName + '...');
+                Logger.info('Loading ' + SERVER_ENTITY_TOUCHED_NAME + queryName + ' ...');
             });
         } else {
             later(onSuccess);
