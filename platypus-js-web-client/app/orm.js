@@ -1,5 +1,126 @@
 define(['logger', 'client', 'internals'], function (Logger, Client, Utils) {
 
+    function Relation(leftEntity,
+            leftItem,
+            leftParameter, // Flag. It is true if leftItem is a parameter.
+            rightEntity,
+            rightItem,
+            rightParameter // Flag. It is true if rightItem is a parameter.
+            ) {
+        this.leftEntity = leftEntity;
+        this.leftItem = leftItem;
+        this.leftParameter = leftParameter;
+        this.rightEntity = rightEntity;
+        this.rightItem = rightItem;
+        this.rightParameter = rightParameter;
+    }
+
+    function ReferenceRelation(
+            leftEntity,
+            leftField,
+            rightEntity,
+            rightField,
+            scalarPropertyName,
+            collectionPropertyName
+            ) {
+        this.leftEntity = leftEntity;
+        this.leftField = leftField;
+        this.rightEntity = rightEntity;
+        this.rightField = rightField;
+        this.scalarPropertyName = scalarPropertyName;
+        this.collectionPropertyName = collectionPropertyName;
+    }
+
+    function Query(entityName) {
+        var entityTitle = null;
+        var parameters = {};
+
+        function prepareCommand() {
+            var command = {
+                kind: 'command',
+                entity: entityName,
+                parameters: {}
+            };
+            for (var p in parameters)
+                command.parameters[p] = parameters[p];
+            return command;
+        }
+
+        Object.defineProperty(this, 'entityName', {
+            get: function () {
+                return entityName;
+            },
+            set: function (aValue) {
+                entityName = aValue;
+            }
+        });
+
+        Object.defineProperty(this, 'title', {
+            get: function () {
+                return entityTitle;
+            },
+            set: function (aValue) {
+                entityTitle = aValue;
+            }
+        });
+        Object.defineProperty(this, 'parameters', {
+            get: function () {
+                return parameters;
+            }
+        });
+        Object.defineProperty(this, 'prepareCommand', {
+            get: function () {
+                return prepareCommand;
+            }
+        });
+    }
+    function RequeryProcess(onSuccess, onFailure) {
+        var errors = new Map();
+
+        if (!onSuccess)
+            "onSuccess callback is required.";
+
+        this.cancel = function () {
+            onFailure("Cancelled");
+        };
+
+        this.success = function () {
+            onSuccess(null);
+        };
+
+        this.failure = function () {
+            onFailure(errors);
+        };
+
+        this.end = function () {
+            if (errors.size === 0) {
+                success();
+            } else {
+                failure();
+            }
+        };
+    }
+
+    function Model() {
+        var relations = new Set();
+        var referenceRelations = new Set();
+        var entities = new Map();
+        var changeLog = [];
+        var process;
+
+        function addRelation(relation) {
+            relations.add(relation);
+        }
+
+        function addReferenceRelation(referenceRelation) {
+            referenceRelations.add(referenceRelation);
+        }
+
+        function addEntity(entity) {
+            entities.set(entity.entityId, entity);
+        }
+    }
+    
     var SERVER_ENTITY_TOUCHED_NAME = "Entity ";
 
     var loadedEntities = new Map();
@@ -102,7 +223,28 @@ define(['logger', 'client', 'internals'], function (Logger, Client, Utils) {
             return readModel('<?xml version="1.0" encoding="UTF-8"?><datamodel></datamodel>');
         }
     }
+    
     var module = {};
+    Object.defineProperty(module, 'Query', {
+        get: function () {
+            return Query;
+        }
+    });
+    Object.defineProperty(module, 'Relation', {
+        get: function () {
+            return Relation;
+        }
+    });
+    Object.defineProperty(module, 'ReferenceRelation', {
+        get: function () {
+            return ReferenceRelation;
+        }
+    });
+    Object.defineProperty(module, 'Model', {
+        get: function () {
+            return Model;
+        }
+    });
     Object.defineProperty(module, 'loadModel', {
         enumerable: true,
         value: loadModel

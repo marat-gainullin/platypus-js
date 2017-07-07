@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.Map;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -17,76 +16,9 @@ import com.google.gwt.xml.client.NodeList;
 
 public class Utils {
 
-	public static JavaScriptObject checkPublishedComponent(Object aCandidate) {
-		if (aCandidate instanceof HasPublished) {
-			return ((HasPublished) aCandidate).getPublished();
-		} else
-			return null;
-	}
-
 	public static class JsObject extends JavaScriptObject {
 		protected JsObject() {
 		}
-
-		public static native String formatDateValueWithJSON(double aDateTimeValue)/*-{
-			return JSON.stringify(new Date(aDateTimeValue));
-		}-*/;
-
-		public final native Object getJava(String aName)/*-{
-			var B = @com.eas.core.Predefine::boxing;
-			return B.boxAsJava(this[aName]);
-		}-*/;
-
-		public final native boolean getBoolean(String aName)/*-{
-			return !!this[aName];
-		}-*/;
-
-		public final native String getString(String aName)/*-{
-			var v = this[aName];
-			return v != null ? v + '' : null;
-		}-*/;
-
-		public final native String getString(int aIndex)/*-{
-			var v = this[aIndex];
-			return v != null ? v + '' : null;
-		}-*/;
-
-		public final native int getInteger(String aName)/*-{
-			return +this[aName];
-		}-*/;
-
-		public final native void setInteger(String aName, int aValue)/*-{
-			this[aName] = aValue;
-		}-*/;
-
-		public final native double getDouble(String aName)/*-{
-			return +this[aName];
-		}-*/;
-
-		public final native Utils.JsObject getJs(String aName)/*-{
-			return this[aName];
-		}-*/;
-
-		public final native void setJs(String aName, JavaScriptObject aValue)/*-{
-			return this[aName] = aValue;
-		}-*/;
-
-		public final native void setJava(String aName, Object aValue)/*-{
-			var B = @com.eas.core.Predefine::boxing;
-			return this[aName] = B.boxAsJs(aValue);
-		}-*/;
-
-		public final native boolean has(String aName)/*-{
-			return typeof this[aName] != 'undefined';
-		}-*/;
-
-		public final native JavaScriptObject deleteProperty(String aName)/*-{
-			delete this[aName];
-		}-*/;
-
-		public final native void defineProperty(String aName, JavaScriptObject aDefinition)/*-{
-			Object.defineProperty(this, aName, aDefinition);
-		}-*/;
 
 		public final void inject(String aName, JavaScriptObject aValue) {
 			inject(aName, aValue, false);
@@ -114,101 +46,8 @@ public class Utils {
 				});
 			}
 		}-*/;
-
-		public final native boolean isArray()/*-{
-			return Array.isArray(this);
-		}-*/;
-
-		public final native int length()/*-{
-			return this.length;
-		}-*/;
-
-		public final native JavaScriptObject splice(int aIndex, int howManyToDelete, JavaScriptObject toInsert)/*-{
-			return this.splice(aIndex, howManyToDelete, toInsert);
-		}-*/;
-
-		public final native JavaScriptObject splice(int aIndex, int howManyToDelete)/*-{
-			return this.splice(aIndex, howManyToDelete);
-		}-*/;
-
-		public final native JsArrayString keys()/*-{
-			return Object.keys(this);
-		}-*/;
-
-		public final native String getStringSlot(int i)/*-{
-			return this[i];
-		}-*/;
-
-		public final native JavaScriptObject getSlot(int i)/*-{
-			return this[i];
-		}-*/;
-
-		public final native void setSlot(int i, JavaScriptObject aValue)/*-{
-			this[i] = aValue;
-		}-*/;
-
-		public final native void setSlot(int i, int aValue)/*-{
-			this[i] = aValue;
-		}-*/;
-
-		public final native void setSlot(int i, String aValue)/*-{
-			this[i] = aValue;
-		}-*/;
-
-		public final native void setSlot(int i, boolean aValue)/*-{
-			this[i] = aValue;
-		}-*/;
-
-		public final native Object apply(JavaScriptObject aThis, JavaScriptObject aArgs)/*-{
-			return this.apply(aThis, aArgs != null ? aArgs : []);
-		}-*/;
-
-		public final native Object call(JavaScriptObject aThis, Object aArg)/*-{
-			var B = @com.eas.core.Predefine::boxing;
-			return this.call(aThis, B.boxAsJs(aArg));
-		}-*/;
-
-		public final native Object call(JavaScriptObject aThis, Object aArg, boolean aFlag)/*-{
-			var B = @com.eas.core.Predefine::boxing;
-			return this.call(aThis, B.boxAsJs(aArg), aFlag);
-		}-*/;
-
-		public final native JavaScriptObject newObject()/*-{
-			var constr = this;
-			return new constr();
-		}-*/;
-
-		public static native JavaScriptObject dateReviver()/*-{
-			return function(k, v) {
-				if (typeof v === 'string' && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(v)) {
-					return new $wnd.Date(v);
-				} else {
-					return v;
-				}
-			};
-		}-*/;
-
-		public static native JavaScriptObject parseJSON(String aText)/*-{
-			return $wnd.JSON.parse(aText);
-		}-*/;
-
-		public static native String stringifyJSON(Object aValue)/*-{
-			return $wnd.JSON.stringify(aValue);
-		}-*/;
-
-		public static native JavaScriptObject parseJSONDateReviver(String aText)/*-{
-			return $wnd.JSON.parse(aText, @com.eas.core.Utils.JsObject::dateReviver()());
-		}-*/;
-
-		public static native String writeJSON(JavaScriptObject changeLog)/*-{
-			return $wnd.JSON.stringify(changeLog);
-		}-*/;
-
-		public native final int indexOf(JavaScriptObject anElement)/*-{
-			return this.indexOf(anElement);
-		}-*/;
-	}
-
+        }
+        
 	private static final String addListenerName = "-platypus-listener-add-func";
 	private static final String removeListenerName = "-platypus-listener-remove-func";
 	private static final String fireChangeName = "-platypus-change-fire-func";

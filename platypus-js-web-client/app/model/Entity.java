@@ -1,53 +1,10 @@
 package com.eas.model;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import com.eas.core.Logger;
-import com.eas.client.CallbackAdapter;
-import com.eas.client.IdGenerator;
-import com.eas.client.metadata.Field;
-import com.eas.client.metadata.Fields;
-import com.eas.client.metadata.Parameter;
-import com.eas.client.metadata.Parameters;
-import com.eas.client.queries.Query;
-import com.eas.core.Callable;
-import com.eas.core.Cancellable;
-import com.eas.core.HasPublished;
-import com.eas.core.Utils;
-import com.eas.core.Utils.JsObject;
-import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsArrayString;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.event.shared.HandlerRegistration;
-
 /**
  *
  * @author mg
  */
 public class Entity implements HasPublished {
-
-    protected static final String PENDING_ASSUMPTION_FAILED_MSG = "pending assigned to null without pending.cancel() call.";
-    public static final String QUERY_REQUIRED = "All model entities must have a query";
-    // runtime
-    protected JavaScriptObject onRequeried;
-    protected JavaScriptObject snapshotConsumer;
-    protected JavaScriptObject snapshotProducer;
-    protected JavaScriptObject lastSnapshot = JavaScriptObject.createArray();
-    protected JavaScriptObject jsPublished;
-    protected HandlerRegistration cursorListener;
-    protected Cancellable pending;
-    protected boolean valid;
-    protected String title;
-    protected String name;
-    protected String entityId = String.valueOf((long) IdGenerator.genId());
-    protected String queryName;
-    protected Model model;
-    protected Query query;
-    protected Set<Relation> inRelations = new Set();
-    protected Set<Relation> outRelations = new Set();
 
     public Entity() {
         super();
@@ -97,129 +54,12 @@ public class Entity implements HasPublished {
         return getFields().getOrmCollectionsDefinitions();
     }
 
-    private static native JavaScriptObject publishFacade(Entity nEntity, JavaScriptObject aTarget)/*-{
-        Object.defineProperty(aTarget, 'elementClass', {
-            get : function() {
-                return nEntity.@com.eas.model.Entity::getElementClass()();
-            },
-            set : function(aValue) {
-                nEntity.@com.eas.model.Entity::setElementClass(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-            }
-        });
-        Object.defineProperty(aTarget, 'onRequeried', {
-            get : function() {
-                return nEntity.@com.eas.model.Entity::getOnRequeried()();
-            },
-            set : function(aValue) {
-                nEntity.@com.eas.model.Entity::setOnRequeried(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-            }
-        });
-        Object.defineProperty(aTarget, 'enqueueUpdate', {
-            value : function(aParams) {
-                nEntity.@com.eas.model.Entity::enqueueUpdate(Lcom/google/gwt/core/client/JavaScriptObject;)(aParams);
-            }
-        });
-        Object.defineProperty(aTarget, 'executeUpdate', {
-            value : function(onSuccess, onFailure) {
-                nEntity.@com.eas.model.Entity::executeUpdate(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
-            }
-        });
-        Object.defineProperty(aTarget, 'execute', {
-            value : function(onSuccess, onFailure) {
-                nEntity.@com.eas.model.Entity::execute(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
-            }
-        });
-        Object.defineProperty(aTarget, 'query', {
-            value : function(params, onSuccess, onFailure) {
-                nEntity.@com.eas.model.Entity::query(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(params, onSuccess, onFailure);
-            }
-        });
-        Object.defineProperty(aTarget, 'requery', {
-            value : function(onSuccess, onFailure) {
-                nEntity.@com.eas.model.Entity::requery(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
-            }
-        });
-        Object.defineProperty(aTarget, 'append', {
-            value : function(aData) {
-                nEntity.@com.eas.model.Entity::append(Lcom/google/gwt/core/client/JavaScriptObject;)(aData);
-            }
-        });
-        Object.defineProperty(aTarget, 'update', {
-            value : function(params, onSuccess, onFailure) {
-                nEntity.@com.eas.model.Entity::update(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(params, onSuccess, onFailure);
-            }
-        });
-}-*/;
-
     public Fields getFields() {
         if (query != null) {
             return query.getFields();
         } else {
             return null;
         }
-    }
-
-    public Model getModel() {
-        return model;
-    }
-
-    public void setModel(Model aValue) {
-        model = aValue;
-    }
-
-    public String getEntityId() {
-        return entityId;
-    }
-
-    public void setEntityId(String aValue) {
-        entityId = aValue;
-    }
-
-    public String getTitle() {
-        String ltitle = title;
-        if (ltitle == null || ltitle.isEmpty()) {
-            try {
-                Query lquery = getQuery();
-                ltitle = lquery.getTitle();
-            } catch (Exception ex) {
-                Logger.severe(ex);
-                ltitle = "";
-            }
-            setTitle(ltitle);
-        }
-        return ltitle;
-    }
-
-    public void setTitle(String aValue) {
-        title = aValue;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String aValue) {
-        name = aValue;
-    }
-
-    public String getQueryName() {
-        return queryName;
-    }
-
-    public void setQueryName(String aValue) {
-        if (queryName == null ? aValue != null : !queryName.equals(aValue)) {
-            setQuery(null);
-        }
-        queryName = aValue;
-    }
-
-    public Query getQuery() throws Exception {
-        assert query != null : "Missing definition of entity '" + queryName + "'";
-        return query;
-    }
-
-    public void setQuery(Query aValue) {
-        query = aValue;
     }
 
     public boolean removeOutRelation(Relation aRelation) {
@@ -261,26 +101,6 @@ public class Entity implements HasPublished {
         return lInOutRelations;
     }
 
-    protected boolean isTagValid(String aTagName) {
-        return true;
-    }
-
-    public JavaScriptObject getSnapshotConsumer() {
-        return snapshotConsumer;
-    }
-
-    public void setSnapshotConsumer(JavaScriptObject aValue) {
-        snapshotConsumer = aValue;
-    }
-
-    public JavaScriptObject getSnapshotProducer() {
-        return snapshotProducer;
-    }
-
-    public void setSnapshotProducer(JavaScriptObject aValue) {
-        snapshotProducer = aValue;
-    }
-
     public void takeSnapshot() {
         if (snapshotProducer != null) {
             lastSnapshot = (JavaScriptObject) snapshotProducer.<Utils.JsObject>cast().call(null, null);
@@ -297,11 +117,6 @@ public class Entity implements HasPublished {
         if (snapshotConsumer != null) {// snapshotConsumer is null in designer
             snapshotConsumer.<Utils.JsObject>cast().call(null, aValue, true);
         }
-    }
-
-    private static class CancellableContainer {
-
-        public Cancellable future;
     }
 
     protected void refreshRowset(final Callback<JavaScriptObject, String> aCallback) throws Exception {
@@ -345,27 +160,6 @@ public class Entity implements HasPublished {
 
         });
         pending = f.future;
-    }
-
-    public void validateQuery() throws Exception {
-        if (query == null) {
-            setQuery(model.client.getCachedAppQuery(queryName));
-        }
-    }
-
-    public Entity copy() throws Exception {
-        assert model != null : "Entities can't exist without a model";
-        Entity copied = new Entity(model);
-        assign(copied);
-        return copied;
-    }
-
-    public JavaScriptObject getOnRequeried() {
-        return onRequeried;
-    }
-
-    public void setOnRequeried(JavaScriptObject aValue) {
-        onRequeried = aValue;
     }
 
     public boolean isPending() {
@@ -532,10 +326,6 @@ public class Entity implements HasPublished {
             }
 
         });
-    }
-
-    public JavaScriptObject getChangeLog() {
-        return model.getChangeLog();
     }
 
     public void execute(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
@@ -749,26 +539,6 @@ public class Entity implements HasPublished {
         }
     }
 
-    protected void assign(Entity appTarget) throws Exception {
-        appTarget.setEntityId(entityId);
-        appTarget.setQueryName(queryName);
-        appTarget.setTitle(title);
-        appTarget.setName(name);
-        appTarget.setOnRequeried(onRequeried);
-    }
-
-    public void accept(ModelVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    public boolean isValid() {
-        return valid;
-    }
-
-    public void invalidate() {
-        valid = false;
-    }
-
     public void setPublished(JavaScriptObject aPublished) {
         if (jsPublished != aPublished) {
             jsPublished = aPublished;
@@ -788,18 +558,5 @@ public class Entity implements HasPublished {
                 });
             }
         }
-    }
-
-    @Override
-    public JavaScriptObject getPublished() {
-        return jsPublished;
-    }
-
-    public JavaScriptObject getElementClass() {
-        return getFields().getInstanceConstructor();
-    }
-
-    public void setElementClass(JavaScriptObject aValue) {
-        getFields().setInstanceConstructor(aValue);
     }
 }

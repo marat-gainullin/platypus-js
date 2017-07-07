@@ -2,7 +2,7 @@ package com.eas.client.queries;
 
 /**
  *
- * @author Marat
+ * @author mg
  */
 public class ParameterBindSpec extends Object{
     protected String datasourceName = null;// null means that parameter is binded to query parameter
