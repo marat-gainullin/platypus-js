@@ -48,69 +48,6 @@ public class Utils {
 		}-*/;
         }
         
-	private static final String addListenerName = "-platypus-listener-add-func";
-	private static final String removeListenerName = "-platypus-listener-remove-func";
-	private static final String fireChangeName = "-platypus-change-fire-func";
-
-	public static native JavaScriptObject listenable(JavaScriptObject aTarget)/*-{
-		var listeners = new Set();
-		Object.defineProperty(aTarget, @com.eas.core.Utils::addListenerName, {
-			value : function(aListener) {
-				listeners.add(aListener);
-			}
-		});
-		Object.defineProperty(aTarget, @com.eas.core.Utils::removeListenerName, {
-			value : function(aListener) {
-				listeners['delete'](aListener);
-			}
-		});
-		Object.defineProperty(aTarget, @com.eas.core.Utils::fireChangeName, {
-			value : function(aChange) {
-				Object.freeze(aChange);
-				var _listeners = [];
-				listeners.forEach(function(aListener) {
-					_listeners.push(aListener);
-				});
-				_listeners.forEach(function(aListener) {
-					aListener(aChange);
-				});
-			}
-		});
-		return function() {
-			unlistenable(aTarget);
-		};
-	}-*/;
-
-	public static native void unlistenable(JavaScriptObject aTarget)/*-{
-		delete aTarget[@com.eas.core.Utils::addListenerName];
-		delete aTarget[@com.eas.core.Utils::removeListenerName];
-	}-*/;
-
-	public static native JavaScriptObject listen(JavaScriptObject aTarget, JavaScriptObject aListener)/*-{
-		var addListener = aTarget[@com.eas.core.Utils::addListenerName];
-		if (addListener) {
-			addListener(aListener);
-			return function() {
-				aTarget[@com.eas.core.Utils::removeListenerName](aListener);
-			};
-		} else {
-			return null;
-		}
-	}-*/;
-
-	public static native void unlisten(JavaScriptObject aTarget, JavaScriptObject aListener)/*-{
-		aTarget[@com.eas.core.Utils::removeListenerName](aListener);
-	}-*/;
-
-	public static native void fire(JavaScriptObject aTarget, JavaScriptObject aChange)/*-{
-		try {
-			aTarget[@com.eas.core.Utils::fireChangeName](aChange);
-		} catch (e) {
-			var Logger = @com.eas.core.Predefine::logger;
-			Logger.Logger.severe(e);
-		}
-	}-*/;
-
 	public static native JavaScriptObject publishCancellable(Cancellable aValue)/*-{
 		return {
 			abort : function() {

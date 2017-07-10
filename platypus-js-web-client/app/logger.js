@@ -1,5 +1,3 @@
-/* global Java */
-
 define(function () {
     function date() {
         return JSON.stringify(new Date());

@@ -1,15 +1,27 @@
-define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, Logger, M, Orderer) {
-    var PENDING_ASSUMPTION_FAILED_MSG = "pending assigned to null without pending.cancel() call.";
-    var QUERY_REQUIRED = "All model entities must have a query";
+define(['./id', './logger', './managed', './orderer', './client'], function (Id, Logger, M, Orderer, Client) {
 
     function Entity(model, query) {
-        var cursorListener;
-        var pending;
-        var valid = false;
+        var self = this;
+        
+        var scalarNavigationProperties = new Map();
+        var collectionNavigationProperties = new Map();
+
+        function addScalarNavigation(aNavigation) {
+            scalarNavigationProperties.set(aNavigation.name, aNavigation);
+        }
+
+        function addCollectionNavigation(aNavigation) {
+            collectionNavigationProperties.set(aNavigation.name, aNavigation);
+        }
+        
+        function clearScalarNavigations(){}
+            scalarNavigationProperties.clear();
+        
+        function clearCollectionNavigations(){
+            collectionNavigationProperties.clear();
+        }
 
         var onRequeried = null;
-        var snapshotConsumer;
-        var snapshotProducer;
         var lastSnapshot = [];
         var title = '';
         var name = '';
@@ -23,29 +35,152 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
         var keysNames = new Set();
         var requiredNames = new Set();
 
-        var self = this;
 
         var elementClass = null;
 
+        var valid = false;
+        var pending = null;
+        var parameters = {};
+
+        function inRelatedValid() {
+            var allvalid = true;
+            inRelations.forEach(function (relation) {
+                if (relation.leftEntity && !relation.leftEntity.valid) {
+                    allvalid = false;
+                }
+            });
+            return allvalid;
+        }
+
+        function fromRight(){
+            var right = [];
+            outRelations.forEach(function(relation){
+                right.push(relation.rightEntity);
+            });
+            return right;
+        }
+
+        function collectRight(){
+            var collected = [];
+            // Breadth first collecting
+            var right = fromRight();
+            for(var r = 0; r < right.length; r++){
+                var rightEntity = right[r];
+                collected.push(rightEntity);
+                Array.prototype.push.apply(rightEntity, rightEntity.fromRight());
+            }
+            return collected;
+        }
+
+        function invalidate() {
+            valid = false;
+        }
+
+        function cancel() {
+            if (!pending)
+                throw "Can't cancel absent request";
+            pending.cancel();
+            pending = null;
+        }
+
+        function bindParameters() {
+            inRelations.forEach(function (relation) {
+                var source = relation.leftEntity;
+                if (relation.leftItem) {
+                    var leftValue;
+                    if (relation.leftParameter) {
+                        leftValue = source.params[relation.leftItem];
+                    } else {
+                        if (source.cursor) {
+                            leftValue = source.cursor[relation.leftItem];
+                        } else if (source.length > 0) {
+                            leftValue = source[0][relation.leftItem];
+                        } else {
+                            leftValue = null;
+                        }
+                    }
+                    parameters[relation.rightItem] = typeof leftValue === 'undefined' ? null : leftValue;
+                }
+            });
+        }
+
+        function start(/*Low level event*/onSuccess, /*Low level event*/onFailure) {
+            if (pending)
+                throw "Can't start new request, while previous request is in progress";
+            if (valid)
+                throw "Can't start request for valid entity";
+            pendingOnSuccess = onSuccess;
+            pendingOnFailure = onFailure;
+            bindParameters();
+            pending = query.requestData(parameters, function (data) {
+                acceptData(data, true);
+                lastSnapshot = data;
+                var onSuccess = pendingOnSuccess;
+                pending = null;
+                pendingOnSuccess = null;
+                pendingOnFailure = null;
+                valid = true;
+                if (onSuccess) {
+                    onSuccess();
+                }
+                if (onRequeried)
+                    onRequeried();
+            }, function () {
+                valid = true;
+                var onFailure = pendingOnFailure;
+                pending = null;
+                pendingOnSuccess = null;
+                pendingOnFailure = null;
+                if (onFailure) {
+                    onFailure();
+                }
+            });
+        }
+
         function enqueueUpdate(params) {
+            var command = query.prepareCommand(params);
+            model.changeLog.push(command);
         }
 
         function executeUpdate(onSuccess, onFailure) {
+            Logger.warning('Entity.executeUpdate() is deprecated, Use Entity.update() instead.');
+            update(onSuccess, onFailure);
         }
 
         function execute(onSuccess, onFailure) {
+            Logger.warning('Entity.execute() is deprecated, Use Entity.requery() instead.');
+            requery(onSuccess, onFailure);
         }
 
         function query(params, onSuccess, onFailure) {
+            if (onSuccess) {
+                query.requestData(params, onSuccess, onFailure);
+            } else {
+                throw "Synchronous Entity.query() method is not supported within browser client. So 'onSuccess' is required argument.";
+            }
         }
 
         function requery(onSuccess, onFailure) {
+            if (onSuccess) {
+                var toInvalidate = collectRight();
+                toInvalidate.push(self);
+                model.start(toInvalidate, onSuccess, onFailure);
+            } else {
+                throw "Synchronous Entity.requery() method is not supported within browser client. So 'onSuccess' is required argument.";
+            }
         }
 
         function append(data) {
+            acceptData(data, false);
         }
 
         function update(params, onSuccess, onFailure) {
+            if (onSuccess) {
+                var command = query.prepareCommand(params);
+                Client.requestCommit([command], onSuccess, onFailure);
+            } else {
+                throw "Synchronous Entity.update() method is not supported within browser client. So 'onSuccess' is required argument.";
+            }
         }
 
         function isPk(aPropertyName) {
@@ -73,28 +208,27 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
             this.data = {};
         }
 
-        function fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nFields) {
+        function fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange) {
             var expandingsOldValues = aChange.beforeState.selfScalarsOldValues;
-            var ormDefs = /*nFields.@com.eas.client.metadata.Fields::*/forEachOrmScalarExpandings(aChange.propertyName, function (ormDef) {
-                var ormDefName = ormDef.name;
-                if (ormDefName) {
+            scalarNavigationProperties.forEach(aChange.propertyName, function (ormDef, scalarName) {
+                if (aChange.propertyName === ormDef.baseName) {
                     var ormDefOppositeName = ormDef.oppositeName;
-                    var expandingOldValue = expandingsOldValues[ormDefName];
-                    var expandingNewValue = aSubject[ormDefName];
-                    /*@com.eas.core.Utils::*/fire(aSubject, {
+                    var expandingOldValue = expandingsOldValues[scalarName];
+                    var expandingNewValue = aSubject[scalarName];
+                    M.fire(aSubject, {
                         source: aChange.source,
-                        propertyName: ormDefName,
+                        propertyName: scalarName,
                         oldValue: expandingOldValue,
                         newValue: expandingNewValue
                     });
                     if (ormDefOppositeName) {
                         if (expandingOldValue) {
-                            /*@com.eas.core.Utils::*/fire(expandingOldValue, {
+                            M.fire(expandingOldValue, {
                                 source: expandingOldValue, propertyName: ormDefOppositeName
                             });
                         }
                         if (expandingNewValue) {
-                            /*@com.eas.core.Utils::*/fire(expandingNewValue, {
+                            M.fire(expandingNewValue, {
                                 source: expandingNewValue, propertyName: ormDefOppositeName
                             });
                         }
@@ -103,11 +237,11 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
             });
         }
 
-        function prepareSelfScalarsChanges(aSubject, aChange, nFields) {
+        function prepareSelfScalarsChanges(aSubject, aChange) {
             var oldScalarValues = [];
-            /*nFields.@com.eas.client.metadata.Fields::*/forEachOrmScalarExpandings(aChange.propertyName, function (ormDef) {
-                if (ormDef && ormDef.name) {
-                    oldScalarValues[ormDef.name] = aSubject[ormDef.name];
+            scalarNavigationProperties.forEach(function (ormDef, scalarName) {
+                if (aChange.propertyName === ormDef.baseName && scalarName) {
+                    oldScalarValues[scalarName] = aSubject[scalarName];
                 }
             });
             return oldScalarValues;
@@ -120,35 +254,31 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
                     aFirerer();
                 });
             }
-            var collectionsDefs = /*nFields.@com.eas.client.metadata.Fields::*/getOrmCollectionsDefinitions();
-            if (collectionsDefs) {
-                collectionsDefs.forEach(function (ormDef, collectionName) {
-                    var collection = aSubject[collectionName];
-                    collection.forEach(function (item) {
-                        /*@com.eas.core.Utils::*/fire(item, {
-                            source: item,
-                            propertyName: ormDef.oppositeName
-                        });
+            collectionNavigationProperties.forEach(function (ormDef, collectionName) {
+                var collection = aSubject[collectionName];
+                collection.forEach(function (item) {
+                    M.fire(item, {
+                        source: item,
+                        propertyName: ormDef.oppositeName
                     });
                 });
-                collectionsDefs.forEach(function (ormDef, collectionName) {
-                    /*@com.eas.core.Utils::*/fire(aSubject, {
-                        source: aSubject, propertyName: collectionName
-                    });
+            });
+            collectionNavigationProperties.forEach(function (ormDef, collectionName) {
+                M.fire(aSubject, {
+                    source: aSubject, propertyName: collectionName
                 });
-            }
+            });
         }
 
         function prepareOppositeScalarsChanges(aSubject) {
             var firerers = [];
-            var collectionsDefs = /*nFields.@com.eas.client.metadata.Fields::*/getOrmCollectionsDefinitions();
-            collectionsDefs.forEach(function (ormDef, collectionName) {
+            collectionNavigationProperties.forEach(function (ormDef, collectionName) {
                 var collection = aSubject[collectionName];
                 collection.forEach(function (item) {
                     var ormDefOppositeName = ormDef.oppositeName;
                     if (ormDefOppositeName) {
                         firerers.push(function () {
-                            /*@com.eas.core.Utils::*/fire(item, {
+                            M.fire(item, {
                                 source: item,
                                 propertyName: ormDefOppositeName
                             });
@@ -167,11 +297,10 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
         }
 
         function fireOppositeCollectionsChanges(aSubject) {
-            var scalarsDefs = /*nFields.@com.eas.client.metadata.Fields::*/getOrmScalarDefinitions();
-            scalarsDefs.forEach(function (ormDef, scalarName) {
+            scalarNavigationProperties.forEach(function (ormDef, scalarName) {
                 var scalar = aSubject[scalarName];
                 if (scalar && ormDef.oppositeName) {
-                    /*@com.eas.core.Utils::*/fire(scalar, {
+                    M.fire(scalar, {
                         source: scalar,
                         propertyName: ormDef.oppositeName
                     });
@@ -184,20 +313,18 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
         var orderers = {};
         var published = [];
 
-        // TODO: Replace using of changeLog with model.changeLog
-        var changeLog = model.changeLog;
         var _onChange = null;
 
         function managedOnChange(aSubject, aChange) {
             if (!tryToComplementInsert(aSubject, aChange)) {
-                var updateChange = new Update(query.name);
+                var updateChange = new Update(query.entityName);
                 // Generate changeLog keys for update
                 keysNames.forEach(function (keyName) {
                     // Tricky processing of primary keys modification case.
                     updateChange.keys[keyName] = keyName === aChange.propertyName ? aChange.oldValue : aChange.newValue;
                 });
                 updateChange.data[aChange.propertyName] = aChange.newValue;
-                changeLog.push(updateChange);
+                model.changeLog.push(updateChange);
             }
             Object.keys(orderers).forEach(function (aOrdererKey) {
                 var aOrderer = orderers[aOrdererKey];
@@ -205,7 +332,7 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
                     aOrderer.add(aChange.source);
                 }
             });
-            /*@com.eas.core.Utils::*/fire(aSubject, aChange);
+            M.fire(aSubject, aChange);
             fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange);// Expanding change
             if (isPk(aChange.propertyName)) {
                 fireOppositeScalarsSelfCollectionsChanges(aSubject, aChange);
@@ -253,63 +380,20 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
             return complemented;
         }
 
-        function javaOrmDefsToJs(aOrmDefs) {
-            var jsDefs = {};
-            var aOrmDefsIt = aOrmDefs.entrySet().iterator();
-            while (aOrmDefsIt.hasNext()) {
-                var defsEntry = aOrmDefsIt.next();
-                var ormDef = defsEntry.getValue();
-                var jsDef = ormDef.getJsDef();
-                jsDefs[defsEntry.getKey()] = jsDef;
-            }
-            return jsDefs;
-        }
-        function acceptInstance(aSubject, aReassignOrmValues) {
+        function acceptInstance(aSubject) {
             for (var aFieldName in aSubject) {
                 if (typeof aSubject[aFieldName] === 'undefined')
                     aSubject[aFieldName] = null;
             }
-            var scalarsContainer = {};
-            var scalarJsDefs = /*nFields.@com.eas.client.metadata.Fields::*/getOrmScalarDefinitions();
-            if (aReassignOrmValues) {
-                scalarJsDefs.forEach(function (scalarDef, scalarName) {
-                    if (typeof aSubject[scalarName] !== 'undefined') {
-                        scalarsContainer[scalarName] = aSubject[scalarName];
-                        aSubject[scalarName] = null;
-                    }
-                });
-            }
-            var collectionsContainer = {};
-            var collectionsJsDefs = /*nFields.@com.eas.client.metadata.Fields::*/getOrmCollectionsDefinitions();
-            if (aReassignOrmValues) {
-                collectionsJsDefs.forEach(function (collectionDef, collectionName) {
-                    if (typeof aSubject[collectionName] !== 'undefined') {
-                        collectionsContainer[collectionName] = aSubject[collectionName];
-                        aSubject[collectionName] = null;
-                    }
-                });
-            }
-
             M.manageObject(aSubject, managedOnChange, managedBeforeChange);
-            /*@com.eas.core.Utils::*/listenable(aSubject);
-            // ORM mutable scalar and collection properties
-            scalarJsDefs.forEach(function (scalarDef, scalarName) {
+            M.listenable(aSubject);
+            // ORM mutable scalar properties
+            scalarNavigationProperties.forEach(function (scalarDef, scalarName) {
                 Object.defineProperty(aSubject, scalarName, scalarDef);
-                if (aReassignOrmValues && typeof scalarsContainer[scalarName] !== 'undefined') {
-                    aSubject[scalarName] = scalarsContainer[scalarName];
-                }
             });
-            collectionsJsDefs.forEach(function (collectionDef, collectionName) {
+            // ORM mutable collection properties
+            collectionNavigationProperties.forEach(function (collectionDef, collectionName) {
                 Object.defineProperty(aSubject, collectionName, collectionDef);
-                if (aReassignOrmValues && typeof collectionsContainer[collectionName] !== 'undefined') {
-                    var definedCollection = aSubject[collectionName];
-                    var savedCollection = collectionsContainer[collectionName];
-                    if (definedCollection && savedCollection && savedCollection.length > 0) {
-                        for (var pi = 0; pi < savedCollection.length; pi++) {
-                            definedCollection.push(savedCollection[pi]);
-                        }
-                    }
-                }
             });
         }
 
@@ -321,7 +405,7 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
             spliced: function (added, deleted) {
                 added.forEach(function (aAdded) {
                     justInserted = aAdded;
-                    justInsertedChange = new Insert(query.name);
+                    justInsertedChange = new Insert(query.entityName);
                     keysNames.forEach(function (keyName) {
                         if (!aAdded[keyName]) // If key is already assigned, than we have to preserve its value
                             aAdded[keyName] = Id.generate();
@@ -330,7 +414,7 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
                     for (var na in aAdded) {
                         justInsertedChange.data[na] = aAdded[na];
                     }
-                    changeLog.push(justInsertedChange);
+                    model.changeLog.push(justInsertedChange);
                     for (var aOrdererKey in orderers) {
                         var aOrderer = orderers[aOrdererKey];
                         aOrderer.add(aAdded);
@@ -344,20 +428,20 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
                         justInserted = null;
                         justInsertedChange = null;
                     }
-                    var deleteChange = new Delete(query.name);
+                    var deleteChange = new Delete(query.entityName);
                     // Generate changeLog keys for delete
                     keysNames.forEach(function (keyName) {
                         // Tricky processing of primary keys modification case.
                         deleteChange.keys[keyName] = aDeleted[keyName];
                     });
-                    changeLog.push(deleteChange);
+                    model.changeLog.push(deleteChange);
                     for (var aOrdererKey in orderers) {
                         var aOrderer = orderers[aOrdererKey];
                         aOrderer['delete'](aDeleted);
                     }
                     fireOppositeScalarsChanges(aDeleted);
                     fireOppositeCollectionsChanges(aDeleted);
-                    /*@com.eas.core.Utils::*/unlistenable(aDeleted);
+                    M.unlistenable(aDeleted);
                     M.unmanageObject(aDeleted);
                 });
                 if (_onInserted && added.length > 0) {
@@ -380,7 +464,10 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
                         Logger.severe(e);
                     }
                 }
-                /*@com.eas.core.Utils::*/fire(self, {source: self, propertyName: 'length'});
+                M.fire(self, {
+                    source: self,
+                    propertyName: 'length'
+                });
             },
             scrolled: function (aSubject, oldCursor, newCursor) {
                 if (_onScrolled) {
@@ -395,23 +482,23 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
                         Logger.severe(e);
                     }
                 }
-                /*@com.eas.core.Utils::*/fire(self, {
+                M.fire(self, {
                     source: self,
                     propertyName: 'cursor',
                     oldValue: oldCursor,
                     newValue: newCursor
                 });
+                Logger.info('About to requery some entities, due to cursor changes in ' + query.entityName);
+                var toInvalidate = collectRight();
+                model.start(toInvalidate, function(){
+                    Logger.info('Some model entities requeried, due to cursor changes in ' + query.entityName);
+                }, function(e){
+                    Logger.severe(e);
+                });
             }
         });
-        // entity.params.p1 syntax
-        Object.defineProperty(self, 'params', {
-            get: function () {
-                return query.parameters;
-            },
-            set: function (aValue) {
-                query.parameters = aValue;
-            }
-        });
+        M.listenable(self);
+        
         function find(aCriteria) {
             if (typeof aCriteria === 'function' && Array.prototype.find) {
                 return Array.prototype.find.call(published, aCriteria);
@@ -431,6 +518,7 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
                 return found;
             }
         }
+        
         function findByKey(aKeyValue) {
             if (keysNames.length > 0) {
                 var criteria = {};
@@ -441,10 +529,12 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
                 return null;
             }
         }
+        
         function findById(aKeyValue) {
             Logger.warning('findById() is deprecated. Use findByKey() instead.');
             return findByKey(aKeyValue);
         }
+        
         var toBeDeletedMark = '-platypus-to-be-deleted-mark';
         function remove(toBeDeleted) {
             toBeDeleted = toBeDeleted.forEach ? toBeDeleted : [toBeDeleted];
@@ -460,6 +550,82 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
                 delete anInstance[toBeDeletedMark];
             });
         }
+
+        function acceptData(aData, aFreshData) {
+            if (aFreshData) {
+                Array.prototype.splice.call(published, 0, published.length);
+            }
+            for (var s = 0; s < aData.length; s++) {
+                var dataRow = aData[s];
+                var accepted;
+                if (elementClass) {
+                    accepted = new elementClass();
+                } else {
+                    accepted = {};
+                }
+                for (var sp in dataRow) {
+                    accepted[sp] = dataRow[sp];
+                }
+                Array.prototype.push.call(self, accepted);
+                acceptInstance(accepted, false);
+            }
+            orderers = {};
+            published.cursor = published.length > 0 ? published[0] : null;
+            M.fire(published, {
+                source: published,
+                propertyName: 'length'
+            });
+            self.forEach(function (aItem) {
+                fireOppositeScalarsChanges(aItem);
+                fireOppositeCollectionsChanges(aItem);
+            });
+        }
+
+        function takeSnapshot() {
+            lastSnapshot = [];
+            self.forEach(function (aItem) {
+                var cloned = {};
+                for (var aFieldName in aItem) {
+                    var typeOfField = typeof aItem[aFieldName];
+                    if (typeOfField === 'undefined' || typeOfField === 'function')
+                        cloned[aFieldName] = null;
+                    else
+                        cloned[aFieldName] = aItem[aFieldName];
+                }
+                lastSnapshot.push(cloned);
+            });
+        }
+
+        function applyLastSnapshot() {
+            if (lastSnapshot) {
+                acceptData(lastSnapshot, true);
+            }
+        }
+
+        function addInRelation(relation) {
+            inRelations.add(relation);
+        }
+
+        function addOutRelation(relation) {
+            outRelations.add(relation);
+        }
+
+        Object.defineProperty(self, 'params', {
+            get: function () {
+                return parameters;
+            }
+        });
+        
+        Object.defineProperty(published, 'applyLastSnapshot', {
+            get: function () {
+                return applyLastSnapshot;
+            }
+        });
+        Object.defineProperty(published, 'takeSnapshot', {
+            get: function () {
+                return takeSnapshot;
+            }
+        });
         Object.defineProperty(published, 'find', {
             get: function () {
                 return find;
@@ -512,60 +678,6 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
                 _onChange = aValue;
             }
         });
-        function snapshotConsumer(aSnapshot, aFreshData) {
-            if (aFreshData) {
-                Array.prototype.splice.call(published, 0, published.length);
-            }
-            for (var s = 0; s < aSnapshot.length; s++) {
-                var snapshotInstance = aSnapshot[s];
-                var accepted;
-                if (elementClass) {
-                    accepted = new elementClass();
-                } else {
-                    accepted = {};
-                }
-                for (var sp in snapshotInstance) {
-                    accepted[sp] = snapshotInstance[sp];
-                }
-                Array.prototype.push.call(self, accepted);
-                acceptInstance(accepted, false);
-            }
-            orderers = {};
-            published.cursor = published.length > 0 ? published[0] : null;
-            /*@com.eas.core.Utils::*/fire(published, {
-                source: published,
-                propertyName: 'length'
-            });
-            self.forEach(function (aItem) {
-                fireOppositeScalarsChanges(aItem);
-                fireOppositeCollectionsChanges(aItem);
-            });
-        }
-        function snapshotProducer() {
-            var snapshot = [];
-            self.forEach(function (aItem) {
-                var cloned = {};
-                for (var aFieldName in aItem) {
-                    var typeOfField = typeof aItem[aFieldName];
-                    if (typeOfField === 'undefined' || typeOfField === 'function')
-                        cloned[aFieldName] = null;
-                    else
-                        cloned[aFieldName] = aItem[aFieldName];
-                }
-                snapshot.push(cloned);
-            });
-            return snapshot;
-        }
-        /*@com.eas.core.Utils::*/listenable(self);
-
-        function addInRelation(relation){
-            inRelations.add(relation);
-        }
-
-        function addOutRelation(relation){
-            outRelations.add(relation);
-        }
-
         Object.defineProperty(this, 'elementClass', {
             get: function () {
                 return elementClass;
@@ -627,7 +739,7 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
         });
         Object.defineProperty(this, 'title', {
             get: function () {
-                return query ? query.title : title;
+                return title;
             },
             set: function (aValue) {
                 title = aValue;
@@ -665,19 +777,6 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
                 elementClass = aValue;
             }
         });
-        Object.defineProperty(this, 'valid', {
-            get: function () {
-                return valid;
-            },
-            set: function (aValue) {
-                valid = aValue;
-            }
-        });
-        Object.defineProperty(this, 'changeLog', {
-            get: function () {
-                return model.changeLog;
-            }
-        });
         Object.defineProperty(this, 'addInRelation', {
             get: function () {
                 return addInRelation;
@@ -686,6 +785,64 @@ define(['id', 'invoke', 'logger', 'managed', 'orderer'], function (Id, Invoke, L
         Object.defineProperty(this, 'addOutRelation', {
             get: function () {
                 return addOutRelation;
+            }
+        });
+        Object.defineProperty(this, 'valid', {
+            get: function () {
+                return valid;
+            },
+            set: function (aValue) {
+                valid = aValue;
+            }
+        });
+        Object.defineProperty(this, 'pending', {
+            get: function () {
+                return !!pending;
+            }
+        });
+        Object.defineProperty(this, 'start', {
+            get: function () {
+                return start;
+            }
+        });
+        Object.defineProperty(this, 'cancel', {
+            get: function () {
+                return cancel;
+            }
+        });
+        Object.defineProperty(this, 'invalidate', {
+            get: function () {
+                return invalidate;
+            }
+        });
+        Object.defineProperty(this, 'inRelatedValid', {
+            get: function () {
+                return inRelatedValid;
+            }
+        });
+        Object.defineProperty(this, 'collectRight', {
+            get: function () {
+                return collectRight;
+            }
+        });
+        Object.defineProperty(this, 'addScalarNavigation', {
+            get: function () {
+                return addScalarNavigation;
+            }
+        });
+        Object.defineProperty(this, 'addCollectionNavigation', {
+            get: function () {
+                return addCollectionNavigation;
+            }
+        });
+        Object.defineProperty(this, 'clearScalarNavigations', {
+            get: function () {
+                return clearScalarNavigations;
+            }
+        });
+        Object.defineProperty(this, 'clearCollectionNavigations', {
+            get: function () {
+                return clearCollectionNavigations;
             }
         });
     }

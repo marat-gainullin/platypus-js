@@ -1,4 +1,4 @@
-define(['logger'], function (Logger) {
+define(['./logger'], function (Logger) {
     var HTML5 = "HTML5 client";
     var J2SE = "Java SE environment";
 

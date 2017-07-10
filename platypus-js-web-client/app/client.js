@@ -1,4 +1,4 @@
-define(['logger', 'invoke', 'id', 'core/report', 'internals'], function (Logger, Invoke, Id, Report, Utils) {
+define(['./logger', './invoke', './id', './core/report', './internals'], function (Logger, Invoke, Id, Report, Utils) {
     var principal;
     var REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
 
@@ -47,6 +47,28 @@ define(['logger', 'invoke', 'id', 'core/report', 'internals'], function (Logger,
                 }
                 res += arguments[i];
             }
+        }
+        return res;
+    }
+    
+    function objToParams(params){
+        var res = "";
+        for(var p in params){
+            if (res.length > 0) {
+                res += "&";
+            }
+            res += param(p, params[p]);
+        }
+        return res;
+    }
+    
+    function arrayToParams(paramsName, params){
+        var res = "";
+        for(var p = 0; p < params.length; p ++){
+            if (res.length > 0) {
+                res += "&";
+            }
+            res += param(paramsName, params[p]);
         }
         return res;
     }
@@ -260,15 +282,11 @@ define(['logger', 'invoke', 'id', 'core/report', 'internals'], function (Logger,
     }
 
     function requestServerMethodExecution(aModuleName, aMethodName, aParams, onSuccess, onFailure) {
-        var convertedParams = [];
-        for (var i = 0; i < aParams.length; i++) {
-            convertedParams.push(param(RequestParams.PARAMS_ARRAY, aParams[i]));
-        }
         var query = params(
                 param(RequestParams.TYPE, RequestTypes.rqExecuteServerModuleMethod),
                 param(RequestParams.MODULE_NAME, aModuleName),
                 param(RequestParams.METHOD_NAME, aMethodName),
-                params(convertedParams));
+                arrayToParams(RequestParams.PARAMS_ARRAY, aParams));
         if (onSuccess) {
             startApiRequest(null, null, query, Methods.POST, "application/x-www-form-urlencoded; charset=utf-8", function (aResponse) {
                 if (isJsonResponse(aResponse)) {
@@ -323,8 +341,11 @@ define(['logger', 'invoke', 'id', 'core/report', 'internals'], function (Logger,
         }
     }
 
-    function requestData(aQueryName, aParams, onSuccess, onFailure) {
-        var query = params(param(RequestParams.TYPE, RequestTypes.rqExecuteQuery), param(RequestParams.QUERY_NAME, aQueryName), params(aParams));
+    function requestData(aServerEntityName, aParams, onSuccess, onFailure) {
+        var query = params(
+                param(RequestParams.TYPE, RequestTypes.rqExecuteQuery),
+                param(RequestParams.QUERY_NAME, aServerEntityName), objToParams(aParams)
+                );
         return startApiRequest(null, query, "", Methods.GET, null, function (aResponse) {
             if (isJsonResponse(aResponse)) {
                 // TODO: Check all JSON.parse() against date reviver

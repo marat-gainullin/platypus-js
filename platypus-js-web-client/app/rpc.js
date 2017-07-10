@@ -1,4 +1,4 @@
-define(['core/report', 'invoke', 'client', 'internals'], function (Report, Invoke, Client, Utils) {
+define(['./core/report', './invoke', './client', './internals'], function (Report, Invoke, Client, Utils) {
     function requireRemotes(aRemotesNames, aOnSuccess, aOnFailure) {
         var remotesNames = Array.isArray(aRemotesNames) ? aRemotesNames : [aRemotesNames];
         var proxies = [];

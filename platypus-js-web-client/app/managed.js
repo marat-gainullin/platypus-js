@@ -1,4 +1,4 @@
-define(function () {
+define(['logger'], function (Logger) {
     var releaseName = '-platypus-orm-release-func';
     /** 
      * Substitutes properties of anObject with observable properties using Object.defineProperty()
@@ -58,99 +58,120 @@ define(function () {
         }
     }
     function manageArray(aTarget, aOnChange) {
-        Object.defineProperty(aTarget, "pop", {
-            value: function () {
-                var popped = Array.prototype.pop.call(aTarget);
-                if (popped) {
-                    aOnChange.spliced([], [popped]);
-                    if (popped === cursor) {
-                        aTarget.cursor = aTarget.length > 0 ? aTarget[aTarget.length - 1] : null;
-                    }
+        function pop() {
+            var popped = Array.prototype.pop.call(aTarget);
+            if (popped) {
+                aOnChange.spliced([], [popped]);
+                if (popped === cursor) {
+                    aTarget.cursor = aTarget.length > 0 ? aTarget[aTarget.length - 1] : null;
                 }
-                return popped;
+            }
+            return popped;
+        }
+        function shift() {
+            var shifted = Array.prototype.shift.call(aTarget);
+            if (shifted) {
+                aOnChange.spliced([], [shifted]);
+                if (shifted === cursor) {
+                    aTarget.cursor = aTarget.length > 0 ? aTarget[0] : null;
+                }
+            }
+            return shifted;
+        }
+        function push() {
+            var newLength = Array.prototype.push.apply(aTarget, arguments);
+            var added = [];
+            for (var a = 0; a < arguments.length; a++) {
+                added.push(arguments[a]);
+            }
+            aOnChange.spliced(added, []);
+            if (added.length > 0)
+                aTarget.cursor = added[added.length - 1];
+            return newLength;
+        }
+        function unshift() {
+            var newLength = Array.prototype.unshift.apply(aTarget, arguments);
+            var added = [];
+            for (var a = 0; a < arguments.length; a++) {
+                added.push(arguments[a]);
+            }
+            aOnChange.spliced(added, []);
+            if (added.length > 0)
+                aTarget.cursor = added[added.length - 1];
+            return newLength;
+        }
+        function reverse() {
+            var reversed = Array.prototype.reverse.apply(aTarget);
+            if (aTarget.length > 0) {
+                aOnChange.spliced([], []);
+            }
+            return reversed;
+        }
+        function sort() {
+            var sorted = Array.prototype.sort.apply(aTarget, arguments);
+            if (aTarget.length > 0) {
+                aOnChange.spliced([], []);
+            }
+            return sorted;
+        }
+        function splice() {
+            var beginDeleteAt = arguments[0];
+            if (beginDeleteAt < 0)
+                beginDeleteAt = aTarget.length - beginDeleteAt;
+            var deleted = Array.prototype.splice.apply(aTarget, arguments);
+            var added = [];
+            for (var a = 2; a < arguments.length; a++) {
+                var aAdded = arguments[a];
+                added.push(aAdded);
+            }
+            aOnChange.spliced(added, deleted);
+            if (added.length > 0) {
+                aTarget.cursor = added[added.length - 1];
+            } else {
+                if (deleted.indexOf(cursor) !== -1) {
+                    if (beginDeleteAt >= 0 && beginDeleteAt < aTarget.length)
+                        aTarget.cursor = aTarget[beginDeleteAt];
+                    else if (beginDeleteAt - 1 >= 0 && beginDeleteAt - 1 < aTarget.length)
+                        aTarget.cursor = aTarget[beginDeleteAt - 1];
+                    else
+                        aTarget.cursor = null;
+                }
+            }
+            return deleted;
+        }
+        Object.defineProperty(aTarget, "pop", {
+            get: function () {
+                return pop;
             }
         });
         Object.defineProperty(aTarget, "shift", {
-            value: function () {
-                var shifted = Array.prototype.shift.call(aTarget);
-                if (shifted) {
-                    aOnChange.spliced([], [shifted]);
-                    if (shifted === cursor) {
-                        aTarget.cursor = aTarget.length > 0 ? aTarget[0] : null;
-                    }
-                }
-                return shifted;
+            get: function () {
+                return shift;
             }
         });
         Object.defineProperty(aTarget, "push", {
-            value: function () {
-                var newLength = Array.prototype.push.apply(aTarget, arguments);
-                var added = [];
-                for (var a = 0; a < arguments.length; a++) {
-                    added.push(arguments[a]);
-                }
-                aOnChange.spliced(added, []);
-                if (added.length > 0)
-                    aTarget.cursor = added[added.length - 1];
-                return newLength;
+            get: function () {
+                return push;
             }
         });
         Object.defineProperty(aTarget, "unshift", {
-            value: function () {
-                var newLength = Array.prototype.unshift.apply(aTarget, arguments);
-                var added = [];
-                for (var a = 0; a < arguments.length; a++) {
-                    added.push(arguments[a]);
-                }
-                aOnChange.spliced(added, []);
-                if (added.length > 0)
-                    aTarget.cursor = added[added.length - 1];
-                return newLength;
+            get: function () {
+                return unshift;
             }
         });
         Object.defineProperty(aTarget, "reverse", {
-            value: function () {
-                var reversed = Array.prototype.reverse.apply(aTarget);
-                if (aTarget.length > 0) {
-                    aOnChange.spliced([], []);
-                }
-                return reversed;
+            get: function () {
+                return reverse;
             }
         });
         Object.defineProperty(aTarget, "sort", {
-            value: function () {
-                var sorted = Array.prototype.sort.apply(aTarget, arguments);
-                if (aTarget.length > 0) {
-                    aOnChange.spliced([], []);
-                }
-                return sorted;
+            get: function () {
+                return sort;
             }
         });
         Object.defineProperty(aTarget, "splice", {
-            value: function () {
-                var beginDeleteAt = arguments[0];
-                if (beginDeleteAt < 0)
-                    beginDeleteAt = aTarget.length - beginDeleteAt;
-                var deleted = Array.prototype.splice.apply(aTarget, arguments);
-                var added = [];
-                for (var a = 2; a < arguments.length; a++) {
-                    var aAdded = arguments[a];
-                    added.push(aAdded);
-                }
-                aOnChange.spliced(added, deleted);
-                if (added.length > 0) {
-                    aTarget.cursor = added[added.length - 1];
-                } else {
-                    if (deleted.indexOf(cursor) !== -1) {
-                        if (beginDeleteAt >= 0 && beginDeleteAt < aTarget.length)
-                            aTarget.cursor = aTarget[beginDeleteAt];
-                        else if (beginDeleteAt - 1 >= 0 && beginDeleteAt - 1 < aTarget.length)
-                            aTarget.cursor = aTarget[beginDeleteAt - 1];
-                        else
-                            aTarget.cursor = null;
-                    }
-                }
-                return deleted;
+            get: function () {
+                return splice;
             }
         });
         var cursor = null;
@@ -168,6 +189,71 @@ define(function () {
         });
         return aTarget;
     }
+
+    var addListenerName = "-platypus-listener-add-func";
+    var removeListenerName = "-platypus-listener-remove-func";
+    var fireChangeName = "-platypus-change-fire-func";
+
+    function listenable(aTarget) {
+        var listeners = new Set();
+        Object.defineProperty(aTarget, addListenerName, {
+            value: function (aListener) {
+                listeners.add(aListener);
+            }
+        });
+        Object.defineProperty(aTarget, removeListenerName, {
+            value: function (aListener) {
+                listeners.delete(aListener);
+            }
+        });
+        Object.defineProperty(aTarget, fireChangeName, {
+            value: function (aChange) {
+                Object.freeze(aChange);
+                var _listeners = [];
+                listeners.forEach(function (aListener) {
+                    _listeners.push(aListener);
+                });
+                _listeners.forEach(function (aListener) {
+                    aListener(aChange);
+                });
+            }
+        });
+        return function () {
+            unlistenable(aTarget);
+        };
+    }
+
+    function unlistenable(aTarget) {
+        delete aTarget[addListenerName];
+        delete aTarget[removeListenerName];
+    }
+
+    function listen(aTarget, aListener) {
+        var addListener = aTarget[addListenerName];
+        if (addListener) {
+            addListener(aListener);
+            return function () {
+                aTarget[removeListenerName](aListener);
+            };
+        } else {
+            return null;
+        }
+    }
+
+    function unlisten(aTarget, aListener) {
+        var removeListener = aTarget[removeListenerName];
+        if(removeListener)
+            removeListener(aListener);
+    }
+
+    function fire(aTarget, aChange) {
+        try {
+            aTarget[fireChangeName](aChange);
+        } catch (e) {
+            Logger.severe(e);
+        }
+    }
+
     var module = {};
     Object.defineProperty(module, 'manageObject', {
         enumerable: true,
@@ -180,6 +266,26 @@ define(function () {
     Object.defineProperty(module, 'manageArray', {
         enumerable: true,
         value: manageArray
+    });
+    Object.defineProperty(module, 'fire', {
+        enumerable: true,
+        value: fire
+    });
+    Object.defineProperty(module, 'listenable', {
+        enumerable: true,
+        value: listenable
+    });
+    Object.defineProperty(module, 'unlistenable', {
+        enumerable: true,
+        value: unlistenable
+    });
+    Object.defineProperty(module, 'listen', {
+        enumerable: true,
+        value: listen
+    });
+    Object.defineProperty(module, 'unlisten', {
+        enumerable: true,
+        value: unlisten
     });
     return module;
 });

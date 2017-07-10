@@ -1,4 +1,4 @@
-define(['client'], function (Client) {
+define(['./client'], function (Client) {
     function Principal(aName) {
         Object.defineProperty(this, "name", {get: function () {
                 return aName;

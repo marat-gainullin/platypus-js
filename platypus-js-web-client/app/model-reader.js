@@ -1,4 +1,4 @@
-define(['orm', 'entity', 'logger'], function (Orm, Entity, Logger) {
+define(['./orm', './entity', './logger'], function (Orm, Entity, Logger) {
 
     var ENTITY_TAG_NAME = "entity";
     var RELATION_TAG_NAME = "relation";
@@ -72,11 +72,12 @@ define(['orm', 'entity', 'logger'], function (Orm, Entity, Logger) {
             if (!queryId)
                 throw "Query name must present";
             entity.query = new Orm.Query(queryId);
-            return entity;
+            entity.model = model;
+            model.addEntity(entity);
         }
 
         function readRelation(element) {
-            var relation = new Orm.Relation();
+            var relation = {};
             var leftEntityId = getAttribute(element, "lei", LEFT_ENTITY_ID_ATTR_NAME, null);
             var leftFieldName = getAttribute(element, "lef", LEFT_ENTITY_FIELD_ATTR_NAME, null);
             var leftParameterName = getAttribute(element, "lep", LEFT_ENTITY_PARAMETER_ATTR_NAME, null);
@@ -99,29 +100,30 @@ define(['orm', 'entity', 'logger'], function (Orm, Entity, Logger) {
             }
             relationsResolvers.push(function () {
                 try {
-                    var lEntity = model.getEntityById(leftEntityId);
+                    var lEntity = model.getEntity(leftEntityId);
                     if (lEntity) {
                         relation.leftEntity = lEntity;
                         lEntity.addOutRelation(relation);
                     } else {
-                        Logger.severe('Relation has no left entity');
+                        Logger.severe('Relation has no left entity. Entity id is: ' + leftEntityId);
                     }
-                    var rEntity = model.getEntityById(rightEntityId);
+                    var rEntity = model.getEntity(rightEntityId);
                     if (rEntity) {
                         relation.rightEntity = rEntity;
                         rEntity.addInRelation(relation);
                     } else {
-                        Logger.severe('Relation has no right entity');
+                        Logger.severe('Relation has no right entity. Entity id is: ' + rightEntityId);
                     }
+                    if(lEntity && rEntity)
+                        model.addRelation(relation);
                 } catch (ex) {
                     Logger.severe(ex);
                 }
             });
-            return relation;
         }
 
         function readReferenceRelation(element) {
-            var referenceRelation = new Orm.ReferenceRelation();
+            var referenceRelation = {};
             var leftEntityId = getAttribute(element, "lei", LEFT_ENTITY_ID_ATTR_NAME, null);
             var rightEntityId = getAttribute(element, "rei", RIGHT_ENTITY_ID_ATTR_NAME, null);
             var leftFieldName = getAttribute(element, "lef", LEFT_ENTITY_FIELD_ATTR_NAME, null);
@@ -132,26 +134,27 @@ define(['orm', 'entity', 'logger'], function (Orm, Entity, Logger) {
             referenceRelation.rightField = rightFieldName ? rightFieldName.trim() : null;
             referenceRelation.scalarPropertyName = scalarPropertyName ? scalarPropertyName.trim() : null;
             referenceRelation.collectionPropertyName = collectionPropertyName ? collectionPropertyName.trim() : null;
-            
+
             relationsResolvers.push(function () {
                 try {
-                    var lEntity = model.getEntityById(leftEntityId);
+                    var lEntity = model.getEntity(leftEntityId);
                     if (lEntity) {
-                        relation.leftEntity = lEntity;
+                        referenceRelation.leftEntity = lEntity;
                     } else {
-                        Logger.severe('Reference relation has no left entity');
+                        Logger.severe('Reference relation has no left entity. Entity id is: ' + leftEntityId);
                     }
-                    var rEntity = model.getEntityById(rightEntityId);
+                    var rEntity = model.getEntity(rightEntityId);
                     if (rEntity) {
-                        relation.rightEntity = rEntity;
+                        referenceRelation.rightEntity = rEntity;
                     } else {
-                        Logger.severe('Reference relation has no right entity');
+                        Logger.severe('Reference relation has no right entity. Entity id is: ' + rightEntityId);
                     }
+                    if(lEntity && rEntity)
+                        model.addReferenceRelation(referenceRelation);
                 } catch (ex) {
                     Logger.severe(ex);
                 }
             });
-            return referenceRelation;
         }
 
         if (modelElement && model) {
@@ -160,23 +163,18 @@ define(['orm', 'entity', 'logger'], function (Orm, Entity, Logger) {
                 for (var i = 0; i < nl.length; i++) {
                     var nodeName = nl[i].nodeName;
                     if ("e" === nodeName || ENTITY_TAG_NAME === nodeName) {
-                        var entity = readEntity(nl[i]);
-                        entity.setModel(model);
-                        model.addEntity(entity);
+                        readEntity(nl[i]);
                     } else if ("r" === nodeName || RELATION_TAG_NAME === nodeName) {
-                        var relation = readRelation(nl[i], relation);
-                        model.addRelation(relation);
+                        readRelation(nl[i]);
                     } else if ("rr" === nodeName || REFERENCE_RELATION_TAG_NAME === nodeName) {
-                        var referenceRelation = readReferenceRelation(nl[i], referenceRelation);
-                        model.addReferenceRelation(referenceRelation);
+                        readReferenceRelation(nl[i]);
                     }
                 }
             }
             relationsResolvers.forEach(function (resolver) {
                 resolver();
             });
-            model.checkRelationsIntegrity();
-            model.checkReferenceRelationsIntegrity();
+            model.processReferenceRelations();
         }
     }
     function read(aDocument, aModuleName) {

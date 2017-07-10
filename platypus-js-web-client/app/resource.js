@@ -1,4 +1,4 @@
-define(['logger', 'internals'], function (Logger, Utils) {
+define(['./logger', './internals'], function (Logger, Utils) {
     
     function lookupCallerApplicationJsFile() {
         try {
