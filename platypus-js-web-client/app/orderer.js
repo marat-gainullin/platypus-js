@@ -22,7 +22,7 @@ define(function () {
             return keyNames.indexOf(aKeyName) !== -1;
         };
 
-        var map = {};
+        var map = new Map();
         this.add = function (anObject) {
             var key = calcKey(anObject);
             var subset = map.get(key);

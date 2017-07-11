@@ -1,8 +1,48 @@
-define(['./id', './logger', './managed', './orderer', './client'], function (Id, Logger, M, Orderer, Client) {
+define(['./id', './logger', './managed', './orderer', './client', './extend'], function (Id, Logger, M, Orderer, Client, extend) {
 
-    function Entity(model, query) {
+    function Query(entityName) {
+        function prepareCommand(parameters) {
+            var command = {
+                kind: 'command',
+                entity: entityName,
+                parameters: {}
+            };
+            for (var p in parameters)
+                command.parameters[p] = parameters[p];
+            return command;
+        }
+
+        function requestData(parameters, onSuccess, onFailure) {
+            pending = Client.requestData(entityName, parameters, onSuccess, onFailure);
+        }
+
+        Object.defineProperty(this, 'entityName', {
+            get: function () {
+                return entityName;
+            },
+            set: function (aValue) {
+                entityName = aValue;
+            }
+        });
+
+        Object.defineProperty(this, 'requestData', {
+            get: function () {
+                return requestData;
+            }
+        });
+        Object.defineProperty(this, 'prepareCommand', {
+            get: function () {
+                return prepareCommand;
+            }
+        });
+    }
+
+    function Entity(serverEntityName) {
+        if (!(this instanceof Entity))
+            throw "Use 'new Entity()' please";
+        Array.apply(this);
         var self = this;
-        
+
         var scalarNavigationProperties = new Map();
         var collectionNavigationProperties = new Map();
 
@@ -13,11 +53,11 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
         function addCollectionNavigation(aNavigation) {
             collectionNavigationProperties.set(aNavigation.name, aNavigation);
         }
-        
-        function clearScalarNavigations(){}
-            scalarNavigationProperties.clear();
-        
-        function clearCollectionNavigations(){
+
+        function clearScalarNavigations() {}
+        scalarNavigationProperties.clear();
+
+        function clearCollectionNavigations() {
             collectionNavigationProperties.clear();
         }
 
@@ -25,9 +65,8 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
         var lastSnapshot = [];
         var title = '';
         var name = '';
-        var entityId = Id.generate();
         var model = null;
-        var query = null;
+        var query = new Query(serverEntityName);
         var elementClass = null;
         var inRelations = new Set();
         var outRelations = new Set();
@@ -52,19 +91,19 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
             return allvalid;
         }
 
-        function fromRight(){
+        function fromRight() {
             var right = [];
-            outRelations.forEach(function(relation){
+            outRelations.forEach(function (relation) {
                 right.push(relation.rightEntity);
             });
             return right;
         }
 
-        function collectRight(){
+        function collectRight() {
             var collected = [];
             // Breadth first collecting
             var right = fromRight();
-            for(var r = 0; r < right.length; r++){
+            for (var r = 0; r < right.length; r++) {
                 var rightEntity = right[r];
                 collected.push(rightEntity);
                 Array.prototype.push.apply(rightEntity, rightEntity.fromRight());
@@ -210,7 +249,7 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
 
         function fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange) {
             var expandingsOldValues = aChange.beforeState.selfScalarsOldValues;
-            scalarNavigationProperties.forEach(aChange.propertyName, function (ormDef, scalarName) {
+            scalarNavigationProperties.forEach(function (ormDef, scalarName) {
                 if (aChange.propertyName === ormDef.baseName) {
                     var ormDefOppositeName = ormDef.oppositeName;
                     var expandingOldValue = expandingsOldValues[scalarName];
@@ -311,7 +350,6 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
         var justInserted = null;
         var justInsertedChange = null;
         var orderers = {};
-        var published = [];
 
         var _onChange = null;
 
@@ -401,7 +439,7 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
         var _onDeleted = null;
         var _onScrolled = null;
 
-        M.manageArray(published, {
+        M.manageArray(self, {
             spliced: function (added, deleted) {
                 added.forEach(function (aAdded) {
                     justInserted = aAdded;
@@ -410,7 +448,6 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
                         if (!aAdded[keyName]) // If key is already assigned, than we have to preserve its value
                             aAdded[keyName] = Id.generate();
                     });
-                    // TODO: Add a test with extra and unknown to a backend properties
                     for (var na in aAdded) {
                         justInsertedChange.data[na] = aAdded[na];
                     }
@@ -447,7 +484,7 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
                 if (_onInserted && added.length > 0) {
                     try {
                         _onInserted({
-                            source: published,
+                            source: self,
                             items: added
                         });
                     } catch (e) {
@@ -457,7 +494,7 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
                 if (_onDeleted && deleted.length > 0) {
                     try {
                         _onDeleted({
-                            source: published,
+                            source: self,
                             items: deleted
                         });
                     } catch (e) {
@@ -473,7 +510,7 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
                 if (_onScrolled) {
                     try {
                         _onScrolled({
-                            source: published,
+                            source: self,
                             propertyName: 'cursor',
                             oldValue: oldCursor,
                             newValue: newCursor
@@ -488,20 +525,22 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
                     oldValue: oldCursor,
                     newValue: newCursor
                 });
-                Logger.info('About to requery some entities, due to cursor changes in ' + query.entityName);
                 var toInvalidate = collectRight();
-                model.start(toInvalidate, function(){
-                    Logger.info('Some model entities requeried, due to cursor changes in ' + query.entityName);
-                }, function(e){
-                    Logger.severe(e);
-                });
+                if (toInvalidate.length > 0) {
+                    Logger.info('About to requery some entities, due to cursor changes in ' + query.entityName);
+                    model.start(toInvalidate, function () {
+                        Logger.info('Some model entities requeried, due to cursor changes in ' + query.entityName);
+                    }, function (e) {
+                        Logger.severe(e);
+                    });
+                }
             }
         });
         M.listenable(self);
-        
+
         function find(aCriteria) {
             if (typeof aCriteria === 'function' && Array.prototype.find) {
-                return Array.prototype.find.call(published, aCriteria);
+                return Array.prototype.find.call(self, aCriteria);
             } else {
                 var keys = Object.keys(aCriteria);
                 keys = keys.sort();
@@ -509,7 +548,7 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
                 var orderer = orderers[ordererKey];
                 if (!orderer) {
                     orderer = new Orderer(keys);
-                    published.forEach(function (item) {
+                    self.forEach(function (item) {
                         orderer.add(item);
                     });
                     orderers[ordererKey] = orderer;
@@ -518,7 +557,7 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
                 return found;
             }
         }
-        
+
         function findByKey(aKeyValue) {
             if (keysNames.length > 0) {
                 var criteria = {};
@@ -529,12 +568,12 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
                 return null;
             }
         }
-        
+
         function findById(aKeyValue) {
             Logger.warning('findById() is deprecated. Use findByKey() instead.');
             return findByKey(aKeyValue);
         }
-        
+
         var toBeDeletedMark = '-platypus-to-be-deleted-mark';
         function remove(toBeDeleted) {
             toBeDeleted = toBeDeleted.forEach ? toBeDeleted : [toBeDeleted];
@@ -553,7 +592,7 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
 
         function acceptData(aData, aFreshData) {
             if (aFreshData) {
-                Array.prototype.splice.call(published, 0, published.length);
+                Array.prototype.splice.call(self, 0, self.length);
             }
             for (var s = 0; s < aData.length; s++) {
                 var dataRow = aData[s];
@@ -570,9 +609,9 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
                 acceptInstance(accepted, false);
             }
             orderers = {};
-            published.cursor = published.length > 0 ? published[0] : null;
-            M.fire(published, {
-                source: published,
+            self.cursor = self.length > 0 ? self[0] : null;
+            M.fire(self, {
+                source: self,
                 propertyName: 'length'
             });
             self.forEach(function (aItem) {
@@ -610,43 +649,43 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
             outRelations.add(relation);
         }
 
-        Object.defineProperty(self, 'params', {
+        Object.defineProperty(this, 'params', {
             get: function () {
                 return parameters;
             }
         });
-        
-        Object.defineProperty(published, 'applyLastSnapshot', {
+
+        Object.defineProperty(this, 'applyLastSnapshot', {
             get: function () {
                 return applyLastSnapshot;
             }
         });
-        Object.defineProperty(published, 'takeSnapshot', {
+        Object.defineProperty(this, 'takeSnapshot', {
             get: function () {
                 return takeSnapshot;
             }
         });
-        Object.defineProperty(published, 'find', {
+        Object.defineProperty(this, 'find', {
             get: function () {
                 return find;
             }
         });
-        Object.defineProperty(published, 'findByKey', {
+        Object.defineProperty(this, 'findByKey', {
             get: function () {
                 return findByKey;
             }
         });
-        Object.defineProperty(published, 'findById', {
+        Object.defineProperty(this, 'findById', {
             get: function () {
                 return findById;
             }
         });
-        Object.defineProperty(published, 'remove', {
+        Object.defineProperty(this, 'remove', {
             get: function () {
                 return remove;
             }
         });
-        Object.defineProperty(published, 'onScroll', {
+        Object.defineProperty(this, 'onScroll', {
             get: function () {
                 return _onScrolled;
             },
@@ -654,7 +693,7 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
                 _onScrolled = aValue;
             }
         });
-        Object.defineProperty(published, 'onInsert', {
+        Object.defineProperty(this, 'onInsert', {
             get: function () {
                 return _onInserted;
             },
@@ -662,7 +701,7 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
                 _onInserted = aValue;
             }
         });
-        Object.defineProperty(published, 'onDelete', {
+        Object.defineProperty(this, 'onDelete', {
             get: function () {
                 return _onDeleted;
             },
@@ -670,7 +709,7 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
                 _onDeleted = aValue;
             }
         });
-        Object.defineProperty(published, 'onChange', {
+        Object.defineProperty(this, 'onChange', {
             get: function () {
                 return _onChange;
             },
@@ -729,14 +768,6 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
                 return update;
             }
         });
-        Object.defineProperty(this, 'entityId', {
-            get: function () {
-                return entityId;
-            },
-            set: function (aValue) {
-                entityId = aValue;
-            }
-        });
         Object.defineProperty(this, 'title', {
             get: function () {
                 return title;
@@ -753,28 +784,12 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
                 name = aValue;
             }
         });
-        Object.defineProperty(this, 'query', {
-            get: function () {
-                return query;
-            },
-            set: function (aValue) {
-                query = aValue;
-            }
-        });
         Object.defineProperty(this, 'model', {
             get: function () {
                 return model;
             },
             set: function (aValue) {
                 model = aValue;
-            }
-        });
-        Object.defineProperty(this, 'elementClass', {
-            get: function () {
-                return elementClass;
-            },
-            set: function (aValue) {
-                elementClass = aValue;
             }
         });
         Object.defineProperty(this, 'addInRelation', {
@@ -846,5 +861,6 @@ define(['./id', './logger', './managed', './orderer', './client'], function (Id,
             }
         });
     }
+    extend(Entity, Array);
     return Entity;
 });

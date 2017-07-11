@@ -426,13 +426,6 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
         }
     });
     
-    Object.defineProperty(module, 'param', {
-        enumerable: true,
-        get: function(){
-            return param;
-        }
-    });
-    
     Object.defineProperty(module, 'RequestTypes', {
         enumerable: true,
         get: function(){

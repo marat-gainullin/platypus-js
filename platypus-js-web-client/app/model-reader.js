@@ -1,4 +1,4 @@
-define(['./orm', './entity', './logger'], function (Orm, Entity, Logger) {
+define(['./model', './entity', './logger'], function (Model, Entity, Logger) {
 
     var ENTITY_TAG_NAME = "entity";
     var RELATION_TAG_NAME = "relation";
@@ -35,44 +35,44 @@ define(['./orm', './entity', './logger'], function (Orm, Entity, Logger) {
     }
 
     function transform(modelElement) {
-        var model = new Orm.Model();
+        var model = new Model();
 
         function getAttribute(aElement, aShortName, aLongName, defaultValue) {
             if (aElement.hasAttribute(aShortName))
-                return aElement.hasAttribute(aShortName);
+                return aElement.getAttribute(aShortName);
             else if (aElement.hasAttribute(aLongName))
-                return aElement.hasAttribute(aLongName);
+                return aElement.getAttribute(aLongName);
             else
                 return defaultValue;
         }
 
         var relationsResolvers = [];
+        var entitiesById = new Map();
 
         function readEntity(element) {
-            var entity = new Entity();
-            var name = getAttribute(element, "n", DATASOURCE_NAME_ATTR_NAME, null);
-            if (name) {
-                entity.name = name;
+            var serverEntityName = getAttribute(element, "qi", QUERY_ID_ATTR_NAME, null);
+            if ("null" === serverEntityName) {
+                serverEntityName = null;
             }
+            if (!serverEntityName)
+                throw "Server entity name ('" + QUERY_ID_ATTR_NAME + "' or 'qi' attribute) must present";
+            var entityId = getAttribute(element, "ei", ENTITY_ID_ATTR_NAME, null);
+            if ("null" === entityId) {
+                entityId = null;
+            }
+            if (!entityId)
+                throw "Entity id ('" + ENTITY_ID_ATTR_NAME + "' or 'n' attribute) must present";
+            var entity = new Entity(serverEntityName);
+            var name = getAttribute(element, "n", DATASOURCE_NAME_ATTR_NAME, null);
+            if (!name) {
+                throw "Entity variable name ('" + DATASOURCE_NAME_ATTR_NAME + "' or 'n' attribute) must present";
+            }
+            entity.name = name;
             var title = getAttribute(element, "tt", DATASOURCE_TITLE_ATTR_NAME, null);
             if (title) {
                 entity.title = title;
             }
-            var entityId = getAttribute(element, "ei", ENTITY_ID_ATTR_NAME, null);
-            if ("null".equals(entityId)) {
-                entityId = null;
-            }
-            if (!entityId)
-                throw "Entity id must present";
-            entity.setEntityId(entityId);
-            var queryId = getAttribute(element, "qi", QUERY_ID_ATTR_NAME, null);
-            if ("null".equals(queryId)) {
-                queryId = null;
-            }
-            if (!queryId)
-                throw "Query name must present";
-            entity.query = new Orm.Query(queryId);
-            entity.model = model;
+            entitiesById.set(entityId, entity);
             model.addEntity(entity);
         }
 
@@ -100,21 +100,21 @@ define(['./orm', './entity', './logger'], function (Orm, Entity, Logger) {
             }
             relationsResolvers.push(function () {
                 try {
-                    var lEntity = model.getEntity(leftEntityId);
+                    var lEntity = entitiesById.get(leftEntityId);
                     if (lEntity) {
                         relation.leftEntity = lEntity;
                         lEntity.addOutRelation(relation);
                     } else {
                         Logger.severe('Relation has no left entity. Entity id is: ' + leftEntityId);
                     }
-                    var rEntity = model.getEntity(rightEntityId);
+                    var rEntity = entitiesById.get(rightEntityId);
                     if (rEntity) {
                         relation.rightEntity = rEntity;
                         rEntity.addInRelation(relation);
                     } else {
                         Logger.severe('Relation has no right entity. Entity id is: ' + rightEntityId);
                     }
-                    if(lEntity && rEntity)
+                    if (lEntity && rEntity)
                         model.addRelation(relation);
                 } catch (ex) {
                     Logger.severe(ex);
@@ -137,20 +137,20 @@ define(['./orm', './entity', './logger'], function (Orm, Entity, Logger) {
 
             relationsResolvers.push(function () {
                 try {
-                    var lEntity = model.getEntity(leftEntityId);
+                    var lEntity = entitiesById.get(leftEntityId);
                     if (lEntity) {
                         referenceRelation.leftEntity = lEntity;
                     } else {
                         Logger.severe('Reference relation has no left entity. Entity id is: ' + leftEntityId);
                     }
-                    var rEntity = model.getEntity(rightEntityId);
+                    var rEntity = entitiesById.get(rightEntityId);
                     if (rEntity) {
                         referenceRelation.rightEntity = rEntity;
                     } else {
                         Logger.severe('Reference relation has no right entity. Entity id is: ' + rightEntityId);
                     }
-                    if(lEntity && rEntity)
-                        model.addReferenceRelation(referenceRelation);
+                    if (lEntity && rEntity)
+                        model.addAssociation(referenceRelation);
                 } catch (ex) {
                     Logger.severe(ex);
                 }
@@ -174,8 +174,9 @@ define(['./orm', './entity', './logger'], function (Orm, Entity, Logger) {
             relationsResolvers.forEach(function (resolver) {
                 resolver();
             });
-            model.processReferenceRelations();
+            model.processAssociations();
         }
+        return model;
     }
     function read(aDocument, aModuleName) {
         try {

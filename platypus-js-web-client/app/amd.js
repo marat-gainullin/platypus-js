@@ -3,34 +3,6 @@
     var MODULES_INDEX = "modules-index"; // Map module name -> script file with this module
     var TYPE_JAVASCRIPT = "text/javascript";
     
-    // TODO: Check whether these constants are needed in other parts of code
-    var MODEL_TAG_NAME = "datamodel";
-    var ENTITY_TAG_NAME = "entity";
-    var QUERY_ID_ATTR_NAME = "queryId";
-    
-    // TODO: Check whether this class is needed in other parts of code
-    function LoadProcess(expected, onSuccess, onFailure) {
-        var calls = 0;
-        var loaded = new Set();
-        var failures = new Set();
-
-        this.complete = function (aLoaded, aFailure) {
-            if (aLoaded) {
-                loaded.add(aLoaded);
-            }
-            if (aFailure) {
-                failures.add(aFailure);
-            }
-            if (++calls === expected) {
-                if (failures.size === 0) {
-                    onSuccess();
-                } else {
-                    onFailure();
-                }
-            }
-        };
-    }
-
     var config = {prefetch: false, cacheBust: false};
     (function () {
         var sourcePath = "/";
@@ -445,11 +417,13 @@
     function getDocumentByModule(aModuleName, aSuffix) {
         var doc = null;
         var structure = modulesStructures.get(aModuleName);
-        structure.structure.forEach(function(part) {
-            if (part.toLowerCase().endsWith(".model")) {
-                doc = documents.get(part);
-            }
-        });
+        if(structure){
+            structure.structure.forEach(function(part) {
+                if (part.toLowerCase().endsWith(".model")) {
+                    doc = documents.get(part);
+                }
+            });
+        }
         return doc;
     }
 

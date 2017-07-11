@@ -61,7 +61,7 @@ describe('AMD loader tests', function () {
         });
     });
     it('Prefetched resources of modules', function (done) {
-        pending('Till tests with http server');
+        pending('Till tests with server');
         require(['prefetched/a'], function(pa){
             expect(pa).toBeDefined();
             expect(pa.model).toBeTruthy();
