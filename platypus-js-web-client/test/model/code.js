@@ -161,7 +161,7 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
             });
         });
     });
-    it('Navigation properties edit', function (done) {
+    it('Navigation scalar properties edit', function (done) {
         require(['id', 'model', 'entity'], function (Id, Model, Entity) {
             withPetsModel(Id, Model, Entity, function (pets, owners, jenny, christy) {
                 christy.pets.forEach(function(pet){
@@ -184,6 +184,23 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
                     expect(pet.owner).toEqual(christy);
                 });
                 expect(christy.pets.length).toEqual(4);
+                done();
+            });
+        });
+    });
+    it('Navigation collection properties edit', function (done) {
+        require(['id', 'model', 'entity'], function (Id, Model, Entity) {
+            withPetsModel(Id, Model, Entity, function (pets, owners, jenny, christy) {
+                christy.pets.splice(0, christy.pets.length);
+                expect(christy.pets.length).toEqual(0);
+                pets.forEach(function (pet) {
+                    expect(pet).toBeDefined();
+                    expect(pet.owner === null || pet.owner === jenny).toBeTruthy();
+                    if(!pet.owner){
+                        jenny.pets.push(pet);
+                    }
+                });
+                expect(jenny.pets.length).toEqual(4);
                 done();
             });
         });
