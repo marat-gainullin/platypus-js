@@ -41,21 +41,36 @@ define(function () {
     }
 
     // TODO: Check if changes are made to this function both in amd.js and here
+    function extractFileName(aFrame) {
+        if (aFrame) {
+            // This is for Chrome stack traces
+            var matched = aFrame.match(/(https?:\/\/.+):\d+:\d+/);
+            if (matched) {
+                return matched[1];
+            } else {
+                matched = aFrame.match(/(file:\/\/.+):\d+:\d+/);
+                if (matched)
+                    return matched[1];
+                else
+                    return null;
+            }
+        } else {
+            return null;
+        }
+    }
+    
+    // TODO: Check if changes are made to this function both in amd.js and here
     function lookupCallerApplicationJsFile(aException) {
         var calledFromFile = null;
-        try {
-            throw new Error("Current application file test");
-        } catch (ex) {
-            var stack = aException.stack.split('\n');
-            var firstFileName = extractFileName(stack[1]);// On Chrome the first line is a error text
-            if (firstFileName) {
-                for (var frameIdx = 1; frameIdx < stack.length; frameIdx++) {
-                    var fileName = extractFileName(stack[frameIdx]);
-                    if (fileName && fileName !== firstFileName) {
-                        calledFromFile = fileName;
-                        var lastQuestionIndex = calledFromFile.lastIndexOf('?');// case of cache busting
-                        return lastQuestionIndex !== -1 ? calledFromFile.substring(0, lastQuestionIndex) : calledFromFile;
-                    }
+        var stack = aException.stack.split('\n');
+        var firstFileName = extractFileName(stack[1]);// On Chrome the first line is a error text
+        if (firstFileName) {
+            for (var frameIdx = 1; frameIdx < stack.length; frameIdx++) {
+                var fileName = extractFileName(stack[frameIdx]);
+                if (fileName && fileName !== firstFileName) {
+                    calledFromFile = fileName;
+                    var lastQuestionIndex = calledFromFile.lastIndexOf('?');// case of cache busting
+                    return lastQuestionIndex !== -1 ? calledFromFile.substring(0, lastQuestionIndex) : calledFromFile;
                 }
             }
         }
@@ -103,7 +118,7 @@ define(function () {
             complete();
         };
     }
-    
+
     function hostPageBaseURL() {
         var s = document.location.href;
 
@@ -125,13 +140,13 @@ define(function () {
         // Ensure a final slash if non-empty.
         return s.length > 0 ? s + "/" : "";
     }
-    
+
     function relativeUri() {
         var pageUrl = hostPageBaseURL();
         pageUrl = pageUrl.substring(0, pageUrl.length - 1);
         return pageUrl;
     }
-    
+
     function toFilyAppModuleId(aRelative, aStartPoint) {
         var moduleIdNormalizer = document.createElement('div');
         moduleIdNormalizer.innerHTML = "<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>";
@@ -144,61 +159,61 @@ define(function () {
         return mormalizedAbsoluteModuleUrl.substring(mormalizedHostContextPrefix.length);
     }
 
-    function resourceUri(aResourceName){
-        if(/https?:\//.test(aResourceName))
+    function resourceUri(aResourceName) {
+        if (/https?:\//.test(aResourceName))
             return aResourceName;
         else {
-            return relativeUri() + window.platypusjs.config.sourcePath + aResourceName;        
+            return relativeUri() + window.platypusjs.config.sourcePath + aResourceName;
         }
     }
-    
+
     function remoteApi() {
         return window.platypusjs.config.remoteApi ? window.platypusjs.remoteApi : relativeUri();
     }
 
     var module = {};
     Object.defineProperty(module, 'dateReviver', {
-        get: function(){
+        get: function () {
             return dateReviver;
         }
     });
     Object.defineProperty(module, 'Process', {
-        get: function(){
+        get: function () {
             return Process;
         }
     });
     Object.defineProperty(module, 'lookupCallerApplicationJsFile', {
-        get: function(){
+        get: function () {
             return lookupCallerApplicationJsFile;
         }
     });
     Object.defineProperty(module, 'lookupCallerApplicationJsDir', {
-        get: function(){
+        get: function () {
             return lookupCallerApplicationJsDir;
         }
     });
     Object.defineProperty(module, 'hostPageBaseURL', {
-        get: function(){
+        get: function () {
             return hostPageBaseURL;
         }
     });
     Object.defineProperty(module, 'relativeUri', {
-        get: function(){
+        get: function () {
             return relativeUri;
         }
     });
     Object.defineProperty(module, 'toFilyAppModuleId', {
-        get: function(){
+        get: function () {
             return toFilyAppModuleId;
         }
     });
     Object.defineProperty(module, 'resourceUri', {
-        get: function(){
+        get: function () {
             return resourceUri;
         }
     });
     Object.defineProperty(module, 'remoteApi', {
-        get: function(){
+        get: function () {
             return remoteApi;
         }
     });

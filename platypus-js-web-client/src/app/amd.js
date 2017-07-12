@@ -419,7 +419,7 @@
         var structure = modulesStructures.get(aModuleName);
         if(structure){
             structure.structure.forEach(function(part) {
-                if (part.toLowerCase().endsWith(".model")) {
+                if (part.toLowerCase().endsWith(aSuffix)) {
                     doc = documents.get(part);
                 }
             });

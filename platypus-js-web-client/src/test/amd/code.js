@@ -1,5 +1,5 @@
 /* global expect, GlobalA, CycleA */
-describe('AMD loader tests', function () {
+describe('Platypus.js AMD loader', function () {
     it('Simple modules', function (done) {
         require(['a', 'b'], function(a, b){
             expect(a).toBeDefined();
@@ -61,11 +61,12 @@ describe('AMD loader tests', function () {
         });
     });
     it('Prefetched resources of modules', function (done) {
-        pending('Till tests with server');
         require(['prefetched/a'], function(pa){
             expect(pa).toBeDefined();
             expect(pa.model).toBeTruthy();
             expect(pa.layout).toBeTruthy();
+            expect(pa.model === pa.layout).toBeFalsy();
+            expect(pa.model == pa.layout).toBeFalsy();
             done();
         });
     });

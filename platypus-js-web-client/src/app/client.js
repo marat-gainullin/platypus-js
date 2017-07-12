@@ -1,5 +1,4 @@
 define(['./logger', './invoke', './id', './core/report', './internals'], function (Logger, Invoke, Id, Report, Utils) {
-    var principal;
     var REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
 
     var RequestTypes = {
@@ -35,7 +34,7 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
     };
     
     function param(aName, aValue) {
-        return aName + "=" + (aValue ? encodeURIComponent(aValue) : "");
+        return aName + "=" + (aValue ? encodeURIComponent(aValue) : aValue);
     }
 
     function params() {
@@ -73,27 +72,22 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
         return res;
     }
     
-    function submitForm(aAction, aMethod, aContentType, aFormData, onSuccess, onFailure) {
+    function submitForm(aAction, aMethod, aFormData, onSuccess, onFailure) {
         var req = new XMLHttpRequest();
-        var urlPath = aAction ? aAction : "";
-        var parameters = [];
-        for (var paramName in aFormData) {
-            parameters.push(param(paramName, aFormData[paramName]));
-        }
-        var paramsData = params(parameters);
+        var url = aAction ? aAction : "";
+        var paramsData = objToParams(aFormData);
         if (aMethod !== Methods.POST) {
-            urlPath += "?" + paramsData;
+            url += "?" + paramsData;
         }
-        req.open(aMethod, urlPath);
-        req.setRequestHeader("Content-Type", aContentType);
+        req.open(aMethod, url);
         // Must set the onreadystatechange handler before calling send().
-        req.onreadystatechange = function (xhr) {
-            if (xhr.readyState === 4/*RequestState.DONE*/) {
+        req.onreadystatechange = function (event) {
+            if (req.readyState === 4/*RequestState.DONE*/) {
                 req.onreadystatechange = null;
-                if (200 <= xhr.status && xhr.status < 300) {
+                if (200 <= req.status && req.status < 300) {
                     if (onSuccess) {
                         try {
-                            onSuccess(xhr);
+                            onSuccess(req);
                         } catch (ex) {
                             Logger.severe(ex);
                         }
@@ -101,7 +95,7 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
                 } else {
                     if (onFailure) {
                         try {
-                            onFailure(xhr);
+                            onFailure(req.responseText ? req.responseText : (req.status + ' : ' + req.statusText));
                         } catch (ex) {
                             Logger.severe(ex);
                         }
@@ -110,6 +104,7 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
             }
         };
         if (aMethod === Methods.POST) {
+            req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             req.send(paramsData);
         } else {
             req.send();
@@ -224,16 +219,16 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
         return startApiRequest(null, query, null, Methods.GET, null, function (aResult) {
             principal = null;
             onSuccess(aResult);
-        }, function (reason) {
-            onFailure(reason.status + " : " + reason.statusText);
+        }, function (xhr) {
+            onFailure(xhr.responseText ? xhr.responseText : (xhr.status + ' : ' + xhr.statusText));
         });
     }
 
     function requestLoggedInUser(onSuccess, onFailure) {
-        if (!principal) {
             var query = param(RequestParams.TYPE, RequestTypes.rqCredential);
-            startApiRequest(null, query, "", Methods.GET, null, function (aResponse) {
+            return startApiRequest(null, query, "", Methods.GET, null, function (aResponse) {
                 if (isJsonResponse(aResponse)) {
+                    var principal;
                     if (aResponse.responseText) {
                         var oResult = JSON.parse(aResponse.responseText);
                         principal = oResult.userName;
@@ -251,19 +246,11 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
                         onFailure(aResponse.responseText);
                     }
                 }
-            }, function (reason) {
-                principal = "anonymous-" + Id.generate();
+            }, function (xhr) {
                 if (onFailure) {
-                    onFailure(reason.status + " : " + reason.statusText);
+                    onFailure(xhr.responseText ? xhr.responseText : (xhr.status + ' : ' + xhr.statusText));
                 }
             });
-        } else {
-            if (onSuccess) {
-                Invoke.later(function () {
-                    onSuccess(principal);
-                });
-            }
-        }
     }
 
     function requestCommit(changeLog, onSuccess, onFailure) {
@@ -273,10 +260,10 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
             if (onSuccess) {
                 onSuccess();
             }
-        }, function (aResponse) {
-            Logger.info("Commit failed: " + aResponse.status + " : " + aResponse.statusText);
+        }, function (xhr) {
+            Logger.info("Commit failed: " + xhr.status + " : " + xhr.statusText);
             if (onFailure) {
-                onFailure(aResponse.status + " : " + aResponse.statusText);
+                onFailure(xhr.responseText ? xhr.responseText : (xhr.status + ' : ' + xhr.statusText));
             }
         });
     }
@@ -288,7 +275,7 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
                 param(RequestParams.METHOD_NAME, aMethodName),
                 arrayToParams(RequestParams.PARAMS_ARRAY, aParams));
         if (onSuccess) {
-            startApiRequest(null, null, query, Methods.POST, "application/x-www-form-urlencoded; charset=utf-8", function (aResponse) {
+            return startApiRequest(null, null, query, Methods.POST, "application/x-www-form-urlencoded; charset=utf-8", function (aResponse) {
                 if (isJsonResponse(aResponse)) {
                     // WARNING!!!Don't edit to JSON.parse()!
                     // It is parsed in high-level js-code.
@@ -298,14 +285,13 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
                 } else {
                     onSuccess(aResponse.responseText);
                 }
-            }, function (aResponse) {
+            }, function (xhr) {
                 if (onFailure) {
                     try {
-                        var responseText = aResponse.responseText;
-                        if (isJsonResponse(aResponse)) {
-                            onFailure(JSON.parse(responseText));
+                        if (isJsonResponse(xhr)) {
+                            onFailure(JSON.parse(xhr.responseText));
                         } else {
-                            onFailure(responseText ? responseText : aResponse.statusText);
+                            onFailure(xhr.responseText ? xhr.responseText : (xhr.status + ' : ' + xhr.statusText));
                         }
                     } catch (ex) {
                         Logger.severe(ex);
@@ -358,12 +344,12 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
                     onFailure(aResponse.responseText ? aResponse.responseText : aResponse.status + ' : ' + aResponse.statusText);
                 }
             }
-        }, function (aResponse) {
+        }, function (xhr) {
             if (onFailure) {
-                if (aResponse.status === 0) {
+                if (xhr.status === 0) {
                     Logger.warning("Data recieving is aborted");
                 }
-                onFailure(aResponse.responseText ? aResponse.responseText : aResponse.status + ' : ' + aResponse.statusText);
+                onFailure(xhr.responseText ? xhr.responseText : (xhr.status + ' : ' + xhr.statusText));
             }
         });
     }

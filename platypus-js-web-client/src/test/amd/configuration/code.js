@@ -1,6 +1,6 @@
 /* global expect */
 
-it('AMD Configuration', function () {
+it('Platypus.js AMD loader configuration', function () {
     expect(window.define).toBeDefined();
     expect(window.define.amd).toBeDefined();
     expect(window.require).toBeDefined();

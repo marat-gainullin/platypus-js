@@ -115,13 +115,6 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
             valid = false;
         }
 
-        function cancel() {
-            if (!pending)
-                throw "Can't cancel absent request";
-            pending.cancel();
-            pending = null;
-        }
-
         function bindParameters() {
             inRelations.forEach(function (relation) {
                 var source = relation.leftEntity;
@@ -174,6 +167,23 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
                     onFailure();
                 }
             });
+        }
+
+        function cancel() {
+            if (pending) {
+                var onFailure = pendingOnFailure;
+                pending.cancel();
+                pending = null;
+                pendingOnSuccess = null;
+                pendingOnFailure = null;
+                valid = true;
+                if (onFailure) {
+                    onFailure('Cancel');
+                }
+                return true;
+            } else {
+                return false;
+            }
         }
 
         function enqueueUpdate(params) {
@@ -437,7 +447,6 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
 
         var _onInserted = null;
         var _onDeleted = null;
-        var _onScrolled = null;
 
         M.manageArray(self, {
             spliced: function (added, deleted) {
@@ -505,37 +514,33 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
                     source: self,
                     propertyName: 'length'
                 });
-            },
-            scrolled: function (aSubject, oldCursor, newCursor) {
-                if (_onScrolled) {
-                    try {
-                        _onScrolled({
-                            source: self,
-                            propertyName: 'cursor',
-                            oldValue: oldCursor,
-                            newValue: newCursor
-                        });
-                    } catch (e) {
-                        Logger.severe(e);
-                    }
-                }
-                M.fire(self, {
-                    source: self,
-                    propertyName: 'cursor',
-                    oldValue: oldCursor,
-                    newValue: newCursor
-                });
-                var toInvalidate = collectRight();
-                if (toInvalidate.length > 0) {
-                    Logger.info('About to requery some entities, due to cursor changes in ' + query.entityName);
-                    model.start(toInvalidate, function () {
-                        Logger.info('Some model entities requeried, due to cursor changes in ' + query.entityName);
-                    }, function (e) {
-                        Logger.severe(e);
-                    });
-                }
             }
         });
+        var _onScrolled = null;
+        var cursor = null;
+        function scrolled(aValue) {
+            var oldCursor = cursor;
+            var newCursor = aValue;
+            cursor = aValue;
+            if (_onScrolled) {
+                try {
+                    _onScrolled({
+                        source: self,
+                        propertyName: 'cursor',
+                        oldValue: oldCursor,
+                        newValue: newCursor
+                    });
+                } catch (e) {
+                    Logger.severe(e);
+                }
+            }
+            M.fire(self, {
+                source: self,
+                propertyName: 'cursor',
+                oldValue: oldCursor,
+                newValue: newCursor
+            });
+        }
         M.listenable(self);
 
         function find(aCriteria) {
@@ -609,7 +614,6 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
                 acceptInstance(accepted, false);
             }
             orderers = {};
-            self.cursor = self.length > 0 ? self[0] : null;
             M.fire(self, {
                 source: self,
                 propertyName: 'length'
@@ -654,7 +658,14 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
                 return parameters;
             }
         });
-
+        Object.defineProperty(this, 'cursor', {
+            get: function () {
+                return cursor;
+            },
+            set: function (aValue) {
+                scrolled(aValue);
+            }
+        });
         Object.defineProperty(this, 'applyLastSnapshot', {
             get: function () {
                 return applyLastSnapshot;

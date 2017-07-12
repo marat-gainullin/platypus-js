@@ -87,15 +87,14 @@ define(['./invoke', './managed', './client', './logger'], function(Invoke, M, Cl
                     pushInvalidToPending();
                 }
             }
-            return {
-                cancel: function () {
-                    entities.forEach(function (entity) {
-                        if (entity.pending) {
-                            entity.cancel();
-                        }
-                    });
+        }
+        
+        function cancel() {
+            entities.forEach(function (entity) {
+                if (entity.pending) {
+                    entity.cancel();
                 }
-            };
+            });
         }
 
         function requery(onSuccess, onFailure) {
@@ -209,6 +208,11 @@ define(['./invoke', './managed', './client', './logger'], function(Invoke, M, Cl
         Object.defineProperty(this, 'start', {
             get: function () {
                 return start;
+            }
+        });
+        Object.defineProperty(this, 'cancel', {
+            get: function () {
+                return cancel;
             }
         });
         Object.defineProperty(this, 'requery', {

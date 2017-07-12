@@ -64,7 +64,7 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
         pending('Till tests with server');
         done();
     });
-    it("'Entity.requery()' -> 'Entity.revert()'", function (done) {
+    it("'Entity.requery()' -> Some changes -> 'Entity.revert()'", function (done) {
         pending('Till tests with server');
         done();
     });

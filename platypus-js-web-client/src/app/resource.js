@@ -1,5 +1,5 @@
 define(['./logger', './internals'], function (Logger, Utils) {
-    
+
     function lookupCallerApplicationJsFile() {
         try {
             throw new Error("Current application file test");
@@ -7,40 +7,45 @@ define(['./logger', './internals'], function (Logger, Utils) {
             return Utils.lookupCallerApplicationJsFile(ex);
         }
     }
-    
+
     function lookupCallerApplicationJsDir() {
         return Utils.lookupCallerApplicationJsDir(lookupCallerApplicationJsFile());
     }
-    
+
     function load(aResourceName, aBinary, onSuccess, onFailure) {
-        var callerDir = lookupCallerApplicationJsDir();
-        var uri = Utils.resourceUri(aResourceName.startsWith("./") || aResourceName.startsWith("../") ? Utils.toFilyAppModuleId(aResourceName, callerDir) : aResourceName);
+        var url;
+        if (aResourceName.startsWith("./") || aResourceName.startsWith("../")) {
+            var callerDir = lookupCallerApplicationJsDir();
+            url = Utils.resourceUri(Utils.toFilyAppModuleId(aResourceName, callerDir));
+        } else {
+            url = Utils.resourceUri(aResourceName);
+        }
         if (onSuccess) {
-            startRequest(uri, aBinary ? 'arraybuffer' : '', function (aResult) {
-                if (200 <= aResult.status && aResult.status < 300) {
-                    if (aResult.responseType === 'arraybuffer') {
-                        var buffer = aResult.responseArrayBuffer;
+            return startDownloadRequest(url, aBinary ? 'arraybuffer' : '', function (xhr) {
+                if (200 <= xhr.status && xhr.status < 300) {
+                    if (xhr.responseType === 'arraybuffer') {
+                        var buffer = xhr.response;
                         buffer.length = buffer.byteLength;
                         onSuccess(buffer);
                     } else {
-                        onSuccess(aResult.responseText);
+                        onSuccess(xhr.responseText);
                     }
                 } else {
                     if (onFailure) {
-                        onFailure(aResult.statusText);
+                        onFailure(xhr.statusText);
                     }
                 }
             }, function (aResult) {
                 if (onFailure) {
                     try {
-                        onFailure(aResult.status ? aResult.statusText : "Request has been cancelled. See browser's console for more details.");
+                        onFailure(aResult.status ? (aResult.status + ' : ' + aResult.statusText) : "It seems, that request has been cancelled. See browser's console for more details.");
                     } catch (ex) {
                         Logger.severe(ex);
                     }
                 }
             });
         } else {
-            var executed = syncRequest(uri, '');
+            var executed = syncRequest(url, '');
             if (executed) {
                 if (200 <= executed.status && executed.status < 300) {
                     if (executed.responseType === 'arraybuffer') {
@@ -58,34 +63,68 @@ define(['./logger', './internals'], function (Logger, Utils) {
         return null;
     }
 
-    function upload(aFile, aName, aCompleteCallback, aProgresssCallback, aErrorCallback) {
+    function upload(aFile, aName, onComplete, onProgresss, onFailure) {
         if (aFile) {
             var completed = false;
-            startUploadRequest(aFile, aName, function (aResult) {
+            return startUploadRequest(aFile, aName, function (aResult) {
                 completed = true;
-                if (aCompleteCallback) {
-                    aCompleteCallback(JSON.parse(aResult.request.responseText));
+                if (onComplete) {
+                    onComplete(JSON.parse(aResult));
                 }
             }, function (aResult) {
                 try {
                     if (!completed) {
-                        if (aProgresssCallback) {
-                            aProgresssCallback(aResult);
+                        if (onProgresss) {
+                            onProgresss(aResult);
                         }
                     }
                 } catch (ex) {
                     Logger.severe(ex);
                 }
             }, function (reason) {
-                if (aErrorCallback) {
+                if (onFailure) {
                     try {
-                        aErrorCallback(reason);
+                        onFailure(reason);
                     } catch (ex) {
                         Logger.severe(ex);
                     }
                 }
             });
         }
+    }
+
+    function startDownloadRequest(url, responseType, onSuccess, onFailure) {
+        var req = new XMLHttpRequest();
+        req.open("get", url);
+        // Must set the onreadystatechange handler before calling send().
+        req.onreadystatechange = function () {
+            if (req.readyState === 4/*RequestState.DONE*/) {
+                req.onreadystatechange = null;
+                try {
+                    if (200 <= req.status && req.status < 300) {
+                        if (onSuccess) {
+                            onSuccess(req);
+                        }
+                    } else {
+                        if (onFailure) {
+                            onFailure(req);
+                        }
+                    }
+                } catch (ex) {
+                    severe(ex);
+                }
+            }
+        };
+        if (responseType) {
+            req.responseType = responseType;
+        }
+        req.send();
+        return {
+            cancel: function () {
+                req.onreadystatechange = null;
+                req.abort();
+            }
+        };
     }
 
     function startUploadRequest(aFile, aName, onComplete, onProgress, onFailure) {
@@ -152,16 +191,16 @@ define(['./logger', './internals'], function (Logger, Utils) {
                 if (200 <= req.status && req.status < 300) {
                     try {
                         if (onComplete) {
-                            onComplete();
+                            onComplete(req.responseText);
                         }
                     } catch (ex) {
                         Logger.severe(ex);
                     }
                 } else {
                     if (req.status === 0) {
-                        onFailure("Upload aborted");
+                        onFailure("Upload canceled");
                     } else {
-                        onFailure(req.statusText);
+                        onFailure(req.responseText ? req.responseText : (req.status + ' : ' + req.statusText));
                     }
                 }
             }
@@ -174,9 +213,9 @@ define(['./logger', './internals'], function (Logger, Utils) {
             }
         };
     }
-    
+
     var module = {};
-    
+
     Object.defineProperty(module, 'upload', {
         enumerable: true,
         get: function () {

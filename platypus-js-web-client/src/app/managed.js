@@ -62,9 +62,6 @@ define(['logger'], function (Logger) {
             var popped = Array.prototype.pop.call(aTarget);
             if (popped) {
                 aOnChange.spliced([], [popped]);
-                if (popped === cursor) {
-                    aTarget.cursor = aTarget.length > 0 ? aTarget[aTarget.length - 1] : null;
-                }
             }
             return popped;
         }
@@ -72,9 +69,6 @@ define(['logger'], function (Logger) {
             var shifted = Array.prototype.shift.call(aTarget);
             if (shifted) {
                 aOnChange.spliced([], [shifted]);
-                if (shifted === cursor) {
-                    aTarget.cursor = aTarget.length > 0 ? aTarget[0] : null;
-                }
             }
             return shifted;
         }
@@ -125,18 +119,6 @@ define(['logger'], function (Logger) {
                 added.push(aAdded);
             }
             aOnChange.spliced(added, deleted);
-            if (added.length > 0) {
-                aTarget.cursor = added[added.length - 1];
-            } else {
-                if (deleted.indexOf(cursor) !== -1) {
-                    if (beginDeleteAt >= 0 && beginDeleteAt < aTarget.length)
-                        aTarget.cursor = aTarget[beginDeleteAt];
-                    else if (beginDeleteAt - 1 >= 0 && beginDeleteAt - 1 < aTarget.length)
-                        aTarget.cursor = aTarget[beginDeleteAt - 1];
-                    else
-                        aTarget.cursor = null;
-                }
-            }
             return deleted;
         }
         Object.defineProperty(aTarget, "pop", {
@@ -172,19 +154,6 @@ define(['logger'], function (Logger) {
         Object.defineProperty(aTarget, "splice", {
             get: function () {
                 return splice;
-            }
-        });
-        var cursor = null;
-        Object.defineProperty(aTarget, 'cursor', {
-            get: function () {
-                return cursor;
-            },
-            set: function (aValue) {
-                if (cursor !== aValue) {
-                    var oldCursor = cursor;
-                    cursor = aValue;
-                    aOnChange.scrolled(aTarget, oldCursor, cursor);
-                }
             }
         });
         return aTarget;
