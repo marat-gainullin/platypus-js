@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.0" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+  <context-param>
+    <param-name>default-datasource</param-name>
+    <param-value/>
+  </context-param>
+  <context-param>
+    <param-name>appelement</param-name>
+    <param-value>start.js</param-value>
+  </context-param>
+  <context-param>
+    <param-name>source-path</param-name>
+    <param-value>app</param-value>
+  </context-param>
+  <listener>
+    <listener-class>com.eas.server.httpservlet.PlatypusSessionsSynchronizer</listener-class>
+  </listener>
+  <servlet>
+    <servlet-name>PlatypusServlet</servlet-name>
+    <servlet-class>com.eas.server.httpservlet.PlatypusHttpServlet</servlet-class>
+    <async-supported>true</async-supported>
+    <multipart-config>
+      <location>C:/Users/mgainullin/platypus-js/platypus-js-web-client/src/pub</location>
+      <max-file-size>2097152</max-file-size>
+      <max-request-size>2165824</max-request-size>
+      <file-size-threshold>1048576</file-size-threshold>
+    </multipart-config>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>PlatypusServlet</servlet-name>
+    <url-pattern>/application/*</url-pattern>
+  </servlet-mapping>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
+</web-app>

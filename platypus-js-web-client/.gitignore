@@ -1,3 +1,4 @@
 build
-WEB-INF/classes
-WEB-INF/lib
+src/WEB-INF/classes
+src/WEB-INF/lib
+src/pub
