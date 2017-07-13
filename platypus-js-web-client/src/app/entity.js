@@ -66,7 +66,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
         var title = '';
         var name = '';
         var model = null;
-        var query = new Query(serverEntityName);
+        var queryProxy = new Query(serverEntityName);
         var elementClass = null;
         var inRelations = new Set();
         var outRelations = new Set();
@@ -144,7 +144,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
             pendingOnSuccess = onSuccess;
             pendingOnFailure = onFailure;
             bindParameters();
-            pending = query.requestData(parameters, function (data) {
+            pending = queryProxy.requestData(parameters, function (data) {
                 acceptData(data, true);
                 lastSnapshot = data;
                 var onSuccess = pendingOnSuccess;
@@ -187,7 +187,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
         }
 
         function enqueueUpdate(params) {
-            var command = query.prepareCommand(params);
+            var command = queryProxy.prepareCommand(params);
             model.changeLog.push(command);
         }
 
@@ -201,9 +201,9 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
             requery(onSuccess, onFailure);
         }
 
-        function query(params, onSuccess, onFailure) {
+        function requestData(params, onSuccess, onFailure) {
             if (onSuccess) {
-                query.requestData(params, onSuccess, onFailure);
+                queryProxy.requestData(params, onSuccess, onFailure);
             } else {
                 throw "Synchronous Entity.query() method is not supported within browser client. So 'onSuccess' is required argument.";
             }
@@ -225,7 +225,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
 
         function update(params, onSuccess, onFailure) {
             if (onSuccess) {
-                var command = query.prepareCommand(params);
+                var command = queryProxy.prepareCommand(params);
                 Client.requestCommit([command], onSuccess, onFailure);
             } else {
                 throw "Synchronous Entity.update() method is not supported within browser client. So 'onSuccess' is required argument.";
@@ -365,7 +365,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
 
         function managedOnChange(aSubject, aChange) {
             if (!tryToComplementInsert(aSubject, aChange)) {
-                var updateChange = new Update(query.entityName);
+                var updateChange = new Update(queryProxy.entityName);
                 // Generate changeLog keys for update
                 keysNames.forEach(function (keyName) {
                     // Tricky processing of primary keys modification case.
@@ -452,7 +452,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
             spliced: function (added, deleted) {
                 added.forEach(function (aAdded) {
                     justInserted = aAdded;
-                    justInsertedChange = new Insert(query.entityName);
+                    justInsertedChange = new Insert(queryProxy.entityName);
                     keysNames.forEach(function (keyName) {
                         if (!aAdded[keyName]) // If key is already assigned, than we have to preserve its value
                             aAdded[keyName] = Id.generate();
@@ -465,7 +465,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
                         var aOrderer = orderers[aOrdererKey];
                         aOrderer.add(aAdded);
                     }
-                    acceptInstance(aAdded, true);
+                    acceptInstance(aAdded);
                     fireOppositeScalarsChanges(aAdded);
                     fireOppositeCollectionsChanges(aAdded);
                 });
@@ -474,7 +474,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
                         justInserted = null;
                         justInsertedChange = null;
                     }
-                    var deleteChange = new Delete(query.entityName);
+                    var deleteChange = new Delete(queryProxy.entityName);
                     // Generate changeLog keys for delete
                     keysNames.forEach(function (keyName) {
                         // Tricky processing of primary keys modification case.
@@ -611,7 +611,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
                     accepted[sp] = dataRow[sp];
                 }
                 Array.prototype.push.call(self, accepted);
-                acceptInstance(accepted, false);
+                acceptInstance(accepted);
             }
             orderers = {};
             M.fire(self, {
@@ -759,9 +759,14 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
                 return execute;
             }
         });
+        Object.defineProperty(this, 'proxy', {
+            get: function () {
+                return queryProxy;
+            }
+        });
         Object.defineProperty(this, 'query', {
             get: function () {
-                return query;
+                return requestData;
             }
         });
         Object.defineProperty(this, 'requery', {

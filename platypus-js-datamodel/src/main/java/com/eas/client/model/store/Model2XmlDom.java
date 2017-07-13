@@ -163,11 +163,11 @@ public abstract class Model2XmlDom<E extends Entity<M, ?, E>, M extends Model<E,
     public static final String TABLE_SCHEMA_NAME_ATTR_NAME = "tableSchemaName";
     public static final String TABLE_NAME_ATTR_NAME = "tableName";
     public static final String ENTITY_TABLE_ALIAS = "tableAlias";
-    public static final String ENTITY_LOCATION_X = "entityLocationX";
-    public static final String ENTITY_LOCATION_Y = "entityLocationY";
-    public static final String ENTITY_SIZE_WIDTH = "entityWidth";
-    public static final String ENTITY_SIZE_HEIGHT = "entityHeight";
-    public static final String ENTITY_ICONIFIED = "entityIconified";
+    public static final String ENTITY_LOCATION_X = "left";//"entityLocationX";
+    public static final String ENTITY_LOCATION_Y = "top";//"entityLocationY";
+    public static final String ENTITY_SIZE_WIDTH = "width";//"entityWidth";
+    public static final String ENTITY_SIZE_HEIGHT = "height";//"entityHeight";
+    public static final String ENTITY_ICONIFIED = "minimized";//"entityIconified";
 
     protected void writeEntityDesignAttributes(Element node, E entity) {
         node.setAttribute(ENTITY_LOCATION_X, String.valueOf(entity.getX()));
@@ -192,7 +192,7 @@ public abstract class Model2XmlDom<E extends Entity<M, ?, E>, M extends Model<E,
     protected void writeRelation(Relation<E> relation, Element node) {
         if (relation != null && relation.getLeftField() != null && relation.getRightField() != null) {
             currentNode.appendChild(node);
-            assert relation.getLeftEntity() != null : " A relation without left side detected";
+            assert relation.getLeftEntity() != null : " A relation without left entity detected";
             node.setAttribute(LEFT_ENTITY_ID_ATTR_NAME, String.valueOf(relation.getLeftEntity().getEntityId()));
             if (relation.isLeftField()) {
                 node.setAttribute(LEFT_ENTITY_FIELD_ATTR_NAME, relation.getLeftField().getName());
@@ -200,7 +200,7 @@ public abstract class Model2XmlDom<E extends Entity<M, ?, E>, M extends Model<E,
                 node.setAttribute(LEFT_ENTITY_PARAMETER_ATTR_NAME, relation.getLeftParameter().getName());
             }
 
-            assert relation.getRightEntity() != null : " A relation without right side detected";
+            assert relation.getRightEntity() != null : " A relation without right entity detected";
             node.setAttribute(RIGHT_ENTITY_ID_ATTR_NAME, String.valueOf(relation.getRightEntity().getEntityId()));
             if (relation.isRightField()) {
                 node.setAttribute(RIGHT_ENTITY_FIELD_ATTR_NAME, relation.getRightField().getName());

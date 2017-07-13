@@ -1,7 +1,7 @@
 /* global expect, GlobalA, CycleA */
 describe('Platypus.js AMD loader', function () {
     it('Simple modules', function (done) {
-        require(['a', 'b'], function(a, b){
+        require(['a', 'b'], function (a, b) {
             expect(a).toBeDefined();
             expect(a.moduleName).toEqual('a module');
             expect(b).toBeDefined();
@@ -10,7 +10,7 @@ describe('Platypus.js AMD loader', function () {
         });
     });
     it('Modules with relative names', function (done) {
-        require(['./a', '../amd/b'], function(a, b){
+        require(['./a', '../amd/b'], function (a, b) {
             expect(a).toBeDefined();
             expect(a.moduleName).toEqual('a module');
             expect(b).toBeDefined();
@@ -19,14 +19,14 @@ describe('Platypus.js AMD loader', function () {
         });
     });
     it('Default module name', function (done) {
-        require('default-module-name/d', function(d){
+        require('default-module-name/d', function (d) {
             expect(d).toBeDefined();
             expect(d.moduleName).toEqual('default-module-name/d');
             done();
         });
     });
     it('Buggy module definer', function (done) {
-        require('buggy-module-definer/a', function(a){
+        require('buggy-module-definer/a', function (a) {
             expect(a).toBeUndefined();
             var c = require('buggy-module-definer/c');
             expect(c).toBeDefined();
@@ -35,16 +35,16 @@ describe('Platypus.js AMD loader', function () {
         });
     });
     it('Absent modules', function (done) {
-        require(['absent-m1', 'absent-m2'], function(am1, am2){
+        require(['absent-m1', 'absent-m2'], function (am1, am2) {
             fail("Absent module success callback shouldn't be called");
             done();
-        }, function(reasons){
+        }, function (reasons) {
             expect(reasons).toBeDefined();
             done();
         });
     });
     it('Multiple modules in one file', function (done) {
-        require(['short-name-m1', 'short-name-m2'], function(snm1, snm2){
+        require(['short-name-m1', 'short-name-m2'], function (snm1, snm2) {
             expect(snm1).toBeDefined();
             expect(snm2).toBeDefined();
             done();
@@ -52,16 +52,16 @@ describe('Platypus.js AMD loader', function () {
     });
     it('AMD cyclic dependencies', function (done) {
         pending('Till cycles in AMD dependencies analysis');
-        require(['cyclic-amd-dependencies/a'], function(a){
+        require(['cyclic-amd-dependencies/a'], function (a) {
             fail("Success callback of module from AMD dependencies cycle shouldn't be called");
             done();
-        }, function(reasons){
+        }, function (reasons) {
             expect(reasons).toBeDefined();
             done();
         });
     });
     it('Prefetched resources of modules', function (done) {
-        require(['prefetched/a'], function(pa){
+        require(['prefetched/a'], function (pa) {
             expect(pa).toBeDefined();
             expect(pa.model).toBeTruthy();
             expect(pa.layout).toBeTruthy();
@@ -71,7 +71,7 @@ describe('Platypus.js AMD loader', function () {
         });
     });
     it('Global dependencies', function (done) {
-        require(['GlobalA'], function(ga){
+        require(['GlobalA'], function (ga) {
             expect(ga).toBeDefined();
             expect(GlobalA).toBeDefined();
             expect(ga).toEqual(GlobalA);
@@ -79,7 +79,7 @@ describe('Platypus.js AMD loader', function () {
         });
     });
     it('Global cyclic dependencies', function (done) {
-        require(['CycleA'], function(ca){
+        require(['CycleA'], function (ca) {
             expect(ca).toBeTruthy();
             expect(CycleA).toBeTruthy();
             done();

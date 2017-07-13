@@ -115,11 +115,12 @@ public class ToolsApplication {
             put("datamodelDbId", "ddi");
             put("datamodelSchemaName", "dsn");
             put("Name", "n");
-            put("entityLocationX", null);
-            put("entityLocationY", null);
-            put("entityWidth", null);
-            put("entityHeight", null);
-            put("entityIconified", null);
+            put("entityLocationX", null); put("left", null);
+            put("entityLocationY", null); put("top", null);
+            put("entityWidth", null); put("width", null);
+            put("entityHeight", null); put("height", null);
+            put("entityIconified", null); put("minimized", null);
+            put("polyline", null);
         }
     };
     private static final Map<String, String> MINIFIED_LAYOUT_TAGS = new HashMap<String, String>() {

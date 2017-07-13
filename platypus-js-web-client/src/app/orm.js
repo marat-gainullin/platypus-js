@@ -1,64 +1,58 @@
-define(['./logger', './client', './internals', './model-reader'], function (Logger, Client, Utils, readModelDocument) {
+define(['./logger', './client', './internals', './model-reader', 'invoke'], function (Logger, Client, Utils, readModelDocument, Invoke) {
 
     var SERVER_ENTITY_TOUCHED_NAME = "Entity ";
 
     var loadedEntities = new Map();
 
-    function loadEntities(aQueriesNames, onSuccess, onFailure) {
-        if (aQueriesNames.length > 0) {
-            var process = new Utils.Process(aQueriesNames.size, function () {
+    function loadEntities(entitiesNames, onSuccess, onFailure) {
+        if (entitiesNames.length > 0) {
+            var process = new Utils.Process(entitiesNames.size, function () {
                 onSuccess();
             }, function (aReasons) {
                 onFailure(aReasons);
             });
-            aQueriesNames.forEach(function (queryName) {
-                var urlQuery = Client.params(Client.param(Client.RequestParams.TYPE, Client.RequestTypess.rqAppQuery), Client.param(Client.RequestParams.QUERY_ID, queryName));
-                return Client.startApiRequest(null, urlQuery, "", Client.Methods.GET, null, function (aResponse) {
-                    if (Client.isJsonResponse(aResponse)) {
-                        loadedEntities.set(queryName, aResponse.responseJSON);
-                        Logger.info(SERVER_ENTITY_TOUCHED_NAME + queryName + ' - Loaded');
-                        process.onSuccess();
-                    } else {
-                        process.onFailure(aResponse.responseText);
-                    }
-                }, function (aResponse) {
-                    Logger.severe(aResponse.responseText);
-                    process.onFailure(aResponse.responseText);
+            entitiesNames.forEach(function (entityName) {
+                return Client.requestEntity(entityName, function (entity) {
+                    loadedEntities.set(entityName, entity);
+                    process.onSuccess();
+                }, function (reason) {
+                    Logger.severe(reason);
+                    process.onFailure(reason);
                 });
-                Logger.info('Loading ' + SERVER_ENTITY_TOUCHED_NAME + queryName + ' ...');
+                Logger.info('Loading ' + SERVER_ENTITY_TOUCHED_NAME + entityName + ' ...');
             });
         } else {
-            later(onSuccess);
+            Invoke.later(onSuccess);
         }
     }
 
-    function requireEntities(aEntities, aOnSuccess, aOnFailure) {
-        var entities;
-        if (!Array.isArray(aEntities)) {
-            aEntities = aEntities + "";
-            if (aEntities.length > 5 && aEntities.trim().substring(0, 5).toLowerCase() === "<?xml") {
-                entities = [];
+    function requireEntities(aEntitiesNames, aOnSuccess, aOnFailure) {
+        var entitiesNames;
+        if (!Array.isArray(aEntitiesNames)) {
+            aEntitiesNames = aEntitiesNames + "";
+            if (aEntitiesNames.length > 5 && aEntitiesNames.trim().substring(0, 5).toLowerCase() === "<?xml") {
+                entitiesNames = [];
                 var pattern = /queryId="(.+?)"/ig;
-                var groups = pattern.exec(aEntities);
+                var groups = pattern.exec(aEntitiesNames);
                 while (groups) {
                     if (groups.length > 1) {
-                        entities.push(groups[1]);
+                        entitiesNames.push(groups[1]);
                     }
-                    groups = pattern.exec(aEntities);
+                    groups = pattern.exec(aEntitiesNames);
                 }
             } else {
-                entities = [aEntities];
+                entitiesNames = [aEntitiesNames];
             }
         } else {
-            entities = aEntities;
+            entitiesNames = aEntitiesNames;
         }
-        var toLoad = entities.filter(function (entityName) {
+        var toLoad = entitiesNames.filter(function (entityName) {
             return !loadedEntities.has(entityName);
         });
         loadEntities(toLoad, function () {
             var resolved = [];
-            for (var i = 0; i < entities.length; i++) {
-                resolved.push(loadedEntities.get(entities[i]));
+            for (var i = 0; i < entitiesNames.length; i++) {
+                resolved.push(loadedEntities.get(entitiesNames[i]));
             }
             aOnSuccess.apply(null, resolved);
         }, aOnFailure);

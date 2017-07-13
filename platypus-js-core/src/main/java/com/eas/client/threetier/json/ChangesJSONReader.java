@@ -1,19 +1,17 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.threetier.json;
 
 import com.eas.client.changes.Change;
 import com.eas.client.changes.ChangeValue;
 import com.eas.client.changes.ChangeVisitor;
 import com.eas.client.changes.Command;
+import com.eas.client.changes.CommandRequest;
 import com.eas.client.changes.Delete;
 import com.eas.client.changes.Insert;
 import com.eas.client.changes.Update;
 import com.eas.script.Scripts;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
@@ -73,9 +71,15 @@ public class ChangesJSONReader implements ChangeVisitor {
     }
 
     @Override
+    public void visit(CommandRequest aRequest) throws Exception {
+        Object oParameters = sChange.getMember(CHANGE_PARAMETERS_NAME);
+        List<ChangeValue> values = parseObjectProperties(oParameters);
+        values.stream().forEach(cv -> aRequest.getParameters().put(cv.name, cv));
+    }
+
+    @Override
     public void visit(Command aChange) throws Exception {
-        Object parameters = sChange.getMember(CHANGE_PARAMETERS_NAME);
-        aChange.getParameters().addAll(parseObjectProperties(parameters));
+        throw new IllegalStateException("Command should not be read from JSON");
     }
 
     public static List<Change> read(String aChangesJson, Scripts.Space aSpace) throws Exception {
@@ -91,24 +95,26 @@ public class ChangesJSONReader implements ChangeVisitor {
                     if (sChange.hasMember("kind") && sChange.hasMember("entity")) {
                         String sKind = JSType.toString(sChange.getMember("kind"));
                         String sEntityName = JSType.toString(sChange.getMember("entity"));
+                        ChangesJSONReader reader = new ChangesJSONReader(sChange, sEntityName, aSpace);
                         Change change = null;
                         switch (sKind) {
                             case "insert":
                                 change = new Insert(sEntityName);
+                                change.accept(reader);
                                 break;
                             case "update":
                                 change = new Update(sEntityName);
+                                change.accept(reader);
                                 break;
                             case "delete":
                                 change = new Delete(sEntityName);
+                                change.accept(reader);
                                 break;
                             case "command":
-                                change = new Command(sEntityName);
+                                change = new CommandRequest(sEntityName);
                                 break;
                         }
                         if (change != null) {
-                            ChangesJSONReader reader = new ChangesJSONReader(sChange, sEntityName, aSpace);
-                            change.accept(reader);
                             changes.add(change);
                         } else {
                             Logger.getLogger(ChangesJSONReader.class.getName()).log(Level.SEVERE, String.format("Unknown type of change occured %s.", sKind));
@@ -125,4 +131,5 @@ public class ChangesJSONReader implements ChangeVisitor {
         }
         return changes;
     }
+
 }

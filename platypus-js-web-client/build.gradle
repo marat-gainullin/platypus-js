@@ -118,6 +118,36 @@ task cleanPub(type: Delete){
 }
 clean.dependsOn cleanPub
 
+task h2Exec(type: JavaExec) {
+    classpath fileTree(sharedLibDir)
+    main 'org.h2.tools.Server'
+    args '-tcp'
+}
+h2Exec.dependsOn buildContainerLibs
+
+
+def h2Server = null
+task h2() {
+    doFirst {
+        h2Server = new ProcessBuilder(h2Exec.commandLine)
+                    .redirectErrorStream(true)
+                    .start()
+        def h2StdOut = new InputStreamReader(h2Server.getInputStream())
+        try{
+            def h2NextLine = h2StdOut.readLine()
+            while(!h2NextLine.contains('TCP server running at')){
+                println(h2NextLine)
+                h2NextLine = h2StdOut.readLine()
+            }
+            println("H2 server started")
+            println()
+        }finally{
+            h2StdOut.close()
+        }
+    }    
+}
+h2.dependsOn buildContainerLibs
+
 def asProps = { fileName ->
     def loaded = new Properties()
     def inputFile = file(fileName)
@@ -148,6 +178,28 @@ check privateProps, 'platypusServer.logLevel', 'INFO'
 check privateProps, 'platypusServer.debugPort', 5004
 check privateProps, 'servletContainer.logLevel', 'INFO'
 check privateProps, 'servletContainer.debugPort', 5007
+
+task h2FillPetHotelExec(type: JavaExec) {
+    classpath fileTree(sharedLibDir)
+    main 'org.h2.tools.RunScript'
+    args '-url', props['datasource.pet-hotel-data.dburl'], '-user', props['datasource.pet-hotel-data.dbuser'], '-password', props['datasource.pet-hotel-data.dbpassword'], '-script', "${projectDir}/src/pet-hotel-data.sql"
+}
+
+def testDatabaseFile = "${System.properties['user.home']}/tests-pet-hotel-data.mv.db"
+task initData() {
+    doFirst {
+        if(!file(testDatabaseFile).exists()){
+            if(new ProcessBuilder(h2FillPetHotelExec.commandLine)
+                .start()
+                .waitFor() != 0)
+                throw new InvalidUserDataException("Can't fill pet hotel database")
+            println 'Test database "tests-pet-hotel-data" filled.'
+        } else {
+            println 'Test database "tests-pet-hotel-data" exists already. Seems it has been filled earlier.'
+        }
+    }    
+}
+initData.dependsOn h2
 
 def webAppUrl = privateProps['browser.customUrl'] ? privateProps['browser.customUrl'] : "http://localhost:${privateProps['http.port']}/${props['webApplication.context']}"
 
@@ -302,6 +354,11 @@ task runWebApp(){
         tomcatServer.destroy()
         tomcatServer.waitFor()
         println 'Tomcat shutted down'
+        h2Server.destroy()
+        h2Server.waitFor()
+        println 'H2 shutted down'
+        file(testDatabaseFile).delete();
+        println "Test pet hotel database erased"
         println()
         println 'See you next time :)'
     }
@@ -309,7 +366,8 @@ task runWebApp(){
 runWebApp.dependsOn buildTomcat,
                     configureTomcat,
                     distilleLib,
-                    explodeWrappers
+                    explodeWrappers,
+                    initData
 /*
 task theme(type: Copy) {
     from "src/main/theme"

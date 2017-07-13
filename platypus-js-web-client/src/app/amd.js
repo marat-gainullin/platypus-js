@@ -2,7 +2,7 @@
     var INJECTED_SCRIPT_CLASS_NAME = "platypus-injected-script";
     var MODULES_INDEX = "modules-index"; // Map module name -> script file with this module
     var TYPE_JAVASCRIPT = "text/javascript";
-    
+
     var config = {prefetch: false, cacheBust: false};
     (function () {
         var sourcePath = "/";
@@ -242,22 +242,18 @@
                     var amdModuleName = amdDefine.moduleName;
                     var amdDependencies = amdDefine.dependencies;
                     var amdModuleDefiner = amdDefine.moduleDefiner;
-                    try {
-                        load(amdDependencies, new Set(), function () {
-                            amdModuleDefiner(amdModuleName);
-                            // If module is still not defined because of buggy definer in script,
-                            // we have to put it definition as null by hand.
-                            if (!defined.has(amdModuleName)) {
-                                defined.set(amdModuleName, null);
-                            }
-                            fireLoaded(amdModuleName);
-                            notifyModuleLoaded(amdModuleName);
-                        }, function (aReason) {
-                            notifyModuleFailed(amdModuleName, [aReason]);
-                        });
-                    } catch (ex) {
-                        severe(ex);
-                    }
+                    load(amdDependencies, new Set(), function () {
+                        amdModuleDefiner(amdModuleName);
+                        // If module is still not defined because of buggy definer in script,
+                        // we have to put it definition as null by hand.
+                        if (!defined.has(amdModuleName)) {
+                            defined.set(amdModuleName, null);
+                        }
+                        fireLoaded(amdModuleName);
+                        notifyModuleLoaded(amdModuleName);
+                    }, function (aReason) {
+                        notifyModuleFailed(amdModuleName, [aReason]);
+                    });
                 });
             }, function (reason) {
                 notifyScriptFailed(aJsResource, [reason]);
@@ -405,20 +401,20 @@
     }
 
     var modulesStructures = new Map();
-    
+
     function getModelDocument(aModuleName) {
         return getDocumentByModule(aModuleName, ".model");
     }
-    
+
     function getFormDocument(aModuleName) {
         return getDocumentByModule(aModuleName, ".layout");
     }
-    
+
     function getDocumentByModule(aModuleName, aSuffix) {
         var doc = null;
         var structure = modulesStructures.get(aModuleName);
-        if(structure){
-            structure.structure.forEach(function(part) {
+        if (structure) {
+            structure.structure.forEach(function (part) {
                 if (part.toLowerCase().endsWith(aSuffix)) {
                     doc = documents.get(part);
                 }
@@ -458,22 +454,22 @@
             };
         } else {
             var query = params(param('__type'/*RequestParams.TYPE*/, '19'/*RequestTypes.rqModuleStructure*/), param('__moduleName'/*RequestParams.MODULE_NAME*/, aModuleName));
-            return startApiRequest(null, query, "", "GET", null, function (aResponse) {
-                if (isJsonResponse(aResponse)) {
+            return startApiRequest(null, query, "", "GET", null, function (xhr) {
+                if (isJsonResponse(xhr)) {
                     // Some post processing
-                    var structure = aResponse.responseJSON;
+                    var structure = JSON.parse(xhr.responseText);
                     modulesStructures.set(aModuleName, structure);
                     if (onSuccess) {
                         onSuccess(structure);
                     }
                 } else {
                     if (onFailure) {
-                        onFailure(aResponse);
+                        onFailure(xhr);
                     }
                 }
-            }, function (reason) {
+            }, function (xhr) {
                 if (onFailure) {
-                    onFailure(reason);
+                    onFailure(xhr);
                 }
             });
         }
@@ -512,18 +508,14 @@
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4/*RequestState.DONE*/) {
                 xhr.onreadystatechange = null;
-                try {
-                    if (200 <= xhr.status && xhr.status < 300) {
-                        if (onSuccess) {
-                            onSuccess(xhr);
-                        }
-                    } else {
-                        if (onFailure) {
-                            onFailure(xhr);
-                        }
+                if (200 <= xhr.status && xhr.status < 300) {
+                    if (onSuccess) {
+                        onSuccess(xhr);
                     }
-                } catch (ex) {
-                    severe(ex);
+                } else {
+                    if (onFailure) {
+                        onFailure(xhr);
+                    }
                 }
             }
         };
@@ -573,15 +565,15 @@
             };
         } else {
             var documentUrl = checkedCacheBust(relativeUri() + config.sourcePath + aResourceName);
-            return startUrlRequest(documentUrl, "document", function (aResponse) {
-                var doc = aResponse.responseXML;
+            return startUrlRequest(documentUrl, "document", function (xhr) {
+                var doc = xhr.responseXML;
                 documents.set(aResourceName, doc);
                 if (onSuccess) {
                     onSuccess(doc);
                 }
-            }, function (reason) {
+            }, function (xhr) {
                 if (onFailure) {
-                    onFailure(reason);
+                    onFailure(xhr);
                 }
             });
         }
@@ -706,11 +698,7 @@
             }
         }, function (reason) {
             if (aOnFailure) {
-                try {
-                    aOnFailure(reason);
-                } catch (ex) {
-                    severe(ex);
-                }
+                aOnFailure(reason);
             } else {
                 warning("platypujs.require failed and callback is missing. Required modules are: " + aDeps);
             }
@@ -776,10 +764,10 @@
 
     function init() {
         define.amd = {}; // AMD compliance
-    
+
         var platypusjs = {require, define, config, documents, getModelDocument, getFormDocument};
         Object.seal(platypusjs);
-        
+
         window.platypusjs = platypusjs;
         window.require = require;
         window.define = define;

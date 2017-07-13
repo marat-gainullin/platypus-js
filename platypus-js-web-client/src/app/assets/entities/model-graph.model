@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <entity Name="petOfOwner" Title="" entityHeight="200" entityIconified="false" entityId="149993667371400" entityLocationX="707" entityLocationY="93" entityWidth="150" queryId="pet-of-owner" tableName="" tableSchemaName=""/>
+  <entity Name="petsOfOwner" Title="" entityHeight="200" entityIconified="false" entityId="149993683834500" entityLocationX="428" entityLocationY="75" entityWidth="150" queryId="pets-of-owner" tableName="" tableSchemaName=""/>
+  <entity Name="owners" Title="" entityHeight="200" entityIconified="false" entityId="149993667071600" entityLocationX="222" entityLocationY="277" entityWidth="150" queryId="all-owners" tableName="" tableSchemaName=""/>
+  <entity Name="addPet" Title="" entityHeight="106" entityIconified="false" entityId="149994281780700" entityLocationX="101" entityLocationY="76" entityWidth="150" queryId="add-pet" tableName="" tableSchemaName=""/>
+  <relation leftEntityFieldName="owners_id" leftEntityId="149993667071600" rightEntityId="149993667371400" rightEntityParameterName="ownerKey"/>
+  <relation leftEntityFieldName="owners_id" leftEntityId="149993667071600" rightEntityId="149993683834500" rightEntityParameterName="ownerKey"/>
+  <relation leftEntityFieldName="pets_id" leftEntityId="149993683834500" rightEntityId="149993667371400" rightEntityParameterName="petKey"/>
+  <referenceRelation leftEntityFieldName="owner_id" leftEntityId="149993683834500" rightEntityFieldName="owners_id" rightEntityId="149993667071600"/>
+  <referenceRelation leftEntityFieldName="owner_id" leftEntityId="149993667371400" rightEntityFieldName="owners_id" rightEntityId="149993667071600"/>
+</datamodel>

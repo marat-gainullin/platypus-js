@@ -13,7 +13,6 @@ import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.ContextHost;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.resourcepool.GeneralResourceProvider;
-import com.eas.client.resourcepool.ResourceUnavalableException;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.concurrent.CallableConsumer;
 import com.eas.concurrent.PlatypusThreadFactory;
@@ -362,7 +361,7 @@ public class DatabasesClient {
                 if (autoFillMetadata) {
                     try {
                         cache.fillTablesCacheByConnectionSchema();
-                    } catch (ResourceUnavalableException ex) {
+                    } catch (NamingException ex) {
                         Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, ex.getMessage());
                     }
                 }

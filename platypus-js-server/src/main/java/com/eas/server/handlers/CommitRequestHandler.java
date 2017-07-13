@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.server.handlers;
 
 import com.eas.server.RequestHandler;
@@ -10,8 +6,11 @@ import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
 import com.eas.client.changes.Change;
 import com.eas.client.changes.Command;
+import com.eas.client.changes.CommandRequest;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.threetier.json.ChangesJSONReader;
 import com.eas.client.threetier.requests.CommitRequest;
@@ -31,30 +30,33 @@ import javax.security.auth.AuthPermission;
 
 /**
  *
- * @author pk, mg refactoring
+ * @author mg
  */
 public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRequest.Response> {
 
     protected static class ChangesSortProcess {
 
-        private final List<Change> expectedChanges;
+        private final List<Change> expectedChanges = new ArrayList<>();
         private final String defaultDatasource;
         private int factCalls;
         private final Consumer<Map<String, List<Change>>> onSuccess;
         private final Consumer<Exception> onFailure;
 
-        private final Map<String, SqlCompiledQuery> entities = new HashMap<>();
         private final List<AccessControlException> accessDeniedEntities = new ArrayList<>();
         private final List<Exception> notRetrievedEntities = new ArrayList<>();
+        private final Map<String, String> datasourcesOfEntities = new HashMap();
 
-        public ChangesSortProcess(List<Change> aChanges, String aDefaultDatasource, Consumer<Map<String, List<Change>>> aOnSuccess, Consumer<Exception> aOnFailure) {
+        public ChangesSortProcess(String aDefaultDatasource, Consumer<Map<String, List<Change>>> aOnSuccess, Consumer<Exception> aOnFailure) {
             super();
-            expectedChanges = aChanges;
             defaultDatasource = aDefaultDatasource;
             onSuccess = aOnSuccess;
             onFailure = aOnFailure;
         }
 
+        public void datasourceDescovered(String aEntityName, String aDatasourceName){
+            datasourcesOfEntities.put(aEntityName, aDatasourceName);
+        }
+        
         protected String assembleErrors() {
             if (accessDeniedEntities != null && !accessDeniedEntities.isEmpty()) {
                 StringBuilder sb = new StringBuilder();
@@ -71,39 +73,23 @@ public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRe
             return null;
         }
 
-        public void complete(Change aChange, SqlQuery aQuery, AccessControlException accessDenied, Exception failed) {
-            if (aChange != null && aQuery != null) {
-                try {
-                    SqlCompiledQuery entity = entities.get(aChange.entityName);
-                    if (entity == null) {
-                        entity = aQuery.compile();
-                        entities.put(aChange.entityName, entity);
-                    }
-                    if (aChange instanceof Command) {
-                        ((Command) aChange).command = entity.getSqlClause();
-                    }
-                } catch (Exception ex) {
-                    Logger.getLogger(CommitRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
-                    notRetrievedEntities.add(ex);
-                }
-            }
+        public void complete(Change aChange, AccessControlException accessDenied, Exception failed) {
+            expectedChanges.add(aChange);
             if (accessDenied != null) {
                 accessDeniedEntities.add(accessDenied);
             }
             if (failed != null) {
                 notRetrievedEntities.add(failed);
             }
-
             if (++factCalls == expectedChanges.size()) {
                 if (accessDeniedEntities.isEmpty() && notRetrievedEntities.isEmpty()) {
                     if (onSuccess != null) {
                         Map<String, List<Change>> changeLogs = new HashMap<>();
                         expectedChanges.stream().forEach((Change aSortedChange) -> {
-                            SqlCompiledQuery entity = entities.get(aSortedChange.entityName);
-                            String datasourceName = entity.getDatasourceName();
+                            String datasourceName = datasourcesOfEntities.get(aSortedChange.entityName);
                             // defaultDatasource is needed here to avoid multi transaction
                             // actions against the same datasource, leading to unexpected
-                            // row-level locking and deadlocks in two phase transaction commit process
+                            // row level locking and deadlocks in two phase transaction commit process
                             if (datasourceName == null || datasourceName.isEmpty()) {
                                 datasourceName = defaultDatasource;
                             }
@@ -129,12 +115,34 @@ public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRe
         super(aServerCore, aRequest);
     }
 
+    private Command compileCommand(CommandRequest change, SqlCompiledQuery compiledEntity) {
+        Command command = new Command(change.entityName);
+        Parameters compiledParameters = compiledEntity.getParameters();
+        for (int p = 1; p <= compiledParameters.getParametersCount(); p++) {
+            Parameter compiledParam = compiledParameters.get(p);
+            command.getParameters().add(change.getParameters().get(compiledParam.getName()));
+        }
+        command.clause = compiledEntity.getSqlClause();
+        return command;
+    }
+
+    private AccessControlException checkWritePrincipalPermission(PlatypusPrincipal aPrincipal, String aEntityName, Set<String> writeRoles) {
+        if (writeRoles != null && !writeRoles.isEmpty()
+                && (aPrincipal == null || !aPrincipal.hasAnyRole(writeRoles))) {
+            return new AccessControlException(String.format("Access denied for write (entity: %s) for '%s'.", aEntityName != null ? aEntityName : "", aPrincipal != null ? aPrincipal.getName() : null), aPrincipal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public void handle(Session aSession, Consumer<CommitRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         try {
             DatabasesClient client = getServerCore().getDatabasesClient();
             List<Change> changes = ChangesJSONReader.read(getRequest().getChangesJson(), Scripts.getSpace());
-            ChangesSortProcess process = new ChangesSortProcess(changes, client.getDefaultDatasourceName(), (Map<String, List<Change>> changeLogs) -> {
+            Map<String, SqlCompiledQuery> compiledEntities = new HashMap<>();
+            
+            ChangesSortProcess process = new ChangesSortProcess(client.getDefaultDatasourceName(), (Map<String, List<Change>> changeLogs) -> {
                 try {
                     client.commit(changeLogs, (Integer aUpdated) -> {
                         if (onSuccess != null) {
@@ -152,19 +160,40 @@ public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRe
             } else {
                 changes.stream().forEach((change) -> {
                     try {
-                        ((LocalQueriesProxy) serverCore.getQueries()).getQuery(change.entityName, Scripts.getSpace(), (SqlQuery aQuery) -> {
-                            if (aQuery.isPublicAccess()) {
-                                AccessControlException aex = checkWritePrincipalPermission((PlatypusPrincipal) Scripts.getContext().getPrincipal(), change.entityName, aQuery.getWriteRoles());
-                                if (aex != null) {
-                                    process.complete(null, null, aex, null);
+                        ((LocalQueriesProxy) serverCore.getQueries()).getQuery(change.entityName, Scripts.getSpace(), (SqlQuery query) -> {
+                            if (query != null) {
+                                process.datasourceDescovered(change.entityName, query.getDatasourceName());
+                                if (query.isPublicAccess()) {
+                                    AccessControlException accessControlEx = checkWritePrincipalPermission((PlatypusPrincipal) Scripts.getContext().getPrincipal(), change.entityName, query.getWriteRoles());
+                                    if (accessControlEx != null) {
+                                        process.complete(change, accessControlEx, null);
+                                    } else {
+                                        try {
+                                            if (change instanceof CommandRequest) {
+                                                Command command = compileCommand((CommandRequest) change, compiledEntities.computeIfAbsent(change.entityName, en -> {
+                                                    try {
+                                                        return query.compile();
+                                                    } catch (Exception ex) {
+                                                        throw new IllegalStateException(ex);
+                                                    }
+                                                }));
+                                                process.complete(command, null, null);
+                                            } else {
+                                                process.complete(change, null, null);
+                                            }
+                                        } catch (Exception ex) {
+                                            Logger.getLogger(CommitRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
+                                            process.complete(null, null, ex);
+                                        }
+                                    }
                                 } else {
-                                    process.complete(change, aQuery, null, null);
+                                    process.complete(null, new AccessControlException(String.format("Public access to entity '%s' is denied while commiting changes for it.", change.entityName)), null);
                                 }
                             } else {
-                                process.complete(null, null, new AccessControlException(String.format("Public access to query %s is denied while commiting changes for it's entity.", change.entityName)), null);
+                                process.complete(null, null, new IllegalArgumentException(String.format("Entity '%s' is not found", change.entityName)));
                             }
                         }, (Exception ex) -> {
-                            process.complete(null, null, null, ex);
+                            process.complete(null, null, ex);
                         });
                     } catch (Exception ex) {
                         Logger.getLogger(CommitRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
@@ -176,12 +205,4 @@ public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRe
         }
     }
 
-    private AccessControlException checkWritePrincipalPermission(PlatypusPrincipal aPrincipal, String aEntityId, Set<String> writeRoles) {
-        if (writeRoles != null && !writeRoles.isEmpty()) {
-            if (aPrincipal == null || !aPrincipal.hasAnyRole(writeRoles)) {
-                return new AccessControlException(String.format("Access denied for write (entity: %s) for '%s'.", aEntityId != null ? aEntityId : "", aPrincipal != null ? aPrincipal.getName() : null), aPrincipal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
-            }
-        }
-        return null;
-    }
 }

@@ -15,6 +15,7 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
             done();
         }, function (e) {
             fail(e);
+            done();
         });
     });
     it('Model creation based on absent prefetched document', function (done) {
@@ -27,6 +28,7 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
             done();
         }, function (e) {
             fail(e);
+            done();
         });
     });
     it('Model reading', function (done) {
@@ -45,6 +47,7 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
             done();
         }, function (e) {
             fail(e);
+            done();
         });
     });
     it('createModel', function (done) {
@@ -89,23 +92,98 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
         done();
     });
     it("'Entity.query()' -> 'Entity.append()' chain", function (done) {
-        pending('Till tests with server');
-        done();
+        withRemotePetsModel(function (model) {
+            model.owners.query({}, function (owners) {
+                expect(owners).toBeDefined();
+                expect(owners.length).toBeDefined();
+                expect(owners.length).toBeGreaterThan(1);
+                expect(model.owners.length).toEqual(0);
+                model.owners.append(owners);
+                expect(model.owners.length).toBeGreaterThan(1);
+                done();
+            }, function (reason) {
+                fail(reason);
+                done();
+            });
+        }, function (reason) {
+            fail(reason);
+            done();
+        });
     });
-    it("'Entity.update()'", function (done) {
-        pending('Till tests with server');
-        done();
+    it("'Entity.update()'.params in order", function (done) {
+        withRemotePetsModel(function (model, Id) {
+            model.addPet.update({
+                id: Id.generate(),
+                ownerId: 142841834950629,
+                typeId: 142841300122653,
+                name: 'test-pet-1'
+            }, function (result) {
+                expect(result).toBeDefined();
+                done();
+            }, function (reason) {
+                fail(reason);
+                done();
+            });
+        }, function (reason) {
+            fail(reason);
+            done();
+        });
+    });
+    it("'Entity.update()'.params out of order", function (done) {
+        pending('Till Platypus.js next version');
+        withRemotePetsModel(function (model, Id) {
+            model.addPet.update({
+                id: Id.generate(),
+                typeId: 142841300122653,
+                ownerId: 142841834950629,
+                name: 'test-pet-2'
+            }, function (result) {
+                expect(result).toBeDefined();
+                done();
+            }, function (reason) {
+                fail(reason);
+                done();
+            });
+        }, function (reason) {
+            fail(reason);
+            done();
+        });
     });
     it("'Entity.enqueueUpdate()'", function (done) {
-        pending('Till tests with server');
-        done();
+        withRemotePetsModel(function (model, Id) {
+            model.addPet.enqueueUpdate({
+                id: Id.generate(),
+                ownerId: 142841834950629,
+                typeId: 142841300122653,
+                name: 'test-pet-3'
+            });
+            model.save(function (result) {
+                expect(result).toBeDefined();
+                done();
+            }, function (reason) {
+                fail(reason);
+                done();
+            });
+        }, function (reason) {
+            fail(reason);
+            done();
+        });
     });
     it("'Model.save()'", function (done) {
         pending('Till tests with server');
         done();
     });
 
-    function withPetsModel(Id, Model, Entity, onPrepared) {
+    function withRemotePetsModel(onSuccess, onFailure) {
+        require(['resource', 'orm', 'id'], function (Resource, Orm, Id) {
+            Resource.loadText('assets/entities/model-graph.model', function (loaded) {
+                var model = Orm.readModel(loaded);
+                onSuccess(model, Id);
+            }, onFailure);
+        });
+    }
+
+    function withLocalPetsModel(Id, Model, Entity, onPrepared) {
         var pets = new Entity('pets');
         var owners = new Entity('owners');
         var model = new Model();
@@ -137,7 +215,7 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
 
     it('Navigation properties view', function (done) {
         require(['id', 'model', 'entity'], function (Id, Model, Entity) {
-            withPetsModel(Id, Model, Entity, function (pets, owners, jenny, christy) {
+            withLocalPetsModel(Id, Model, Entity, function (pets, owners, jenny, christy) {
                 pets.forEach(function (pet) {
                     expect(pet).toBeDefined();
                     expect(pet.owner).toBeDefined();
@@ -163,8 +241,8 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
     });
     it('Navigation scalar properties edit', function (done) {
         require(['id', 'model', 'entity'], function (Id, Model, Entity) {
-            withPetsModel(Id, Model, Entity, function (pets, owners, jenny, christy) {
-                christy.pets.forEach(function(pet){
+            withLocalPetsModel(Id, Model, Entity, function (pets, owners, jenny, christy) {
+                christy.pets.forEach(function (pet) {
                     pet.owner = jenny;
                 });
                 expect(christy.pets.length).toEqual(0);
@@ -174,7 +252,7 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
                     expect(pet.owner).toEqual(jenny);
                 });
                 expect(jenny.pets.length).toEqual(4);
-                jenny.pets.forEach(function(pet){
+                jenny.pets.forEach(function (pet) {
                     pet.owner = christy;
                 });
                 expect(jenny.pets.length).toEqual(0);
@@ -190,13 +268,13 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
     });
     it('Navigation collection properties edit', function (done) {
         require(['id', 'model', 'entity'], function (Id, Model, Entity) {
-            withPetsModel(Id, Model, Entity, function (pets, owners, jenny, christy) {
+            withLocalPetsModel(Id, Model, Entity, function (pets, owners, jenny, christy) {
                 christy.pets.splice(0, christy.pets.length);
                 expect(christy.pets.length).toEqual(0);
                 pets.forEach(function (pet) {
                     expect(pet).toBeDefined();
                     expect(pet.owner === null || pet.owner === jenny).toBeTruthy();
-                    if(!pet.owner){
+                    if (!pet.owner) {
                         jenny.pets.push(pet);
                     }
                 });

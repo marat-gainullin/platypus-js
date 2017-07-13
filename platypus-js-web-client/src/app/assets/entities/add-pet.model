@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <parameters>
+    <parameter description="" name="typeId" nullable="true" parameterMode="1" selectionForm="null" type="Number"/>
+    <parameter description="" name="ownerId" nullable="true" parameterMode="1" selectionForm="null" type="Number"/>
+    <parameter description="" name="id" nullable="true" parameterMode="1" selectionForm="null" type="Number"/>
+    <parameter description="" name="name" nullable="true" parameterMode="1" selectionForm="null" type="String"/>
+  </parameters>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="8" entityLocationY="7" entityWidth="150"/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="149994277479100" entityLocationX="288" entityLocationY="3" entityWidth="150" tableAlias="" tableName="PETS" tableSchemaName=""/>
+</datamodel>

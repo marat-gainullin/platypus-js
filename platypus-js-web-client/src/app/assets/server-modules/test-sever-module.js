@@ -9,6 +9,15 @@ define(['invoke'], function (Invoke) {
                 onSuccess(result);
             });
         };
+        this.failureEcho = function (a, b, c, d, onSuccess, onFailure) {
+            var result = a + ' - ' + b + ' - ' + c + ' - ' + d;
+            Invoke.later(function () {
+                onFailure({
+                    calculated: result,
+                    description: 'Errors from server modules should be JSON-ed'
+                });
+            });
+        };
     }
     return EchoServerModule;
 });

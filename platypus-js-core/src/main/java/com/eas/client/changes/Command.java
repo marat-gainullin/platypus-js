@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.changes;
 
 import com.eas.script.NoPublisherException;
@@ -12,21 +8,21 @@ import java.util.List;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
- *
  * @author mg
  */
 public class Command extends Change {
     
-    public String command;// transient property
+    /**
+     * Compiled sql clause with lineaar parameters in form of (?, ?, ?).
+     */
+    public String clause;
+    /**
+     * Compiled and not unique collection of parameters.
+     */
     private final List<ChangeValue> parameters = new ArrayList<>();
 
     public Command(String aEntityName) {
         super(aEntityName);
-    }
-
-    @Override
-    public void accept(ChangeVisitor aChangeVisitor) throws Exception {
-        aChangeVisitor.visit(this);
     }
 
     @ScriptFunction(jsDoc = ""
@@ -34,7 +30,7 @@ public class Command extends Change {
             + " * Command sql text to be applied in a database.\n"
             + " */")
     public String getCommand() {
-        return command;
+        return clause;
     }
 
     @ScriptFunction(jsDoc = ""
@@ -55,6 +51,11 @@ public class Command extends Change {
             published = (JSObject) publisher.call(null, new Object[]{this});
         }
         return published;
+    }
+
+    @Override
+    public void accept(ChangeVisitor aChangeVisitor) throws Exception {
+        aChangeVisitor.visit(this);
     }
     
 }

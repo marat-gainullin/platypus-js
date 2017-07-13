@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.model.store;
 
 import com.eas.client.metadata.Field;
@@ -122,11 +118,13 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
     }
 
     protected void readEntityDesignAttributes(E entity) {
-        entity.setX(readIntegerAttribute(currentNode, Model2XmlDom.ENTITY_LOCATION_X, Model2XmlDom.ENTITY_LOCATION_X, 0));
-        entity.setY(readIntegerAttribute(currentNode, Model2XmlDom.ENTITY_LOCATION_Y, Model2XmlDom.ENTITY_LOCATION_Y, 0));
-        entity.setWidth(readIntegerAttribute(currentNode, Model2XmlDom.ENTITY_SIZE_WIDTH, Model2XmlDom.ENTITY_SIZE_WIDTH, 0));
-        entity.setHeight(readIntegerAttribute(currentNode, Model2XmlDom.ENTITY_SIZE_HEIGHT, Model2XmlDom.ENTITY_SIZE_HEIGHT, 0));
-        entity.setIconified(readBooleanAttribute(currentNode, Model2XmlDom.ENTITY_ICONIFIED, Model2XmlDom.ENTITY_ICONIFIED, false));
+        // Here, old names of attributes are used as long names, because they are removed at all by minification tool.
+        // So, (new name, old name) of attribute here instead of (short name, long name)
+        entity.setX(readIntegerAttribute(currentNode, Model2XmlDom.ENTITY_LOCATION_X, "entityLocationX", 0));
+        entity.setY(readIntegerAttribute(currentNode, Model2XmlDom.ENTITY_LOCATION_Y, "entityLocationY", 0));
+        entity.setWidth(readIntegerAttribute(currentNode, Model2XmlDom.ENTITY_SIZE_WIDTH, "entityWidth", 0));
+        entity.setHeight(readIntegerAttribute(currentNode, Model2XmlDom.ENTITY_SIZE_HEIGHT, "entityHeight", 0));
+        entity.setIconified(readBooleanAttribute(currentNode, Model2XmlDom.ENTITY_ICONIFIED, "entityIconified", false));
     }
 
     @Override

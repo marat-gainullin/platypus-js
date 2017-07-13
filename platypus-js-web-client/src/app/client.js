@@ -13,18 +13,16 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
         rqExecuteServerModuleMethod: '14',
         rqLogout: '18'
     };
-    
+
     var RequestParams = {
         CACHE_BUSTER: "__cb",
-        QUERY_NAME: "__queryId",
+        ENTITY_NAME: "__queryId",
         TYPE: "__type",
-        //ENTITY_ID: "__entityId",
         MODULE_NAME: "__moduleName",
         METHOD_NAME: "__methodName",
-        //APP_ELEMENT_NAME: "__appElementName",
         PARAMS_ARRAY: "__param[]"
     };
-    
+
     var Methods = {
         GET: 'GET',
         PUT: 'PUT',
@@ -32,7 +30,7 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
         HEAD: 'HEAD',
         DELETE: 'DELETE'
     };
-    
+
     function param(aName, aValue) {
         return aName + "=" + (aValue ? encodeURIComponent(aValue) : aValue);
     }
@@ -49,10 +47,10 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
         }
         return res;
     }
-    
-    function objToParams(params){
+
+    function objToParams(params) {
         var res = "";
-        for(var p in params){
+        for (var p in params) {
             if (res.length > 0) {
                 res += "&";
             }
@@ -60,10 +58,10 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
         }
         return res;
     }
-    
-    function arrayToParams(paramsName, params){
+
+    function arrayToParams(paramsName, params) {
         var res = "";
-        for(var p = 0; p < params.length; p ++){
+        for (var p = 0; p < params.length; p++) {
             if (res.length > 0) {
                 res += "&";
             }
@@ -71,7 +69,7 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
         }
         return res;
     }
-    
+
     function submitForm(aAction, aMethod, aFormData, onSuccess, onFailure) {
         var req = new XMLHttpRequest();
         var url = aAction ? aAction : "";
@@ -86,19 +84,11 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
                 req.onreadystatechange = null;
                 if (200 <= req.status && req.status < 300) {
                     if (onSuccess) {
-                        try {
-                            onSuccess(req);
-                        } catch (ex) {
-                            Logger.severe(ex);
-                        }
+                        onSuccess(req);
                     }
                 } else {
                     if (onFailure) {
-                        try {
-                            onFailure(req.responseText ? req.responseText : (req.status + ' : ' + req.statusText));
-                        } catch (ex) {
-                            Logger.severe(ex);
-                        }
+                        onFailure(req.responseText ? req.responseText : (req.status + ' : ' + req.statusText));
                     }
                 }
             }
@@ -116,7 +106,7 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
             }
         };
     }
-    
+
     function startApiRequest(aUrlPrefix, aUrlQuery, aBody, aMethod, aContentType, onSuccess, onFailure) {
         var url = Utils.remoteApi() + window.platypusjs.config.apiUri + (aUrlPrefix ? aUrlPrefix : "") + (aUrlQuery ? "?" + aUrlQuery : "");
         var req = new XMLHttpRequest();
@@ -133,18 +123,14 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
         req.onreadystatechange = function () {
             if (req.readyState === 4/*RequestState.DONE*/) {
                 req.onreadystatechange = null;
-                try {
-                    if (200 <= req.status && req.status < 300) {
-                        if (onSuccess) {
-                            onSuccess(req);
-                        }
-                    } else {
-                        if (onFailure) {
-                            onFailure(req);
-                        }
+                if (200 <= req.status && req.status < 300) {
+                    if (onSuccess) {
+                        onSuccess(req);
                     }
-                } catch (ex) {
-                    severe(ex);
+                } else {
+                    if (onFailure) {
+                        onFailure(req);
+                    }
                 }
             }
         };
@@ -192,8 +178,8 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
         }
     }
 
-    function isJsonResponse(aResponse) {
-        var responseType = aResponse.getResponseHeader("content-type");
+    function isJsonResponse(xhr) {
+        var responseType = xhr.getResponseHeader("content-type");
         if (responseType) {
             responseType = responseType.toLowerCase();
             return  responseType.indexOf("application/json") > -1 ||
@@ -204,7 +190,7 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
             return false;
         }
     }
-    
+
     function isReportResponse(aResponse) {
         var responseType = aResponse.getResponseHeader("content-type");
         if (responseType) {
@@ -214,51 +200,76 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
         }
     }
 
+    function requestEntity(entityName, onSuccess, onFailure) {
+        var url = params(param(RequestParams.TYPE, RequestTypes.rqAppQuery), param(RequestParams.ENTITY_NAME, entityName));
+        return startApiRequest(null, url, "", Methods.GET, null, function (xhr) {
+            if (isJsonResponse(xhr)) {
+                if (onSuccess) {
+                    var entity = JSON.parse(xhr.responseText);
+                    onSuccess(entity);
+                }
+            } else {
+                if (onFailure) {
+                    onFailure('Wrong response MIME type. It should be json like MIME type');
+                }
+            }
+        }, function (xhr) {
+            if (onFailure) {
+                onFailure(xhr.responseText ? xhr.responseText : (xhr.status + ' : ' + xhr.statusText));
+            }
+        });
+    }
+
     function requestLogout(onSuccess, onFailure) {
         var query = param(RequestParams.TYPE, RequestTypes.rqLogout);
-        return startApiRequest(null, query, null, Methods.GET, null, function (aResult) {
+        return startApiRequest(null, query, null, Methods.GET, null, function (xhr) {
             principal = null;
-            onSuccess(aResult);
+            onSuccess(xhr);
         }, function (xhr) {
             onFailure(xhr.responseText ? xhr.responseText : (xhr.status + ' : ' + xhr.statusText));
         });
     }
 
     function requestLoggedInUser(onSuccess, onFailure) {
-            var query = param(RequestParams.TYPE, RequestTypes.rqCredential);
-            return startApiRequest(null, query, "", Methods.GET, null, function (aResponse) {
-                if (isJsonResponse(aResponse)) {
-                    var principal;
-                    if (aResponse.responseText) {
-                        var oResult = JSON.parse(aResponse.responseText);
-                        principal = oResult.userName;
-                    } else {
-                        principal = null;
-                    }
-                    if (!principal) {
-                        principal = "anonymous-" + Id.generate();
-                    }
-                    if (onSuccess) {
-                        onSuccess(principal);
-                    }
+        var query = param(RequestParams.TYPE, RequestTypes.rqCredential);
+        return startApiRequest(null, query, "", Methods.GET, null, function (xhr) {
+            if (isJsonResponse(xhr)) {
+                var principal;
+                if (xhr.responseText) {
+                    var oResult = JSON.parse(xhr.responseText);
+                    principal = oResult.userName;
                 } else {
-                    if (onFailure) {
-                        onFailure(aResponse.responseText);
-                    }
+                    principal = null;
                 }
-            }, function (xhr) {
+                if (!principal) {
+                    principal = "anonymous-" + Id.generate();
+                }
+                if (onSuccess) {
+                    onSuccess(principal);
+                }
+            } else {
                 if (onFailure) {
-                    onFailure(xhr.responseText ? xhr.responseText : (xhr.status + ' : ' + xhr.statusText));
+                    onFailure(xhr.responseText);
                 }
-            });
+            }
+        }, function (xhr) {
+            if (onFailure) {
+                onFailure(xhr.responseText ? xhr.responseText : (xhr.status + ' : ' + xhr.statusText));
+            }
+        });
     }
 
     function requestCommit(changeLog, onSuccess, onFailure) {
         var query = param(RequestParams.TYPE, RequestTypes.rqCommit);
-        return startApiRequest(null, query, JSON.stringify(changeLog), Methods.POST, "application/json; charset=utf-8", function (aResponse) {
-            Logger.info("Commit succeded: " + aResponse.getStatus() + " " + aResponse.getStatusText());
+        return startApiRequest(null, query, JSON.stringify(changeLog), Methods.POST, "application/json; charset=utf-8", function (xhr) {
+            Logger.info("Commit succeded: " + xhr.status + " : " + xhr.statusText);
             if (onSuccess) {
-                onSuccess();
+                if (isJsonResponse(xhr)) {
+                    var touched = JSON.parse(xhr.responseText);
+                    onSuccess(touched);
+                } else {
+                    onFailure('Wrong response MIME type. It should be json like MIME type');
+                }
             }
         }, function (xhr) {
             Logger.info("Commit failed: " + xhr.status + " : " + xhr.statusText);
@@ -275,26 +286,22 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
                 param(RequestParams.METHOD_NAME, aMethodName),
                 arrayToParams(RequestParams.PARAMS_ARRAY, aParams));
         if (onSuccess) {
-            return startApiRequest(null, null, query, Methods.POST, "application/x-www-form-urlencoded; charset=utf-8", function (aResponse) {
-                if (isJsonResponse(aResponse)) {
+            return startApiRequest(null, null, query, Methods.POST, "application/x-www-form-urlencoded; charset=utf-8", function (xhr) {
+                if (isJsonResponse(xhr)) {
                     // WARNING!!!Don't edit to JSON.parse()!
                     // It is parsed in high-level js-code.
-                    onSuccess(aResponse.responseText);
-                } else if (isReportResponse(aResponse)) {
-                    onSuccess(new Report(aResponse.responseText));
+                    onSuccess(xhr.responseText);
+                } else if (isReportResponse(xhr)) {
+                    onSuccess(new Report(xhr.responseText));
                 } else {
-                    onSuccess(aResponse.responseText);
+                    onSuccess(xhr.responseText);
                 }
             }, function (xhr) {
                 if (onFailure) {
-                    try {
-                        if (isJsonResponse(xhr)) {
-                            onFailure(JSON.parse(xhr.responseText));
-                        } else {
-                            onFailure(xhr.responseText ? xhr.responseText : (xhr.status + ' : ' + xhr.statusText));
-                        }
-                    } catch (ex) {
-                        Logger.severe(ex);
+                    if (isJsonResponse(xhr)) {
+                        onFailure(JSON.parse(xhr.responseText));
+                    } else {
+                        onFailure(xhr.responseText ? xhr.responseText : (xhr.status + ' : ' + xhr.statusText));
                     }
                 }
             });
@@ -330,18 +337,18 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
     function requestData(aServerEntityName, aParams, onSuccess, onFailure) {
         var query = params(
                 param(RequestParams.TYPE, RequestTypes.rqExecuteQuery),
-                param(RequestParams.QUERY_NAME, aServerEntityName), objToParams(aParams)
+                param(RequestParams.ENTITY_NAME, aServerEntityName), objToParams(aParams)
                 );
-        return startApiRequest(null, query, "", Methods.GET, null, function (aResponse) {
-            if (isJsonResponse(aResponse)) {
+        return startApiRequest(null, query, "", Methods.GET, null, function (xhr) {
+            if (isJsonResponse(xhr)) {
                 // TODO: Check all JSON.parse() against date reviver
-                var parsed = JSON.parse(aResponse.responseText, Utils.dateReviver);
+                var parsed = JSON.parse(xhr.responseText, Utils.dateReviver);
                 if (onSuccess) {
                     onSuccess(parsed);
                 }
             } else {
                 if (onFailure) {
-                    onFailure(aResponse.responseText ? aResponse.responseText : aResponse.status + ' : ' + aResponse.statusText);
+                    onFailure('Wrong response MIME type. It should be json like MIME type');
                 }
             }
         }, function (xhr) {
@@ -353,78 +360,85 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
             }
         });
     }
-    
+
     var module = {};
-    
+
+    Object.defineProperty(module, 'requestEntity', {
+        enumerable: true,
+        get: function () {
+            return requestEntity;
+        }
+    });
+
     Object.defineProperty(module, 'requestCommit', {
         enumerable: true,
-        get: function(){
+        get: function () {
             return requestCommit;
         }
     });
-    
+
     Object.defineProperty(module, 'requestData', {
         enumerable: true,
-        get: function(){
+        get: function () {
             return requestData;
         }
     });
-    
+
     Object.defineProperty(module, 'requestLoggedInUser', {
         enumerable: true,
-        get: function(){
+        get: function () {
             return requestLoggedInUser;
         }
     });
-    
+
     Object.defineProperty(module, 'requestLogout', {
         enumerable: true,
-        get: function(){
+        get: function () {
             return requestLogout;
         }
     });
-    
+
     Object.defineProperty(module, 'requestServerMethodExecution', {
         enumerable: true,
-        get: function(){
+        get: function () {
             return requestServerMethodExecution;
         }
     });
-    
+
     Object.defineProperty(module, 'submitForm', {
         enumerable: true,
-        get: function(){
+        get: function () {
             return submitForm;
         }
     });
-    
+
     Object.defineProperty(module, 'params', {
         enumerable: true,
-        get: function(){
+        get: function () {
             return params;
         }
     });
-    
+
     Object.defineProperty(module, 'param', {
         enumerable: true,
-        get: function(){
+        get: function () {
             return param;
         }
     });
-    
+
     Object.defineProperty(module, 'RequestTypes', {
         enumerable: true,
-        get: function(){
+        get: function () {
             return RequestTypes;
         }
     });
-    
+
     Object.defineProperty(module, 'RequestParams', {
         enumerable: true,
-        get: function(){
+        get: function () {
             return RequestParams;
         }
     });
-    
+
     return module;
 });

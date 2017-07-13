@@ -1,11 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.model.store;
 
 import com.eas.client.model.application.ApplicationEntity;
-import com.eas.client.model.application.ApplicationModel; 
+import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import org.w3c.dom.Document;
@@ -56,14 +52,18 @@ public class ApplicationModel2XmlDom<E extends ApplicationEntity<M, ?, E>, M ext
             node.setAttribute(DATASOURCE_NAMEE_ATTR_NAME, aEntity.getName());
             node.setAttribute(DATASOURCE_TITLE_ATTR_NAME, aEntity.getTitle());
             node.setAttribute(ENTITY_ID_ATTR_NAME, String.valueOf(aEntity.getEntityId()));
-            if (aEntity.getQueryName() != null) {
+            if (aEntity.getQueryName() != null && !aEntity.getQueryName().isEmpty()) {
                 node.setAttribute(QUERY_ID_ATTR_NAME, String.valueOf(aEntity.getQueryName()));
             }
-            if (aEntity.getTableDatasourceName() != null) {
+            if (aEntity.getTableDatasourceName() != null && !aEntity.getTableDatasourceName().isEmpty()) {
                 node.setAttribute(TABLE_DB_ID_ATTR_NAME, String.valueOf(aEntity.getTableDatasourceName()));
             }
-            node.setAttribute(TABLE_SCHEMA_NAME_ATTR_NAME, aEntity.getTableSchemaName());
-            node.setAttribute(TABLE_NAME_ATTR_NAME, aEntity.getTableName());
+            if (aEntity.getTableSchemaName() != null && !aEntity.getTableSchemaName().isEmpty()) {
+                node.setAttribute(TABLE_SCHEMA_NAME_ATTR_NAME, aEntity.getTableSchemaName());
+            }
+            if (aEntity.getTableName() != null && !aEntity.getTableName().isEmpty()) {
+                node.setAttribute(TABLE_NAME_ATTR_NAME, aEntity.getTableName());
+            }
             writeEntityDesignAttributes(node, aEntity);
         }
     }

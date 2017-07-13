@@ -35,7 +35,7 @@ public class QueryDocument {
     public final static String FIELD_NAME_ATTRIBUTE_NAME = "bindedColumn";
     public final static String FIELD_DESCRIPTION_ATTRIBUTE_NAME = "description";
     public final static String FIELD_TYPE_ATTRIBUTE_NAME = "type";
-    
+
     public static class StoredFieldMetadata {
 
         public String bindedColumn;
@@ -97,7 +97,7 @@ public class QueryDocument {
         return model;
     }
 
-    public static QueryDocument parse(String aName, File aMainFile, DatabasesClient aBasesProxy, QueriesProxy<SqlQuery> aQueriesPrioxy) throws Exception {
+    public static QueryDocument parse(String aName, File aMainFile, DatabasesClient aBasesProxy, QueriesProxy<SqlQuery> aQueriesProxy) throws Exception {
         Path mainPath = Paths.get(aMainFile.toURI());
         String sqledName = mainPath.getFileName().toString();
         String woExtension = sqledName.substring(0, sqledName.length() - PlatypusFiles.SQL_EXTENSION.length());
@@ -106,17 +106,27 @@ public class QueryDocument {
         String sqlContent = FileUtils.readString(sqlFile, SettingsConstants.COMMON_ENCODING);
         // sql dialect source
         File dialectFile = mainPath.resolveSibling(woExtension + PlatypusFiles.DIALECT_EXTENSION).toFile();
-        String dialectContent = FileUtils.readString(dialectFile, SettingsConstants.COMMON_ENCODING);
+        String dialectContent = dialectFile.exists() ? FileUtils.readString(dialectFile, SettingsConstants.COMMON_ENCODING) : "";
         // query model
         File modelFile = mainPath.resolveSibling(woExtension + PlatypusFiles.MODEL_EXTENSION).toFile();
-        String modelContent = FileUtils.readString(modelFile, SettingsConstants.COMMON_ENCODING);
-        Document modelDoc = Source2XmlDom.transform(modelContent);        
-        QueryModel model = XmlDom2QueryModel.transform(aBasesProxy, aQueriesPrioxy, modelDoc);
+        QueryModel model;
+        if (modelFile.exists()) {
+            String modelContent = FileUtils.readString(modelFile, SettingsConstants.COMMON_ENCODING);
+            Document modelDoc = Source2XmlDom.transform(modelContent);
+            model = XmlDom2QueryModel.transform(aBasesProxy, aQueriesProxy, modelDoc);
+        } else {
+            model = new QueryModel(aBasesProxy, aQueriesProxy);
+        }
         // output fields hints
         File outFile = mainPath.resolveSibling(woExtension + PlatypusFiles.OUT_EXTENSION).toFile();
-        String outContent = FileUtils.readString(outFile, SettingsConstants.COMMON_ENCODING);
-        Document outDoc = Source2XmlDom.transform(outContent);
-        List<QueryDocument.StoredFieldMetadata> additionalFields = parseFieldsHintsTag(outDoc.getDocumentElement());
+        List<QueryDocument.StoredFieldMetadata> additionalFields;
+        if (outFile.exists()) {
+            String outContent = FileUtils.readString(outFile, SettingsConstants.COMMON_ENCODING);
+            Document outDoc = Source2XmlDom.transform(outContent);
+            additionalFields = parseFieldsHintsTag(outDoc.getDocumentElement());
+        } else {
+            additionalFields = new ArrayList<>();
+        }
         //
         SqlQuery query = new SqlQuery(aBasesProxy);
         query.setEntityName(aName);

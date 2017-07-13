@@ -12,6 +12,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 /**
@@ -61,7 +62,7 @@ public class PlatypusNativeDataSource extends BearResourcePool<BearDatabaseConne
             Connection sqlConnection = DriverManager.getConnection(url, props);
             return new BearDatabaseConnection(maxStatements, sqlConnection, this);
         }catch(SQLException ex){
-            throw new ResourceUnavalableException(ex);
+            throw new NamingException(ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage() : ex.toString());
         }
     }
 

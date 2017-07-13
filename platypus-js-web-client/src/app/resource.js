@@ -100,18 +100,14 @@ define(['./logger', './internals'], function (Logger, Utils) {
         req.onreadystatechange = function () {
             if (req.readyState === 4/*RequestState.DONE*/) {
                 req.onreadystatechange = null;
-                try {
-                    if (200 <= req.status && req.status < 300) {
-                        if (onSuccess) {
-                            onSuccess(req);
-                        }
-                    } else {
-                        if (onFailure) {
-                            onFailure(req);
-                        }
+                if (200 <= req.status && req.status < 300) {
+                    if (onSuccess) {
+                        onSuccess(req);
                     }
-                } catch (ex) {
-                    severe(ex);
+                } else {
+                    if (onFailure) {
+                        onFailure(req);
+                    }
                 }
             }
         };
@@ -132,52 +128,32 @@ define(['./logger', './internals'], function (Logger, Utils) {
         req.open("post", Utils.remoteApi() + window.platypusjs.config.apiUri);
         if (req.upload) {
             req.upload.onprogress = function (aProgressEvent) {
-                try {
-                    if (onProgress) {
-                        onProgress(aProgressEvent);
-                    }
-                } catch (ex) {
-                    Logger.severe(ex);
+                if (onProgress) {
+                    onProgress(aProgressEvent);
                 }
             };
 
             req.upload.onloadend = function (aProgressEvent) {
-                try {
-                    if (onProgress) {
-                        onProgress(aProgressEvent);
-                    }
-                } catch (ex) {
-                    Logger.severe(ex);
+                if (onProgress) {
+                    onProgress(aProgressEvent);
                 }
             };
 
             req.upload.ontimeout = function (aProgressEvent) {
                 if (onFailure) {
-                    try {
-                        onFailure("Upload timed out");
-                    } catch (ex) {
-                        Logger.severe(ex);
-                    }
+                    onFailure("Upload timed out");
                 }
             };
 
             req.upload.onabort = function (aEvent) {
                 if (onFailure) {
-                    try {
-                        onFailure("Upload aborted");
-                    } catch (ex) {
-                        Logger.severe(ex);
-                    }
+                    onFailure("Upload aborted");
                 }
             };
 
             req.upload.onerror = function (aEvent) {
                 if (onFailure) {
-                    try {
-                        onFailure(req.responseText ? req.responseText : (req.status + ' : ' + req.statusText));
-                    } catch (ex) {
-                        Logger.severe(ex);
-                    }
+                    onFailure(req.responseText ? req.responseText : (req.status + ' : ' + req.statusText));
                 }
             };
         }
@@ -189,12 +165,8 @@ define(['./logger', './internals'], function (Logger, Utils) {
             if (req.readyState === 4/*RequestState.DONE*/) {
                 req.onreadystatechange = null;
                 if (200 <= req.status && req.status < 300) {
-                    try {
-                        if (onComplete) {
-                            onComplete(req.responseText);
-                        }
-                    } catch (ex) {
-                        Logger.severe(ex);
+                    if (onComplete) {
+                        onComplete(req.responseText);
                     }
                 } else {
                     if (req.status === 0) {

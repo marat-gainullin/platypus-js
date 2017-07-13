@@ -3,6 +3,7 @@ package com.eas.client.dataflow;
 import com.eas.client.changes.ChangeValue;
 import com.eas.client.changes.ChangeVisitor;
 import com.eas.client.changes.Command;
+import com.eas.client.changes.CommandRequest;
 import com.eas.client.changes.Delete;
 import com.eas.client.changes.EntitiesHost;
 import com.eas.client.changes.Insert;
@@ -353,7 +354,7 @@ public class StatementsGenerator implements ChangeVisitor {
     public void visit(Command aChange) throws Exception {
         if (!aChange.consumed) {
             StatementsLogEntry logEntry = new StatementsLogEntry(gConverter);
-            logEntry.clause = aChange.command;
+            logEntry.clause = aChange.clause;
             for (ChangeValue v : aChange.getParameters()) {
                 Parameter p = entitiesHost.resolveParameter(aChange.entityName, v.name);
                 if (v.value != null && Scripts.GEOMETRY_TYPE_NAME.equals(p.getType())) {
@@ -366,4 +367,11 @@ public class StatementsGenerator implements ChangeVisitor {
             logEntries.add(logEntry);
         }
     }
+
+    @Override
+    public void visit(CommandRequest aChange) throws Exception {
+        throw new IllegalStateException("'CommandRequest' should not be transformed to sql clauses");
+    }
+    
+    
 }

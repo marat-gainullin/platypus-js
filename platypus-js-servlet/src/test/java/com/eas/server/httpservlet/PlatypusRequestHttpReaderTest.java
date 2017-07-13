@@ -157,7 +157,7 @@ public class PlatypusRequestHttpReaderTest {
         assertEquals("testEntity", u.entityName);
         assertEquals("testEntity", d.entityName);
         assertEquals("testEntity", c.entityName);
-        assertNull(c.command);
+        assertNull(c.clause);
         assertNotNull(i.getData());
         assertEquals(5, i.getData().size());
         assertNotNull(u.getData());

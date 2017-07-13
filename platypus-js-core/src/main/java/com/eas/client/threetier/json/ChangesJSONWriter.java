@@ -1,20 +1,18 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.threetier.json;
 
 import com.eas.client.changes.Change;
 import com.eas.client.changes.ChangeValue;
 import com.eas.client.changes.ChangeVisitor;
 import com.eas.client.changes.Command;
+import com.eas.client.changes.CommandRequest;
 import com.eas.client.changes.Delete;
 import com.eas.client.changes.Insert;
 import com.eas.client.changes.Update;
 import com.eas.util.JsonUtils;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -95,15 +93,26 @@ public class ChangesJSONWriter implements ChangeVisitor {
     }
 
     @Override
-    public void visit(Command aChange) throws Exception {
+    public void visit(CommandRequest aChange) throws Exception {
         List<String> params = new ArrayList<>();
-        for (ChangeValue parameter : aChange.getParameters()) {
-            params.add(parameter.name);
-            params.add(JsonUtils.v(parameter.value));
-        }
+        aChange.getParameters().entrySet().stream().forEach(e -> {
+            try {
+                params.add(e.getKey());
+                params.add(JsonUtils.v(e.getValue().value));
+            } catch (Exception ex) {
+                Logger.getLogger(ChangesJSONWriter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
         written = JsonUtils.o(CHANGE_KIND_NAME, JsonUtils.s("command").toString(),
                 CHANGE_ENTITY_NAME, JsonUtils.s(aChange.entityName).toString(),
                 CHANGE_PARAMETERS_NAME, JsonUtils.o(params.toArray(new String[]{})).toString()
         ).toString();
     }
+
+    @Override
+    public void visit(Command aChange) throws Exception {
+        throw new IllegalStateException("'Command' should not be written to JSON.");
+    }
+    
+    
 }

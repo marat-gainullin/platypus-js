@@ -409,29 +409,12 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                         }
                         return complemented;
                     }
-                    function acceptInstance(aSubject, aReassignOrmValues) {
+                    
+                    function acceptInstance(aSubject) {
                         Object.keys(noFields).forEach(function (aFieldName) {
                             if (typeof aSubject[aFieldName] === 'undefined')
                                 aSubject[aFieldName] = null;
                         });
-                        if (aReassignOrmValues) {
-                            var scalarsContainer = {};
-                            for each (var defsEntry in nFields.getOrmScalarDefinitions().entrySet()) {
-                                var sd = defsEntry.getKey();
-                                if (typeof aSubject[sd] !== 'undefined') {
-                                    scalarsContainer[sd] = aSubject[sd];
-                                    aSubject[sd] = null;
-                                }
-                            }
-                            var collectionsContainer = {};
-                            for each (var defsEntry in nFields.getOrmCollectionsDefinitions().entrySet()) {
-                                var cd = defsEntry.getKey();
-                                if (typeof aSubject[cd] !== 'undefined') {
-                                    collectionsContainer[cd] = aSubject[cd];
-                                    aSubject[cd] = null;
-                                }
-                            }
-                        }
                         M.manageObject(aSubject, managedOnChange, managedBeforeChange);
                         listenable(aSubject);
                         // ORM mutable scalar and collection properties
@@ -439,22 +422,11 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                             var jsDef = EngineUtilsClass.unwrap(defsEntry.getValue().getJsDef());
                             var sd = defsEntry.getKey();
                             Object.defineProperty(aSubject, sd, jsDef);
-                            if (aReassignOrmValues && typeof scalarsContainer[sd] !== 'undefined') {
-                                aSubject[sd] = scalarsContainer[sd];
-                            }
                         }
                         for each (var defsEntry in nFields.getOrmCollectionsDefinitions().entrySet()) {
                             var jsDef = EngineUtilsClass.unwrap(defsEntry.getValue().getJsDef());
                             var cd = defsEntry.getKey();
                             Object.defineProperty(aSubject, cd, jsDef);
-                            if (aReassignOrmValues && typeof collectionsContainer[cd] !== 'undefined') {
-                                var definedCollection = aSubject[cd];
-                                var savedCollection = collectionsContainer[cd];
-                                if (definedCollection && savedCollection && savedCollection.length > 0) {
-                                    for (var pi = 0; pi < savedCollection.length; pi++)
-                                        definedCollection.push(savedCollection[pi]);
-                                }
-                            }
                         }
                     }
 
@@ -485,7 +457,7 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                                     var aOrderer = orderers[aOrdererKey];
                                     aOrderer.add(aAdded);
                                 }
-                                acceptInstance(aAdded, true);
+                                acceptInstance(aAdded);
                                 fireOppositeScalarsChanges(aAdded, nFields);
                                 fireOppositeCollectionsChanges(aAdded, nFields);
                             });
@@ -508,29 +480,48 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                             });
                             if (_onInserted && added.length > 0) {
                                 try {
-                                    _onInserted({source: published, items: added});
+                                    _onInserted({
+                                        source: published,
+                                        items: added
+                                    });
                                 } catch (e) {
                                     Logger.severe(e);
                                 }
                             }
                             if (_onDeleted && deleted.length > 0) {
                                 try {
-                                    _onDeleted({source: published, items: deleted});
+                                    _onDeleted({
+                                        source: published,
+                                        items: deleted
+                                    });
                                 } catch (e) {
                                     Logger.severe(e);
                                 }
                             }
-                            fire(published, {source: published, propertyName: 'length'});
+                            fire(published, {
+                                source: published,
+                                propertyName: 'length'
+                            });
                         },
                         scrolled: function (aSubject, oldCursor, newCursor) {
                             if (_onScrolled) {
                                 try {
-                                    _onScrolled({source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
+                                    _onScrolled({
+                                        source: published,
+                                        propertyName: 'cursor',
+                                        oldValue: oldCursor,
+                                        newValue: newCursor
+                                    });
                                 } catch (e) {
                                     Logger.severe(e);
                                 }
                             }
-                            fire(published, {source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
+                            fire(published, {
+                                source: published,
+                                propertyName: 'cursor',
+                                oldValue: oldCursor,
+                                newValue: newCursor
+                            });
                         }
                     });
                     var pSchema = {};
@@ -683,7 +674,7 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                                 accepted[sp] = snapshotInstance[sp];
                             }
                             Array.prototype.push.call(published, accepted);
-                            acceptInstance(accepted, false);
+                            acceptInstance(accepted);
                         }
                         orderers = {};
                         published.cursor = published.length > 0 ? published[0] : null;

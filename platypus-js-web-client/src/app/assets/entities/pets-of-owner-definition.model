@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><datamodel>
+  <parameters>
+    <parameter description="" name="ownerKey" nullable="true" parameterMode="1" selectionForm="null" type="Number"/>
+  </parameters>
+  <parametersEntity entityHeight="200" entityIconified="false" entityLocationX="8" entityLocationY="7" entityWidth="150"/>
+  <entity Title="" entityHeight="200" entityIconified="false" entityId="149993653800000" entityLocationX="312" entityLocationY="7" entityWidth="150" tableAlias="t1" tableName="PETS" tableSchemaName=""/>
+  <relation leftEntityId="-1" leftEntityParameterName="ownerKey" rightEntityFieldName="owner_id" rightEntityId="149993653800000"/>
+</datamodel>

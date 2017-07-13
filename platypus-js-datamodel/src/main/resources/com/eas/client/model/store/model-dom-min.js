@@ -45,7 +45,12 @@ var modelMin = {
         "entityLocationY",
         "entityWidth",
         "entityHeight",
-        "entityIconified"
+        "entityIconified",
+        "left",
+        "top",
+        "width",
+        "height",
+        "polyline"
     ]
 };
 print('model tags:');

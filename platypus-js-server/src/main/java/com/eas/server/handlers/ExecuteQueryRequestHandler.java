@@ -27,9 +27,9 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class ExecuteQueryRequestHandler extends RequestHandler<ExecuteQueryRequest, ExecuteQueryRequest.Response> {
 
-    public static final String PUBLIC_ACCESS_DENIED_MSG = "Public access to query %s is denied.";
-    public static final String ACCESS_DENIED_MSG = "Access denied to query  %s for user %s";
-    public static final String MISSING_QUERY_MSG = "Query %s not found neither in application database, nor in hand-constructed queries.";
+    public static final String PUBLIC_ACCESS_DENIED_MSG = "Public access to entity %s is denied.";
+    public static final String ACCESS_DENIED_MSG = "Access denied to entity %s for user %s";
+    public static final String MISSING_QUERY_MSG = "Entity %s not found neither in application folder, nor in hand-constructed queries.";
 
     public ExecuteQueryRequestHandler(PlatypusServerCore aServerCore, ExecuteQueryRequest aRequest) {
         super(aServerCore, aRequest);

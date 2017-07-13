@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.changes;
 
 import com.eas.script.AlreadyPublishedException;
@@ -26,7 +22,7 @@ public abstract class Change implements HasPublished {
     }
 
     public abstract void accept(ChangeVisitor aChangeVisitor) throws Exception;
-
+    
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Indicates the change's type (Insert, Update, Delete or Command).\n"
