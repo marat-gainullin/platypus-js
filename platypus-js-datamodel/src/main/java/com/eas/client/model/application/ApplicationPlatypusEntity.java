@@ -1,16 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.model.application;
 
 import com.eas.client.changes.Change;
+import com.eas.client.changes.CommandRequest;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -49,19 +46,18 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
                     p.setValue(jsValue);// .toJava is inside prepreCommand()
                 }
             });
-            model.getChangeLog().add(copied.prepareCommand());
+            model.getChangeLog().add(copied.prepareCommandRequest());
         } else {
-            model.getChangeLog().add(query.prepareCommand());
+            model.getChangeLog().add(query.prepareCommandRequest());
         }
     }
 
     @ScriptFunction(jsDoc = EXECUTE_UPDATE_JSDOC, params = {"onSuccess", "onFailure"})
     @Override
     public int executeUpdate(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
-        List<Change> localLog = new ArrayList<>();
-        localLog.add(getQuery().prepareCommand());
+        CommandRequest commandRequest = query.prepareCommandRequest();
         if (aOnSuccess != null) {
-            return model.serverProxy.commit(localLog, Scripts.getSpace(), (Integer aUpdated) -> {
+            return model.serverProxy.commit(Collections.singletonList(commandRequest), Scripts.getSpace(), (Integer aUpdated) -> {
                 aOnSuccess.call(null, new Object[]{aUpdated});
             }, (Exception ex) -> {
                 if (aOnFailure != null) {
@@ -69,7 +65,7 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
                 }
             });
         } else {
-            return model.serverProxy.commit(localLog, Scripts.getSpace(), null, null);
+            return model.serverProxy.commit(Collections.singletonList(commandRequest), Scripts.getSpace(), null, null);
         }
     }
 
@@ -84,10 +80,9 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
                 p.setValue(Scripts.getSpace().toJava(jsValue));
             }
         });
-        List<Change> localLog = new ArrayList<>();
-        localLog.add(copied.prepareCommand());
+        CommandRequest commandRequest = copied.prepareCommandRequest();
         if (aOnSuccess != null) {
-            return model.serverProxy.commit(localLog, Scripts.getSpace(), (Integer aUpdated) -> {
+            return model.serverProxy.commit(Collections.singletonList(commandRequest), Scripts.getSpace(), (Integer aUpdated) -> {
                 aOnSuccess.call(null, new Object[]{aUpdated});
             }, (Exception ex) -> {
                 if (aOnFailure != null) {
@@ -95,7 +90,7 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
                 }
             });
         } else {
-            return model.serverProxy.commit(localLog, Scripts.getSpace(), null, null);
+            return model.serverProxy.commit(Collections.singletonList(commandRequest), Scripts.getSpace(), null, null);
         }
     }
 

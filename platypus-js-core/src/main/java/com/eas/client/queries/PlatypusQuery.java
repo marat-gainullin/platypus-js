@@ -1,11 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.queries;
 
 import com.eas.client.changes.ChangeValue;
-import com.eas.client.changes.Command;
+import com.eas.client.changes.CommandRequest;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.threetier.PlatypusClient;
 import com.eas.client.threetier.PlatypusFlowProvider;
@@ -54,12 +50,12 @@ public class PlatypusQuery extends Query {
         }
     }
 
-    public Command prepareCommand() {
-        Command command = new Command(entityName);
+    public CommandRequest prepareCommandRequest() {
+        CommandRequest command = new CommandRequest(entityName);
         for (int i = 0; i < params.getParametersCount(); i++) {
             Parameter param = params.get(i + 1);
             // Command couldn't contain JavaScript values, because of multithreading model, ChangesJSONWriter, etc.
-            command.getParameters().add(new ChangeValue(param.getName(), Scripts.getSpace().toJava(param.getValue())));
+            command.getParameters().put(param.getName(), new ChangeValue(param.getName(), Scripts.getSpace().toJava(param.getValue())));
         }
         return command;
     }

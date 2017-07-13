@@ -5,12 +5,9 @@ import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
 import com.eas.client.changes.Change;
-import com.eas.client.changes.Command;
 import com.eas.client.changes.CommandRequest;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.metadata.Parameter;
-import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.threetier.json.ChangesJSONReader;
 import com.eas.client.threetier.requests.CommitRequest;
@@ -115,17 +112,6 @@ public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRe
         super(aServerCore, aRequest);
     }
 
-    private Command compileCommand(CommandRequest change, SqlCompiledQuery compiledEntity) {
-        Command command = new Command(change.entityName);
-        Parameters compiledParameters = compiledEntity.getParameters();
-        for (int p = 1; p <= compiledParameters.getParametersCount(); p++) {
-            Parameter compiledParam = compiledParameters.get(p);
-            command.getParameters().add(change.getParameters().get(compiledParam.getName()));
-        }
-        command.clause = compiledEntity.getSqlClause();
-        return command;
-    }
-
     private AccessControlException checkWritePrincipalPermission(PlatypusPrincipal aPrincipal, String aEntityName, Set<String> writeRoles) {
         if (writeRoles != null && !writeRoles.isEmpty()
                 && (aPrincipal == null || !aPrincipal.hasAnyRole(writeRoles))) {
@@ -138,8 +124,8 @@ public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRe
     @Override
     public void handle(Session aSession, Consumer<CommitRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         try {
-            DatabasesClient client = getServerCore().getDatabasesClient();
             List<Change> changes = ChangesJSONReader.read(getRequest().getChangesJson(), Scripts.getSpace());
+            DatabasesClient client = getServerCore().getDatabasesClient();
             Map<String, SqlCompiledQuery> compiledEntities = new HashMap<>();
             
             ChangesSortProcess process = new ChangesSortProcess(client.getDefaultDatasourceName(), (Map<String, List<Change>> changeLogs) -> {
@@ -170,14 +156,14 @@ public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRe
                                     } else {
                                         try {
                                             if (change instanceof CommandRequest) {
-                                                Command command = compileCommand((CommandRequest) change, compiledEntities.computeIfAbsent(change.entityName, en -> {
+                                                SqlCompiledQuery compiled = compiledEntities.computeIfAbsent(change.entityName, en -> {
                                                     try {
                                                         return query.compile();
                                                     } catch (Exception ex) {
                                                         throw new IllegalStateException(ex);
                                                     }
-                                                }));
-                                                process.complete(command, null, null);
+                                                });
+                                                process.complete(compiled.prepareCommand(), null, null);
                                             } else {
                                                 process.complete(change, null, null);
                                             }
