@@ -10,6 +10,7 @@ import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ScriptDocument;
 import com.eas.client.cache.ScriptsConfigs;
+import com.eas.client.dataflow.FlowProviderFailedException;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.LocalQueriesProxy;
@@ -388,6 +389,8 @@ public class PlatypusHttpServlet extends HttpServlet {
                                 aHttpResponse.setStatus(HttpServletResponse.SC_CONFLICT);
                             }
                             PlatypusHttpResponseWriter.writeJsonResponse(errorBody, aHttpResponse, null);
+                        } else if (ex instanceof FlowProviderFailedException) {
+                            aHttpResponse.sendError(HttpServletResponse.SC_EXPECTATION_FAILED, "Can't return data with such entity");
                         } else {
                             aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
                         }

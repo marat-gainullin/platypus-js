@@ -32,17 +32,17 @@ define(['./invoke', './managed', './client', './logger'], function(Invoke, M, Cl
             }
 
             function entitiesPending() {
-                var pending = false;
+                var pendingMet = false;
                 entities.forEach(function (entity) {
                     if (entity.pending) {
-                        pending = true;
+                        pendingMet = true;
                     }
                 });
-                return pending;
+                return pendingMet;
             }
 
             var failures = [];
-            function complete(failureReason) {
+            function complete(failureReason, entity) {
                 if (failureReason)
                     failures.push(failureReason);
                 if (entitiesValid()) {
@@ -64,10 +64,9 @@ define(['./invoke', './managed', './client', './logger'], function(Invoke, M, Cl
                 entities.forEach(function (entity) {
                     if (!entity.valid && !entity.pending && entity.inRelatedValid()) {
                         entity.start(function () {
-                            
-                            complete();
+                            complete(null, entity);
                         }, function (reason) {
-                            complete(reason);
+                            complete(reason, entity);
                         });
                     }
                 });
@@ -126,12 +125,12 @@ define(['./invoke', './managed', './client', './logger'], function(Invoke, M, Cl
 
         function save(onSuccess, onFailure) {
             if (onSuccess) {
-                Client.requestCommit(changeLog, function () {
+                Client.requestCommit(changeLog, function (touched) {
                     commited();
-                    onSuccess();
-                }, function () {
+                    onSuccess(touched);
+                }, function (e) {
                     rolledback();
-                    onFailure();
+                    onFailure(e);
                 });
             } else {
                 throw 'onSuccess is required argument';

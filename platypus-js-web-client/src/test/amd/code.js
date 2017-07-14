@@ -60,8 +60,8 @@ describe('Platypus.js AMD loader', function () {
             done();
         });
     });
-    it('Prefetched resources of modules', function (done) {
-        require(['prefetched/a'], function (pa) {
+    it('Fetched resources of modules', function (done) {
+        require(['fetched/a'], function (pa) {
             expect(pa).toBeDefined();
             expect(pa.model).toBeTruthy();
             expect(pa.layout).toBeTruthy();

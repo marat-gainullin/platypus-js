@@ -81,18 +81,5 @@ public class ExecuteQueryRequestHandler extends RequestHandler<ExecuteQueryReque
         // SqlCompiledQuery.executeUpdate/Client.enqueueUpdate is prohibited here, because no security check is performed in it.
         // Stored procedures can't be called directly from three-tier clients for security reasons
         // and out parameters can't pass through the network.
-        /*
-         if (aQuery.isProcedure()) {
-         for (int i = 1; i <= queryParams.getParametersCount(); i++) {
-         Parameter queryParam = queryParams.get(i);
-         if (queryParam.getMode() == ParameterMetaData.parameterModeOut || queryParam.getMode() == ParameterMetaData.parameterModeInOut) {
-         Parameter executedParam = compiledQuery.getParameters().get(queryParam.getName());
-         if (executedParam != null) {
-         queryParam.setValue(executedParam.getValue());
-         }
-         }
-         }
-         }
-         */
     }
 }

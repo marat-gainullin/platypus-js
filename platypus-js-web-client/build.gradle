@@ -19,7 +19,7 @@ configurations {
     containerLibs
 }
 
-def platypusJsVersion = '5.11.4'
+def platypusJsVersion = '5.11.6'
 def tomcatVersion = '8.5.8'
 
 dependencies {

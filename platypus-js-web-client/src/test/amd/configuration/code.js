@@ -7,7 +7,7 @@ it('Platypus.js AMD loader configuration', function () {
     expect(window.platypusjs).toBeDefined();
     expect(window.platypusjs.config).toBeDefined();
     var config = window.platypusjs.config;
-    expect(config.prefetch).toBeTruthy();
+    expect(config.autofetch).toBeTruthy();
     expect(config.remoteApi).toEqual('test-remote-api');
     expect(config.apiUri).toEqual('/test-api-uri');
     expect(config.sourcePath).toEqual('/test-source-path/');

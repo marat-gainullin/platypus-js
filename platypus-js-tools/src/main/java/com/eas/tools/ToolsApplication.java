@@ -518,7 +518,7 @@ public class ToolsApplication {
                             moduleNamesAndProps.add(JsonUtils.as(scriptDoc.getModules().keySet().toArray(new String[]{})));
                         }
                         if (!resources.isEmpty()) {
-                            moduleNamesAndProps.add(new StringBuilder("prefetched"));
+                            moduleNamesAndProps.add(new StringBuilder("fetched"));
                             moduleNamesAndProps.add(JsonUtils.as(resources.toArray(new String[]{})));
                         }
                         if (!walker.getDependencies().isEmpty()) {

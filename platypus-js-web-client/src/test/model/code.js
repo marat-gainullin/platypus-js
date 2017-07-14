@@ -18,7 +18,7 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
             done();
         });
     });
-    it('Model creation based on absent prefetched document', function (done) {
+    it('Model creation based on absent fetched document', function (done) {
         require(['orm', 'model', 'entity'], function (Orm, Model, Entity) {
             try {
                 new Orm.createModel('absent-module');
@@ -28,6 +28,17 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
             done();
         }, function (e) {
             fail(e);
+            done();
+        });
+    });
+    it('Model creation based on fetched document', function (done) {
+        require('assets/full-module', function (FullModule) {
+            var m = new FullModule();
+            expect(m.model).toBeDefined();
+            expect(m.model1).toBeDefined();
+            done();
+        }, function (reason) {
+            fail(reason);
             done();
         });
     });
@@ -50,46 +61,202 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
             done();
         });
     });
-    it('createModel', function (done) {
-        pending('Till tests with server');
-        done();
+    it('requireEntities.success', function (done) {
+        require('orm', function (Orm) {
+            Orm.requireEntities(['pets', 'all-owners'], function (petsEntity, ownersEntity) {
+                expect(petsEntity).toBeDefined();
+                expect(petsEntity.fields).toBeDefined();
+                expect(petsEntity.fields.length).toBeDefined();
+                expect(petsEntity.fields.length).toEqual(5);
+                expect(petsEntity.parameters).toBeDefined();
+                expect(petsEntity.parameters.length).toBeDefined();
+                expect(petsEntity.title).toBeDefined();
+                expect(ownersEntity).toBeDefined();
+                expect(ownersEntity.fields).toBeDefined();
+                expect(ownersEntity.fields.length).toBeDefined();
+                expect(ownersEntity.fields.length).toEqual(7);
+                expect(ownersEntity.parameters).toBeDefined();
+                expect(ownersEntity.parameters.length).toBeDefined();
+                expect(ownersEntity.title).toBeDefined();
+                done();
+            }, function (e) {
+                fail(e);
+                done();
+            });
+        });
     });
-    it('loadModel', function (done) {
-        pending('Till tests with server');
-        done();
-    });
-    it('requireEntities', function (done) {
-        pending('Till tests with server');
-        done();
-    });
-    it("Snapshots of entities' data", function (done) {
-        // TODO: Add requery -> revert test.
-        pending('Till tests with server');
-        done();
+    it('requireEntities.failure', function (done) {
+        require('orm', function (Orm) {
+            Orm.requireEntities(['absent-entity'], function () {
+                fail("'Orm.requireEntities' against absent entity should lead to an error");
+                done();
+            }, function (e) {
+                expect(e).toBeDefined();
+                done();
+            });
+        });
     });
     it("'Entity.requery()' -> Some changes -> 'Entity.revert()'", function (done) {
-        pending('Till tests with server');
-        done();
+        withRemotePetsModel(function (model, Id) {
+            model.requery(function () {
+                var oldLength = model.owners.length;
+                expect(oldLength).toBeGreaterThan(1);
+                var oldValue = model.owners[0].firstname;
+                expect(model.changeLog).toBeDefined();
+                expect(model.changeLog.length).toBeDefined();
+                expect(model.changeLog.length).toEqual(0);
+                model.owners[0].firstname += Id.generate();
+                expect(model.changeLog.length).toEqual(1);
+                model.owners.push({
+                    owners_id: Id.generate()
+                });
+                expect(model.changeLog.length).toEqual(2);
+                model.revert();
+                expect(model.owners.length, oldLength);
+                expect(model.owners[0].firstname).toEqual(oldValue);
+                expect(model.changeLog.length).toEqual(0);
+                done();
+            }, function (e) {
+                fail(e);
+                done();
+            });
+        }, function (e) {
+            fail(e);
+            done();
+        });
     });
     it("Requery graph", function (done) {
+        withRemotePetsModel(function (model, Id) {
+            var ownersRequeried = 0;
+            model.owners.onRequeried = function () {
+                ownersRequeried++;
+            };
+            var petsOfOwnerRequeried = 0;
+            model.petsOfOwner.onRequeried = function () {
+                petsOfOwnerRequeried++;
+            };
+            var petOfOwnerRequeried = 0;
+            model.petOfOwner.onRequeried = function () {
+                petOfOwnerRequeried++;
+            };
+            model.requery(function () {
+                expect(ownersRequeried).toEqual(1);
+                expect(petsOfOwnerRequeried).toEqual(1);
+                expect(petOfOwnerRequeried).toEqual(1);
+                done();
+            }, function (reason) {
+                fail(reason);
+                done();
+            });
+        }, function (reason) {
+            fail(reason);
+            done();
+        });
+    });
+    it("Requery partial graph with 'Entity.requery() with dependents'", function (done) {
         pending('Till tests with server');
         done();
     });
-    it("Requery partial graph", function (done) {
+    it("Requery graph after 'Model.cancel()'", function (done) {
         pending('Till tests with server');
         done();
     });
-    it("Requery graph after crash", function (done) {
-        pending('Till tests with server');
-        done();
+    it("Entities' events", function (done) {
+        withRemotePetsModel(function (model, Id) {
+            var onRequiredCalled = 0;
+            model.owners.onRequeried = function () {
+                onRequiredCalled++;
+            };
+            var onChangeCalled = 0;
+            model.owners.onChange = function (event) {
+                onChangeCalled++;
+                expect(event).toBeDefined();
+                expect(event.source).toBeDefined();
+                expect(event.propertyName).toBeDefined();
+                expect(event.oldValue).toBeDefined();
+                expect(event.newValue).toBeDefined();
+            };
+            var onInsertCalled = 0;
+            model.owners.onInsert = function (event) {
+                onInsertCalled++;
+                expect(event).toBeDefined();
+                expect(event.source).toBeDefined();
+                expect(event.items).toBeDefined();
+            };
+            var onDeleteCalled = 0;
+            model.owners.onDelete = function (event) {
+                onDeleteCalled++;
+                expect(event).toBeDefined();
+                expect(event.source).toBeDefined();
+                expect(event.items).toBeDefined();
+            };
+            expect(model.owners.onRequery === model.owners.onRequeried).toBeTruthy();
+            model.requery(function () {
+                expect(onRequiredCalled).toEqual(1);
+                var newOwner = {
+                    // Note! Only changes of those properties, that are in push/splice/unshift will be observable
+                    // for changeLog and for onChange events!
+                    owners_id: Id.generate(),
+                    firstname: 'test-owner'
+                };
+                model.owners.push(newOwner);
+                expect(onInsertCalled).toEqual(1);
+                newOwner.firstname = 'test-owner-edited';
+                expect(onChangeCalled).toEqual(1);
+                model.owners.remove(newOwner);
+                expect(onDeleteCalled).toEqual(1);
+                done();
+            }, function (reason) {
+                fail(reason);
+                done();
+            });
+        }, function (reason) {
+            fail(reason);
+            done();
+        });
     });
-    it("Requery graph due to cursor changes (aka scrolling)", function (done) {
-        pending('Till tests with server');
-        done();
+    it("Requery of model with command like entities", function (done) {
+        withRemotePetsModel(function (model, Id) {
+            var Entity = model.owners.constructor;
+            model.addEntity(new Entity('add-pet'));
+            model.requery(function () {
+                fail("'model.requery()' with command like entity inside, should lead to an error");
+                done();
+            }, function (reason) {
+                expect(reason).toBeDefined();
+                done();
+            });
+        }, function (reason) {
+            fail(reason);
+            done();
+        });
     });
+
     it("Extra and unknown to a backend properties", function (done) {
-        pending('Till tests with server');
-        done();
+        withRemotePetsModel(function (model, Id) {
+            model.requery(function () {
+                model.owners[0].name += '-edited by test';
+                var testOwner = {
+                    owners_id: Id.generate(),
+                    unknownproperty: 'should not be considered while translating to database'
+                };
+                model.owners.push(testOwner);
+                model.save(function (result) {
+                    expect(result).toBeDefined();
+                    expect(result).toBeGreaterThanOrEqual(1);
+                    done();
+                }, function (reason) {
+                    fail(reason);
+                    done();
+                });
+            }, function (reason) {
+                fail(reason);
+                done();
+            });
+        }, function (reason) {
+            fail(reason);
+            done();
+        });
     });
     it("'Entity.query()' -> 'Entity.append()' chain", function (done) {
         withRemotePetsModel(function (model) {
@@ -112,7 +279,10 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
     });
     it("'Entity.update()'.params in order", function (done) {
         withRemotePetsModel(function (model, Id) {
-            model.addPet.update({
+            var Entity = model.owners.constructor;
+            var addPet = new Entity('add-pet');
+            model.addEntity(addPet);
+            addPet.update({
                 id: Id.generate(),
                 ownerId: 142841834950629,
                 typeId: 142841300122653,
@@ -130,9 +300,11 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
         });
     });
     it("'Entity.update()'.params out of order", function (done) {
-        pending('Till Platypus.js next version');
         withRemotePetsModel(function (model, Id) {
-            model.addPet.update({
+            var Entity = model.owners.constructor;
+            var addPet = new Entity('add-pet');
+            model.addEntity(addPet);
+            addPet.update({
                 id: Id.generate(),
                 typeId: 142841300122653,
                 ownerId: 142841834950629,
@@ -151,7 +323,10 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
     });
     it("'Entity.enqueueUpdate()'", function (done) {
         withRemotePetsModel(function (model, Id) {
-            model.addPet.enqueueUpdate({
+            var Entity = model.owners.constructor;
+            var addPet = new Entity('add-pet');
+            model.addEntity(addPet);
+            addPet.enqueueUpdate({
                 id: Id.generate(),
                 ownerId: 142841834950629,
                 typeId: 142841300122653,
@@ -170,14 +345,48 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
         });
     });
     it("'Model.save()'", function (done) {
-        pending('Till tests with server');
-        done();
+        withRemotePetsModel(function (model, Id) {
+            model.requery(function () {
+                var newOwnerId = Id.generate();
+                model.owners[0].name += '-edited by test';
+                var testOwner = {
+                    owners_id: newOwnerId,
+                    firstname: 'test-owner-name',
+                    lastname: 'test-owner-surname-' + newOwnerId,
+                    email: 'john@doe.com'
+                };
+                model.owners.push(testOwner);
+                model.save(function (result) {
+                    expect(result).toBeDefined();
+                    expect(result).toBeGreaterThanOrEqual(1);
+                    model.requery(function () {
+                        var justAddedOwner = model.owners.findByKey(newOwnerId);
+                        expect(justAddedOwner).toBeDefined();
+                        expect(justAddedOwner.lastname).toEqual('test-owner-surname-' + newOwnerId);
+                        done();
+                    }, function (reason) {
+                        fail(reason);
+                        done();
+                    });
+                }, function (reason) {
+                    fail(reason);
+                    done();
+                });
+            }, function (reason) {
+                fail(reason);
+                done();
+            });
+        }, function (reason) {
+            fail(reason);
+            done();
+        });
     });
 
     function withRemotePetsModel(onSuccess, onFailure) {
         require(['resource', 'orm', 'id'], function (Resource, Orm, Id) {
             Resource.loadText('assets/entities/model-graph.model', function (loaded) {
                 var model = Orm.readModel(loaded);
+                model.owners.keysNames.add('owners_id');
                 onSuccess(model, Id);
             }, onFailure);
         });

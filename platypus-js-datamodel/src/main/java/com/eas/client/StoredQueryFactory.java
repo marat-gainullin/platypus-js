@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client;
 
 import com.eas.client.cache.PlatypusIndexer;
@@ -46,8 +42,7 @@ public class StoredQueryFactory {
         SqlQuery subQuery = new SqlQuery(aQuery.getBasesProxy(), aQuery.getDatasourceName(), "");
         subQuery.setEntityName(aSubSelect.getAliasName());
         resolveOutputFieldsFromTables(subQuery, aSubSelect.getSelectBody());
-        Fields subFields = subQuery.getFields();
-        return subFields;
+        return subQuery.getFields();
     }
 
     public static final String INNER_JOIN_CONSTRUCTION = "select %s from %s %s inner join %s on (%s.%s = %s.%s)";
@@ -117,13 +112,14 @@ public class StoredQueryFactory {
         return uniqueTables;
     }
 
-    public SqlQuery loadQuery(String aAppElementName) throws Exception {
-        if (aAppElementName == null) {
+    public SqlQuery loadQuery(String aEntityName) throws Exception {
+        if (aEntityName != null) {
+            Logger.getLogger(this.getClass().getName()).finer(String.format(LOADING_QUERY_MSG, aEntityName));
+            File mainQueryFile = indexer.nameToFile(aEntityName);
+            return mainQueryFile != null ? fileToSqlQuery(aEntityName, mainQueryFile) : null;
+        } else {
             throw new NullPointerException(CANT_LOAD_NULL_MSG);
         }
-        Logger.getLogger(this.getClass().getName()).finer(String.format(LOADING_QUERY_MSG, aAppElementName));
-        File mainQueryFile = indexer.nameToFile(aAppElementName);
-        return mainQueryFile != null ? fileToSqlQuery(aAppElementName, mainQueryFile) : null;
     }
 
     protected SqlQuery fileToSqlQuery(String aName, File aFile) throws Exception {
@@ -459,7 +455,7 @@ public class StoredQueryFactory {
     /**
      * Returns cached table fields if <code>aTablyName</code> is a table name or
      * query fields if <code>aTablyName</code> is query tably name in format:
-     * #&lt;id&gt;.
+     * #&lt;queryName&gt;.
      *
      * @param aDatasourceName Database identifier, the query belongs to. That
      * database is query-inner table metadata source, but query is stored in
@@ -469,24 +465,21 @@ public class StoredQueryFactory {
      * @throws Exception
      */
     protected FieldsResult getTablyFields(String aDatasourceName, String aTablyName) throws Exception {
-        Fields tableFields;
-        if (aTablyName.startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {// strong reference to stored subquery
-            tableFields = null;
-            aTablyName = aTablyName.substring(ClientConstants.STORED_QUERY_REF_PREFIX.length());
-        } else {// soft reference to table or a stored subquery.
-            try {
-                tableFields = basesProxy.getMetadataCache(aDatasourceName).getTableMetadata(aTablyName);
-            } catch (Exception ex) {
-                tableFields = null;
-            }
-        }
-        if (tableFields != null) {// Tables have a higher priority in soft reference case
-            return new FieldsResult(tableFields, true);
-        } else {
-            SqlQuery query = subQueriesProxy.getQuery(aTablyName, null, null, null);
+        if (aTablyName.startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {
+            // Reference to a stored subquery
+            String queryName = aTablyName.substring(ClientConstants.STORED_QUERY_REF_PREFIX.length());
+            SqlQuery query = subQueriesProxy.getQuery(queryName, null, null, null);
             if (query != null) {
                 return new FieldsResult(query.getFields(), false);
             } else {
+                return null;
+            }
+        } else {
+            // Reference to a table
+            try {
+                Fields tableFields = basesProxy.getMetadataCache(aDatasourceName).getTableMetadata(aTablyName);
+                return new FieldsResult(tableFields, true);
+            } catch (Exception ex) {
                 return null;
             }
         }

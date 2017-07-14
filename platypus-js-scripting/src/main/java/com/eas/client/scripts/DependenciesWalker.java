@@ -45,57 +45,59 @@ public class DependenciesWalker {
     }
 
     public void walk() {
-        parsedSource = Scripts.parseJs(source);
         SymbolsResolver outerDefinedFinder = new SymbolsResolver();
-        parsedSource.getAst().accept(outerDefinedFinder);
-        parsedSource.getAst().accept(new NodeVisitor<LexicalContext>(new LexicalContext()) {
+        parsedSource = Scripts.parseJs(source);
+        if (parsedSource != null) {
+            parsedSource.getAst().accept(outerDefinedFinder);
+            parsedSource.getAst().accept(new NodeVisitor<LexicalContext>(new LexicalContext()) {
 
-            private final Deque<CallNode> calls = new LinkedList<>();
+                private final Deque<CallNode> calls = new LinkedList<>();
 
-            @Override
-            public boolean enterCallNode(CallNode callNode) {
-                calls.push(callNode);
-                return super.enterCallNode(callNode);
-            }
+                @Override
+                public boolean enterCallNode(CallNode callNode) {
+                    calls.push(callNode);
+                    return super.enterCallNode(callNode);
+                }
 
-            @Override
-            public Node leaveCallNode(CallNode callNode) {
-                calls.pop();
-                return super.leaveCallNode(callNode);
-            }
+                @Override
+                public Node leaveCallNode(CallNode callNode) {
+                    calls.pop();
+                    return super.leaveCallNode(callNode);
+                }
 
-            @Override
-            public boolean enterLiteralNode(LiteralNode<?> literalNode) {
-                if (literalNode.getType().isString() && !calls.isEmpty()) {
-                    String value = literalNode.getString();
-                    CallNode lastCall = calls.peek();
-                    //boolean arrayAtFirstArg = lastCall.getArgs().size() >= 1 && lastCall.getArgs().get(0) instanceof LiteralNode.ArrayLiteralNode;
-                    boolean atFirstArg = lastCall.getArgs().size() >= 1 && lastCall.getArgs().get(0) == literalNode;
-                    Expression fe = lastCall.getFunction();
-                    if (fe instanceof AccessNode) {
-                        AccessNode lastAccess = (AccessNode) fe;
-                        String funcName = lastAccess.getProperty();
-                        if (/*lastCall.isNew() && */atFirstArg) {
-                            switch (funcName) {
-                                case RPC_PROXY:
-                                case SERVER_MODULE:
-                                    putServerDependence(value);
-                                    break;
-                                case LOAD_ENTITY:
-                                    if (lastAccess.getBase() instanceof IdentNode) {
-                                        //String baseName = ((IdentNode) lastAccess.getBase()).getName();
-                                        if (LOAD_ENTITY.equals(funcName)) {
-                                            putQueryDependence(value);
+                @Override
+                public boolean enterLiteralNode(LiteralNode<?> literalNode) {
+                    if (literalNode.getType().isString() && !calls.isEmpty()) {
+                        String value = literalNode.getString();
+                        CallNode lastCall = calls.peek();
+                        //boolean arrayAtFirstArg = lastCall.getArgs().size() >= 1 && lastCall.getArgs().get(0) instanceof LiteralNode.ArrayLiteralNode;
+                        boolean atFirstArg = lastCall.getArgs().size() >= 1 && lastCall.getArgs().get(0) == literalNode;
+                        Expression fe = lastCall.getFunction();
+                        if (fe instanceof AccessNode) {
+                            AccessNode lastAccess = (AccessNode) fe;
+                            String funcName = lastAccess.getProperty();
+                            if (/*lastCall.isNew() && */atFirstArg) {
+                                switch (funcName) {
+                                    case RPC_PROXY:
+                                    case SERVER_MODULE:
+                                        putServerDependence(value);
+                                        break;
+                                    case LOAD_ENTITY:
+                                        if (lastAccess.getBase() instanceof IdentNode) {
+                                            //String baseName = ((IdentNode) lastAccess.getBase()).getName();
+                                            if (LOAD_ENTITY.equals(funcName)) {
+                                                putQueryDependence(value);
+                                            }
                                         }
-                                    }
-                                    break;
+                                        break;
+                                }
                             }
                         }
                     }
+                    return super.enterLiteralNode(literalNode);
                 }
-                return super.enterLiteralNode(literalNode);
-            }
-        });
+            });
+        }
         dependencies.removeAll(Arrays.asList(new String[]{REQUIRE_FUNCTION_NAME, DEFINE_FUNCTION_NAME}));
         outerDefinedFinder.getGlobalSymbols().forEach((String aIfGlobalDependency) -> {
             try {
@@ -113,7 +115,7 @@ public class DependenciesWalker {
     public Set<String> getQueryDependencies() {
         return queryDependencies;
     }
-    
+
     public void putQueryDependence(String value) {
         queryDependencies.add(value);
     }

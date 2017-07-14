@@ -112,6 +112,7 @@ public class ChangesJSONReader implements ChangeVisitor {
                                 break;
                             case "command":
                                 change = new CommandRequest(sEntityName);
+                                change.accept(reader);
                                 break;
                         }
                         if (change != null) {

@@ -1,7 +1,6 @@
 define(['./id', './logger', './managed', './orderer', './client', './extend'], function (Id, Logger, M, Orderer, Client, extend) {
-
     function Query(entityName) {
-        function prepareCommand(parameters) {
+        function prepareCommandRequest(parameters) {
             var command = {
                 kind: 'command',
                 entity: entityName,
@@ -13,7 +12,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
         }
 
         function requestData(parameters, onSuccess, onFailure) {
-            pending = Client.requestData(entityName, parameters, onSuccess, onFailure);
+            return Client.requestData(entityName, parameters, onSuccess, onFailure);
         }
 
         Object.defineProperty(this, 'entityName', {
@@ -30,9 +29,9 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
                 return requestData;
             }
         });
-        Object.defineProperty(this, 'prepareCommand', {
+        Object.defineProperty(this, 'prepareCommandRequest', {
             get: function () {
-                return prepareCommand;
+                return prepareCommandRequest;
             }
         });
     }
@@ -61,7 +60,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
             collectionNavigationProperties.clear();
         }
 
-        var onRequeried = null;
+        var _onRequeried = null;
         var lastSnapshot = [];
         var title = '';
         var name = '';
@@ -79,6 +78,8 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
 
         var valid = false;
         var pending = null;
+        var pendingOnSuccess = null;
+        var pendingOnFailure = null;
         var parameters = {};
 
         function inRelatedValid() {
@@ -136,13 +137,15 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
             });
         }
 
-        function start(/*Low level event*/onSuccess, /*Low level event*/onFailure) {
+        function start(/*Low level event*/_onSuccess, /*Low level event*/_onFailure) {
             if (pending)
                 throw "Can't start new request, while previous request is in progress";
             if (valid)
                 throw "Can't start request for valid entity";
-            pendingOnSuccess = onSuccess;
-            pendingOnFailure = onFailure;
+            if(keysNames.size === 0)
+                Logger.warning("'keysNames' for '" + name + "' are absent. Keys auto generation and 'findByKey()' will not work properly");
+            pendingOnSuccess = _onSuccess;
+            pendingOnFailure = _onFailure;
             bindParameters();
             pending = queryProxy.requestData(parameters, function (data) {
                 acceptData(data, true);
@@ -155,16 +158,16 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
                 if (onSuccess) {
                     onSuccess();
                 }
-                if (onRequeried)
-                    onRequeried();
-            }, function () {
+                if (_onRequeried)
+                    _onRequeried();
+            }, function (reason) {
                 valid = true;
                 var onFailure = pendingOnFailure;
                 pending = null;
                 pendingOnSuccess = null;
                 pendingOnFailure = null;
                 if (onFailure) {
-                    onFailure();
+                    onFailure(reason);
                 }
             });
         }
@@ -187,7 +190,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
         }
 
         function enqueueUpdate(params) {
-            var command = queryProxy.prepareCommand(params);
+            var command = queryProxy.prepareCommandRequest(params);
             model.changeLog.push(command);
         }
 
@@ -225,7 +228,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
 
         function update(params, onSuccess, onFailure) {
             if (onSuccess) {
-                var command = queryProxy.prepareCommand(params);
+                var command = queryProxy.prepareCommandRequest(params);
                 Client.requestCommit([command], onSuccess, onFailure);
             } else {
                 throw "Synchronous Entity.update() method is not supported within browser client. So 'onSuccess' is required argument.";
@@ -564,9 +567,11 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
         }
 
         function findByKey(aKeyValue) {
-            if (keysNames.length > 0) {
+            if (keysNames.size > 0) {
                 var criteria = {};
-                criteria[keysNames[0]] = aKeyValue;
+                keysNames.forEach(function(keyName){
+                    criteria[keyName] = aKeyValue;
+                });
                 var found = find(criteria);
                 return found.length > 0 ? found[0] : null;
             } else {
@@ -653,6 +658,11 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
             outRelations.add(relation);
         }
 
+        Object.defineProperty(this, 'keysNames', {
+            get: function () {
+                return keysNames;
+            }
+        });
         Object.defineProperty(this, 'params', {
             get: function () {
                 return parameters;
@@ -728,20 +738,28 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
                 _onChange = aValue;
             }
         });
+        Object.defineProperty(this, 'onRequeried', {
+            get: function () {
+                return _onRequeried;
+            },
+            set: function (aValue) {
+                _onRequeried = aValue;
+            }
+        });
+        Object.defineProperty(this, 'onRequery', {
+            get: function () {
+                return _onRequeried;
+            },
+            set: function (aValue) {
+                _onRequeried = aValue;
+            }
+        });
         Object.defineProperty(this, 'elementClass', {
             get: function () {
                 return elementClass;
             },
             set: function (aValue) {
                 elementClass = aValue;
-            }
-        });
-        Object.defineProperty(this, 'onRequeried', {
-            get: function () {
-                return onRequeried;
-            },
-            set: function (aValue) {
-                onRequeried = aValue;
             }
         });
         Object.defineProperty(this, 'enqueueUpdate', {

@@ -7,7 +7,7 @@ describe('Platypus.js AJAX requests', function () {
             var insertRequest = Client.requestCommit([
                 {
                     kind: 'insert',
-                    entity: 'all-pets',
+                    entity: 'pets',
                     data: {
                         pets_id: newPetId,
                         type_id: 142841300155478,
@@ -21,7 +21,7 @@ describe('Platypus.js AJAX requests', function () {
                 Client.requestCommit([
                     {
                         kind: 'update',
-                        entity: 'all-pets',
+                        entity: 'pets',
                         keys: {
                             pets_id: newPetId
                         },
@@ -35,7 +35,7 @@ describe('Platypus.js AJAX requests', function () {
                     Client.requestCommit([
                         {
                             kind: 'delete',
-                            entity: 'all-pets',
+                            entity: 'pets',
                             keys: {
                                 pets_id: newPetId
                             }
@@ -65,7 +65,7 @@ describe('Platypus.js AJAX requests', function () {
             var request = Client.requestCommit([
                 {
                     kind: 'insert',
-                    entity: 'all-pets',
+                    entity: 'pets',
                     data: {
                         name: 'test-pet',
                         type_id: 142841300155478,
@@ -84,7 +84,6 @@ describe('Platypus.js AJAX requests', function () {
         });
     });
     it('requestCommit.failure.2', function (done) {
-        pending('Till fixes on server');
         require(['client', 'id'], function (Client, Id) {
             var request = Client.requestCommit([
                 {
@@ -110,7 +109,7 @@ describe('Platypus.js AJAX requests', function () {
     });
     it('requestData.success', function (done) {
         require(['client'], function (Client) {
-            var request = Client.requestData('all-pets', {}, function (data) {
+            var request = Client.requestData('pets', {}, function (data) {
                 expect(data).toBeDefined();
                 expect(data.length).toBeDefined();
                 expect(data.length).toBeGreaterThan(1);
@@ -136,16 +135,32 @@ describe('Platypus.js AJAX requests', function () {
             expect(request.cancel).toBeDefined();
         });
     });
-    it('requestEntity.success', function (done) {
-        // TODO: Add bugs to Platypus.js issue tracker:
-        // - Same names of entities and database table lead to stackoverflow exception
-        // - There is no ability to add an entity by just *.sql file
+    it('requestEntity.success.1', function (done) {
         require('client', function (Client) {
-            var request = Client.requestEntity('all-pets', function (petsEntity) {
+            var request = Client.requestEntity('pets', function (petsEntity) {
                 expect(petsEntity).toBeDefined();
                 expect(petsEntity.fields).toBeDefined();
                 expect(petsEntity.fields.length).toBeDefined();
                 expect(petsEntity.fields.length).toEqual(5);
+                expect(petsEntity.parameters).toBeDefined();
+                expect(petsEntity.parameters.length).toBeDefined();
+                expect(petsEntity.title).toBeDefined();
+                done();
+            }, function (e) {
+                fail(e);
+                done();
+            });
+            expect(request).toBeDefined();
+            expect(request.cancel).toBeDefined();
+        });
+    });
+    it('requestEntity.success.2', function (done) {
+        require('client', function (Client) {
+            var request = Client.requestEntity('fake-pets', function (petsEntity) {
+                expect(petsEntity).toBeDefined();
+                expect(petsEntity.fields).toBeDefined();
+                expect(petsEntity.fields.length).toBeDefined();
+                expect(petsEntity.fields.length).toEqual(0);
                 expect(petsEntity.parameters).toBeDefined();
                 expect(petsEntity.parameters.length).toBeDefined();
                 expect(petsEntity.title).toBeDefined();
@@ -159,10 +174,24 @@ describe('Platypus.js AJAX requests', function () {
             expect(request.cancel).toBeDefined();
         });
     });
-    it('requestEntity.failure', function (done) {
+    it('requestEntity.failure.1', function (done) {
         require('client', function (Client) {
             var request = Client.requestEntity('absent-entity', function (entity) {
                 fail('Request about abesent entity should lead to an error.');
+                done();
+            }, function (e) {
+                expect(e).toBeDefined();
+                done();
+            });
+            expect(request).toBeDefined();
+            expect(request.cancel).toBeDefined();
+        });
+    });
+    it('requestEntity.failure.cyclic', function (done) {
+        pending('Till cyclic dependencies in entities detection');
+        require('client', function (Client) {
+            var request = Client.requestEntity('cyclicPets', function (entity) {
+                fail('Request about entity with cyclic reference should lead to an error.');
                 done();
             }, function (e) {
                 expect(e).toBeDefined();

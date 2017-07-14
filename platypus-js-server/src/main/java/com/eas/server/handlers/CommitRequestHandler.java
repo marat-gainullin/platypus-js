@@ -50,12 +50,12 @@ public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRe
             onFailure = aOnFailure;
         }
 
-        public void datasourceDescovered(String aEntityName, String aDatasourceName){
+        public void datasourceDescovered(String aEntityName, String aDatasourceName) {
             datasourcesOfEntities.put(aEntityName, aDatasourceName);
         }
-        
+
         protected String assembleErrors() {
-            if (accessDeniedEntities != null && !accessDeniedEntities.isEmpty()) {
+            if (!notRetrievedEntities.isEmpty() || !accessDeniedEntities.isEmpty()) {
                 StringBuilder sb = new StringBuilder();
                 Consumer<Exception> appender = (ex) -> {
                     if (sb.length() > 0) {
@@ -66,8 +66,9 @@ public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRe
                 accessDeniedEntities.stream().forEach(appender);
                 notRetrievedEntities.stream().forEach(appender);
                 return sb.toString();
+            } else {
+                return "Unknown error";
             }
-            return null;
         }
 
         public void complete(Change aChange, AccessControlException accessDenied, Exception failed) {
@@ -127,7 +128,7 @@ public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRe
             List<Change> changes = ChangesJSONReader.read(getRequest().getChangesJson(), Scripts.getSpace());
             DatabasesClient client = getServerCore().getDatabasesClient();
             Map<String, SqlCompiledQuery> compiledEntities = new HashMap<>();
-            
+
             ChangesSortProcess process = new ChangesSortProcess(client.getDefaultDatasourceName(), (Map<String, List<Change>> changeLogs) -> {
                 try {
                     client.commit(changeLogs, (Integer aUpdated) -> {
@@ -156,6 +157,7 @@ public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRe
                                     } else {
                                         try {
                                             if (change instanceof CommandRequest) {
+                                                CommandRequest commandRequest = (CommandRequest)change;
                                                 SqlCompiledQuery compiled = compiledEntities.computeIfAbsent(change.entityName, en -> {
                                                     try {
                                                         return query.compile();
@@ -163,7 +165,7 @@ public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRe
                                                         throw new IllegalStateException(ex);
                                                     }
                                                 });
-                                                process.complete(compiled.prepareCommand(), null, null);
+                                                process.complete(compiled.prepareCommand(commandRequest.getParameters()), null, null);
                                             } else {
                                                 process.complete(change, null, null);
                                             }

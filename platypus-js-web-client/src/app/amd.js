@@ -3,7 +3,7 @@
     var MODULES_INDEX = "modules-index"; // Map module name -> script file with this module
     var TYPE_JAVASCRIPT = "text/javascript";
 
-    var config = {prefetch: false, cacheBust: false};
+    var config = {autofetch: false, cacheBust: false};
     (function () {
         var sourcePath = "/";
         var apiUri = "/application";
@@ -178,12 +178,12 @@
             if (aStructure.structure.size === 0)
                 throw "Module [" + aModuleName + "] structure should contain at least one element.";
             var jsPart = null;
-            var prefetchedResources = new Set();
+            var fetchedResources = new Set();
             aStructure.structure.forEach(function (part) {
                 if (part.toLowerCase().endsWith(".js")) {
                     jsPart = part;
                 } else {
-                    prefetchedResources.add(part);
+                    fetchedResources.add(part);
                 }
             });
             if (!jsPart)
@@ -198,7 +198,7 @@
                     notifyModuleFailed(aModuleName, [aReason]);
                 });
                 if (!startedScripts.has(jsResource)) {
-                    startLoadScript(prefetchedResources, jsResource, aStructure.clientDependencies ? aStructure.clientDependencies : [], aCyclic);
+                    startLoadScript(fetchedResources, jsResource, aStructure.clientDependencies ? aStructure.clientDependencies : [], aCyclic);
                     startedScripts.add(jsResource);
                 }
             }
@@ -226,8 +226,8 @@
             document.head.appendChild(scriptElement);
     }
 
-    function startLoadScript(/*Set*/aPrefetchedResources, aJsResource, /*Set*/ aGlobalDependencies, /*Set*/aCyclic) {
-        var scriptProcess = new Process(aPrefetchedResources.size === 0 ? 1 : 2, function () {
+    function startLoadScript(/*Set*/aFetchedResources, aJsResource, /*Set*/ aGlobalDependencies, /*Set*/aCyclic) {
+        var scriptProcess = new Process(aFetchedResources.size === 0 ? 1 : 2, function () {
             var jsUrl = checkedCacheBust(relativeUri() + config.sourcePath + aJsResource);
             inject(jsUrl, function () {
                 var amdDefines = consumeAmdDefines();
@@ -262,17 +262,17 @@
         }, function (aReasons) {
             notifyScriptFailed(aJsResource, aReasons);
         });
-        var prefetchProcess = new Process(aPrefetchedResources.size, function () {
+        var fetchProcess = new Process(aFetchedResources.size, function () {
             scriptProcess.onSuccess();
         }, function (aReasons) {
             scriptProcess.onFailure(aReasons);
         });
 
-        aPrefetchedResources.forEach(function (prefetched) {
-            requestDocument(prefetched, function (/*Document*/aResult) {
-                prefetchProcess.onSuccess(aResult);
+        aFetchedResources.forEach(function (fetched) {
+            requestDocument(fetched, function (/*Document*/aResult) {
+                fetchProcess.onSuccess(aResult);
             }, function (reason) {
-                prefetchProcess.onFailure(reason.status + " : " + reason.statusText);
+                fetchProcess.onFailure(reason.status + " : " + reason.statusText);
             });
         });
         load(aGlobalDependencies, aCyclic, function () {
@@ -435,7 +435,7 @@
                     // no op here because of no request
                 }
             };
-        } else if (!config.prefetch) {
+        } else if (!config.autofetch) {
             if (onSuccess) {
                 later(function () {
                     var fakeRelativeFileName = aModuleName;
@@ -800,7 +800,7 @@
                 if (script.hasAttribute("api-uri")) {
                     config.apiUri = script.getAttribute("api-uri").toLowerCase();
                 }
-                config.prefetch = script.hasAttribute("prefetch");
+                config.autofetch = script.hasAttribute("autofetch");
                 break;
             }
         }
@@ -810,7 +810,7 @@
                 for (var resourceName in modulesIndex) {
                     var resourceIndex = modulesIndex[resourceName];
                     var resourceStructure = {
-                        structure: resourceIndex.prefetched ? resourceIndex.prefetched.slice(0, resourceIndex.prefetched.length) : [],
+                        structure: resourceIndex.fetched ? resourceIndex.fetched.slice(0, resourceIndex.fetched.length) : [],
                         clientDependencies: resourceIndex['global-deps'],
                         serverDependencies: resourceIndex['rpc-stubs'],
                         queryDependencies: resourceIndex.entities

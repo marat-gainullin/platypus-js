@@ -6,18 +6,18 @@ define.amd['modules-index'] = {
             "short-name-m1",
             "short-name-m2"
         ]
-        //"prefetched":[],
+        //"fetched":[],
         //"global-deps":[],
         //"entities":[],
         //"rpc-stubs":[]
     },
-    "prefetched/a.js": {
+    "fetched/a.js": {
         "modules":[
-            "prefetched/a"
+            "fetched/a"
         ],
-        "prefetched":[
-            "prefetched/a.model",
-            "prefetched/a.layout"
+        "fetched":[
+            "fetched/a.model",
+            "fetched/a.layout"
         ]
         //"global-deps":[],
         //"entities":[],
@@ -27,7 +27,7 @@ define.amd['modules-index'] = {
         "modules": [
             "GlobalA"
         ],
-        //"prefetched":[],
+        //"fetched":[],
         "global-deps":[
             "GlobalB"            
         ]
@@ -38,7 +38,7 @@ define.amd['modules-index'] = {
         "modules": [
             "GlobalB"
         ]
-        //"prefetched":[],
+        //"fetched":[],
         //"global-deps":[],
         //"entities":[],
         //"rpc-stubs":[]
@@ -47,7 +47,7 @@ define.amd['modules-index'] = {
         "modules": [
             "CycleA"
         ],
-        //"prefetched":[],
+        //"fetched":[],
         "global-deps":[
             "CycleB"
         ]
@@ -58,7 +58,7 @@ define.amd['modules-index'] = {
         "modules": [
             "CycleB"
         ],
-        //"prefetched":[],
+        //"fetched":[],
         "global-deps":[
             "CycleC"
         ]
@@ -69,7 +69,7 @@ define.amd['modules-index'] = {
         "modules": [
             "CycleC"
         ],
-        //"prefetched":[],
+        //"fetched":[],
         "global-deps":[
             "CycleA"
         ]

@@ -1,5 +1,5 @@
 /**
- * @name all-pets
+ * @name pets
  * @public
  */
 select * from pets

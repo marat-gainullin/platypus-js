@@ -195,6 +195,16 @@ public class SqlCompiledQuery {
         }
         return command;
     }
+    
+    public Command prepareCommand(Map<String, ChangeValue> aParameters) {
+        Command command = new Command(entityName);
+        command.clause = sqlClause;
+        for (int i = 0; i < parameters.getParametersCount(); i++) {
+            Parameter param = parameters.get(i + 1);
+            command.getParameters().add(aParameters.get(param.getName()));
+        }
+        return command;
+    }
 
     /**
      * Returns the SQL query text.

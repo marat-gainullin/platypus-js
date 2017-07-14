@@ -6,7 +6,7 @@ define(['./logger', './client', './internals', './model-reader', 'invoke'], func
 
     function loadEntities(entitiesNames, onSuccess, onFailure) {
         if (entitiesNames.length > 0) {
-            var process = new Utils.Process(entitiesNames.size, function () {
+            var process = new Utils.Process(entitiesNames.length, function () {
                 onSuccess();
             }, function (aReasons) {
                 onFailure(aReasons);
@@ -78,7 +78,7 @@ define(['./logger', './client', './internals', './model-reader', 'invoke'], func
                     throw 'Model definition for module "' + aModuleName + '" is not found';
                 }
             } else {
-                throw "Prefetched model definitions are not accessible. Use Platypus.js AMD loader and switch 'prefetch' configuration flag on or call 'createModel()' without arguments to create a model without prefetch model definition.";
+                throw "Fetched model definitions are not accessible. Use Platypus.js AMD loader and switch 'autofetch' configuration flag on or call 'createModel()' without arguments to create a model without fetched model definition.";
             }
         } else {
             return readModel('<?xml version="1.0" encoding="UTF-8"?><datamodel></datamodel>');
