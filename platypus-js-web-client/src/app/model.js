@@ -42,7 +42,7 @@ define(['./invoke', './managed', './client', './logger'], function(Invoke, M, Cl
             }
 
             var failures = [];
-            function complete(failureReason, entity) {
+            function complete(failureReason) {
                 if (failureReason)
                     failures.push(failureReason);
                 if (entitiesValid()) {
@@ -64,9 +64,9 @@ define(['./invoke', './managed', './client', './logger'], function(Invoke, M, Cl
                 entities.forEach(function (entity) {
                     if (!entity.valid && !entity.pending && entity.inRelatedValid()) {
                         entity.start(function () {
-                            complete(null, entity);
+                            complete(null);
                         }, function (reason) {
-                            complete(reason, entity);
+                            complete(reason);
                         });
                     }
                 });
@@ -92,6 +92,8 @@ define(['./invoke', './managed', './client', './logger'], function(Invoke, M, Cl
             entities.forEach(function (entity) {
                 if (entity.pending) {
                     entity.cancel();
+                } else if(!entity.valid) {
+                    entity.valid = true;
                 }
             });
         }

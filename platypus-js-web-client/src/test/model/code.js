@@ -126,7 +126,7 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
         });
     });
     it("Requery graph", function (done) {
-        withRemotePetsModel(function (model, Id) {
+        withRemotePetsModel(function (model, Id, Invoke) {
             var ownersRequeried = 0;
             model.owners.onRequeried = function () {
                 ownersRequeried++;
@@ -140,10 +140,12 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
                 petOfOwnerRequeried++;
             };
             model.requery(function () {
-                expect(ownersRequeried).toEqual(1);
-                expect(petsOfOwnerRequeried).toEqual(1);
-                expect(petOfOwnerRequeried).toEqual(1);
-                done();
+                Invoke.later(function () {
+                    expect(ownersRequeried).toEqual(1);
+                    expect(petsOfOwnerRequeried).toEqual(1);
+                    expect(petOfOwnerRequeried).toEqual(1);
+                    done();
+                });
             }, function (reason) {
                 fail(reason);
                 done();
@@ -154,12 +156,100 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
         });
     });
     it("Requery partial graph with 'Entity.requery() with dependents'", function (done) {
-        pending('Till tests with server');
-        done();
+        withRemotePetsModel(function (model, Id, Invoke) {
+            var ownersRequeried = 0;
+            model.owners.onRequeried = function () {
+                ownersRequeried++;
+            };
+            var petsOfOwnerRequeried = 0;
+            model.petsOfOwner.onRequeried = function () {
+                petsOfOwnerRequeried++;
+            };
+            var petOfOwnerRequeried = 0;
+            model.petOfOwner.onRequeried = function () {
+                petOfOwnerRequeried++;
+            };
+            model.owners.requery(function () {
+                Invoke.later(function () {
+                    expect(ownersRequeried).toEqual(1);
+                    expect(petsOfOwnerRequeried).toEqual(1);
+                    expect(petOfOwnerRequeried).toEqual(1);
+                    done();
+                });
+            }, function (reason) {
+                fail(reason);
+                done();
+            });
+        }, function (reason) {
+            fail(reason);
+            done();
+        });
     });
-    it("Requery graph after 'Model.cancel()'", function (done) {
-        pending('Till tests with server');
-        done();
+    it("Requery graph after 'Model.cancel()' after one entity requeried", function (done) {
+        withRemotePetsModel(function (model, Id, Invoke) {
+            var ownersRequeried = 0;
+            model.owners.onRequeried = function () {
+                ownersRequeried++;
+                model.cancel();
+            };
+            var petsOfOwnerRequeried = 0;
+            model.petsOfOwner.onRequeried = function () {
+                petsOfOwnerRequeried++;
+            };
+            var petOfOwnerRequeried = 0;
+            model.petOfOwner.onRequeried = function () {
+                petOfOwnerRequeried++;
+            };
+            model.requery(function () {
+                fail("Success callbck of requery shouldn't be called after 'Model.cancel()'");
+                done();
+            }, function (reason) {
+                expect(reason).toBeDefined();
+                expect(ownersRequeried).toEqual(1);
+                expect(model.owners.length).toBeGreaterThan(0);
+                expect(petsOfOwnerRequeried).toEqual(0);
+                expect(model.petsOfOwner.length).toEqual(0);
+                expect(petOfOwnerRequeried).toEqual(0);
+                expect(model.petOfOwner.length).toEqual(0);
+                done();
+            });
+        }, function (reason) {
+            fail(reason);
+            done();
+        });
+    });
+    it("Requery graph after 'Model.cancel()'.immediate", function (done) {
+        withRemotePetsModel(function (model, Id, Invoke) {
+            var ownersRequeried = 0;
+            model.owners.onRequeried = function () {
+                ownersRequeried++;
+            };
+            var petsOfOwnerRequeried = 0;
+            model.petsOfOwner.onRequeried = function () {
+                petsOfOwnerRequeried++;
+            };
+            var petOfOwnerRequeried = 0;
+            model.petOfOwner.onRequeried = function () {
+                petOfOwnerRequeried++;
+            };
+            model.requery(function () {
+                fail("Success callbck of requery shouldn't be called after 'Model.cancel()'");
+                done();
+            }, function (reason) {
+                expect(reason).toBeDefined();
+                expect(ownersRequeried).toEqual(0);
+                expect(model.owners.length).toEqual(0);
+                expect(petsOfOwnerRequeried).toEqual(0);
+                expect(model.petsOfOwner.length).toEqual(0);
+                expect(petOfOwnerRequeried).toEqual(0);
+                expect(model.petOfOwner.length).toEqual(0);
+                done();
+            });
+            model.cancel();
+        }, function (reason) {
+            fail(reason);
+            done();
+        });
     });
     it("Entities' events", function (done) {
         withRemotePetsModel(function (model, Id) {
@@ -383,11 +473,11 @@ describe('Model orm, requey of graph, Orm navigation properties and orderers', f
     });
 
     function withRemotePetsModel(onSuccess, onFailure) {
-        require(['resource', 'orm', 'id'], function (Resource, Orm, Id) {
+        require(['resource', 'orm', 'id', 'invoke'], function (Resource, Orm, Id, Invoke) {
             Resource.loadText('assets/entities/model-graph.model', function (loaded) {
                 var model = Orm.readModel(loaded);
                 model.owners.keysNames.add('owners_id');
-                onSuccess(model, Id);
+                onSuccess(model, Id, Invoke);
             }, onFailure);
         });
     }

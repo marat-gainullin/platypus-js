@@ -129,7 +129,15 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
                     }
                 } else {
                     if (onFailure) {
-                        onFailure(req);
+                        if (req.status === 0) {
+                            // Chrome calls 'req.onreadystatechange' in the same control flow as 'req.abort()'
+                            // has been called by client code. So, we have to emulate network like error control flow.
+                            Invoke.later(function(){
+                                onFailure(req);
+                            });
+                        } else {
+                            onFailure(req);
+                        }
                     }
                 }
             }
@@ -141,7 +149,6 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
         }
         return {
             cancel: function () {
-                req.onreadystatechange = null;
                 req.abort();
             }
         };
@@ -354,9 +361,10 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
         }, function (xhr) {
             if (onFailure) {
                 if (xhr.status === 0) {
-                    Logger.warning("Data recieving is aborted");
+                    onFailure('Cancel'); // In case of cancelled request, no useful information is presented in xhr.
+                } else {
+                    onFailure(xhr.responseText ? xhr.responseText : (xhr.status + ' : ' + xhr.statusText));
                 }
-                onFailure(xhr.responseText ? xhr.responseText : (xhr.status + ' : ' + xhr.statusText));
             }
         });
     }

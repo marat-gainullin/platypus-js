@@ -1,4 +1,4 @@
-define(['./id', './logger', './managed', './orderer', './client', './extend'], function (Id, Logger, M, Orderer, Client, extend) {
+define(['./id', './logger', './managed', './orderer', './client', './extend', './invoke'], function (Id, Logger, M, Orderer, Client, extend, Invoke) {
     function Query(entityName) {
         function prepareCommandRequest(parameters) {
             var command = {
@@ -101,15 +101,15 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
         }
 
         function collectRight() {
-            var collected = [];
+            var collected = new Set();
             // Breadth first collecting
             var right = fromRight();
             for (var r = 0; r < right.length; r++) {
                 var rightEntity = right[r];
-                collected.push(rightEntity);
-                Array.prototype.push.apply(rightEntity, rightEntity.fromRight());
+                collected.add(rightEntity);
+                Array.prototype.push.apply(right, rightEntity.fromRight());
             }
-            return collected;
+            return Array.from(collected);
         }
 
         function invalidate() {
@@ -174,15 +174,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
 
         function cancel() {
             if (pending) {
-                var onFailure = pendingOnFailure;
                 pending.cancel();
-                pending = null;
-                pendingOnSuccess = null;
-                pendingOnFailure = null;
-                valid = true;
-                if (onFailure) {
-                    onFailure('Cancel');
-                }
                 return true;
             } else {
                 return false;
@@ -867,6 +859,11 @@ define(['./id', './logger', './managed', './orderer', './client', './extend'], f
         Object.defineProperty(this, 'inRelatedValid', {
             get: function () {
                 return inRelatedValid;
+            }
+        });
+        Object.defineProperty(this, 'fromRight', {
+            get: function () {
+                return fromRight;
             }
         });
         Object.defineProperty(this, 'collectRight', {
