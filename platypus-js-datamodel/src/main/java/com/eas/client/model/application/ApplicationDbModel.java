@@ -23,7 +23,7 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, SqlQuery> {
 
-    protected Map<String, List<Change>> changeLogs = new HashMap<>();
+    protected Map<String, List<Change.Applicable>> changeLogs = new HashMap<>();
     protected DatabasesClient basesProxy;
 
     public ApplicationDbModel(QueriesProxy<SqlQuery> aQueries) {
@@ -62,14 +62,14 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
     @ScriptFunction(jsDoc = MODIFIED_JSDOC)
     @Override
     public boolean isModified() throws Exception {
-        return changeLogs.values().stream().anyMatch((List<Change> aLog) -> {
+        return changeLogs.values().stream().anyMatch((List<Change.Applicable> aLog) -> {
             return !aLog.isEmpty();
         });
     }
 
     @Override
     public int commit(Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        Map<String, List<Change>> logs = changeLogs;
+        Map<String, List<Change.Applicable>> logs = changeLogs;
         changeLogs = new HashMap<>();
         // Change logs are cleared unconditionaly because of
         // compliance of synchronous and asynchronous cases with errors while commit in mind.
@@ -99,7 +99,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
         super.requery(aOnSuccess, aOnFailure);
     }
 
-    public List<Change> getChangeLog(String aDatasourceName) {
+    public List<Change.Applicable> getChangeLog(String aDatasourceName) {
         String datasourceName = aDatasourceName;
         // basesProxy.getDefaultDatasourceName() is needed here to avoid multi transaction
         // actions against the same datasource, leading to unexpected
@@ -107,7 +107,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
         if (datasourceName == null || datasourceName.isEmpty()) {
             datasourceName = basesProxy.getDefaultDatasourceName();
         }
-        List<Change> changeLog = changeLogs.get(datasourceName);
+        List<Change.Applicable> changeLog = changeLogs.get(datasourceName);
         if (changeLog == null) {
             changeLog = new ArrayList<>();
             changeLogs.put(datasourceName, changeLog);
@@ -115,8 +115,8 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
         return changeLog;
     }
 
-    public void forEachChange(Consumer<Change> aActor) {
-        changeLogs.entrySet().stream().forEach((Map.Entry<String, List<Change>> aEntry) -> {
+    public void forEachChange(Consumer<Change.Applicable> aActor) {
+        changeLogs.entrySet().stream().forEach((Map.Entry<String, List<Change.Applicable>> aEntry) -> {
             aEntry.getValue().stream().forEach(aActor);
         });
     }

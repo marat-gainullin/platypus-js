@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.model.application;
 
 import com.eas.client.cache.ServerDataStorage;
@@ -23,7 +19,7 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatypusEntity, PlatypusQuery> {
 
-    protected List<Change> changeLog = new ArrayList<>();
+    protected List<Change.Transferable> changeLog = new ArrayList<>();
     protected ServerDataStorage serverProxy;
 
     protected ApplicationPlatypusModel(QueriesProxy<PlatypusQuery> aQueries) {
@@ -91,7 +87,7 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
         super.requery(aOnSuccess, aOnFailure);
     }
 
-    public List<Change> getChangeLog() {
+    public List<Change.Transferable> getChangeLog() {
         return changeLog;
     }
 }

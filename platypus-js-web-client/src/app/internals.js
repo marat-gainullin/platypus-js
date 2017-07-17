@@ -1,5 +1,7 @@
 define(function () {
-    if (!window.platypusjs) {
+    var global = window;
+    
+    if (!global.platypusjs) {
         var config = {};
         (function () {
             var sourcePath = "/";
@@ -36,8 +38,8 @@ define(function () {
             });
         }());
 
-        window.platypusjs = {config};
-        Object.seal(window.platypusjs);
+        global.platypusjs = {config};
+        Object.seal(global.platypusjs);
     }
 
     // TODO: Check if changes are made to this function both in amd.js and here
@@ -152,7 +154,7 @@ define(function () {
         moduleIdNormalizer.innerHTML = "<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>";
         // TODO: check if decodeURIComponent is applicable instead of decodeURI.
         var mormalizedAbsoluteModuleUrl = decodeURI(moduleIdNormalizer.firstChild.href);
-        var hostContextPrefix = relativeUri() + window.platypusjs.config.sourcePath;
+        var hostContextPrefix = relativeUri() + global.platypusjs.config.sourcePath;
         var hostContextNormalizer = document.createElement('div');
         hostContextNormalizer.innerHTML = "<a href=\"" + hostContextPrefix + "\">o</a>";
         var mormalizedHostContextPrefix = decodeURI(hostContextNormalizer.firstChild.href);
@@ -163,12 +165,12 @@ define(function () {
         if (/https?:\//.test(aResourceName))
             return aResourceName;
         else {
-            return relativeUri() + window.platypusjs.config.sourcePath + aResourceName;
+            return relativeUri() + global.platypusjs.config.sourcePath + aResourceName;
         }
     }
 
     function remoteApi() {
-        return window.platypusjs.config.remoteApi ? window.platypusjs.remoteApi : relativeUri();
+        return global.platypusjs.config.remoteApi ? global.platypusjs.remoteApi : relativeUri();
     }
 
     var module = {};

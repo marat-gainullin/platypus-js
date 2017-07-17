@@ -1,4 +1,6 @@
 (function () {
+    var global = window;
+    
     var INJECTED_SCRIPT_CLASS_NAME = "platypus-injected-script";
     var MODULES_INDEX = "modules-index"; // Map module name -> script file with this module
     var TYPE_JAVASCRIPT = "text/javascript";
@@ -349,7 +351,7 @@
     }
 
     function lookupInGlobal(aModuleName) {
-        return window[aModuleName];
+        return global[aModuleName];
     }
 
     function load(aModulesNames, aCyclic, onSuccess, onFailure) {
@@ -581,7 +583,7 @@
 
     // Polyfill of Function#name on browsers that don't support it (IE):
     if (!(function f() {}).name) {
-        Object.defineProperty(window.Function.prototype, 'name', {
+        Object.defineProperty(global.Function.prototype, 'name', {
             get: function () {
                 var name = this.toString().match(/function\s*(\S*)\s*\(/)[1];
                 // For better performance only parse once, and then replace the accessor for repeated access.
@@ -768,9 +770,9 @@
         var platypusjs = {require, define, config, documents, getModelDocument, getFormDocument};
         Object.seal(platypusjs);
 
-        window.platypusjs = platypusjs;
-        window.require = require;
-        window.define = define;
+        global.platypusjs = platypusjs;
+        global.require = require;
+        global.define = define;
 
         var thisScriptFile = lookupCallerJsFile();
         var scriptTags = document.getElementsByTagName("script");

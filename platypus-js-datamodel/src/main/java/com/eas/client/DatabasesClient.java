@@ -435,12 +435,12 @@ public class DatabasesClient {
         }
     }
 
-    public int commit(Map<String, List<Change>> aChangeLogs, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public int commit(Map<String, List<Change.Applicable>> aChangeLogs, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Callable<Integer> doWork = () -> {
             int rowsAffected = 0;
             List<ApplyResult> results = new ArrayList<>(aChangeLogs.size());
             try {
-                for (Map.Entry<String, List<Change>> logEntry : aChangeLogs.entrySet()) {
+                for (Map.Entry<String, List<Change.Applicable>> logEntry : aChangeLogs.entrySet()) {
                     results.add(apply(logEntry.getKey(), logEntry.getValue()));
                 }
                 for (ApplyResult r : results) {
@@ -496,7 +496,7 @@ public class DatabasesClient {
         }
     }
 
-    protected ApplyResult apply(final String aDatasourceName, List<Change> aLog) throws Exception {
+    protected ApplyResult apply(final String aDatasourceName, List<Change.Applicable> aLog) throws Exception {
         int rowsAffected;
         MetadataCache mdCache = getMetadataCache(aDatasourceName);
         if (mdCache == null) {
@@ -518,7 +518,7 @@ public class DatabasesClient {
             // It doesn't break security, because such "unactual" lookup takes place ONLY
             // while transaction processing.
             final Map<String, SqlQuery> entityQueries = new HashMap<>();
-            for (Change change : aLog) {
+            for (Change.Applicable change : aLog) {
                 StatementsGenerator generator = new StatementsGenerator(new EntitiesHost() {
 
                     @Override

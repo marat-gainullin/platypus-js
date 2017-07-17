@@ -1,9 +1,8 @@
 package com.eas.client.dataflow;
 
+import com.eas.client.changes.ApplicableChangeVisitor;
 import com.eas.client.changes.ChangeValue;
-import com.eas.client.changes.ChangeVisitor;
 import com.eas.client.changes.Command;
-import com.eas.client.changes.CommandRequest;
 import com.eas.client.changes.Delete;
 import com.eas.client.changes.EntitiesHost;
 import com.eas.client.changes.Insert;
@@ -32,7 +31,7 @@ import java.util.logging.Logger;
  *
  * @author mg
  */
-public class StatementsGenerator implements ChangeVisitor {
+public class StatementsGenerator implements ApplicableChangeVisitor {
 
     public interface TablesContainer {
 
@@ -367,11 +366,4 @@ public class StatementsGenerator implements ChangeVisitor {
             logEntries.add(logEntry);
         }
     }
-
-    @Override
-    public void visit(CommandRequest aChange) throws Exception {
-        throw new IllegalStateException("'CommandRequest' should not be transformed to sql clauses");
-    }
-    
-    
 }

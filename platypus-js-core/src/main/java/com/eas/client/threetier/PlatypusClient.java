@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.threetier;
 
 import com.eas.client.threetier.json.ChangesJSONWriter;
@@ -108,7 +104,7 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
     }
 
     @Override
-    public int commit(List<Change> aLog, Scripts.Space aSpace, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public int commit(List<Change.Transferable> aLog, Scripts.Space aSpace, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         String changesJson = ChangesJSONWriter.write(aLog);
         CommitRequest request = new CommitRequest(changesJson);
         if (onSuccess != null) {

@@ -11,6 +11,31 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public abstract class Change implements HasPublished {
 
+    public interface Generic {
+
+        String getEntity();
+    }
+
+    /**
+     * Changes marked with this interface are applicable to a datasource.
+     *
+     * @author mgainullin
+     */
+    public interface Applicable extends Generic {
+
+        void accept(ApplicableChangeVisitor aChangeVisitor) throws Exception;
+    }
+
+    /**
+     * Changes marked with this interface are transferable over the network.
+     *
+     * @author mgainullin
+     */
+    public interface Transferable extends Generic {
+
+        void accept(TransferableChangeVisitor aChangeVisitor) throws Exception;
+    }
+
     public String entityName;
     public boolean consumed;
     //
@@ -21,8 +46,6 @@ public abstract class Change implements HasPublished {
         entityName = aEntityName;
     }
 
-    public abstract void accept(ChangeVisitor aChangeVisitor) throws Exception;
-    
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Indicates the change's type (Insert, Update, Delete or Command).\n"

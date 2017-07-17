@@ -11,8 +11,8 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class Delete extends Change {
-    
+public class Delete extends Change implements Change.Applicable, Change.Transferable {
+
     private final List<ChangeValue> keys = new ArrayList<>();
 
     public Delete(String aEntityName) {
@@ -20,7 +20,12 @@ public class Delete extends Change {
     }
 
     @Override
-    public void accept(ChangeVisitor aChangeVisitor) throws Exception {
+    public void accept(TransferableChangeVisitor aChangeVisitor) throws Exception {
+        aChangeVisitor.visit(this);
+    }
+
+    @Override
+    public void accept(ApplicableChangeVisitor aChangeVisitor) throws Exception {
         aChangeVisitor.visit(this);
     }
 
@@ -31,7 +36,7 @@ public class Delete extends Change {
     public List<ChangeValue> getKeys() {
         return keys;
     }
-    
+
     @Override
     public JSObject getPublished() {
         if (published == null) {
@@ -43,5 +48,5 @@ public class Delete extends Change {
         }
         return published;
     }
-    
+
 }

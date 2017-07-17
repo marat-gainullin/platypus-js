@@ -1,4 +1,6 @@
 define(['./logger', './invoke', './id', './core/report', './internals'], function (Logger, Invoke, Id, Report, Utils) {
+    var global = window;
+    
     var REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
 
     var RequestTypes = {
@@ -108,7 +110,7 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
     }
 
     function startApiRequest(aUrlPrefix, aUrlQuery, aBody, aMethod, aContentType, onSuccess, onFailure) {
-        var url = Utils.remoteApi() + window.platypusjs.config.apiUri + (aUrlPrefix ? aUrlPrefix : "") + (aUrlQuery ? "?" + aUrlQuery : "");
+        var url = Utils.remoteApi() + global.platypusjs.config.apiUri + (aUrlPrefix ? aUrlPrefix : "") + (aUrlQuery ? "?" + aUrlQuery : "");
         var req = new XMLHttpRequest();
         req.open(aMethod, url);
         if (aContentType) {
@@ -155,7 +157,7 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
     }
 
     function syncApiRequest(aUrlPrefix, aUrlQuery, aResponseType) {
-        var url = Utils.remoteApi() + window.platypusjs.config.apiUri + (aUrlPrefix ? aUrlPrefix : "") + "?" + aUrlQuery;
+        var url = Utils.remoteApi() + global.platypusjs.config.apiUri + (aUrlPrefix ? aUrlPrefix : "") + "?" + aUrlQuery;
         var req = syncRequest(url, aResponseType, null, Methods.GET);
         if (200 <= req.status && req.status < 300) {
             return req;

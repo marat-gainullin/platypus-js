@@ -4,7 +4,7 @@ package com.eas.client.changes;
  *
  * @author mg
  */
-public interface ChangeVisitor {
+public interface TransferableChangeVisitor {
 
     public void visit(Insert aChange) throws Exception;
 
@@ -12,7 +12,5 @@ public interface ChangeVisitor {
 
     public void visit(Delete aChange) throws Exception;
 
-    public void visit(Command aChange) throws Exception;
-    
     public void visit(CommandRequest aChange) throws Exception;
 }

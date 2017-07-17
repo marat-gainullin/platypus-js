@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.cache;
 
 import com.eas.client.changes.Change;
@@ -16,5 +11,5 @@ import java.util.function.Consumer;
  */
 public interface ServerDataStorage {
 
-    public int commit(List<Change> aLog, Scripts.Space aSpace, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    public int commit(List<Change.Transferable> aLog, Scripts.Space aSpace, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception;
 }

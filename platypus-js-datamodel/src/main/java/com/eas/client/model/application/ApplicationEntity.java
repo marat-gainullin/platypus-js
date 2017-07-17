@@ -328,15 +328,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         }
     }
 
-    /**
-     * Returns change log for this entity. In some cases, we might have several
-     * change logs in one model. Several databases is the case.
-     *
-     * @throws java.lang.Exception
-     * @return
-     */
-    public abstract List<Change> getChangeLog() throws Exception;
-
     private static final String ON_REQUIRED_JSDOC = ""
             + "/**\n"
             + " * The handler function for the event occured after the entity's data have been requeried.\n"

@@ -2,7 +2,6 @@ package com.eas.client.threetier.json;
 
 import com.eas.client.changes.Change;
 import com.eas.client.changes.ChangeValue;
-import com.eas.client.changes.ChangeVisitor;
 import com.eas.client.changes.Command;
 import com.eas.client.changes.CommandRequest;
 import com.eas.client.changes.Delete;
@@ -11,17 +10,17 @@ import com.eas.client.changes.Update;
 import com.eas.script.Scripts;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.JSType;
+import com.eas.client.changes.TransferableChangeVisitor;
 
 /**
  *
  * @author mg
  */
-public class ChangesJSONReader implements ChangeVisitor {
+public class ChangesJSONReader implements TransferableChangeVisitor {
 
     private static final String CHANGE_DATA_NAME = "data";
     private static final String CHANGE_KEYS_NAME = "keys";
@@ -77,13 +76,8 @@ public class ChangesJSONReader implements ChangeVisitor {
         values.stream().forEach(cv -> aRequest.getParameters().put(cv.name, cv));
     }
 
-    @Override
-    public void visit(Command aChange) throws Exception {
-        throw new IllegalStateException("Command should not be read from JSON");
-    }
-
-    public static List<Change> read(String aChangesJson, Scripts.Space aSpace) throws Exception {
-        List<Change> changes = new ArrayList<>();
+    public static List<Change.Transferable> read(String aChangesJson, Scripts.Space aSpace) throws Exception {
+        List<Change.Transferable> changes = new ArrayList<>();
         Object sChanges = aSpace.parseJsonWithDates(aChangesJson);
         if (sChanges instanceof JSObject) {
             JSObject jsChanges = (JSObject) sChanges;
@@ -96,7 +90,7 @@ public class ChangesJSONReader implements ChangeVisitor {
                         String sKind = JSType.toString(sChange.getMember("kind"));
                         String sEntityName = JSType.toString(sChange.getMember("entity"));
                         ChangesJSONReader reader = new ChangesJSONReader(sChange, sEntityName, aSpace);
-                        Change change = null;
+                        Change.Transferable change = null;
                         switch (sKind) {
                             case "insert":
                                 change = new Insert(sEntityName);

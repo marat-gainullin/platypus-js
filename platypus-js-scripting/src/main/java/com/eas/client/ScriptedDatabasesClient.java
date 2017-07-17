@@ -142,10 +142,10 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     @Override
-    public int commit(Map<String, List<Change>> aChangeLogs, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public int commit(Map<String, List<Change.Applicable>> aChangeLogs, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Scripts.Space space = Scripts.getSpace();
         if (onSuccess != null) {
-            CollectionAsyncProcess<Map.Entry<String, List<Change>>> logsProcess = new CollectionAsyncProcess<>(aChangeLogs.entrySet(), space, v -> {
+            CollectionAsyncProcess<Map.Entry<String, List<Change.Applicable>>> logsProcess = new CollectionAsyncProcess<>(aChangeLogs.entrySet(), space, v -> {
                 try {
                     super.commit(aChangeLogs, onSuccess, onFailure);
                 } catch (Exception ex) {
@@ -154,7 +154,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
             }, onFailure);
             logsProcess.perform(dsEntry -> {
                 String dsName = dsEntry.getKey();
-                List<Change> changeLog = dsEntry.getValue();
+                List<Change.Applicable> changeLog = dsEntry.getValue();
                 validate(dsName, changeLog, v -> {
                     logsProcess.complete(null);
                 }, ex -> {
@@ -165,7 +165,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         } else {
             aChangeLogs.entrySet().stream().forEach(dsEntry -> {
                 String dataSourceName = dsEntry.getKey();
-                List<Change> log = dsEntry.getValue();
+                List<Change.Applicable> log = dsEntry.getValue();
                 validate(dataSourceName, log, null, null, space);
             });
             return super.commit(aChangeLogs, null, null);
@@ -176,7 +176,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         return Scripts.getSpace().createModule(aModuleName);
     }
 
-    private void validate(final String aDatasourceName, final List<Change> aLog, Consumer<Void> onSuccess, Consumer<Exception> onFailure, Scripts.Space aSpace) {
+    private void validate(final String aDatasourceName, final List<Change.Applicable> aLog, Consumer<Void> onSuccess, Consumer<Exception> onFailure, Scripts.Space aSpace) {
         Collection<String> requiredModules = validators.entrySet().stream()
                 .filter(vEntry -> {
                     Collection<String> datasourcesUnderControl = vEntry.getValue();

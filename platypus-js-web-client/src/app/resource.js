@@ -1,4 +1,5 @@
 define(['./logger', './internals'], function (Logger, Utils) {
+    var global = window;
 
     function lookupCallerApplicationJsFile() {
         try {
@@ -125,7 +126,7 @@ define(['./logger', './internals'], function (Logger, Utils) {
 
     function startUploadRequest(aFile, aName, onComplete, onProgress, onFailure) {
         var req = new XMLHttpRequest();
-        req.open("post", Utils.remoteApi() + window.platypusjs.config.apiUri);
+        req.open("post", Utils.remoteApi() + global.platypusjs.config.apiUri);
         if (req.upload) {
             req.upload.onprogress = function (aProgressEvent) {
                 if (onProgress) {

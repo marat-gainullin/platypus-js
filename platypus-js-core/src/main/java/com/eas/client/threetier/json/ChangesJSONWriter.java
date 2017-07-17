@@ -2,8 +2,6 @@ package com.eas.client.threetier.json;
 
 import com.eas.client.changes.Change;
 import com.eas.client.changes.ChangeValue;
-import com.eas.client.changes.ChangeVisitor;
-import com.eas.client.changes.Command;
 import com.eas.client.changes.CommandRequest;
 import com.eas.client.changes.Delete;
 import com.eas.client.changes.Insert;
@@ -13,12 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import com.eas.client.changes.TransferableChangeVisitor;
 
 /**
  *
  * @author mg
  */
-public class ChangesJSONWriter implements ChangeVisitor {
+public class ChangesJSONWriter implements TransferableChangeVisitor {
 
     private static final String CHANGE_DATA_NAME = "data";
     private static final String CHANGE_KEYS_NAME = "keys";
@@ -32,9 +31,9 @@ public class ChangesJSONWriter implements ChangeVisitor {
         super();
     }
 
-    public static String write(List<Change> aLog) throws Exception {
+    public static String write(List<Change.Transferable> aLog) throws Exception {
         List<String> changes = new ArrayList<>();
-        for (Change change : aLog) {
+        for (Change.Transferable change : aLog) {
             ChangesJSONWriter changeWriter = new ChangesJSONWriter();
             change.accept(changeWriter);
             changes.add(changeWriter.getWritten());
@@ -109,10 +108,4 @@ public class ChangesJSONWriter implements ChangeVisitor {
         ).toString();
     }
 
-    @Override
-    public void visit(Command aChange) throws Exception {
-        throw new IllegalStateException("'Command' should not be written to JSON.");
-    }
-    
-    
 }

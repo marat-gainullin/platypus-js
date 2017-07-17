@@ -10,7 +10,7 @@ import jdk.nashorn.api.scripting.JSObject;
 /**
  * @author mg
  */
-public class Command extends Change {
+public class Command extends Change implements Change.Applicable {
     
     /**
      * Compiled sql clause with lineaar parameters in form of (?, ?, ?).
@@ -33,6 +33,11 @@ public class Command extends Change {
         return clause;
     }
 
+    @Override
+    public void accept(ApplicableChangeVisitor aChangeVisitor) throws Exception {
+        aChangeVisitor.visit(this);
+    }
+    
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Parameters of command.\n"
@@ -53,9 +58,4 @@ public class Command extends Change {
         return published;
     }
 
-    @Override
-    public void accept(ChangeVisitor aChangeVisitor) throws Exception {
-        aChangeVisitor.visit(this);
-    }
-    
 }

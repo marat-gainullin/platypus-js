@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.model.application;
 
 import com.eas.client.MetadataCache;
@@ -108,12 +104,18 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
         // aParams argument may be omitted, and so, all parameters will be taken from entity.params.
         SqlCompiledQuery compiled = copied.compile(Scripts.getSpace());
         Command command = compiled.prepareCommand();
-        List<Change> log = getChangeLog();
+        List<Change.Applicable> log = getChangeLog();
         log.add(command);
     }
 
-    @Override
-    public List<Change> getChangeLog() throws Exception {
+    /**
+     * Returns change log for this entity. In some cases, we might have several
+     * change logs in one model. Several databases is the case.
+     *
+     * @throws java.lang.Exception
+     * @return
+     */
+    public List<Change.Applicable> getChangeLog() throws Exception {
         validateQuery();
         String datasourceName = tableName != null && !tableName.isEmpty() ? tableDatasourceName : query != null ? query.getDatasourceName() : null;
         return model.getChangeLog(datasourceName);

@@ -94,8 +94,14 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
         }
     }
 
-    @Override
-    public List<Change> getChangeLog() throws Exception {
+    /**
+     * Returns change log for this entity. In some cases, we might have several
+     * change logs in one model. Several databases is the case.
+     *
+     * @throws java.lang.Exception
+     * @return 
+     */
+    public List<Change.Transferable> getChangeLog() throws Exception {
         return model.getChangeLog();
     }
 

@@ -1,5 +1,6 @@
 define(['./logger', './client', './internals', './model-reader', 'invoke'], function (Logger, Client, Utils, readModelDocument, Invoke) {
-
+    var global = window;
+    
     var SERVER_ENTITY_TOUCHED_NAME = "Entity ";
 
     var loadedEntities = new Map();
@@ -70,8 +71,8 @@ define(['./logger', './client', './internals', './model-reader', 'invoke'], func
 
     function createModel(aModuleName, aTarget) {
         if (arguments.length > 0) {
-            if (window.platypusjs && window.platypusjs.getModelDocument) {
-                var modelDoc = window.platypusjs.getModelDocument(aModuleName);
+            if (global.platypusjs && global.platypusjs.getModelDocument) {
+                var modelDoc = global.platypusjs.getModelDocument(aModuleName);
                 if (modelDoc) {
                     return readModelDocument(modelDoc, aModuleName, aTarget);
                 } else {

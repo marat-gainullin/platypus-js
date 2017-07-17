@@ -10,7 +10,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mgainullin
  */
-public class CommandRequest extends Change {
+public class CommandRequest extends Change implements Change.Transferable{
 
     private final Map<String, ChangeValue> parameters = new HashMap<>();
 
@@ -27,7 +27,7 @@ public class CommandRequest extends Change {
     }
 
     @Override
-    public void accept(ChangeVisitor aChangeVisitor) throws Exception {
+    public void accept(TransferableChangeVisitor aChangeVisitor) throws Exception {
         aChangeVisitor.visit(this);
     }
 
