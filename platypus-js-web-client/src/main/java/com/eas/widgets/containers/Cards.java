@@ -14,8 +14,6 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.shared.HandlerRegistration;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -240,11 +238,6 @@ public class Cards extends Container implements HasSelectionHandlers<Widget>, Ha
                 });
             }
         }
-    }
-
-    @Override
-    protected void publish(JavaScriptObject aValue) {
-        publish(this, aValue);
     }
 
     private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{

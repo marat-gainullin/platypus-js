@@ -282,188 +282,188 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
 
         var mouseState = MOUSESTATE.NULL;
 
-        var actionPerformed;
+        var onActionPerformed;
         var actionPerformedReg;
-        Object.defineProperty(this, 'actionPerformed', {
+        Object.defineProperty(this, 'onActionPerformed', {
             get: function () {
-                return actionPerformed;
+                return onActionPerformed;
             }, set: function (aValue) {
-                if (actionPerformed !== aValue) {
+                if (onActionPerformed !== aValue) {
                     if (actionPerformedReg) {
                         actionPerformedReg.removeHandler();
                         actionPerformedReg = null;
                     }
-                    actionPerformed = aValue;
-                    if (actionPerformed) {
+                    onActionPerformed = aValue;
+                    if (onActionPerformed) {
                         actionPerformedReg = addActionHandler(function (event) {
-                            if (actionPerformed) {
-                                actionPerformed(event);
+                            if (onActionPerformed) {
+                                onActionPerformed(event);
                             }
                         });
                     }
                 }
             }});
-        var mouseExited;
+        
+        var onMouseExited;
         var mouseOutReg;
-
-        Object.defineProperty(this, 'mouseExited', {
+        Object.defineProperty(this, 'onMouseExited', {
             get: function () {
-                return mouseExited;
+                return onMouseExited;
             }, set: function (aValue) {
-                if (mouseExited !== aValue) {
+                if (onMouseExited !== aValue) {
                     if (mouseOutReg) {
                         mouseOutReg.removeHandler();
                         mouseOutReg = null;
                     }
-                    mouseExited = aValue;
-                    if (mouseExited) {
+                    onMouseExited = aValue;
+                    if (onMouseExited) {
                         mouseOutReg = addMouseExitHandler(function (evt) {
-                            if (mouseExited) {
+                            if (onMouseExited) {
                                 evt.event.stopPropagation();
-                                mouseExited(evt);
+                                onMouseExited(evt);
                             }
                         });
                     }
                 }
             }});
-        var mouseClicked;
+        var onMouseClicked;
         var mouseClickedReg;
-        Object.defineProperty(this, 'mouseClicked', {
+        Object.defineProperty(this, 'onMouseClicked', {
             get: function () {
-                return mouseClicked;
+                return onMouseClicked;
             },
             set: function (aValue) {
-                if (mouseClicked !== aValue) {
+                if (onMouseClicked !== aValue) {
                     if (mouseClickedReg) {
                         mouseClickedReg.removeHandler();
                         mouseClickedReg = null;
                     }
-                    mouseClicked = aValue;
-                    if (mouseClicked) {
+                    onMouseClicked = aValue;
+                    if (onMouseClicked) {
                         mouseClickedReg = addMouseClickHandler(function (evt) {
-                            if (mouseClicked) {
+                            if (onMouseClicked) {
                                 evt.event.stopPropagation();
-                                mouseClicked(evt);
+                                onMouseClicked(evt);
                             }
                         });
                     }
                 }
             }
         });
-        var mousePressed;
+        var onMousePressed;
         var mouseDownReg;
-        Object.defineProperty(this, 'mousePressed', {
+        Object.defineProperty(this, 'onMousePressed', {
             get: function () {
-                return mousePressed;
+                return onMousePressed;
             },
             set: function (aValue) {
-                if (mousePressed !== aValue) {
+                if (onMousePressed !== aValue) {
                     if (mouseDownReg) {
                         mouseDownReg.removeHandler();
                         mouseDownReg = null;
                     }
-                    mousePressed = aValue;
-                    if (mousePressed) {
+                    onMousePressed = aValue;
+                    if (onMousePressed) {
                         mouseDownReg = addMouseDownHandler(function (evt) {
-                            if (mousePressed) {
+                            if (onMousePressed) {
                                 evt.event.stopPropagation();
-                                mousePressed(evt);
+                                onMousePressed(evt);
                             }
                         });
                     }
                 }
             }
         });
-        var mouseReleased;
+        var onMouseReleased;
         var mouseUpReg;
-        Object.defineProperty(this, 'mouseReleased', {
+        Object.defineProperty(this, 'onMouseReleased', {
             get: function () {
-                return mouseReleased;
+                return onMouseReleased;
             },
             set: function (aValue) {
-                if (mouseReleased !== aValue) {
+                if (onMouseReleased !== aValue) {
                     if (mouseUpReg) {
                         mouseUpReg.removeHandler();
                         mouseUpReg = null;
                     }
-                    mouseReleased = aValue;
-                    if (mouseReleased) {
+                    onMouseReleased = aValue;
+                    if (onMouseReleased) {
                         mouseUpReg = addMouseUpHandler(function (evt) {
-                            if (mouseReleased) {
+                            if (onMouseReleased) {
                                 evt.event.stopPropagation();
-                                mouseReleased(evt);
+                                onMouseReleased(evt);
                             }
                         });
                     }
                 }
             }
         });
-        var mouseEntered;
+        var onMouseEntered;
         var mouseOverReg;
-        Object.defineProperty(this, 'mouseEntered', {
+        Object.defineProperty(this, 'onMouseEntered', {
             get: function () {
-                return mouseEntered;
+                return onMouseEntered;
             },
             set: function (aValue) {
-                if (mouseEntered !== aValue) {
+                if (onMouseEntered !== aValue) {
                     if (mouseOverReg) {
                         mouseOverReg.removeHandler();
                         mouseOverReg = null;
                     }
-                    mouseEntered = aValue;
-                    if (mouseEntered) {
+                    onMouseEntered = aValue;
+                    if (onMouseEntered) {
                         mouseOverReg = addMouseEnterHandler(function (evt) {
-                            if (mouseEntered) {
+                            if (onMouseEntered) {
                                 evt.event.stopPropagation();
-                                mouseEntered(evt);
+                                onMouseEntered(evt);
                             }
                         });
                     }
                 }
             }
         });
-        var mouseWheelMoved;
+        var onMouseWheelMoved;
         var mouseWheelReg;
-        Object.defineProperty(this, 'mouseWheelMoved', {
+        Object.defineProperty(this, 'onMouseWheelMoved', {
             get: function () {
-                return mouseWheelMoved;
+                return onMouseWheelMoved;
             },
             set: function (aValue) {
-                if (mouseWheelMoved !== aValue) {
+                if (onMouseWheelMoved !== aValue) {
                     if (mouseWheelReg) {
                         mouseWheelReg.removeHandler();
                         mouseWheelReg = null;
                     }
-                    mouseWheelMoved = aValue;
-                    if (mouseWheelMoved) {
+                    onMouseWheelMoved = aValue;
+                    if (onMouseWheelMoved) {
                         mouseWheelReg = addMouseWheelHandler(function (evt) {
-                            if (mouseWheelMoved) {
+                            if (onMouseWheelMoved) {
                                 evt.event.stopPropagation();
-                                mouseWheelMoved(evt);
+                                onMouseWheelMoved(evt);
                             }
                         });
                     }
                 }
             }
         });
-        var mouseMoved;
+        var onMouseMoved;
         var mouseMoveReg;
-        Object.defineProperty(this, 'mouseMoved', {
+        Object.defineProperty(this, 'onMouseMoved', {
             get: function () {
-                return mouseMoved;
+                return onMouseMoved;
             },
             set: function (aValue) {
-                if (mouseMoved !== aValue) {
+                if (onMouseMoved !== aValue) {
                     if (mouseMoveReg) {
                         mouseMoveReg.removeHandler();
                         mouseMoveReg = null;
                     }
-                    mouseMoved = aValue;
-                    if (mouseMoved) {
+                    onMouseMoved = aValue;
+                    if (onMouseMoved) {
                         mouseMoveReg = addMouseMoveHandler(function (evt) {
-                            if (mouseMoved) {
+                            if (onMouseMoved) {
                                 evt.event.stopPropagation();
-                                mouseMoved(evt);
+                                onMouseMoved(evt);
                             }
                         });
                     }
@@ -471,16 +471,16 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
 
             }
         });
-        var mouseDragged;
+        var onMouseDragged;
         var mouseDownForDragReg;
         var mouseUpForDragReg;
         var mouseMoveForDragReg;
-        Object.defineProperty(this, 'mouseDragged', {
+        Object.defineProperty(this, 'onMouseDragged', {
             get: function () {
-                return mouseDragged;
+                return onMouseDragged;
             },
             set: function (aValue) {
-                if (mouseDragged !== aValue) {
+                if (onMouseDragged !== aValue) {
                     if (mouseDownForDragReg) {
                         mouseDownForDragReg.removeHandler();
                         mouseDownForDragReg = null;
@@ -493,13 +493,13 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
                         mouseMoveForDragReg.removeHandler();
                         mouseMoveForDragReg = null;
                     }
-                    mouseDragged = aValue;
-                    if (mouseDragged) {
+                    onMouseDragged = aValue;
+                    if (onMouseDragged) {
                         mouseDownForDragReg = addMouseDownHandler(function (evt) {
                             // TODO: Check capture using during dragging
                             element.setCapture();
                             mouseState = MOUSESTATE.PRESSED;
-                            mouseDragged(evt);
+                            onMouseDragged(evt);
                         });
                         mouseUpForDragReg = addMouseUpHandler(function (evt) {
                             document.releaseCapture();
@@ -507,11 +507,11 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
                             mouseState = MOUSESTATE.NULL;
                         });
                         mouseMoveForDragReg = addMouseMoveHandler(function (evt) {
-                            if (mouseDragged) {
+                            if (onMouseDragged) {
                                 evt.event.stopPropagation();
                                 if (mouseState === MOUSESTATE.PRESSED || mouseState === MOUSESTATE.DRAGGED) {
                                     mouseState = MOUSESTATE.DRAGGED;
-                                    mouseDragged(evt);
+                                    onMouseDragged(evt);
                                 }
                             }
                         });
@@ -519,92 +519,92 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
                 }
             }
         });
-        var componentShown;
+        var onComponentShown;
         var componentShownReg;
-        Object.defineProperty(this, 'componentShown', {
+        Object.defineProperty(this, 'onComponentShown', {
             get: function () {
-                return componentShown;
+                return onComponentShown;
             },
             set: function (aValue) {
-                if (componentShown !== aValue) {
+                if (onComponentShown !== aValue) {
                     if (componentShownReg) {
                         componentShownReg.removeHandler();
                         componentShownReg = null;
                     }
-                    componentShown = aValue;
-                    if (componentShown) {
+                    onComponentShown = aValue;
+                    if (onComponentShown) {
                         componentShownReg = addShowHandler(function (event) {
-                            if (componentShown) {
-                                componentShown(event);
+                            if (onComponentShown) {
+                                onComponentShown(event);
                             }
                         });
                     }
                 }
             }
         });
-        var componentHidden;
+        var onComponentHidden;
         var componentHiddenReg;
-        Object.defineProperty(this, 'componentHidden', {
+        Object.defineProperty(this, 'onComponentHidden', {
             get: function () {
-                return componentHidden;
+                return onComponentHidden;
             },
             set: function (aValue) {
-                if (componentHidden !== aValue) {
+                if (onComponentHidden !== aValue) {
                     if (componentHiddenReg) {
                         componentHiddenReg.removeHandler();
                         componentHiddenReg = null;
                     }
-                    componentHidden = aValue;
-                    if (componentHidden) {
+                    onComponentHidden = aValue;
+                    if (onComponentHidden) {
                         componentHiddenReg = addHideHandler(function (event) {
-                            if (componentHidden) {
-                                componentHidden(event);
+                            if (onComponentHidden) {
+                                onComponentHidden(event);
                             }
                         });
                     }
                 }
             }
         });
-        var focusGained;
+        var onFocusGained;
         var focusReg;
-        Object.defineProperty(this, 'focusGained', {
+        Object.defineProperty(this, 'onFocusGained', {
             get: function () {
-                return focusGained;
+                return onFocusGained;
             },
             set: function (aValue) {
-                if (focusGained !== aValue) {
+                if (onFocusGained !== aValue) {
                     if (focusReg) {
                         focusReg.removeHandler();
                         focusReg = null;
                     }
-                    focusGained = aValue;
-                    if (focusGained && this.addFocusHandler) {
+                    onFocusGained = aValue;
+                    if (onFocusGained && this.addFocusHandler) {
                         focusReg = this.addFocusHandler(function (event) {
-                            if (focusGained) {
-                                focusGained(event);
+                            if (onFocusGained) {
+                                onFocusGained(event);
                             }
                         });
                     }
                 }
             }
         });
-        var focusLost;
+        var onFocusLost;
         var blurReg;
-        Object.defineProperty(this, 'focusLost', {
+        Object.defineProperty(this, 'onFocusLost', {
             get: function () {
-                return focusLost;
+                return onFocusLost;
             },
             set: function (aValue) {
-                if (focusLost !== aValue) {
+                if (onFocusLost !== aValue) {
                     if (blurReg) {
                         blurReg.removeHandler();
                         blurReg = null;
                     }
-                    focusLost = aValue;
-                    if (focusLost && this.addBlurHandler) {
+                    onFocusLost = aValue;
+                    if (onFocusLost && this.addBlurHandler) {
                         blurReg = this.addBlurHandler(function (event) {
-                            if (focusLost) {
-                                focusLost(event);
+                            if (onFocusLost) {
+                                onFocusLost(event);
                             }
                             mouseState = MOUSESTATE.NULL;
                         });
@@ -612,117 +612,117 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
                 }
             }
         });
-        var keyTyped;
+        var onKeyTyped;
         var keyTypedReg;
-        Object.defineProperty(this, 'keyTyped', {
+        Object.defineProperty(this, 'onKeyTyped', {
             get: function () {
-                return keyTyped;
+                return onKeyTyped;
             },
             set: function (aValue) {
-                if (keyTyped !== aValue) {
+                if (onKeyTyped !== aValue) {
                     if (keyTypedReg) {
                         keyTypedReg.removeHandler();
                         keyTypedReg = null;
                     }
-                    keyTyped = aValue;
-                    if (keyTyped && this.addKeyPressHandler) {
+                    onKeyTyped = aValue;
+                    if (onKeyTyped && this.addKeyPressHandler) {
                         keyTypedReg = this.addKeyPressHandler(function (event) {
-                            if (keyTyped) {
+                            if (onKeyTyped) {
                                 event.event.stopPropagation();
-                                keyTyped(event);
+                                onKeyTyped(event);
                             }
                         });
                     }
                 }
             }
         });
-        var keyPressed;
+        var onKeyPressed;
         var keyDownReg;
-        Object.defineProperty(this, 'keyPressed', {
+        Object.defineProperty(this, 'onKeyPressed', {
             get: function () {
-                return keyPressed;
+                return onKeyPressed;
             },
             set: function (aValue) {
-                if (keyPressed !== aValue) {
+                if (onKeyPressed !== aValue) {
                     if (keyDownReg) {
                         keyDownReg.removeHandler();
                         keyDownReg = null;
                     }
-                    keyPressed = aValue;
-                    if (keyPressed && this.addKeyDownHandler) {
+                    onKeyPressed = aValue;
+                    if (onKeyPressed && this.addKeyDownHandler) {
                         keyDownReg = this.addKeyDownHandler(function (event) {
-                            if (keyPressed) {
+                            if (onKeyPressed) {
                                 event.getEvent().stopPropagation();
-                                keyPressed(event);
+                                onKeyPressed(event);
                             }
                         });
                     }
                 }
             }
         });
-        var keyReleased;
+        var onKeyReleased;
         var keyUpReg;
-        Object.defineProperty(this, 'keyReleased', {
+        Object.defineProperty(this, 'onKeyReleased', {
             get: function () {
-                return keyReleased;
+                return onKeyReleased;
             },
             set: function (aValue) {
-                if (keyReleased !== aValue) {
+                if (onKeyReleased !== aValue) {
                     if (keyUpReg) {
                         keyUpReg.removeHandler();
                         keyUpReg = null;
                     }
-                    keyReleased = aValue;
-                    if (keyReleased && this.addKeyUpHandler) {
+                    onKeyReleased = aValue;
+                    if (onKeyReleased && this.addKeyUpHandler) {
                         keyUpReg = this.addKeyUpHandler(function (event) {
-                            if (keyReleased) {
+                            if (onKeyReleased) {
                                 event.event.stopPropagation();
-                                keyReleased(event);
+                                onKeyReleased(event);
                             }
                         });
                     }
                 }
             }
         });
-        var itemSelected;
+        var onItemSelected;
         var selectedItemReg;
-        Object.defineProperty(this, 'itemSelected', {
+        Object.defineProperty(this, 'onItemSelected', {
             get: function () {
-                return itemSelected;
+                return onItemSelected;
             },
             set: function (aValue) {
-                if (itemSelected !== aValue) {
+                if (onItemSelected !== aValue) {
                     if (selectedItemReg) {
                         selectedItemReg.removeHandler();
                         selectedItemReg = null;
                     }
-                    itemSelected = aValue;
-                    if (itemSelected && this.addSelectionHandler) {
+                    onItemSelected = aValue;
+                    if (onItemSelected && this.addSelectionHandler) {
                         selectedItemReg = this.addSelectionHandler(function (event) {
-                            if (itemSelected) {
-                                itemSelected(event);
+                            if (onItemSelected) {
+                                onItemSelected(event);
                             }
                         });
                     }
                 }
             }
         });
-        var valueChanged;
-        var valueChangedReg;
-        Object.defineProperty(this, 'valueChanged', {get: function () {
-                return valueChanged;
+        var valueChange;
+        var valueChangeReg;
+        Object.defineProperty(this, 'onValueChange', {get: function () {
+                return valueChange;
             },
             set: function (aValue) {
-                if (valueChanged !== aValue) {
-                    if (valueChangedReg) {
-                        valueChangedReg.removeHandler();
-                        valueChangedReg = null;
+                if (valueChange !== aValue) {
+                    if (valueChangeReg) {
+                        valueChangeReg.removeHandler();
+                        valueChangeReg = null;
                     }
-                    valueChanged = aValue;
-                    if (valueChanged && this.addValueChangeHandler) {
-                        valueChangedReg = this.addValueChangeHandler(function (event) {
-                            if (valueChanged) {
-                                valueChanged(event);
+                    valueChange = aValue;
+                    if (valueChange && this.addValueChangeHandler) {
+                        valueChangeReg = this.addValueChangeHandler(function (event) {
+                            if (valueChange) {
+                                valueChange(event);
                             }
                         });
 
