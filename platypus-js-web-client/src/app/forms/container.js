@@ -26,6 +26,16 @@ define(['../extend', './widget', './container-event'], function (extend, Widget,
                 return get;
             }
         });
+        
+        function forEach(action){
+            children.forEach(action);
+        }
+        
+        Object.defineProperty(this, 'forEach', {
+            get: function () {
+                return forEach;
+            }
+        });
 
         function indexOf(w) {
             return children.indexOf(w);
@@ -54,6 +64,7 @@ define(['../extend', './widget', './container-event'], function (extend, Widget,
         }
 
         Object.defineProperty(this, 'add', {
+            configurable: true,
             get: function () {
                 return add;
             }
@@ -77,6 +88,7 @@ define(['../extend', './widget', './container-event'], function (extend, Widget,
         }
 
         Object.defineProperty(this, 'remove', {
+            configurable: true,
             get: function () {
                 return remove;
             }
@@ -92,6 +104,7 @@ define(['../extend', './widget', './container-event'], function (extend, Widget,
         }
 
         Object.defineProperty(this, 'clear', {
+            configurable: true,
             get: function () {
                 return clear;
             }

@@ -1,17 +1,3 @@
-package com.eas.widgets.containers;
-
-import com.eas.core.HasPublished;
-import com.eas.ui.CommonResources;
-import com.eas.ui.Orientation;
-import com.eas.ui.Widget;
-import com.eas.ui.HasChildrenPosition;
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.Style;
-
-/**
- *
- * @author mg
- */
 public class Box extends Container implements HasChildrenPosition {
 
     protected int orientation; // horizontal
