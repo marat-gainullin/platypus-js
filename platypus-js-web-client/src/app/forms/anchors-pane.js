@@ -1,9 +1,7 @@
 define([
     '../extend',
-    '../ui',
     './container'], function (
         extend,
-        Ui,
         Container) {
     function Anchors() {
         Container.call(this);
@@ -12,68 +10,106 @@ define([
         var constraints = new Map();
 
         function is(a) {
-            return typeof a !== 'undefined' && a !== null;
+            return typeof a !== 'undefined' && a !== null && a !== '';
         }
 
-        function applyConstraints(w, aConstraints) {
-            constraints.put(w, aConstraints);
+        function u(value) {
+            if (is(value)) {
+                value = value + '';
+                if (!value.endsWith('px') && !value.endsWith('%'))
+                    return value + 'px';
+                else
+                    return value;
+            } else {
+                return null;
+            }
+        }
 
-            var left = aConstraints.left;
-            var top = aConstraints.top;
-            var right = aConstraints.right;
-            var bottom = aConstraints.bottom;
-            var width = aConstraints.width;
-            var height = aConstraints.height;
+        function applyAnchors(w, _anchors) {
+            var anchors = {
+                left: u(_anchors.left),
+                top: u(_anchors.top),
+                right: u(_anchors.right),
+                bottom: u(_anchors.bottom),
+                width: u(_anchors.width),
+                height: u(_anchors.height)
+            };
+
+            constraints.put(w, anchors);
 
             var ws = w.element.style;
 
             // horizontal
-            if (is(left) && is(width)) {
-                right = null;
+            if (is(anchors.left) && is(anchors.width)) {
+                anchors.right = null;
             }
-            if (is(left) && is(right)) {
-                ws.left = left.value + left.unit;
-                ws.right = right.value + right.unit;
-            } else if (!is(left) && is(right)) {
-                if (!width)
+            if (is(anchors.left) && is(anchors.right)) {
+                ws.left = anchors.left;
+                ws.right = anchors.right;
+            } else if (!is(anchors.left) && is(anchors.right)) {
+                if (!anchors.width)
                     throw "Left may be absent in presence of width and right";
-                ws.right = right.value + right.unit;
-                ws.width = width.value + width.unit;
-            } else if (!is(right) && is(left)) {
-                if (!width)
+                ws.right = anchors.right;
+                ws.width = anchors.width;
+            } else if (!is(anchors.right) && is(anchors.left)) {
+                if (!anchors.width)
                     throw "Right may be absent in presence of width and left";
-                ws.left = left.value + left.unit;
-                ws.width = width.value + width.unit;
+                ws.left = anchors.left;
+                ws.width = anchors.width;
             } else {
                 throw "At least left with width, right with width or both (without width) must present";
             }
             // vertical
-            if (is(top) && is(height)) {
-                bottom = null;
+            if (is(anchors.top) && is(anchors.height)) {
+                anchors.bottom = null;
             }
-            if (is(top) && is(bottom)) {
-                ws.top = top.value + top.unit;
-                ws.bottom = bottom.value + bottom.unit;
-            } else if (!is(top) && is(bottom)) {
-                if (!is(height))
+            if (is(anchors.top) && is(anchors.bottom)) {
+                ws.top = anchors.top;
+                ws.bottom = anchors.bottom;
+            } else if (!is(anchors.top) && is(anchors.bottom)) {
+                if (!is(anchors.height))
                     throw "Top may be absent in presence of height and bottom";
-                ws.bottom = bottom.value + bottom.unit;
-                ws.height = height.value + height.unit;
-            } else if (is(top) && !is(bottom)) {
-                if (!is(height))
+                ws.bottom = anchors.bottom;
+                ws.height = anchors.height;
+            } else if (is(anchors.top) && !is(anchors.bottom)) {
+                if (!is(anchors.height))
                     throw "Bottom may be absent in presence of height and top";
-                ws.top = top.value + top.unit;
-                ws.height = height.value + height.unit;
+                ws.top = anchors.top;
+                ws.height = anchors.height;
             } else {
                 throw "At least top with height, bottom with height or both (without height) must present";
             }
             ws.margin = 0 + 'px';
         }
 
+        var superAdd = this.add;
         function add(w, indexOrAnchors) {
-            add(w);
-            applyConstraints(w, anchors);
+            if (w) {
+                if (w.parent == self)
+                    throw 'A widget is already added to this container';
+                if (isNaN(indexOrAnchors)) {
+                    var anchors = indexOrAnchors;
+                    superAdd(w);
+                    applyAnchors(w, anchors);
+                } else {
+                    var index = indexOrAnchors;
+                    superAdd(w, index);
+                    applyAnchors(w, {
+                        left: w.left,
+                        right: w.right,
+                        top: w.top,
+                        bottom: w.bottom,
+                        width: w.width,
+                        height: w.height
+                    });
+                }
+            }
         }
+        Object.defineProperty(this, 'add', {
+            get: function () {
+                return add;
+            }
+        });
 
         var superRemove = this.remove;
         function remove(widgetOrIndex) {
@@ -98,70 +134,108 @@ define([
             }
         });
 
+        function updatePlainValue(anchor, value, containerSize) {
+            if (anchor.endsWith('px'))
+                return value + 'px';
+            else if (anchor.endsWith('%'))
+                return Math.round(value / containerSize * 100) + '%';
+            else
+                return value + 'px';
+        }
+
         function ajustWidth(w, aValue) {
             var anchors = constraints.get(w);
             var containerWidth = self.element.offsetWidth;
             if (is(anchors.width)) {
-                anchors.getWidth().setPlainValue(aValue, containerWidth);
+                anchors.width = updatePlainValue(anchors.width, aValue, containerWidth);
             } else if (is(anchors.left) && is(anchors.right)) {
-                anchors.getRight().setPlainValue(containerWidth - w.element.offsetLeft - aValue, containerWidth);
+                anchors.right = updatePlainValue(anchors.right, containerWidth - w.element.offsetLeft - aValue, containerWidth);
             }
-            applyConstraints(w, anchors);
+            applyAnchors(w, anchors);
         }
+        Object.defineProperty(this, 'ajustWidth', {
+            get: function () {
+                return ajustWidth;
+            }
+        });
 
         function ajustHeight(w, aValue) {
             var anchors = constraints.get(w);
             var containerHeight = self.element.getOffsetHeight();
             if (is(anchors.height)) {
-                anchors.getHeight().setPlainValue(aValue, containerHeight);
+                anchors.height = updatePlainValue(anchors.height, aValue, containerHeight);
             } else if (is(anchors.top) && is(anchors.bottom)) {
-                anchors.getBottom().setPlainValue(containerHeight - w.element.offsetTop - aValue, containerHeight);
+                anchors.bottom = updatePlainValue(anchors.bottom, containerHeight - w.element.offsetTop - aValue, containerHeight);
             }
-            applyConstraints(w, anchors);
+            applyAnchors(w, anchors);
         }
+        Object.defineProperty(this, 'ajustHeight', {
+            get: function () {
+                return ajustHeight;
+            }
+        });
 
         function ajustLeft(w, aValue) {
             var anchors = constraints.get(w);
             var containerWidth = self.element.offsetWidth;
             var childWidth = w.element.offsetWidth;
             if (is(anchors.left) && is(anchors.width)) {
-                anchors.getLeft().setPlainValue(aValue, containerWidth);
+                anchors.left = updatePlainValue(anchors.left, aValue, containerWidth);
             } else if (is(anchors.width) && is(anchors.right)) {
-                anchors.getRight().setPlainValue(containerWidth - aValue - childWidth, containerWidth);
+                anchors.right = updatePlainValue(anchors.right, containerWidth - aValue - childWidth, containerWidth);
             } else if (is(anchors.left) && is(anchors.right)) {
-                anchors.getLeft().setPlainValue(aValue, containerWidth);
-                anchors.getRight().setPlainValue(containerWidth - aValue - childWidth, containerWidth);
+                anchors.left = updatePlainValue(anchors.left, aValue, containerWidth);
+                anchors.right = updatePlainValue(anchors.right, containerWidth - aValue - childWidth, containerWidth);
             }
-            applyConstraints(w, anchors);
+            applyAnchors(w, anchors);
         }
+        Object.defineProperty(this, 'ajustLeft', {
+            get: function () {
+                return ajustLeft;
+            }
+        });
 
         function ajustTop(w, aValue) {
             var anchors = constraints.get(w);
             var containerHeight = self.element.offsetHeight;
             var childHeight = w.element.offsetHeight;
             if (is(anchors.top) && is(anchors.height)) {
-                anchors.top.setPlainValue(aValue, containerHeight);
+                anchors.top = updatePlainValue(anchors.top, aValue, containerHeight);
             } else if (is(anchors.height) && is(anchors.bottom)) {
-                anchors.getBottom().setPlainValue(containerHeight - aValue - childHeight, containerHeight);
+                anchors.bottom = updatePlainValue(anchors.bottom, containerHeight - aValue - childHeight, containerHeight);
             } else if (is(anchors.top) && is(anchors.bottom)) {
-                anchors.getTop().setPlainValue(aValue, containerHeight);
-                anchors.getBottom().setPlainValue(containerHeight - aValue - childHeight, containerHeight);
+                anchors.top = updatePlainValue(anchors.top, aValue, containerHeight);
+                anchors.bottom = updatePlainValue(anchors.bottom, containerHeight - aValue - childHeight, containerHeight);
             }
-            applyConstraints(w, anchors);
+            applyAnchors(w, anchors);
         }
+        Object.defineProperty(this, 'ajustTop', {
+            get: function () {
+                return ajustTop;
+            }
+        });
 
         function getTop(aWidget) {
             if (aWidget.parent !== this)
                 throw "Widget should be a child of this container";
             return aWidget.element.offsetTop;
         }
+        Object.defineProperty(this, 'getTop', {
+            get: function () {
+                return getTop;
+            }
+        });
 
         function getLeft(aWidget) {
             if (aWidget.parent !== this)
                 throw "widget should be a child of this container";
             return aWidget.element.offsetLeft;
         }
-
+        Object.defineProperty(this, 'getLeft', {
+            get: function () {
+                return getLeft;
+            }
+        });
     }
     extend(Anchors, Container);
     return Anchors;

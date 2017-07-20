@@ -5,19 +5,19 @@ define([
         extend,
         Ui,
         Container) {
-    function Split(dividerSize) {
+    function Split(orientation) {
         Container.call(this);
 
         var self = this;
 
         if (arguments.length < 1)
-            dividerSize = 10;
+            orientation = Ui.Orientation.Horizontal;
+        var dividerSize = 10;
 
         var firstWidget;
         var secondWidget;
 
         var oneTouchExpandable;
-        var orientation = Ui.Orientation.Horizontal;
         var dividerLocation = 84;
 
         function checkAdd(w) {

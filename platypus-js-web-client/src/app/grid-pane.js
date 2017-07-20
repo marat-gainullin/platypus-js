@@ -1,45 +1,34 @@
-package com.eas.widgets.containers;
-
-import com.eas.core.HasPublished;
-import com.eas.ui.Widget;
-
-import com.eas.ui.HasChildrenPosition;
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.Style;
-
-/**
- *
- * @author mg
- */
-public class Cells extends Container implements HasChildrenPosition {
-
-    protected int rows = 1;
-    protected int columns = 1;
-    protected Widget[][] grid = new Widget[rows][columns];
-
-    protected int hgap;
-    protected int vgap;
-
-    public Cells() {
-        super();
-        com.eas.ui.CommonResources.INSTANCE.commons().ensureInjected();
-    }
-
-    public Cells(int aRows, int aCols) {
-        this();
-        rows = aRows;
-        columns = aCols;
+define([
+    '../extend',
+    './container'], function (
+        extend,
+        Container) {
+    /**
+     * A container with Grid Layout.
+     * @param rows the number of grid rows.
+     * @param cols the number of grid columns.
+     * @param hgap the horizontal gap (optional).
+     * @param vgap the vertical gap (optional).
+     * @constructor GridPane GridPane
+     */
+    function GridPane(rows, cols, hgap, vgap) {
+        Container.call(this);
+        var self = this;
+        
+        if(arguments.length < 1)
+            rows = 1;
+        if(arguments.length < 2)
+            cols = 1;
+        if(arguments.length < 3)
+            hgap = 0;
+        if(arguments.length < 3)
+            vgap = 0;
+        
         grid = new Widget[rows][0];
         for (int r = 0; r < rows; r++) {
             grid[r] = new Widget[columns];
         }
-    }
-
-    public Cells(int aRows, int aCols, int aVGap, int aHGap) {
-        this(aRows, aCols);
-        setHgap(aHGap);
-        setVgap(aVGap);
-    }
+        formatCells();
 
     public int getRowCount() {
         return rows;
@@ -251,4 +240,8 @@ public class Cells extends Container implements HasChildrenPosition {
         assert aWidget.parent == this : "widget should be a child of this container";
         return aWidget.element.getParentElement().getOffsetLeft();
     }
-}
+        
+    }
+    extend(GridPane, Container);
+    return GridPane;
+});

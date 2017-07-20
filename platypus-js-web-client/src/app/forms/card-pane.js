@@ -67,7 +67,7 @@ define([
         function add(w, indexOrCard) {
             if (w) {
                 if (w.parent === self)
-                    throw 'A widget already added to this container';
+                    throw 'A widget is already added to this container';
                 format(w);
                 if (isNaN(indexOrCard)) {
                     var card = indexOrCard;
@@ -76,12 +76,12 @@ define([
                     }
                     superAdd(w);
                     cards.set(card, w);
-                    w.card = cards;
+                    w['-platypus-ui-card'] = cards;
                 } else {
                     var index = indexOrCard;
                     superAdd(w, index);
-                    w.card = 'card-'+Id.generate();
-                    cards.set(w.card, w);
+                    w['-platypus-ui-card'] = 'card-' + Id.generate();
+                    cards.set(w['-platypus-ui-card'], w);
                 }
                 if (!visibleWidget) {
                     showWidget(w);
@@ -108,7 +108,7 @@ define([
         var superRemove = this.remove;
         function remove(widgetOrIndex) {
             var removed = superRemove(widgetOrIndex);
-            if(removed){
+            if (removed) {
                 removeCard(removed);
                 if (visibleWidget === removed) {
                     visibleWidget = null;
@@ -123,9 +123,9 @@ define([
         });
 
         function removeCard(w) {
-            if (w && w.card) {
-                cards.remove(w.card);
-                delete w.card;
+            if (w && w['-platypus-ui-card']) {
+                cards.remove(w['-platypus-ui-card']);
+                delete w['-platypus-ui-card'];
             }
         }
 
@@ -135,12 +135,12 @@ define([
 
             if (visibleWidget !== oldWidget) {
                 visibleWidget.visible = true;
-                visibleWidget.element.classList.add("card-shown");
-                visibleWidget.element.classList.remove("card-hidden");
+                visibleWidget.element.classList.add('card-shown');
+                visibleWidget.element.classList.remove('card-hidden');
 
                 if (oldWidget) {
-                    oldWidget.element.classList.add("card-hidden");
-                    oldWidget.element.classList.remove("card-shown");
+                    oldWidget.element.classList.add('card-hidden');
+                    oldWidget.element.classList.remove('card-shown');
                     oldWidget.visible = false;
                 }
                 if (oldWidget !== visibleWidget) {
@@ -170,7 +170,6 @@ define([
         });
 
         function format(w) {
-            // Set all anchors by default.
             var ws = w.element.style;
             ws.position = 'absolute';
             ws.width = '';
