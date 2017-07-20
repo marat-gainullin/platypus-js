@@ -98,25 +98,25 @@ public class ProgressBar extends ValueWidget {
         text = aText;
 
         // Create the outer shell
-        element.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        element.getStyle().setPosition(Style.Position.RELATIVE);
+        element.getStyle().display ='inline-block');
+        element.getStyle().position = 'relative';
         // default preferred size
-        element.getStyle().setWidth(150, Style.Unit.PX);
-        element.getStyle().setHeight(16, Style.Unit.PX);
+        element.getStyle().width =150+ 'px');
+        element.getStyle().height =16+ 'px');
 
         // Create the bar element
         barElement = DOM.createDiv();
         element.appendChild(barElement);
-        barElement.getStyle().setHeight(100, Style.Unit.PCT);
-        barElement.addClassName("progress-bar");
-        barElement.addClassName("progress-bar-default");
+        barElement.getStyle().height =100 + '%');
+        barElement.classList.add("progress-bar");
+        barElement.classList.add("progress-bar-default");
 
         // Create the text element
         textElement = DOM.createDiv();
         DOM.appendChild(element, textElement);
 
-        textElement.getStyle().setPosition(Style.Position.ABSOLUTE);
-        textElement.getStyle().setTop(0, Style.Unit.PX);
+        textElement.getStyle().position = 'absolute';
+        textElement.getStyle().top =0+ 'px');
         textElement.setClassName("gwt-ProgressBar-text");
         // Set the current progress
         setValue(aValue);
@@ -211,16 +211,16 @@ public class ProgressBar extends ValueWidget {
 
         // Calculate percent complete
         int percent = (int) (100 * getPercent());
-        barElement.getStyle().setWidth(percent, Style.Unit.PCT);
+        barElement.getStyle().width =percent + '%');
         textElement.setInnerHTML(generateText((Double)value));
 
         // Set the style depending on the size of the bar
         if (percent < 50) {
-            textElement.removeClassName("progress-bar-text-secondHalf");
-            textElement.addClassName("progress-bar-text-firstHalf");
+            textElement.classList.remove("progress-bar-text-secondHalf");
+            textElement.classList.add("progress-bar-text-firstHalf");
         } else {
-            textElement.removeClassName("progress-bar-text-firstHalf");
-            textElement.addClassName("progressBar-text-secondHalf");
+            textElement.classList.remove("progress-bar-text-firstHalf");
+            textElement.classList.add("progressBar-text-secondHalf");
         }
         fireValueChange(oldValue);
     }
@@ -244,7 +244,7 @@ public class ProgressBar extends ValueWidget {
         if (textVisible) {
             textElement.getStyle().clearDisplay();
         } else {
-            textElement.getStyle().setDisplay(Style.Display.NONE);
+            textElement.getStyle().display ='none');
         }
     }
 

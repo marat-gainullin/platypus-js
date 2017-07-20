@@ -1,167 +1,150 @@
-define(function(){
-    function Box(orientation, hgap, vgap){
+define([
+    '../extend',
+    '../ui',
+    './container'], function (
+        extend,
+        Ui,
+        Container) {
+    function Box(orientation, hgap, vgap) {
         Container.call(this);
-        
+
+        var self = this;
+
         self.element.style.whiteSpace = 'nowrap';
         self.element.style.display = 'inline-block';
         self.element.style.overflow = 'hidden';
         self.element.style.position = 'relative';
 
-        applyOrientation(aValue);
-        
-        
-        function applyHGap(){
-                if (orientation == Orientation.HORIZONTAL) {
-                    for (int i = 1; i < children.size(); i++) {
-                        Widget w = children.get(i);
-                        w.getElement().getStyle().setMarginLeft(aValue, Style.Unit.PX);
-                    }
-                }
+        function applyHGap() {
+            if (orientation === Ui.Orientation.HORIZONTAL) {
+                self.forEach(function (w) {
+                    w.element.style.marginLeft = hgap + 'px';
+                });
+            }
         }
-        
-        function applyVGap(){
-                if (orientation == Orientation.VERTICAL) {
-                    for (int i = 1; i < children.size(); i++) {
-                        Widget w = children.get(i);
-                        w.getElement().getStyle().setMarginTop(aValue, Style.Unit.PX);
-                    }
-                }
+
+        function applyVGap() {
+            if (orientation === Ui.Orientation.HORIZONTAL) {
+                self.forEach(function (w) {
+                    w.element.style.marginTop = vgap + 'px';
+                });
+            }
         }
         applyHGap();
         applyVGap();
-        
-            Object.defineProperty(this, "hgap", {
-                get : function(){
-                    return hgap;
-                },
-                set : function(aValue){
+
+        Object.defineProperty(this, "hgap", {
+            get: function () {
+                return hgap;
+            },
+            set: function (aValue) {
+                if (hgap >= 0 && hgap !== aValue) {
                     hgap = aValue;
                     applyHGap();
                 }
+            }
+        });
+        Object.defineProperty(this, "vgap", {
+            configurable: true,
+            get: function () {
+                return vgap;
+            },
+            set: function (aValue) {
+                if (vgap >= 0 && vgap !== aValue) {
+                    vgap = aValue;
+                    applyVGap();
+                }
+            }
+        });
+        function applyOrientation() {
+            self.forEach(function (w) {
+                format(w);
             });
-            Object.defineProperty(this, "vgap", {
-                get : function(){
-                    return aWidget.@com.eas.widgets.CardPane::getVgap()();
-                },
-                set : function(aValue){
-                    aWidget.@com.eas.widgets.CardPane::setVgap(I)(aValue);
-                }
-            });
-            
-        public Box(int aOrientation, int aHGap, int aVGap) {
-            this();
-            setHgap(aHGap);
-            setVgap(aVGap);
-            setOrientation(aOrientation);
         }
-
-        public int getOrientation() {
-            return orientation;
-        }
-
-        public final void setOrientation(int aValue) {
-            applyOrientation(aValue);
-        }
-
-        protected void applyOrientation(int aValue) {
-            if (orientation != aValue) {
-                orientation = aValue;
-                for (int i = 0; i < children.size(); i++) {
-                    format(children.get(i));
+        applyOrientation();
+        Object.defineProperty(this, "orientation", {
+            configurable: true,
+            get: function () {
+                return orientation;
+            },
+            set: function (aValue) {
+                if (orientation !== aValue) {
+                    orientation = aValue;
+                    applyOrientation();
                 }
             }
-        }
+        });
 
-        public int getHgap() {
-            return hgap;
-        }
 
-        public final void setHgap(int aValue) {
-            if (aValue >= 0) {
-                hgap = aValue;
-                applyHGap();
-            }
-        }
-
-        public int getVgap() {
-            return vgap;
-        }
-
-        public final void setVgap(int aValue) {
-            if (aValue >= 0) {
-                vgap = aValue;
-                applyVGap();
-            }
-        }
-
-        protected void format(Widget w) {
-            boolean visible = !w.getElement().hasAttribute("aria-hidden");
-            Style ws = w.getElement().getStyle();
-            ws.setMarginLeft(0, Style.Unit.PX);
-            ws.setMarginRight(0, Style.Unit.PX);
-            ws.setMarginTop(0, Style.Unit.PX);
-            if (orientation == Orientation.HORIZONTAL) {
-                if (element.getFirstChildElement() != w.getElement()) {
-                    ws.setMarginLeft(hgap, Style.Unit.PX);
-                    ws.setMarginRight(0, Style.Unit.PX);
+        function format(w) {
+            var visible = w.visible;
+            var ws = w.element.style;
+            ws.marginLeft = 0 + 'px';
+            ws.marginRight = 0 + 'px';
+            ws.marginTop = 0 + 'px';
+            if (orientation === Ui.Orientation.HORIZONTAL) {
+                if (self.element.firstElementChild !== w.element) {
+                    ws.marginLeft = hgap + 'px';
+                    ws.marginRight = 0 + 'px';
                 }
-                ws.clearTop();
-                ws.clearBottom();
-                ws.setPosition(Style.Position.RELATIVE);
-                ws.setHeight(100, Style.Unit.PCT);
-                ws.setDisplay(visible ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
-                ws.clearFloat();
+                ws.top = '';
+                ws.bottom = '';
+                ws.position = 'relative';
+                ws.height = 100 + '%';
+                ws.display = visible ? 'inline-block' : 'none';
+                ws.float = '';
             } else {
-                if (element.getFirstChildElement() != w.getElement()) {
-                    ws.setMarginTop(vgap, Style.Unit.PX);
-                    ws.setMarginBottom(0, Style.Unit.PX);
+                if (self.element.firstElementChild !== w.element) {
+                    ws.marginTop = vgap + 'px';
+                    ws.marginBottom = 0 + 'px';
                 }
-                ws.setPosition(Style.Position.RELATIVE);
-                ws.setDisplay(visible ? Style.Display.BLOCK : Style.Display.NONE);
-                ws.setLeft(0, Style.Unit.PX);
-                ws.clearRight();
-                ws.setWidth(100, Style.Unit.PCT);
+                ws.position = 'relative';
+                ws.display = visible ? 'block' : 'none';
+                ws.left = 0 + 'px';
+                ws.right = '';
+                ws.width = 100 + 'px';
             }
-            ws.setVerticalAlign(Style.VerticalAlign.MIDDLE);
-            w.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
+            ws.verticalAlign = 'middle';
         }
 
-        @Override
-        public void add(Widget w) {
-            if (orientation == Orientation.HORIZONTAL) {
-                super.add(w);
+        var superAdd = this.add;
+        function add(w) {
+            if (orientation === Ui.Orientation.HORIZONTAL) {
+                superAdd(w);
                 format(w);
             } else {
-                super.add(w);
+                superAdd(w);
                 format(w);
             }
         }
-
-        /*
-        @Override
-        protected void onAttach() {
-            super.onAttach();
-            if (orientation == Orientation.HORIZONTAL) {
-                if (getParent() instanceof ScrollPanel) {
-                    getElement().getStyle().setHeight(100, Style.Unit.PCT);
-                }
-            } else {
-                if (getParent() instanceof ScrollPanel) {
-                    getElement().getStyle().setWidth(100, Style.Unit.PCT);
-                }
+        Object.defineProperty(this, 'add', {
+            get: function () {
+                return add;
             }
-        }
-         */
-        @Override
-        public int getTop(Widget w) {
-            assert w.getParent() == this : "widget should be a child of this container";
-            return orientation == Orientation.HORIZONTAL ? 0 : w.getElement().getOffsetTop();
-        }
+        });
 
-        @Override
-        public int getLeft(Widget w) {
-            assert w.getParent() == this : "widget should be a child of this container";
-            return orientation == Orientation.HORIZONTAL ? w.getElement().getOffsetLeft() : 0;
+        function getTop(w) {
+            if (w.parent !== self)
+                throw "widget should be a child of this container";
+            return orientation === Ui.Orientation.HORIZONTAL ? 0 : w.element.offsetTop;
         }
+        Object.defineProperty(this, 'getTop', {
+            get: function () {
+                return getTop;
+            }
+        });
+
+        function getLeft(w) {
+            if (w.parent !== self)
+                throw "widget should be a child of this container";
+            return orientation === Ui.Orientation.HORIZONTAL ? w.element.offsetLeft : 0;
+        }
+        Object.defineProperty(this, 'getLeft', {
+            get: function () {
+                return getLeft;
+            }
+        });
     }
+    extend(Box, Container);
+    return Box;
 });

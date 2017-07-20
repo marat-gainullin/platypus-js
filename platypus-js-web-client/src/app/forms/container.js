@@ -2,7 +2,7 @@ define(['../extend', './widget', './container-event'], function (extend, Widget,
     function Container() {
         Widget.call(this);
         var self = this;
-        
+
         var children = [];
 
         this.element.style.position = 'relative';
@@ -14,23 +14,24 @@ define(['../extend', './widget', './container-event'], function (extend, Widget,
             }
         });
 
-        function get(index) {
+        function child(index) {
             if (index >= 0 && index < children.length) {
                 return children[index];
             } else {
                 return null;
             }
         }
-        Object.defineProperty(this, 'get', {
+        Object.defineProperty(this, 'child', {
+            configurable: true,
             get: function () {
-                return get;
+                return child;
             }
         });
-        
-        function forEach(action){
+
+        function forEach(action) {
             children.forEach(action);
         }
-        
+
         Object.defineProperty(this, 'forEach', {
             get: function () {
                 return forEach;
@@ -40,7 +41,7 @@ define(['../extend', './widget', './container-event'], function (extend, Widget,
         function indexOf(w) {
             return children.indexOf(w);
         }
-        
+
         Object.defineProperty(this, 'indexOf', {
             get: function () {
                 return indexOf;
@@ -48,7 +49,7 @@ define(['../extend', './widget', './container-event'], function (extend, Widget,
         });
 
         function add(w, beforeIndex) {
-            w.parent = this;
+            w.parent = self;
             if (arguments.length > 1) {
                 children.splice(beforeIndex, 0, w);
                 if (beforeIndex < children.length) {
@@ -69,21 +70,21 @@ define(['../extend', './widget', './container-event'], function (extend, Widget,
                 return add;
             }
         });
-        
+
         function remove(w) {
             var idx;
             if (w instanceof Widget)
                 idx = children.indexOf(w);
             else
-                idx = w;
-            var removed = children.splice(idx, 1);
-            if (removed.length > 0) {
+                idx = w;            
+            if (idx >= 0 && idx < children.length) {
+                var removed = children.splice(idx, 1);
                 removed[0].parent = null;
                 removed[0].element.removeFromParent();
                 fireRemoved(w);
                 return removed[0];
             } else {
-                return removed;
+                return null;
             }
         }
 
@@ -93,7 +94,7 @@ define(['../extend', './widget', './container-event'], function (extend, Widget,
                 return remove;
             }
         });
-        
+
         function clear() {
             children.forEach(function (child) {
                 child.parent = null;
@@ -109,7 +110,7 @@ define(['../extend', './widget', './container-event'], function (extend, Widget,
                 return clear;
             }
         });
-        
+
         var addHandlers = new Set();
 
         function addAddHandler(handler) {
@@ -120,7 +121,7 @@ define(['../extend', './widget', './container-event'], function (extend, Widget,
                 }
             };
         }
-        
+
         Object.defineProperty(this, 'addAddHandler', {
             get: function () {
                 return addAddHandler;
@@ -128,7 +129,7 @@ define(['../extend', './widget', './container-event'], function (extend, Widget,
         });
 
         function fireAdded(w) {
-            var event = new ContainerEvent(this, w);
+            var event = new ContainerEvent(self, w);
             addHandlers.forEach(function (h) {
                 h(event);
             });
@@ -152,7 +153,7 @@ define(['../extend', './widget', './container-event'], function (extend, Widget,
         });
 
         function fireRemoved(w) {
-            var event = new ContainerEvent(this, w);
+            var event = new ContainerEvent(self, w);
             removeHandlers.forEach(function (h) {
                 h.onRemove(event);
             });

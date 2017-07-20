@@ -45,7 +45,7 @@ public class CheckBox extends ValueWidget implements HasButtonGroup, HasText,
     public CheckBox() {
         this(Document.get().createCheckInputElement(), Document.get().createLabelElement());
         input.setClassName("check-box");
-        label.addClassName("check-label");
+        label.classList.add("check-label");
     }
 
     protected CheckBox(InputElement aInput, Element aLabel) {
@@ -54,9 +54,9 @@ public class CheckBox extends ValueWidget implements HasButtonGroup, HasText,
         label = aLabel;
         label.appendChild(input);
         element.appendChild(label);
-        anchor.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        anchor.getStyle().setPosition(Style.Position.RELATIVE);
-        anchor.getStyle().setHeight(100, Style.Unit.PCT);
+        anchor.getStyle().display ='inline-block');
+        anchor.getStyle().position = 'relative';
+        anchor.getStyle().height =100 + '%');
         anchor.getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
         element.appendChild(anchor);
         element.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {

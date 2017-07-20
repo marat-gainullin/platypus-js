@@ -40,24 +40,24 @@ public class DropDownListDecoratorField extends ValueDecoratorField {
         DropDownList box = (DropDownList) decorated;
         box.addItem("...", keyForNullValue, null, "");
         nullOption = box.getItem(0);
-        decorated.getElement().addClassName(CUSTOM_DROPDOWN_CLASS);
-        decorated.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+        decorated.element.classList.add(CUSTOM_DROPDOWN_CLASS);
+        decorated.element.style.setOverflow(Style.Overflow.HIDDEN);
         CommonResources.INSTANCE.commons().ensureInjected();
-        box.getElement().addClassName(CommonResources.INSTANCE.commons().withoutDropdown());
+        box.element.classList.add(CommonResources.INSTANCE.commons().withoutDropdown());
         nonListMask.setReadOnly(true);
-        nonListMask.addClassName(CommonResources.INSTANCE.commons().borderSized());
-        nonListMask.getStyle().setPosition(Style.Position.ABSOLUTE);
-        nonListMask.getStyle().setDisplay(Style.Display.NONE);
-        nonListMask.getStyle().setTop(0, Style.Unit.PX);
-        nonListMask.getStyle().setLeft(0, Style.Unit.PX);
-        nonListMask.getStyle().setWidth(100, Style.Unit.PCT);
-        nonListMask.getStyle().setHeight(100, Style.Unit.PCT);
+        nonListMask.classList.add(CommonResources.INSTANCE.commons().borderSized());
+        nonListMask.getStyle().position = 'absolute';
+        nonListMask.getStyle().display ='none');
+        nonListMask.getStyle().top =0+ 'px');
+        nonListMask.getStyle().setLeft(0+ 'px');
+        nonListMask.getStyle().width =100 + '%');
+        nonListMask.getStyle().height =100 + '%');
         nonListMask.getStyle().setFloat(Style.Float.RIGHT); // Same as decorated within decorator
 
         getElement().insertFirst(nonListMask);
 
-        btnSelect.addClassName("decorator-select-combo");
-        btnClear.addClassName("decorator-clear-combo");
+        btnSelect.classList.add("decorator-select-combo");
+        btnClear.classList.add("decorator-clear-combo");
     }
 
     @Override
@@ -176,19 +176,19 @@ public class DropDownListDecoratorField extends ValueDecoratorField {
             list = aValue;
             DropDownList listBox = (DropDownList) decorated;
             if (list) {
-                listBox.getElement().addClassName(CUSTOM_DROPDOWN_CLASS);
-                listBox.getElement().getStyle().clearVisibility();
-                nonListMask.getStyle().setDisplay(Style.Display.NONE);
-                btnSelect.addClassName("decorator-select-combo");
-                btnClear.addClassName("decorator-clear-combo");
-                nonListMask.removeClassName("form-control");
+                listBox.element.classList.add(CUSTOM_DROPDOWN_CLASS);
+                listBox.element.style.clearVisibility();
+                nonListMask.getStyle().display ='none');
+                btnSelect.classList.add("decorator-select-combo");
+                btnClear.classList.add("decorator-clear-combo");
+                nonListMask.classList.remove("form-control");
             } else {
-                listBox.getElement().removeClassName(CUSTOM_DROPDOWN_CLASS);
-                listBox.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
-                nonListMask.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-                btnSelect.removeClassName("decorator-select-combo");
-                btnClear.removeClassName("decorator-clear-combo");
-                nonListMask.addClassName("form-control");
+                listBox.element.classList.remove(CUSTOM_DROPDOWN_CLASS);
+                listBox.element.style.setVisibility(Style.Visibility.HIDDEN);
+                nonListMask.getStyle().display ='inline-block');
+                btnSelect.classList.remove("decorator-select-combo");
+                btnClear.classList.remove("decorator-clear-combo");
+                nonListMask.classList.add("form-control");
             }
             rebindList();
         }

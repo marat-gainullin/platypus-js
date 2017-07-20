@@ -11,7 +11,7 @@ public class RadioButton extends CheckBox {
     public RadioButton() {
         super(Document.get().createRadioInputElement(""), Document.get().createLabelElement());
         input.setClassName("radio-box");
-        label.addClassName("radio-label");
+        label.classList.add("radio-label");
     }
     
 }

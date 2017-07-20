@@ -1,10 +1,8 @@
 define([
-    './extend',
     'common-utils/color',
     'common-utils/cursor',
     'common-utils/font',
     './key-codes'], function (
-        extend,
         Color,
         Cursor,
         Font,

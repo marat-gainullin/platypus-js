@@ -31,16 +31,16 @@ public class MenuItemImageText extends MenuItem implements HasText, HasHTML {
         element.setClassName("menu-item");
         leftMark = Document.get().createDivElement();
         leftMark.setClassName("menu-left-mark");
-        leftMark.getStyle().setDisplay(Style.Display.INLINE);
-        leftMark.getStyle().setPosition(Style.Position.RELATIVE);
-        leftMark.getStyle().setHeight(100, Style.Unit.PCT);
+        leftMark.getStyle().display =Style.Display.INLINE);
+        leftMark.getStyle().position = 'relative';
+        leftMark.getStyle().height =100 + '%');
         leftMark.setInnerHTML("&nbsp;&nbsp;&nbsp;&nbsp;");
         setImageUri(aImageUri);
         element.appendChild(leftMark);
 
         field = Document.get().createDivElement();
         field.setClassName("menu-field");
-        field.getStyle().setDisplay(Style.Display.INLINE);
+        field.getStyle().display =Style.Display.INLINE);
         field.getStyle().setWhiteSpace(Style.WhiteSpace.NOWRAP);
         if (asHtml) {
             setHTML(aText);

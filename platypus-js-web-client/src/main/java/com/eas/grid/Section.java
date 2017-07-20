@@ -113,7 +113,7 @@ public class Section {
 
     public void addColumn(Column aColumn, boolean needRedraw) {
         columns.add(aColumn);
-        colgroup.appendChild(aColumn.getElement());
+        colgroup.appendChild(aColumn.element);
         if (needRedraw) {
             redraw();
         }
@@ -128,7 +128,7 @@ public class Section {
             if (index < columns.size()) { // It is all about insertBefore
                 columns.add(index, aColumn);
                 Element col = (Element) colgroup.getChild(index);
-                colgroup.insertBefore(aColumn.getElement(), col);
+                colgroup.insertBefore(aColumn.element, col);
             } else {
                 addColumn(aColumn);
             }
@@ -145,7 +145,7 @@ public class Section {
     public Column removeColumn(int index, boolean needRedraw) {
         if (index >= 0 && index < columns.size()) {
             Column removed = columns.remove(index);
-            removed.getElement().removeFromParent();
+            removed.element.removeFromParent();
             removed.getColumnRule().removeFromParent();
             if (needRedraw) {
                 redraw();
@@ -220,11 +220,11 @@ public class Section {
             JavaScriptObject dataRow = data.get(i);
             TableRowElement viewRow = Document.get().createTRElement();
             if ((i + 1) % 2 == 0) {
-                viewRow.addClassName(dynamicEvenRowsClassName);
+                viewRow.classList.add(dynamicEvenRowsClassName);
             } else {
-                viewRow.addClassName(dynamicOddRowsClassName);
+                viewRow.classList.add(dynamicOddRowsClassName);
             }
-            viewRow.addClassName("selected-row");
+            viewRow.classList.add("selected-row");
             viewRow.setPropertyJSO(JS_ROW_NAME, dataRow);
             if (i < startRow) {
                 tbody.insertFirst(viewRow);
@@ -236,7 +236,7 @@ public class Section {
                 TableCellElement viewCell = Document.get().createTDElement();
                 // TODO: Check alignment of the cell
                 // TODO: Check image decoration of the cell and decoration styles
-                viewCell.addClassName(dynamicCellClassName);
+                viewCell.classList.add(dynamicCellClassName);
                 viewRow.appendChild(viewCell);
                 column.render(i, dataRow, viewCell);
             }
@@ -295,7 +295,7 @@ public class Section {
         layer.addAll(headerNodes);
         TableRowElement tr = Document.get().createTRElement();
         layer.forEach(hn -> {
-            tr.appendChild(hn.getHeader().getElement());
+            tr.appendChild(hn.getHeader().element);
             children.addAll(hn.getChildren());
         });
         thead.appendChild(tr);
@@ -335,8 +335,8 @@ public class Section {
                 JavaScriptObject dataRow = data.get(i);
                 TableRowElement viewRow = (TableRowElement) tbody.getRows().getItem(i - startRow);
                 TableCellElement viewCell = (TableCellElement) viewRow.getCells().getItem(aIndex);
-                while (viewCell.getFirstChildElement() != null) {
-                    viewCell.getFirstChildElement().removeFromParent();
+                while (viewCell.firstElementChild != null) {
+                    viewCell.firstElementChild.removeFromParent();
                 }
                 column.render(i, dataRow, viewCell);
             }
@@ -361,7 +361,7 @@ public class Section {
     public void clearColumnsAndHeader(boolean needRedraw) {
         for (int i = columns.size() - 1; i >= 0; i--) {
             Column removed = columns.remove(i);
-            removed.getElement().removeFromParent();
+            removed.element.removeFromParent();
             removed.getColumnRule().removeFromParent();
         }
         headerNodes = new ArrayList<>();

@@ -216,8 +216,8 @@ public class Form extends WindowPanel implements HasPublished {
     public void show(boolean aModal, final JavaScriptObject aCallback, Desktop aDesktop) {
         //popup = new WindowPopupPanel(this, autoHide, aModal);
         //popup.setWidget(view);
-        String sWidth = view.getElement().getStyle().getWidth();
-        String sHeight = view.getElement().getStyle().getHeight();
+        String sWidth = view.element.style.getWidth();
+        String sHeight = view.element.style.getHeight();
         double width = sWidth != null && sWidth.endsWith("px") ? Double.parseDouble(sWidth.substring(0, sWidth.length() - 2)) : 0;
         double height = sHeight != null && sHeight.endsWith("px") ? Double.parseDouble(sHeight.substring(0, sHeight.length() - 2)) : 0;
         //popup.setSize(sWidth, sHeight);
@@ -237,8 +237,8 @@ public class Form extends WindowPanel implements HasPublished {
                 if (location != null) {
                     setPosition(location.getX(), location.getY());
                 } else {
-                    int left = (aDesktop.getElement().getClientWidth() - (int) width) / 2;
-                    int top = (aDesktop.getElement().getClientHeight() - (int) height) / 2;
+                    int left = (aDesktop.element.getClientWidth() - (int) width) / 2;
+                    int top = (aDesktop.element.getClientHeight() - (int) height) / 2;
                     setPosition(left, top);
                 }
             } else {
@@ -276,7 +276,7 @@ public class Form extends WindowPanel implements HasPublished {
             @Override
             public void onActivate(ActivateEvent event) {
                 for (Form w : showingForms.values()) {
-                    if (w != event.getTarget() && !(w.getParent() instanceof Desktop)) {
+                    if (w != event.getTarget() && !(w.parent instanceof Desktop)) {
                         w.deactivate();
                     }
                 }
@@ -472,19 +472,19 @@ public class Form extends WindowPanel implements HasPublished {
     }
 
     public double getWidth() {
-        return view.getElement().getOffsetWidth();
+        return view.element.getOffsetWidth();
     }
 
     public void setWidth(double aValue) {
-        super.setWidth(aValue + "px");
+        super.width =aValue + "px");
     }
 
     public double getHeight() {
-        return view.getElement().getOffsetHeight();
+        return view.element.getOffsetHeight();
     }
 
     public void setHeight(double aValue) {
-        super.setHeight(aValue + "px");
+        super.height =aValue + "px");
     }
 
     @Override

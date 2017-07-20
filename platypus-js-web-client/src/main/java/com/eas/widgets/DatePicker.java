@@ -93,15 +93,15 @@ public class DatePicker extends ValueWidget {
                 monthDay.setClassName("month-day");
                 monthDay.setInnerText(dayOfMonth + "");
                 if (monthToShow == current.getMonth()) {
-                    monthDay.addClassName("in-month-day");
+                    monthDay.classList.add("in-month-day");
                 } else {
-                    monthDay.addClassName("non-month-day");
+                    monthDay.classList.add("non-month-day");
                 }
                 if (today.getYear() == current.getYear() && today.getMonth() == current.getMonth() && today.getDate() == current.getDate()) {
-                    monthDay.addClassName("today");
+                    monthDay.classList.add("today");
                 }
                 if (valueToShow.getYear() == current.getYear() && valueToShow.getMonth() == current.getMonth() && valueToShow.getDate() == current.getDate()) {
-                    monthDay.addClassName("picked-day");
+                    monthDay.classList.add("picked-day");
                 }
             }
         }

@@ -1,4 +1,10 @@
-define(['./container', './item-event'], function (Container, SelectionEvent) {
+define([
+    '../extend',
+    './container',
+    './item-event'], function (
+        extend,
+        Container,
+        SelectionEvent) {
     function Cards(vgap, hgap) {
         Container.call(this);
 
@@ -39,13 +45,14 @@ define(['./container', './item-event'], function (Container, SelectionEvent) {
             }
         });
 
+        var superChild = this.child;
         function child(indexOrCard) {
             if (isNaN(indexOrCard)) {
                 var card = indexOrCard;
                 return cards.get(card);
             } else {
                 var index = +indexOrCard;
-                return self.get(index);
+                return superChild(index);
             }
         }
         Object.defineProperty(this, 'child', {
@@ -54,7 +61,7 @@ define(['./container', './item-event'], function (Container, SelectionEvent) {
             }
         });
 
-        var superAdd = self.add;
+        var superAdd = this.add;
         function add(w, indexOrCard) {
             if (w) {
                 if (w.parent === self)
@@ -82,7 +89,7 @@ define(['./container', './item-event'], function (Container, SelectionEvent) {
             }
         });
 
-        var superClear = self.clear;
+        var superClear = this.clear;
         function clear() {
             cards.clear();
             superClear();
@@ -93,7 +100,7 @@ define(['./container', './item-event'], function (Container, SelectionEvent) {
             }
         });
 
-        var superRemove = self.remove;
+        var superRemove = this.remove;
         function remove(widgetOrIndex) {
             if (isNaN(widgetOrIndex)) {
                 var w = widgetOrIndex;
@@ -131,21 +138,25 @@ define(['./container', './item-event'], function (Container, SelectionEvent) {
 
             if (visibleWidget !== oldWidget) {
                 visibleWidget.visible = true;
-                visibleWidget.element.addClassName("card-shown");
-                visibleWidget.element.removeClassName("card-hidden");
+                visibleWidget.element.classList.add("card-shown");
+                visibleWidget.element.classList.remove("card-hidden");
 
                 if (oldWidget) {
-                    oldWidget.element.addClassName("card-hidden");
-                    oldWidget.element.removeClassName("card-shown");
+                    oldWidget.element.classList.add("card-hidden");
+                    oldWidget.element.classList.remove("card-shown");
                     oldWidget.visible = false;
                 }
                 if (oldWidget !== visibleWidget) {
-                    var event = new SelectionEvent(self, visibleWidget);
-                    selectionHandlers.forEach(function (h) {
-                        h(event);
-                    });
+                    fireSelected();
                 }
             }
+        }
+
+        function fireSelected() {
+            var event = new SelectionEvent(self, visibleWidget);
+            selectionHandlers.forEach(function (h) {
+                h(event);
+            });
         }
 
         function show(aCardName) {
@@ -242,5 +253,6 @@ define(['./container', './item-event'], function (Container, SelectionEvent) {
             }
         });
     }
+    extend(Cards, Container);
     return Cards;
 });

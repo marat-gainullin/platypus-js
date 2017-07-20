@@ -34,7 +34,7 @@ public class DropDownButton extends ImageButton {
         menu = aMenu;
         CommonResources.INSTANCE.commons().ensureInjected();
         chevron.setClassName("dropdown");
-        menu.getElement().setClassName("dropdown-menu " + CommonResources.INSTANCE.commons().unselectable());
+        menu.element.setClassName("dropdown-menu " + CommonResources.INSTANCE.commons().unselectable());
         splitter.setClassName("dropdown-split " + CommonResources.INSTANCE.commons().unselectable());
         chevron.appendChild(splitter);
         element.insertFirst(chevron);
@@ -75,7 +75,7 @@ public class DropDownButton extends ImageButton {
                 // menu.hide();
             }
             menu = aMenu;
-            splitter.getStyle().setDisplay(menu != null ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
+            splitter.getStyle().display =menu != null ? 'inline-block' : 'none');
         }
     }
 

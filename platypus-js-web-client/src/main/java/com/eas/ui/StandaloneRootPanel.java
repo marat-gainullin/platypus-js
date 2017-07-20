@@ -20,9 +20,9 @@ public class StandaloneRootPanel extends SimplePanel implements RequiresResize {
 	@Override
 	public void setWidget(Widget w) {
 		super.setWidget(w);
-		w.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
-		w.getElement().getStyle().setWidth(100, Style.Unit.PCT);
-		w.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		w.element.style.position = 'absolute';
+		w.element.style.width =100 + '%');
+		w.element.style.height =100 + '%');
 	}
 
 	@Override

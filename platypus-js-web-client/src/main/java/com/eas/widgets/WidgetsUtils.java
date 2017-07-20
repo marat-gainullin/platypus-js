@@ -258,7 +258,7 @@ public class WidgetsUtils {
     }
 
     public static void applyBackground(Widget aWidget, final String aColorString) {
-        Element aElement = aWidget.getElement();
+        Element aElement = aWidget.element;
         if (aElement != null) {
             if (aColorString != null && !aColorString.isEmpty()) {
                 aElement.getStyle().setBackgroundColor(aColorString);
@@ -271,7 +271,7 @@ public class WidgetsUtils {
     }
 
     public static void applyForeground(Widget aWidget, final PublishedColor aColor) {
-        Element aElement = aWidget.getElement();
+        Element aElement = aWidget.element;
         if (aColor != null) {
             aElement.getStyle().setColor(aColor.toStyled());
         } else {
@@ -280,7 +280,7 @@ public class WidgetsUtils {
     }
 
     public static void applyFont(Widget aWidget, final PublishedFont aFont) {
-        Element aElement = aWidget.getElement();
+        Element aElement = aWidget.element;
         aElement.getStyle().setProperty("fontFamily", aFont != null ? aFont.getFamily() : "");
         if (aFont != null) {
             aElement.getStyle().setFontSize(aFont.getSize(), Style.Unit.PT);
@@ -302,7 +302,7 @@ public class WidgetsUtils {
     }
 
     public static void applyCursor(Widget aWidget, final String aCursor) {
-        aWidget.getElement().getStyle().setProperty("cursor", aCursor != null ? aCursor : "");
+        aWidget.element.style.setProperty("cursor", aCursor != null ? aCursor : "");
     }
 
     public static void reapplyStyle(HasPublished aComponent) {
@@ -331,13 +331,13 @@ public class WidgetsUtils {
                 HasCustomParent bar = (HasCustomParent) parent;
                 parent = bar.getCustomParent();
             } else if (parent instanceof Widget) {
-                parent = ((Widget) parent).getParent();
+                parent = ((Widget) parent).parent;
             } else if (parent instanceof MenuItemSeparator) {
                 MenuItemSeparator sep = (MenuItemSeparator) parent;
-                parent = sep.getParent();
+                parent = sep.parent;
             } else if (parent instanceof MenuItem) {
                 MenuItem sep = (MenuItem) parent;
-                parent = sep.getParent();
+                parent = sep.parent;
             } else {
                 parent = null;
             }

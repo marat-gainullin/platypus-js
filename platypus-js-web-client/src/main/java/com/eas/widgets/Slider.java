@@ -243,31 +243,31 @@ public class Slider extends ValueWidget {
         setLabelFormatter(aLabelFormatter);
 
         // Create the outer shell
-        element.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        element.getStyle().setPosition(Style.Position.RELATIVE);
+        element.getStyle().display ='inline-block');
+        element.getStyle().position = 'relative';
         // default preferred size
-        element.getStyle().setWidth(150, Style.Unit.PX);
-        element.getStyle().setHeight(35, Style.Unit.PX);
+        element.getStyle().width =150+ 'px');
+        element.getStyle().height =35+ 'px');
         element.setClassName("slider-shell");
 
         // Create the line
         lineElement = DOM.createDiv();
         element.appendChild(lineElement);
-        lineElement.getStyle().setPosition(Style.Position.ABSOLUTE);
+        lineElement.getStyle().position = 'absolute';
         lineElement.setClassName("slider-line");
         coverElement = DOM.createDiv();
         lineElement.appendChild(coverElement);
-        coverElement.getStyle().setPosition(Style.Position.ABSOLUTE);
-        coverElement.getStyle().setLeft(0, Style.Unit.PX);
-        coverElement.getStyle().setTop(0, Style.Unit.PX);
-        coverElement.getStyle().setBottom(0, Style.Unit.PX);
+        coverElement.getStyle().position = 'absolute';
+        coverElement.getStyle().setLeft(0+ 'px');
+        coverElement.getStyle().top =0+ 'px');
+        coverElement.getStyle().bottom =0+ 'px');
         coverElement.setClassName("slider-line-before-knob");
 
         // Create the knob
-        knobElement.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        knobElement.getStyle().setPosition(Style.Position.ABSOLUTE);
+        knobElement.getStyle().display ='inline-block');
+        knobElement.getStyle().position = 'absolute';
         knobElement.setClassName("slider-knob slider-knob-default");
-        knobElement.addClassName("slider-knob-enabled");
+        knobElement.classList.add("slider-knob-enabled");
         element.appendChild(knobElement);
 
         element.<XElement>cast().addEventListener(BrowserEvents.BLUR, new XElement.NativeHandler() {
@@ -468,10 +468,10 @@ public class Slider extends ValueWidget {
         int lineWidth = lineElement.getOffsetWidth();
         //int lineHeight = lineElement.getOffsetHeight();
         lineLeftOffset = (width / 2) - (lineWidth / 2);
-        //lineElement.getStyle().setLeft(lineLeftOffset, Style.Unit.PX);
-        //lineElement.getStyle().setTop((height - lineHeight) / 2, Style.Unit.PX);
+        //lineElement.getStyle().setLeft(lineLeftOffset+ 'px');
+        //lineElement.getStyle().top =(height - lineHeight) / 2+ 'px');
         //int knobHeight = knobElement.getOffsetHeight();
-        //knobElement.getStyle().setTop((height - knobHeight) / 2, Style.Unit.PX);
+        //knobElement.getStyle().top =(height - knobHeight) / 2+ 'px');
         // Draw the other components
         drawLabels();
         drawTicks();
@@ -516,15 +516,15 @@ public class Slider extends ValueWidget {
             super.setEnabled(aValue);
             enabled = aValue;
             if (aValue) {
-                knobElement.removeClassName("slider-knob-disabled");
-                lineElement.removeClassName("slider-line-disabled");
-                knobElement.addClassName("slider-knob-enabled");
-                lineElement.addClassName("slider-line-enabled");
+                knobElement.classList.remove("slider-knob-disabled");
+                lineElement.classList.remove("slider-line-disabled");
+                knobElement.classList.add("slider-knob-enabled");
+                lineElement.classList.add("slider-line-enabled");
             } else {
-                knobElement.removeClassName("slider-knob-enabled");
-                lineElement.removeClassName("slider-line-enabled");
-                knobElement.addClassName("slider-knob-disabled");
-                lineElement.addClassName("slider-line-disabled");
+                knobElement.classList.remove("slider-knob-enabled");
+                lineElement.classList.remove("slider-line-enabled");
+                knobElement.classList.add("slider-knob-disabled");
+                lineElement.classList.add("slider-line-disabled");
             }
             redraw();
         }
@@ -680,8 +680,8 @@ public class Slider extends ValueWidget {
             int knobWidth = knobElement.getOffsetWidth();
             int knobLeftOffset = (int) (lineLeftOffset + getKnobPercent() * lineWidth - knobWidth / 2);
             knobLeftOffset = Math.min(knobLeftOffset, lineLeftOffset + lineWidth - knobWidth / 2 - 1);
-            knobElement.getStyle().setLeft(knobLeftOffset, Style.Unit.PX);
-            coverElement.getStyle().setWidth(getKnobPercent() * lineWidth, Style.Unit.PX);
+            knobElement.getStyle().setLeft(knobLeftOffset+ 'px');
+            coverElement.getStyle().width =getKnobPercent() * lineWidth+ 'px');
         }
     }
 
@@ -700,18 +700,18 @@ public class Slider extends ValueWidget {
                         label = labelElements.get(i);
                     } else { // Create the new label
                         label = DOM.createDiv();
-                        label.addClassName("slider-label");
-                        label.getStyle().setPosition(Style.Position.ABSOLUTE);
-                        label.getStyle().setDisplay(Style.Display.NONE);
+                        label.classList.add("slider-label");
+                        label.getStyle().position = 'absolute';
+                        label.getStyle().display ='none');
                         getElement().appendChild(label);
                         labelElements.add(label);
                     }
                     if (enabled) {
-                        label.removeClassName("slider-label-disabled");
-                        label.addClassName("slider-label-enabled");
+                        label.classList.remove("slider-label-disabled");
+                        label.classList.add("slider-label-enabled");
                     } else {
-                        label.removeClassName("slider-label-enabled");
-                        label.addClassName("slider-label-disabled");
+                        label.classList.remove("slider-label-enabled");
+                        label.classList.add("slider-label-disabled");
                     }
 
                     // Set the label text
@@ -721,7 +721,7 @@ public class Slider extends ValueWidget {
                     label.setInnerHTML(formatLabel(value4Formatting));
 
                     // Move to the left so the label width is not clipped by the shell
-                    label.getStyle().setLeft(0, Style.Unit.PX);
+                    label.getStyle().setLeft(0+ 'px');
 
                     // Position the label and make it visible
                     int labelWidth = label.getOffsetWidth();
@@ -730,16 +730,16 @@ public class Slider extends ValueWidget {
                     labelLeftOffset = Math.min(labelLeftOffset, lineLeftOffset + lineWidth
                             - labelWidth);
                     labelLeftOffset = Math.max(labelLeftOffset, lineLeftOffset);
-                    label.getStyle().setLeft(labelLeftOffset, Style.Unit.PX);
+                    label.getStyle().setLeft(labelLeftOffset+ 'px');
                     label.getStyle().setVisibility(Style.Visibility.VISIBLE);
                 }
                 // Hide unused labels
                 for (int i = (numLabels + 1); i < labelElements.size(); i++) {
-                    labelElements.get(i).getStyle().setDisplay(Style.Display.NONE);
+                    labelElements.get(i).getStyle().display ='none');
                 }
             } else { // Hide all labels
                 for (Element elem : labelElements) {
-                    elem.getStyle().setDisplay(Style.Display.NONE);
+                    elem.getStyle().display ='none');
                 }
             }
         }
@@ -761,9 +761,9 @@ public class Slider extends ValueWidget {
                         tick = tickElements.get(i);
                     } else { // Create the new tick
                         tick = DOM.createDiv();
-                        tick.addClassName("slider-tick");
-                        tick.getStyle().setPosition(Style.Position.ABSOLUTE);
-                        tick.getStyle().setDisplay(Style.Display.NONE);
+                        tick.classList.add("slider-tick");
+                        tick.getStyle().position = 'absolute';
+                        tick.getStyle().display ='none');
                         DOM.appendChild(getElement(), tick);
                         tickElements.add(tick);
                     }
@@ -775,24 +775,24 @@ public class Slider extends ValueWidget {
                             - (tickWidth / 2);
                     tickLeftOffset = Math.min(tickLeftOffset, lineLeftOffset + lineWidth
                             - tickWidth);
-                    tick.getStyle().setLeft(tickLeftOffset, Style.Unit.PX);
+                    tick.getStyle().setLeft(tickLeftOffset+ 'px');
                     tick.getStyle().setVisibility(Style.Visibility.VISIBLE);
                     if (enabled) {
-                        tick.removeClassName("slider-tick-disabled");
-                        tick.addClassName("slider-tick-enabled");
+                        tick.classList.remove("slider-tick-disabled");
+                        tick.classList.add("slider-tick-enabled");
                     } else {
-                        tick.removeClassName("slider-tick-enabled");
-                        tick.addClassName("slider-tick-disabled");
+                        tick.classList.remove("slider-tick-enabled");
+                        tick.classList.add("slider-tick-disabled");
                     }
                 }
 
                 // Hide unused ticks
                 for (int i = (numTicks + 1); i < tickElements.size(); i++) {
-                    tickElements.get(i).getStyle().setDisplay(Style.Display.NONE);
+                    tickElements.get(i).getStyle().display ='none');
                 }
             } else { // Hide all ticks
                 for (Element elem : tickElements) {
-                    elem.getStyle().setDisplay(Style.Display.NONE);
+                    elem.getStyle().display ='none');
                 }
             }
         }
@@ -802,7 +802,7 @@ public class Slider extends ValueWidget {
      * Highlight this widget.
      */
     private void highlightFocus() {
-        element.addClassName("slider-shell-focused");
+        element.classList.add("slider-shell-focused");
     }
 
     /**
@@ -836,8 +836,8 @@ public class Slider extends ValueWidget {
      */
     private void startSliding(boolean highlight) {
         if (highlight) {
-            lineElement.addClassName("slider-line-sliding");
-            knobElement.addClassName("slider-knob-sliding");
+            lineElement.classList.add("slider-line-sliding");
+            knobElement.classList.add("slider-knob-sliding");
         }
     }
 
@@ -849,8 +849,8 @@ public class Slider extends ValueWidget {
      */
     private void stopSliding(boolean unhighlight) {
         if (unhighlight) {
-            lineElement.removeClassName("slider-line-sliding");
-            knobElement.removeClassName("slider-knob-sliding");
+            lineElement.classList.remove("slider-line-sliding");
+            knobElement.classList.remove("slider-knob-sliding");
         }
     }
 
@@ -858,7 +858,7 @@ public class Slider extends ValueWidget {
      * Unhighlight this widget.
      */
     private void unhighlightFocus() {
-        getElement().removeClassName("slider-shell-focused");
+        getElement().classList.remove("slider-shell-focused");
     }
 
     @Override

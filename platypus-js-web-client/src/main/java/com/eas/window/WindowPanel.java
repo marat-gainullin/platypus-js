@@ -64,8 +64,8 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
     public WindowPanel() {
         super();
         super.setVisible(false); // This is for open event when visible becomes true
-        element.addClassName("window-panel");
-        mdHandler = caption.getElement().<XElement>cast().addEventListener(BrowserEvents.MOUSEDOWN, new XElement.NativeHandler() {
+        element.classList.add("window-panel");
+        mdHandler = caption.element.<XElement>cast().addEventListener(BrowserEvents.MOUSEDOWN, new XElement.NativeHandler() {
 
             @Override
             public void on(NativeEvent event) {
@@ -73,7 +73,7 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
                 event.stopPropagation();
                 focus();
                 if (movable && !maximized) {
-                    DOM.setCapture(caption.getElement());
+                    DOM.setCapture(caption.element);
                     mouseScreenX = event.getScreenX();
                     mouseScreenY = event.getScreenY();
                     String tLeft = element.getStyle().getLeft();
@@ -84,7 +84,7 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
             }
 
         });
-        muHandler = caption.getElement().<XElement>cast().addEventListener(BrowserEvents.MOUSEUP, new XElement.NativeHandler() {
+        muHandler = caption.element.<XElement>cast().addEventListener(BrowserEvents.MOUSEUP, new XElement.NativeHandler() {
 
             @Override
             public void on(NativeEvent event) {
@@ -92,18 +92,18 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
                 event.preventDefault();
                 event.stopPropagation();
                 if (movable && !maximized) {
-                    DOM.releaseCapture(caption.getElement());
+                    DOM.releaseCapture(caption.element);
                     endMoving();
                 }
             }
 
         });
-        mmHandler = caption.getElement().<XElement>cast().addEventListener(BrowserEvents.MOUSEMOVE, new XElement.NativeHandler() {
+        mmHandler = caption.element.<XElement>cast().addEventListener(BrowserEvents.MOUSEMOVE, new XElement.NativeHandler() {
 
             @Override
             public void on(NativeEvent event) {
                 if (movable && !maximized) {
-                    if (DOM.getCaptureElement() == caption.getElement()) {
+                    if (DOM.getCaptureElement() == caption.element) {
                         event.preventDefault();
                         event.stopPropagation();
                         int dx = event.getScreenX() - mouseScreenX;
@@ -141,22 +141,22 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
     @Override
     protected void decorate() {
         super.decorate();
-        content.getElement().setClassName("content-decor");
+        content.element.setClassName("content-decor");
         if (isActive()) {
-            content.getElement().addClassName("content-decor-active");
+            content.element.classList.add("content-decor-active");
         } else {
-            content.getElement().removeClassName("content-decor-active");
+            content.element.classList.remove("content-decor-active");
         }
-        caption.getElement().getStyle().clearDisplay();
+        caption.element.style.clearDisplay();
     }
 
     @Override
     protected void undecorate() {
         super.undecorate();
-        content.getElement().removeClassName("content-decor");
-        content.getElement().removeClassName("content-decor-active");
+        content.element.classList.remove("content-decor");
+        content.element.classList.remove("content-decor-active");
         if (caption != null) {
-            caption.getElement().getStyle().setDisplay(Style.Display.NONE);
+            caption.element.style.display ='none');
         }
     }
 
@@ -197,12 +197,12 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
     @Override
     public void setContent(Widget w) {
         if (content != null) {
-            content.getElement().removeClassName("window-content");
+            content.element.classList.remove("window-content");
             super.remove(content);
         }
         content = w;
         if (content != null) {
-            content.getElement().addClassName("window-content");
+            content.element.classList.add("window-content");
             super.add(w);
         }
     }
@@ -271,12 +271,12 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
             updateDecorCursors();
             snapshotMetrics();
             // editing
-            Style contentStyle = content.getElement().getStyle(); // content
-            int leftInset = content.getElement().getAbsoluteLeft() - element.getAbsoluteLeft();
-            int rightInset = element.getAbsoluteRight() - getContent().getElement().getAbsoluteRight();
+            Style contentStyle = content.element.style; // content
+            int leftInset = content.element.getAbsoluteLeft() - element.getAbsoluteLeft();
+            int rightInset = element.getAbsoluteRight() - getContent().element.getAbsoluteRight();
             int hInsets = leftInset + rightInset;
-            int topInset = getContent().getElement().getAbsoluteTop() - element.getAbsoluteTop();
-            int bottomInset = element.getAbsoluteBottom() - getContent().getElement().getAbsoluteBottom();
+            int topInset = getContent().element.getAbsoluteTop() - element.getAbsoluteTop();
+            int bottomInset = element.getAbsoluteBottom() - getContent().element.getAbsoluteBottom();
             int vInsets = topInset + bottomInset;
             Element parentElement = element.getParentElement();
             int parentScrollWidth = parentElement.getScrollWidth();
@@ -287,12 +287,12 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
             } else {
                 parentScrollHeight = parentElement.getScrollHeight();
             }
-            contentStyle.setWidth(parentScrollWidth - hInsets, Style.Unit.PX);
-            contentStyle.setHeight(parentScrollHeight - vInsets, Style.Unit.PX);
+            contentStyle.width =parentScrollWidth - hInsets+ 'px');
+            contentStyle.height =parentScrollHeight - vInsets+ 'px');
             // editing
             Style wndStyle = element.getStyle(); // window
-            wndStyle.setLeft(0, Style.Unit.PX);
-            wndStyle.setTop(0, Style.Unit.PX);
+            wndStyle.setLeft(0+ 'px');
+            wndStyle.top =0+ 'px');
             fireMaximizeEvent();
         }
     }
@@ -310,7 +310,7 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
 
     private void snapshotMetrics() throws NumberFormatException {
         // measurement
-        Style contentStyle = getContent().getElement().getStyle(); // content
+        Style contentStyle = getContent().element.style; // content
         String sHeight = contentStyle.getHeight();
         contentHeightToRestore = Double.parseDouble(sHeight.substring(0, sHeight.length() - 2));
         String sWidth = contentStyle.getWidth();
@@ -341,8 +341,8 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
             // measure
             snapshotMetrics();
             // edit
-            Style targetStyle = getContent().getElement().getStyle(); // content
-            targetStyle.setHeight(0, Style.Unit.PX);
+            Style targetStyle = getContent().element.style; // content
+            targetStyle.height =0+ 'px');
             fireMinimizeEvent();
         }
     }
@@ -357,19 +357,19 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
             minimized = false;
             maximized = false;
             if (leftToRestore != null) {
-                element.getStyle().setLeft(leftToRestore, Style.Unit.PX);
+                element.getStyle().setLeft(leftToRestore+ 'px');
             }
             leftToRestore = null;
             if (topToRestore != null) {
-                element.getStyle().setTop(topToRestore, Style.Unit.PX);
+                element.getStyle().top =topToRestore+ 'px');
             }
             topToRestore = null;
             if (contentWidthToRestore != null) {
-                content.getElement().getStyle().setWidth(contentWidthToRestore, Style.Unit.PX);
+                content.element.style.width =contentWidthToRestore+ 'px');
             }
             contentWidthToRestore = null;
             if (contentHeightToRestore != null) {
-                content.getElement().getStyle().setHeight(contentHeightToRestore, Style.Unit.PX);
+                content.element.style.height =contentHeightToRestore+ 'px');
             }
             contentHeightToRestore = null;
             fireRestoreEvent();
@@ -395,13 +395,13 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
         if (!active) {
             active = true;
             if (caption != null) {
-                caption.getElement().addClassName(Caption.CAPTION_CLASS_NAME + "-" + ACTIVE_SUFFIX_NAME);
+                caption.element.classList.add(Caption.CAPTION_CLASS_NAME + "-" + ACTIVE_SUFFIX_NAME);
             }
             Draggable[] draggables = new Draggable[]{n, s, w, e, ne, nw, se, sw};
             for (Draggable d : draggables) {
                 d.activate();
             }
-            content.getElement().addClassName("content-decor" + "-" + ACTIVE_SUFFIX_NAME);
+            content.element.classList.add("content-decor" + "-" + ACTIVE_SUFFIX_NAME);
             fireActivateEvent();
         }
     }
@@ -410,13 +410,13 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
         if (active) {
             active = false;
             if (caption != null) {
-                caption.getElement().removeClassName(Caption.CAPTION_CLASS_NAME + "-" + ACTIVE_SUFFIX_NAME);
+                caption.element.classList.remove(Caption.CAPTION_CLASS_NAME + "-" + ACTIVE_SUFFIX_NAME);
             }
             Draggable[] draggables = new Draggable[]{n, s, w, e, ne, nw, se, sw};
             for (Draggable d : draggables) {
                 d.deactivate();
             }
-            content.getElement().removeClassName("content-decor" + "-" + ACTIVE_SUFFIX_NAME);
+            content.element.classList.remove("content-decor" + "-" + ACTIVE_SUFFIX_NAME);
             fireDeactivateEvent();
         }
     }
@@ -481,9 +481,9 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
         if (animationEnabled != aValue) {
             animationEnabled = aValue;
             if (animationEnabled) {
-                content.getElement().getStyle().clearProperty("transition");
+                content.element.style.clearProperty("transition");
             } else {
-                content.getElement().getStyle().setProperty("transition", "none");
+                content.element.style.setProperty("transition", "none");
             }
         }
     }
@@ -491,28 +491,28 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
     @Override
     protected void beginResizing() {
         super.beginResizing();
-        content.getElement().getStyle().setProperty("transition", "none");
+        content.element.style.setProperty("transition", "none");
         element.getStyle().setProperty("transition", "none");
-        content.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
+        content.element.style.setVisibility(Style.Visibility.HIDDEN);
     }
 
     @Override
     protected void endResizing() {
         super.endResizing();
-        content.getElement().getStyle().clearVisibility();
+        content.element.style.clearVisibility();
         if (animationEnabled) {
-            content.getElement().getStyle().clearProperty("transition");
+            content.element.style.clearProperty("transition");
             element.getStyle().clearProperty("transition");
         }
     }
 
     protected void beginMoving() {
         element.getStyle().setProperty("transition", "none");
-        content.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
+        content.element.style.setVisibility(Style.Visibility.HIDDEN);
     }
 
     protected void endMoving() {
-        content.getElement().getStyle().clearVisibility();
+        content.element.style.clearVisibility();
         if (animationEnabled) {
             element.getStyle().clearProperty("transition");
         }
@@ -521,9 +521,9 @@ public class WindowPanel extends Resizable implements HasOpenHandlers, HasClosed
     protected void updateCaptionCursor() {
         if (caption != null) {
             if (movable) {
-                caption.getElement().getStyle().clearCursor();
+                caption.element.style.clearCursor();
             } else {
-                caption.getElement().getStyle().setCursor(Style.Cursor.DEFAULT);
+                caption.element.style.setCursor(Style.Cursor.DEFAULT);
             }
         }
     }

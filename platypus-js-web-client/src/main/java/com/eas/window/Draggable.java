@@ -20,7 +20,7 @@ public abstract class Draggable {
     public Draggable(String... aClasses) {
         super();
         for (String className : aClasses) {
-            element.addClassName(className);
+            element.classList.add(className);
         }
         element.<XElement>cast().addEventListener(BrowserEvents.MOUSEDOWN, new XElement.NativeHandler() {
             @Override

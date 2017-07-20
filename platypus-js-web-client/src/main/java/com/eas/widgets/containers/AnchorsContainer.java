@@ -34,7 +34,7 @@ public abstract class AnchorsContainer extends Container implements HasChildrenP
         MarginConstraints.Margin width = aConstraints.getWidth();
         MarginConstraints.Margin height = aConstraints.getHeight();
 
-        Style ws = w.getElement().getStyle();
+        Style ws = w.element.style;
         
         // horizontal
         if (left != null && width != null) {
@@ -42,15 +42,15 @@ public abstract class AnchorsContainer extends Container implements HasChildrenP
         }
         if (left != null && right != null) {
             ws.setLeft(left.value, left.unit);
-            ws.setRight(right.value, right.unit);
+            ws.right =right.value, right.unit);
         } else if (left == null && right != null) {
             assert width != null : "left may be absent in presence of width and right";
-            ws.setRight(right.value, right.unit);
-            ws.setWidth(width.value, width.unit);
+            ws.right =right.value, right.unit);
+            ws.width =width.value, width.unit);
         } else if (right == null && left != null) {
             assert width != null : "right may be absent in presence of width and left";
             ws.setLeft(left.value, left.unit);
-            ws.setWidth(width.value, width.unit);
+            ws.width =width.value, width.unit);
         } else {
             assert false : "At least left with width, right with width or both (without width) must present";
         }
@@ -59,20 +59,20 @@ public abstract class AnchorsContainer extends Container implements HasChildrenP
             bottom = null;
         }
         if (top != null && bottom != null) {
-            ws.setTop(top.value, top.unit);
-            ws.setBottom(bottom.value, bottom.unit);
+            ws.top =top.value, top.unit);
+            ws.bottom =bottom.value, bottom.unit);
         } else if (top == null && bottom != null) {
             assert height != null : "top may be absent in presence of height and bottom";
-            ws.setBottom(bottom.value, bottom.unit);
-            ws.setHeight(height.value, height.unit);
+            ws.bottom =bottom.value, bottom.unit);
+            ws.height =height.value, height.unit);
         } else if (bottom == null && top != null) {
             assert height != null : "bottom may be absent in presence of height and top";
-            ws.setTop(top.value, top.unit);
-            ws.setHeight(height.value, height.unit);
+            ws.top =top.value, top.unit);
+            ws.height =height.value, height.unit);
         } else {
             assert false : "At least top with height, bottom with height or both (without height) must present";
         }
-        ws.setMargin(0, Style.Unit.PX);
+        ws.setMargin(0+ 'px');
     }
 
     public void add(Widget w, PublishedMarginConstraints aConstraints) {
@@ -88,27 +88,27 @@ public abstract class AnchorsContainer extends Container implements HasChildrenP
         }
         String right = aConstraints.getRight();
         if (right != null && !right.isEmpty()) {
-            anchors.setRight(MarginConstraints.Margin.parse(right));
+            anchors.right =MarginConstraints.Margin.parse(right));
             h++;
         }
         String width = aConstraints.getWidth();
         if (width != null && !width.isEmpty()) {
-            anchors.setWidth(MarginConstraints.Margin.parse(width));
+            anchors.width =MarginConstraints.Margin.parse(width));
             h++;
         }
         String top = aConstraints.getTop();
         if (top != null && !top.isEmpty()) {
-            anchors.setTop(MarginConstraints.Margin.parse(top));
+            anchors.top =MarginConstraints.Margin.parse(top));
             v++;
         }
         String bottom = aConstraints.getBottom();
         if (bottom != null && !bottom.isEmpty()) {
-            anchors.setBottom(MarginConstraints.Margin.parse(bottom));
+            anchors.bottom =MarginConstraints.Margin.parse(bottom));
             v++;
         }
         String height = aConstraints.getHeight();
         if (height != null && !height.isEmpty()) {
-            anchors.setHeight(MarginConstraints.Margin.parse(height));
+            anchors.height =MarginConstraints.Margin.parse(height));
             v++;
         }
         if (h < 2) {
@@ -129,15 +129,15 @@ public abstract class AnchorsContainer extends Container implements HasChildrenP
         }
         String width = aConstraints != null && aConstraints.getWidth() != null ? aConstraints.getWidth() : "10";
         if (width != null && !width.isEmpty()) {
-            anchors.setWidth(MarginConstraints.Margin.parse(width));
+            anchors.width =MarginConstraints.Margin.parse(width));
         }
         String top = aConstraints != null && aConstraints.getTop() != null ? aConstraints.getTop() : "0";
         if (top != null && !top.isEmpty()) {
-            anchors.setTop(MarginConstraints.Margin.parse(top));
+            anchors.top =MarginConstraints.Margin.parse(top));
         }
         String height = aConstraints != null && aConstraints.getHeight() != null ? aConstraints.getHeight() : "10";
         if (height != null && !height.isEmpty()) {
-            anchors.setHeight(MarginConstraints.Margin.parse(height));
+            anchors.height =MarginConstraints.Margin.parse(height));
         }
         add(w);
         applyConstraints(w, anchors);
@@ -177,7 +177,7 @@ public abstract class AnchorsContainer extends Container implements HasChildrenP
         if (anchors.getWidth() != null) {
             anchors.getWidth().setPlainValue(aValue, containerWidth);
         } else if (anchors.getLeft() != null && anchors.getRight() != null) {
-            anchors.getRight().setPlainValue(containerWidth - w.getElement().getOffsetLeft() - aValue, containerWidth);
+            anchors.getRight().setPlainValue(containerWidth - w.element.getOffsetLeft() - aValue, containerWidth);
         }
         applyConstraints(w, anchors);
     }
@@ -188,7 +188,7 @@ public abstract class AnchorsContainer extends Container implements HasChildrenP
         if (anchors.getHeight() != null) {
             anchors.getHeight().setPlainValue(aValue, containerHeight);
         } else if (anchors.getTop() != null && anchors.getBottom() != null) {
-            anchors.getBottom().setPlainValue(containerHeight - w.getElement().getOffsetTop() - aValue, containerHeight);
+            anchors.getBottom().setPlainValue(containerHeight - w.element.getOffsetTop() - aValue, containerHeight);
         }
         applyConstraints(w, anchors);
     }
@@ -196,7 +196,7 @@ public abstract class AnchorsContainer extends Container implements HasChildrenP
     public void ajustLeft(Widget w, int aValue) {
         MarginConstraints anchors = constraints.get(w);
         int containerWidth = element.getOffsetWidth();
-        int childWidth = w.getElement().getOffsetWidth();
+        int childWidth = w.element.getOffsetWidth();
         if (anchors.getLeft() != null && anchors.getWidth() != null) {
             anchors.getLeft().setPlainValue(aValue, containerWidth);
         } else if (anchors.getWidth() != null && anchors.getRight() != null) {
@@ -210,8 +210,8 @@ public abstract class AnchorsContainer extends Container implements HasChildrenP
 
     public void ajustTop(Widget layouted, int aValue) {
         MarginConstraints anchors = constraints.get(layouted);
-        int containerHeight = layouted.getParent().getElement().getOffsetHeight();
-        int childHeight = layouted.getElement().getOffsetHeight();
+        int containerHeight = layouted.parent.element.getOffsetHeight();
+        int childHeight = layouted.element.getOffsetHeight();
         if (anchors.getTop() != null && anchors.getHeight() != null) {
             anchors.getTop().setPlainValue(aValue, containerHeight);
         } else if (anchors.getHeight() != null && anchors.getBottom() != null) {
@@ -226,7 +226,7 @@ public abstract class AnchorsContainer extends Container implements HasChildrenP
     @Override
     public void toFront(Widget aWidget) {
         if (aWidget != null) {
-            getElement().insertBefore(aWidget.getElement(), getElement().getLastChild()); // exclude last element
+            getElement().insertBefore(aWidget.element, getElement().getLastChild()); // exclude last element
         }
     }
 
@@ -234,7 +234,7 @@ public abstract class AnchorsContainer extends Container implements HasChildrenP
     public void toFront(Widget w, int aCount) {
         if (w != null && aCount > 0) {
             XElement container = getElement().cast();
-            Element widgetElement = w.getElement();
+            Element widgetElement = w.element;
             int index = container.getChildIndex(widgetElement);
             if (index < 0 || (index + aCount) >= container.getChildCount() - 1) {// exclude last element
                 getElement().insertBefore(widgetElement, container.getLastChild());
@@ -247,7 +247,7 @@ public abstract class AnchorsContainer extends Container implements HasChildrenP
     @Override
     public void toBack(Widget w) {
         if (w != null) {
-            getElement().insertFirst(w.getElement());
+            getElement().insertFirst(w.element);
         }
     }
 
@@ -255,7 +255,7 @@ public abstract class AnchorsContainer extends Container implements HasChildrenP
     public void toBack(Widget aWidget, int aCount) {
         if (aWidget != null && aCount > 0) {
             XElement container = getElement().cast();
-            Element widgetElement = aWidget.getElement();
+            Element widgetElement = aWidget.element;
             int index = container.getChildIndex(widgetElement);
             if (index < 0 || (index - aCount) < 0) {
                 getElement().insertFirst(widgetElement);
@@ -267,14 +267,14 @@ public abstract class AnchorsContainer extends Container implements HasChildrenP
 
     @Override
     public int getTop(Widget aWidget) {
-        assert aWidget.getParent() == this : "widget should be a child of this container";
-        return aWidget.getElement().getOffsetTop();
+        assert aWidget.parent == this : "widget should be a child of this container";
+        return aWidget.element.getOffsetTop();
     }
 
     @Override
     public int getLeft(Widget aWidget) {
-        assert aWidget.getParent() == this : "widget should be a child of this container";
-        return aWidget.getElement().getOffsetLeft();
+        assert aWidget.parent == this : "widget should be a child of this container";
+        return aWidget.element.getOffsetLeft();
     }
 
 }

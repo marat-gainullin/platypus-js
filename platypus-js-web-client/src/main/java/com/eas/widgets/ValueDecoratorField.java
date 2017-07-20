@@ -72,12 +72,12 @@ public abstract class ValueDecoratorField extends Widget implements HasValue, Ha
         super();
         // TODO: Check all widgets against element.setClassName() in derived classes
         element.setClassName("form-control");
-        element.addClassName("decorator");
+        element.classList.add("decorator");
         assert decorated instanceof HasValue;
         assert decorated instanceof HasValueChangeHandlers;
         decorated = aDecorated;
         CommonResources.INSTANCE.commons().ensureInjected();
-        decorated.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
+        decorated.element.classList.add(CommonResources.INSTANCE.commons().borderSized());
         ((HasValueChangeHandlers) decorated).addValueChangeHandler(new ValueChangeHandler() {
 
             @Override
@@ -87,14 +87,14 @@ public abstract class ValueDecoratorField extends Widget implements HasValue, Ha
         });
 
         btnSelect.setClassName("decorator-select");
-        btnSelect.getStyle().setDisplay(Style.Display.NONE);
-        btnSelect.getStyle().setHeight(100, Style.Unit.PCT);
-        btnSelect.getStyle().setPosition(Style.Position.RELATIVE);
+        btnSelect.getStyle().display ='none');
+        btnSelect.getStyle().height =100 + '%');
+        btnSelect.getStyle().position = 'relative';
         btnSelect.getStyle().setZIndex(1); // FireFox hides this in ModelCombo without such setting
         btnClear.setClassName("decorator-clear");
-        btnClear.getStyle().setDisplay(Style.Display.NONE);
-        btnClear.getStyle().setHeight(100, Style.Unit.PCT);
-        btnClear.getStyle().setPosition(Style.Position.RELATIVE);
+        btnClear.getStyle().display ='none');
+        btnClear.getStyle().height =100 + '%');
+        btnClear.getStyle().position = 'relative';
         btnClear.getStyle().setZIndex(1); // FireFox hides this in ModelCombo without such setting
 
         // TODO: Ensure action event occurs when user clicks on select or on clear button.
@@ -121,12 +121,12 @@ public abstract class ValueDecoratorField extends Widget implements HasValue, Ha
 
     @Override
     public String getEmptyText() {
-        return decorated.getElement().getAttribute("placeholder");
+        return decorated.element.getAttribute("placeholder");
     }
 
     @Override
     public void setEmptyText(String aValue) {
-        decorated.getElement().setAttribute("placeholder", aValue);
+        decorated.element.setAttribute("placeholder", aValue);
     }
 
     @Override
@@ -228,29 +228,29 @@ public abstract class ValueDecoratorField extends Widget implements HasValue, Ha
     }
 
     protected boolean isSelectButtonVisible() {
-        return !Style.Display.NONE.getCssName().equalsIgnoreCase(btnSelect.getStyle().getDisplay());
+        return !'none'.getCssName().equalsIgnoreCase(btnSelect.getStyle().getDisplay());
     }
 
     protected void setSelectButtonVisible(boolean aValue) {
         if (isSelectButtonVisible() != aValue) {
             if (aValue) {
-                btnSelect.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+                btnSelect.getStyle().display ='inline-block');
             } else {
-                btnSelect.getStyle().setDisplay(Style.Display.NONE);
+                btnSelect.getStyle().display ='none');
             }
         }
     }
 
     protected boolean isClearButtonVisible() {
-        return !Style.Display.NONE.getCssName().equalsIgnoreCase(btnClear.getStyle().getDisplay());
+        return !'none'.getCssName().equalsIgnoreCase(btnClear.getStyle().getDisplay());
     }
 
     protected void setClearButtonVisible(boolean aValue) {
         if (isClearButtonVisible() != aValue) {
             if (aValue) {
-                btnClear.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+                btnClear.getStyle().display ='inline-block');
             } else {
-                btnClear.getStyle().setDisplay(Style.Display.NONE);
+                btnClear.getStyle().display ='none');
             }
         }
     }
@@ -344,12 +344,12 @@ public abstract class ValueDecoratorField extends Widget implements HasValue, Ha
 
     @Override
     public void setReadonly(boolean aValue) {
-        decorated.getElement().setPropertyBoolean("readOnly", aValue);
+        decorated.element.setPropertyBoolean("readOnly", aValue);
     }
 
     @Override
     public boolean isReadonly() {
-        return decorated.getElement().getPropertyBoolean("readOnly");
+        return decorated.element.getPropertyBoolean("readOnly");
     }
 
     @Override

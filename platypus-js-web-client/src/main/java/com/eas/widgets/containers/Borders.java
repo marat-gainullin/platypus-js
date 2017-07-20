@@ -30,7 +30,7 @@ public class Borders extends Container implements HasChildrenPosition {
     public Borders() {
         super();
         element.getStyle().setOverflow(Style.Overflow.HIDDEN);
-        element.getStyle().setPosition(Style.Position.RELATIVE);
+        element.getStyle().position = 'relative';
         com.eas.ui.CommonResources.INSTANCE.commons().ensureInjected();
     }
 
@@ -175,66 +175,66 @@ public class Borders extends Container implements HasChildrenPosition {
 
     private void formatLeft() {
         if (left != null) {
-            left.getElement().addClassName(com.eas.ui.CommonResources.INSTANCE.commons().borderSized());
-            Style ls = left.getElement().getStyle();
-            ls.setPosition(Style.Position.ABSOLUTE);
+            left.element.classList.add(com.eas.ui.CommonResources.INSTANCE.commons().borderSized());
+            Style ls = left.element.style;
+            ls.position = 'absolute';
             ls.setOverflow(Style.Overflow.HIDDEN);
-            ls.setLeft(0, Style.Unit.PX);
-            ls.setWidth(leftWidth, Style.Unit.PX);
-            ls.setTop(topHeight, Style.Unit.PX);
-            ls.setBottom(bottomHeight, Style.Unit.PX);
+            ls.setLeft(0+ 'px');
+            ls.width =leftWidth+ 'px');
+            ls.top =topHeight+ 'px');
+            ls.bottom =bottomHeight+ 'px');
         }
     }
 
     private void formatRight() {
         if (right != null) {
-            right.getElement().addClassName(com.eas.ui.CommonResources.INSTANCE.commons().borderSized());
-            Style rs = right.getElement().getStyle();
-            rs.setPosition(Style.Position.ABSOLUTE);
+            right.element.classList.add(com.eas.ui.CommonResources.INSTANCE.commons().borderSized());
+            Style rs = right.element.style;
+            rs.position = 'absolute';
             rs.setOverflow(Style.Overflow.HIDDEN);
-            rs.setRight(0, Style.Unit.PX);
-            rs.setWidth(rightWidth, Style.Unit.PX);
-            rs.setTop(topHeight, Style.Unit.PX);
-            rs.setBottom(bottomHeight, Style.Unit.PX);
+            rs.right =0+ 'px');
+            rs.width =rightWidth+ 'px');
+            rs.top =topHeight+ 'px');
+            rs.bottom =bottomHeight+ 'px');
         }
     }
 
     private void formatTop() {
         if (top != null) {
-            top.getElement().addClassName(com.eas.ui.CommonResources.INSTANCE.commons().borderSized());
-            Style ts = top.getElement().getStyle();
-            ts.setPosition(Style.Position.ABSOLUTE);
+            top.element.classList.add(com.eas.ui.CommonResources.INSTANCE.commons().borderSized());
+            Style ts = top.element.style;
+            ts.position = 'absolute';
             ts.setOverflow(Style.Overflow.HIDDEN);
-            ts.setTop(0, Style.Unit.PX);
-            ts.setHeight(topHeight, Style.Unit.PX);
-            ts.setLeft(leftWidth, Style.Unit.PX);
-            ts.setRight(rightWidth, Style.Unit.PX);
+            ts.top =0+ 'px');
+            ts.height =topHeight+ 'px');
+            ts.setLeft(leftWidth+ 'px');
+            ts.right =rightWidth+ 'px');
         }
     }
 
     private void formatBottom() {
         if (bottom != null) {
-            bottom.getElement().addClassName(com.eas.ui.CommonResources.INSTANCE.commons().borderSized());
-            Style bs = bottom.getElement().getStyle();
-            bs.setPosition(Style.Position.ABSOLUTE);
+            bottom.element.classList.add(com.eas.ui.CommonResources.INSTANCE.commons().borderSized());
+            Style bs = bottom.element.style;
+            bs.position = 'absolute';
             bs.setOverflow(Style.Overflow.HIDDEN);
-            bs.setBottom(0, Style.Unit.PX);
-            bs.setHeight(bottomHeight, Style.Unit.PX);
-            bs.setLeft(leftWidth, Style.Unit.PX);
-            bs.setRight(rightWidth, Style.Unit.PX);
+            bs.bottom =0+ 'px');
+            bs.height =bottomHeight+ 'px');
+            bs.setLeft(leftWidth+ 'px');
+            bs.right =rightWidth+ 'px');
         }
     }
 
     private void formatCenter() {
         if (center != null) {
-            center.getElement().addClassName(com.eas.ui.CommonResources.INSTANCE.commons().borderSized());
-            Style cs = center.getElement().getStyle();
-            cs.setPosition(Style.Position.ABSOLUTE);
+            center.element.classList.add(com.eas.ui.CommonResources.INSTANCE.commons().borderSized());
+            Style cs = center.element.style;
+            cs.position = 'absolute';
             cs.setOverflow(Style.Overflow.HIDDEN);
-            cs.setBottom(bottomHeight, Style.Unit.PX);
-            cs.setTop(topHeight, Style.Unit.PX);
-            cs.setLeft(leftWidth, Style.Unit.PX);
-            cs.setRight(rightWidth, Style.Unit.PX);
+            cs.bottom =bottomHeight+ 'px');
+            cs.top =topHeight+ 'px');
+            cs.setLeft(leftWidth+ 'px');
+            cs.right =rightWidth+ 'px');
         }
     }
 
@@ -285,11 +285,11 @@ public class Borders extends Container implements HasChildrenPosition {
 
     protected void recalcCenterMargins() {
         if (center != null) {
-            Style cs = center.getElement().getStyle();
-            cs.setMarginLeft(hgap, Style.Unit.PX);
-            cs.setMarginRight(hgap, Style.Unit.PX);
-            cs.setMarginTop(vgap, Style.Unit.PX);
-            cs.setMarginBottom(vgap, Style.Unit.PX);
+            Style cs = center.element.style;
+            cs.setMarginLeft(hgap+ 'px');
+            cs.setMarginRight(hgap+ 'px');
+            cs.setMarginTop(vgap+ 'px');
+            cs.setMarginBottom(vgap+ 'px');
         }
     }
 
@@ -327,14 +327,14 @@ public class Borders extends Container implements HasChildrenPosition {
 
     @Override
     public int getTop(Widget w) {
-        assert w.getParent() == this : "widget should be a child of this container";
-        return w.getElement().getOffsetTop();
+        assert w.parent == this : "widget should be a child of this container";
+        return w.element.getOffsetTop();
     }
 
     @Override
     public int getLeft(Widget w) {
-        assert w.getParent() == this : "widget should be a child of this container";
-        return w.getElement().getOffsetLeft();
+        assert w.parent == this : "widget should be a child of this container";
+        return w.element.getOffsetLeft();
     }
 
     @Override

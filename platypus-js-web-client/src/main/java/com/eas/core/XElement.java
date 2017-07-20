@@ -54,11 +54,11 @@ public class XElement extends Element {
 
     public final int getContentWidth() {
         Element ruler = DOM.createDiv();
-        ruler.getStyle().setMargin(0, Style.Unit.PX);
-        ruler.getStyle().setPadding(0, Style.Unit.PX);
-        ruler.getStyle().setBorderWidth(0, Style.Unit.PX);
-        ruler.getStyle().setPosition(Style.Position.RELATIVE);
-        ruler.getStyle().setWidth(100, Style.Unit.PCT);
+        ruler.getStyle().setMargin(0+ 'px');
+        ruler.getStyle().setPadding(0+ 'px');
+        ruler.getStyle().setBorderWidth(0+ 'px');
+        ruler.getStyle().position = 'relative';
+        ruler.getStyle().width =100 + '%');
         insertFirst(ruler);
         try {
             String swidth = ruler.<XElement>cast().getComputedStyle().getWidth();
@@ -75,11 +75,11 @@ public class XElement extends Element {
 
     public final int getContentHeight() {
         Element ruler = DOM.createDiv();
-        ruler.getStyle().setMargin(0, Style.Unit.PX);
-        ruler.getStyle().setPadding(0, Style.Unit.PX);
-        ruler.getStyle().setBorderWidth(0, Style.Unit.PX);
-        ruler.getStyle().setPosition(Style.Position.RELATIVE);
-        ruler.getStyle().setHeight(100, Style.Unit.PCT);
+        ruler.getStyle().setMargin(0+ 'px');
+        ruler.getStyle().setPadding(0+ 'px');
+        ruler.getStyle().setBorderWidth(0+ 'px');
+        ruler.getStyle().position = 'relative';
+        ruler.getStyle().height =100 + '%');
         insertFirst(ruler);
         try {
             String sheight = ruler.<XElement>cast().getComputedStyle().getHeight();
@@ -214,20 +214,20 @@ public class XElement extends Element {
 
     public final void mask(String aClassName) {
         Element mask = Document.get().createDivElement();
-        mask.getStyle().setLeft(0, Style.Unit.PX);
-        mask.getStyle().setTop(0, Style.Unit.PX);
-        mask.getStyle().setRight(0, Style.Unit.PX);
-        mask.getStyle().setBottom(0, Style.Unit.PX);
-        mask.getStyle().setPosition(Style.Position.ABSOLUTE);
-        mask.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+        mask.getStyle().setLeft(0+ 'px');
+        mask.getStyle().top =0+ 'px');
+        mask.getStyle().right =0+ 'px');
+        mask.getStyle().bottom =0+ 'px');
+        mask.getStyle().position = 'absolute';
+        mask.getStyle().display ='inline-block');
         mask.setClassName("p-mask");
         Element maskInner = Document.get().createDivElement();
-        maskInner.getStyle().setLeft(0, Style.Unit.PX);
-        maskInner.getStyle().setTop(0, Style.Unit.PX);
-        maskInner.getStyle().setRight(0, Style.Unit.PX);
-        maskInner.getStyle().setBottom(0, Style.Unit.PX);
-        maskInner.getStyle().setPosition(Style.Position.ABSOLUTE);
-        maskInner.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+        maskInner.getStyle().setLeft(0+ 'px');
+        maskInner.getStyle().top =0+ 'px');
+        maskInner.getStyle().right =0+ 'px');
+        maskInner.getStyle().bottom =0+ 'px');
+        maskInner.getStyle().position = 'absolute';
+        maskInner.getStyle().display ='inline-block');
         maskInner.setClassName(aClassName);
         mask.appendChild(maskInner);
         appendChild(mask);

@@ -31,19 +31,19 @@ public abstract class ImageParagraph extends Widget implements HasText, HasHTML,
         text = aTitle;
         html = asHtml;
         image = aImage;
-        element.getStyle().setPosition(Style.Position.RELATIVE);
-        element.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        element.getStyle().setPadding(0, Style.Unit.PX);
+        element.getStyle().position = 'relative';
+        element.getStyle().display ='inline-block');
+        element.getStyle().setPadding(0+ 'px');
         //
         content = Document.get().createPElement();
-        content.getStyle().setMargin(0, Style.Unit.PX);
-        content.getStyle().setPosition(Style.Position.RELATIVE);
-        content.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+        content.getStyle().setMargin(0+ 'px');
+        content.getStyle().position = 'relative';
+        content.getStyle().display ='inline-block');
 
         aligner = Document.get().createDivElement();
-        aligner.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        aligner.getStyle().setPosition(Style.Position.RELATIVE);
-        aligner.getStyle().setHeight(100, Style.Unit.PCT);
+        aligner.getStyle().display ='inline-block');
+        aligner.getStyle().position = 'relative';
+        aligner.getStyle().height =100 + '%');
         aligner.getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
         aligner.getStyle().setVisibility(Style.Visibility.HIDDEN);
         //
@@ -72,7 +72,7 @@ public abstract class ImageParagraph extends Widget implements HasText, HasHTML,
         switch (horizontalAlignment) {
             case LEFT:
             case LEADING:
-                contentStyle.setLeft(0, Style.Unit.PX);
+                contentStyle.setLeft(0+ 'px');
                 contentStyle.clearRight();
                 contentStyle.setTextAlign(Style.TextAlign.LEFT);
                 containerStyle.setTextAlign(Style.TextAlign.LEFT);
@@ -80,13 +80,13 @@ public abstract class ImageParagraph extends Widget implements HasText, HasHTML,
             case RIGHT:
             case TRAILING:
                 contentStyle.clearLeft();
-                contentStyle.setRight(0, Style.Unit.PX);
+                contentStyle.right =0+ 'px');
                 contentStyle.setTextAlign(Style.TextAlign.RIGHT);
                 containerStyle.setTextAlign(Style.TextAlign.RIGHT);
                 break;
             case CENTER:
-                // contentStyle.setLeft(0, Style.Unit.PX);
-                // contentStyle.setRight(0, Style.Unit.PX);
+                // contentStyle.setLeft(0+ 'px');
+                // contentStyle.right =0+ 'px');
                 contentStyle.setTextAlign(Style.TextAlign.CENTER);
                 containerStyle.setTextAlign(Style.TextAlign.CENTER);
                 break;
@@ -126,21 +126,21 @@ public abstract class ImageParagraph extends Widget implements HasText, HasHTML,
             if (horizontalTextPosition == LEFT || horizontalTextPosition == LEADING) {
                 /*
                 backgroundPosition = "right";
-                es.setPaddingLeft(0, Style.Unit.PX);
-                es.setPaddingRight(textGap + image.getWidth(), Style.Unit.PX);
+                es.setPaddingLeft(0+ 'px');
+                es.setPaddingRight(textGap + image.getWidth()+ 'px');
                 */
             } else if (horizontalTextPosition == RIGHT || horizontalTextPosition == TRAILING) {
                 /*
                 backgroundPosition = "left";
-                es.setPaddingLeft(textGap + image.getWidth(), Style.Unit.PX);
-                es.setPaddingRight(0, Style.Unit.PX);
+                es.setPaddingLeft(textGap + image.getWidth()+ 'px');
+                es.setPaddingRight(0+ 'px');
                 */
             } else {
                 if (text == null || text.isEmpty()) {
                     /*
                     int imageWidth = image.getWidth();
-                    es.setPaddingLeft(imageWidth / 2, Style.Unit.PX);
-                    es.setPaddingRight(imageWidth / 2, Style.Unit.PX);
+                    es.setPaddingLeft(imageWidth / 2+ 'px');
+                    es.setPaddingRight(imageWidth / 2+ 'px');
                     */
                 }
                 //backgroundPosition = "center";
@@ -149,21 +149,21 @@ public abstract class ImageParagraph extends Widget implements HasText, HasHTML,
             if (verticalTextPosition == TOP || verticalTextPosition == LEADING) {
                 /*
                 backgroundPosition += "bottom";
-                es.setPaddingTop(0, Style.Unit.PX);
-                es.setPaddingBottom(textGap + image.getHeight(), Style.Unit.PX);
+                es.setPaddingTop(0+ 'px');
+                es.setPaddingBottom(textGap + image.getHeight()+ 'px');
                 */
             } else if (verticalTextPosition == BOTTOM || verticalTextPosition == TRAILING) {
                 /*
                 backgroundPosition += "top";
-                es.setPaddingTop(textGap + image.getHeight(), Style.Unit.PX);
-                es.setPaddingBottom(0, Style.Unit.PX);
+                es.setPaddingTop(textGap + image.getHeight()+ 'px');
+                es.setPaddingBottom(0+ 'px');
                 */
             } else {
                 if (text == null || text.isEmpty()) {
                     /*
                     int imageHeight = image.getHeight();
-                    es.setPaddingTop(imageHeight / 2, Style.Unit.PX);
-                    es.setPaddingBottom(imageHeight / 2, Style.Unit.PX);
+                    es.setPaddingTop(imageHeight / 2+ 'px');
+                    es.setPaddingBottom(imageHeight / 2+ 'px');
                     */
                 }
                 //backgroundPosition += "center";

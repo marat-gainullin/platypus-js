@@ -82,9 +82,9 @@ public class PlatypusImageResource implements ImageResource {
                 }
             });
             im.setVisible(false);
-            im.getElement().getStyle().setPosition(Position.ABSOLUTE);
-            im.getElement().getStyle().setLeft(-Integer.MAX_VALUE / 2, Style.Unit.PX);
-            im.getElement().getStyle().setTop(-Integer.MAX_VALUE / 2, Style.Unit.PX);
+            im.element.style.setPosition(Position.ABSOLUTE);
+            im.element.style.setLeft(-Integer.MAX_VALUE / 2+ 'px');
+            im.element.style.top =-Integer.MAX_VALUE / 2+ 'px');
             RootPanel.get().add(im);
         }
     }

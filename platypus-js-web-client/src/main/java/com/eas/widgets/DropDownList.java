@@ -189,7 +189,7 @@ public class DropDownList extends ValueWidget implements HasDecorationsWidth,
 
     @Override
     public void setDecorationsWidth(int aDecorationsWidth) {
-        element.getStyle().setPaddingRight(aDecorationsWidth, Style.Unit.PX);
+        element.getStyle().setPaddingRight(aDecorationsWidth+ 'px');
     }
 
     public int getCount() {

@@ -96,8 +96,8 @@ public class DefaultUiReader extends UiReader {
         viewWidget = widgets.get(rootContainerName);
         if (viewWidget == null) {
             viewWidget = new Anchors();
-            viewWidget.getElement().getStyle().setWidth(400, Style.Unit.PX);
-            viewWidget.getElement().getStyle().setHeight(300, Style.Unit.PX);
+            viewWidget.element.style.width =400+ 'px');
+            viewWidget.element.style.height =300+ 'px');
             Logger.warning("view widget missing. Falling back to AnchrosPane.");
         }
     }
@@ -268,8 +268,8 @@ public class DefaultUiReader extends UiReader {
             Dimension prefSize = readPrefSize(anElement);
             if (prefSize != null) {
                 PublishedComponent pComp = ((HasPublished) aTarget).getPublished().<PublishedComponent>cast();
-                pComp.setWidth(prefSize.width);
-                pComp.setHeight(prefSize.height);
+                pComp.width =prefSize.width);
+                pComp.height =prefSize.height);
             }
         }
     }
@@ -391,19 +391,19 @@ public class DefaultUiReader extends UiReader {
             result.setLeft(MarginConstraints.Margin.parse(Utils.getAttribute(anElement, "l", "left", null)));
         }
         if (Utils.hasAttribute(anElement, "r", "right")) {
-            result.setRight(MarginConstraints.Margin.parse(Utils.getAttribute(anElement, "r", "right", null)));
+            result.right =MarginConstraints.Margin.parse(Utils.getAttribute(anElement, "r", "right", null)));
         }
         if (Utils.hasAttribute(anElement, "t", "top")) {
-            result.setTop(MarginConstraints.Margin.parse(Utils.getAttribute(anElement, "t", "top", null)));
+            result.top =MarginConstraints.Margin.parse(Utils.getAttribute(anElement, "t", "top", null)));
         }
         if (Utils.hasAttribute(anElement, "b", "bottom")) {
-            result.setBottom(MarginConstraints.Margin.parse(Utils.getAttribute(anElement, "b", "bottom", null)));
+            result.bottom =MarginConstraints.Margin.parse(Utils.getAttribute(anElement, "b", "bottom", null)));
         }
         if (Utils.hasAttribute(anElement, "w", "width")) {
-            result.setWidth(MarginConstraints.Margin.parse(Utils.getAttribute(anElement, "w", "width", null)));
+            result.width =MarginConstraints.Margin.parse(Utils.getAttribute(anElement, "w", "width", null)));
         }
         if (Utils.hasAttribute(anElement, "h", "height")) {
-            result.setHeight(MarginConstraints.Margin.parse(Utils.getAttribute(anElement, "h", "height", null)));
+            result.height =MarginConstraints.Margin.parse(Utils.getAttribute(anElement, "h", "height", null)));
         }
         return result;
     }

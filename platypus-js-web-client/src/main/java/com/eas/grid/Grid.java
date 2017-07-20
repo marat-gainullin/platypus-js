@@ -149,7 +149,7 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
         scrollableRightContainer.setClassName("grid-section-body-right");
         footerLeftContainer.setClassName("grid-section-footer-left");
         footerRightContainer.setClassName("grid-section-footer-right");
-        columnsChevron.addClassName("grid-columns-chevron");
+        columnsChevron.classList.add("grid-columns-chevron");
         element.appendChild(cellsStyleElement);
         element.appendChild(rowsStyleElement);
         element.appendChild(oddRowsStyleElement);
@@ -174,53 +174,53 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
         /*
             @Override
             public void onScroll(ScrollEvent event) {
-                int aimLeft = scrollableRightContainer.getElement().getScrollLeft();
+                int aimLeft = scrollableRightContainer.element.getScrollLeft();
                 if (isHeaderVisible()) {
-                    headerRightContainer.getElement().setScrollLeft(aimLeft);
-                    int factLeftDelta0 = aimLeft - headerRightContainer.getElement().getScrollLeft();
+                    headerRightContainer.element.setScrollLeft(aimLeft);
+                    int factLeftDelta0 = aimLeft - headerRightContainer.element.getScrollLeft();
                     if (factLeftDelta0 > 0) {
-                        headerRightContainer.getElement().getStyle().setRight(factLeftDelta0, Style.Unit.PX);
+                        headerRightContainer.element.style.right =factLeftDelta0+ 'px');
                     } else {
-                        headerRightContainer.getElement().getStyle().clearRight();
+                        headerRightContainer.element.style.clearRight();
                     }
                 }
                 if (frozenColumns > 0 || frozenRows > 0) {
-                    int aimTop = scrollableRightContainer.getElement().getScrollTop();
+                    int aimTop = scrollableRightContainer.element.getScrollTop();
 
-                    scrollableLeftContainer.getElement().setScrollTop(aimTop);
-                    int factTopDelta = aimTop - scrollableLeftContainer.getElement().getScrollTop();
+                    scrollableLeftContainer.element.setScrollTop(aimTop);
+                    int factTopDelta = aimTop - scrollableLeftContainer.element.getScrollTop();
                     if (factTopDelta > 0) {
-                        scrollableLeftContainer.getElement().getStyle().setBottom(factTopDelta, Style.Unit.PX);
+                        scrollableLeftContainer.element.style.bottom =factTopDelta+ 'px');
                     } else {
-                        scrollableLeftContainer.getElement().getStyle().setBottom(0, Style.Unit.PX);
-                        //scrollableLeftContainer.getElement().getStyle().clearBottom();
+                        scrollableLeftContainer.element.style.bottom =0+ 'px');
+                        //scrollableLeftContainer.element.style.clearBottom();
                     }
-                    frozenRightContainer.getElement().setScrollLeft(aimLeft);
-                    int factLeftDelta1 = aimLeft - frozenRightContainer.getElement().getScrollLeft();
+                    frozenRightContainer.element.setScrollLeft(aimLeft);
+                    int factLeftDelta1 = aimLeft - frozenRightContainer.element.getScrollLeft();
                     if (factLeftDelta1 > 0) {
-                        frozenRightContainer.getElement().getStyle().setRight(factLeftDelta1, Style.Unit.PX);
+                        frozenRightContainer.element.style.right =factLeftDelta1+ 'px');
                     } else {
-                        frozenRightContainer.getElement().getStyle().clearRight();
+                        frozenRightContainer.element.style.clearRight();
                     }
-                    footerRightContainer.getElement()
-                            .setScrollLeft(scrollableRightContainer.getElement().getScrollLeft());
-                    int factLeftDelta2 = aimLeft - footerRightContainer.getElement().getScrollLeft();
+                    footerRightContainer.element
+                            .setScrollLeft(scrollableRightContainer.element.getScrollLeft());
+                    int factLeftDelta2 = aimLeft - footerRightContainer.element.getScrollLeft();
                     if (factLeftDelta2 > 0) {
-                        footerRightContainer.getElement().getStyle().setRight(factLeftDelta2, Style.Unit.PX);
+                        footerRightContainer.element.style.right =factLeftDelta2+ 'px');
                     } else {
-                        footerRightContainer.getElement().getStyle().clearRight();
+                        footerRightContainer.element.style.clearRight();
                     }
                 }
             }
         });
          */
-        ghostLine.addClassName(RULER_STYLE);
-        ghostLine.getStyle().setPosition(Style.Position.ABSOLUTE);
-        ghostLine.getStyle().setTop(0, Style.Unit.PX);
+        ghostLine.classList.add(RULER_STYLE);
+        ghostLine.getStyle().position = 'absolute';
+        ghostLine.getStyle().top =0+ 'px');
         ghostColumn = Document.get().createDivElement();
-        ghostColumn.addClassName(COLUMN_PHANTOM_STYLE);
-        ghostColumn.getStyle().setPosition(Style.Position.ABSOLUTE);
-        ghostColumn.getStyle().setTop(0, Style.Unit.PX);
+        ghostColumn.classList.add(COLUMN_PHANTOM_STYLE);
+        ghostColumn.getStyle().position = 'absolute';
+        ghostColumn.getStyle().top =0+ 'px');
 
         element.<XElement>cast().addEventListener(BrowserEvents.DRAGSTART, new XElement.NativeHandler() {
 
@@ -282,14 +282,14 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
                             event.getDataTransfer().<XDataTransfer>cast().setDropEffect("none");
                         }
                     } else {
-                        Element hostElement = Grid.this.getElement();
+                        Element hostElement = Grid.this.element;
                         int clientX = event.getClientX();
                         int hostAbsX = hostElement.getAbsoluteLeft();
                         int hostScrollX = hostElement.getScrollLeft();
                         int docScrollX = hostElement.getOwnerDocument().getScrollLeft();
                         int relativeX = clientX - hostAbsX + hostScrollX + docScrollX;
-                        ghostLine.getStyle().setLeft(relativeX, Style.Unit.PX);
-                        ghostLine.getStyle().setHeight(hostElement.getClientHeight(), Style.Unit.PX);
+                        ghostLine.getStyle().setLeft(relativeX+ 'px');
+                        ghostLine.getStyle().height =hostElement.getClientHeight()+ 'px');
                         if (ghostLine.getParentElement() != hostElement) {
                             hostElement.appendChild(ghostLine);
                         }
@@ -304,7 +304,7 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
                 if (ColumnDrag.instance != null) {
                     event.stopPropagation();
                     if (ColumnDrag.instance.isMove()) {
-                        if (event.getEventTarget() == (JavaScriptObject) Grid.this.getElement()) {
+                        if (event.getEventTarget() == (JavaScriptObject) Grid.this.element) {
                             hideColumnDecorations();
                         }
                     }
@@ -347,7 +347,7 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
                                     event.getClientX() - source.getDecorationElement().getAbsoluteLeft(),
                                     MINIMUM_COLUMN_WIDTH);
                             if (newWidth >= header.getColumn().getMinWidth() && newWidth <= header.getColumn().getMaxWidth()) {
-                                header.getColumn().setWidth(newWidth);
+                                header.getColumn().width =newWidth);
                             }
                         }
                     }
@@ -656,7 +656,7 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
                 return targetDraggedColumn;
             } else {
                 while ((targetCell == null || targetSection == null) && currentTarget != null
-                        && currentTarget != Grid.this.getElement()) {
+                        && currentTarget != Grid.this.element) {
                     if (targetCell == null) {
                         if ("td".equalsIgnoreCase(currentTarget.getTagName())
                                 || "th".equalsIgnoreCase(currentTarget.getTagName())) {
@@ -664,21 +664,21 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
                         }
                     }
                     if (targetSection == null) {
-                        if (currentTarget == headerLeft.getElement()) {
+                        if (currentTarget == headerLeft.element) {
                             targetSection = headerLeft;
-                        } else if (currentTarget == frozenLeft.getElement()) {
+                        } else if (currentTarget == frozenLeft.element) {
                             targetSection = frozenLeft;
-                        } else if (currentTarget == scrollableLeft.getElement()) {
+                        } else if (currentTarget == scrollableLeft.element) {
                             targetSection = scrollableLeft;
-                        } else if (currentTarget == footerLeft.getElement()) {
+                        } else if (currentTarget == footerLeft.element) {
                             targetSection = footerLeft;
-                        } else if (currentTarget == headerRight.getElement()) {
+                        } else if (currentTarget == headerRight.element) {
                             targetSection = headerRight;
-                        } else if (currentTarget == frozenRight.getElement()) {
+                        } else if (currentTarget == frozenRight.element) {
                             targetSection = frozenRight;
-                        } else if (currentTarget == scrollableRight.getElement()) {
+                        } else if (currentTarget == scrollableRight.element) {
                             targetSection = scrollableRight;
-                        } else if (currentTarget == footerRight.getElement()) {
+                        } else if (currentTarget == footerRight.element) {
                             targetSection = footerRight;
                         }
                     }
@@ -711,11 +711,11 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
         Element thtdElement = target.getDecorationElement();
         int thLeft = thtdElement.getAbsoluteLeft();
         thLeft = thLeft - element.getAbsoluteLeft() + hostElement.getScrollLeft();
-        ghostLine.getStyle().setLeft(thLeft, Style.Unit.PX);
-        ghostLine.getStyle().setHeight(hostElement.getClientHeight(), Style.Unit.PX);
-        ghostColumn.getStyle().setLeft(thLeft, Style.Unit.PX);
-        ghostColumn.getStyle().setWidth(thtdElement.getOffsetWidth(), Style.Unit.PX);
-        ghostColumn.getStyle().setHeight(hostElement.getClientHeight(), Style.Unit.PX);
+        ghostLine.getStyle().setLeft(thLeft+ 'px');
+        ghostLine.getStyle().height =hostElement.getClientHeight()+ 'px');
+        ghostColumn.getStyle().setLeft(thLeft+ 'px');
+        ghostColumn.getStyle().width =thtdElement.getOffsetWidth()+ 'px');
+        ghostColumn.getStyle().height =hostElement.getClientHeight()+ 'px');
         if (ghostLine.getParentElement() != hostElement) {
             ghostLine.removeFromParent();
             hostElement.appendChild(ghostLine);
@@ -813,8 +813,8 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
     }
 
     public boolean isHeaderVisible() {
-        return !Style.Display.NONE.equals(headerLeft.getElement().getStyle().getDisplay())
-                && !Style.Display.NONE.equals(headerRight.getElement().getStyle().getDisplay());
+        return !'none'.equals(headerLeft.element.style.getDisplay())
+                && !'none'.equals(headerRight.element.style.getDisplay());
     }
 
     public void setHeaderVisible(boolean aValue) {
@@ -823,9 +823,9 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
             headerLeftContainer.getStyle().clearDisplay();
             headerRightContainer.getStyle().clearDisplay();
         } else {
-            columnsChevron.getStyle().setDisplay(Style.Display.NONE);
-            headerLeftContainer.getStyle().setDisplay(Style.Display.NONE);
-            headerRightContainer.getStyle().setDisplay(Style.Display.NONE);
+            columnsChevron.getStyle().display ='none');
+            headerLeftContainer.getStyle().display ='none');
+            headerRightContainer.getStyle().display ='none');
         }
     }
 
@@ -1413,9 +1413,9 @@ public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObjec
     }
 
     public void moveColumnNode(HeaderNode aSubject, HeaderNode aInsertBefore) {
-        if (aSubject != null && aInsertBefore != null && aSubject.getParent() == aInsertBefore.getParent()) {
-            List<HeaderNode> neighbours = aSubject.getParent() != null
-                    ? aSubject.getParent().getChildren() : header;
+        if (aSubject != null && aInsertBefore != null && aSubject.parent == aInsertBefore.parent) {
+            List<HeaderNode> neighbours = aSubject.parent != null
+                    ? aSubject.parent.getChildren() : header;
             neighbours.remove(aSubject);
             int insertAt = neighbours.indexOf(aInsertBefore);
             neighbours.add(insertAt, aSubject);

@@ -50,7 +50,7 @@ public class TextField extends ValueWidget implements HasText, HasEmptyText,
         element.setClassName("form-control");
         // TODO: evict such injection from all sources
         CommonResources.INSTANCE.commons().ensureInjected();
-        element.addClassName(CommonResources.INSTANCE.commons().borderSized());
+        element.classList.add(CommonResources.INSTANCE.commons().borderSized());
         onChange = new XElement.NativeHandler() {
             @Override
             public void on(NativeEvent evt) {

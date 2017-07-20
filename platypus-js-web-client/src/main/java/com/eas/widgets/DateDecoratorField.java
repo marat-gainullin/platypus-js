@@ -36,7 +36,7 @@ public class DateDecoratorField extends ValueDecoratorField {
         if (Utils.isMobile()) {
             ((FormattedField) decorated).setPattern(formatPattern);
         }
-        element.addClassName("date-time-field");
+        element.classList.add("date-time-field");
         ((HasValueChangeHandlers) decorated).addValueChangeHandler(new ValueChangeHandler() {
 
             @Override
@@ -138,17 +138,17 @@ public class DateDecoratorField extends ValueDecoratorField {
 
     private void changeViewPresentation() {
         if (dateShown && timeShown) {
-            dateSelect.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-            timeSelect.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+            dateSelect.getStyle().display ='inline-block');
+            timeSelect.getStyle().display ='inline-block');
         } else if (dateShown) {
-            dateSelect.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-            timeSelect.getStyle().setDisplay(Style.Display.NONE);
+            dateSelect.getStyle().display ='inline-block');
+            timeSelect.getStyle().display ='none');
         } else if (timeShown) {
-            timeSelect.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-            dateSelect.getStyle().setDisplay(Style.Display.NONE);
+            timeSelect.getStyle().display ='inline-block');
+            dateSelect.getStyle().display ='none');
         } else {
-            dateSelect.getStyle().setDisplay(Style.Display.NONE);
-            timeSelect.getStyle().setDisplay(Style.Display.NONE);
+            dateSelect.getStyle().display ='none');
+            timeSelect.getStyle().display ='none');
         }
 
     }

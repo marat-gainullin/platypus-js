@@ -79,24 +79,24 @@ public class Cells extends Container implements HasChildrenPosition {
     protected void formatCell(int row, int column) {
         Widget w = getWidget(row, column);
         if (w != null) {
-            Style ws = w.getElement().getStyle();
+            Style ws = w.element.style;
 
-            ws.setPosition(Style.Position.ABSOLUTE);
-            ws.setLeft((100f / columns) * column, Style.Unit.PCT);
-            ws.setTop((100f / rows) * row, Style.Unit.PCT);
-            ws.setWidth(100f / columns, Style.Unit.PCT);
-            ws.setHeight(100f / rows, Style.Unit.PCT);
-            ws.setMargin(0, Style.Unit.PX);
-            ws.setPaddingLeft(Math.floor(hgap / 2f), Style.Unit.PX);
-            ws.setPaddingRight(Math.ceil(hgap / 2f), Style.Unit.PX);
-            ws.setPaddingTop(Math.floor(vgap / 2f), Style.Unit.PX);
-            ws.setPaddingBottom(Math.ceil(vgap / 2f), Style.Unit.PX);
+            ws.position = 'absolute';
+            ws.setLeft((100f / columns) * column + '%');
+            ws.top =(100f / rows) * row + '%');
+            ws.width =100f / columns + '%');
+            ws.height =100f / rows + '%');
+            ws.setMargin(0+ 'px');
+            ws.setPaddingLeft(Math.floor(hgap / 2f)+ 'px');
+            ws.setPaddingRight(Math.ceil(hgap / 2f)+ 'px');
+            ws.setPaddingTop(Math.floor(vgap / 2f)+ 'px');
+            ws.setPaddingBottom(Math.ceil(vgap / 2f)+ 'px');
         }
     }
 
     @Override
     public void add(Widget w) {
-        w.getElement().addClassName(com.eas.ui.CommonResources.INSTANCE.commons().borderSized());
+        w.element.classList.add(com.eas.ui.CommonResources.INSTANCE.commons().borderSized());
         addToFreeCell(w);
     }
 
@@ -243,13 +243,13 @@ public class Cells extends Container implements HasChildrenPosition {
 
     @Override
     public int getTop(Widget aWidget) {
-        assert aWidget.getParent() == this : "widget should be a child of this container";
-        return aWidget.getElement().getParentElement().getOffsetTop();
+        assert aWidget.parent == this : "widget should be a child of this container";
+        return aWidget.element.getParentElement().getOffsetTop();
     }
 
     @Override
     public int getLeft(Widget aWidget) {
-        assert aWidget.getParent() == this : "widget should be a child of this container";
-        return aWidget.getElement().getParentElement().getOffsetLeft();
+        assert aWidget.parent == this : "widget should be a child of this container";
+        return aWidget.element.getParentElement().getOffsetLeft();
     }
 }

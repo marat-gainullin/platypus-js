@@ -170,7 +170,7 @@ public class HeaderNode implements HasName {
     }
 
     public void setPreferredWidth(double aValue) {
-        column.setWidth(aValue);
+        column.width =aValue);
     }
 
     public String getField() {
@@ -218,7 +218,7 @@ public class HeaderNode implements HasName {
     }
 
     public void setWidth(double aValue) {
-        column.setWidth(aValue);
+        column.width =aValue);
     }
 
     public boolean isReadonly() {
@@ -285,11 +285,11 @@ public class HeaderNode implements HasName {
 
     public void setDepthRemainder(int aValue) {
         depthRemainder = aValue;
-        header.getElement().setAttribute("rowspan", (aValue + 1) + "");
+        header.element.setAttribute("rowspan", (aValue + 1) + "");
     }
 
     public void setLeavesCount(int aValue) {
         leavesCount = aValue;
-        header.getElement().setAttribute("colspan", aValue + "");
+        header.element.setAttribute("colspan", aValue + "");
     }
 }

@@ -84,10 +84,10 @@ public class Resizable extends Flow {
         @Override
         protected boolean changeTarget(int dx, int dy, NativeEvent aEvent) {
             if (isNresizable()) {
-                double newTop = Resizable.this.getElement().getScrollTop() + dy;
-                Resizable.this.getElement().getStyle().setTop(newTop >= 0 ? newTop : 0, Style.Unit.PX);
+                double newTop = Resizable.this.element.getScrollTop() + dy;
+                Resizable.this.element.style.top =newTop >= 0 ? newTop : 0+ 'px');
                 if (newTop >= 0) {
-                    content.getElement().getStyle().setHeight(content.getElement().getOffsetHeight() - dy, Style.Unit.PX);
+                    content.element.style.height =content.element.getOffsetHeight() - dy+ 'px');
                 }
                 return true;
             } else {
@@ -97,12 +97,12 @@ public class Resizable extends Flow {
 
         @Override
         protected void activate() {
-            element.addClassName("north-decor-active");
+            element.classList.add("north-decor-active");
         }
 
         @Override
         protected void deactivate() {
-            element.removeClassName("north-decor-active");
+            element.classList.remove("north-decor-active");
         }
 
     };
@@ -111,7 +111,7 @@ public class Resizable extends Flow {
         @Override
         protected boolean changeTarget(int dx, int dy, NativeEvent aEvent) {
             if (isSresizable()) {
-                content.getElement().getStyle().setHeight(content.getElement().getOffsetHeight() + dy, Style.Unit.PX);
+                content.element.style.height =content.element.getOffsetHeight() + dy+ 'px');
                 return true;
             } else {
                 return false;
@@ -120,12 +120,12 @@ public class Resizable extends Flow {
 
         @Override
         protected void activate() {
-            element.addClassName("south-decor-active");
+            element.classList.add("south-decor-active");
         }
 
         @Override
         protected void deactivate() {
-            element.removeClassName("south-decor-active");
+            element.classList.remove("south-decor-active");
         }
 
     };
@@ -134,10 +134,10 @@ public class Resizable extends Flow {
         @Override
         protected boolean changeTarget(int dx, int dy, NativeEvent aEvent) {
             if (isWresizable()) {
-                double newLeft = Resizable.this.getElement().getScrollLeft() + dx;
-                Resizable.this.getElement().getStyle().setLeft(newLeft >= 0 ? newLeft : 0, Style.Unit.PX);
+                double newLeft = Resizable.this.element.getScrollLeft() + dx;
+                Resizable.this.element.style.setLeft(newLeft >= 0 ? newLeft : 0+ 'px');
                 if (newLeft >= 0) {
-                    content.getElement().getStyle().setWidth(content.getElement().getOffsetWidth() - dx, Style.Unit.PX);
+                    content.element.style.width =content.element.getOffsetWidth() - dx+ 'px');
                 }
                 return true;
             } else {
@@ -147,12 +147,12 @@ public class Resizable extends Flow {
 
         @Override
         protected void activate() {
-            element.addClassName("west-decor-active");
+            element.classList.add("west-decor-active");
         }
 
         @Override
         protected void deactivate() {
-            element.removeClassName("west-decor-active");
+            element.classList.remove("west-decor-active");
         }
 
     };
@@ -160,7 +160,7 @@ public class Resizable extends Flow {
         @Override
         protected boolean changeTarget(int dx, int dy, NativeEvent aEvent) {
             if (isEresizable()) {
-                content.getElement().getStyle().setWidth(content.getElement().getOffsetWidth() + dx, Style.Unit.PX);
+                content.element.style.width =content.element.getOffsetWidth() + dx+ 'px');
                 return true;
             } else {
                 return false;
@@ -169,12 +169,12 @@ public class Resizable extends Flow {
 
         @Override
         protected void activate() {
-            element.addClassName("east-decor-active");
+            element.classList.add("east-decor-active");
         }
 
         @Override
         protected void deactivate() {
-            element.removeClassName("east-decor-active");
+            element.classList.remove("east-decor-active");
         }
 
     };
@@ -189,12 +189,12 @@ public class Resizable extends Flow {
 
         @Override
         protected void activate() {
-            element.addClassName("north-west-decor-active");
+            element.classList.add("north-west-decor-active");
         }
 
         @Override
         protected void deactivate() {
-            element.removeClassName("north-west-decor-active");
+            element.classList.remove("north-west-decor-active");
         }
 
     };
@@ -208,12 +208,12 @@ public class Resizable extends Flow {
 
         @Override
         protected void activate() {
-            element.addClassName("north-east-decor-active");
+            element.classList.add("north-east-decor-active");
         }
 
         @Override
         protected void deactivate() {
-            element.removeClassName("north-east-decor-active");
+            element.classList.remove("north-east-decor-active");
         }
 
     };
@@ -227,12 +227,12 @@ public class Resizable extends Flow {
 
         @Override
         protected void activate() {
-            element.addClassName("south-west-decor-active");
+            element.classList.add("south-west-decor-active");
         }
 
         @Override
         protected void deactivate() {
-            element.removeClassName("south-west-decor-active");
+            element.classList.remove("south-west-decor-active");
         }
 
     };
@@ -246,12 +246,12 @@ public class Resizable extends Flow {
 
         @Override
         protected void activate() {
-            element.addClassName("south-east-decor-active");
+            element.classList.add("south-east-decor-active");
         }
 
         @Override
         protected void deactivate() {
-            element.removeClassName("south-east-decor-active");
+            element.classList.remove("south-east-decor-active");
         }
 
     };
@@ -310,56 +310,56 @@ public class Resizable extends Flow {
 
     public void setPosition(double aLeft, double aTop) {
         Style es = element.getStyle();
-        es.setLeft(aLeft, Style.Unit.PX);
-        es.setTop(aTop, Style.Unit.PX);
-        es.setPosition(Style.Position.ABSOLUTE);
+        es.setLeft(aLeft+ 'px');
+        es.top =aTop+ 'px');
+        es.position = 'absolute';
     }
 
     public void setSize(double aWidth, double aHeight) {
         if (content != null) {
-            Element elem = content.getElement();
-            elem.getStyle().setWidth(aWidth, Style.Unit.PX);
-            elem.getStyle().setHeight(aHeight, Style.Unit.PX);
+            Element elem = content.element;
+            elem.getStyle().width =aWidth+ 'px');
+            elem.getStyle().height =aHeight+ 'px');
         }
     }
 
     public void setWidth(String width) {
         if (content != null) {
-            content.getElement().getStyle().setProperty("width", width);
+            content.element.style.setProperty("width", width);
         }
     }
 
     public void setHeight(String height) {
         if (content != null) {
-            content.getElement().getStyle().setProperty("height", height);
+            content.element.style.setProperty("height", height);
         }
     }
 
     protected void decorate() {
         if (content != null) {
-            content.getElement().addClassName(styles.contentDecor());
+            content.element.classList.add(styles.contentDecor());
         }
-        element.appendChild(n.getElement());
-        element.appendChild(s.getElement());
-        element.appendChild(w.getElement());
-        element.appendChild(e.getElement());
-        element.appendChild(nw.getElement());
-        element.appendChild(ne.getElement());
-        element.appendChild(sw.getElement());
-        element.appendChild(se.getElement());
+        element.appendChild(n.element);
+        element.appendChild(s.element);
+        element.appendChild(w.element);
+        element.appendChild(e.element);
+        element.appendChild(nw.element);
+        element.appendChild(ne.element);
+        element.appendChild(sw.element);
+        element.appendChild(se.element);
     }
 
     protected void undecorate() {
-        e.getElement().removeFromParent();
-        w.getElement().removeFromParent();
-        n.getElement().removeFromParent();
-        s.getElement().removeFromParent();
-        nw.getElement().removeFromParent();
-        ne.getElement().removeFromParent();
-        sw.getElement().removeFromParent();
-        se.getElement().removeFromParent();
+        e.element.removeFromParent();
+        w.element.removeFromParent();
+        n.element.removeFromParent();
+        s.element.removeFromParent();
+        nw.element.removeFromParent();
+        ne.element.removeFromParent();
+        sw.element.removeFromParent();
+        se.element.removeFromParent();
         if (content != null) {
-            content.getElement().removeClassName(styles.contentDecor());
+            content.element.classList.remove(styles.contentDecor());
         }
     }
 
@@ -381,60 +381,60 @@ public class Resizable extends Flow {
 
     protected void updateDecorCursors() {
         if (isNresizable()) {
-            n.getElement().getStyle().clearCursor();
+            n.element.style.clearCursor();
         } else {
-            n.getElement().getStyle().setCursor(Style.Cursor.DEFAULT);
+            n.element.style.setCursor(Style.Cursor.DEFAULT);
         }
         if (isSresizable()) {
-            s.getElement().getStyle().clearCursor();
+            s.element.style.clearCursor();
         } else {
-            s.getElement().getStyle().setCursor(Style.Cursor.DEFAULT);
+            s.element.style.setCursor(Style.Cursor.DEFAULT);
         }
         if (isEresizable()) {
-            e.getElement().getStyle().clearCursor();
+            e.element.style.clearCursor();
         } else {
-            e.getElement().getStyle().setCursor(Style.Cursor.DEFAULT);
+            e.element.style.setCursor(Style.Cursor.DEFAULT);
         }
         if (isWresizable()) {
-            w.getElement().getStyle().clearCursor();
+            w.element.style.clearCursor();
         } else {
-            w.getElement().getStyle().setCursor(Style.Cursor.DEFAULT);
+            w.element.style.setCursor(Style.Cursor.DEFAULT);
         }
         if (isNresizable() && isWresizable()) {
-            nw.getElement().getStyle().clearCursor();
+            nw.element.style.clearCursor();
         } else if (isNresizable()) {
-            nw.getElement().getStyle().setCursor(Style.Cursor.N_RESIZE);
+            nw.element.style.setCursor(Style.Cursor.N_RESIZE);
         } else if (isWresizable()) {
-            nw.getElement().getStyle().setCursor(Style.Cursor.W_RESIZE);
+            nw.element.style.setCursor(Style.Cursor.W_RESIZE);
         } else {
-            nw.getElement().getStyle().setCursor(Style.Cursor.DEFAULT);
+            nw.element.style.setCursor(Style.Cursor.DEFAULT);
         }
         if (isNresizable() && isEresizable()) {
-            ne.getElement().getStyle().clearCursor();
+            ne.element.style.clearCursor();
         } else if (isNresizable()) {
-            ne.getElement().getStyle().setCursor(Style.Cursor.N_RESIZE);
+            ne.element.style.setCursor(Style.Cursor.N_RESIZE);
         } else if (isEresizable()) {
-            ne.getElement().getStyle().setCursor(Style.Cursor.E_RESIZE);
+            ne.element.style.setCursor(Style.Cursor.E_RESIZE);
         } else {
-            ne.getElement().getStyle().setCursor(Style.Cursor.DEFAULT);
+            ne.element.style.setCursor(Style.Cursor.DEFAULT);
         }
         if (isSresizable() && isEresizable()) {
-            se.getElement().getStyle().clearCursor();
+            se.element.style.clearCursor();
         } else if (isSresizable()) {
-            se.getElement().getStyle().setCursor(Style.Cursor.S_RESIZE);
+            se.element.style.setCursor(Style.Cursor.S_RESIZE);
         } else if (isEresizable()) {
-            se.getElement().getStyle().setCursor(Style.Cursor.E_RESIZE);
+            se.element.style.setCursor(Style.Cursor.E_RESIZE);
         } else {
-            se.getElement().getStyle().setCursor(Style.Cursor.DEFAULT);
+            se.element.style.setCursor(Style.Cursor.DEFAULT);
         }
         if (isSresizable() && isWresizable()) {
-            sw.getElement().getStyle().clearCursor();
+            sw.element.style.clearCursor();
         } else if (isSresizable()) {
-            sw.getElement().getStyle().setCursor(Style.Cursor.S_RESIZE);
+            sw.element.style.setCursor(Style.Cursor.S_RESIZE);
         } else if (isWresizable()) {
-            sw.getElement().getStyle().setCursor(Style.Cursor.W_RESIZE);
+            sw.element.style.setCursor(Style.Cursor.W_RESIZE);
         } else {
-            sw.getElement().getStyle().setCursor(Style.Cursor.DEFAULT);
+            sw.element.style.setCursor(Style.Cursor.DEFAULT);
         }
     }
 

@@ -1,5 +1,4 @@
 define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent, ComponentEvent, ActionEvent) {
-
     function Widget(element) {
         if (!(this instanceof Widget))
             throw 'Use new with this constructor function';
@@ -7,6 +6,9 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
         if (!element)
             element = document.createElement('div');
         element['p-widget'] = this;
+
+        // TODO: Ensure all widgets have a class 'border-sized' or something as 'widget' with border sizing setted up.
+
         var parent;
         var visibleDisplay = 'inline-block';
         var menu;
@@ -230,7 +232,7 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
                 return addMouseWheelHandler;
             }
         });
-        
+
         Object.defineProperty(this, 'fireActionPerformed', {
             get: function () {
                 return fireActionPerformed;
@@ -255,7 +257,7 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
                 return element.style.display !== 'none';
             },
             set: function (aValue) {
-                var oldValue = this.visible;
+                var oldValue = self.visible;
                 if (oldValue !== aValue) {
                     if (aValue) {
                         element.style.display = visibleDisplay;
@@ -264,17 +266,24 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
                     }
                     var event = new ComponentEvent(self);
                     if (aValue) {
-                        showHandlers.forEach(function (h) {
-                            h(event);
-                        });
+                        fireShown();
                     } else {
-                        hideHandlers.forEach(function (h) {
-                            h(event);
-                        });
+                        fireHidden();
                     }
                 }
             }
         });
+
+        function fireShown() {
+            showHandlers.forEach(function (h) {
+                h(event);
+            });
+        }
+        function fireHidden() {
+            hideHandlers.forEach(function (h) {
+                h(event);
+            });
+        }
 
         var MOUSESTATE = {
             NULL: {}, PRESSED: {}, MOVED: {}, DRAGGED: {}
@@ -303,7 +312,7 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
                     }
                 }
             }});
-        
+
         var onMouseExited;
         var mouseOutReg;
         Object.defineProperty(this, 'onMouseExited', {
@@ -578,8 +587,8 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
                         focusReg = null;
                     }
                     onFocusGained = aValue;
-                    if (onFocusGained && this.addFocusHandler) {
-                        focusReg = this.addFocusHandler(function (event) {
+                    if (onFocusGained && self.addFocusHandler) {
+                        focusReg = self.addFocusHandler(function (event) {
                             if (onFocusGained) {
                                 onFocusGained(event);
                             }
@@ -601,8 +610,8 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
                         blurReg = null;
                     }
                     onFocusLost = aValue;
-                    if (onFocusLost && this.addBlurHandler) {
-                        blurReg = this.addBlurHandler(function (event) {
+                    if (onFocusLost && self.addBlurHandler) {
+                        blurReg = self.addBlurHandler(function (event) {
                             if (onFocusLost) {
                                 onFocusLost(event);
                             }
@@ -625,8 +634,8 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
                         keyTypedReg = null;
                     }
                     onKeyTyped = aValue;
-                    if (onKeyTyped && this.addKeyPressHandler) {
-                        keyTypedReg = this.addKeyPressHandler(function (event) {
+                    if (onKeyTyped && self.addKeyPressHandler) {
+                        keyTypedReg = self.addKeyPressHandler(function (event) {
                             if (onKeyTyped) {
                                 event.event.stopPropagation();
                                 onKeyTyped(event);
@@ -649,8 +658,8 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
                         keyDownReg = null;
                     }
                     onKeyPressed = aValue;
-                    if (onKeyPressed && this.addKeyDownHandler) {
-                        keyDownReg = this.addKeyDownHandler(function (event) {
+                    if (onKeyPressed && self.addKeyDownHandler) {
+                        keyDownReg = self.addKeyDownHandler(function (event) {
                             if (onKeyPressed) {
                                 event.getEvent().stopPropagation();
                                 onKeyPressed(event);
@@ -673,8 +682,8 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
                         keyUpReg = null;
                     }
                     onKeyReleased = aValue;
-                    if (onKeyReleased && this.addKeyUpHandler) {
-                        keyUpReg = this.addKeyUpHandler(function (event) {
+                    if (onKeyReleased && self.addKeyUpHandler) {
+                        keyUpReg = self.addKeyUpHandler(function (event) {
                             if (onKeyReleased) {
                                 event.event.stopPropagation();
                                 onKeyReleased(event);
@@ -697,8 +706,8 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
                         selectedItemReg = null;
                     }
                     onItemSelected = aValue;
-                    if (onItemSelected && this.addSelectionHandler) {
-                        selectedItemReg = this.addSelectionHandler(function (event) {
+                    if (onItemSelected && self.addSelectionHandler) {
+                        selectedItemReg = self.addSelectionHandler(function (event) {
                             if (onItemSelected) {
                                 onItemSelected(event);
                             }
@@ -719,8 +728,8 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
                         valueChangeReg = null;
                     }
                     valueChange = aValue;
-                    if (valueChange && this.addValueChangeHandler) {
-                        valueChangeReg = this.addValueChangeHandler(function (event) {
+                    if (valueChange && self.addValueChangeHandler) {
+                        valueChangeReg = self.addValueChangeHandler(function (event) {
                             if (valueChange) {
                                 valueChange(event);
                             }

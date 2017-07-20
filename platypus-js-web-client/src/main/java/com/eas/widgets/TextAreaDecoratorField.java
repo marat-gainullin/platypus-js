@@ -9,8 +9,8 @@ public class TextAreaDecoratorField extends ValueDecoratorField implements HasSc
 
     public TextAreaDecoratorField() {
         super(new TextArea());
-        //((TextArea) decorated).getElement().getStyle().setProperty("wordWrap", "normal");
-        ((TextArea) decorated).getElement().getStyle().setProperty("resize", "none");
+        //((TextArea) decorated).element.style.setProperty("wordWrap", "normal");
+        ((TextArea) decorated).element.style.setProperty("resize", "none");
     }
 
     @Override

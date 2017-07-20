@@ -42,15 +42,15 @@ public class JsUi {
 
     public static void selectFile(final Callback<JavaScriptObject, String> aCallback, String aFileTypes) {
         final FileUpload fu = new FileUpload();
-        fu.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
-        fu.setWidth("10px");
-        fu.setHeight("10px");
-        fu.getElement().getStyle().setLeft(-100, Style.Unit.PX);
-        fu.getElement().getStyle().setTop(-100, Style.Unit.PX);
+        fu.element.style.position = 'absolute';
+        fu.width ="10px");
+        fu.height ="10px");
+        fu.element.style.setLeft(-100+ 'px');
+        fu.element.style.top =-100+ 'px');
         fu.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                Utils.JsObject jsFu = fu.getElement().cast();
+                Utils.JsObject jsFu = fu.element.cast();
                 JavaScriptObject oFiles = jsFu.getJs("files");
                 if (oFiles != null) {
                     JsArray<JavaScriptObject> jsFiles = oFiles.cast();
@@ -99,13 +99,13 @@ public class JsUi {
 
     public static void selectColor(String aOldValue, final Callback<String, String> aCallback) {
         final TextBox tb = new TextBox();
-        tb.getElement().setAttribute("type", "color");
-        tb.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
-        tb.setWidth("10px");
-        tb.setHeight("10px");
+        tb.element.setAttribute("type", "color");
+        tb.element.style.position = 'absolute';
+        tb.width ="10px");
+        tb.height ="10px");
         tb.setValue(aOldValue);
-        tb.getElement().getStyle().setLeft(-100, Style.Unit.PX);
-        tb.getElement().getStyle().setTop(-100, Style.Unit.PX);
+        tb.element.style.setLeft(-100+ 'px');
+        tb.element.style.top =-100+ 'px');
 
         tb.addChangeHandler(new ChangeHandler() {
 
@@ -124,7 +124,7 @@ public class JsUi {
             @Override
             public void execute() {
                 tb.setFocus(true);
-                tb.getElement().<XElement>cast().click();
+                tb.element.<XElement>cast().click();
                 Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
                     @Override
                     public boolean execute() {

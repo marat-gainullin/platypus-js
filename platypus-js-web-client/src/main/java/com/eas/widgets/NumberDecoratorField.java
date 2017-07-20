@@ -23,29 +23,29 @@ public class NumberDecoratorField extends ValueDecoratorField {
 
     public NumberDecoratorField() {
         super(Utils.isMobile() ? new NumberField() : new FormattedField(FormattedField.NUMBER));
-        decorated.getElement().addClassName("spin-field");
+        decorated.element.classList.add("spin-field");
         element.setClassName("form-control");
         left.setClassName("spin-left");
-        left.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        left.getStyle().setTop(0, Style.Unit.PX);
-        left.getStyle().setHeight(100, Style.Unit.PCT);
-        left.getStyle().setPosition(Style.Position.RELATIVE);
+        left.getStyle().display ='inline-block');
+        left.getStyle().top =0+ 'px');
+        left.getStyle().height =100 + '%');
+        left.getStyle().position = 'relative';
         // FireFox hides this without such setting because of place in DOM.
         // Place in DOM is after input element because of FireFox's float elements behaviour.
         left.getStyle().setZIndex(1);
 
-        right.addClassName("spin-right");
-        right.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        right.getStyle().setTop(0, Style.Unit.PX);
-        right.getStyle().setHeight(100, Style.Unit.PCT);
-        right.getStyle().setPosition(Style.Position.RELATIVE);
+        right.classList.add("spin-right");
+        right.getStyle().display ='inline-block');
+        right.getStyle().top =0+ 'px');
+        right.getStyle().height =100 + '%');
+        right.getStyle().position = 'relative';
         // FireFox hides this without such setting because of place in DOM.
         // Place in DOM is after input element because of FireFox's float elements behaviour.
         right.getStyle().setZIndex(1);
 
         CommonResources.INSTANCE.commons().ensureInjected();
-        left.addClassName(CommonResources.INSTANCE.commons().unselectable());
-        right.addClassName(CommonResources.INSTANCE.commons().unselectable());
+        left.classList.add(CommonResources.INSTANCE.commons().unselectable());
+        right.classList.add(CommonResources.INSTANCE.commons().unselectable());
 
         left.<XElement>cast().addEventListener(BrowserEvents.CLICK, new XElement.NativeHandler() {
 

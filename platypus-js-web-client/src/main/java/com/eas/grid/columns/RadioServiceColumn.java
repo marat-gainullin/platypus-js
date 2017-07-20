@@ -14,7 +14,7 @@ public class RadioServiceColumn extends Column {
 
     @Override
     public void setWidth(double aValue) {
-        super.setWidth(aValue);
+        super.width =aValue);
         minWidth = width;
         maxWidth = width;
     }

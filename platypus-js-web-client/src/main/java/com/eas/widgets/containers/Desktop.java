@@ -38,16 +38,6 @@ public class Desktop extends Anchors {
         return windows;
     }
 
-    public List<HasPublished> getPublishedManaged() {
-        List<HasPublished> res = new ArrayList<>();
-        for (Widget w : children) {
-            if (w instanceof HasPublished && w instanceof WindowPanel) {
-                res.add((HasPublished) w);
-            }
-        }
-        return res;
-    }
-
     public void minimizeAll() {
         for (Widget w : children) {
             if (w instanceof WindowPanel) {
@@ -127,7 +117,7 @@ public class Desktop extends Anchors {
 
     @Override
     public boolean remove(Widget w) {
-        if (w.getParent() == this) {
+        if (w.parent == this) {
             if (w instanceof WindowPanel) {
                 ((WindowPanel) w).close();
                 return true;
@@ -162,11 +152,6 @@ public class Desktop extends Anchors {
             consideredPosition = new Point(consideredPosition.getX(), 0);// setY(0)
         }
         consideredPosition = consideredPosition.plus(new Point(DEFAULT_WINDOWS_SPACING_X, DEFAULT_WINDOWS_SPACING_Y));
-    }
-
-    @Override
-    protected void publish(JavaScriptObject aValue) {
-        publish(this, aValue);
     }
 
     private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{

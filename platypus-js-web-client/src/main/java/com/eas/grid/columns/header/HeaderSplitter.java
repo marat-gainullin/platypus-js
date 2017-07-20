@@ -39,8 +39,8 @@ public class HeaderSplitter {
         for (int i = 0; i < splittedLeaves.size(); i++) {
             HeaderNode leaf = splittedLeaves.get(i);
             HeaderNode parent = leaf;
-            while (parent.getParent() != null) {
-                parent = parent.getParent();
+            while (parent.parent != null) {
+                parent = parent.parent;
             }
             if (!met.contains(parent)) {
                 met.add(parent);

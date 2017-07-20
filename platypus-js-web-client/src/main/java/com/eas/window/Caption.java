@@ -41,28 +41,28 @@ public class Caption implements HasHTML {
     public Caption(WindowPanel aWindow) {
         super();
         element.setClassName(CAPTION_CLASS_NAME);
-        btnMinimize.addClassName(WINDOW_TOOL_CLASS_NAME + "-minimize");
-        btnMaximize.addClassName(WINDOW_TOOL_CLASS_NAME + "-maximize");
-        btnRestore.addClassName(WINDOW_TOOL_CLASS_NAME + "-restore");
-        btnClose.addClassName(WINDOW_TOOL_CLASS_NAME + "-close");
+        btnMinimize.classList.add(WINDOW_TOOL_CLASS_NAME + "-minimize");
+        btnMaximize.classList.add(WINDOW_TOOL_CLASS_NAME + "-maximize");
+        btnRestore.classList.add(WINDOW_TOOL_CLASS_NAME + "-restore");
+        btnClose.classList.add(WINDOW_TOOL_CLASS_NAME + "-close");
         for (Element e : new Element[]{btnMinimize, btnMaximize, btnRestore, btnClose}) {
-            e.getStyle().setMargin(0, Style.Unit.PX);
-            e.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-            e.addClassName(WINDOW_TOOL_CLASS_NAME);
+            e.getStyle().setMargin(0+ 'px');
+            e.getStyle().display ='inline-block');
+            e.classList.add(WINDOW_TOOL_CLASS_NAME);
         }
 
-        label.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        label.getStyle().setPosition(Style.Position.RELATIVE);
+        label.getStyle().display ='inline-block');
+        label.getStyle().position = 'relative';
         label.getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
         label.setClassName("window-caption-text");// to implicitly remove
         // gwt-HTML class
 
-        tools.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+        tools.getStyle().display ='inline-block');
         tools.getStyle().setFloat(Style.Float.RIGHT);
         tools.getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
         tools.setClassName("window-caption-tools");
 
-        element.getStyle().setPosition(Style.Position.RELATIVE);
+        element.getStyle().position = 'relative';
 
         element.appendChild(tools);
         element.appendChild(label);
@@ -206,9 +206,9 @@ public class Caption implements HasHTML {
     }
 
     public void updateToolsVisibility() {
-        btnMinimize.getStyle().setDisplay(window.isMinimizable() && !window.isMinimized() ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
-        btnMaximize.getStyle().setDisplay(window.isMaximizable() && !window.isMaximized() && !window.isMinimized() ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
-        btnRestore.getStyle().setDisplay(window.isMinimized() || window.isMaximized() ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
-        btnClose.getStyle().setDisplay(window.isClosable() ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
+        btnMinimize.getStyle().display =window.isMinimizable() && !window.isMinimized() ? 'inline-block' : 'none');
+        btnMaximize.getStyle().display =window.isMaximizable() && !window.isMaximized() && !window.isMinimized() ? 'inline-block' : 'none');
+        btnRestore.getStyle().display =window.isMinimized() || window.isMaximized() ? 'inline-block' : 'none');
+        btnClose.getStyle().display =window.isClosable() ? 'inline-block' : 'none');
     }
 }

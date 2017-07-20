@@ -74,7 +74,7 @@ public class TimePicker extends ValueWidget {
         textBlock.appendChild(txtMinute);
         textBlock.appendChild(separatorTime2);
         textBlock.appendChild(txtSecond);
-        textBlock.getStyle().setDisplay(Style.Display.BLOCK);
+        textBlock.getStyle().display =Style.Display.BLOCK);
         widgetContainer.appendChild(textBlock);
 
         Element lowerBtnBlock = Document.get().createDivElement();
@@ -218,12 +218,12 @@ public class TimePicker extends ValueWidget {
         } else {
             dateBlock.setInnerText(Localization.get("date") + fmt.format(currentDate));
         }
-        element.getStyle().setHeight(100, Style.Unit.PCT);
+        element.getStyle().height =100 + '%');
         showing = true;
     }
 
     public void hide() {
-        element.getStyle().setHeight(0, Style.Unit.PCT);
+        element.getStyle().height =0 + '%');
         showing = false;
     }
 

@@ -155,13 +155,13 @@ public class Tabs extends Borders implements HasSelectionHandlers<Widget>, HasCh
     
     @Override
     public int getTop(Widget aWidget) {
-        assert aWidget.getParent() == this : "widget should be a child of this container";
-        return tabs.getElement().getOffsetTop();
+        assert aWidget.parent == this : "widget should be a child of this container";
+        return tabs.element.getOffsetTop();
     }
 
     @Override
     public int getLeft(Widget aWidget) {
-        assert aWidget.getParent() == this : "widget should be a child of this container";
+        assert aWidget.parent == this : "widget should be a child of this container";
         return 0;
     }
 

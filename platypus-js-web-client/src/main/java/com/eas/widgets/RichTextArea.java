@@ -126,13 +126,13 @@ public class RichTextArea extends ValueWidget implements HasScroll, HorizontalSc
         addTool(btnBackground, null, "editor-background-color", Localization.get("background.color"));
         addTool(btnForeground, null, "editor-foreground-color", Localization.get("foreground.color"));
         addControl(fonts, null, "");
-        fonts.getElement().getStyle().setWidth(120, Style.Unit.PX);
+        fonts.element.style.width =120+ 'px');
         addControl(fontSizes, null, "");
-        fontSizes.getElement().getStyle().setWidth(80, Style.Unit.PX);
+        fontSizes.element.style.width =80+ 'px');
 
         textContainer.setClassName("form-control");
-        textContainer.addClassName(CommonResources.INSTANCE.commons().borderSized());
-        element.appendChild(toolbar.getElement());
+        textContainer.classList.add(CommonResources.INSTANCE.commons().borderSized());
+        element.appendChild(toolbar.element);
         element.appendChild(textContainer);
 
         btnBold.addActionHandler(new ActionHandler() {
@@ -555,7 +555,7 @@ public class RichTextArea extends ValueWidget implements HasScroll, HorizontalSc
 
     private void addControl(Widget aWidget, ButtonGroup aBtnGroup, String aClassName) {
         if (aClassName != null && !aClassName.isEmpty()) {
-            aWidget.getElement().setClassName(aClassName);
+            aWidget.element.setClassName(aClassName);
         }
         if (aBtnGroup != null) {
             aBtnGroup.add(aWidget);
