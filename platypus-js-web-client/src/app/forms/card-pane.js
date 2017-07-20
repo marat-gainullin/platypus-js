@@ -1,7 +1,9 @@
 define([
+    '../id',
     '../extend',
     './container',
     './item-event'], function (
+        Id,
         extend,
         Container,
         SelectionEvent) {
@@ -74,9 +76,12 @@ define([
                     }
                     superAdd(w);
                     cards.set(card, w);
+                    w.card = cards;
                 } else {
                     var index = indexOrCard;
                     superAdd(w, index);
+                    w.card = 'card-'+Id.generate();
+                    cards.set(w.card, w);
                 }
                 if (!visibleWidget) {
                     showWidget(w);
@@ -102,23 +107,14 @@ define([
 
         var superRemove = this.remove;
         function remove(widgetOrIndex) {
-            if (isNaN(widgetOrIndex)) {
-                var w = widgetOrIndex;
-                removeCard(w);
-                var removed = superRemove(w);
-                if (removed && visibleWidget === w) {
+            var removed = superRemove(widgetOrIndex);
+            if(removed){
+                removeCard(removed);
+                if (visibleWidget === removed) {
                     visibleWidget = null;
                 }
-                return removed;
-            } else {
-                var index = widgetOrIndex;
-                var w = superRemove(index);
-                removeCard(w);
-                if (visibleWidget === w) {
-                    visibleWidget = null;
-                }
-                return w;
             }
+            return removed;
         }
         Object.defineProperty(this, 'remove', {
             get: function () {
@@ -129,6 +125,7 @@ define([
         function removeCard(w) {
             if (w && w.card) {
                 cards.remove(w.card);
+                delete w.card;
             }
         }
 
