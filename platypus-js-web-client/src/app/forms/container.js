@@ -1,4 +1,10 @@
-define(['../extend', './widget', './container-event'], function (extend, Widget, ContainerEvent) {
+define([
+    '../extend',
+    './widget',
+    './container-event'], function (
+        extend,
+        Widget,
+        ContainerEvent) {
     function Container() {
         Widget.call(this);
         var self = this;
@@ -76,7 +82,7 @@ define(['../extend', './widget', './container-event'], function (extend, Widget,
             if (w instanceof Widget)
                 idx = children.indexOf(w);
             else
-                idx = w;            
+                idx = w;
             if (idx >= 0 && idx < children.length) {
                 var removed = children.splice(idx, 1);
                 removed[0].parent = null;
@@ -123,6 +129,7 @@ define(['../extend', './widget', './container-event'], function (extend, Widget,
         }
 
         Object.defineProperty(this, 'addAddHandler', {
+            configurable: true,
             get: function () {
                 return addAddHandler;
             }
@@ -147,6 +154,7 @@ define(['../extend', './widget', './container-event'], function (extend, Widget,
         }
 
         Object.defineProperty(this, 'addRemoveHandler', {
+            configurable: true,
             get: function () {
                 return addRemoveHandler;
             }

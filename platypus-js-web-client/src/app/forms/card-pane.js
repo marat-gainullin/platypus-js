@@ -68,24 +68,31 @@ define([
             if (w) {
                 if (w.parent === self)
                     throw 'A widget is already added to this container';
-                format(w);
-                if (isNaN(indexOrCard)) {
-                    var card = indexOrCard;
-                    if (cards.has(card)) {
-                        superRemove(cards.get(card));
+                var card;
+                var index;
+                if(arguments.length < 2){
+                    card = 'card - ' + Id.generate();
+                    index = self.count;
+                } else{
+                    if (isNaN(indexOrCard)) {
+                        card = indexOrCard;
+                        index = self.count;
+                    } else {
+                        card = 'card-' + Id.generate();
+                        index = indexOrCard;
                     }
-                    superAdd(w);
-                    cards.set(card, w);
-                    w['-platypus-ui-card'] = cards;
-                } else {
-                    var index = indexOrCard;
-                    superAdd(w, index);
-                    w['-platypus-ui-card'] = 'card-' + Id.generate();
-                    cards.set(w['-platypus-ui-card'], w);
                 }
+                if (cards.has(card)) {
+                    superRemove(cards.get(card));
+                }
+                superAdd(w, index);
+                cards.set(card, w);
+                w['-platypus-ui-card'] = card;
+                format(w);
                 if (!visibleWidget) {
                     showWidget(w);
                 }
+                return card;
             }
         }
         Object.defineProperty(this, 'add', {
