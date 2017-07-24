@@ -2,7 +2,7 @@ define([
     'common-utils/color',
     'common-utils/cursor',
     'common-utils/font',
-    './key-codes'], function (
+    './forms/key-codes'], function (
         Color,
         Cursor,
         Font,

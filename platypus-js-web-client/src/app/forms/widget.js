@@ -1,11 +1,23 @@
-define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent, ComponentEvent, ActionEvent) {
+define([
+    '../ui',
+    './mouse-event',
+    './component-event',
+    '../invoke'], function (
+        Ui,
+        MouseEvent,
+        ComponentEvent,
+        ActionEvent,
+        Invoke) {
     function Widget(element) {
         if (!(this instanceof Widget))
             throw 'Use new with this constructor function';
+
         var self = this;
+
         if (!element)
             element = document.createElement('div');
         element['p-widget'] = this;
+        element.classList.add('p-widget');
 
         // TODO: Ensure all widgets have a class 'border-sized' or something as 'widget' with border sizing setted up.
 
@@ -14,6 +26,15 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
         var menu;
         var enabled = true;
         var name;
+        var background;
+        var foreground;
+        var opaque;
+        var cursor;
+        var error;
+        var toolTipText;
+        var nextFocusableComponent;
+        var focusable = false;
+        var font = null;
 
         Object.defineProperty(this, 'visibleDisplay', {
             get: function () {
@@ -67,6 +88,209 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
                 element.title = aValue;
             }
         });
+        Object.defineProperty(this, 'font', {
+            get: function () {
+                return font;
+            },
+            set: function (aValue) {
+                if(font !== aValue){
+                    font = aValue;
+                    if (font) {
+                        element.style.fontFamily = font.family;
+                        element.style.fontSize = font.size + 'pt';
+                        if (font.bold) {
+                            element.style.fontWeight = 'bold';
+                        } else {
+                            element.style.fontWeight = 'normal';
+                        }
+                        if (font.italic) {
+                            element.style.fontStyle = 'italic';
+                        } else {
+                            element.style.fontStyle = 'normal';
+                        }
+                    } else {
+                        element.style.fontFamily = '';
+                        element.style.fontSize = '';
+                        element.style.fontWeight = '';
+                        element.style.fontStyle = '';
+                    }
+                }
+            }
+        });
+
+        function applyBackground() {
+            if (opaque)
+                element.style.background = background && background.toStyled ? background.toStyled() : background;
+            else
+                element.style.background = 'none';
+        }
+
+        Object.defineProperty(this, 'opaque', {
+            get: function () {
+                return opaque;
+            },
+            set: function (aValue) {
+                if (opaque !== aValue) {
+                    opaque = aValue;
+                    applyBackground();
+                }
+            }
+        });
+        Object.defineProperty(this, 'background', {
+            get: function () {
+                return background;
+            },
+            set: function (aValue) {
+                if (background !== aValue) {
+                    background = aValue;
+                    applyBackground();
+                }
+            }
+        });
+        Object.defineProperty(this, 'foreground', {
+            get: function () {
+                return foreground;
+            },
+            set: function (aValue) {
+                foreground = aValue;
+                element.style.color = foreground && foreground.toStyled ? foreground.toStyled() : foreground;
+            }
+        });
+        Object.defineProperty(this, 'cursor', {
+            get: function () {
+                return cursor;
+            },
+            set: function (aValue) {
+                cursor = aValue;
+                element.style.cursor = cursor;
+            }
+        });
+        Object.defineProperty(this, 'error', {
+            get: function () {
+                return error;
+            },
+            set: function (aValue) {
+                error = aValue;
+            }
+        });
+        Object.defineProperty(this, 'toolTipText', {
+            get: function () {
+                return toolTipText;
+            },
+            set: function (aValue) {
+                if(toolTipText !== aValue){
+                    toolTipText = aValue;
+                    element.title = toolTipText;
+                }
+            }
+        });
+        Object.defineProperty(this, 'nextFocusableComponent', {
+            get: function () {
+                return nextFocusableComponent;
+            },
+            set: function (aValue) {
+                if(nextFocusableComponent !== aValue){
+                    nextFocusableComponent = aValue;
+                }
+            }
+        });
+        Object.defineProperty(this, 'focusable', {
+            get: function () {
+                return focusable;
+            },
+            set: function (aValue) {
+                if(focusable !== aValue){
+                    focusable = aValue;
+                }
+            }
+        });
+        // TODO: Check 'left', 'top', 'width', 'height' properties and
+        // 'getLeft', 'getTop', 'ajustWidth' and 'ajustHeight' methods against all containers.
+        Object.defineProperty(this, "left", {
+            get: function () {
+                if (isAttached()) {
+                    if (parent && parent.getLeft) {
+                        return parent.getLeft(self);
+                    } else {
+                        return element.offsetLeft;
+                    }
+                } else {
+                    return parseFloat(element.style.left);
+                }
+            },
+            set: function (aValue) {
+                if (aValue !== null) {
+                    if (parent && parent.ajustLeft)
+                        parent.ajustLeft(self, aValue);
+                    else
+                        element.style.left = aValue + 'px';
+                } else {
+                    element.style.left = null;
+                }
+            }
+        });
+        Object.defineProperty(this, "top", {
+            get: function () {
+                if (isAttached()) {
+                    if (parent && parent.getTop) {
+                        return parent.getTop(self);
+                    } else {
+                        return element.offsetTop;
+                    }
+                } else {
+                    return parseFloat(element.style.top);
+                }
+            },
+            set: function (aValue) {
+                if (aValue !== null) {
+                    if (parent && parent.ajustTop)
+                        parent.ajustTop(self, aValue);
+                    else
+                        element.style.top = aValue + 'px';
+                } else {
+                    element.style.top = null;
+                }
+            }
+        });
+        Object.defineProperty(this, "width", {
+            get: function () {
+                if (isAttached())
+                    return element.offsetWidth;
+                else {
+                    return parseFloat(element.style.width);
+                }
+            },
+            set: function (aValue) {
+                if (aValue !== null) {
+                    if (parent && parent.ajustWidth) {
+                        parent.ajustWidth(self, aValue);
+                    } else {
+                        element.style.width = aValue + 'px';
+                    }
+                } else {
+                    element.style.width = null;
+                }
+            }
+        });
+        Object.defineProperty(this, "height", {
+            get: function () {
+                if (isAttached())
+                    return element.offsetHeight;
+                else
+                    return parseFloat(element.style.height);
+            },
+            set: function (aValue) {
+                if (aValue !== null) {
+                    if (parent && parent.ajustHeight) {
+                        parent.ajustHeight(self, aValue);
+                    } else {
+                        element.style.height = aValue + 'px';
+                    }
+                } else {
+                    element.style.height = null;
+                }
+            }
+        });
         var menuTriggerReg = null;
         Object.defineProperty(this, 'componentPopupMenu', {
             get: function () {
@@ -105,7 +329,9 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
         function fireActionPerformed() {
             var event = new ActionEvent(self);
             actionHandlers.forEach(function (h) {
-                h(event);
+                Invoke.later(function () {
+                    h(event);
+                });
             });
         }
 
@@ -240,11 +466,11 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
         });
 
         function isAttached() {
-            var cursor = element;
-            while (cursor && element !== document.body) {
-                cursor = cursor.parentElement;
+            var cursorElement = element;
+            while (cursorElement && element !== document.body) {
+                cursorElement = cursorElement.parentElement;
             }
-            return !!cursor;
+            return !!cursorElement;
         }
 
         Object.defineProperty(this, 'attached', {
@@ -264,7 +490,6 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
                     } else {
                         element.style.display = 'none';
                     }
-                    var event = new ComponentEvent(self);
                     if (aValue) {
                         fireShown();
                     } else {
@@ -274,14 +499,34 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
             }
         });
 
+        function focus() {
+            element.focus();
+        }
+        Object.defineProperty(this, 'focus', {
+            get: function () {
+                return focus;
+            }
+        });
+        Object.defineProperty(this, 'component', {
+            get: function () {
+                return null;
+            }
+        });
+
         function fireShown() {
+            var event = new ComponentEvent(self);
             showHandlers.forEach(function (h) {
-                h(event);
+                Invoke.later(function () {
+                    h(event);
+                });
             });
         }
         function fireHidden() {
+            var event = new ComponentEvent(self);
             hideHandlers.forEach(function (h) {
-                h(event);
+                Invoke.later(function () {
+                    h(event);
+                });
             });
         }
 
@@ -740,4 +985,5 @@ define(['../ui', './mouse-event', './component-event'], function (Ui, MouseEvent
             }
         });
     }
+    return Widget;
 });

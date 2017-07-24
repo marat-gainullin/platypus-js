@@ -1,16 +1,15 @@
 define([
     '../extend',
-    './container'], function (
+    './container',
+    '../id'
+], function (
         extend,
-        Container) {
+        Container,
+        Id) {
     function Flow(hgap, vgap) {
         Container.call(this);
 
         var self = this;
-
-        this.element.style.whiteSpace = 'normal';
-        this.element.style.lineHeight = 0 + 'px';
-        this.element.style.overflow = 'auto';
 
         if (arguments.length < 2) {
             vgap = 0;
@@ -20,15 +19,30 @@ define([
             hgap = 0;
         }
 
+        this.element.classList.add('p-flow');
+
+        this.element.id = Id.generate();
+
+        var style = document.createElement('style');
+        function formatChildren() {
+            style.innerHTML =
+                    'div#' + self.element.id + ' div {' +
+                    'margin-left: ' + hgap + 'px;' +
+                    'margin-top: ' + vgap + 'px;' +
+                    'display: ' + 'inline-block;' +
+                    'verticalAlign: bottom;' +
+                    '}';
+        }
+        formatChildren();
+        this.element.appendChild(style);
+
         Object.defineProperty(this, "hgap", {
             get: function () {
                 return hgap;
             },
             set: function (aValue) {
                 hgap = aValue;
-                self.forEach(function (w) {
-                    w.element.style.marginLeft = hgap + 'px';
-                });
+                formatChildren();
             }
         });
         Object.defineProperty(this, "vgap", {
@@ -37,19 +51,15 @@ define([
             },
             set: function (aValue) {
                 vgap = aValue;
-                self.forEach(function (w) {
-                    w.element.style.marginTop = vgap + 'px';
-                });
+                formatChildren();
             }
         });
-
 
         var superAdd = this.add;
         function add(w, beforeIndex) {
             if (w) {
                 if (w.parent === self)
                     throw 'A widget already added to this container';
-                format(w);
                 superAdd(w, beforeIndex);
             }
         }
@@ -58,14 +68,6 @@ define([
                 return add;
             }
         });
-
-        function format(w) {
-            var ws = w.element.style;
-            ws.marginLeft = hgap + 'px';
-            ws.marginTop = vgap + 'px';
-            ws.display = 'inline-block';
-            ws.verticalAlign = 'bottom';
-        }
 
         function getTop(aWidget) {
             if (aWidget.parent !== this)

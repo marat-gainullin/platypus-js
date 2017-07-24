@@ -1,4 +1,18 @@
-define(['./id', './logger', './managed', './orderer', './client', './extend', './invoke'], function (Id, Logger, M, Orderer, Client, extend, Invoke) {
+define([
+    './id',
+    './logger',
+    './managed',
+    './orderer',
+    './client',
+    './extend',
+    './invoke'], function (
+        Id,
+        Logger,
+        M,
+        Orderer,
+        Client,
+        extend,
+        Invoke) {
     function Query(entityName) {
         function prepareCommandRequest(parameters) {
             var command = {
@@ -42,6 +56,10 @@ define(['./id', './logger', './managed', './orderer', './client', './extend', '.
         Array.apply(this);
         var self = this;
 
+        // Entity's chnge log is used as well ass model.changeLog to 
+        // accomplish future changeLog replay while revert feature.
+        var changeLog = [];
+
         var scalarNavigationProperties = new Map();
         var collectionNavigationProperties = new Map();
 
@@ -60,7 +78,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend', '.
             collectionNavigationProperties.clear();
         }
 
-        var _onRequeried = null;
+        var onRequery = null;
         var lastSnapshot = [];
         var title = '';
         var name = '';
@@ -142,7 +160,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend', '.
                 throw "Can't start new request, while previous request is in progress";
             if (valid)
                 throw "Can't start request for valid entity";
-            if(keysNames.size === 0)
+            if (keysNames.size === 0)
                 Logger.warning("'keysNames' for '" + name + "' are absent. Keys auto generation and 'findByKey()' will not work properly");
             pendingOnSuccess = _onSuccess;
             pendingOnFailure = _onFailure;
@@ -158,8 +176,11 @@ define(['./id', './logger', './managed', './orderer', './client', './extend', '.
                 if (onSuccess) {
                     onSuccess();
                 }
-                if (_onRequeried)
-                    _onRequeried();
+                if (onRequery) {
+                    Invoke.later(function () {
+                        onRequery();
+                    });
+                }
             }, function (reason) {
                 valid = true;
                 var onFailure = pendingOnFailure;
@@ -356,7 +377,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend', '.
         var justInsertedChange = null;
         var orderers = {};
 
-        var _onChange = null;
+        var onChange = null;
 
         function managedOnChange(aSubject, aChange) {
             if (!tryToComplementInsert(aSubject, aChange)) {
@@ -367,6 +388,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend', '.
                     updateChange.keys[keyName] = keyName === aChange.propertyName ? aChange.oldValue : aChange.newValue;
                 });
                 updateChange.data[aChange.propertyName] = aChange.newValue;
+                changeLog.push(updateChange);
                 model.changeLog.push(updateChange);
             }
             Object.keys(orderers).forEach(function (aOrdererKey) {
@@ -380,12 +402,10 @@ define(['./id', './logger', './managed', './orderer', './client', './extend', '.
             if (isPk(aChange.propertyName)) {
                 fireOppositeScalarsSelfCollectionsChanges(aSubject, aChange);
             }
-            if (_onChange) {
-                try {
-                    _onChange(aChange);
-                } catch (e) {
-                    Logger.severe(e);
-                }
+            if (onChange) {
+                Invoke.later(function () {
+                    onChange(aChange);
+                });
             }
         }
         function managedBeforeChange(aSubject, aChange) {
@@ -440,8 +460,8 @@ define(['./id', './logger', './managed', './orderer', './client', './extend', '.
             });
         }
 
-        var _onInserted = null;
-        var _onDeleted = null;
+        var onInsert = null;
+        var onDelete = null;
 
         M.manageArray(self, {
             spliced: function (added, deleted) {
@@ -455,6 +475,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend', '.
                     for (var na in aAdded) {
                         justInsertedChange.data[na] = aAdded[na];
                     }
+                    changeLog.push(justInsertedChange);
                     model.changeLog.push(justInsertedChange);
                     for (var aOrdererKey in orderers) {
                         var aOrderer = orderers[aOrdererKey];
@@ -475,6 +496,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend', '.
                         // Tricky processing of primary keys modification case.
                         deleteChange.keys[keyName] = aDeleted[keyName];
                     });
+                    changeLog.push(deleteChange);
                     model.changeLog.push(deleteChange);
                     for (var aOrdererKey in orderers) {
                         var aOrderer = orderers[aOrdererKey];
@@ -485,25 +507,21 @@ define(['./id', './logger', './managed', './orderer', './client', './extend', '.
                     M.unlistenable(aDeleted);
                     M.unmanageObject(aDeleted);
                 });
-                if (_onInserted && added.length > 0) {
-                    try {
-                        _onInserted({
+                if (onInsert && added.length > 0) {
+                    Invoke.later(function () {
+                        onInsert({
                             source: self,
                             items: added
                         });
-                    } catch (e) {
-                        Logger.severe(e);
-                    }
+                    });
                 }
-                if (_onDeleted && deleted.length > 0) {
-                    try {
-                        _onDeleted({
+                if (onDelete && deleted.length > 0) {
+                    Invoke.later(function () {
+                        onDelete({
                             source: self,
                             items: deleted
                         });
-                    } catch (e) {
-                        Logger.severe(e);
-                    }
+                    });
                 }
                 M.fire(self, {
                     source: self,
@@ -511,23 +529,21 @@ define(['./id', './logger', './managed', './orderer', './client', './extend', '.
                 });
             }
         });
-        var _onScrolled = null;
+        var onScroll = null;
         var cursor = null;
         function scrolled(aValue) {
             var oldCursor = cursor;
             var newCursor = aValue;
             cursor = aValue;
-            if (_onScrolled) {
-                try {
-                    _onScrolled({
+            if (onScroll) {
+                Invoke.later(function () {
+                    onScroll({
                         source: self,
                         propertyName: 'cursor',
                         oldValue: oldCursor,
                         newValue: newCursor
                     });
-                } catch (e) {
-                    Logger.severe(e);
-                }
+                });
             }
             M.fire(self, {
                 source: self,
@@ -561,7 +577,7 @@ define(['./id', './logger', './managed', './orderer', './client', './extend', '.
         function findByKey(aKeyValue) {
             if (keysNames.size > 0) {
                 var criteria = {};
-                keysNames.forEach(function(keyName){
+                keysNames.forEach(function (keyName) {
                     criteria[keyName] = aKeyValue;
                 });
                 var found = find(criteria);
@@ -621,7 +637,8 @@ define(['./id', './logger', './managed', './orderer', './client', './extend', '.
             });
         }
 
-        function takeSnapshot() {
+        // TODO: Eliminatre snapshots and transform snapshots feature.
+        function commit() {
             lastSnapshot = [];
             self.forEach(function (aItem) {
                 var cloned = {};
@@ -634,12 +651,15 @@ define(['./id', './logger', './managed', './orderer', './client', './extend', '.
                 }
                 lastSnapshot.push(cloned);
             });
+            changeLog = [];
         }
 
-        function applyLastSnapshot() {
+        // TODO: Change revert implementation to changeLog undo.
+        function revert() {
             if (lastSnapshot) {
                 acceptData(lastSnapshot, true);
             }
+            changeLog = [];
         }
 
         function addInRelation(relation) {
@@ -668,14 +688,14 @@ define(['./id', './logger', './managed', './orderer', './client', './extend', '.
                 scrolled(aValue);
             }
         });
-        Object.defineProperty(this, 'applyLastSnapshot', {
+        Object.defineProperty(this, 'revert', {
             get: function () {
-                return applyLastSnapshot;
+                return revert;
             }
         });
-        Object.defineProperty(this, 'takeSnapshot', {
+        Object.defineProperty(this, 'commit', {
             get: function () {
-                return takeSnapshot;
+                return commit;
             }
         });
         Object.defineProperty(this, 'find', {
@@ -700,50 +720,50 @@ define(['./id', './logger', './managed', './orderer', './client', './extend', '.
         });
         Object.defineProperty(this, 'onScroll', {
             get: function () {
-                return _onScrolled;
+                return onScroll;
             },
             set: function (aValue) {
-                _onScrolled = aValue;
+                onScroll = aValue;
             }
         });
         Object.defineProperty(this, 'onInsert', {
             get: function () {
-                return _onInserted;
+                return onInsert;
             },
             set: function (aValue) {
-                _onInserted = aValue;
+                onInsert = aValue;
             }
         });
         Object.defineProperty(this, 'onDelete', {
             get: function () {
-                return _onDeleted;
+                return onDelete;
             },
             set: function (aValue) {
-                _onDeleted = aValue;
+                onDelete = aValue;
             }
         });
         Object.defineProperty(this, 'onChange', {
             get: function () {
-                return _onChange;
+                return onChange;
             },
             set: function (aValue) {
-                _onChange = aValue;
+                onChange = aValue;
             }
         });
         Object.defineProperty(this, 'onRequeried', {
             get: function () {
-                return _onRequeried;
+                return onRequery;
             },
             set: function (aValue) {
-                _onRequeried = aValue;
+                onRequery = aValue;
             }
         });
         Object.defineProperty(this, 'onRequery', {
             get: function () {
-                return _onRequeried;
+                return onRequery;
             },
             set: function (aValue) {
-                _onRequeried = aValue;
+                onRequery = aValue;
             }
         });
         Object.defineProperty(this, 'elementClass', {

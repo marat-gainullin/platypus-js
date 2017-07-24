@@ -110,14 +110,14 @@ define(['./invoke', './managed', './client', './logger'], function(Invoke, M, Cl
         function revert() {
             changeLog = [];
             entities.forEach(function (e) {
-                e.applyLastSnapshot();
+                e.revert();
             });
         }
 
         function commited() {
             changeLog = [];
             entities.forEach(function (e) {
-                e.takeSnapshot();
+                e.commit();
             });
         }
 
@@ -127,6 +127,7 @@ define(['./invoke', './managed', './client', './logger'], function(Invoke, M, Cl
 
         function save(onSuccess, onFailure) {
             if (onSuccess) {
+                // Warning! We have to support both per entitiy changeLog and model's changeLog, because of order of changes.
                 Client.requestCommit(changeLog, function (touched) {
                     commited();
                     onSuccess(touched);
@@ -135,7 +136,7 @@ define(['./invoke', './managed', './client', './logger'], function(Invoke, M, Cl
                     onFailure(e);
                 });
             } else {
-                throw 'onSuccess is required argument';
+                throw "'onSuccess' is required argument";
             }
         }
 

@@ -1,4 +1,4 @@
-define(['./event'], function (Event) {
+define(['./event', '../extend'], function (Event, extend) {
     function KeyEvent(aWidget, aEvent) {
         Event.call(this, aWidget, aEvent.target, aEvent);
         Object.defineProperty(this, "altDown", {

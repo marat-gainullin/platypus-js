@@ -1,16 +1,16 @@
 define(function () {
     function Event(source, target, event) {
-        Object.defineProperty(module, 'event', {
+        Object.defineProperty(this, 'event', {
             get: function () {
                 return event;
             }
         });
-        Object.defineProperty(module, 'source', {
+        Object.defineProperty(this, 'source', {
             get: function () {
                 return source;
             }
         });
-        Object.defineProperty(module, 'target', {
+        Object.defineProperty(this, 'target', {
             get: function () {
                 if (target && target['p-widget'])
                     return target['p-widget'];

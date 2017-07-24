@@ -1,0 +1,18 @@
+/**
+ * Platypus.js UI layout styles
+ */
+
+.p-widget {
+    box-sizing: border-box;
+}
+
+.p-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.p-flow {
+    white-space: normal;
+    line-height: 0px;
+    overflow: auto;
+}

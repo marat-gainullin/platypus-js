@@ -1,18 +1,21 @@
 define([
     '../extend',
     './widget',
-    './container-event'], function (
+    './container-event',
+    '../invoke',
+    '../logger'], function (
         extend,
         Widget,
-        ContainerEvent) {
+        ContainerEvent,
+        Invoke,
+        Logger) {
     function Container() {
         Widget.call(this);
         var self = this;
 
         var children = [];
 
-        this.element.style.position = 'relative';
-        this.element.style.overflow = 'hidden';
+        this.element.classList.add('p-container');
 
         Object.defineProperty(this, 'count', {
             get: function () {
@@ -31,6 +34,16 @@ define([
             configurable: true,
             get: function () {
                 return child;
+            }
+        });
+        function _children(){
+            Logger.warning("'children()' function is obsolete. Use 'count', 'child' and 'forEach' please");
+            return children.slice(0, children.length);
+        }
+        Object.defineProperty(this, 'children', {
+            configurable: true,
+            get: function () {
+                return _children;
             }
         });
 
@@ -56,16 +69,16 @@ define([
 
         function add(w, beforeIndex) {
             w.parent = self;
-            if (arguments.length > 1) {
+            if (isNaN(beforeIndex)) {
+                children.push(w);
+                self.element.appendChild(w.element);
+            } else {
                 children.splice(beforeIndex, 0, w);
                 if (beforeIndex < children.length) {
                     self.element.insertBefore(w.element, children[beforeIndex].element);
                 } else {
                     self.element.appendChild(w.element);
                 }
-            } else {
-                children.push(w);
-                self.element.appendChild(w.element);
             }
             fireAdded(w);
         }
@@ -86,7 +99,7 @@ define([
             if (idx >= 0 && idx < children.length) {
                 var removed = children.splice(idx, 1);
                 removed[0].parent = null;
-                removed[0].element.removeFromParent();
+                removed[0].element.parentNode.removeChild(removed[0].element);
                 fireRemoved(w);
                 return removed[0];
             } else {
@@ -104,7 +117,7 @@ define([
         function clear() {
             children.forEach(function (child) {
                 child.parent = null;
-                child.element.removeFromParent();
+                child.element.parentNode.removeChild(child.element);
                 fireRemoved(child);
             });
             children.splice(0, children.length);
@@ -138,7 +151,9 @@ define([
         function fireAdded(w) {
             var event = new ContainerEvent(self, w);
             addHandlers.forEach(function (h) {
-                h(event);
+                Invoke.later(function () {
+                    h(event);
+                });
             });
         }
 
@@ -163,7 +178,9 @@ define([
         function fireRemoved(w) {
             var event = new ContainerEvent(self, w);
             removeHandlers.forEach(function (h) {
-                h.onRemove(event);
+                Invoke.later(function () {
+                    h(event);
+                });
             });
         }
 
