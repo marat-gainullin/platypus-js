@@ -1,19 +1,47 @@
 define([
     '../id',
     '../extend',
+    '../invoke',
     './container',
     './item-event'], function (
         Id,
         extend,
+        Invoke,
         Container,
         SelectionEvent) {
-    function Cards(vgap, hgap) {
+    function Cards(hgap, vgap) {
         Container.call(this);
 
         var self = this;
+        
+        if (arguments.length < 2) {
+            vgap = 0;
+        }
+        if (arguments.length < 1) {
+            vgap = 0;
+            hgap = 0;
+        }
 
         this.element.style.overflow = 'hidden';
         this.element.style.position = 'relative';
+        
+        this.element.id = 'p-' + Id.generate();
+
+        var style = document.createElement('style');
+        self.element.appendChild(style);
+        function formatChildren() {
+            style.innerHTML =
+                    'div#' + self.element.id + ' > div {' +
+                    'margin-left: ' + hgap + 'px;' +
+                    'margin-right: ' + hgap + 'px;' +
+                    'margin-top: ' + vgap + 'px;' +
+                    'margin-bottom: ' + vgap + 'px;' +
+                    'display: block !important;' +
+                    'height: 100%' +
+                    '}';
+        }
+        formatChildren();
+
 
         var cards = new Map();
 
@@ -24,12 +52,10 @@ define([
                 return hgap;
             },
             set: function (aValue) {
-                hgap = aValue;
-                self.forEach(function (w) {
-                    var we = w.element;
-                    we.style.marginLeft = hgap + 'px';
-                    we.style.marginRight = hgap + 'px';
-                });
+                if (hgap !== aValue) {
+                    hgap = aValue;
+                    formatChildren();
+                }
             }
         });
 
@@ -38,12 +64,10 @@ define([
                 return vgap;
             },
             set: function (aValue) {
-                vgap = aValue;
-                self.forEach(function (w) {
-                    var we = w.element;
-                    we.style.marginTop = vgap + 'px';
-                    we.style.marginBottom = vgap + 'px';
-                });
+                if (vgap !== aValue) {
+                    vgap = aValue;
+                    formatChildren();
+                }
             }
         });
 
@@ -70,10 +94,10 @@ define([
                     throw 'A widget is already added to this container';
                 var card;
                 var index;
-                if(arguments.length < 2){
-                    card = 'card - ' + Id.generate();
+                if (arguments.length < 2) {
+                    card = 'card-' + Id.generate();
                     index = self.count;
-                } else{
+                } else {
                     if (isNaN(indexOrCard)) {
                         card = indexOrCard;
                         index = self.count;
@@ -88,7 +112,7 @@ define([
                 superAdd(w, index);
                 cards.set(card, w);
                 w['-platypus-ui-card'] = card;
-                format(w);
+                w.visible = false;
                 if (!visibleWidget) {
                     showWidget(w);
                 }
@@ -103,6 +127,7 @@ define([
 
         var superClear = this.clear;
         function clear() {
+            visibleWidget = null;
             cards.clear();
             superClear();
         }
@@ -113,12 +138,14 @@ define([
         });
 
         var superRemove = this.remove;
-        function remove(widgetOrIndex) {
-            var removed = superRemove(widgetOrIndex);
+        function remove(widgetOrIndexOrCard) {
+            if(typeof widgetOrIndexOrCard === 'string')
+                widgetOrIndexOrCard = cards.get(widgetOrIndexOrCard);
+            var removed = superRemove(widgetOrIndexOrCard);
             if (removed) {
                 removeCard(removed);
                 if (visibleWidget === removed) {
-                    visibleWidget = null;
+                    visibleWidget = self.count === 0 ? null : superChild(0);
                 }
             }
             return removed;
@@ -131,7 +158,7 @@ define([
 
         function removeCard(w) {
             if (w && w['-platypus-ui-card']) {
-                cards.remove(w['-platypus-ui-card']);
+                cards.delete(w['-platypus-ui-card']);
                 delete w['-platypus-ui-card'];
             }
         }
@@ -150,23 +177,25 @@ define([
                     oldWidget.element.classList.remove('card-shown');
                     oldWidget.visible = false;
                 }
-                if (oldWidget !== visibleWidget) {
-                    fireSelected();
-                }
+                fireSelected();
             }
         }
 
         function fireSelected() {
             var event = new SelectionEvent(self, visibleWidget);
             selectionHandlers.forEach(function (h) {
-                h(event);
+                Invoke.later(function(){
+                    h(event);
+                });
             });
         }
 
-        function show(aCardName) {
-            if (cards.has(aCardName)) {
-                var toShow = cards.get(aCardName);
+        function show(widgetOrCardName) {
+            if (cards.has(widgetOrCardName)) {
+                var toShow = cards.get(widgetOrCardName);
                 showWidget(toShow);
+            } else {
+                showWidget(widgetOrCardName);
             }
         }
 
@@ -176,21 +205,11 @@ define([
             }
         });
 
-        function format(w) {
-            var ws = w.element.style;
-            ws.position = 'absolute';
-            ws.width = '';
-            ws.height = '';
-            ws.left = '0px';
-            ws.right = '0px';
-            ws.top = '0px';
-            ws.bottom = '0px';
-            ws.marginLeft = hgap + 'px';
-            ws.marginRight = hgap + 'px';
-            ws.marginTop = vgap + 'px';
-            ws.marginBottom = vgap + 'px';
-            w.visible = false;
-        }
+        Object.defineProperty(this, 'visibleWidget', {
+            get: function () {
+                return visibleWidget;
+            }
+        });
 
         var selectionHandlers = new Set();
 
@@ -209,27 +228,19 @@ define([
             }
         });
 
-        var onItemSelected;
-        var selectedReg;
-        Object.defineProperty(this, 'onItemSelected', {
+        function ajustWidth(w, aValue) {
+        }
+        Object.defineProperty(this, 'ajustWidth', {
             get: function () {
-                return onItemSelected;
-            },
-            set: function (aValue) {
-                if (onItemSelected !== aValue) {
-                    if (selectedReg) {
-                        selectedReg.removeHandler();
-                        selectedReg = null;
-                    }
-                    onItemSelected = aValue;
-                    if (onItemSelected) {
-                        selectedReg = addSelectionHandler(function (event) {
-                            if (onItemSelected) {
-                                onItemSelected(event);
-                            }
-                        });
-                    }
-                }
+                return ajustWidth;
+            }
+        });
+
+        function ajustHeight(w, aValue) {
+        }
+        Object.defineProperty(this, 'ajustHeight', {
+            get: function () {
+                return ajustHeight;
             }
         });
 

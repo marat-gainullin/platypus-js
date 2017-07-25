@@ -4,6 +4,7 @@
 
 .p-widget {
     box-sizing: border-box;
+    display: inline-block;
 }
 
 .p-container {

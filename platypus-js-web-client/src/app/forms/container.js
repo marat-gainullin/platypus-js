@@ -70,15 +70,15 @@ define([
         function add(w, beforeIndex) {
             w.parent = self;
             if (isNaN(beforeIndex)) {
-                children.push(w);
                 self.element.appendChild(w.element);
+                children.push(w);
             } else {
-                children.splice(beforeIndex, 0, w);
                 if (beforeIndex < children.length) {
                     self.element.insertBefore(w.element, children[beforeIndex].element);
                 } else {
                     self.element.appendChild(w.element);
                 }
+                children.splice(beforeIndex, 0, w);
             }
             fireAdded(w);
         }

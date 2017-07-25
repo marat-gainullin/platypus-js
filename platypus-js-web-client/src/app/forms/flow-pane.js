@@ -21,12 +21,12 @@ define([
 
         this.element.classList.add('p-flow');
 
-        this.element.id = Id.generate();
+        this.element.id = 'p-' + Id.generate();
 
         var style = document.createElement('style');
         function formatChildren() {
             style.innerHTML =
-                    'div#' + self.element.id + ' div {' +
+                    'div#' + self.element.id + ' > div {' +
                     'margin-left: ' + hgap + 'px;' +
                     'margin-top: ' + vgap + 'px;' +
                     'display: ' + 'inline-block;' +
@@ -66,28 +66,6 @@ define([
         Object.defineProperty(this, 'add', {
             get: function () {
                 return add;
-            }
-        });
-
-        function getTop(aWidget) {
-            if (aWidget.parent !== this)
-                throw "widget should be a child of this container";
-            return aWidget.element.offsetTop;
-        }
-        Object.defineProperty(this, 'getTop', {
-            get: function () {
-                return getTop;
-            }
-        });
-
-        function getLeft(aWidget) {
-            if (aWidget.parent !== this)
-                throw "widget should be a child of this container";
-            return aWidget.element.offsetLeft;
-        }
-        Object.defineProperty(this, 'getLeft', {
-            get: function () {
-                return getLeft;
             }
         });
     }

@@ -93,7 +93,7 @@ define([
                 return font;
             },
             set: function (aValue) {
-                if(font !== aValue){
+                if (font !== aValue) {
                     font = aValue;
                     if (font) {
                         element.style.fontFamily = font.family;
@@ -178,7 +178,7 @@ define([
                 return toolTipText;
             },
             set: function (aValue) {
-                if(toolTipText !== aValue){
+                if (toolTipText !== aValue) {
                     toolTipText = aValue;
                     element.title = toolTipText;
                 }
@@ -189,7 +189,7 @@ define([
                 return nextFocusableComponent;
             },
             set: function (aValue) {
-                if(nextFocusableComponent !== aValue){
+                if (nextFocusableComponent !== aValue) {
                     nextFocusableComponent = aValue;
                 }
             }
@@ -199,7 +199,7 @@ define([
                 return focusable;
             },
             set: function (aValue) {
-                if(focusable !== aValue){
+                if (focusable !== aValue) {
                     focusable = aValue;
                 }
             }
@@ -208,14 +208,15 @@ define([
         // 'getLeft', 'getTop', 'ajustWidth' and 'ajustHeight' methods against all containers.
         Object.defineProperty(this, "left", {
             get: function () {
-                if (isAttached()) {
-                    if (parent && parent.getLeft) {
-                        return parent.getLeft(self);
-                    } else {
-                        return element.offsetLeft;
-                    }
+                if (parent && parent.getLeft) {
+                    return parent.getLeft(self);
                 } else {
-                    return parseFloat(element.style.left);
+                    if (isAttached()) {
+                        return element.offsetLeft;
+                    } else {
+                        var parsed = parseFloat(element.style.left);
+                        return isNaN(parsed) ? 0 : parsed;
+                    }
                 }
             },
             set: function (aValue) {
@@ -231,14 +232,15 @@ define([
         });
         Object.defineProperty(this, "top", {
             get: function () {
-                if (isAttached()) {
-                    if (parent && parent.getTop) {
-                        return parent.getTop(self);
-                    } else {
-                        return element.offsetTop;
-                    }
+                if (parent && parent.getTop) {
+                    return parent.getTop(self);
                 } else {
-                    return parseFloat(element.style.top);
+                    if (isAttached()) {
+                        return element.offsetTop;
+                    } else {
+                        var parsed = parseFloat(element.style.top);
+                        return isNaN(parsed) ? 0 : parsed;
+                    }
                 }
             },
             set: function (aValue) {
@@ -257,7 +259,8 @@ define([
                 if (isAttached())
                     return element.offsetWidth;
                 else {
-                    return parseFloat(element.style.width);
+                    var parsed = parseFloat(element.style.width);
+                    return isNaN(parsed) ? 0 : parsed;
                 }
             },
             set: function (aValue) {
@@ -274,10 +277,12 @@ define([
         });
         Object.defineProperty(this, "height", {
             get: function () {
-                if (isAttached())
+                if (isAttached()) {
                     return element.offsetHeight;
-                else
-                    return parseFloat(element.style.height);
+                } else {
+                    var parsed = parseFloat(element.style.height);
+                    return isNaN(parsed) ? 0 : parsed;
+                }
             },
             set: function (aValue) {
                 if (aValue !== null) {
@@ -467,7 +472,7 @@ define([
 
         function isAttached() {
             var cursorElement = element;
-            while (cursorElement && element !== document.body) {
+            while (cursorElement && cursorElement !== document.body) {
                 cursorElement = cursorElement.parentElement;
             }
             return !!cursorElement;
