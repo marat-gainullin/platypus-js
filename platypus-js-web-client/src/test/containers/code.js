@@ -426,7 +426,7 @@ describe('Containers Api', function () {
             done();
         });
     });
-    fit('Cards pane.attached children left top width height', function (done) {
+    it('Cards pane.attached children left top width height', function (done) {
         require([
             'forms/card-pane',
             'invoke'
@@ -466,42 +466,31 @@ describe('Containers Api', function () {
     });
     it('Cards pane.attached hgap vgap', function (done) {
         require([
-            'forms/flow-pane',
+            'forms/card-pane',
             'invoke'
         ], function (
                 Cards,
                 Invoke) {
             var container = new Cards();
             document.body.appendChild(container.element);
+            container.width = container.height = 40;
             expect(container.attached).toBeTruthy();
             Invoke.later(function () {
-                container.width = container.height = 40;
                 var widget1 = new Cards();
                 container.add(widget1);
                 expect(widget1.attached).toBeTruthy();
-                widget1.width = 10;
-                widget1.height = 10;
 
-                var widget2 = new Cards();
-                widget2.width = 10;
-                widget2.height = 10;
-                container.add(widget2);
-                expect(widget2.attached).toBeTruthy();
-
-                expect(widget2.left).toEqual(widget1.left + widget1.width);
-                container.hgap += 5;
-                expect(container.hgap).toEqual(5);
                 Invoke.later(function () {
-                    expect(widget2.left).toEqual(10 + 2*container.hgap);
-                    
+                    expect(widget1.left).toEqual(0);
                     expect(widget1.top).toEqual(0);
-                    expect(widget2.top).toEqual(0);
-                    container.width = 20;
-                    expect(widget1.top).toEqual(0);
-                    expect(widget2.top).toEqual(10);
+                    expect(widget1.width).toEqual(40);
+                    expect(widget1.height).toEqual(40);
+                    container.hgap += 5;
                     container.vgap += 5;
-                    expect(widget1.top).toEqual(5);
-                    expect(widget2.top).toEqual(20);
+                    expect(widget1.left).toEqual(0);
+                    expect(widget1.top).toEqual(0);
+                    expect(widget1.width).toEqual(40);
+                    expect(widget1.height).toEqual(40);
                     
                     document.body.removeChild(container.element);
                     done();

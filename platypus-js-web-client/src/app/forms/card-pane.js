@@ -25,6 +25,8 @@ define([
         this.element.style.overflow = 'hidden';
         this.element.style.position = 'relative';
         
+        this.element.classList.add('p-cards');
+        
         this.element.id = 'p-' + Id.generate();
 
         var style = document.createElement('style');
@@ -32,12 +34,12 @@ define([
         function formatChildren() {
             style.innerHTML =
                     'div#' + self.element.id + ' > div {' +
-                    'margin-left: ' + hgap + 'px;' +
-                    'margin-right: ' + hgap + 'px;' +
-                    'margin-top: ' + vgap + 'px;' +
-                    'margin-bottom: ' + vgap + 'px;' +
-                    'display: block !important;' +
-                    'height: 100%' +
+                    'padding-left: ' + hgap + 'px;' +
+                    'padding-right: ' + hgap + 'px;' +
+                    'padding-top: ' + vgap + 'px;' +
+                    'padding-bottom: ' + vgap + 'px;' +
+                    'width: 100%;' +
+                    'height: 100%;' +
                     '}';
         }
         formatChildren();
@@ -228,6 +230,14 @@ define([
             }
         });
 
+        function ajustLeft(w, aValue) {
+        }
+        Object.defineProperty(this, 'ajustLeft', {
+            get: function () {
+                return ajustLeft;
+            }
+        });
+
         function ajustWidth(w, aValue) {
         }
         Object.defineProperty(this, 'ajustWidth', {
@@ -236,34 +246,18 @@ define([
             }
         });
 
+        function ajustTop(w, aValue) {
+        }
+        Object.defineProperty(this, 'ajustTop', {
+            get: function () {
+                return ajustTop;
+            }
+        });
         function ajustHeight(w, aValue) {
         }
         Object.defineProperty(this, 'ajustHeight', {
             get: function () {
                 return ajustHeight;
-            }
-        });
-
-        function getTop(aWidget) {
-            if (aWidget.parent !== self)
-                throw "widget should be a child of this container";
-            return 0;
-        }
-
-        Object.defineProperty(this, 'getTop', {
-            get: function () {
-                return getTop;
-            }
-        });
-
-        function getLeft(aWidget) {
-            if (aWidget.parent !== self)
-                throw "widget should be a child of this container";
-            return 0;
-        }
-        Object.defineProperty(this, 'getLeft', {
-            get: function () {
-                return getLeft;
             }
         });
     }
