@@ -29,8 +29,6 @@ define([
                     'div#' + self.element.id + ' > div {' +
                     'margin-left: ' + hgap + 'px;' +
                     'margin-top: ' + vgap + 'px;' +
-                    'display: ' + 'inline-block;' +
-                    'verticalAlign: bottom;' +
                     '}';
         }
         formatChildren();
@@ -41,8 +39,11 @@ define([
                 return hgap;
             },
             set: function (aValue) {
-                hgap = aValue;
-                formatChildren();
+                if(hgap !== aValue){
+                    hgap = aValue;
+                    formatChildren();
+                    self.element.style.paddingRight = hgap + 'px';
+                }
             }
         });
         Object.defineProperty(this, "vgap", {
@@ -50,8 +51,11 @@ define([
                 return vgap;
             },
             set: function (aValue) {
-                vgap = aValue;
-                formatChildren();
+                if(vgap !== aValue){
+                    vgap = aValue;
+                    formatChildren();
+                    self.element.style.paddingBottom = vgap + 'px';
+                }
             }
         });
 

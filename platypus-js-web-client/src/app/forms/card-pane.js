@@ -28,23 +28,16 @@ define([
         this.element.classList.add('p-cards');
         
         this.element.id = 'p-' + Id.generate();
-
+        
         var style = document.createElement('style');
         self.element.appendChild(style);
         function formatChildren() {
             style.innerHTML =
                     'div#' + self.element.id + ' > div {' +
-                    'padding-left: ' + hgap + 'px;' +
-                    'padding-right: ' + hgap + 'px;' +
-                    'padding-top: ' + vgap + 'px;' +
-                    'padding-bottom: ' + vgap + 'px;' +
-                    'width: 100%;' +
-                    'height: 100%;' +
                     '}';
         }
         formatChildren();
-
-
+        
         var cards = new Map();
 
         var visibleWidget;
@@ -56,7 +49,7 @@ define([
             set: function (aValue) {
                 if (hgap !== aValue) {
                     hgap = aValue;
-                    formatChildren();
+                    self.element.style.paddingLeft = self.element.style.paddingRight = hgap + 'px';
                 }
             }
         });
@@ -68,7 +61,7 @@ define([
             set: function (aValue) {
                 if (vgap !== aValue) {
                     vgap = aValue;
-                    formatChildren();
+                    self.element.style.paddingTop = self.element.style.paddingBottom = vgap + 'px';
                 }
             }
         });
@@ -108,17 +101,20 @@ define([
                         index = indexOrCard;
                     }
                 }
+                var old;
                 if (cards.has(card)) {
-                    superRemove(cards.get(card));
+                    old = superRemove(cards.get(card));
                 }
                 superAdd(w, index);
                 cards.set(card, w);
                 w['-platypus-ui-card'] = card;
-                w.visible = false;
                 if (!visibleWidget) {
                     showWidget(w);
                 }
-                return card;
+                return {
+                    card: card,
+                    evicted: old
+                };
             }
         }
         Object.defineProperty(this, 'add', {
@@ -131,6 +127,10 @@ define([
         function clear() {
             visibleWidget = null;
             cards.clear();
+            self.forEach(function(w){
+                w.element.classList.remove('card-shown');
+                w.element.classList.remove('card-hidden');
+            });
             superClear();
         }
         Object.defineProperty(this, 'clear', {
@@ -159,6 +159,8 @@ define([
         });
 
         function removeCard(w) {
+            w.element.classList.remove('card-shown');
+            w.element.classList.remove('card-hidden');
             if (w && w['-platypus-ui-card']) {
                 cards.delete(w['-platypus-ui-card']);
                 delete w['-platypus-ui-card'];
@@ -170,14 +172,12 @@ define([
             visibleWidget = toBeShown;
 
             if (visibleWidget !== oldWidget) {
-                visibleWidget.visible = true;
                 visibleWidget.element.classList.add('card-shown');
                 visibleWidget.element.classList.remove('card-hidden');
 
                 if (oldWidget) {
                     oldWidget.element.classList.add('card-hidden');
                     oldWidget.element.classList.remove('card-shown');
-                    oldWidget.visible = false;
                 }
                 fireSelected();
             }

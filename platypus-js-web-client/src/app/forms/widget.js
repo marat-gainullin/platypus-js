@@ -28,7 +28,7 @@ define([
         var name;
         var background;
         var foreground;
-        var opaque;
+        var opaque = true;
         var cursor;
         var error;
         var toolTipText;
@@ -120,7 +120,7 @@ define([
 
         function applyBackground() {
             if (opaque)
-                element.style.background = background && background.toStyled ? background.toStyled() : background;
+                element.style.backgroundColor = background && background.toStyled ? background.toStyled() : background;
             else
                 element.style.background = 'none';
         }

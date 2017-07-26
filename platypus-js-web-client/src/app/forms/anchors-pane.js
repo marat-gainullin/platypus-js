@@ -6,6 +6,8 @@ define([
     function Anchors() {
         Container.call(this);
         var self = this;
+        
+        this.element.classList.add('p-anchors');
 
         var constraints = new Map();
 
@@ -35,7 +37,7 @@ define([
                 height: u(_anchors.height)
             };
 
-            constraints.put(w, anchors);
+            constraints.set(w, anchors);
 
             var ws = w.element.style;
 
@@ -85,10 +87,10 @@ define([
         var superAdd = this.add;
         function add(w, indexOrAnchors) {
             if (w) {
-                if (w.parent == self)
+                if (w.parent === self)
                     throw 'A widget is already added to this container';
                 if (isNaN(indexOrAnchors)) {
-                    var anchors = indexOrAnchors;
+                    var anchors = indexOrAnchors ? indexOrAnchors : {left: w.left, top: w.top, width: w.width, height: w.height};
                     superAdd(w);
                     applyAnchors(w, anchors);
                 } else {
@@ -114,7 +116,7 @@ define([
         var superRemove = this.remove;
         function remove(widgetOrIndex) {
             var w = superRemove(widgetOrIndex);
-            constraints.remove(w);
+            constraints.delete(w);
             return w;
         }
         Object.defineProperty(this, 'remove', {
@@ -138,7 +140,7 @@ define([
             if (anchor.endsWith('px'))
                 return value + 'px';
             else if (anchor.endsWith('%'))
-                return Math.round(value / containerSize * 100) + '%';
+                return (value / containerSize * 100) + '%';
             else
                 return value + 'px';
         }
@@ -161,7 +163,7 @@ define([
 
         function ajustHeight(w, aValue) {
             var anchors = constraints.get(w);
-            var containerHeight = self.element.getOffsetHeight();
+            var containerHeight = self.element.offsetHeight;
             if (is(anchors.height)) {
                 anchors.height = updatePlainValue(anchors.height, aValue, containerHeight);
             } else if (is(anchors.top) && is(anchors.bottom)) {
@@ -215,27 +217,6 @@ define([
             }
         });
 
-        function getTop(aWidget) {
-            if (aWidget.parent !== this)
-                throw "Widget should be a child of this container";
-            return aWidget.element.offsetTop;
-        }
-        Object.defineProperty(this, 'getTop', {
-            get: function () {
-                return getTop;
-            }
-        });
-
-        function getLeft(aWidget) {
-            if (aWidget.parent !== this)
-                throw "widget should be a child of this container";
-            return aWidget.element.offsetLeft;
-        }
-        Object.defineProperty(this, 'getLeft', {
-            get: function () {
-                return getLeft;
-            }
-        });
     }
     extend(Anchors, Container);
     return Anchors;
