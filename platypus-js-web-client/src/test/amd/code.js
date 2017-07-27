@@ -66,7 +66,7 @@ describe('Platypus.js AMD loader', function () {
             expect(pa.model).toBeTruthy();
             expect(pa.layout).toBeTruthy();
             expect(pa.model === pa.layout).toBeFalsy();
-            expect(pa.model == pa.layout).toBeFalsy();
+            expect(pa.model === pa.layout).toBeFalsy();
             done();
         });
     });

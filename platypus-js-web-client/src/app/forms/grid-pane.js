@@ -1,7 +1,9 @@
 define([
     '../extend',
+    '../id',
     './container'], function (
         extend,
+        Id,
         Container) {
     /**
      * A container with Grid Layout.
@@ -25,6 +27,23 @@ define([
             vgap = 0;
 
         this.element.classList.add('p-cells');
+
+        this.element.id = 'p-' + Id.generate();
+
+        var gapsStyle = document.createElement('style');
+        self.element.appendChild(gapsStyle);
+        function formatChildren() {
+            gapsStyle.innerHTML =
+                    'div#' + self.element.id + ' > div {' +
+                    'width: ' + (100 / columns) + '%;' +
+                    'height: ' + (100 / rows) + '%;' +
+                    'padding-left: ' + (hgap / 2) + 'px;' +
+                    'padding-right: ' + (hgap / 2) + 'px;' +
+                    'padding-top: ' + (vgap / 2) + 'px;' +
+                    'padding-bottom: ' + (vgap / 2) + 'px;' +
+                    '}';
+        }
+        formatChildren();
 
         var grid = [];
         for (var r = 0; r < rows; r++) {
@@ -52,7 +71,7 @@ define([
             set: function (aValue) {
                 if (hgap !== aValue) {
                     hgap = aValue;
-                    formatCells();
+                    formatChildren();
                 }
             }
         });
@@ -63,31 +82,10 @@ define([
             set: function (aValue) {
                 if (vgap !== aValue) {
                     vgap = aValue;
-                    formatCells();
+                    formatChildren();
                 }
             }
         });
-
-        function formatCells() {
-            for (var i = 0; i < grid.length; i++) {
-                for (var j = 0; j < grid[i].length; j++) {
-                    formatCell(i, j);
-                }
-            }
-        }
-
-        function formatCell(row, column) {
-            var w = getWidget(row, column);
-            if (w) {
-                var ws = w.element.style;
-                ws.width = (100 / columns) + '%';
-                ws.height = (100 / rows) + '%';
-                ws.paddingLeft = (column === 0 ? hgap : Math.floor(hgap / 2)) + 'px';
-                ws.paddingRight = (column === columns - 1 ? hgap : Math.ceil(hgap / 2)) + 'px';
-                ws.paddingTop = (row === 0 ? vgap : Math.floor(vgap / 2)) + 'px';
-                ws.paddingBottom = (row === rows - 1 ? hgap : Math.ceil(vgap / 2)) + 'px';
-            }
-        }
 
         var superAdd = this.add;
         function add(w, row, col) {
@@ -128,7 +126,6 @@ define([
                     superRemove(old);
                 }
                 grid[row][column] = w;
-                formatCell(row, column);
                 superAdd(w);
                 return old;
             }

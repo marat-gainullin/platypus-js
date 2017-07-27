@@ -618,13 +618,13 @@ describe('Containers Api', function () {
             widget.top += 20;
             expect(widget.top).toEqual(0);
 
-            expect(widget.width).toEqual(100); // 100%
+            expect(widget.width).toEqual(0);
             widget.width += 30;
-            expect(widget.width).toEqual(100); // 100%
+            expect(widget.width).toEqual(0);
 
-            expect(widget.height).toEqual(100); // 100%
+            expect(widget.height).toEqual(0);
             widget.height += 40;
-            expect(widget.height).toEqual(100); // 100%
+            expect(widget.height).toEqual(0);
 
             done();
         });
@@ -721,7 +721,7 @@ describe('Containers Api', function () {
             });
         });
     });
-    it('Grid pane.attached hgap vgap', function (done) {
+    fit('Grid pane.attached hgap vgap', function (done) {
         require([
             'common-utils/color',
             'invoke',
@@ -975,41 +975,258 @@ describe('Containers Api', function () {
                 child0.left += 26;
                 expect(child0.left).toEqual(40 + 26);
                 expect(child0.element.style.left).toEqual('16.5%');
-                
+
                 expect(child0.top).toEqual(40);
                 child0.top += 26;
                 expect(child0.top).toEqual(40 + 26);
                 expect(child0.element.style.top).toEqual('16.5%');
-                
+
                 // child1
                 expect(child1.width).toEqual(200);
                 child1.width += 26;
                 expect(child1.width).toEqual(200 + 26);
                 expect(child1.element.style.width).toEqual('56.5%');
-                
+
                 expect(child1.height).toEqual(200);
                 child1.height += 26;
                 expect(child1.height).toEqual(200 + 26);
                 expect(child1.element.style.height).toEqual('56.5%');
-                
+
                 // child2
                 expect(child2.width).toEqual(200);
                 child2.width -= 26;
                 expect(child2.width).toEqual(200 - 26);
                 expect(child2.element.style.width).toEqual('43.5%');
-                
+
                 expect(child2.height).toEqual(200);
                 child2.height -= 26;
                 expect(child2.height).toEqual(200 - 26);
                 expect(child2.element.style.height).toEqual('43.5%');
-                
+
                 document.body.removeChild(container.element);
                 done();
             });
         });
     });
-    // TODO: Add tests against scroll and nested boxes
-    // TODO: Add tests against boxes with 'by content' layout and with 'size with scroll' layout
+    it('Box pane.Structure', function (done) {
+        require([
+            'forms/box-pane',
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor'
+        ], function (
+                Box,
+                Font,
+                Color,
+                Cursor) {
+            var container = new Box();
+            expectContainer(container, Font, Color, Cursor);
+            expect(container.element).toBeDefined();
+
+            var child0 = new Box();
+            var child1 = new Box();
+            var child2 = new Box();
+            container.add(child0);
+            container.add(child1);
+            container.add(child2);
+
+            expect(container.count).toEqual(3);
+            expect(container.child(0)).toEqual(child0);
+            expect(container.child(1)).toEqual(child1);
+            expect(container.child(2)).toEqual(child2);
+            expect(container.children()).toEqual([child0, child1, child2]);
+            expect(container.indexOf(child0)).toEqual(0);
+            expect(container.indexOf(child1)).toEqual(1);
+            expect(container.indexOf(child2)).toEqual(2);
+
+            var removed0 = container.remove(0);
+            expect(removed0).toBeDefined();
+            var removed1 = container.remove(child1);
+            expect(removed1).toBeDefined();
+
+            container.clear();
+            expect(container.count).toEqual(0);
+            expect(container.child(0)).toEqual(null);
+            expect(container.children()).toEqual([]);
+            expect(container.indexOf(child0)).toEqual(-1);
+            expect(container.indexOf(child1)).toEqual(-1);
+            expect(container.indexOf(child2)).toEqual(-1);
+
+            done();
+        });
+    });
+    it('Box pane.detached left top width height', function (done) {
+        require([
+            'forms/box-pane'
+        ], function (
+                Box) {
+            var container = new Box();
+            done();
+        });
+    });
+    it('Box pane.attached left top width height', function (done) {
+        require([
+            'forms/box-pane'
+        ], function (
+                Box) {
+            var container = new Box();
+            done();
+        });
+    });
+    it('Box pane.attached hgap vgap orientation', function (done) {
+        require([
+            'forms/box-pane'
+        ], function (
+                Box) {
+            var container = new Box();
+            done();
+        });
+    });
+    it('Scroll pane.Structure', function (done) {
+        require([
+            'forms/scroll-pane',
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor'
+        ], function (
+                Scroll,
+                Font,
+                Color,
+                Cursor) {
+            var container = new Scroll();
+            expectContainer(container, Font, Color, Cursor);
+            expect(container.element).toBeDefined();
+
+            var child0 = new Scroll();
+            var child1 = new Scroll();
+
+            container.add(child0);
+            expect(container.count).toEqual(1);
+            expect(container.child(0)).toEqual(child0);
+            expect(container.view).toEqual(child0);
+
+            container.add(child1);
+            expect(container.count).toEqual(1);
+            expect(container.child(0)).toEqual(child1);
+            expect(container.view).toEqual(child1);
+
+            expect(container.children()).toEqual([child1]);
+            expect(container.indexOf(child0)).toEqual(-1);
+            expect(container.indexOf(child1)).toEqual(0);
+
+            var removed0 = container.remove(0);
+            expect(removed0).toBeDefined();
+            expect(removed0).toEqual(child1);
+            expect(container.count).toEqual(0);
+            expect(container.children()).toEqual([]);
+            expect(container.indexOf(child1)).toEqual(-1);
+            expect(container.view).toBeNull();
+
+            container.view = child0;
+            var removed1 = container.remove(child0);
+            expect(removed1).toBeDefined();
+            expect(removed1).toEqual(child0);
+
+            container.view = child1;
+            expect(container.count).toEqual(0);
+            expect(container.child(0)).toEqual(child1);
+
+            container.clear();
+            expect(container.count).toEqual(0);
+            expect(container.child(0)).toEqual(null);
+            expect(container.children()).toEqual([]);
+
+            container.view = child0;
+            expect(container.count).toEqual(1);
+            expect(container.child(0)).toEqual(child0);
+
+            container.view = null;
+            expect(container.count).toEqual(0);
+            expect(container.child(0)).toEqual(-1);
+            expect(container.children()).toEqual([]);
+
+            done();
+        });
+    });
+    it('Scroll pane.detached left top width height', function (done) {
+        require([
+            'forms/scroll-pane'
+        ], function (
+                Scroll) {
+            var container = new Scroll();
+            done();
+        });
+    });
+    it('Scroll pane.attached left top width height', function (done) {
+        require([
+            'forms/scroll-pane'
+        ], function (
+                Scroll) {
+            var container = new Scroll();
+            done();
+        });
+    });
+    it('Box in Scroll horizontal', function (done) {
+        require([
+            'forms/scroll-pane',
+            'forms/box-pane'
+        ], function (
+                Scroll,
+                Box) {
+            var scroll = new Scroll();
+            var box = new Box();
+            done();
+        });
+    });
+    it('Box in Scroll vertical', function (done) {
+        require([
+            'forms/scroll-pane',
+            'forms/box-pane'
+        ], function (
+                Scroll,
+                Box) {
+            var scroll = new Scroll();
+            var box = new Box();
+            done();
+        });
+    });
+    it('Box by content horizontal', function (done) {
+        require([
+            'forms/box-pane'
+        ], function (
+                Box) {
+            var container = new Box();
+            done();
+        });
+    });
+    it('Box by content vertical', function (done) {
+        require([
+            'forms/box-pane'
+        ], function (
+                Box) {
+            var container = new Box();
+            done();
+        });
+    });
+    it('Sized Box with horizontal scrolling', function (done) {
+        require([
+            'forms/box-pane'
+        ], function (
+                Box) {
+            var container = new Box();
+            done();
+        });
+    });
+    it('Sized Box with vertical scrolling', function (done) {
+        require([
+            'forms/box-pane'
+        ], function (
+                Box) {
+            var container = new Box();
+            done();
+        });
+    });
+    // TODO: Add tests against scrolls and nested boxes
     // TODO: Add tests against scroll and text boxes
     // TODO: Add tests against tabs onItemSelected event
 
