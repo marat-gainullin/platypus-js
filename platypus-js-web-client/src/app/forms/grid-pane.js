@@ -1,9 +1,9 @@
 define([
-    '../extend',
     '../id',
+    '../extend',
     './container'], function (
-        extend,
         Id,
+        extend,
         Container) {
     /**
      * A container with Grid Layout.
@@ -212,7 +212,6 @@ define([
                 return ajustHeight;
             }
         });
-
     }
     extend(GridPane, Container);
     return GridPane;

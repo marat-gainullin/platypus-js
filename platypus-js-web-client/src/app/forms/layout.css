@@ -1,5 +1,5 @@
 /**
- * Platypus.js UI layout styles
+ * Platypus.js UI layout rules
  */
 
 .p-widget {
@@ -28,10 +28,6 @@
     height: 100%;
 }
 
-.p-cells > .p-widget {
-    background-clip: content-box;
-}
-
 .p-cards {
 }
 
@@ -43,9 +39,30 @@
     display: none;
 }
 
+.p-cells > .p-widget {
+    background-clip: content-box;
+}
+
 .p-anchors > .p-widget {
     position: absolute;
 }
 
 .p-anchors{
+}
+
+.p-box-horizontal{
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+.p-box-vertical{
+    overflow-y: auto;
+}
+
+.p-scroll > .p-box-horizontal {
+    height: 100%
+}
+
+.p-scroll > .p-box-vertical {
+    width: 100%
 }

@@ -1,23 +1,27 @@
 define([
+    '../ui',
     '../extend',
-    './has-scroll',
     './container',
-    './box-pane',
+    // TODO: Remove has-scroll, horizontal-scroll-filler and vertical-scroll-filler forever.
+    // maybe replace with css classes, or by using marker properties
+    './has-scroll',
     './horizontal-scroll-filler',
-    './vertical-scroll-filler',
-    '../ui'], function (
+    './vertical-scroll-filler'
+    ], function (
+        Ui,
         extend,
-        HasScroll,
         Container,
-        Box,
+        HasScroll,
         HorizontalScrollFiller,
-        VerticalScrollFiller,
-        Ui) {
+        VerticalScrollFiller
+        ) {
 
     function Scroll(view) {
         Container.call(this);
 
         var self = this;
+
+        this.element.classList.add('p-scroll');
         /**
          * Used to set the horizontal scroll bar policy so that horizontal
          * scrollbars are displayed only when needed.
@@ -59,17 +63,17 @@ define([
 
         function isHorizontalScrollFiller(aWidget) {
             return aWidget instanceof HorizontalScrollFiller
-                    || (aWidget instanceof Box && aWidget.orientation === Ui.Orientation.VERTICAL);
+                    || aWidget.element.className.indexOf('p-horizontal-scroll-filler') > -1;
         }
 
         function isVerticalScrollFiller(aWidget) {
             return aWidget instanceof VerticalScrollFiller
-                    || (aWidget instanceof Box && aWidget.orientation === Ui.Orientation.HORIZONTAL);
+                    || aWidget.element.className.indexOf('p-vertical-scroll-filler') > -1;
         }
 
-        function ajustWidth(w, aWidth) {
+        function ajustWidth(w, aValue) {
             if (!isHorizontalScrollFiller(w)) {
-                w.element.style.width = aWidth + 'px';
+                w.element.style.width = aValue + 'px';
             }
         }
         Object.defineProperty(this, 'ajustWidth', {
@@ -78,9 +82,9 @@ define([
             }
         });
 
-        function ajustHeight(w, aHeight) {
+        function ajustHeight(w, aValue) {
             if (!isVerticalScrollFiller(w)) {
-                w.element.style.height = aHeight + 'px';
+                w.element.style.height = aValue + 'px';
             }
         }
         Object.defineProperty(this, 'ajustHeight', {
@@ -92,12 +96,6 @@ define([
         var superAdd = this.add;
         var superRemove = this.remove;
         function setView(w) {
-            if (isHorizontalScrollFiller(w)) {
-                w.element.style.width = 100 + '%';
-            }
-            if (isVerticalScrollFiller(w)) {
-                w.element.style.height = 100 + '%';
-            }
             var old = view;
             if (old) {
                 superRemove(old);
@@ -177,27 +175,22 @@ define([
             }
         });
 
-        function getTop(aWidget) {
-            if (aWidget.parent !== this)
-                throw "Widget should be a child of this container";
-            return 0;
+        function ajustTop(aWidget) {
         }
-        Object.defineProperty(this, "getTop", {
+        Object.defineProperty(this, "ajustTop", {
             get: function () {
-                return getTop;
+                return ajustTop;
             }
         });
 
-        function getLeft(aWidget) {
-            if (aWidget.parent !== this)
-                throw "Widget should be a child of this container";
-            return 0;
+        function ajustLeft(aWidget) {
         }
-        Object.defineProperty(this, "getLeft", {
+        Object.defineProperty(this, "ajustLeft", {
             get: function () {
-                return getLeft;
+                return ajustLeft;
             }
         });
+
     }
     extend(Scroll, Container);
     return Scroll;

@@ -721,7 +721,7 @@ describe('Containers Api', function () {
             });
         });
     });
-    fit('Grid pane.attached hgap vgap', function (done) {
+    it('Grid pane.attached hgap vgap', function (done) {
         require([
             'common-utils/color',
             'invoke',
@@ -1057,28 +1057,219 @@ describe('Containers Api', function () {
     });
     it('Box pane.detached left top width height', function (done) {
         require([
+            'ui',
             'forms/box-pane'
         ], function (
+                Ui,
                 Box) {
             var container = new Box();
+            container.width = container.height = 400;
+            var child0 = new Box();
+            var child1 = new Box();
+            var child2 = new Box();
+            container.add(child0);
+            container.add(child1);
+            container.add(child2);
+            expect(child0.width).toEqual(0);
+            expect(child1.width).toEqual(0);
+            expect(child1.width).toEqual(0);
+            expect(child0.height).toEqual(0);
+            expect(child1.height).toEqual(0);
+            expect(child1.height).toEqual(0);
+            container.orientation = Ui.Orientation.VERTICAL;
+            expect(child0.height).toEqual(0);
+            expect(child1.height).toEqual(0);
+            expect(child1.height).toEqual(0);
+            expect(child0.width).toEqual(0);
+            expect(child1.width).toEqual(0);
+            expect(child1.width).toEqual(0);
+            
+            
+            container.orientation = Ui.Orientation.HORIZONTAL;
+            
+            child0.left += 10;
+            expect(child0.left).toEqual(0);
+            child0.top += 10;
+            expect(child0.top).toEqual(0);
+            child0.width += 10;
+            expect(child0.width).toEqual(10);
+            child0.height += 10;
+            expect(child0.height).toEqual(0);
+            
+            child0.width = 0;
+            container.orientation = Ui.Orientation.VERTICAL;
+            
+            child0.left += 10;
+            expect(child0.left).toEqual(0);
+            child0.top += 10;
+            expect(child0.top).toEqual(0);
+            child0.width += 10;
+            expect(child0.width).toEqual(0);
+            child0.height += 10;
+            expect(child0.height).toEqual(10);
             done();
         });
     });
     it('Box pane.attached left top width height', function (done) {
         require([
+            'ui',
             'forms/box-pane'
         ], function (
+                Ui,
                 Box) {
             var container = new Box();
+            document.body.appendChild(container.element);
+            container.width = container.height = 400;
+            var child0 = new Box();
+            var child1 = new Box();
+            var child2 = new Box();
+            container.add(child0);
+            container.add(child1);
+            container.add(child2);
+            expect(child0.width).toEqual(0);
+            expect(child1.width).toEqual(0);
+            expect(child1.width).toEqual(0);
+            expect(child0.height).toEqual(400);
+            expect(child1.height).toEqual(400);
+            expect(child1.height).toEqual(400);
+            container.orientation = Ui.Orientation.VERTICAL;
+            expect(child0.height).toEqual(0);
+            expect(child1.height).toEqual(0);
+            expect(child1.height).toEqual(0);
+            expect(child0.width).toEqual(400);
+            expect(child1.width).toEqual(400);
+            expect(child1.width).toEqual(400);            
+            
+            container.orientation = Ui.Orientation.HORIZONTAL;
+            
+            child0.left += 10;
+            expect(child0.left).toEqual(0);
+            child0.top += 10;
+            expect(child0.top).toEqual(0);
+            child0.width += 10;
+            expect(child0.width).toEqual(10);            
+            expect(child1.left).toEqual(10);
+            
+            expect(child0.height).toEqual(400);
+            child0.height += 10;
+            expect(child0.height).toEqual(400);
+            
+            child0.width = 0;
+            expect(child1.left).toEqual(0);
+            container.orientation = Ui.Orientation.VERTICAL;
+            
+            child0.left += 10;
+            expect(child0.left).toEqual(0);
+            child0.top += 10;
+            expect(child0.top).toEqual(0);
+            
+            expect(child0.width).toEqual(0);// width of child0 is already in its tag's style
+            child0.width += 10;
+            expect(child0.width).toEqual(0); // width of child0 is already in its tag's style
+            
+            expect(child1.width).toEqual(400);
+            child1.width += 10;
+            expect(child1.width).toEqual(400);
+            child0.height += 10;
+            expect(child0.height).toEqual(10);
+            expect(child1.top).toEqual(10);
+            child0.height = 0;
+            expect(child0.height).toEqual(0);
+            expect(child1.top).toEqual(0);
+            document.body.removeChild(container.element);
             done();
         });
     });
     it('Box pane.attached hgap vgap orientation', function (done) {
         require([
+            'ui',
             'forms/box-pane'
         ], function (
+                Ui,
                 Box) {
             var container = new Box();
+            document.body.appendChild(container.element);
+            container.width = container.height = 400;
+            var child0 = new Box();
+            var child1 = new Box();
+            container.add(child0);
+            container.add(child1);
+            
+            container.hgap = 10;
+            expect(child0.left).toEqual(0);
+            expect(child1.left).toEqual(10);
+            
+            container.orientation = Ui.Orientation.VERTICAL;
+            
+            container.vgap = 10;
+            expect(child0.top).toEqual(0);
+            expect(child1.top).toEqual(10);
+            
+            document.body.removeChild(container.element);
+            done();
+        });
+    });
+    it('Box by content horizontal vertical', function (done) {
+        require([
+            'ui',
+            'forms/box-pane'
+        ], function (
+                Ui,
+                Box) {
+            var box = new Box();
+            document.body.appendChild(box.element);
+            box.height = 400;
+            var child0 = new Box();
+            var child1 = new Box();
+            box.add(child0);
+            box.add(child1);
+            child0.width = child1.width = 200;
+            box.hgap = 10;
+            expect(box.element.offsetWidth).toEqual(410);
+
+            // cleanup
+            box.height = null;
+            child0.width = child1.width = null;
+            box.orientation = Ui.Orientation.VERTICAL;
+            
+            box.width = 400;
+            child0.height = child1.height = 200;
+            box.vgap = 10;
+            expect(box.element.offsetHeight).toEqual(410);
+            
+            document.body.removeChild(box.element);
+            done();
+        });
+    });
+    it('Sized Box with horizontal and vertical scrolling', function (done) {
+        require([
+            'ui',
+            'forms/box-pane'
+        ], function (
+                Ui,
+                Box) {
+            var box = new Box();
+            document.body.appendChild(box.element);
+            box.width = box.height = 400;
+            var child0 = new Box();
+            var child1 = new Box();
+            box.add(child0);
+            box.add(child1);
+            child0.width = child1.width = 200;
+            box.hgap = 10;
+            expect(box.element.offsetWidth).toEqual(400);
+            expect(box.element.scrollWidth).toEqual(410);
+
+            // cleanup
+            child0.width = child1.width = null;
+            box.orientation = Ui.Orientation.VERTICAL;
+            
+            child0.height = child1.height = 200;
+            box.vgap = 10;
+            expect(box.element.offsetHeight).toEqual(400);
+            expect(box.element.scrollHeight).toEqual(410);
+            
+            document.body.removeChild(box.element);
             done();
         });
     });
@@ -1128,7 +1319,7 @@ describe('Containers Api', function () {
             expect(removed1).toEqual(child0);
 
             container.view = child1;
-            expect(container.count).toEqual(0);
+            expect(container.count).toEqual(1);
             expect(container.child(0)).toEqual(child1);
 
             container.clear();
@@ -1142,7 +1333,7 @@ describe('Containers Api', function () {
 
             container.view = null;
             expect(container.count).toEqual(0);
-            expect(container.child(0)).toEqual(-1);
+            expect(container.child(0)).toEqual(null);
             expect(container.children()).toEqual([]);
 
             done();
@@ -1153,7 +1344,20 @@ describe('Containers Api', function () {
             'forms/scroll-pane'
         ], function (
                 Scroll) {
-            var container = new Scroll();
+            var child = new Scroll();
+            var container = new Scroll(child);
+            expect(child.left).toEqual(0);
+            child.left += 10;
+            expect(child.left).toEqual(0);
+            expect(child.top).toEqual(0);
+            child.top += 10;
+            expect(child.top).toEqual(0);
+            expect(child.width).toEqual(0);
+            child.width += 10;
+            expect(child.width).toEqual(10);
+            expect(child.height).toEqual(0);
+            child.height += 10;
+            expect(child.height).toEqual(10);
             done();
         });
     });
@@ -1162,70 +1366,65 @@ describe('Containers Api', function () {
             'forms/scroll-pane'
         ], function (
                 Scroll) {
-            var container = new Scroll();
+            var child = new Scroll();
+            var container = new Scroll(child);
+            container.width = container.height = 400;
+            document.body.appendChild(container.element);
+            expect(child.width).toEqual(0);
+            child.width += 10;
+            expect(child.width).toEqual(10);
+            expect(child.height).toEqual(0);
+            child.height += 10;
+            expect(child.height).toEqual(10);
+            expect(child.left).toEqual(0);
+            child.left += 10;
+            expect(child.element.offsetLeft).toEqual(0);
+            expect(child.top).toEqual(0);
+            child.top += 10;
+            expect(child.element.offsetTop).toEqual(0);
+            document.body.removeChild(container.element);
             done();
         });
     });
-    it('Box in Scroll horizontal', function (done) {
+    it('Box in Scroll horizontal vertical', function (done) {
         require([
+            'ui',
             'forms/scroll-pane',
             'forms/box-pane'
         ], function (
+                Ui,
                 Scroll,
                 Box) {
             var scroll = new Scroll();
+            document.body.appendChild(scroll.element);
+            scroll.width = scroll.height = 400;
             var box = new Box();
+            scroll.view = box;
+            var child0 = new Box();
+            child0.width = 200;
+            var child1 = new Box();
+            child1.width = 200;
+            box.add(child0);
+            box.add(child1);
+            box.hgap = 10;
+            expect(box.element.offsetWidth).toEqual(410);
+            
+            // cleanup
+            child0.width = null;
+            child1.width = null;
+            
+            box.orientation = Ui.Orientation.VERTICAL;
+            
+            child0.height = 200;
+            child1.height = 200;
+            box.vgap = 10;
+            expect(box.element.offsetHeight).toEqual(410);
+            
+            document.body.removeChild(scroll.element);
             done();
         });
     });
-    it('Box in Scroll vertical', function (done) {
-        require([
-            'forms/scroll-pane',
-            'forms/box-pane'
-        ], function (
-                Scroll,
-                Box) {
-            var scroll = new Scroll();
-            var box = new Box();
-            done();
-        });
-    });
-    it('Box by content horizontal', function (done) {
-        require([
-            'forms/box-pane'
-        ], function (
-                Box) {
-            var container = new Box();
-            done();
-        });
-    });
-    it('Box by content vertical', function (done) {
-        require([
-            'forms/box-pane'
-        ], function (
-                Box) {
-            var container = new Box();
-            done();
-        });
-    });
-    it('Sized Box with horizontal scrolling', function (done) {
-        require([
-            'forms/box-pane'
-        ], function (
-                Box) {
-            var container = new Box();
-            done();
-        });
-    });
-    it('Sized Box with vertical scrolling', function (done) {
-        require([
-            'forms/box-pane'
-        ], function (
-                Box) {
-            var container = new Box();
-            done();
-        });
-    });
+    
     // TODO: Add tests against scrolls and nested boxes
     // TODO: Add tests against scroll and text boxes
     // TODO: Add tests against tabs onItemSelected event

@@ -1,7 +1,9 @@
 define([
+    '../id',
     '../extend',
     '../ui',
     './container'], function (
+        Id,
         extend,
         Ui,
         Container) {
@@ -10,28 +12,48 @@ define([
 
         var self = this;
 
-        self.element.style.whiteSpace = 'nowrap';
-        self.element.style.display = 'inline-block';
-        self.element.style.overflow = 'hidden';
-        self.element.style.position = 'relative';
+        if (arguments.length < 3)
+            vgap = 0;
+        if (arguments.length < 2)
+            hgap = 0;
+        if (arguments.length < 1)
+            orientation = Ui.Orientation.HORIZONTAL;
 
-        function applyHGap() {
+        self.element.classList.add('p-box-horizontal');
+        self.element.classList.add('p-horizontal-scroll-filler');
+        this.element.id = 'p-' + Id.generate();
+
+        var gapsStyle = document.createElement('style');
+        self.element.appendChild(gapsStyle);
+        function formatChildren() {
             if (orientation === Ui.Orientation.HORIZONTAL) {
-                self.forEach(function (w) {
-                    w.element.style.marginLeft = hgap + 'px';
-                });
+                self.element.classList.remove('p-box-vertical');
+                self.element.classList.remove('p-vertical-scroll-filler');
+                self.element.classList.add('p-box-horizontal');
+                self.element.classList.add('p-horizontal-scroll-filler');
+                gapsStyle.innerHTML =
+                        'div#' + self.element.id + ' > div {' +
+                        'height: 100%;' +
+                        'display: inline-block;' +
+                        '}' + 
+                        'div#' + self.element.id + ' > div:nth-child(n + 3) {' +
+                        'margin-left: ' + hgap + 'px;' +
+                        '}';
+            } else {
+                self.element.classList.add('p-box-vertical');
+                self.element.classList.add('p-vertical-scroll-filler');
+                self.element.classList.remove('p-box-horizontal');
+                self.element.classList.remove('p-horizontal-scroll-filler');
+                gapsStyle.innerHTML =
+                        'div#' + self.element.id + ' > div {' +
+                        'display: block;' +
+                        '}' + 
+                        'div#' + self.element.id + ' > div:nth-child(n + 3) {' +
+                        'margin-top: ' + vgap + 'px;' +
+                        '}';
             }
         }
-
-        function applyVGap() {
-            if (orientation === Ui.Orientation.HORIZONTAL) {
-                self.forEach(function (w) {
-                    w.element.style.marginTop = vgap + 'px';
-                });
-            }
-        }
-        applyHGap();
-        applyVGap();
+        formatChildren();
 
         Object.defineProperty(this, "hgap", {
             get: function () {
@@ -40,7 +62,7 @@ define([
             set: function (aValue) {
                 if (hgap >= 0 && hgap !== aValue) {
                     hgap = aValue;
-                    applyHGap();
+                    formatChildren();
                 }
             }
         });
@@ -52,16 +74,10 @@ define([
             set: function (aValue) {
                 if (vgap >= 0 && vgap !== aValue) {
                     vgap = aValue;
-                    applyVGap();
+                    formatChildren();
                 }
             }
         });
-        function applyOrientation() {
-            self.forEach(function (w) {
-                format(w);
-            });
-        }
-        applyOrientation();
         Object.defineProperty(this, "orientation", {
             configurable: true,
             get: function () {
@@ -70,51 +86,17 @@ define([
             set: function (aValue) {
                 if (orientation !== aValue) {
                     orientation = aValue;
-                    applyOrientation();
+                    formatChildren();
                 }
             }
         });
-
-
-        function format(w) {
-            var visible = w.visible;
-            var ws = w.element.style;
-            ws.marginLeft = 0 + 'px';
-            ws.marginRight = 0 + 'px';
-            ws.marginTop = 0 + 'px';
-            if (orientation === Ui.Orientation.HORIZONTAL) {
-                if (self.element.firstElementChild !== w.element) {
-                    ws.marginLeft = hgap + 'px';
-                    ws.marginRight = 0 + 'px';
-                }
-                ws.top = '';
-                ws.bottom = '';
-                ws.position = 'relative';
-                ws.height = 100 + '%';
-                ws.display = visible ? 'inline-block' : 'none';
-                ws.float = '';
-            } else {
-                if (self.element.firstElementChild !== w.element) {
-                    ws.marginTop = vgap + 'px';
-                    ws.marginBottom = 0 + 'px';
-                }
-                ws.position = 'relative';
-                ws.display = visible ? 'block' : 'none';
-                ws.left = 0 + 'px';
-                ws.right = '';
-                ws.width = 100 + 'px';
-            }
-            ws.verticalAlign = 'middle';
-        }
 
         var superAdd = this.add;
         function add(w) {
             if (orientation === Ui.Orientation.HORIZONTAL) {
                 superAdd(w);
-                format(w);
             } else {
                 superAdd(w);
-                format(w);
             }
         }
         Object.defineProperty(this, 'add', {
@@ -123,25 +105,40 @@ define([
             }
         });
 
-        function getTop(w) {
-            if (w.parent !== self)
-                throw "widget should be a child of this container";
-            return orientation === Ui.Orientation.HORIZONTAL ? 0 : w.element.offsetTop;
+        function ajustLeft(w, aValue) {
         }
-        Object.defineProperty(this, 'getTop', {
+        Object.defineProperty(this, 'ajustLeft', {
             get: function () {
-                return getTop;
+                return ajustLeft;
             }
         });
 
-        function getLeft(w) {
-            if (w.parent !== self)
-                throw "widget should be a child of this container";
-            return orientation === Ui.Orientation.HORIZONTAL ? w.element.offsetLeft : 0;
+        function ajustWidth(w, aValue) {
+            if(orientation === Ui.Orientation.HORIZONTAL){
+                w.element.style.width = aValue + 'px';
+            }
         }
-        Object.defineProperty(this, 'getLeft', {
+        Object.defineProperty(this, 'ajustWidth', {
             get: function () {
-                return getLeft;
+                return ajustWidth;
+            }
+        });
+
+        function ajustTop(w, aValue) {
+        }
+        Object.defineProperty(this, 'ajustTop', {
+            get: function () {
+                return ajustTop;
+            }
+        });
+        function ajustHeight(w, aValue) {
+            if(orientation === Ui.Orientation.VERTICAL){
+                w.element.style.height = aValue + 'px';
+            }
+        }
+        Object.defineProperty(this, 'ajustHeight', {
+            get: function () {
+                return ajustHeight;
             }
         });
     }
