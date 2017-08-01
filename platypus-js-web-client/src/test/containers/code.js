@@ -510,13 +510,11 @@ describe('Containers Api', function () {
 
     it('Grid pane.Structure', function (done) {
         require([
-            'invoke',
             'forms/grid-pane',
             'common-utils/font',
             'common-utils/color',
             'common-utils/cursor'
         ], function (
-                Invoke,
                 Cells,
                 Font,
                 Color,

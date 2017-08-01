@@ -104,12 +104,12 @@ define([
             }
         });
 
-        function addToFreeCell(aWidget) {
+        function addToFreeCell(w) {
             for (var row = 0; row < grid.length; row++) {
                 for (var col = 0; col < grid[row].length; col++) {
-                    var w = getWidget(row, col);
-                    if (!w) {
-                        setWidget(row, col, aWidget);
+                    var already = getWidget(row, col);
+                    if (!already) {
+                        setWidget(row, col, w);
                         return true;
                     }
                 }

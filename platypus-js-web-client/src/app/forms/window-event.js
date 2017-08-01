@@ -1,6 +1,6 @@
 define(['./event', '../extend'], function(Event, extend){
-    function WindowEvent(aWidget) {
-        Event.call(this, aWidget, aWidget);
+    function WindowEvent(w) {
+        Event.call(this, w, w);
     }
     extend(WindowEvent, Event);
     return WindowEvent;

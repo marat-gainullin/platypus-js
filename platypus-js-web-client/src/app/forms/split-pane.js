@@ -102,10 +102,10 @@ define([
             }
         }
 
-        function getTop(aWidget) {
-            if (aWidget.parent !== this)
+        function getTop(w) {
+            if (w.parent !== this)
                 throw "widget should be a child of this container";
-            return aWidget.element.offsetTop;
+            return w.element.offsetTop;
         }
         Object.defineProperty(this, "getTop", {
             get: function () {
@@ -113,10 +113,10 @@ define([
             }
         });
 
-        function getLeft(aWidget) {
-            if (aWidget.parent !== this)
+        function getLeft(w) {
+            if (w.parent !== this)
                 throw "widget should be a child of this container";
-            return aWidget.element.offsetLeft;
+            return w.element.offsetLeft;
         }
         Object.defineProperty(this, "getLeft", {
             get: function () {

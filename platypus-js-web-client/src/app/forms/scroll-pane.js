@@ -61,14 +61,14 @@ define([
             }
         });
 
-        function isHorizontalScrollFiller(aWidget) {
-            return aWidget instanceof HorizontalScrollFiller
-                    || aWidget.element.className.indexOf('p-horizontal-scroll-filler') > -1;
+        function isHorizontalScrollFiller(w) {
+            return w instanceof HorizontalScrollFiller
+                    || w.element.className.indexOf('p-horizontal-scroll-filler') > -1;
         }
 
-        function isVerticalScrollFiller(aWidget) {
-            return aWidget instanceof VerticalScrollFiller
-                    || aWidget.element.className.indexOf('p-vertical-scroll-filler') > -1;
+        function isVerticalScrollFiller(w) {
+            return w instanceof VerticalScrollFiller
+                    || w.element.className.indexOf('p-vertical-scroll-filler') > -1;
         }
 
         function ajustWidth(w, aValue) {
@@ -175,7 +175,7 @@ define([
             }
         });
 
-        function ajustTop(aWidget) {
+        function ajustTop(w) {
         }
         Object.defineProperty(this, "ajustTop", {
             get: function () {
@@ -183,7 +183,7 @@ define([
             }
         });
 
-        function ajustLeft(aWidget) {
+        function ajustLeft(w) {
         }
         Object.defineProperty(this, "ajustLeft", {
             get: function () {

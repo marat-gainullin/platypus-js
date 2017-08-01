@@ -104,8 +104,8 @@ define([
             }
         });
 
-        function getTop(aWidget) {
-            if (aWidget.parent !== this)
+        function getTop(w) {
+            if (w.parent !== this)
                 throw "Widget should be a child of this container";
             return tabs.element.offsetTop;
         }
@@ -114,8 +114,8 @@ define([
                 return getTop;
             }
         });
-        function getLeft(aWidget) {
-            if (aWidget.parent !== this)
+        function getLeft(w) {
+            if (w.parent !== this)
                 throw "Widget should be a child of this container";
             return 0;
         }

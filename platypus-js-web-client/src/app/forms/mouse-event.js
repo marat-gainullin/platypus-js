@@ -1,49 +1,49 @@
 define(['./event', '../extend'], function (Event, extend) {
-    function MouseEvent(aWidget, aEvent, aClickCount) {
-        Event.call(this, aWidget, aEvent.target, aEvent);
+    function MouseEvent(w, event, clickCount) {
+        Event.call(this, w, event.target, event);
         Object.defineProperty(this, "x", {
             get: function () {
-                return aEvent.x;
+                return event.x;
             }
         });
         Object.defineProperty(this, "y", {
             get: function () {
-                return aEvent.y;
+                return event.y;
             }
         });
         Object.defineProperty(this, "screenX", {
             get: function () {
-                aEvent.screenX;
+                event.screenX;
             }
         });
         Object.defineProperty(this, "screenY", {
             get: function () {
-                aEvent.screenY;
+                event.screenY;
             }
         });
         Object.defineProperty(this, "altDown", {
             get: function () {
-                return aEvent.altKey;
+                return event.altKey;
             }
         });
         Object.defineProperty(this, "controlDown", {
             get: function () {
-                return aEvent.ctrlKey;
+                return event.ctrlKey;
             }
         });
         Object.defineProperty(this, "shiftDown", {
             get: function () {
-                return aEvent.shiftKey;
+                return event.shiftKey;
             }
         });
         Object.defineProperty(this, "metaDown", {
             get: function () {
-                return aEvent.metaKey;
+                return event.metaKey;
             }
         });
         Object.defineProperty(this, "button", {
             get: function () {
-                switch (aEvent.button) {
+                switch (event.button) {
                     case 1/*BUTTON_LEFT*/ :
                         return 1;
                     case 2/*BUTTON_RIGHT*/ :
@@ -57,8 +57,8 @@ define(['./event', '../extend'], function (Event, extend) {
         });
         Object.defineProperty(this, "clickCount", {
             get: function () {
-                if (aClickCount)
-                    return aClickCount;
+                if (clickCount)
+                    return clickCount;
                 else
                     return 0;
             }
