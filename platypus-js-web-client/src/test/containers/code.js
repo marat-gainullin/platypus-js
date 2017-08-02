@@ -1081,10 +1081,10 @@ describe('Containers Api', function () {
             expect(child0.width).toEqual(0);
             expect(child1.width).toEqual(0);
             expect(child1.width).toEqual(0);
-            
-            
+
+
             container.orientation = Ui.Orientation.HORIZONTAL;
-            
+
             child0.left += 10;
             expect(child0.left).toEqual(0);
             child0.top += 10;
@@ -1093,10 +1093,10 @@ describe('Containers Api', function () {
             expect(child0.width).toEqual(10);
             child0.height += 10;
             expect(child0.height).toEqual(0);
-            
+
             child0.width = 0;
             container.orientation = Ui.Orientation.VERTICAL;
-            
+
             child0.left += 10;
             expect(child0.left).toEqual(0);
             child0.top += 10;
@@ -1136,35 +1136,35 @@ describe('Containers Api', function () {
             expect(child1.height).toEqual(0);
             expect(child0.width).toEqual(400);
             expect(child1.width).toEqual(400);
-            expect(child1.width).toEqual(400);            
-            
+            expect(child1.width).toEqual(400);
+
             container.orientation = Ui.Orientation.HORIZONTAL;
-            
+
             child0.left += 10;
             expect(child0.left).toEqual(0);
             child0.top += 10;
             expect(child0.top).toEqual(0);
             child0.width += 10;
-            expect(child0.width).toEqual(10);            
+            expect(child0.width).toEqual(10);
             expect(child1.left).toEqual(10);
-            
+
             expect(child0.height).toEqual(400);
             child0.height += 10;
             expect(child0.height).toEqual(400);
-            
+
             child0.width = 0;
             expect(child1.left).toEqual(0);
             container.orientation = Ui.Orientation.VERTICAL;
-            
+
             child0.left += 10;
             expect(child0.left).toEqual(0);
             child0.top += 10;
             expect(child0.top).toEqual(0);
-            
+
             expect(child0.width).toEqual(0);// width of child0 is already in its tag's style
             child0.width += 10;
             expect(child0.width).toEqual(0); // width of child0 is already in its tag's style
-            
+
             expect(child1.width).toEqual(400);
             child1.width += 10;
             expect(child1.width).toEqual(400);
@@ -1192,17 +1192,17 @@ describe('Containers Api', function () {
             var child1 = new Box();
             container.add(child0);
             container.add(child1);
-            
+
             container.hgap = 10;
             expect(child0.left).toEqual(0);
             expect(child1.left).toEqual(10);
-            
+
             container.orientation = Ui.Orientation.VERTICAL;
-            
+
             container.vgap = 10;
             expect(child0.top).toEqual(0);
             expect(child1.top).toEqual(10);
-            
+
             document.body.removeChild(container.element);
             done();
         });
@@ -1229,12 +1229,12 @@ describe('Containers Api', function () {
             box.height = null;
             child0.width = child1.width = null;
             box.orientation = Ui.Orientation.VERTICAL;
-            
+
             box.width = 400;
             child0.height = child1.height = 200;
             box.vgap = 10;
             expect(box.element.offsetHeight).toEqual(410);
-            
+
             document.body.removeChild(box.element);
             done();
         });
@@ -1261,12 +1261,12 @@ describe('Containers Api', function () {
             // cleanup
             child0.width = child1.width = null;
             box.orientation = Ui.Orientation.VERTICAL;
-            
+
             child0.height = child1.height = 200;
             box.vgap = 10;
             expect(box.element.offsetHeight).toEqual(400);
             expect(box.element.scrollHeight).toEqual(410);
-            
+
             document.body.removeChild(box.element);
             done();
         });
@@ -1406,23 +1406,79 @@ describe('Containers Api', function () {
             box.add(child1);
             box.hgap = 10;
             expect(box.element.offsetWidth).toEqual(410);
-            
+
             // cleanup
             child0.width = null;
             child1.width = null;
-            
+
             box.orientation = Ui.Orientation.VERTICAL;
-            
+
             child0.height = 200;
             child1.height = 200;
             box.vgap = 10;
             expect(box.element.offsetHeight).toEqual(410);
-            
+
             document.body.removeChild(scroll.element);
             done();
         });
     });
-    
+
+    fit('Toolbar.Structure', function (done) {
+        require([
+            'ui',
+            'invoke',
+            'forms/tool-bar'
+        ], function (
+                Ui,
+                Invoke,
+                Toolbar) {
+            var toolbar = new Toolbar();
+            document.body.appendChild(toolbar.element);
+            toolbar.height = 150;
+            toolbar.width = 400;
+            var tool0 = new Toolbar();
+            tool0.width = 100;
+            tool0.background = Ui.Color.black;
+            var tool1 = new Toolbar();
+            tool1.width = 100;
+            tool1.background = Ui.Color.black;
+            var tool2 = new Toolbar();
+            tool2.width = 100;
+            tool2.background = Ui.Color.black;
+            var tool3 = new Toolbar();
+            tool3.width = 100;
+            tool3.background = Ui.Color.black;
+            toolbar.add(tool0);
+            toolbar.add(tool1);
+            toolbar.add(tool2);
+            toolbar.add(tool3);
+
+            expect('orientation' in toolbar).toBeFalsy();
+            expect('vgap' in toolbar).toBeFalsy();
+            expect('hgap' in toolbar).toBeTruthy();
+
+            expect(tool0.left).toEqual(0);
+            expect(tool1.left).toEqual(100);
+            expect(toolbar.element.childElementCount).toEqual(5);
+
+            toolbar.hgap = 10;
+
+            expect(tool0.left).toEqual(0);
+            expect(tool1.left).toEqual(110);
+
+            toolbar.remove(tool3);
+            toolbar.add(tool3);
+            Invoke.later(function () {
+                expect(toolbar.element.childElementCount).toEqual(6);
+                toolbar.element.scrollLeft = 50;
+                Invoke.later(function () {
+                    expect(toolbar.element.childElementCount).toEqual(6);
+                    //document.body.removeChild(toolbar.element);
+                    done();
+                });
+            });
+        });
+    });
     // TODO: Add tests against scrolls and nested boxes
     // TODO: Add tests against scroll and text boxes
     // TODO: Add tests against tabs onItemSelected event

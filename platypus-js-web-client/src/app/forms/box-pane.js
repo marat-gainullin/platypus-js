@@ -25,6 +25,7 @@ define([
 
         var gapsStyle = document.createElement('style');
         self.element.appendChild(gapsStyle);
+        
         function formatChildren() {
             if (orientation === Ui.Orientation.HORIZONTAL) {
                 self.element.classList.remove('p-box-vertical');
@@ -36,7 +37,7 @@ define([
                         'height: 100%;' +
                         'display: inline-block;' +
                         '}' + 
-                        'div#' + self.element.id + ' > div:nth-child(n + 3) {' +
+                        'div#' + self.element.id + ' > div:nth-child(n + ' + 3 + ') {' +
                         'margin-left: ' + hgap + 'px;' +
                         '}';
             } else {
@@ -48,7 +49,7 @@ define([
                         'div#' + self.element.id + ' > div {' +
                         'display: block;' +
                         '}' + 
-                        'div#' + self.element.id + ' > div:nth-child(n + 3) {' +
+                        'div#' + self.element.id + ' > div:nth-child(n + ' + 3 + ') {' +
                         'margin-top: ' + vgap + 'px;' +
                         '}';
             }

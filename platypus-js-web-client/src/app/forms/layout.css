@@ -66,3 +66,22 @@
 .p-scroll > .p-box-vertical {
     width: 100%
 }
+
+.p-toolbar{
+    overflow-x: hidden;
+}
+
+.p-toolbar-chevron {
+    position: absolute;
+    display: inline-block;
+    height: 100%;
+    width: 20px;
+}
+
+.p-toolbar-chevron-left{
+    left: 0px;
+}
+
+.p-toolbar-chevron-right{
+    right: 0px;
+}
