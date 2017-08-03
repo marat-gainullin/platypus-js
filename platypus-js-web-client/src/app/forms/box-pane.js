@@ -33,11 +33,11 @@ define([
                 self.element.classList.add('p-box-horizontal');
                 self.element.classList.add('p-horizontal-scroll-filler');
                 gapsStyle.innerHTML =
-                        'div#' + self.element.id + ' > div {' +
+                        'div#' + self.element.id + ' > .p-widget {' +
                         'height: 100%;' +
                         'display: inline-block;' +
                         '}' + 
-                        'div#' + self.element.id + ' > div:nth-child(n + ' + 3 + ') {' +
+                        'div#' + self.element.id + ' > .p-widget:nth-child(n + ' + 3 + ') {' +
                         'margin-left: ' + hgap + 'px;' +
                         '}';
             } else {
@@ -46,10 +46,10 @@ define([
                 self.element.classList.remove('p-box-horizontal');
                 self.element.classList.remove('p-horizontal-scroll-filler');
                 gapsStyle.innerHTML =
-                        'div#' + self.element.id + ' > div {' +
+                        'div#' + self.element.id + ' > .p-widget {' +
                         'display: block;' +
                         '}' + 
-                        'div#' + self.element.id + ' > div:nth-child(n + ' + 3 + ') {' +
+                        'div#' + self.element.id + ' > .p-widget:nth-child(n + ' + 3 + ') {' +
                         'margin-top: ' + vgap + 'px;' +
                         '}';
             }

@@ -33,7 +33,7 @@ define([
         self.element.appendChild(style);
         function formatChildren() {
             style.innerHTML =
-                    'div#' + self.element.id + ' > div {' +
+                    'div#' + self.element.id + ' > .p-widget {' +
                     '}';
         }
         formatChildren();

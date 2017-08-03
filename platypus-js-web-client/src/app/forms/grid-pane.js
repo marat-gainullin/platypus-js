@@ -34,7 +34,7 @@ define([
         self.element.appendChild(gapsStyle);
         function formatChildren() {
             gapsStyle.innerHTML =
-                    'div#' + self.element.id + ' > div {' +
+                    'div#' + self.element.id + ' > .p-widget {' +
                     'width: ' + (100 / columns) + '%;' +
                     'height: ' + (100 / rows) + '%;' +
                     'padding-left: ' + (hgap / 2) + 'px;' +

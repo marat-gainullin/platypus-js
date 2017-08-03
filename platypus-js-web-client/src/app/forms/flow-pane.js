@@ -26,7 +26,7 @@ define([
         var style = document.createElement('style');
         function formatChildren() {
             style.innerHTML =
-                    'div#' + self.element.id + ' > div {' +
+                    'div#' + self.element.id + ' > .p-widget {' +
                     'margin-left: ' + hgap + 'px;' +
                     'margin-top: ' + vgap + 'px;' +
                     '}';

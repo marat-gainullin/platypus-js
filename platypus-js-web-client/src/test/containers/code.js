@@ -1423,7 +1423,7 @@ describe('Containers Api', function () {
         });
     });
 
-    fit('Toolbar.Structure', function (done) {
+    it('Toolbar.Structure', function (done) {
         require([
             'ui',
             'invoke',
@@ -1473,7 +1473,195 @@ describe('Containers Api', function () {
                 toolbar.element.scrollLeft = 50;
                 Invoke.later(function () {
                     expect(toolbar.element.childElementCount).toEqual(6);
-                    //document.body.removeChild(toolbar.element);
+                    document.body.removeChild(toolbar.element);
+                    done();
+                });
+            });
+        });
+    });
+    it('Split pane.Structure', function (done) {
+        require([
+            'forms/split-pane',
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor'
+        ], function (
+                Split,
+                Font,
+                Color,
+                Cursor) {
+            var container = new Split();
+            expectContainer(container, Font, Color, Cursor);
+            expect(container.element).toBeDefined();
+
+            var child0 = new Split();
+            var child1 = new Split();
+
+            container.add(child0);
+            expect(container.count).toEqual(1);
+            expect(container.child(0)).toEqual(child0);
+            expect(container.firstComponent).toEqual(child0);
+
+            container.add(child1);
+            expect(container.count).toEqual(2);
+            expect(container.child(1)).toEqual(child1);
+            expect(container.secondComponent).toEqual(child1);
+
+            expect(container.children()).toEqual([child0, child1]);
+
+            var removed0 = container.remove(0);
+            expect(removed0).toBeDefined();
+            expect(removed0).toEqual(child0);
+            expect(container.count).toEqual(1);
+            expect(container.children()).toEqual([child0]);
+
+            expect(container.firstComponent).toBeNull();
+
+            var removed1 = container.remove(0);
+            expect(removed1).toBeDefined();
+            expect(removed1).toEqual(child1);
+            expect(container.count).toEqual(0);
+            expect(container.children()).toEqual([]);
+
+            expect(container.secondComponent).toBeNull();
+
+            container.firstComponent = child0;
+            expect(container.count).toEqual(1);
+            expect(container.child(0)).toEqual(child0);
+            container.secondComponent = child1;
+            expect(container.count).toEqual(2);
+            expect(container.child(1)).toEqual(child1);
+
+            container.firstComponent = null;
+            expect(container.count).toEqual(1);
+            expect(container.child(0)).toEqual(child1);
+
+            container.secondComponent = null;
+            expect(container.count).toEqual(0);
+            expect(container.children()).toEqual([]);
+
+            container.firstComponent = child0;
+            container.secondComponent = child1;
+            expect(container.count).toEqual(2);
+            expect(container.children()).toEqual([child0, child1]);
+            container.clear();
+            expect(container.count).toEqual(0);
+            expect(container.children()).toEqual([]);
+            expect(container.firstComponent).toBeNull();
+            expect(container.secondComponent).toBeNull();
+
+            done();
+        });
+    });
+
+    it('Split pane.detached left top width height', function (done) {
+        require([
+            'forms/split-pane'
+        ], function (
+                Split) {
+            var split = new Split();
+
+            var first = new Split();
+            var second = new Split();
+
+            split.firstComponent = first;
+            split.secondComponent = second;
+
+            expect(first.left).toEqual(0);
+            first.left += 10;
+            expect(first.left).toEqual(0);
+
+            expect(first.top).toEqual(0);
+            first.top += 10;
+            expect(first.top).toEqual(0);
+
+            expect(first.width).toEqual(0);
+            first.width += 10;
+            expect(first.width).toEqual(0);
+
+            expect(first.height).toEqual(0);
+            first.height += 10;
+            expect(first.height).toEqual(0);
+
+            expect(second.left).toEqual(0);
+            second.left += 10;
+            expect(second.left).toEqual(0);
+
+            expect(second.top).toEqual(0);
+            second.top += 10;
+            expect(second.top).toEqual(0);
+
+            expect(second.width).toEqual(0);
+            second.width += 10;
+            expect(second.width).toEqual(0);
+
+            expect(second.height).toEqual(0);
+            second.height += 10;
+            expect(second.height).toEqual(0);
+
+            done();
+        });
+    });
+    it('Split pane.attached left top width height', function (done) {
+        require([
+            'ui',
+            'invoke',
+            'forms/split-pane'
+        ], function (
+                Ui,
+                Invoke,
+                Split) {
+            var split = new Split();
+            split.width = split.height = 200;
+            document.body.appendChild(split.element);
+
+            var first = new Split();
+            var second = new Split();
+
+            split.dividerLocation = 100;
+
+            split.secondComponent = second;
+
+            Invoke.later(function () {
+
+                expect(second.left).toEqual(110);
+                second.left += 10;
+                expect(second.left).toEqual(110);
+
+                expect(second.top).toEqual(0);
+                second.top += 10;
+                expect(second.top).toEqual(0);
+
+                expect(second.width).toEqual(90);
+                second.width += 10;
+                expect(second.width).toEqual(90);
+
+                expect(second.height).toEqual(200);
+                second.height += 10;
+                expect(second.height).toEqual(200);
+                
+                split.firstComponent = first;
+
+                Invoke.later(function () {
+
+                    expect(first.left).toEqual(0);
+                    first.left += 10;
+                    expect(first.left).toEqual(0);
+
+                    expect(first.top).toEqual(0);
+                    first.top += 10;
+                    expect(first.top).toEqual(0);
+
+                    expect(first.width).toEqual(100);
+                    first.width += 10;
+                    expect(first.width).toEqual(100);
+
+                    expect(first.height).toEqual(200);
+                    first.height += 10;
+                    expect(first.height).toEqual(200);
+                    split.orientation = Ui.Orientation.VERTICAL;
+                    
+                    document.body.removeChild(split.element);
                     done();
                 });
             });
@@ -1484,3 +1672,4 @@ describe('Containers Api', function () {
     // TODO: Add tests against tabs onItemSelected event
 
 });
+
