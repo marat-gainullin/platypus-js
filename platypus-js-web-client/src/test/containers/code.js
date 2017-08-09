@@ -1639,7 +1639,7 @@ describe('Containers Api', function () {
                 expect(second.height).toEqual(200);
                 second.height += 10;
                 expect(second.height).toEqual(200);
-                
+
                 split.firstComponent = first;
 
                 Invoke.later(function () {
@@ -1660,16 +1660,300 @@ describe('Containers Api', function () {
                     first.height += 10;
                     expect(first.height).toEqual(200);
                     split.orientation = Ui.Orientation.VERTICAL;
-                    
+
                     document.body.removeChild(split.element);
                     done();
                 });
             });
         });
     });
+    it('Borders pane.Structure', function (done) {
+        require([
+            'ui',
+            'forms/border-pane',
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor'
+        ], function (
+                Ui,
+                Borders,
+                Font,
+                Color,
+                Cursor) {
+            var borders = new Borders();
+            expectContainer(borders, Font, Color, Cursor);
+            expect(borders.element).toBeDefined();
+
+            var topChild = new Borders();
+            var leftChild = new Borders();
+            var centerChild = new Borders();
+            var rightChild = new Borders();
+            var bottomChild = new Borders();
+
+            borders.topComponent = topChild;
+            expect(borders.count).toEqual(1);
+            expect(borders.child(0)).toEqual(topChild);
+            expect(borders.topComponent).toEqual(topChild);
+
+            borders.leftComponent = leftChild;
+            expect(borders.count).toEqual(2);
+            expect(borders.child(1)).toEqual(leftChild);
+            expect(borders.leftComponent).toEqual(leftChild);
+
+            borders.centerComponent = centerChild;
+            expect(borders.count).toEqual(3);
+            expect(borders.child(2)).toEqual(centerChild);
+            expect(borders.centerComponent).toEqual(centerChild);
+
+            borders.rightComponent = rightChild;
+            expect(borders.count).toEqual(4);
+            expect(borders.child(3)).toEqual(rightChild);
+            expect(borders.rightComponent).toEqual(rightChild);
+
+            borders.bottomComponent = bottomChild;
+            expect(borders.count).toEqual(5);
+            expect(borders.child(4)).toEqual(bottomChild);
+            expect(borders.bottomComponent).toEqual(bottomChild);
+
+            expect(borders.children()).toEqual([topChild, leftChild, centerChild, rightChild, bottomChild]);
+
+            var removed0 = borders.remove(0);
+            expect(removed0).toBeDefined();
+            expect(removed0).toEqual(topChild);
+            expect(borders.count).toEqual(4);
+            expect(borders.children()).toEqual([leftChild, centerChild, rightChild, bottomChild]);
+
+            expect(borders.topComponent).toBeNull();
+
+            borders.topComponent = topChild;
+            expect(borders.count).toEqual(5);
+            expect(borders.child(borders.count - 1)).toEqual(topChild);
+            expect(borders.topComponent).toEqual(topChild);
+
+            borders.clear();
+            expect(borders.count).toEqual(0);
+            expect(borders.children()).toEqual([]);
+            expect(borders.leftComponent).toBeNull();
+            expect(borders.centerComponent).toBeNull();
+            expect(borders.rightComponent).toBeNull();
+            expect(borders.bottomComponent).toBeNull();
+
+            borders.centerComponent = centerChild;
+            var centerChild1 = new Borders();
+            var oldCenter = borders.add(centerChild1);
+            expect(oldCenter).toEqual(centerChild);
+
+            borders.rightComponent = rightChild;
+            var rightChild1 = new Borders();
+            var oldRight = borders.add(rightChild1, Ui.HorizontalPosition.RIGHT);
+            expect(oldRight).toEqual(rightChild);
+
+            done();
+        });
+    });
+    it('Borders pane.attached left top width height', function (done) {
+        require([
+            'ui',
+            'invoke',
+            'common-utils/color',
+            'forms/border-pane'
+        ], function (
+                Ui,
+                Invoke,
+                Color,
+                Borders) {
+            var borders = new Borders();
+            borders.background = Color.blue;
+            borders.width = borders.height = 400;
+            document.body.appendChild(borders.element);
+
+            var topChild = new Borders();
+            topChild.height = 50;
+            topChild.background = Color.black;
+            
+            var leftChild = new Borders();
+            leftChild.width = 50;
+            leftChild.background = Color.black;
+            
+            var centerChild = new Borders();
+            centerChild.background = Color.black;
+            
+            var rightChild = new Borders();
+            //rightChild.width = 50; moved to third argument 'add' call
+            rightChild.background = Color.black;
+            
+            var bottomChild = new Borders();
+            bottomChild.height = 50;
+            bottomChild.background = Color.black;
+
+            borders.topComponent = topChild;
+            borders.leftComponent = leftChild;
+            borders.centerComponent = centerChild;
+            //borders.rightComponent = rightChild;
+            borders.add(rightChild, Ui.HorizontalPosition.RIGHT, 50);
+            borders.bottomComponent = bottomChild;
+            
+            Invoke.later(function(){
+                // top
+                expect(topChild.width).toEqual(400);
+                topChild.width += 10;
+                expect(topChild.width).toEqual(400);                
+                expect(topChild.height).toEqual(50);
+                topChild.height += 10;
+                expect(topChild.height).toEqual(60);                
+                expect(topChild.left).toEqual(0);
+                topChild.left += 10;
+                expect(topChild.left).toEqual(0);                
+                expect(topChild.top).toEqual(0);
+                topChild.top += 10;
+                expect(topChild.top).toEqual(0);
+                // bottom
+                expect(bottomChild.width).toEqual(400);
+                bottomChild.width += 10;
+                expect(bottomChild.width).toEqual(400);                
+                expect(bottomChild.height).toEqual(50);
+                bottomChild.height += 10;
+                expect(bottomChild.height).toEqual(60);                
+                expect(bottomChild.left).toEqual(0);
+                bottomChild.left += 10;
+                expect(bottomChild.left).toEqual(0);                
+                expect(bottomChild.top).toEqual(340);
+                bottomChild.top += 10;
+                expect(bottomChild.top).toEqual(340);
+                // left
+                expect(leftChild.width).toEqual(50);
+                leftChild.width += 10;
+                expect(leftChild.width).toEqual(60);                
+                expect(leftChild.height).toEqual(280);
+                leftChild.height += 10;
+                expect(leftChild.height).toEqual(280);                
+                expect(leftChild.left).toEqual(0);
+                leftChild.left += 10;
+                expect(leftChild.left).toEqual(0);
+                expect(leftChild.top).toEqual(60);
+                leftChild.top += 10;
+                expect(leftChild.top).toEqual(60);
+                // right
+                expect(rightChild.width).toEqual(50);
+                rightChild.width += 10;
+                expect(rightChild.width).toEqual(60);                
+                expect(rightChild.height).toEqual(280);
+                rightChild.height += 10;
+                expect(rightChild.height).toEqual(280);                
+                expect(rightChild.left).toEqual(340);
+                rightChild.left += 10;
+                expect(rightChild.left).toEqual(340);                
+                expect(rightChild.top).toEqual(60);
+                rightChild.top += 10;
+                expect(rightChild.top).toEqual(60);
+                // center
+                expect(centerChild.width).toEqual(280);
+                centerChild.width += 10;
+                expect(centerChild.width).toEqual(280);                
+                expect(centerChild.height).toEqual(280);
+                centerChild.height += 10;
+                expect(centerChild.height).toEqual(280);
+                expect(centerChild.left).toEqual(60);
+                centerChild.left += 10;
+                expect(centerChild.left).toEqual(60);
+                expect(centerChild.top).toEqual(60);
+                centerChild.top += 10;
+                expect(centerChild.top).toEqual(60);
+                
+                document.body.removeChild(borders.element);
+                done();
+            });            
+
+        });
+    });
+    it('Borders pane.attached hgap vgap', function (done) {
+        require([
+            'invoke',
+            'common-utils/color',
+            'forms/border-pane'
+        ], function (
+                Invoke,
+                Color,
+                Borders) {
+            var borders = new Borders(10);
+            borders.background = Color.blue;
+            borders.width = borders.height = 400;
+            document.body.appendChild(borders.element);
+
+            var topChild = new Borders();
+            topChild.height = 50;
+            topChild.background = Color.black;
+            
+            var leftChild = new Borders();
+            leftChild.width = 50;
+            leftChild.background = Color.black;
+            
+            var centerChild = new Borders();
+            centerChild.background = Color.black;
+            
+            var rightChild = new Borders();
+            rightChild.width = 50;
+            rightChild.background = Color.black;
+            
+            var bottomChild = new Borders();
+            bottomChild.height = 50;
+            bottomChild.background = Color.black;
+
+            borders.topComponent = topChild;
+            borders.leftComponent = leftChild;
+            borders.centerComponent = centerChild;
+            borders.rightComponent = rightChild;
+            borders.bottomComponent = bottomChild;
+            
+            expect(borders.vgap).toEqual(0);
+            borders.vgap = 10;
+            
+            Invoke.later(function(){
+                // top
+                expect(topChild.width).toEqual(400);
+                expect(topChild.height).toEqual(50);
+                expect(topChild.left).toEqual(0);
+                expect(topChild.top).toEqual(0);
+                // bottom
+                expect(bottomChild.width).toEqual(400);
+                expect(bottomChild.height).toEqual(50);
+                expect(bottomChild.left).toEqual(0);
+                expect(bottomChild.top).toEqual(350);
+                // left
+                expect(leftChild.width).toEqual(50);
+                expect(leftChild.height).toEqual(280);                
+                expect(leftChild.left).toEqual(0);
+                expect(leftChild.top).toEqual(60);
+                // right
+                expect(rightChild.width).toEqual(50);                
+                expect(rightChild.height).toEqual(280);
+                expect(rightChild.left).toEqual(350);
+                expect(rightChild.top).toEqual(60);
+                // center
+                expect(centerChild.width).toEqual(280);
+                expect(centerChild.height).toEqual(280);
+                expect(centerChild.left).toEqual(60);
+                expect(centerChild.top).toEqual(60);
+                
+                document.body.removeChild(borders.element);
+                done();
+            });            
+
+        });
+    });
+    
+    it('TabedPane.Structure', function(done){
+        pending('Label widget');
+        done();
+    });
+    it('DesktopPane.Structure', function(done){
+        pending('Windows');
+        done();
+    });
     // TODO: Add tests against scrolls and nested boxes
     // TODO: Add tests against scroll and text boxes
-    // TODO: Add tests against tabs onItemSelected event
-
+    // TODO: Add tests against tabs 'onItemSelected' event
+    // TODO: Add tests against cards 'onItemSelected' event
+    
 });
 

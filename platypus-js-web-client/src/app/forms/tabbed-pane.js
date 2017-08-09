@@ -17,7 +17,7 @@ define([
         var tabsOf = new Map();
         var onItemSelected;
 
-        this.add(tabs, TOP, 30);
+        this.topComponent = tabs;
         this.centerComponent = content;
 
         function addCaptionFor(w, title, image, toolTip, beforeIndex) {
@@ -101,27 +101,6 @@ define([
                     return content.indexOf(content.visibleWidget);
                 else
                     return -1;
-            }
-        });
-
-        function getTop(w) {
-            if (w.parent !== this)
-                throw "Widget should be a child of this container";
-            return tabs.element.offsetTop;
-        }
-        Object.defineProperty(this, 'getTop', {
-            get: function () {
-                return getTop;
-            }
-        });
-        function getLeft(w) {
-            if (w.parent !== this)
-                throw "Widget should be a child of this container";
-            return 0;
-        }
-        Object.defineProperty(this, 'getLeft', {
-            get: function () {
-                return getLeft;
             }
         });
 

@@ -31,7 +31,7 @@ define([
         this.element.id = 'p-' + Id.generate();
 
         var gapsStyle = document.createElement('style');
-        self.element.appendChild(gapsStyle);
+        this.element.appendChild(gapsStyle);
         function formatChildren() {
             gapsStyle.innerHTML =
                     'div#' + self.element.id + ' > .p-widget {' +

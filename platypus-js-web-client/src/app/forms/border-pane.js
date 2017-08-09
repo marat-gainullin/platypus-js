@@ -1,36 +1,62 @@
 define([
+    '../id',
     '../extend',
     '../ui',
     './container'
 ], function (
+        Id,
         extend,
         Ui,
         Container) {
     function BorderPane(hgap, vgap) {
+        if (arguments.length < 2)
+            vgap = 0;
+        if (arguments.length < 1)
+            hgap = 0;
+
         Container.call(this);
 
         var self = this;
+        var flexColumn = this.element;
+
+        flexColumn.classList.add('p-borders-column');
+        var flexRow = document.createElement('div');
+        flexRow.classList.add('p-borders-row');
+        this.element.appendChild(flexRow);
+
+        flexColumn.id = 'p-' + Id.generate();
+        flexRow.id = 'p-' + Id.generate();
+
+        var gapsStyle = document.createElement('style');
+        this.element.appendChild(gapsStyle);
+        function formatChildren() {
+            gapsStyle.innerHTML =
+                    'div#' + flexColumn.id + ' > .p-borders-row {' +
+                    'margin-top: ' + vgap + 'px;' +
+                    'margin-bottom: ' + vgap + 'px;' +
+                    '}' +
+                    'div#' + flexRow.id + ' > .p-borders-center {' +
+                    'margin-left: ' + hgap + 'px;' +
+                    'margin-right: ' + hgap + 'px;' +
+                    '}';
+        }
+        formatChildren();
 
         var center;
         var left;
         var right;
         var top;
         var bottom;
-        var bottomHeight;
-        var topHeight;
-        var leftWidth;
-        var rightWidth;
-
-        var hgap = 0;
-        var vgap = 0;
 
         Object.defineProperty(this, 'hgap', {
             get: function () {
                 return hgap;
             },
             set: function (aValue) {
-                hgap = aValue;
-                recalcCenterMargins();
+                if (hgap !== aValue) {
+                    hgap = aValue;
+                    formatChildren();
+                }
             }
         });
 
@@ -39,38 +65,132 @@ define([
                 return vgap;
             },
             set: function (aValue) {
-                vgap = aValue;
-                recalcCenterMargins();
+                if (vgap !== aValue) {
+                    vgap = aValue;
+                    formatChildren();
+                }
             }
         });
 
         var superAdd = this.add;
-        function add(w, aPlace) {
-            if (arguments.lenth < 2) {
+        function add(w, aPlace, aSize) {
+            if (arguments.length < 2) {
+                var cold = self.centerComponent;
                 self.centerComponent = w;
+                return cold;
             } else {
                 switch (aPlace) {
                     case Ui.HorizontalPosition.LEFT:
+                        var lold = self.leftComponent;
                         self.leftComponent = w;
-                        break;
+                        if(arguments.length > 2)
+                            w.width = aSize;
+                        return lold;
                     case Ui.HorizontalPosition.RIGHT:
+                        var rold = self.rightComponent;
                         self.rightComponent = w;
-                        break;
+                        if(arguments.length > 2)
+                            w.width = aSize;
+                        return rold;
                     case Ui.VerticalPosition.TOP:
+                        var told = self.topComponent;
                         self.topComponent = w;
-                        break;
+                        if(arguments.length > 2)
+                            w.height = aSize;
+                        return told;
                     case Ui.VerticalPosition.BOTTOM:
+                        var bold = self.bottomComponent;
                         self.bottomComponent = w;
-                        break;
+                        if(arguments.length > 2)
+                            w.height = aSize;
+                        return bold;
                     default:
+                        var cold = self.centerComponent;
                         self.centerComponent = w;
-                        break;
+                        return cold;
                 }
             }
         }
         Object.defineProperty(this, 'add', {
             get: function () {
                 return add;
+            }
+        });
+
+        function leftRemoved() {
+            left.element.classList.remove('p-borders-left');
+            left = null;
+            leftWidth = 0;
+        }
+
+        function rightRemoved() {
+            right.element.classList.remove('p-borders-right');
+            right = null;
+            rightWidth = 0;
+        }
+
+        function topRemoved() {
+            top.element.classList.remove('p-borders-top');
+            top = null;
+            topHeight = 0;
+        }
+        function bottomRemoved() {
+            bottom.element.classList.remove('p-borders-bottom');
+            bottom = null;
+            bottomHeight = 0;
+        }
+        function centerRemoved() {
+            center.element.classList.remove('p-borders-center');
+            center = null;
+        }
+
+        function checkRemoved(w) {
+            if (left === w) {
+                leftRemoved();
+            }
+            if (right === w) {
+                rightRemoved();
+            }
+            if (top === w) {
+                topRemoved();
+            }
+            if (bottom === w) {
+                bottomRemoved();
+            }
+            if (center === w) {
+                centerRemoved();
+            }
+        }
+
+        var superRemove = this.remove;
+        function remove(widgetOrIndex) {
+            var removed = superRemove(widgetOrIndex);
+            checkRemoved(removed);
+            return removed;
+        }
+        Object.defineProperty(this, 'remove', {
+            get: function () {
+                return remove;
+            }
+        });
+
+        var superClear = this.clear;
+        function clear() {
+            superClear();
+            if (left)
+                leftRemoved();
+            if (right)
+                rightRemoved();
+            if (top)
+                topRemoved();
+            if (bottom)
+                bottomRemoved();
+            if (center)
+                centerRemoved();
+        }
+        Object.defineProperty(this, 'clear', {
+            get: function () {
+                return clear;
             }
         });
 
@@ -82,15 +202,14 @@ define([
                 if (w !== left) {
                     if (left) {
                         superRemove(left);
+                        leftRemoved();
+                    }
+                    if (w) {
+                        superAdd(w);
+                        flexRow.appendChild(w.element);
+                        w.element.classList.add('p-borders-left');
                     }
                     left = w;
-                    if (left) {
-                        leftWidth = left.width;
-                        if (!leftWidth)
-                            leftWidth = 30;
-                        formatLeft();
-                        superAdd(left);
-                    }
                 }
             }
         });
@@ -102,15 +221,14 @@ define([
                 if (w !== right) {
                     if (right) {
                         superRemove(right);
+                        rightRemoved();
+                    }
+                    if (w) {
+                        superAdd(w);
+                        flexRow.appendChild(w.element);
+                        w.element.classList.add('p-borders-right');
                     }
                     right = w;
-                    if (right) {
-                        rightWidth = right.width;
-                        if (!rightWidth)
-                            rightWidth = 30;
-                        formatRight();
-                        superAdd(right);
-                    }
                 }
             }
         });
@@ -122,15 +240,13 @@ define([
                 if (w !== top) {
                     if (top) {
                         superRemove(top);
+                        topRemoved();
+                    }
+                    if (w) {
+                        superAdd(w);
+                        w.element.classList.add('p-borders-top');
                     }
                     top = w;
-                    if (top) {
-                        topHeight = top.height;
-                        if (!topHeight)
-                            topHeight = 30;
-                        formatTop();
-                        superAdd(top);
-                    }
                 }
             }
         });
@@ -142,15 +258,13 @@ define([
                 if (w !== bottom) {
                     if (bottom) {
                         superRemove(bottom);
+                        bottomRemoved();
+                    }
+                    if (w) {
+                        superAdd(w);
+                        w.element.classList.add('p-borders-bottom');
                     }
                     bottom = w;
-                    if (bottom) {
-                        bottomHeight = bottom.height;
-                        if (!bottomHeight)
-                            bottomHeight = 30;
-                        formatBottom();
-                        superAdd(bottom);
-                    }
                 }
             }
         });
@@ -162,130 +276,31 @@ define([
                 if (w !== center) {
                     if (center) {
                         superRemove(center);
+                        centerRemoved();
+                    }
+                    if (w) {
+                        superAdd(w);
+                        w.element.classList.add('p-borders-center');
+                        flexRow.appendChild(w.element);
                     }
                     center = w;
-                    if (center) {
-                        centerHeight = center.height;
-                        formatCenter();
-                        recalcCenterMargins();
-                        superAdd(center);
-                    }
                 }
             }
         });
 
-        function formatLeft() {
-            if (left) {
-                var ls = left.element.style;
-                ls.position = 'absolute';
-                ls.overflow = 'hidden';
-                ls.left = 0 + 'px';
-                ls.width = leftWidth + 'px';
-                ls.top = topHeight + 'px';
-                ls.bottom = bottomHeight + 'px';
-            }
+        function ajustLeft(w, aValue) {
         }
-
-        function formatRight() {
-            if (right) {
-                var rs = right.element.style;
-                rs.position = 'absolute';
-                rs.pverflow = 'hidden';
-                rs.right = 0 + 'px';
-                rs.width = rightWidth + 'px';
-                rs.top = topHeight + 'px';
-                rs.bottom = bottomHeight + 'px';
+        Object.defineProperty(this, 'ajustLeft', {
+            get: function () {
+                return ajustLeft;
             }
-        }
+        });
 
-        function formatTop() {
-            if (top) {
-                var ts = top.element.style;
-                ts.position = 'absolute';
-                ts.overflow = 'hidden';
-                ts.top = 0 + 'px';
-                ts.height = topHeight + 'px';
-                ts.left = leftWidth + 'px';
-                ts.right = rightWidth + 'px';
-            }
-        }
-
-        function formatBottom() {
-            if (bottom) {
-                var bs = bottom.element.style;
-                bs.position = 'absolute';
-                bs.overflow = 'hidden';
-                bs.bottom = 0 + 'px';
-                bs.height = bottomHeight + 'px';
-                bs.left = leftWidth + 'px';
-                bs.right = rightWidth + 'px';
-            }
-        }
-
-        function formatCenter() {
-            if (center) {
-                var cs = center.element.style;
-                cs.position = 'absolute';
-                cs.overflow = 'hidden';
-                cs.bottom = bottomHeight + 'px';
-                cs.top = topHeight + 'px';
-                cs.left = leftWidth + 'px';
-                cs.right = rightWidth + 'px';
-            }
-        }
-
-        function checkParts(w) {
+        function ajustWidth(w, aValue) {
             if (left === w) {
-                left = null;
-                leftWidth = 0;
-            }
-            if (right === w) {
-                right = null;
-                rightWidth = 0;
-            }
-            if (top === w) {
-                top = null;
-                topHeight = 0;
-            }
-            if (bottom === w) {
-                bottom = null;
-                bottomHeight = 0;
-            }
-            if (center === w) {
-                center = null;
-            }
-        }
-
-        var superRemove = this.remove;
-        function remove(widgetOrIndex) {
-            var removed = superRemove(widgetOrIndex);
-            checkParts(removed);
-            return removed;
-        }
-
-        function recalcCenterMargins() {
-            if (center) {
-                var cs = center.element.style;
-                cs.marginLeft = hgap + 'px';
-                cs.marginRight = hgap + 'px';
-                cs.marginTop = vgap + 'px';
-                cs.marginBottom = vgap + 'px';
-            }
-        }
-
-        function ajustWidth(w, width) {
-            if (left === w) {
-                leftWidth = width;
-                formatLeft();
-                formatTop();
-                formatBottom();
-                formatCenter();
+                left.element.style.width = aValue + 'px';
             } else if (right === w) {
-                rightWidth = width;
-                formatRight();
-                formatTop();
-                formatBottom();
-                formatCenter();
+                right.element.style.width = aValue + 'px';
             }
         }
         Object.defineProperty(this, 'ajustWidth', {
@@ -294,46 +309,24 @@ define([
             }
         });
 
-        function ajustHeight(w, height) {
+        function ajustTop(w, aValue) {
+        }
+        Object.defineProperty(this, 'ajustTop', {
+            get: function () {
+                return ajustTop;
+            }
+        });
+
+        function ajustHeight(w, aValue) {
             if (top === w) {
-                topHeight = height;
-                formatTop();
-                formatLeft();
-                formatRight();
-                formatCenter();
+                top.element.style.height = aValue + 'px';
             } else if (bottom === w) {
-                bottomHeight = height;
-                formatBottom();
-                formatLeft();
-                formatRight();
-                formatCenter();
+                bottom.element.style.height = aValue + 'px';
             }
         }
         Object.defineProperty(this, 'ajustHeight', {
             get: function () {
                 return ajustHeight;
-            }
-        });
-
-        function getTop(w) {
-            if (w.parent !== this)
-                throw "Widget should be a child of this container";
-            return w.element.offsetTop;
-        }
-        Object.defineProperty(this, 'getTop', {
-            get: function () {
-                return getTop;
-            }
-        });
-
-        function getLeft(w) {
-            if (w.parent !== this)
-                throw "Widget should be a child of this container";
-            return w.element.getOffsetLeft();
-        }
-        Object.defineProperty(this, 'getLeft', {
-            get: function () {
-                return getLeft;
             }
         });
     }

@@ -68,6 +68,8 @@ define([
         });
 
         function add(w, beforeIndex) {
+            if(w.parent === self)
+                throw 'A widget is already child of this container';
             w.parent = self;
             if (isNaN(beforeIndex)) {
                 self.element.appendChild(w.element);
@@ -97,11 +99,11 @@ define([
             else
                 idx = w;
             if (idx >= 0 && idx < children.length) {
-                var removed = children.splice(idx, 1);
-                removed[0].parent = null;
-                removed[0].element.parentNode.removeChild(removed[0].element);
+                var removed = children.splice(idx, 1)[0];
+                removed.parent = null;
+                removed.element.parentNode.removeChild(removed.element);
                 fireRemoved(w);
-                return removed[0];
+                return removed;
             } else {
                 return null;
             }
