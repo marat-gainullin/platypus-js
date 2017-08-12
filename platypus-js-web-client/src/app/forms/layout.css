@@ -126,3 +126,28 @@
 {
     order: 3;
 }
+
+.p-image-paragraph-column > .p-image,
+.p-image-paragraph-column > .p-paragraph{
+    display: block;
+}
+
+.p-image-paragraph-row > .p-image,
+.p-image-paragraph-row > .p-paragraph{
+    display: inline;
+}
+
+.p-image-paragraph-aligner{
+    display: inline;
+    height: 100%;
+    /* debug */
+    width: 3px;
+    background-color: black;
+}
+
+.p-image-paragraph-row,
+.p-image-paragraph-column{
+    display: inline;
+    /* debug */
+    background-color: yellowgreen;
+}

@@ -2,11 +2,13 @@ define([
     'common-utils/color',
     'common-utils/cursor',
     'common-utils/font',
-    './forms/key-codes'], function (
+    './forms/key-codes',
+    './internals'], function (
         Color,
         Cursor,
         Font,
-        KeyCodes) {
+        KeyCodes,
+        Utils) {
     var global = window;
     var Events = {
         BLUR: 'blur',
@@ -113,9 +115,45 @@ define([
 
     function Icon() {
     }
+
+    function lookupCallerApplicationJsFile() {
+        try {
+            throw new Error("Current application file test");
+        } catch (ex) {
+            return Utils.lookupCallerApplicationJsFile(ex);
+        }
+    }
+
+    function lookupCallerApplicationJsDir() {
+        return Utils.lookupCallerApplicationJsDir(lookupCallerApplicationJsFile());
+    }
+
+    function loadIcon(aResourceName, onSuccess, onFailure) {
+        var url;
+        if (aResourceName.startsWith("./") || aResourceName.startsWith("../")) {
+            var callerDir = lookupCallerApplicationJsDir();
+            url = Utils.resourceUri(Utils.toFilyAppModuleId(aResourceName, callerDir));
+        } else {
+            url = Utils.resourceUri(aResourceName);
+        }
+        var image = document.createElement('img');
+        image.onload = function () {
+            image.onload = null;
+            image.onerror = null;
+            onSuccess(image);
+        };
+        image.onerror = function (e) {
+            image.onload = null;
+            image.onerror = null;
+            if (onFailure)
+                onFailure(e);
+        };
+        image.src = url;
+        return url;
+    }
     Object.defineProperty(Icon, "load", {
-        value: function (aIconName, aOnSuccess, aOnFailure) {
-            /*@com.eas.ui.PlatypusImageResource::*/jsLoad(aIconName ? '' + aIconName : null, aOnSuccess, aOnFailure);
+        get: function () {
+            return loadIcon;
         }
     });
 

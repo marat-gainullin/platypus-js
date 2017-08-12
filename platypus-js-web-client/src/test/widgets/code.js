@@ -88,9 +88,91 @@ describe('Widgets Api', function () {
         expect('onKeyPressed' in widget).toBeTruthy();
         expectValue(widget, 'onKeyPressed', function () {});
     }
-    
-    it('Label', function(){
-        pending('Label widget');
+
+    function expectImageParagraph(w, Ui) {
+        var h = [Ui.HorizontalPosition.LEFT, Ui.HorizontalPosition.CENTER, Ui.HorizontalPosition.RIGHT];
+        var v = [Ui.VerticalPosition.TOP, Ui.VerticalPosition.CENTER, Ui.VerticalPosition.BOTTOM];
+        h.forEach(function (hi) {
+            w.horizontalTextPosition = hi;
+            expect(w.horizontalTextPosition).toEqual(hi);
+            v.forEach(function (vi) {
+                w.verticalTextPosition = vi;
+                expect(w.verticalTextPosition).toEqual(vi);
+
+            });
+        });
+    }
+
+    it('Label.Structure', function (done) {
+        require([
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
+            'ui',
+            'forms/label'], function (
+                Font,
+                Color,
+                Cursor,
+                Ui,
+                Label) {
+            var label1 = new Label('txt', null, 45);
+            expectImageParagraph(label1, Ui);
+            expect(label1.text).toEqual('txt');
+            expect(label1.icon).toBeNull();
+            expect(label1.iconTextGap).toEqual(45);
+            var label2 = new Label('txt', null);
+            expectImageParagraph(label2, Ui);
+            expect(label2.text).toEqual('txt');
+            expect(label2.icon).toBeNull();
+            expect(label2.iconTextGap).toEqual(4);
+            var label3 = new Label('txt');
+            expectImageParagraph(label3, Ui);
+            expect(label3.text).toEqual('txt');
+            expect(label3.icon).toBeNull();
+            expect(label3.iconTextGap).toEqual(4);
+            var label4 = new Label();
+            expectImageParagraph(label4, Ui);
+            expectWidget(label4, Font, Color, Cursor);
+            label4.text = 'Sample label';
+            expect(label4.iconTextGap).toEqual(4);
+            Ui.Icon.load('assets/binary-content.png', function (loaded) {
+                label4.icon = loaded;
+                done();
+            }, function (e) {
+                done.fail(e);
+            });
+        });
     });
-    
+    fit('Label.Markup.1', function (done) {
+        require([
+            'ui',
+            'forms/label'], function (
+                Ui,
+                Label) {
+            var label = new Label();
+            document.body.appendChild(label.element);
+            label.text = 'Sample label';
+            expect(label.iconTextGap).toEqual(4);
+            Ui.Icon.load('assets/binary-content.png', function (loaded) {
+                label.icon = loaded;
+                document.body.removeChild(label.element);
+                done();
+            }, function (e) {
+                done.fail(e);
+            });
+        });
+    });
+    it('Label.Markup.2', function (done) {
+        require([
+            'ui',
+            'forms/label'], function (
+                Ui,
+                Label) {
+            var label = new Label();
+            document.body.appendChild(label.element);
+            label.text = 'Sample label';
+            expect(label.iconTextGap).toEqual(4);
+            // TODO: Ensure that gap is absent with no icon
+        });
+    });
 });
