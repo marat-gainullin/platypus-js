@@ -143,7 +143,7 @@ describe('Widgets Api', function () {
             });
         });
     });
-    fit('Label.Markup.top', function (done) {
+    it('Label.Markup', function (done) {
         require([
             'ui',
             'forms/label'], function (
@@ -159,32 +159,47 @@ describe('Widgets Api', function () {
                 // right text
                 expect(label.horizontalTextPosition).toEqual(Ui.HorizontalPosition.RIGHT);
                 expect(label.verticalTextPosition).toEqual(Ui.VerticalPosition.CENTER);
+                (function () {
+                    var image = label.element.firstElementChild;
+                    var paragraph = label.element.lastElementChild;
+                    expect(image.offsetLeft).toEqual(0);
+                    expect(paragraph.offsetLeft).toEqual(16 + 4);
+                }());
                 // top and bottom
                 label.verticalTextPosition = Ui.VerticalPosition.BOTTOM;
-                expect(label.verticalTextPosition).toEqual(Ui.VerticalPosition.BOTTOM);
                 label.verticalTextPosition = Ui.VerticalPosition.TOP;
-                expect(label.verticalTextPosition).toEqual(Ui.VerticalPosition.TOP);
                 // left text
                 label.horizontalTextPosition = Ui.HorizontalPosition.LEFT;
-                expect(label.horizontalTextPosition).toEqual(Ui.HorizontalPosition.LEFT);
+                (function () {
+                    var image = label.element.lastElementChild;
+                    var paragraph = label.element.firstElementChild;
+                    expect(paragraph.offsetLeft).toEqual(0);
+                    expect(image.offsetLeft).toEqual(label.element.firstElementChild.offsetWidth + 4);
+                }());
                 // top and bottom
                 label.verticalTextPosition = Ui.VerticalPosition.BOTTOM;
-                expect(label.verticalTextPosition).toEqual(Ui.VerticalPosition.BOTTOM);
                 label.verticalTextPosition = Ui.VerticalPosition.TOP;
-                expect(label.verticalTextPosition).toEqual(Ui.VerticalPosition.TOP);
-                
+
                 // center text
                 label.horizontalTextPosition = Ui.HorizontalPosition.CENTER;
-                expect(label.horizontalTextPosition).toEqual(Ui.HorizontalPosition.CENTER);
+                
                 // top and bottom
                 label.verticalTextPosition = Ui.VerticalPosition.BOTTOM;
-                expect(label.verticalTextPosition).toEqual(Ui.VerticalPosition.BOTTOM);
+                (function () {
+                    var image = label.element.firstElementChild;
+                    var paragraph = label.element.lastElementChild;
+                    expect(image.offsetTop).toEqual(0);
+                    expect(paragraph.offsetTop).toEqual(16 + 4);
+                }());
                 label.verticalTextPosition = Ui.VerticalPosition.TOP;
-                expect(label.verticalTextPosition).toEqual(Ui.VerticalPosition.TOP);
+                (function () {
+                    var image = label.element.lastElementChild;
+                    var paragraph = label.element.firstElementChild;
+                    expect(image.offsetTop).toBeGreaterThan(paragraph.offsetTop);
+                }());
                 // center center
                 label.verticalTextPosition = Ui.VerticalPosition.CENTER;
-                expect(label.verticalTextPosition).toEqual(Ui.VerticalPosition.CENTER);
-                
+
                 document.body.removeChild(label.element);
                 done();
             }, function (e) {

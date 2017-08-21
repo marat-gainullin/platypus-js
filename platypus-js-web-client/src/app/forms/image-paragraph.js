@@ -31,7 +31,6 @@ define([
             self.element.classList.remove('p-image-paragraph-row');
             self.element.classList.remove('p-image-paragraph-row-top');
             self.element.classList.remove('p-image-paragraph-row-bottom');
-            self.element.classList.remove('p-image-paragraph-layers');
             if (image) {
                 image.style.marginLeft = '';
                 image.style.marginRight = '';
@@ -39,9 +38,6 @@ define([
                 image.style.marginBottom = '';
             }
             if (horizontalTextPosition === Ui.HorizontalPosition.CENTER) {
-                if (verticalTextPosition === Ui.VerticalPosition.CENTER) {
-                    self.element.classList.add('p-image-paragraph-layers');
-                } else {
                     self.element.classList.add('p-image-paragraph-column');
                     if (verticalTextPosition === Ui.VerticalPosition.TOP) {
                         if (image) {
@@ -49,14 +45,13 @@ define([
                             if (iconTextGap > 0)
                                 image.style.marginTop = iconTextGap + 'px';
                         }
-                    } else if (verticalTextPosition === Ui.VerticalPosition.BOTTOM) {
+                    } else if (verticalTextPosition === Ui.VerticalPosition.BOTTOM || verticalTextPosition === Ui.VerticalPosition.CENTER) {
                         if (image) {
                             self.element.insertBefore(image, paragraph);
                             if (iconTextGap > 0)
                                 image.style.marginBottom = iconTextGap + 'px';
                         }
                     }// else // value of 'verticalTextPosition' is unknown
-                }
             } else {
                 self.element.classList.add('p-image-paragraph-row');
                 if (horizontalTextPosition === Ui.HorizontalPosition.LEFT) {
