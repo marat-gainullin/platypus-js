@@ -143,7 +143,7 @@ describe('Widgets Api', function () {
             });
         });
     });
-    fit('Label.Markup.1', function (done) {
+    fit('Label.Markup.top', function (done) {
         require([
             'ui',
             'forms/label'], function (
@@ -155,24 +155,41 @@ describe('Widgets Api', function () {
             expect(label.iconTextGap).toEqual(4);
             Ui.Icon.load('assets/binary-content.png', function (loaded) {
                 label.icon = loaded;
+                // defaults
+                // right text
+                expect(label.horizontalTextPosition).toEqual(Ui.HorizontalPosition.RIGHT);
+                expect(label.verticalTextPosition).toEqual(Ui.VerticalPosition.CENTER);
+                // top and bottom
+                label.verticalTextPosition = Ui.VerticalPosition.BOTTOM;
+                expect(label.verticalTextPosition).toEqual(Ui.VerticalPosition.BOTTOM);
+                label.verticalTextPosition = Ui.VerticalPosition.TOP;
+                expect(label.verticalTextPosition).toEqual(Ui.VerticalPosition.TOP);
+                // left text
+                label.horizontalTextPosition = Ui.HorizontalPosition.LEFT;
+                expect(label.horizontalTextPosition).toEqual(Ui.HorizontalPosition.LEFT);
+                // top and bottom
+                label.verticalTextPosition = Ui.VerticalPosition.BOTTOM;
+                expect(label.verticalTextPosition).toEqual(Ui.VerticalPosition.BOTTOM);
+                label.verticalTextPosition = Ui.VerticalPosition.TOP;
+                expect(label.verticalTextPosition).toEqual(Ui.VerticalPosition.TOP);
+                
+                // center text
+                label.horizontalTextPosition = Ui.HorizontalPosition.CENTER;
+                expect(label.horizontalTextPosition).toEqual(Ui.HorizontalPosition.CENTER);
+                // top and bottom
+                label.verticalTextPosition = Ui.VerticalPosition.BOTTOM;
+                expect(label.verticalTextPosition).toEqual(Ui.VerticalPosition.BOTTOM);
+                label.verticalTextPosition = Ui.VerticalPosition.TOP;
+                expect(label.verticalTextPosition).toEqual(Ui.VerticalPosition.TOP);
+                // center center
+                label.verticalTextPosition = Ui.VerticalPosition.CENTER;
+                expect(label.verticalTextPosition).toEqual(Ui.VerticalPosition.CENTER);
+                
                 document.body.removeChild(label.element);
                 done();
             }, function (e) {
                 done.fail(e);
             });
-        });
-    });
-    it('Label.Markup.2', function (done) {
-        require([
-            'ui',
-            'forms/label'], function (
-                Ui,
-                Label) {
-            var label = new Label();
-            document.body.appendChild(label.element);
-            label.text = 'Sample label';
-            expect(label.iconTextGap).toEqual(4);
-            // TODO: Ensure that gap is absent with no icon
         });
     });
 });

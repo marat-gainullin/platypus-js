@@ -31,31 +31,52 @@ define([
             self.element.classList.remove('p-image-paragraph-row');
             self.element.classList.remove('p-image-paragraph-row-top');
             self.element.classList.remove('p-image-paragraph-row-bottom');
+            self.element.classList.remove('p-image-paragraph-layers');
+            if (image) {
+                image.style.marginLeft = '';
+                image.style.marginRight = '';
+                image.style.marginTop = '';
+                image.style.marginBottom = '';
+            }
             if (horizontalTextPosition === Ui.HorizontalPosition.CENTER) {
-                self.element.classList.add('p-image-paragraph-column');
-                if (verticalTextPosition === Ui.VerticalPosition.TOP) {
-                    if (image)
-                        self.element.insertBefore(paragraph, image);
-                } else if (verticalTextPosition === Ui.VerticalPosition.BOTTOM) {
-                    if (image)
-                        self.element.insertBefore(image, paragraph);
+                if (verticalTextPosition === Ui.VerticalPosition.CENTER) {
+                    self.element.classList.add('p-image-paragraph-layers');
                 } else {
-                    // TODO: Think about .CENTER .CENTER
+                    self.element.classList.add('p-image-paragraph-column');
+                    if (verticalTextPosition === Ui.VerticalPosition.TOP) {
+                        if (image) {
+                            self.element.insertBefore(paragraph, image);
+                            if (iconTextGap > 0)
+                                image.style.marginTop = iconTextGap + 'px';
+                        }
+                    } else if (verticalTextPosition === Ui.VerticalPosition.BOTTOM) {
+                        if (image) {
+                            self.element.insertBefore(image, paragraph);
+                            if (iconTextGap > 0)
+                                image.style.marginBottom = iconTextGap + 'px';
+                        }
+                    }// else // value of 'verticalTextPosition' is unknown
                 }
             } else {
                 self.element.classList.add('p-image-paragraph-row');
                 if (horizontalTextPosition === Ui.HorizontalPosition.LEFT) {
-                    if (image)
+                    if (image) {
                         self.element.insertBefore(paragraph, image);
+                        if (iconTextGap > 0)
+                            image.style.marginLeft = iconTextGap + 'px';
+                    }
                 } else if (horizontalTextPosition === Ui.HorizontalPosition.RIGHT) {
-                    if (image)
+                    if (image) {
                         self.element.insertBefore(image, paragraph);
+                        if (iconTextGap > 0)
+                            image.style.marginRight = iconTextGap + 'px';
+                    }
                 } // else // value of 'horizontalTextPosition' is unknown
                 if (verticalTextPosition === Ui.VerticalPosition.TOP) {
                     self.element.classList.add('p-image-paragraph-row-top');
                 } else if (verticalTextPosition === Ui.VerticalPosition.BOTTOM) {
                     self.element.classList.add('p-image-paragraph-row-bottom');
-                }
+                } // else // value of 'verticalTextPosition' is unknown
             }
         }
 
