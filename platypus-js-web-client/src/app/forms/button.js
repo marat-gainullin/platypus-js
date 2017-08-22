@@ -1,4 +1,10 @@
-define(['./image-paragraph'], function(ImageParagraph){
+define([
+    '../ui',
+    '../extend',
+    './image-paragraph'], function (
+        Ui,
+        extend,
+        ImageParagraph) {
     function Button(text, icon, iconTextGap, onActionPerformed) {
         if (arguments.length < 3)
             iconTextGap = 4;
@@ -10,6 +16,37 @@ define(['./image-paragraph'], function(ImageParagraph){
         var self = this;
         this.opaque = true;
         this.onActionPerformed = onActionPerformed;
+
+        var actionHandlers = 0;
+        var clickReg = null;
+        var superAddActionHandler = this.addActionHandler;
+        function addActionHandler(handler) {
+            if (actionHandlers === 0) {
+                clickReg = Ui.on(this.element, 'click', function () {
+                    self.fireActionPerformed();
+                });
+            }
+            actionHandlers++;
+            var reg = superAddActionHandler(handler);
+            return {
+                removeHandler: function () {
+                    if (reg) {
+                        reg.removeHandler();
+                        reg = null;
+                        actionHandlers--;
+                        if (actionHandlers === 0) {
+                            clickReg.removeHandler();
+                            clickReg = null;
+                        }
+                    }
+                }
+            };
+        }
+        Object.defineProperty(this, 'addActionHandler', {
+            get: function () {
+                return addActionHandler;
+            }
+        });
     }
     extend(Button, ImageParagraph);
     return Button;

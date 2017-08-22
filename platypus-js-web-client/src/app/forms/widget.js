@@ -2,6 +2,7 @@ define([
     '../ui',
     './mouse-event',
     './component-event',
+    './action-event',
     '../invoke'], function (
         Ui,
         MouseEvent,
@@ -327,7 +328,6 @@ define([
                 removeHandler: function () {
                     actionHandlers.delete(handler);
                 }
-
             };
         }
 
@@ -414,6 +414,7 @@ define([
         }
 
         Object.defineProperty(this, 'addActionHandler', {
+            configurable: true,
             get: function () {
                 return addActionHandler;
             }
@@ -554,7 +555,7 @@ define([
                     }
                     onActionPerformed = aValue;
                     if (onActionPerformed) {
-                        actionPerformedReg = addActionHandler(function (event) {
+                        actionPerformedReg = self.addActionHandler(function (event) {
                             if (onActionPerformed) {
                                 onActionPerformed(event);
                             }

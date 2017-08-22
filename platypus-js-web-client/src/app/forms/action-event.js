@@ -1,4 +1,8 @@
-define(['./event'], function(Event){
+define([
+    '../extend',
+    './event'], function(
+        extend,
+        Event){
     function ActionEvent(w) {
         Event.call(this, w, w);
     }
