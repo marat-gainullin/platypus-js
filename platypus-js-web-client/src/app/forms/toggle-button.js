@@ -79,6 +79,22 @@ define([
         this.addActionHandler(function(){
             self.selected = !self.selected;
         });
+        
+        var buttonGroup = null;
+        
+        Object.defineProperty(this, 'buttonGroup', {
+            get: function () {
+                return buttonGroup;
+            },
+            set: function (aValue) {
+                var oldGroup = buttonGroup;
+                buttonGroup = aValue;
+                if (oldGroup)
+                    oldGroup.remove(self);
+                if (buttonGroup)
+                    buttonGroup.add(self);
+            }
+        });
     }
     extend(ToggleButton, Button);
     return ToggleButton;

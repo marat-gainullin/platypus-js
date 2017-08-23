@@ -1,6 +1,6 @@
 define(['./event', '../extend'], function(Event, extend){
     function ContainerEvent(aContainer, aChild) {
-        Event.call(this, aContainer, aContainer);
+        Event.call(this, aContainer, aChild);
         Object.defineProperty(this, 'child', {
             get: function(){
                 return aChild;

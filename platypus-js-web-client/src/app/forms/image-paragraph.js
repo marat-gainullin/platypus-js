@@ -38,32 +38,32 @@ define([
                 image.style.marginBottom = '';
             }
             if (horizontalTextPosition === Ui.HorizontalPosition.CENTER) {
-                    self.element.classList.add('p-image-paragraph-column');
-                    if (verticalTextPosition === Ui.VerticalPosition.TOP) {
-                        if (image) {
-                            self.element.insertBefore(paragraph, image);
-                            if (iconTextGap > 0)
-                                image.style.marginTop = iconTextGap + 'px';
-                        }
-                    } else if (verticalTextPosition === Ui.VerticalPosition.BOTTOM || verticalTextPosition === Ui.VerticalPosition.CENTER) {
-                        if (image) {
-                            self.element.insertBefore(image, paragraph);
-                            if (iconTextGap > 0)
-                                image.style.marginBottom = iconTextGap + 'px';
-                        }
-                    }// else // value of 'verticalTextPosition' is unknown
+                self.element.classList.add('p-image-paragraph-column');
+                if (verticalTextPosition === Ui.VerticalPosition.TOP) {
+                    if (image) {
+                        self.element.insertBefore(paragraph, image);
+                        if (iconTextGap > 0 && text)
+                            image.style.marginTop = iconTextGap + 'px';
+                    }
+                } else if (verticalTextPosition === Ui.VerticalPosition.BOTTOM || verticalTextPosition === Ui.VerticalPosition.CENTER) {
+                    if (image) {
+                        self.element.insertBefore(image, paragraph);
+                        if (iconTextGap > 0 && text)
+                            image.style.marginBottom = iconTextGap + 'px';
+                    }
+                }// else // value of 'verticalTextPosition' is unknown
             } else {
                 self.element.classList.add('p-image-paragraph-row');
                 if (horizontalTextPosition === Ui.HorizontalPosition.LEFT) {
                     if (image) {
                         self.element.insertBefore(paragraph, image);
-                        if (iconTextGap > 0)
+                        if (iconTextGap > 0 && text)
                             image.style.marginLeft = iconTextGap + 'px';
                     }
                 } else if (horizontalTextPosition === Ui.HorizontalPosition.RIGHT) {
                     if (image) {
                         self.element.insertBefore(image, paragraph);
-                        if (iconTextGap > 0)
+                        if (iconTextGap > 0 && text)
                             image.style.marginRight = iconTextGap + 'px';
                     }
                 } // else // value of 'horizontalTextPosition' is unknown
@@ -75,7 +75,12 @@ define([
             }
         }
 
+        function applyText(){
+            paragraph.innerText = text;
+        }
+
         applyPosition();
+        applyText();
 
         Object.defineProperty(this, "icon", {
             get: function () {
@@ -101,8 +106,10 @@ define([
                 return text;
             },
             set: function (aValue) {
-                text = aValue;
-                paragraph.innerText = text;
+                if (text !== aValue) {
+                    text = aValue;
+                    applyText();
+                }
             }
         });
         Object.defineProperty(this, "iconTextGap", {
@@ -114,7 +121,7 @@ define([
             }
         });
         /**
-         * Vertical position of the text relative to the icon.
+         * Horizontal position of the text relative to the icon.
          */
         Object.defineProperty(this, "horizontalTextPosition", {
             get: function () {

@@ -209,10 +209,8 @@ describe('Widgets Api', function () {
     });
     it('Button.Structure', function (done) {
         require([
-            'logger',
             'ui',
             'forms/button'], function (
-                Logger,
                 Ui,
                 Button) {
             Ui.Icon.load('assets/binary-content.png', function (icon) {
@@ -250,7 +248,7 @@ describe('Widgets Api', function () {
             done.fail(e);
         });
     });
-    it('Button.Markup', function (done) {
+    it('Button.Markup.1', function (done) {
         require([
             'logger',
             'ui',
@@ -305,6 +303,75 @@ describe('Widgets Api', function () {
                     var image = btn.element.lastElementChild;
                     var paragraph = btn.element.firstElementChild;
                     expect(image.offsetTop).toBeGreaterThan(paragraph.offsetTop);
+                }());
+                // center center
+                btn.verticalTextPosition = Ui.VerticalPosition.CENTER;
+
+                btn.onActionPerformed = function () {
+                    Logger.info('btn action');
+                };
+
+                document.body.removeChild(btn.element);
+                done();
+            }, function (e) {
+                done.fail(e);
+            });
+        });
+    });
+    it('Button.Markup.2', function (done) {
+        require([
+            'logger',
+            'ui',
+            'forms/button'], function (
+                Logger,
+                Ui,
+                Button) {
+            var btn = new Button();
+            document.body.appendChild(btn.element);
+            expect(btn.iconTextGap).toEqual(4);
+            Ui.Icon.load('assets/binary-content.png', function (loaded) {
+                btn.icon = loaded;
+                // defaults
+                // right text
+                expect(btn.horizontalTextPosition).toEqual(Ui.HorizontalPosition.RIGHT);
+                expect(btn.verticalTextPosition).toEqual(Ui.VerticalPosition.CENTER);
+                (function () {
+                    var image = btn.element.firstElementChild;
+                    var paragraph = btn.element.lastElementChild;
+                    expect(image.offsetLeft).toEqual(6);
+                    expect(paragraph.offsetLeft).toEqual(6 + 16 /*+ 4 gap is ignored without text or image*/);
+                }());
+                // top and bottom
+                btn.verticalTextPosition = Ui.VerticalPosition.BOTTOM;
+                btn.verticalTextPosition = Ui.VerticalPosition.TOP;
+                // left text
+                btn.horizontalTextPosition = Ui.HorizontalPosition.LEFT;
+                (function () {
+                    var image = btn.element.lastElementChild;
+                    var paragraph = btn.element.firstElementChild;
+                    expect(paragraph.offsetLeft).toEqual(6);
+                    expect(image.offsetLeft).toEqual(6 + paragraph.offsetWidth /*+ 4 gap is ignored without text or image*/);
+                }());
+                // top and bottom
+                btn.verticalTextPosition = Ui.VerticalPosition.BOTTOM;
+                btn.verticalTextPosition = Ui.VerticalPosition.TOP;
+
+                // center text
+                btn.horizontalTextPosition = Ui.HorizontalPosition.CENTER;
+
+                // top and bottom
+                btn.verticalTextPosition = Ui.VerticalPosition.BOTTOM;
+                (function () {
+                    var image = btn.element.firstElementChild;
+                    var paragraph = btn.element.lastElementChild;
+                    expect(image.offsetTop).toEqual(1 + 0);
+                    expect(paragraph.offsetTop).toEqual(1 + 16 /*+ 4 gap is ignored without text or image*/);
+                }());
+                btn.verticalTextPosition = Ui.VerticalPosition.TOP;
+                (function () {
+                    var image = btn.element.lastElementChild;
+                    var paragraph = btn.element.firstElementChild;
+                    expect(image.offsetTop).toEqual(paragraph.offsetTop);
                 }());
                 // center center
                 btn.verticalTextPosition = Ui.VerticalPosition.CENTER;
@@ -456,7 +523,7 @@ describe('Widgets Api', function () {
                     Logger.info('toggle action');
                 };
 
-                // document.body.removeChild(toggle.element);
+                document.body.removeChild(toggle.element);
                 done();
             }, function (e) {
                 done.fail(e);
@@ -538,6 +605,215 @@ describe('Widgets Api', function () {
                 done();
             }, function (e) {
                 done.fail(e);
+            });
+        });
+    });
+
+    function expectCheckRadio(CheckRadio) {
+        var check1 = new CheckRadio();
+        expect(check1.text).toEqual('');
+        expect(check1.selected).toBe(false);
+        expect(check1.onActionPerformed).toBeFalsy();
+
+        var check2 = new CheckRadio('Sample check box');
+        expect(check2.text).toEqual('Sample check box');
+        expect(check2.selected).toBe(false);
+        expect(check2.onActionPerformed).toBeFalsy();
+
+        check2.text = 'Sample check box 1';
+        expect(check2.text).toEqual('Sample check box 1');
+        check2.selected = true;
+        expect(check2.selected).toBe(true);
+        function action() {}
+
+        check2.onActionPerformed = action;
+        expect(check2.onActionPerformed).toBe(action);
+
+        var check3 = new CheckRadio('Sample check box', true);
+        expect(check3.text).toEqual('Sample check box');
+        expect(check3.selected).toBe(true);
+        expect(check3.onActionPerformed).toBeFalsy();
+
+        var check4 = new CheckRadio('Sample check box', true, action);
+        expect(check4.text).toEqual('Sample check box');
+        expect(check4.selected).toBe(true);
+        expect(check4.onActionPerformed).toBe(action);
+    }
+
+    it('Checkbox.Structure', function (done) {
+        require([
+            'forms/check-box'], function (
+                CheckBox) {
+            expectCheckRadio(CheckBox);
+            done();
+        });
+    });
+
+    function expectCheckRadioMarkup(Logger, Ui, CheckRadio) {
+        var check = new CheckRadio();
+        document.body.appendChild(check.element);
+        check.text = 'Sample check box';
+        check.onActionPerformed = function (e) {
+            Logger.info('Check action');
+        };
+        check.onValueChange = function (e) {
+            Logger.info('Check value: ' + e.newValue);
+        };
+        expect(check.element.style.direction).toEqual('rtl');
+        check.horizontalTextPosition = Ui.HorizontalPosition.LEFT;
+        expect(check.element.style.direction).toEqual('ltr');
+        document.body.removeChild(check.element);
+    }
+
+    it('Checkbox.Markup', function (done) {
+        require([
+            'logger',
+            'ui',
+            'forms/check-box'], function (
+                Logger,
+                Ui,
+                Checkbox) {
+            expectCheckRadioMarkup(Logger, Ui, Checkbox);
+            done();
+        });
+    });
+    it('RadioButton.Structure', function (done) {
+        require([
+            'forms/radio-button'], function (
+                RadioButton) {
+            expectCheckRadio(RadioButton);
+            done();
+        });
+    });
+    it('RadioButton.Markup', function (done) {
+        require([
+            'logger',
+            'ui',
+            'forms/radio-button'], function (
+                Logger,
+                Ui,
+                RadioButton) {
+            expectCheckRadioMarkup(Logger, Ui, RadioButton);
+            done();
+        });
+    });
+    it('ButtonGroup.Structure', function (done) {
+        require([
+            'logger',
+            'forms/check-box',
+            'forms/radio-button',
+            'forms/toggle-button',
+            'forms/button-group'], function (
+                Logger,
+                CheckBox,
+                RadioButton,
+                ToggleButton,
+                ButtonGroup) {
+            var check = new CheckBox('Check');
+            var radio = new RadioButton('Radio');
+            var toggle = new ToggleButton('Toggle');
+
+            var group = new ButtonGroup();
+
+            group.onComponentAdded = function (evt) {
+                Logger.info('added ' + evt.target.constructor.name + ' | ' + evt.child.constructor.name);
+            };
+
+            group.onComponentRemoved = function (evt) {
+                Logger.info('removed ' + evt.target.constructor.name + ' | ' + evt.child.constructor.name);
+            };
+
+            group.add(check);
+            group.add(radio);
+            group.add(toggle);
+            expect(group.count).toEqual(3);
+            expect(group.children()).toEqual([check, radio, toggle]);
+            expect(group.indexOf(check)).toEqual(0);
+            expect(group.indexOf(radio)).toEqual(1);
+            expect(group.indexOf(toggle)).toEqual(2);
+            expect(check.buttonGroup).toBe(group);
+            expect(radio.buttonGroup).toBe(group);
+            expect(toggle.buttonGroup).toBe(group);
+
+            group.remove(check);
+            expect(group.count).toEqual(2);
+            expect(group.children()).toEqual([radio, toggle]);
+            group.remove(radio);
+            expect(group.count).toEqual(1);
+            expect(group.children()).toEqual([toggle]);
+            group.remove(toggle);
+            expect(group.count).toEqual(0);
+            expect(group.children()).toEqual([]);
+            expect(check.buttonGroup).toBeNull();
+            expect(radio.buttonGroup).toBeNull();
+            expect(toggle.buttonGroup).toBeNull();
+
+            check.buttonGroup = group;
+            radio.buttonGroup = group;
+            toggle.buttonGroup = group;
+            expect(group.count).toEqual(3);
+            expect(group.children()).toEqual([check, radio, toggle]);
+            var met = 0;
+            group.forEach(function () {
+                met++;
+            });
+            expect(met).toEqual(3);
+
+            group.clear();
+            expect(group.count).toEqual(0);
+            expect(group.children()).toEqual([]);
+            expect(check.buttonGroup).toBeNull();
+            expect(radio.buttonGroup).toBeNull();
+            expect(toggle.buttonGroup).toBeNull();
+
+            done();
+        });
+    });
+    it('ButtonGroup.Markup', function (done) {
+        require([
+            '../logger',
+            '../invoke',
+            'forms/check-box',
+            'forms/radio-button',
+            'forms/toggle-button',
+            'forms/button-group'], function (
+                Logger,
+                Invoke,
+                CheckBox,
+                RadioButton,
+                ToggleButton,
+                ButtonGroup) {
+            var check = new CheckBox('Check');
+            var radio = new RadioButton('Radio');
+            var toggle = new ToggleButton('Toggle');
+
+            document.body.appendChild(check.element);
+            document.body.appendChild(radio.element);
+            document.body.appendChild(toggle.element);
+
+            var group = new ButtonGroup();
+            group.add(check);
+            group.add(radio);
+            group.add(toggle);
+
+            group.onItemSelected = function (evt) {
+                Logger.info('selected ' + evt.target.constructor.name);
+            };
+            
+            spyOn(group, 'onItemSelected');
+
+            check.selected = true;
+            radio.selected = true;
+            toggle.selected = true;
+
+            Invoke.later(function () {
+                Invoke.later(function () {
+                    expect(group.onItemSelected.calls.count()).toEqual(3);
+                    document.body.removeChild(check.element);
+                    document.body.removeChild(radio.element);
+                    document.body.removeChild(toggle.element);
+                    done();
+                });
             });
         });
     });

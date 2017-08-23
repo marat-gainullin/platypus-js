@@ -179,12 +179,12 @@ define([
                     oldWidget.element.classList.add('card-hidden');
                     oldWidget.element.classList.remove('card-shown');
                 }
-                fireSelected();
+                fireSelected(visibleWidget);
             }
         }
 
-        function fireSelected() {
-            var event = new SelectionEvent(self, visibleWidget);
+        function fireSelected(aItem) {
+            var event = new SelectionEvent(self, aItem);
             selectionHandlers.forEach(function (h) {
                 Invoke.later(function(){
                     h(event);
