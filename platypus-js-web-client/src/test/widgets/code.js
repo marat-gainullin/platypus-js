@@ -210,7 +210,7 @@ describe('Widgets Api', function () {
     it('Button.Structure', function (done) {
         require([
             'ui',
-            'forms/button'], function (
+            'forms/buttons/button'], function (
                 Ui,
                 Button) {
             Ui.Icon.load('assets/binary-content.png', function (icon) {
@@ -252,7 +252,7 @@ describe('Widgets Api', function () {
         require([
             'logger',
             'ui',
-            'forms/button'], function (
+            'forms/buttons/button'], function (
                 Logger,
                 Ui,
                 Button) {
@@ -322,7 +322,7 @@ describe('Widgets Api', function () {
         require([
             'logger',
             'ui',
-            'forms/button'], function (
+            'forms/buttons/button'], function (
                 Logger,
                 Ui,
                 Button) {
@@ -391,7 +391,7 @@ describe('Widgets Api', function () {
         require([
             'ui',
             'invoke',
-            'forms/toggle-button'], function (
+            'forms/buttons/toggle-button'], function (
                 Ui,
                 Invoke,
                 ToggleButton) {
@@ -464,7 +464,7 @@ describe('Widgets Api', function () {
         require([
             'logger',
             'ui',
-            'forms/toggle-button'], function (
+            'forms/buttons/toggle-button'], function (
                 Logger,
                 Ui,
                 ToggleButton) {
@@ -532,7 +532,7 @@ describe('Widgets Api', function () {
     });
     it('DropdownButton.Structure', function (done) {
         require([
-            'forms/drop-down-button'], function (
+            'forms/buttons/drop-down-button'], function (
                 DropdownButton) {
             var btn = new DropdownButton();
             expect(btn.dropDown).toBeFalsy();
@@ -548,7 +548,7 @@ describe('Widgets Api', function () {
         require([
             'logger',
             'ui',
-            'forms/drop-down-button'], function (
+            'forms/buttons/drop-down-button'], function (
                 Logger,
                 Ui,
                 DropdownButton) {
@@ -642,7 +642,7 @@ describe('Widgets Api', function () {
 
     it('Checkbox.Structure', function (done) {
         require([
-            'forms/check-box'], function (
+            'forms/buttons/check-box'], function (
                 CheckBox) {
             expectCheckRadio(CheckBox);
             done();
@@ -669,7 +669,7 @@ describe('Widgets Api', function () {
         require([
             'logger',
             'ui',
-            'forms/check-box'], function (
+            'forms/buttons/check-box'], function (
                 Logger,
                 Ui,
                 Checkbox) {
@@ -679,7 +679,7 @@ describe('Widgets Api', function () {
     });
     it('RadioButton.Structure', function (done) {
         require([
-            'forms/radio-button'], function (
+            'forms/buttons/radio-button'], function (
                 RadioButton) {
             expectCheckRadio(RadioButton);
             done();
@@ -689,7 +689,7 @@ describe('Widgets Api', function () {
         require([
             'logger',
             'ui',
-            'forms/radio-button'], function (
+            'forms/buttons/radio-button'], function (
                 Logger,
                 Ui,
                 RadioButton) {
@@ -700,10 +700,10 @@ describe('Widgets Api', function () {
     it('ButtonGroup.Structure', function (done) {
         require([
             'logger',
-            'forms/check-box',
-            'forms/radio-button',
-            'forms/toggle-button',
-            'forms/button-group'], function (
+            'forms/buttons/check-box',
+            'forms/buttons/radio-button',
+            'forms/buttons/toggle-button',
+            'forms/containers/button-group'], function (
                 Logger,
                 CheckBox,
                 RadioButton,
@@ -773,10 +773,10 @@ describe('Widgets Api', function () {
         require([
             '../logger',
             '../invoke',
-            'forms/check-box',
-            'forms/radio-button',
-            'forms/toggle-button',
-            'forms/button-group'], function (
+            'forms/buttons/check-box',
+            'forms/buttons/radio-button',
+            'forms/buttons/toggle-button',
+            'forms/containers/button-group'], function (
                 Logger,
                 Invoke,
                 CheckBox,
@@ -799,7 +799,7 @@ describe('Widgets Api', function () {
             group.onItemSelected = function (evt) {
                 Logger.info('selected ' + evt.target.constructor.name);
             };
-            
+
             spyOn(group, 'onItemSelected');
 
             check.selected = true;
@@ -815,6 +815,244 @@ describe('Widgets Api', function () {
                     done();
                 });
             });
+        });
+    });
+    it('TextField.Structure', function (done) {
+        require([
+            'forms/fields/text-field'], function (
+                TextField) {
+            var textField1 = new TextField();
+            expect(textField1.text).toEqual('');
+            var textField2 = new TextField('Sample text');
+            expect(textField2.text).toEqual('Sample text');
+            done();
+        });
+    });
+    it('TextField.Markup', function (done) {
+        require([
+            'invoke',
+            'logger',
+            'forms/fields/text-field'], function (
+                Invoke,
+                Logger,
+                TextField) {
+            var textField = new TextField();
+            document.body.appendChild(textField.element);
+            textField.text = 'Sample text';
+            textField.onActionPerformed = function () {
+                Logger.info('TextField action');
+            };
+            textField.onValueChange = function (evt) {
+                Logger.info('TextField value changed: newValue: ' + evt.newValue + '; oldValue: ' + evt.oldValue);
+            };
+
+            spyOn(textField, 'onValueChange');
+
+            textField.text += ' 1';
+            textField.text += ' 2';
+            textField.text += ' 3';
+
+            Invoke.later(function () {
+                expect(textField.onValueChange.calls.count()).toEqual(3);
+                document.body.removeChild(textField.element);
+                done();
+            });
+        });
+    });
+    
+    function expectTypedField(TypedField){
+        var instance = new TypedField();
+        expect(instance.element.type).not.toEqual('');
+    }
+    
+    function expectTypedFieldMarkup(Logger, TypedField){
+        var instance = new TypedField();
+        document.body.appendChild(instance.element);
+        expect(instance.element.type).not.toEqual('');
+        instance.onValueChange = function(evt){
+            Logger.info('Value change. newValue: ' + evt.newValue + '; oldValue: ' + evt.oldValue);
+        };
+        // document.body.removeChild(instance.element);
+    }
+    
+    it('ColorField.Structure', function (done) {
+        require([
+            'forms/fields/color-field'], function (
+                ColorField) {
+            expectTypedField(ColorField);
+            done();
+        });
+    });
+    it('ColorField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/color-field'], function (
+                Logger,
+                ColorField) {
+            expectTypedFieldMarkup(Logger, ColorField);
+            done();
+        });
+    });
+    it('DateField.Structure', function (done) {
+        require([
+            'forms/fields/date-field'], function (
+                DateField) {
+            expectTypedField(DateField);
+            done();
+        });
+    });
+    it('DateField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/date-field'], function (
+                Logger,
+                DateField) {
+            expectTypedFieldMarkup(Logger, DateField);
+            done();
+        });
+    });
+    it('DateTimeField.Structure', function (done) {
+        require([
+            'forms/fields/date-time-field'], function (
+                DateTimeField) {
+            expectTypedField(DateTimeField);
+            done();
+        });
+    });
+    it('DateTimeField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/date-time-field'], function (
+                Logger,
+                DateTimeField) {
+            expectTypedFieldMarkup(Logger, DateTimeField);
+            done();
+        });
+    });
+    it('EMailField.Structure', function (done) {
+        require([
+            'forms/fields/email-field'], function (
+                EMailField) {
+            expectTypedField(EMailField);
+            done();
+        });
+    });
+    it('EMailField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/email-field'], function (
+                Logger,
+                EMailField) {
+            expectTypedFieldMarkup(Logger, EMailField);
+            done();
+        });
+    });
+    it('PasswordField.Structure', function (done) {
+        require([
+            'forms/fields/password-field'], function (
+                PasswordField) {
+            expectTypedField(PasswordField);
+            done();
+        });
+    });
+    it('PasswordField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/password-field'], function (
+                Logger,
+                PasswordField) {
+            expectTypedFieldMarkup(Logger, PasswordField);
+            done();
+        });
+    });
+    it('PhoneField.Structure', function (done) {
+        require([
+            'forms/fields/phone-field'], function (
+                PhoneField) {
+            expectTypedField(PhoneField);
+            done();
+        });
+    });
+    it('PhoneField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/phone-field'], function (
+                Logger,
+                PhoneField) {
+            expectTypedFieldMarkup(Logger, PhoneField);
+            done();
+        });
+    });
+    it('TimeField.Structure', function (done) {
+        require([
+            'forms/fields/time-field'], function (
+                TimeField) {
+            expectTypedField(TimeField);
+            done();
+        });
+    });
+    it('TimeField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/time-field'], function (
+                Logger,
+                TimeField) {
+            expectTypedFieldMarkup(Logger, TimeField);
+            done();
+        });
+    });
+    it('UrlField.Structure', function (done) {
+        require([
+            'forms/fields/url-field'], function (
+                UrlField) {
+            expectTypedField(UrlField);
+            done();
+        });
+    });
+    it('UrlField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/url-field'], function (
+                Logger,
+                UrlField) {
+            expectTypedFieldMarkup(Logger, UrlField);
+            done();
+        });
+    });
+    it('RangeField.Structure', function (done) {
+        require([
+            'forms/fields/range-field'], function (
+                RangeField) {
+            expectTypedField(RangeField);
+            done();
+        });
+    });
+    it('RangeField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/range-field'], function (
+                Logger,
+                RangeField) {
+            expectTypedFieldMarkup(Logger, RangeField);
+            done();
+        });
+    });
+    it('NumberField.Structure', function (done) {
+        require([
+            'forms/fields/number-field'], function (
+                NumberField) {
+            expectTypedField(NumberField);
+            done();
+        });
+    });
+    it('NumberField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/number-field'], function (
+                Logger,
+                NumberField) {
+            expectTypedFieldMarkup(Logger, NumberField);
+            done();
         });
     });
 });

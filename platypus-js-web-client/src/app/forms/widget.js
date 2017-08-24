@@ -1,8 +1,8 @@
 define([
     '../ui',
-    './mouse-event',
-    './component-event',
-    './action-event',
+    './events/mouse-event',
+    './events/component-event',
+    './events/action-event',
     '../invoke'], function (
         Ui,
         MouseEvent,
@@ -79,6 +79,7 @@ define([
             },
             set: function (aValue) {
                 name = aValue;
+                self.element.name = name;
             }
         });
         Object.defineProperty(this, 'title', {

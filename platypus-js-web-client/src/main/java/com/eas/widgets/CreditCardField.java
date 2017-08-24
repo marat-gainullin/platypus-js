@@ -8,7 +8,7 @@ import com.google.gwt.dom.client.Document;
  */
 public class CreditCardField extends TextField {
 
-    // TODO: switch of auto completion due tyo security considerations
+    // TODO: switch of auto completion due to security considerations
     public CreditCardField() {
         super(Document.get().createCreditCardInputElement());
     }
