@@ -1,4 +1,4 @@
-define(function () {
+define(['./i18n'], function (i18n) {
     var rgbPattern = /^\s*rgb\s*\(\s*([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]+)\s*\)\s*$/;
     var rgbaPattern = /^\s*rgba\s*\(\s*([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]*\.?[0-9]*)\s*\)\s*$/;
 
@@ -20,6 +20,8 @@ define(function () {
                         blue: parseInt(colorText.substring(4, 6), 16),
                         alpha: 0xff
                     };
+                } else {
+                    throw i18n['not.a.color'];
                 }
             } else {
                 var m = colorText.match(rgbPattern);
@@ -28,7 +30,8 @@ define(function () {
                         red: parseInt(m[1]), // r
                         green: parseInt(m[2]), // g
                         blue: parseInt(m[3]), // b
-                        alpha: 0xff}; // a
+                        alpha: 0xff // a
+                    };
                 } else {
                     var m1 = colorText.match(rgbaPattern);
                     if (m1) {
@@ -41,12 +44,16 @@ define(function () {
                             red: parseInt(m1[1]), // r
                             green: parseInt(m1[2]), // g
                             blue: parseInt(m1[3]), // b
-                            alpha: alpha}; // a
+                            alpha: alpha // a
+                        };
+                    } else {
+                        throw i18n['not.a.color'];
                     }
                 }
             }
+        } else {
+            return null;
         }
-        return null;
     }
 
     function Color(aRed, aGreen, aBlue, aAlpha) {
@@ -131,5 +138,6 @@ define(function () {
     Color.WHITE = new Color(0xff, 0xff, 0xff);
     Color.yellow = new Color(0xff, 0xff, 0);
     Color.YELLOW = new Color(0xff, 0xff, 0);
+    Color.parse = parse;
     return Color;
 });

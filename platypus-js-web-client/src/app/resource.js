@@ -1,4 +1,8 @@
-define(['./logger', './internals'], function (Logger, Utils) {
+define([
+    './logger',
+    './internals'], function (
+        Logger,
+        Utils) {
     var global = window;
 
     function lookupCallerApplicationJsFile() {

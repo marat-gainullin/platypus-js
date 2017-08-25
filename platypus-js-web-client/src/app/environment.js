@@ -1,4 +1,6 @@
-define(['./logger'], function (Logger) {
+define([
+    './logger'], function (
+        Logger) {
     var global = window;
     
     var HTML5 = "HTML5 client";

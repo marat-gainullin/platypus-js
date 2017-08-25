@@ -3,9 +3,14 @@ define([
     '../client',
     '../internals',
     './model-reader',
-    '../invoke'], function (Logger, Client, Utils, readModelDocument, Invoke) {
+    '../invoke'], function (
+        Logger,
+        Client,
+        Utils,
+        readModelDocument,
+        Invoke) {
     var global = window;
-    
+
     var SERVER_ENTITY_TOUCHED_NAME = "Entity ";
 
     var loadedEntities = new Map();

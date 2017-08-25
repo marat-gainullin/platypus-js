@@ -31,7 +31,6 @@ define([
         var foreground;
         var opaque = true;
         var cursor;
-        var error;
         var toolTipText;
         var nextFocusableComponent;
         var focusable = false;
@@ -64,12 +63,12 @@ define([
                 return enabled;
             },
             set: function (aValue) {
-                var oldValue = enabled;
-                enabled = aValue;
-                if (!oldValue && enabled) {
-                    Ui.unmask(element);
-                } else if (oldValue && !enabled) {
-                    Ui.disabledMask(element);
+                if (enabled !== aValue) {
+                    enabled = aValue;
+                    if (enabled)
+                        element.removeAttribute('disabled');
+                    else
+                        element.setAttribute('disabled', '');
                 }
             }
         });
@@ -167,12 +166,29 @@ define([
                 element.style.cursor = cursor;
             }
         });
+
+        var errorStub = null;
         Object.defineProperty(this, 'error', {
             get: function () {
-                return error;
+                if (element.setCustomValidity)
+                    return element.validationMessage !== '' ? element.validationMessage : null;
+                else
+                    return errorStub;
             },
             set: function (aValue) {
-                error = aValue;
+                if (self.error !== aValue) {
+                    if (element.setCustomValidity)
+                        element.setCustomValidity(aValue !== null ? aValue : '');
+                    else
+                        errorStub = aValue;
+                    if(aValue){
+                        if(self.showError)
+                            self.showError();
+                    } else {
+                        if(self.hideError)
+                            self.hideError();                        
+                    }
+                }
             }
         });
         Object.defineProperty(this, 'toolTipText', {

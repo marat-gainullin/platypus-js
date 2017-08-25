@@ -32,8 +32,37 @@ define([
 
         var changeReg = Ui.on(box, 'change', function (evt) {
             self.fireActionPerformed();
-            self.text = box.value;
+            box.checkValidity();
+            self.textChanged();
         });
+
+        var changeReg = Ui.on(box, 'input', function (evt) {
+            self.error = null;
+        });
+
+        function hideError() {
+            if (errorPopup && errorPopup.parentNode)
+                document.body.removeChild(errorPopup);
+            errorPopup = null;
+        }
+        this.hideError = hideError;
+
+        var errorPopup = null;
+        function showError() {
+            if (!errorPopup) {
+                errorPopup = document.createElement('div');
+                errorPopup.className = 'p-error-popup';
+                errorPopup.innerText = self.error;
+                var left = Ui.absoluteLeft(box);
+                var top = Ui.absoluteTop(box);
+                errorPopup.style.left = (left + box.offsetWidth / 2) + 'px';
+                errorPopup.style.top = top + box.offsetHeight + 'px';
+                document.body.appendChild(errorPopup);
+                errorPopup.style.left = (errorPopup.offsetLeft - errorPopup.offsetWidth * 0.2) + 'px';
+            }
+        }
+
+        this.showError = showError;
 
         var valueChangeHandlers = new Set();
         function addValueChangeHandler(handler) {
@@ -42,7 +71,6 @@ define([
                 removeHandler: function () {
                     valueChangeHandlers.delete(handler);
                 }
-
             };
         }
 

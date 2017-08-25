@@ -167,3 +167,14 @@
     right: 0px;
     height: 100%;
 }
+
+.p-error-popup{
+    position: absolute;
+    display: inline-block;
+}
+
+.p-error-popup::after{
+    content: " ";
+    position: absolute;
+    display: inline-block;
+}

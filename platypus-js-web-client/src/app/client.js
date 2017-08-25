@@ -1,6 +1,16 @@
-define(['./logger', './invoke', './id', './core/report', './internals'], function (Logger, Invoke, Id, Report, Utils) {
+define([
+    './logger',
+    './invoke',
+    './id',
+    './core/report',
+    './internals'], function (
+        Logger,
+        Invoke,
+        Id,
+        Report,
+        Utils) {
     var global = window;
-    
+
     var REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
 
     var RequestTypes = {
@@ -134,7 +144,7 @@ define(['./logger', './invoke', './id', './core/report', './internals'], functio
                         if (req.status === 0) {
                             // Chrome calls 'req.onreadystatechange' in the same control flow as 'req.abort()'
                             // has been called by client code. So, we have to emulate network like error control flow.
-                            Invoke.later(function(){
+                            Invoke.later(function () {
                                 onFailure(req);
                             });
                         } else {

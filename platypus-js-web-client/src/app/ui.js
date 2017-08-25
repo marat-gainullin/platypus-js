@@ -1,7 +1,7 @@
 define([
-    'common-utils/color',
-    'common-utils/cursor',
-    'common-utils/font',
+    './common-utils/color',
+    './common-utils/cursor',
+    './common-utils/font',
     './forms/key-codes',
     './internals'], function (
         Color,
@@ -90,13 +90,6 @@ define([
                 element.removeEventListener(eventName, handler, false);
             }
         };
-    }
-
-    function mask(element) {
-    }
-    function unmask(element) {
-    }
-    function disabledMask(element) {
     }
 
     var Orientation = {HORIZONTAL: 0, VERTICAL: 1};
@@ -340,21 +333,6 @@ define([
     Object.defineProperty(module, 'absoluteTop', {
         get: function () {
             return absoluteTop;
-        }
-    });
-    Object.defineProperty(module, 'mask', {
-        get: function () {
-            return mask;
-        }
-    });
-    Object.defineProperty(module, 'unmask', {
-        get: function () {
-            return unmask;
-        }
-    });
-    Object.defineProperty(module, 'disabledMask', {
-        get: function () {
-            return disabledMask;
         }
     });
     return module;

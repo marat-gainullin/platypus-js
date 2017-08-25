@@ -2,7 +2,11 @@ define([
     '../invoke',
     './managed',
     '../client',
-    '../logger'], function(Invoke, M, Client, Logger){
+    '../logger'], function (
+        Invoke,
+        M,
+        Client,
+        Logger) {
     function Model() {
         var self = this;
         var relations = new Set();
@@ -91,12 +95,12 @@ define([
                 }
             }
         }
-        
+
         function cancel() {
             entities.forEach(function (entity) {
                 if (entity.pending) {
                     entity.cancel();
-                } else if(!entity.valid) {
+                } else if (!entity.valid) {
                     entity.valid = true;
                 }
             });
@@ -199,7 +203,7 @@ define([
         }
 
         function processAssociations() {
-            entities.forEach(function(entity){
+            entities.forEach(function (entity) {
                 entity.clearScalarNavigations();
                 entity.clearCollectionNavigations();
             });

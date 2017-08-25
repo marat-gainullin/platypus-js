@@ -1,16 +1,15 @@
 define([
     '../../extend',
-    './text-value-field'], function (
+    './text-field'], function (
         extend,
-        TextValueField) {
+        TextField) {
     function UrlField() {
-        TextValueField.call(this);
-
+        TextField.call(this);
         var self = this;
 
         var box = this.element;
         box.type = 'url';
     }
-    extend(UrlField, TextValueField);
+    extend(UrlField, TextField);
     return UrlField;
 });

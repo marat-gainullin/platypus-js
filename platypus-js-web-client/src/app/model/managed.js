@@ -1,4 +1,6 @@
-define(['../logger'], function (Logger) {
+define([
+    '../logger'], function (
+        Logger) {
     var releaseName = '-platypus-orm-release-func';
     /** 
      * Substitutes properties of anObject with observable properties using Object.defineProperty()

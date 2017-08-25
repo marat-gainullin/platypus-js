@@ -859,22 +859,25 @@ describe('Widgets Api', function () {
             });
         });
     });
-    
-    function expectTypedField(TypedField){
+
+    function expectTypedField(TypedField) {
         var instance = new TypedField();
         expect(instance.element.type).not.toEqual('');
     }
-    
-    function expectTypedFieldMarkup(Logger, TypedField){
+
+    function expectTypedFieldMarkup(Logger, TypedField) {
         var instance = new TypedField();
         document.body.appendChild(instance.element);
         expect(instance.element.type).not.toEqual('');
-        instance.onValueChange = function(evt){
-            Logger.info('Value change. newValue: ' + evt.newValue + '; oldValue: ' + evt.oldValue);
+        instance.onActionPerformed = function (evt) {
+            Logger.info('Action performed on ' + evt.source.constructor.name);
+        };
+        instance.onValueChange = function (evt) {
+            Logger.info('Value change on ' + evt.source.constructor.name + '. newValue: ' + evt.newValue + '; oldValue: ' + evt.oldValue);
         };
         // document.body.removeChild(instance.element);
     }
-    
+
     it('ColorField.Structure', function (done) {
         require([
             'forms/fields/color-field'], function (

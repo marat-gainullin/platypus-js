@@ -1,16 +1,15 @@
 define([
     '../../extend',
-    './text-value-field'], function (
+    './text-field'], function (
         extend,
-        TextValueField) {
+        TextField) {
     function EMailField() {
-        TextValueField.call(this);
-
+        TextField.call(this);
         var self = this;
 
         var box = this.element;
-        box.type = 'email';
+        box.type = 'email';        
     }
-    extend(EMailField, TextValueField);
+    extend(EMailField, TextField);
     return EMailField;
 });

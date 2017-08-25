@@ -6,38 +6,47 @@ define([
     function TextField(text) {
         if (arguments.length < 1)
             text = '';
-        
         TextValueField.call(this);
-
         var self = this;
+        var value = null;
 
         var box = this.element;
-        
-        function applyText() {
-            box.value = text;
+        box.type = 'text';
+        box.value = text;
+
+        function textChanged() {
+            var oldValue = value;
+            value = text === '' ? null : text;
+            self.fireValueChanged(oldValue);
         }
-        applyText();
+
+        Object.defineProperty(this, 'textChanged', {
+            enumerable: false,
+            get: function () {
+                return textChanged;
+            }
+        });
 
         Object.defineProperty(this, 'text', {
             get: function () {
-                return text;
+                return box.value;
             },
             set: function (aValue) {
-                if (text !== aValue) {
-                    var oldValue = text;
-                    text = aValue;
-                    applyText();
-                    fireValueChanged(oldValue);
+                if (box.value !== aValue) {
+                    box.value = aValue;
+                    textChanged();
                 }
             }
         });
 
         Object.defineProperty(this, 'value', {
             get: function () {
-                return self.text;
+                return value;
             },
             set: function (aValue) {
-                self.text = aValue;
+                var oldValue = value;
+                value = aValue;
+                self.fireValueChanged(oldValue);
             }
         });
     }
