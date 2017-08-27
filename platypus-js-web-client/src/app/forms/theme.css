@@ -6,7 +6,7 @@
     border-radius: 10px;
     padding: 10px;
     margin-top: 5px;
-    width: 150px;
+    max-width: 150px;
     background: white;
 }
 

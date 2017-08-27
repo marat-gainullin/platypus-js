@@ -3,12 +3,12 @@ define([
     './text-field'], function (
         extend,
         TextField) {
-    function EMailField() {
-        TextField.call(this);
+    function EMailField(shell) {
+        var box = document.createElement('input');
+        box.type = 'email';
+        
+        TextField.call(this, '', box, shell);
         var self = this;
-
-        var box = this.element;
-        box.type = 'email';        
     }
     extend(EMailField, TextField);
     return EMailField;

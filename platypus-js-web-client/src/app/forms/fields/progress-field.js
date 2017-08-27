@@ -3,14 +3,12 @@ define([
     './number-field'], function (
         extend,
         NumberField) {
-    function RangeField(shell) {
-        var box = document.createElement('input');
-        box.type = 'range';
+    function ProgressField(shell) {
+        var box = document.createElement('progress');
         
         NumberField.call(this, box, shell);
         var self = this;
-
     }
-    extend(RangeField, NumberField);
-    return RangeField;
+    extend(ProgressField, NumberField);
+    return ProgressField;
 });

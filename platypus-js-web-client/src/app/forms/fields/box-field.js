@@ -9,13 +9,17 @@ define([
         extend,
         Widget,
         ValueChangeEvent) {
-    function TextValueField() {
-        var box = document.createElement('input');
-        Widget.call(this, box);
+    function BoxField(box, shell) {
+        if (!box) {
+            box = document.createElement('input');
+            box.type = 'text';
+        }
+        if (!shell) {
+            shell = box;
+        }
 
+        Widget.call(this, box, shell);
         var self = this;
-
-        box.type = 'text';
 
         /**
          * The text to be shown when component's value is absent.
@@ -49,17 +53,16 @@ define([
 
         var errorPopup = null;
         function showError() {
-            if (!errorPopup) {
-                errorPopup = document.createElement('div');
-                errorPopup.className = 'p-error-popup';
-                errorPopup.innerText = self.error;
-                var left = Ui.absoluteLeft(box);
-                var top = Ui.absoluteTop(box);
-                errorPopup.style.left = (left + box.offsetWidth / 2) + 'px';
-                errorPopup.style.top = top + box.offsetHeight + 'px';
-                document.body.appendChild(errorPopup);
-                errorPopup.style.left = (errorPopup.offsetLeft - errorPopup.offsetWidth * 0.2) + 'px';
-            }
+            hideError();
+            errorPopup = document.createElement('div');
+            errorPopup.className = 'p-error-popup';
+            errorPopup.innerText = self.error;
+            var left = Ui.absoluteLeft(box);
+            var top = Ui.absoluteTop(box);
+            errorPopup.style.left = (left + box.offsetWidth / 2) + 'px';
+            errorPopup.style.top = top + box.offsetHeight + 'px';
+            document.body.appendChild(errorPopup);
+            errorPopup.style.left = (errorPopup.offsetLeft - errorPopup.offsetWidth * 0.2) + 'px';
         }
 
         this.showError = showError;
@@ -95,7 +98,7 @@ define([
         });
 
     }
-    extend(TextValueField, Widget);
-    return TextValueField;
+    extend(BoxField, Widget);
+    return BoxField;
 });
        

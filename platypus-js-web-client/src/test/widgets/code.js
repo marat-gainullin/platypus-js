@@ -1040,6 +1040,42 @@ describe('Widgets Api', function () {
             done();
         });
     });
+    it('ProgressField.Structure', function (done) {
+        require([
+            'forms/fields/progress-field'], function (
+                ProgressField) {
+            expectTypedField(ProgressField);
+            done();
+        });
+    });
+    it('ProgressField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/progress-field'], function (
+                Logger,
+                ProgressField) {
+            expectTypedFieldMarkup(Logger, ProgressField);
+            done();
+        });
+    });
+    it('MeterField.Structure', function (done) {
+        require([
+            'forms/fields/meter-field'], function (
+                MeterField) {
+            expectTypedField(MeterField);
+            done();
+        });
+    });
+    it('MeterField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/meter-field'], function (
+                Logger,
+                MeterField) {
+            expectTypedFieldMarkup(Logger, MeterField);
+            done();
+        });
+    });
     it('NumberField.Structure', function (done) {
         require([
             'forms/fields/number-field'], function (
@@ -1055,6 +1091,42 @@ describe('Widgets Api', function () {
                 Logger,
                 NumberField) {
             expectTypedFieldMarkup(Logger, NumberField);
+            done();
+        });
+    });
+    it('TextField.Structure', function (done) {
+        require([
+            'forms/fields/text-field'], function (
+                TextField) {
+            expectTypedField(TextField);
+            done();
+        });
+    });
+    it('TextField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/text-field'], function (
+                Logger,
+                TextField) {
+            expectTypedFieldMarkup(Logger, TextField);
+            done();
+        });
+    });
+    it('TextArea.Structure', function (done) {
+        require([
+            'forms/fields/text-area'], function (
+                TextArea) {
+            expectTypedField(TextArea);
+            done();
+        });
+    });
+    it('TextArea.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/text-area'], function (
+                Logger,
+                TextArea) {
+            expectTypedFieldMarkup(Logger, TextArea);
             done();
         });
     });

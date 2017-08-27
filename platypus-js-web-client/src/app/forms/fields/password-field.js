@@ -3,12 +3,12 @@ define([
     './text-field'], function (
         extend,
         TextField) {
-    function PasswordField() {
-        TextField.call(this);
-        var self = this;
-
-        var box = this.element;
+    function PasswordField(shell) {
+        var box = document.createElement('input');
         box.type = 'password';
+        
+        TextField.call(this, '', box, shell);
+        var self = this;
     }
     extend(PasswordField, TextField);
     return PasswordField;

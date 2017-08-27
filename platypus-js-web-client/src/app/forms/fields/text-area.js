@@ -3,13 +3,12 @@ define([
     './text-field'], function (
         extend,
         TextField) {
-    function UrlField(shell) {
-        var box = document.createElement('input');
-        box.type = 'url';
+    function TextArea(shell) {
+        var box = document.createElement('textarea');
         
         TextField.call(this, '', box, shell);
         var self = this;
     }
-    extend(UrlField, TextField);
-    return UrlField;
+    extend(TextArea, TextField);
+    return TextArea;
 });

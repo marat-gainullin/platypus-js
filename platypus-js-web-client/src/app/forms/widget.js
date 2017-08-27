@@ -9,16 +9,23 @@ define([
         ComponentEvent,
         ActionEvent,
         Invoke) {
-    function Widget(element) {
+    function Widget(box, shell) {
         if (!(this instanceof Widget))
             throw 'Use new with this constructor function';
+        if (!box) {
+            box = document.createElement('div');
+        }
+        if (!shell) {
+            shell = box;
+        }
+
+        if(shell !== box)
+            shell.appendChild(box);
 
         var self = this;
 
-        if (!element)
-            element = document.createElement('div');
-        element['p-widget'] = this;
-        element.classList.add('p-widget');
+        shell['p-widget'] = this;
+        shell.classList.add('p-widget');
 
         // TODO: Ensure all widgets have a class 'border-sized' or something as 'widget' with border sizing setted up.
 
@@ -54,7 +61,7 @@ define([
         });
         Object.defineProperty(this, 'element', {
             get: function () {
-                return element;
+                return shell;
             }
         });
 
@@ -66,9 +73,9 @@ define([
                 if (enabled !== aValue) {
                     enabled = aValue;
                     if (enabled)
-                        element.removeAttribute('disabled');
+                        box.removeAttribute('disabled');
                     else
-                        element.setAttribute('disabled', '');
+                        box.setAttribute('disabled', '');
                 }
             }
         });
@@ -83,10 +90,10 @@ define([
         });
         Object.defineProperty(this, 'title', {
             get: function () {
-                return element.title;
+                return box.title;
             },
             set: function (aValue) {
-                element.title = aValue;
+                box.title = aValue;
             }
         });
         Object.defineProperty(this, 'font', {
@@ -97,23 +104,23 @@ define([
                 if (font !== aValue) {
                     font = aValue;
                     if (font) {
-                        element.style.fontFamily = font.family;
-                        element.style.fontSize = font.size + 'pt';
+                        shell.style.fontFamily = font.family;
+                        shell.style.fontSize = font.size + 'pt';
                         if (font.bold) {
-                            element.style.fontWeight = 'bold';
+                            shell.style.fontWeight = 'bold';
                         } else {
-                            element.style.fontWeight = 'normal';
+                            shell.style.fontWeight = 'normal';
                         }
                         if (font.italic) {
-                            element.style.fontStyle = 'italic';
+                            shell.style.fontStyle = 'italic';
                         } else {
-                            element.style.fontStyle = 'normal';
+                            shell.style.fontStyle = 'normal';
                         }
                     } else {
-                        element.style.fontFamily = '';
-                        element.style.fontSize = '';
-                        element.style.fontWeight = '';
-                        element.style.fontStyle = '';
+                        shell.style.fontFamily = '';
+                        shell.style.fontSize = '';
+                        shell.style.fontWeight = '';
+                        shell.style.fontStyle = '';
                     }
                 }
             }
@@ -121,9 +128,9 @@ define([
 
         function applyBackground() {
             if (opaque)
-                element.style.backgroundColor = background && background.toStyled ? background.toStyled() : background;
+                box.style.backgroundColor = background && background.toStyled ? background.toStyled() : background;
             else
-                element.style.background = 'none';
+                box.style.background = 'none';
         }
 
         Object.defineProperty(this, 'opaque', {
@@ -154,7 +161,7 @@ define([
             },
             set: function (aValue) {
                 foreground = aValue;
-                element.style.color = foreground && foreground.toStyled ? foreground.toStyled() : foreground;
+                box.style.color = foreground && foreground.toStyled ? foreground.toStyled() : foreground;
             }
         });
         Object.defineProperty(this, 'cursor', {
@@ -163,22 +170,22 @@ define([
             },
             set: function (aValue) {
                 cursor = aValue;
-                element.style.cursor = cursor;
+                box.style.cursor = cursor;
             }
         });
 
         var errorStub = null;
         Object.defineProperty(this, 'error', {
             get: function () {
-                if (element.setCustomValidity)
-                    return element.validationMessage !== '' ? element.validationMessage : null;
+                if (box.setCustomValidity)
+                    return box.validationMessage !== '' ? box.validationMessage : null;
                 else
                     return errorStub;
             },
             set: function (aValue) {
                 if (self.error !== aValue) {
-                    if (element.setCustomValidity)
-                        element.setCustomValidity(aValue !== null ? aValue : '');
+                    if (box.setCustomValidity)
+                        box.setCustomValidity(aValue !== null ? aValue : '');
                     else
                         errorStub = aValue;
                     if(aValue){
@@ -198,7 +205,7 @@ define([
             set: function (aValue) {
                 if (toolTipText !== aValue) {
                     toolTipText = aValue;
-                    element.title = toolTipText;
+                    box.title = toolTipText;
                 }
             }
         });
@@ -230,9 +237,9 @@ define([
                     return parent.getLeft(self);
                 } else {
                     if (isAttached()) {
-                        return element.offsetLeft;
+                        return shell.offsetLeft;
                     } else {
-                        var parsed = parseFloat(element.style.left);
+                        var parsed = parseFloat(shell.style.left);
                         return isNaN(parsed) ? 0 : parsed;
                     }
                 }
@@ -242,9 +249,9 @@ define([
                     if (parent && parent.ajustLeft)
                         parent.ajustLeft(self, aValue);
                     else
-                        element.style.left = aValue + 'px';
+                        shell.style.left = aValue + 'px';
                 } else {
-                    element.style.left = null;
+                    shell.style.left = null;
                 }
             }
         });
@@ -254,9 +261,9 @@ define([
                     return parent.getTop(self);
                 } else {
                     if (isAttached()) {
-                        return element.offsetTop;
+                        return shell.offsetTop;
                     } else {
-                        var parsed = parseFloat(element.style.top);
+                        var parsed = parseFloat(shell.style.top);
                         return isNaN(parsed) ? 0 : parsed;
                     }
                 }
@@ -266,18 +273,18 @@ define([
                     if (parent && parent.ajustTop)
                         parent.ajustTop(self, aValue);
                     else
-                        element.style.top = aValue + 'px';
+                        shell.style.top = aValue + 'px';
                 } else {
-                    element.style.top = null;
+                    shell.style.top = null;
                 }
             }
         });
         Object.defineProperty(this, "width", {
             get: function () {
                 if (isAttached())
-                    return element.offsetWidth;
+                    return shell.offsetWidth;
                 else {
-                    var parsed = parseFloat(element.style.width);
+                    var parsed = parseFloat(shell.style.width);
                     return isNaN(parsed) ? 0 : parsed;
                 }
             },
@@ -286,19 +293,19 @@ define([
                     if (parent && parent.ajustWidth) {
                         parent.ajustWidth(self, aValue);
                     } else {
-                        element.style.width = aValue + 'px';
+                        shell.style.width = aValue + 'px';
                     }
                 } else {
-                    element.style.width = null;
+                    shell.style.width = null;
                 }
             }
         });
         Object.defineProperty(this, "height", {
             get: function () {
                 if (isAttached()) {
-                    return element.offsetHeight;
+                    return shell.offsetHeight;
                 } else {
-                    var parsed = parseFloat(element.style.height);
+                    var parsed = parseFloat(shell.style.height);
                     return isNaN(parsed) ? 0 : parsed;
                 }
             },
@@ -307,10 +314,10 @@ define([
                     if (parent && parent.ajustHeight) {
                         parent.ajustHeight(self, aValue);
                     } else {
-                        element.style.height = aValue + 'px';
+                        shell.style.height = aValue + 'px';
                     }
                 } else {
-                    element.style.height = null;
+                    shell.style.height = null;
                 }
             }
         });
@@ -327,10 +334,10 @@ define([
                     }
                     menu = aValue;
                     if (menu) {
-                        menuTriggerReg = Ui.on(element, Ui.Events.CONTEXTMENU, function (event) {
+                        menuTriggerReg = Ui.on(box, Ui.Events.CONTEXTMENU, function (event) {
                             event.preventDefault();
                             event.stopPropagation();
-                            menu.show(Ui.absoluteLeft(element), Ui.absoluteTop(element), element.offsetWidth, element.offsetHeight);
+                            menu.show(Ui.absoluteLeft(shell), Ui.absoluteTop(shell), shell.offsetWidth, shell.offsetHeight);
                         });
                     }
                 }
@@ -380,10 +387,10 @@ define([
         }
 
         function addMouseClickHandler(handler) {
-            var clickReg = Ui.on(element, Ui.Events.CLICK, function (evt) {
+            var clickReg = Ui.on(shell, Ui.Events.CLICK, function (evt) {
                 handler(new MouseEvent(self, evt, 1));
             });
-            var dblClickReg = Ui.on(element, Ui.Events.DBLCLICK, function (evt) {
+            var dblClickReg = Ui.on(shell, Ui.Events.DBLCLICK, function (evt) {
                 handler(new MouseEvent(self, evt, 2));
             });
             return {
@@ -395,37 +402,37 @@ define([
         }
 
         function addMouseDownHandler(handler) {
-            return Ui.on(element, Ui.Events.MOUSEDOWN, function (evt) {
+            return Ui.on(shell, Ui.Events.MOUSEDOWN, function (evt) {
                 handler(new MouseEvent(self, evt));
             });
         }
 
         function addMouseUpHandler(handler) {
-            return Ui.on(element, Ui.Events.MOUSEUP, function (evt) {
+            return Ui.on(shell, Ui.Events.MOUSEUP, function (evt) {
                 handler(new MouseEvent(self, evt));
             });
         }
 
         function addMouseMoveHandler(handler) {
-            return Ui.on(element, Ui.Events.MOUSEMOVE, function (evt) {
+            return Ui.on(shell, Ui.Events.MOUSEMOVE, function (evt) {
                 handler(new MouseEvent(self, evt));
             });
         }
 
         function addMouseEnterHandler(handler) {
-            return Ui.on(element, Ui.Events.MOUSEOVER, function (evt) {
+            return Ui.on(shell, Ui.Events.MOUSEOVER, function (evt) {
                 handler(new MouseEvent(self, evt));
             });
         }
 
         function addMouseExitHandler(handler) {
-            return Ui.on(element, Ui.Events.MOUSEOUT, function (evt) {
+            return Ui.on(shell, Ui.Events.MOUSEOUT, function (evt) {
                 handler(new MouseEvent(self, evt));
             });
         }
 
         function addMouseWheelHandler(handler) {
-            return Ui.on(element, Ui.Events.MOUSEWHEEL, function (evt) {
+            return Ui.on(shell, Ui.Events.MOUSEWHEEL, function (evt) {
                 handler(new MouseEvent(self, evt));
             });
         }
@@ -489,7 +496,7 @@ define([
         });
 
         function isAttached() {
-            var cursorElement = element;
+            var cursorElement = shell;
             while (cursorElement && cursorElement !== document.body) {
                 cursorElement = cursorElement.parentElement;
             }
@@ -503,15 +510,15 @@ define([
         });
         Object.defineProperty(this, 'visible', {
             get: function () {
-                return element.style.display !== 'none';
+                return shell.style.display !== 'none';
             },
             set: function (aValue) {
                 var oldValue = self.visible;
                 if (oldValue !== aValue) {
                     if (aValue) {
-                        element.style.display = visibleDisplay;
+                        shell.style.display = visibleDisplay;
                     } else {
-                        element.style.display = 'none';
+                        shell.style.display = 'none';
                     }
                     if (aValue) {
                         fireShown();
@@ -523,7 +530,7 @@ define([
         });
 
         function focus() {
-            element.focus();
+            box.focus();
         }
         Object.defineProperty(this, 'focus', {
             get: function () {
@@ -773,8 +780,7 @@ define([
                     onMouseDragged = aValue;
                     if (onMouseDragged) {
                         mouseDownForDragReg = addMouseDownHandler(function (evt) {
-                            // TODO: Check capture using during dragging
-                            element.setCapture();
+                            // TODO: Check mouse capturing capture using during dragging
                             mouseState = MOUSESTATE.PRESSED;
                             onMouseDragged(evt);
                         });

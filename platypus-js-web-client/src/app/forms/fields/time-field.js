@@ -1,17 +1,17 @@
 define([
     '../../extend',
     '../i18n',
-    './text-value-field'], function (
+    './box-field'], function (
         extend,
         i18n,
-        TextValueField) {
-    function TimeField() {
-        TextValueField.call(this);
+        BoxField) {
+    function TimeField(shell) {
+        var box = document.createElement('input');
+        box.type = 'time';
+        
+        BoxField.call(this, box, shell);
         var self = this;
         var value = null;
-
-        var box = this.element;
-        box.type = 'time';
 
         function parse(source) {
             return (new Date('1970-01-01T' + source + 'Z')).valueOf();
@@ -77,6 +77,6 @@ define([
             }
         });
     }
-    extend(TimeField, TextValueField);
+    extend(TimeField, BoxField);
     return TimeField;
 });

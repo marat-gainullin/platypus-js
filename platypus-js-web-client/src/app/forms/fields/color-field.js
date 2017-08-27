@@ -1,17 +1,17 @@
 define([
     '../../extend',
     '../../common-utils/color',
-    './text-value-field'], function (
+    './box-field'], function (
         extend,
         Color,
-        TextValueField) {
-    function ColorField() {
-        TextValueField.call(this);
+        BoxField) {
+    function ColorField(shell) {
+        var box = document.createElement('input');
+        box.type = 'color';
+
+        BoxField.call(this, box, shell);
         var self = this;
         var value = null;
-
-        var box = this.element;
-        box.type = 'color';
 
         function format(color) {
             return color ? color.toString() : '#000000';
@@ -63,6 +63,6 @@ define([
             }
         });
     }
-    extend(ColorField, TextValueField);
+    extend(ColorField, BoxField);
     return ColorField;
 });

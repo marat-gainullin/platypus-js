@@ -1,14 +1,15 @@
 define([
     '../../extend',
-    './text-value-field'], function (
+    './box-field'], function (
         extend,
-        TextValueField) {
-    function FormattedField() {
-        TextValueField.call(this);
+        BoxField) {
+    function FormattedField(shell) {
+        var box = document.createElement('input');
+        box.type = 'text';
+        
+        BoxField.call(this, box, shell);
         var self = this;
         var value = null;
-
-        var box = this.element;
 
         function textChanged() {
             var oldValue = value;
@@ -49,6 +50,6 @@ define([
             }
         });
     }
-    extend(FormattedField, TextValueField);
+    extend(FormattedField, BoxField);
     return FormattedField;
 });

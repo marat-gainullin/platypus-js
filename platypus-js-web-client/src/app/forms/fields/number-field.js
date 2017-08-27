@@ -1,19 +1,23 @@
 define([
     '../../extend',
     '../i18n',
-    './text-value-field'], function (
+    './box-field'], function (
         extend,
         i18n,
-        TextValueField) {
-    function NumberField() {
-        TextValueField.call(this);
+        BoxField) {
+    function NumberField(box, shell) {
+        if (!box) {
+            box = document.createElement('input');
+            box.type = 'number';
+        }
+        if(!shell){
+            shell = box;
+        }
+        BoxField.call(this, box, shell);
         var self = this;
         var value = null;
 
-        var box = this.element;
-        box.type = 'number';
-
-        Object.defineProperty(this, 'min', {
+        Object.defineProperty(this, 'minimum', {
             get: function () {
                 var boxMin = parseFloat(box.min);
                 return isNaN(boxMin) ? null : boxMin;
@@ -22,7 +26,7 @@ define([
                 box.min = aValue;
             }
         });
-        Object.defineProperty(this, 'max', {
+        Object.defineProperty(this, 'maximum', {
             get: function () {
                 var boxMax = parseFloat(box.max);
                 return isNaN(boxMax) ? null : boxMax;
@@ -92,6 +96,6 @@ define([
             }
         });
     }
-    extend(NumberField, TextValueField);
+    extend(NumberField, BoxField);
     return NumberField;
 });

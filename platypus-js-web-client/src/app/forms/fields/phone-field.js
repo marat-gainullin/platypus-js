@@ -3,12 +3,12 @@ define([
     './text-field'], function (
         extend,
         TextField) {
-    function PhoneField() {
-        TextField.call(this);
-        var self = this;
-
-        var box = this.element;
+    function PhoneField(shell) {
+        var box = document.createElement('input');
         box.type = 'tel';
+        
+        TextField.call(this, '', box, shell);
+        var self = this;
     }
     extend(PhoneField, TextField);
     return PhoneField;
