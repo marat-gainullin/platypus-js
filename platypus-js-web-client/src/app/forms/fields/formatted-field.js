@@ -6,6 +6,8 @@ define([
     function FormattedField(shell) {
         var box = document.createElement('input');
         box.type = 'text';
+        if(!shell)
+            shell = box;
         
         BoxField.call(this, box, shell);
         var self = this;

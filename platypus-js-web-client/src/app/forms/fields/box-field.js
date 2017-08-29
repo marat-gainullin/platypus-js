@@ -9,6 +9,7 @@ define([
         extend,
         Widget,
         ValueChangeEvent) {
+    var ERROR_BUBBLE_OFFSET_PART = 0.2;
     function BoxField(box, shell) {
         if (!box) {
             box = document.createElement('input');
@@ -37,7 +38,10 @@ define([
         var changeReg = Ui.on(box, 'change', function (evt) {
             self.fireActionPerformed();
             box.checkValidity();
-            self.textChanged();
+            if(self.error)
+                showError();
+            else
+                self.textChanged();
         });
 
         var changeReg = Ui.on(box, 'input', function (evt) {
@@ -62,7 +66,7 @@ define([
             errorPopup.style.left = (left + box.offsetWidth / 2) + 'px';
             errorPopup.style.top = top + box.offsetHeight + 'px';
             document.body.appendChild(errorPopup);
-            errorPopup.style.left = (errorPopup.offsetLeft - errorPopup.offsetWidth * 0.2) + 'px';
+            errorPopup.style.left = (errorPopup.offsetLeft - errorPopup.offsetWidth * ERROR_BUBBLE_OFFSET_PART) + 'px';
         }
 
         this.showError = showError;

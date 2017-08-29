@@ -8,6 +8,8 @@ define([
     function ColorField(shell) {
         var box = document.createElement('input');
         box.type = 'color';
+        if(!shell)
+            shell = box;
 
         BoxField.call(this, box, shell);
         var self = this;

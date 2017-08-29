@@ -8,6 +8,8 @@ define([
     function TimeField(shell) {
         var box = document.createElement('input');
         box.type = 'time';
+        if(!shell)
+            shell = box;
         
         BoxField.call(this, box, shell);
         var self = this;

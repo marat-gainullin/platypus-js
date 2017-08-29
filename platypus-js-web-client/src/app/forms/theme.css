@@ -14,11 +14,16 @@
     width: 10px;
     height: 10px;
     top: 0px;
-    left: 20%;
     margin-top: -6px;
     margin-left: -5px;
     border: 1px solid lightgrey;
     background: white;
     transform: rotate(45deg);
-    clip-path: polygon(0 0,0 100%, 100% 0);
+    clip-path: polygon(0 0, 0 100%, 100% 0);
 }
+
+.p-indeterminate::-webkit-slider-thumb {
+    visibility: hidden;
+    border: 1px solid lightgray;
+}
+

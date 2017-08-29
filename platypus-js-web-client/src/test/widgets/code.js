@@ -875,21 +875,46 @@ describe('Widgets Api', function () {
         instance.onValueChange = function (evt) {
             Logger.info('Value change on ' + evt.source.constructor.name + '. newValue: ' + evt.newValue + '; oldValue: ' + evt.oldValue);
         };
-        // document.body.removeChild(instance.element);
+        if (instance.error)
+            instance.error = null;
+        document.body.removeChild(instance.element);
     }
 
     it('ColorField.Structure', function (done) {
         require([
+            'common-utils/color',
             'forms/fields/color-field'], function (
+                Color,
                 ColorField) {
             expectTypedField(ColorField);
+            var instance = new ColorField();
+            expect(instance.text).toEqual('#000000');
+            instance.text = '#fcfcfc';
+            expect(instance.text).toEqual('#fcfcfc');
+            expect(instance.value instanceof Color).toBe(true);
+            expect(instance.value.toString()).toEqual('#fcfcfc');
+
+            instance.text = '';
+            expect(instance.text).toEqual('#000000');
+            expect(instance.value.toString()).toBe('#000000');
+
+            instance.value = Color.blue;
+            expect(instance.value).toBe(Color.blue);
+            expect(instance.text).toEqual('#0000ff');
+
+            instance.value = null;
+            expect(instance.value).toBe(null);
+            expect(instance.text).toEqual('#000000');
+
             done();
         });
     });
     it('ColorField.Markup', function (done) {
         require([
+            'common-utils/color',
             'logger',
             'forms/fields/color-field'], function (
+                Color,
                 Logger,
                 ColorField) {
             expectTypedFieldMarkup(Logger, ColorField);
@@ -901,6 +926,24 @@ describe('Widgets Api', function () {
             'forms/fields/date-field'], function (
                 DateField) {
             expectTypedField(DateField);
+            var instance = new DateField();
+            expect(instance.text).toEqual('');
+            expect(instance.value).toBe(null);
+
+            var day = new Date('2017-04-23T00:00:00.000Z');
+            instance.text = '2017-04-23';
+            expect(instance.value instanceof Date).toBe(true);
+            expect(instance.value.valueOf()).toEqual(day.valueOf());
+
+            instance.text = '';
+            expect(instance.value).toBeNull();
+
+            instance.value = day;
+            expect(instance.text).toEqual('2017-04-23');
+
+            instance.value = null;
+            expect(instance.text).toEqual('');
+
             done();
         });
     });
@@ -919,6 +962,27 @@ describe('Widgets Api', function () {
             'forms/fields/date-time-field'], function (
                 DateTimeField) {
             expectTypedField(DateTimeField);
+
+            var instance = new DateTimeField();
+            expect(instance.text).toEqual('');
+            expect(instance.value).toBe(null);
+
+            var moment = new Date('2017-04-23T01:07:00.068Z');
+            var localMoment = new Date(-moment.getTimezoneOffset() * 60000 + moment.valueOf()).toJSON(); // local version of moment
+            localMoment = localMoment.substring(0, localMoment.length - 1);
+            instance.text = localMoment;
+            expect(instance.value instanceof Date).toBe(true);
+            expect(instance.value.valueOf()).toEqual(moment.valueOf());
+
+            instance.text = '';
+            expect(instance.value).toBeNull();
+
+            instance.value = moment;
+            expect(instance.text).toEqual(localMoment);
+
+            instance.value = null;
+            expect(instance.text).toEqual('');
+
             done();
         });
     });
@@ -929,60 +993,7 @@ describe('Widgets Api', function () {
                 Logger,
                 DateTimeField) {
             expectTypedFieldMarkup(Logger, DateTimeField);
-            done();
-        });
-    });
-    it('EMailField.Structure', function (done) {
-        require([
-            'forms/fields/email-field'], function (
-                EMailField) {
-            expectTypedField(EMailField);
-            done();
-        });
-    });
-    it('EMailField.Markup', function (done) {
-        require([
-            'logger',
-            'forms/fields/email-field'], function (
-                Logger,
-                EMailField) {
-            expectTypedFieldMarkup(Logger, EMailField);
-            done();
-        });
-    });
-    it('PasswordField.Structure', function (done) {
-        require([
-            'forms/fields/password-field'], function (
-                PasswordField) {
-            expectTypedField(PasswordField);
-            done();
-        });
-    });
-    it('PasswordField.Markup', function (done) {
-        require([
-            'logger',
-            'forms/fields/password-field'], function (
-                Logger,
-                PasswordField) {
-            expectTypedFieldMarkup(Logger, PasswordField);
-            done();
-        });
-    });
-    it('PhoneField.Structure', function (done) {
-        require([
-            'forms/fields/phone-field'], function (
-                PhoneField) {
-            expectTypedField(PhoneField);
-            done();
-        });
-    });
-    it('PhoneField.Markup', function (done) {
-        require([
-            'logger',
-            'forms/fields/phone-field'], function (
-                Logger,
-                PhoneField) {
-            expectTypedFieldMarkup(Logger, PhoneField);
+            var instance = new DateTimeField();
             done();
         });
     });
@@ -991,6 +1002,23 @@ describe('Widgets Api', function () {
             'forms/fields/time-field'], function (
                 TimeField) {
             expectTypedField(TimeField);
+            var instance = new TimeField();
+            expect(instance.text).toEqual('');
+            expect(instance.value).toBe(null);
+
+            instance.text = '13:45';
+            expect(typeof instance.value).toEqual('number');
+            expect(instance.value).toEqual(13 * 3600 * 1000 + 45 * 60 * 1000);
+
+            instance.text = '';
+            expect(instance.value).toBeNull();
+
+            instance.value = 13 * 3600 * 1000 + 45 * 60 * 1000;
+            expect(instance.text).toEqual('13:45:00.000');
+
+            instance.value = null;
+            expect(instance.text).toEqual('');
+
             done();
         });
     });
@@ -1004,101 +1032,24 @@ describe('Widgets Api', function () {
             done();
         });
     });
-    it('UrlField.Structure', function (done) {
-        require([
-            'forms/fields/url-field'], function (
-                UrlField) {
-            expectTypedField(UrlField);
-            done();
-        });
-    });
-    it('UrlField.Markup', function (done) {
-        require([
-            'logger',
-            'forms/fields/url-field'], function (
-                Logger,
-                UrlField) {
-            expectTypedFieldMarkup(Logger, UrlField);
-            done();
-        });
-    });
-    it('RangeField.Structure', function (done) {
-        require([
-            'forms/fields/range-field'], function (
-                RangeField) {
-            expectTypedField(RangeField);
-            done();
-        });
-    });
-    it('RangeField.Markup', function (done) {
-        require([
-            'logger',
-            'forms/fields/range-field'], function (
-                Logger,
-                RangeField) {
-            expectTypedFieldMarkup(Logger, RangeField);
-            done();
-        });
-    });
-    it('ProgressField.Structure', function (done) {
-        require([
-            'forms/fields/progress-field'], function (
-                ProgressField) {
-            expectTypedField(ProgressField);
-            done();
-        });
-    });
-    it('ProgressField.Markup', function (done) {
-        require([
-            'logger',
-            'forms/fields/progress-field'], function (
-                Logger,
-                ProgressField) {
-            expectTypedFieldMarkup(Logger, ProgressField);
-            done();
-        });
-    });
-    it('MeterField.Structure', function (done) {
-        require([
-            'forms/fields/meter-field'], function (
-                MeterField) {
-            expectTypedField(MeterField);
-            done();
-        });
-    });
-    it('MeterField.Markup', function (done) {
-        require([
-            'logger',
-            'forms/fields/meter-field'], function (
-                Logger,
-                MeterField) {
-            expectTypedFieldMarkup(Logger, MeterField);
-            done();
-        });
-    });
-    it('NumberField.Structure', function (done) {
-        require([
-            'forms/fields/number-field'], function (
-                NumberField) {
-            expectTypedField(NumberField);
-            done();
-        });
-    });
-    it('NumberField.Markup', function (done) {
-        require([
-            'logger',
-            'forms/fields/number-field'], function (
-                Logger,
-                NumberField) {
-            expectTypedFieldMarkup(Logger, NumberField);
-            done();
-        });
-    });
     it('TextField.Structure', function (done) {
         require([
             'forms/fields/text-field'], function (
                 TextField) {
             expectTypedField(TextField);
+            var instance = new TextField();
+            expect(instance.text).toEqual('');
+            expect(instance.value).toBeNull();
+
+            instance.text = 'sample text';
+            expect(instance.value).toEqual('sample text');
+            instance.text = '';
+            expect(instance.value).toBeNull();
+            instance.value = 'another sample text';
+            expect(instance.text).toEqual('another sample text');
+            instance.value = null;
+            expect(instance.text).toEqual('');
+
             done();
         });
     });
@@ -1117,6 +1068,19 @@ describe('Widgets Api', function () {
             'forms/fields/text-area'], function (
                 TextArea) {
             expectTypedField(TextArea);
+            var instance = new TextArea();
+            expect(instance.text).toEqual('');
+            expect(instance.value).toBeNull();
+
+            instance.text = 'sample text';
+            expect(instance.value).toEqual('sample text');
+            instance.text = '';
+            expect(instance.value).toBeNull();
+            instance.value = 'another sample text';
+            expect(instance.text).toEqual('another sample text');
+            instance.value = null;
+            expect(instance.text).toEqual('');
+
             done();
         });
     });
@@ -1127,6 +1091,320 @@ describe('Widgets Api', function () {
                 Logger,
                 TextArea) {
             expectTypedFieldMarkup(Logger, TextArea);
+            done();
+        });
+    });
+    it('EMailField.Structure', function (done) {
+        require([
+            'forms/fields/email-field'], function (
+                EMailField) {
+            expectTypedField(EMailField);
+            var instance = new EMailField();
+            expect(instance.text).toEqual('');
+            expect(instance.value).toBeNull();
+
+            instance.text = 'fd@mk.com';
+            expect(instance.value).toEqual('fd@mk.com');
+            instance.text = '';
+            expect(instance.value).toBeNull();
+            instance.value = 'dd@rf.nl';
+            expect(instance.text).toEqual('dd@rf.nl');
+            instance.value = null;
+            expect(instance.text).toEqual('');
+
+            done();
+        });
+    });
+    it('EMailField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/email-field'], function (
+                Logger,
+                EMailField) {
+            expectTypedFieldMarkup(Logger, EMailField);
+            done();
+        });
+    });
+    it('PasswordField.Structure', function (done) {
+        require([
+            'forms/fields/password-field'], function (
+                PasswordField) {
+            expectTypedField(PasswordField);
+            var instance = new PasswordField();
+            expect(instance.text).toEqual('');
+            expect(instance.value).toBeNull();
+
+            instance.text = 'fd-mk.com';
+            expect(instance.value).toEqual('fd-mk.com');
+            instance.text = '';
+            expect(instance.value).toBeNull();
+            instance.value = 'dd-rf.nl';
+            expect(instance.text).toEqual('dd-rf.nl');
+            instance.value = null;
+            expect(instance.text).toEqual('');
+
+            done();
+        });
+    });
+    it('PasswordField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/password-field'], function (
+                Logger,
+                PasswordField) {
+            expectTypedFieldMarkup(Logger, PasswordField);
+            done();
+        });
+    });
+    it('PhoneField.Structure', function (done) {
+        require([
+            'forms/fields/phone-field'], function (
+                PhoneField) {
+            expectTypedField(PhoneField);
+            var instance = new PhoneField();
+            expect(instance.text).toEqual('');
+            expect(instance.value).toBeNull();
+
+            instance.text = '+5 907 143 26 78';
+            expect(instance.value).toEqual('+5 907 143 26 78');
+            instance.text = '';
+            expect(instance.value).toBeNull();
+            instance.value = '+5 907 143 26 55';
+            expect(instance.text).toEqual('+5 907 143 26 55');
+            instance.value = null;
+            expect(instance.text).toEqual('');
+
+            done();
+        });
+    });
+    it('PhoneField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/phone-field'], function (
+                Logger,
+                PhoneField) {
+            expectTypedFieldMarkup(Logger, PhoneField);
+            done();
+        });
+    });
+    it('UrlField.Structure', function (done) {
+        require([
+            'forms/fields/url-field'], function (
+                UrlField) {
+            expectTypedField(UrlField);
+            var instance = new UrlField();
+            expect(instance.text).toEqual('');
+            expect(instance.value).toBeNull();
+
+            instance.text = 'udp://host.nl/path';
+            expect(instance.value).toEqual('udp://host.nl/path');
+            instance.text = '';
+            expect(instance.value).toBeNull();
+            instance.value = 'udp://host.nl/path1';
+            expect(instance.text).toEqual('udp://host.nl/path1');
+            instance.value = null;
+            expect(instance.text).toEqual('');
+
+            done();
+        });
+    });
+    it('UrlField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/url-field'], function (
+                Logger,
+                UrlField) {
+            expectTypedFieldMarkup(Logger, UrlField);
+            done();
+        });
+    });
+    it('NumberField.Structure', function (done) {
+        require([
+            'forms/fields/number-field'], function (
+                NumberField) {
+            expectTypedField(NumberField);
+            var instance = new NumberField();
+            expect(instance.text).toEqual('');
+            expect(instance.value).toBeNull();
+
+            instance.text = '09';
+            expect(instance.value).toEqual(9);
+            instance.text = '';
+            expect(instance.value).toBeNull();
+            instance.value = 67;
+            expect(instance.text).toEqual('67');
+            instance.step = 100;
+            expect(instance.step).toEqual(100);
+            instance.minimum = -100;
+            expect(instance.minimum).toEqual(-100);
+            instance.maximum = 100;
+            expect(instance.maximum).toEqual(100);
+            instance.value = -200;
+            expect(instance.value).toEqual(-200); // value is assignable regardless of constraints
+            instance.text = 'hh';
+            expect(instance.text).toEqual('-200');
+            expect(instance.value).toEqual(-200);
+            instance.value = NaN;
+            expect(instance.text).toEqual('-200');
+            expect(instance.value).toEqual(-200);
+            instance.value = null;
+            expect(instance.text).toEqual('');
+            if (instance.error)
+                instance.error = null;
+
+            done();
+        });
+    });
+    it('NumberField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/number-field'], function (
+                Logger,
+                NumberField) {
+            expectTypedFieldMarkup(Logger, NumberField);
+            done();
+        });
+    });
+    it('RangeField.Structure', function (done) {
+        require([
+            'forms/fields/range-field'], function (
+                RangeField) {
+            expectTypedField(RangeField);
+            var instance = new RangeField();
+            expect(instance.text).toEqual('');
+            expect(instance.value).toBeNull();
+
+            instance.text = '09';
+            expect(instance.value).toEqual(9);
+            instance.text = '';
+            expect(instance.value).toBeNull();
+            instance.value = 67;
+            expect(instance.text).toEqual('67');
+            instance.step = 100;
+            expect(instance.step).toEqual(100);
+            instance.minimum = -100;
+            expect(instance.minimum).toEqual(-100);
+            instance.maximum = 100;
+            expect(instance.maximum).toEqual(100);
+            instance.value = -200;
+            expect(instance.value).toEqual(-200); // value is assignable regardless of constraints
+            instance.text = 'hh';
+            expect(instance.text).toEqual('-200');
+            expect(instance.value).toEqual(-200);
+            instance.value = NaN;
+            expect(instance.text).toEqual('-200');
+            expect(instance.value).toEqual(-200);
+            instance.value = null;
+            expect(instance.text).toEqual('');
+            if (instance.error)
+                instance.error = null;
+
+            done();
+        });
+    });
+    it('RangeField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/range-field'], function (
+                Logger,
+                RangeField) {
+            expectTypedFieldMarkup(Logger, RangeField);
+            done();
+        });
+    });
+    it('ProgressField.Structure', function (done) {
+        require([
+            'forms/fields/progress-field'], function (
+                ProgressField) {
+            expectTypedField(ProgressField);
+            var instance = new ProgressField();
+            expect(instance.text).toEqual('');
+            expect(instance.value).toBeNull();
+
+            instance.text = '09';
+            expect(instance.value).toEqual(9);
+            instance.text = '';
+            expect(instance.value).toBeNull();
+            instance.text = '9.56';
+            expect(instance.value).toEqual(9.56);
+            instance.text = '';
+            expect(instance.value).toBeNull();
+
+            instance.value = 78;
+            expect(instance.text).toEqual('78');
+            instance.value = null;
+            expect(instance.text).toEqual('');
+            instance.value = 56;
+            expect(instance.text).toEqual('56');
+            instance.text = 'hh';
+            expect(instance.text).toEqual('56');
+            expect(instance.value).toEqual(56);
+            instance.value = NaN;
+            expect(instance.text).toEqual('56');
+            expect(instance.value).toEqual(56);
+            instance.value = null;
+            expect(instance.text).toEqual('');
+            if (instance.error)
+                instance.error = null;
+
+            done();
+        });
+    });
+    it('ProgressField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/progress-field'], function (
+                Logger,
+                ProgressField) {
+            expectTypedFieldMarkup(Logger, ProgressField);
+            done();
+        });
+    });
+    it('MeterField.Structure', function (done) {
+        require([
+            'forms/fields/meter-field'], function (
+                MeterField) {
+            expectTypedField(MeterField);
+            var instance = new MeterField();
+            expect(instance.text).toEqual('');
+            expect(instance.value).toBeNull();
+
+            instance.text = '09';
+            expect(instance.value).toEqual(9);
+            instance.text = '';
+            expect(instance.value).toBeNull();
+            instance.text = '9.56';
+            expect(instance.value).toEqual(9.56);
+            instance.text = '';
+            expect(instance.value).toBeNull();
+
+            instance.value = 78;
+            expect(instance.text).toEqual('78');
+            instance.value = null;
+            expect(instance.text).toEqual('');
+            instance.value = 56;
+            expect(instance.text).toEqual('56');
+            instance.text = 'hh';
+            expect(instance.text).toEqual('56');
+            expect(instance.value).toEqual(56);
+            instance.value = NaN;
+            expect(instance.text).toEqual('56');
+            expect(instance.value).toEqual(56);
+            instance.value = null;
+            expect(instance.text).toEqual('');
+            if (instance.error)
+                instance.error = null;
+
+            done();
+        });
+    });
+    it('MeterField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/meter-field'], function (
+                Logger,
+                MeterField) {
+            expectTypedFieldMarkup(Logger, MeterField);
             done();
         });
     });

@@ -1,50 +1,21 @@
 define([
     '../../extend',
     '../i18n',
-    './box-field'], function (
+    './constraint-field'], function (
         extend,
         i18n,
-        BoxField) {
+        ConstraintField) {
     function NumberField(box, shell) {
         if (!box) {
             box = document.createElement('input');
             box.type = 'number';
         }
-        if(!shell){
+        if (!shell) {
             shell = box;
         }
-        BoxField.call(this, box, shell);
+        ConstraintField.call(this, box, shell);
         var self = this;
         var value = null;
-
-        Object.defineProperty(this, 'minimum', {
-            get: function () {
-                var boxMin = parseFloat(box.min);
-                return isNaN(boxMin) ? null : boxMin;
-            },
-            set: function (aValue) {
-                box.min = aValue;
-            }
-        });
-        Object.defineProperty(this, 'maximum', {
-            get: function () {
-                var boxMax = parseFloat(box.max);
-                return isNaN(boxMax) ? null : boxMax;
-            },
-            set: function (aValue) {
-                box.max = aValue;
-            }
-        });
-        Object.defineProperty(this, 'step', {
-            get: function () {
-                var boxStep = parseFloat(box.step);
-                return isNaN(boxStep) ? null : boxStep;
-            },
-            set: function (aValue) {
-                box.step = aValue;
-            }
-        });
-
 
         function textChanged() {
             var oldValue = value;
@@ -75,6 +46,8 @@ define([
                 return box.value;
             },
             set: function (aValue) {
+                if (aValue && isNaN(parseFloat(aValue)))
+                    return;
                 if (box.value !== aValue) {
                     box.value = aValue;
                     textChanged();
@@ -87,15 +60,17 @@ define([
                 return value;
             },
             set: function (aValue) {
-                if (value !== aValue) {
-                    var oldValue = value;
-                    value = aValue;
-                    box.value = value !== null ? value + '' : '';
-                    self.fireValueChanged(oldValue);
+                if (!isNaN(aValue)) {
+                    if (value !== aValue) {
+                        var oldValue = value;
+                        value = aValue;
+                        box.value = value !== null ? value + '' : '';
+                        self.fireValueChanged(oldValue);
+                    }
                 }
             }
         });
     }
-    extend(NumberField, BoxField);
+    extend(NumberField, ConstraintField);
     return NumberField;
 });

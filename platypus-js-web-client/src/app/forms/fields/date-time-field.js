@@ -8,6 +8,8 @@ define([
     function DateTimeField(shell) {
         var box = document.createElement('input');
         box.type = 'datetime-local';
+        if(!shell)
+            shell = box;
         
         BoxField.call(this, box, shell);
         var self = this;

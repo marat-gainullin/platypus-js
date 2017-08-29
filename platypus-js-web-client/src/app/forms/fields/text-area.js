@@ -5,6 +5,8 @@ define([
         TextField) {
     function TextArea(shell) {
         var box = document.createElement('textarea');
+        if(!shell)
+            shell = box;
         
         TextField.call(this, '', box, shell);
         var self = this;

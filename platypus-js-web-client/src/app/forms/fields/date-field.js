@@ -8,6 +8,8 @@ define([
     function DateField(shell) {
         var box = document.createElement('input');
         box.type = 'date';
+        if(!shell)
+            shell = box;
         
         BoxField.call(this, box, shell);
         var self = this;
@@ -21,7 +23,6 @@ define([
             var json = date.toJSON();
             return json.substring(0, json.length - 'T00:00:00.000Z'.length);
         }
-
 
         function textChanged() {
             var oldValue = value;

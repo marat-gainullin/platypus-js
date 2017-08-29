@@ -1,11 +1,13 @@
 define([
     '../../extend',
-    './number-field'], function (
+    './progress-field'], function (
         extend,
-        NumberField) {
+        ProgressField) {
     function MeterField(shell) {
         var box = document.createElement('meter');
-        NumberField.call(this, box, shell);
+        if(!shell)
+            shell = box;
+        ProgressField.call(this, box, shell);
         
         var self = this;
 
@@ -37,6 +39,6 @@ define([
             }
         });
     }
-    extend(MeterField, NumberField);
+    extend(MeterField, ProgressField);
     return MeterField;
 });

@@ -21,7 +21,7 @@ define([
 
         function textChanged() {
             var oldValue = value;
-            value = text === '' ? null : text;
+            value = box.value === '' ? null : box.value;
             self.fireValueChanged(oldValue);
         }
 
@@ -51,6 +51,7 @@ define([
             set: function (aValue) {
                 var oldValue = value;
                 value = aValue;
+                box.value = aValue;
                 self.fireValueChanged(oldValue);
             }
         });
