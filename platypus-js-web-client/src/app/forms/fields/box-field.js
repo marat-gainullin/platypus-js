@@ -25,8 +25,8 @@ define([
         /**
          * The text to be shown when component's value is absent.
          */
-        this.emptyText = '';
         Object.defineProperty(this, "emptyText", {
+            configurable: true,
             get: function () {
                 return box.placeholder;
             },
@@ -98,6 +98,14 @@ define([
         Object.defineProperty(this, 'fireValueChanged', {
             get: function () {
                 return fireValueChanged;
+            }
+        });
+        Object.defineProperty(this, 'tabIndex', {
+            get: function () {
+                return box.tabIndex;
+            },
+            set: function(aValue){
+                box.tabIndex = aValue;
             }
         });
 

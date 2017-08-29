@@ -54,7 +54,7 @@ public class RichTextArea extends ValueWidget implements HasScroll, HorizontalSc
     protected Element textContainer = Document.get().createDivElement();
     protected Flow toolbar = new Flow();
 
-    // TODO: publidh API to manipulate controls from client code
+    // TODO: publish API to manipulate controls from client code
     protected ImageButton btnBold = new ImageButton();
     protected ImageButton btnItalic = new ImageButton();
     protected ImageButton btnUnderline = new ImageButton();
