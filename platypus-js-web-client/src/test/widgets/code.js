@@ -1332,18 +1332,18 @@ describe('Widgets Api', function () {
             done();
         });
     });
-    it('RangeField.Structure', function (done) {
+    it('Slider.Structure', function (done) {
         require([
             'common-utils/font',
             'common-utils/color',
             'common-utils/cursor',
-            'forms/fields/range-field'], function (
+            'forms/fields/slider'], function (
                 Font,
                 Color,
                 Cursor,
-                RangeField) {
-            expectTypedField(RangeField, Font, Color, Cursor);
-            var instance = new RangeField();
+                Slider) {
+            expectTypedField(Slider, Font, Color, Cursor);
+            var instance = new Slider();
             expect(instance.text).toEqual('');
             expect(instance.value).toBeNull();
 
@@ -1375,13 +1375,13 @@ describe('Widgets Api', function () {
             done();
         });
     });
-    it('RangeField.Markup', function (done) {
+    it('Slider.Markup', function (done) {
         require([
             'logger',
-            'forms/fields/range-field'], function (
+            'forms/fields/slider'], function (
                 Logger,
-                RangeField) {
-            expectTypedFieldMarkup(Logger, RangeField);
+                Slider) {
+            expectTypedFieldMarkup(Logger, Slider);
             done();
         });
     });
