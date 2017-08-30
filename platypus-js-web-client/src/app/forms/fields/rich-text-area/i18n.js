@@ -3,10 +3,10 @@ define(function () {
         'rich.text.bold': 'Жирный',
         'rich.text.italic': 'Курсив',
         'rich.text.underline': 'Подчеркнутый',
-        'rich.text.strike.trough': 'Зачеркнутый',
+        'rich.text.strike.through': 'Зачеркнутый',
         
-        'rich.text.sub': 'Нижний индекс',
-        'rich.text.sup': 'Верхний индекс',
+        'rich.text.subscript': 'Нижний индекс',
+        'rich.text.superscript': 'Верхний индекс',
         
         'rich.text.align.left': 'По левому краю',
         'rich.text.align.center': 'По центру',
@@ -23,7 +23,7 @@ define(function () {
         'rich.text.indent.right': 'Увеличить отступ',
         'rich.text.indent.left': 'Уменьшить отступ',
 
-        'rich.text.horizontal.rule': '',
+        'rich.text.horizontal.rule': 'Горизонтальная линия',
 
         'rich.text.ordered.list': 'Нумерованный список',
         'rich.text.unordered.list': 'Маркированный список',
@@ -43,12 +43,12 @@ define(function () {
         
         'rich.text.font.name': 'Шрифт',
         'rich.text.font.size': 'Размер шрифта.',
-        'rich.text.font.size.xxsmall': 'Очень мелкий',
-        'rich.text.font.size.xsmall': 'Мелкий',
-        'rich.text.font.size.small': 'Уменьшенный',
-        'rich.text.font.size.medium': 'Обычный',
-        'rich.text.font.size.large': 'Увеличенный',
-        'rich.text.font.size.xlarge': 'Крупный',
-        'rich.text.font.size.xxlarge': 'Самый крупный'
+        'rich.text.font.size.1': 'Мелкий',
+        'rich.text.font.size.2': 'Уменьшенный',
+        'rich.text.font.size.3': 'Обычный',
+        'rich.text.font.size.4': 'Увеличенный',
+        'rich.text.font.size.5': 'Крупнее',
+        'rich.text.font.size.6': 'Крупный',
+        'rich.text.font.size.7': 'Самый крупный'
     };
 });        

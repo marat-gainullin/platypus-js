@@ -98,12 +98,29 @@ define([
     var FontStyle = Font.Style;
     var ScrollBarPolicy = {ALLWAYS: 32, NEVER: 31, AUTO: 30};
 
-    function selectFile(aCallback, aFileFilter) {
-        /*@com.eas.ui.JsUi::*/jsSelectFile(aCallback, aFileFilter);
+    function selectFile(onSelection, fileFilter) {
+        var fileField = document.createElement('input');
+        fileField.type = 'file';
+        if(fileFilter)
+            fileField.accept = fileFilter;
+        on(fileField, 'change', function () {
+            if(fileField.files.length === 1)
+                onSelection(fileField.files[0]);
+            else
+                onSelection(fileField.files);
+        });
+        fileField.click();
     }
 
-    function selectColor(aCallback, aOldValue) {
-        /*@com.eas.ui.JsUi::*/jsSelectColor(aOldValue ? aOldValue + '' : '', aCallback);
+    function selectColor(onSelection, oldValue) {
+        var colorField = document.createElement('input');
+        colorField.type = 'color';
+        if (oldValue)
+            colorField.value = oldValue + '';
+        on(colorField, 'change', function () {
+            onSelection(new Color(colorField.value));
+        });
+        colorField.click();
     }
 
     function Icon() {

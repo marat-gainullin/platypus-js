@@ -1,33 +1,80 @@
 define([
     '../../extend',
-    './reach-text-i18n',
-    '../ui',
-    '../widget'], function (
+    './rich-text-area/i18n',
+    '../../ui',
+    '../../invoke',
+    '../widget',
+    '../events/value-change-event'], function (
         extend,
         i18n,
         Ui,
-        Widget) {
+        Invoke,
+        Widget,
+        ValueChangeEvent) {
     function RichTextArea(shell) {
         var box = document.createElement('div');
         if (!shell)
             shell = box;
 
+        box.classList.add('p-rich-text-area');
+        
         Widget.call(this, box, shell);
         var self = this;
+        var wasValue = null;
+
+        var valueChangeHandlers = new Set();
+        function addValueChangeHandler(handler) {
+            valueChangeHandlers.add(handler);
+            return {
+                removeHandler: function () {
+                    valueChangeHandlers.delete(handler);
+                }
+            };
+        }
+
+        Object.defineProperty(this, 'addValueChangeHandler', {
+            get: function () {
+                return addValueChangeHandler;
+            }
+        });
+
+        function fireValueChanged(oldValue) {
+            wasValue = self.value;
+            var event = new ValueChangeEvent(self, oldValue, self.value);
+            valueChangeHandlers.forEach(function (h) {
+                Invoke.later(function () {
+                    h(event);
+                });
+            });
+        }
+        Object.defineProperty(this, 'fireValueChanged', {
+            get: function () {
+                return fireValueChanged;
+            }
+        });
 
         var tools = document.createElement('div');
+        tools.classList.add('p-rich-text-tools');
         var content = document.createElement('div');
+        tools.classList.add('p-rich-text-content');
         content.setAttribute("contenteditable", "true");
         box.appendChild(tools);
         box.appendChild(content);
 
         function on(target, event, handler) {
             Ui.on(target, event, function (e) {
-                var oldValue = self.value;
                 handler(e);
-                self.fireValueChnaged(oldValue);
+                self.fireActionPerformed();
+                self.fireValueChanged(wasValue);
             });
         }
+
+        Ui.on(content, 'blur', function (e) {
+            if (wasValue !== self.value) {
+                self.fireActionPerformed();
+                self.fireValueChanged(wasValue);
+            }
+        });
 
         var btnBold = document.createElement('button');
         on(btnBold, 'click', function () {
@@ -50,27 +97,27 @@ define([
         btnUnderline.className = 'p-rich-text-tool p-rich-text-underline';
         btnUnderline.title = i18n['rich.text.underline'];
         tools.appendChild(btnItalic);
-        var btnStrikeTrough = document.createElement('button');
-        on(btnStrikeTrough, 'click', function () {
+        var btnStrikeThrough = document.createElement('button');
+        on(btnStrikeThrough, 'click', function () {
             document.execCommand('strikeThrough', null, null);
         });
-        btnStrikeTrough.className = 'p-rich-text-tool p-rich-text-strike-trough';
-        btnStrikeTrough.title = i18n['rich.text.strike.trough'];
-        tools.appendChild(btnStrikeTrough);
+        btnStrikeThrough.className = 'p-rich-text-tool p-rich-text-strike-through';
+        btnStrikeThrough.title = i18n['rich.text.strike.through'];
+        tools.appendChild(btnStrikeThrough);
 
         var btnSub = document.createElement('button');
         on(btnSub, 'click', function () {
             document.execCommand('subscript', null, null);
         });
-        btnSub.className = 'p-rich-text-tool p-rich-text-sub';
-        btnSub.title = i18n['rich.text.sub'];
+        btnSub.className = 'p-rich-text-tool p-rich-text-subscript';
+        btnSub.title = i18n['rich.text.subscript'];
         tools.appendChild(btnSub);
         var btnSup = document.createElement('button');
         on(btnSup, 'click', function () {
             document.execCommand('superscript', null, null);
         });
-        btnSup.className = 'p-rich-text-tool p-rich-text-sup';
-        btnSup.title = i18n['rich.text.sup'];
+        btnSup.className = 'p-rich-text-tool p-rich-text-superscript';
+        btnSup.title = i18n['rich.text.superscript'];
         tools.appendChild(btnSup);
 
         var tglAlignLeft = document.createElement('button');
@@ -181,9 +228,9 @@ define([
         Ui.on(btnImage, 'click', function () {
             var url = prompt(i18n['rich.text.insert.image.prompt'], "http://");
             if (url) {
-                var oldValue = self.value;
                 document.execCommand('insertImage', null, url);
-                self.fireValueChnaged(oldValue);
+                self.fireActionPerformed();
+                self.fireValueChanged(wasValue);
             }
         });
         btnImage.className = 'p-rich-text-tool p-rich-text-insert-image';
@@ -193,9 +240,9 @@ define([
         Ui.on(btnUploadImage, 'click', function () {
             Ui.selectFile(function (selectedFile) {
                 upload(selectedFile, function (uploaded) {
-                    var oldValue = self.value;
                     document.execCommand('insertImage', null, uploaded[0]);
-                    self.fireValueChnaged(oldValue);
+                    self.fireActionPerformed();
+                    self.fireValueChanged(wasValue);
                 });
             }, null);
         });
@@ -207,9 +254,9 @@ define([
         Ui.on(btnCreateLink, 'click', function () {
             var url = prompt(i18n['rich.text.create.link.prompt'], "http://");
             if (url) {
-                var oldValue = self.value;
                 document.execCommand('createLink', null, url);
-                self.fireValueChnaged(oldValue);
+                self.fireActionPerformed();
+                self.fireValueChanged(wasValue);
             }
         });
         btnCreateLink.className = 'p-rich-text-tool p-rich-text-create-link';
@@ -234,9 +281,9 @@ define([
         var btnBackground = document.createElement('button');
         Ui.on(btnBackground, 'click', function () {
             Ui.selectColor(function (selectedColor) {
-                var oldValue = self.value;
                 document.execCommand('backColor', null, selectedColor);
-                self.fireValueChnaged(oldValue);
+                self.fireActionPerformed();
+                self.fireValueChanged(wasValue);
             }, null);
         });
         btnBackground.className = 'p-rich-text-tool p-rich-text-background';
@@ -245,9 +292,9 @@ define([
         var btnForeground = document.createElement('button');
         Ui.on(btnForeground, 'click', function () {
             Ui.selectColor(function (selectedColor) {
-                var oldValue = self.value;
                 document.execCommand('foreColor', null, selectedColor);
-                self.fireValueChnaged(oldValue);
+                self.fireActionPerformed();
+                self.fireValueChanged(wasValue);
             }, null);
         });
         btnForeground.className = 'p-rich-text-tool p-rich-text-foreground';
@@ -272,8 +319,8 @@ define([
             nameItem.innerText = nameItem.value = fontName;
             fontNames.appendChild(nameItem);
         });
-        fontNames.selectedIndex = 0;
         tools.appendChild(fontNames);
+        fontNames.selectedIndex = 0;
 
         var fontSizes = document.createElement('select');
         on(fontSizes, 'change', function () {
@@ -282,13 +329,13 @@ define([
         fontSizes.className = 'p-rich-text-tool p-rich-text-font-size';
         fontSizes.title = i18n['rich.text.font.size'];
         [
-            'xxsmall',
-            'xsmall',
-            'small',
-            'medium',
-            'large',
-            'xlarge',
-            'xxlarge'
+            '1',
+            '2',
+            '3',
+            '4',
+            '5',
+            '6',
+            '7'
         ].forEach(function (fontSize) {
             var sizeItem = document.createElement('option');
             sizeItem.value = fontSize;
@@ -296,6 +343,7 @@ define([
             fontSizes.appendChild(sizeItem);
         });
         tools.appendChild(fontSizes);
+        fontSizes.selectedIndex = 2;
 
         Object.defineProperty(this, 'text', {
             get: function () {
@@ -304,7 +352,7 @@ define([
             set: function (aValue) {
                 var oldValue = self.value;
                 content.innerText = aValue;
-                self.fireValueChnaged(oldValue);
+                self.fireValueChanged(oldValue);
             }
         });
         Object.defineProperty(this, 'value', {
@@ -315,7 +363,7 @@ define([
             set: function (aValue) {
                 var oldValue = self.value;
                 content.innerHTML = aValue;
-                self.fireValueChnaged(oldValue);
+                self.fireValueChanged(oldValue);
             }
         });
     }

@@ -19,7 +19,7 @@ define([
             shell = box;
         }
 
-        if(shell !== box)
+        if (shell !== box)
             shell.appendChild(box);
 
         var self = this;
@@ -174,26 +174,27 @@ define([
             }
         });
 
-        var errorStub = null;
+        var errorText = null;
         Object.defineProperty(this, 'error', {
             get: function () {
-                if (box.setCustomValidity)
-                    return box.validationMessage !== '' ? box.validationMessage : null;
+                if (errorText)
+                    return errorText;
+                else if (box.validationMessage)
+                    return box.validationMessage;
                 else
-                    return errorStub;
+                    return null;
             },
             set: function (aValue) {
                 if (self.error !== aValue) {
+                    errorText = aValue;
                     if (box.setCustomValidity)
                         box.setCustomValidity(aValue !== null ? aValue : '');
-                    else
-                        errorStub = aValue;
-                    if(aValue){
-                        if(self.showError)
+                    if (aValue) {
+                        if (self.showError)
                             self.showError();
                     } else {
-                        if(self.hideError)
-                            self.hideError();                        
+                        if (self.hideError)
+                            self.hideError();
                     }
                 }
             }

@@ -1,6 +1,10 @@
 define(function () {
     function date() {
-        return JSON.stringify(new Date());
+        // We want JSON format on the one hand and on another hand, we want local time
+        var moment = new Date();
+        var timeZone = -moment.getTimezoneOffset() * 60000;
+        var local = (new Date(moment.valueOf() + timeZone)).toJSON();
+        return local.substring(0, local.length - 1);
     }
 
     function messagePrinted(aMessage) {
@@ -35,7 +39,7 @@ define(function () {
     });
     Object.defineProperty(module, "info", {
         value: function (aMessage) {
-            if (console){
+            if (console) {
                 console.log(date() + " INFO " + aMessage);
                 messagePrinted(aMessage);
             }
@@ -43,7 +47,7 @@ define(function () {
     });
     Object.defineProperty(module, "fine", {
         value: function (aMessage) {
-            if (console){
+            if (console) {
                 console.log(date() + " FINE " + aMessage);
                 messagePrinted(aMessage);
             }
@@ -51,7 +55,7 @@ define(function () {
     });
     Object.defineProperty(module, "finer", {
         value: function (aMessage) {
-            if (console){
+            if (console) {
                 console.log(date() + " FINER " + aMessage);
                 messagePrinted(aMessage);
             }
@@ -59,7 +63,7 @@ define(function () {
     });
     Object.defineProperty(module, "finest", {
         value: function (aMessage) {
-            if (console){
+            if (console) {
                 console.log(date() + " FINEST " + aMessage);
                 messagePrinted(aMessage);
             }

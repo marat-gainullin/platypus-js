@@ -29,18 +29,12 @@ define([
 
         function itemChanged() {
             var oldValue = value;
-            var selectedItem;
             if (box.selectedIndex === -1) {
                 value = null;
-                selectedItem = null;
             } else {
-                selectedItem = itemAt(box.selectedIndex);
-                if (selectedItem)
-                    value = selectedItem['js-value'];
-                else
-                    value = null;
+                value = valueAt(box.selectedIndex);
             }
-            fireSelected(selectedItem);
+            fireSelected(value);
             self.fireValueChanged(oldValue);
         }
         
@@ -98,14 +92,14 @@ define([
             set: function (aValue) {
                 if (value !== aValue) {
                     if (aValue !== null) {
-                        var index = indexOf(aValue);
+                        var index = indexOfValue(aValue);
                         if (index !== -1) {
-                            box.selecteIndex = index;
+                            box.selectedIndex = index;
                         } else {
-                            box.selecteIndex = indexOf(null);
+                            box.selectedIndex = indexOfValue(null);
                         }
                     } else {
-                        box.selecteIndex = indexOf(null);
+                        box.selectedIndex = indexOfValue(null);
                     }
                     itemChanged();
                 }
@@ -161,7 +155,7 @@ define([
 
         function addValue(aLabel, aValue) {
             if (aValue !== null) {
-                var index = indexOf(aValue);
+                var index = indexOfValue(aValue);
                 if (index !== -1) {
                     var item = itemAt(index);
                     item.innerText = aLabel;
@@ -173,19 +167,56 @@ define([
 
         Object.defineProperty(this, 'addValue', {
             get: function () {
-                return;
+                return addValue;
+            }
+        });
+
+        function insertValue(insertAt, aLabel, aValue) {
+            if (aValue !== null) {
+                var index = indexOfValue(aValue);
+                if (index === -1) {
+                    addItem(insertAt, aLabel, aValue);
+                }
+            }
+        }
+
+        Object.defineProperty(this, 'insertValue', {
+            get: function () {
+                return insertValue;
+            }
+        });
+
+        function valueAt(index){
+            var item = itemAt(index);
+            return item ? item['js-value'] : null;
+        }
+
+        Object.defineProperty(this, 'valueAt', {
+            get: function () {
+                return valueAt;
+            }
+        });
+
+        function labelAt(index){
+            var item = itemAt(index);
+            return item ? item.innerText : null;
+        }
+
+        Object.defineProperty(this, 'labelAt', {
+            get: function () {
+                return labelAt;
             }
         });
 
         function removeValue(aValue) {
-            var index = indexOf(aValue);
+            var index = indexOfValue(aValue);
             var removed = removeItem(index);
             return removed ? true : false;
         }
 
         Object.defineProperty(this, 'removeValue', {
             get: function () {
-                return;
+                return removeValue;
             }
         });
 
@@ -205,7 +236,7 @@ define([
             if (aValue !== null && index >= 0 && index <= box.options.length) {
                 if (index === 0)
                     Logger.warning(i18n['null.item.index']);
-                var item = document.get().createElement('option');
+                var item = document.createElement('option');
                 item.innerText = aLabel;
                 item['js-value'] = aValue;
                 var wasUnselected = box.selectedIndex === -1;
@@ -229,14 +260,20 @@ define([
             }
         }
 
-        function indexOf(aValue) {
+        function indexOfValue(aValue) {
             for (var i = 0; i < box.options.length; i++) {
-                if (box.options[i]['js-value'] === aValue) {
+                if (valueAt(i) === aValue) {
                     return i;
                 }
             }
             return -1;
         }
+
+        Object.defineProperty(this, 'indexOfValue', {
+            get: function () {
+                return indexOfValue;
+            }
+        });
 
     }
     extend(DropDownField, BoxField);

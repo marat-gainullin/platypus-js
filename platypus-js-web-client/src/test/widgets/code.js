@@ -1,4 +1,5 @@
 /* global expect */
+/* global NaN */
 
 describe('Widgets Api', function () {
 
@@ -40,6 +41,7 @@ describe('Widgets Api', function () {
         expectValue(widget, 'foreground', new Color(12, 45, 78, 35));
         expect('error' in widget).toBeTruthy();
         expectValue(widget, 'error', 'sample validation message');
+        widget.error = null;
         expect('componentPopupMenu' in widget).toBeTruthy();
         expectValue(widget, 'componentPopupMenu', new widget.constructor());
         expect('toolTipText' in widget).toBeTruthy();
@@ -860,9 +862,10 @@ describe('Widgets Api', function () {
         });
     });
 
-    function expectTypedField(TypedField) {
+    function expectTypedField(TypedField, Font, Color, Cursor) {
         var instance = new TypedField();
         expect(instance.element.type).not.toEqual('');
+        expectWidget(instance, Font, Color, Cursor);
     }
 
     function expectTypedFieldMarkup(Logger, TypedField) {
@@ -882,11 +885,15 @@ describe('Widgets Api', function () {
 
     it('ColorField.Structure', function (done) {
         require([
+            'common-utils/font',
             'common-utils/color',
+            'common-utils/cursor',
             'forms/fields/color-field'], function (
+                Font,
                 Color,
+                Cursor,
                 ColorField) {
-            expectTypedField(ColorField);
+            expectTypedField(ColorField, Font, Color, Cursor);
             var instance = new ColorField();
             expect(instance.text).toEqual('#000000');
             instance.text = '#fcfcfc';
@@ -923,9 +930,15 @@ describe('Widgets Api', function () {
     });
     it('DateField.Structure', function (done) {
         require([
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
             'forms/fields/date-field'], function (
+                Font,
+                Color,
+                Cursor,
                 DateField) {
-            expectTypedField(DateField);
+            expectTypedField(DateField, Font, Color, Cursor);
             var instance = new DateField();
             expect(instance.text).toEqual('');
             expect(instance.value).toBe(null);
@@ -959,9 +972,15 @@ describe('Widgets Api', function () {
     });
     it('DateTimeField.Structure', function (done) {
         require([
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
             'forms/fields/date-time-field'], function (
+                Font,
+                Color,
+                Cursor,
                 DateTimeField) {
-            expectTypedField(DateTimeField);
+            expectTypedField(DateTimeField, Font, Color, Cursor);
 
             var instance = new DateTimeField();
             expect(instance.text).toEqual('');
@@ -999,9 +1018,15 @@ describe('Widgets Api', function () {
     });
     it('TimeField.Structure', function (done) {
         require([
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
             'forms/fields/time-field'], function (
+                Font,
+                Color,
+                Cursor,
                 TimeField) {
-            expectTypedField(TimeField);
+            expectTypedField(TimeField, Font, Color, Cursor);
             var instance = new TimeField();
             expect(instance.text).toEqual('');
             expect(instance.value).toBe(null);
@@ -1034,9 +1059,15 @@ describe('Widgets Api', function () {
     });
     it('TextField.Structure', function (done) {
         require([
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
             'forms/fields/text-field'], function (
+                Font,
+                Color,
+                Cursor,
                 TextField) {
-            expectTypedField(TextField);
+            expectTypedField(TextField, Font, Color, Cursor);
             var instance = new TextField();
             expect(instance.text).toEqual('');
             expect(instance.value).toBeNull();
@@ -1065,9 +1096,15 @@ describe('Widgets Api', function () {
     });
     it('TextArea.Structure', function (done) {
         require([
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
             'forms/fields/text-area'], function (
+                Font,
+                Color,
+                Cursor,
                 TextArea) {
-            expectTypedField(TextArea);
+            expectTypedField(TextArea, Font, Color, Cursor);
             var instance = new TextArea();
             expect(instance.text).toEqual('');
             expect(instance.value).toBeNull();
@@ -1096,9 +1133,15 @@ describe('Widgets Api', function () {
     });
     it('EMailField.Structure', function (done) {
         require([
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
             'forms/fields/email-field'], function (
+                Font,
+                Color,
+                Cursor,
                 EMailField) {
-            expectTypedField(EMailField);
+            expectTypedField(EMailField, Font, Color, Cursor);
             var instance = new EMailField();
             expect(instance.text).toEqual('');
             expect(instance.value).toBeNull();
@@ -1127,9 +1170,15 @@ describe('Widgets Api', function () {
     });
     it('PasswordField.Structure', function (done) {
         require([
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
             'forms/fields/password-field'], function (
+                Font,
+                Color,
+                Cursor,
                 PasswordField) {
-            expectTypedField(PasswordField);
+            expectTypedField(PasswordField, Font, Color, Cursor);
             var instance = new PasswordField();
             expect(instance.text).toEqual('');
             expect(instance.value).toBeNull();
@@ -1158,9 +1207,15 @@ describe('Widgets Api', function () {
     });
     it('PhoneField.Structure', function (done) {
         require([
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
             'forms/fields/phone-field'], function (
+                Font,
+                Color,
+                Cursor,
                 PhoneField) {
-            expectTypedField(PhoneField);
+            expectTypedField(PhoneField, Font, Color, Cursor);
             var instance = new PhoneField();
             expect(instance.text).toEqual('');
             expect(instance.value).toBeNull();
@@ -1189,9 +1244,15 @@ describe('Widgets Api', function () {
     });
     it('UrlField.Structure', function (done) {
         require([
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
             'forms/fields/url-field'], function (
+                Font,
+                Color,
+                Cursor,
                 UrlField) {
-            expectTypedField(UrlField);
+            expectTypedField(UrlField, Font, Color, Cursor);
             var instance = new UrlField();
             expect(instance.text).toEqual('');
             expect(instance.value).toBeNull();
@@ -1220,9 +1281,15 @@ describe('Widgets Api', function () {
     });
     it('NumberField.Structure', function (done) {
         require([
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
             'forms/fields/number-field'], function (
+                Font,
+                Color,
+                Cursor,
                 NumberField) {
-            expectTypedField(NumberField);
+            expectTypedField(NumberField, Font, Color, Cursor);
             var instance = new NumberField();
             expect(instance.text).toEqual('');
             expect(instance.value).toBeNull();
@@ -1267,9 +1334,15 @@ describe('Widgets Api', function () {
     });
     it('RangeField.Structure', function (done) {
         require([
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
             'forms/fields/range-field'], function (
+                Font,
+                Color,
+                Cursor,
                 RangeField) {
-            expectTypedField(RangeField);
+            expectTypedField(RangeField, Font, Color, Cursor);
             var instance = new RangeField();
             expect(instance.text).toEqual('');
             expect(instance.value).toBeNull();
@@ -1314,9 +1387,15 @@ describe('Widgets Api', function () {
     });
     it('ProgressField.Structure', function (done) {
         require([
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
             'forms/fields/progress-field'], function (
+                Font,
+                Color,
+                Cursor,
                 ProgressField) {
-            expectTypedField(ProgressField);
+            expectTypedField(ProgressField, Font, Color, Cursor);
             var instance = new ProgressField();
             expect(instance.text).toEqual('');
             expect(instance.value).toBeNull();
@@ -1362,9 +1441,15 @@ describe('Widgets Api', function () {
     });
     it('MeterField.Structure', function (done) {
         require([
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
             'forms/fields/meter-field'], function (
+                Font,
+                Color,
+                Cursor,
                 MeterField) {
-            expectTypedField(MeterField);
+            expectTypedField(MeterField, Font, Color, Cursor);
             var instance = new MeterField();
             expect(instance.text).toEqual('');
             expect(instance.value).toBeNull();
@@ -1406,6 +1491,167 @@ describe('Widgets Api', function () {
                 MeterField) {
             expectTypedFieldMarkup(Logger, MeterField);
             done();
+        });
+    });
+    it('DropDownField.Structure', function (done) {
+        require([
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
+            'forms/fields/drop-down-field'], function (
+                Font,
+                Color,
+                Cursor,
+                DropDownField) {
+            expectWidget(new DropDownField(), Font, Color, Cursor);
+
+            var instance = new DropDownField();
+            expect(instance.value).toBeNull();
+            expect(instance.text).toEqual('< . >');
+            expect(instance.count).toEqual(1);
+
+            instance.visibleItemCount = 4;
+            expect(instance.visibleItemCount).toEqual(4);
+
+            instance.addValue('1', 1);
+            instance.addValue('2', 2);
+            instance.addValue('3', 3);
+            instance.addValue('4', 4);
+            instance.addValue('5', 5);
+            expect(instance.count).toEqual(6);
+            expect(instance.labelAt(4)).toEqual('4');
+
+            instance.addValue('44', 4);
+            expect(instance.count).toEqual(6);
+            expect(instance.labelAt(4)).toEqual('44');
+
+
+            for (var i = 1; i < instance.count; i++) {
+                expect(instance.valueAt(i)).toEqual(i);
+                expect(instance.indexOfValue(i)).toEqual(i);
+            }
+
+            for (i = instance.count - 1; i >= 0; i--) {
+                instance.removeValue(i);
+            }
+            expect(instance.count).toEqual(1);
+            expect(instance.valueAt(0)).toBeNull();
+            expect(instance.value).toBeNull();
+            expect(instance.labelAt(0)).toEqual('< . >');
+            expect(instance.text).toEqual('< . >');
+
+            instance.emptyText = 'Select an item please';
+            expect(instance.text).toEqual('Select an item please');
+            expect(instance.labelAt(0)).toEqual('Select an item please');
+
+            instance.addValue('1', 1);
+            instance.addValue('2', 2);
+            instance.addValue('3', 3);
+            instance.addValue('4', 4);
+            instance.addValue('5', 5);
+            expect(instance.count).toEqual(6);
+
+            instance.clear();
+            expect(instance.count).toEqual(1);
+            expect(instance.valueAt(0)).toBeNull();
+            expect(instance.value).toBeNull();
+            expect(instance.labelAt(0)).toEqual('Select an item please');
+            expect(instance.text).toEqual('Select an item please');
+            done();
+        });
+    });
+    it('DropDownField.Markup', function (done) {
+        require([
+            'logger',
+            'forms/fields/drop-down-field'], function (
+                Logger,
+                DropDownField) {
+            var instance = new DropDownField();
+            document.body.appendChild(instance.element);
+            instance.addValue('1', 1);
+            instance.addValue('2', 2);
+            instance.addValue('3', 3);
+            instance.addValue('4', 4);
+            instance.addValue('5', 5);
+            instance.addValue('6', 6);
+            instance.addValue('7', 7);
+            instance.addValue('8', 8);
+            instance.addValue('9', 9);
+            instance.addValue('10', 10);
+
+            instance.emptyText = 'Select an item please';
+            expect(instance.text).toEqual('Select an item please');
+            instance.onActionPerformed = function () {
+                Logger.info('Action performed on ' + instance.constructor.name);
+            };
+            instance.onItemSelected = function (evt) {
+                Logger.info('Item selected on ' + instance.constructor.name + '; item: ' + evt.item);
+            };
+            instance.onValueChange = function (evt) {
+                Logger.info(instance.constructor.name + ' value changed: newValue: ' + evt.newValue + '; oldValue: ' + evt.oldValue);
+            };
+            document.body.removeChild(instance.element);
+            done();
+        });
+    });
+    it('RichTextArea.Structure', function (done) {
+        require([
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
+            'forms/fields/rich-text-area'], function (
+                Font,
+                Color,
+                Cursor,
+                RichTextArea) {
+            expectWidget(new RichTextArea(), Font, Color, Cursor);
+
+            var instance = new RichTextArea();
+            expect(instance.value).toBeNull();
+            expect(instance.text).toEqual('');
+
+            instance.value = '<p>content</p>';
+            expect(instance.text).toEqual('content');
+
+            instance.value = null;
+            expect(instance.text).toEqual('');
+
+            instance.text = '<p>content</p>';
+            expect(instance.value).toEqual('&lt;p&gt;content&lt;/p&gt;');
+
+            instance.text = '';
+            expect(instance.value).toBeNull();
+
+            done();
+        });
+    });
+    it('RichTextArea.Markup', function (done) {
+        require([
+            'invoke',
+            'logger',
+            'forms/fields/rich-text-area'], function (
+                Invoke,
+                Logger,
+                RichTextArea) {
+            var instance = new RichTextArea();
+            document.body.appendChild(instance.element);
+
+            instance.onActionPerformed = function () {
+                Logger.info('Action performed on ' + instance.constructor.name);
+            };
+            instance.onValueChange = function (evt) {
+                Logger.info(instance.constructor.name + ' value changed: newValue: ' + evt.newValue + '; oldValue: ' + evt.oldValue);
+            };
+
+            spyOn(instance, 'onValueChange');
+
+            instance.value = 'Sample content';
+
+            Invoke.later(function () {
+                expect(instance.onValueChange.calls.count()).toEqual(1);
+                document.body.removeChild(instance.element);
+                done();
+            });
         });
     });
 });

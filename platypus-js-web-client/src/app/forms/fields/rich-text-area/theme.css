@@ -1,0 +1,128 @@
+/**
+ * Platypus.js UI rich text editor styles
+ */
+
+.p-rich-text-tools {
+    text-align: left;
+    line-height: 30px;
+}
+
+.p-rich-text-tool{
+    width: 25px;
+    height: 25px;
+    background-position: center;
+    vertical-align: middle;
+}
+
+.p-rich-text-bold{
+    background-image: url(bold.gif);
+}
+.p-rich-text-italic{
+    background-image: url(italic.gif);
+}
+.p-rich-text-underline{
+    background-image: url(underline.gif);
+}
+.p-rich-text-strike-through{
+    background-image: url(strike-through.gif);
+    margin-right: 20px;
+}
+
+.p-rich-text-subscript{
+    background-image: url(subscript.gif);
+}
+.p-rich-text-superscript{
+    background-image: url(superscript.gif);
+    margin-right: 20px;
+}
+
+.p-rich-text-align-left{
+    background-image: url(align-left.gif);
+}
+.p-rich-text-align-center{
+    background-image: url(align-center.gif);
+}
+.p-rich-text-align-right{
+    background-image: url(align-right.gif);
+}
+.p-rich-text-align-full{
+    background-image: url(align-full.gif);
+    margin-right: 20px;
+}
+
+.p-rich-text-cut{
+    background-image: url(cut.gif);
+}
+.p-rich-text-copy{
+    background-image: url(copy.gif);
+}
+.p-rich-text-paste{
+    background-image: url(paste.gif);
+    margin-right: 20px;
+}
+
+.p-rich-text-undo{
+    background-image: url(undo.gif);
+}
+.p-rich-text-redo{
+    background-image: url(redo.gif);
+    margin-right: 20px;
+}
+
+.p-rich-text-indent-right{
+    background-image: url(indent-right.gif);
+}
+.p-rich-text-indent-left{
+    background-image: url(indent-left.gif);
+    margin-right: 20px;
+}
+
+.p-rich-text-horizontal-rule{
+    background-image: url(horizontal-rule.gif);
+    margin-right: 20px;
+}
+
+.p-rich-text-ordered-list{
+    background-image: url(ordered-list.gif);
+}
+.p-rich-text-unordered-list{
+    background-image: url(unordered-list.gif);
+    margin-right: 20px;
+}
+
+.p-rich-text-insert-image{
+    background-image: url(insert-image.gif);
+}
+.p-rich-text-upload-image{
+    background-image: url(upload-image.gif);
+    margin-right: 20px;
+}
+
+.p-rich-text-create-link{
+    background-image: url(create-link.gif);
+}
+.p-rich-text-remove-link{
+    background-image: url(remove-link.gif);
+    margin-right: 20px;
+}
+
+.p-rich-text-clear-format{
+    background-image: url(clear-format.gif);
+    margin-right: 20px;
+}
+
+.p-rich-text-background{
+    background-image: url(background.gif);
+}
+.p-rich-text-foreground{
+    background-image: url(foreground.gif);
+    margin-right: 20px;
+}
+
+.p-rich-text-font-name{
+    width: 150px;
+    margin-right: 2px;
+}
+.p-rich-text-font-size{
+    width: 150px;
+}
