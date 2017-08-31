@@ -7,7 +7,7 @@ define([
         Bound) {
     function ModelCheckBox(text, selected, onActionPerformed) {
         if (arguments.length < 2)
-            selected = false;
+            selected = null;
         if (arguments.length < 1)
             text = '';
         

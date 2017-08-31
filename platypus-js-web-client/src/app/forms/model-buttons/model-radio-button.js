@@ -3,17 +3,17 @@ define([
     '../buttons/radio-button',
     '../bound'], function (
         extend,
-        CheckBox,
+        RadioButton,
         Bound) {
     function ModelRadioButton(text, selected, onActionPerformed) {
         if (arguments.length < 2)
-            selected = false;
+            selected = null;
         if (arguments.length < 1)
             text = '';
         
-        CheckBox.call(this, text, selected, onActionPerformed);
+        RadioButton.call(this, text, selected, onActionPerformed);
         Bound.call(this);
     }
-    extend(ModelRadioButton, CheckBox);
+    extend(ModelRadioButton, RadioButton);
     return ModelRadioButton;
 });

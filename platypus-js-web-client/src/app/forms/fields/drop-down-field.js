@@ -26,6 +26,20 @@ define([
         nullItem.value = '';
         nullItem['js-value'] = null;
         box.appendChild(nullItem);
+        var valuesIndicies = null;
+
+        function invalidateValuesIndicies() {
+            valuesIndicies = null;
+        }
+
+        function validateValuesIndicies() {
+            if (!valuesIndicies) {
+                valuesIndicies = new Map();
+                for (var i = 0; i < box.options.length; i++) {
+                    valuesIndicies.set(box.options[i]['js-value'], i);
+                }
+            }
+        }
 
         function itemChanged() {
             var oldValue = value;
@@ -37,7 +51,7 @@ define([
             fireSelected(value);
             self.fireValueChanged(oldValue);
         }
-        
+
         var selectionHandlers = new Set();
 
         function addSelectionHandler(handler) {
@@ -54,11 +68,11 @@ define([
                 return addSelectionHandler;
             }
         });
-        
+
         function fireSelected(aItem) {
             var event = new SelectionEvent(self, aItem);
             selectionHandlers.forEach(function (h) {
-                Invoke.later(function(){
+                Invoke.later(function () {
                     h(event);
                 });
             });
@@ -155,13 +169,7 @@ define([
 
         function addValue(aLabel, aValue) {
             if (aValue !== null) {
-                var index = indexOfValue(aValue);
-                if (index !== -1) {
-                    var item = itemAt(index);
-                    item.innerText = aLabel;
-                } else {
-                    addItem(box.options.length, aLabel, aValue);
-                }
+                addItem(box.options.length, aLabel, aValue);
             }
         }
 
@@ -186,7 +194,23 @@ define([
             }
         });
 
-        function valueAt(index){
+        function updateLabel(aValue, aLabel) {
+            if (aValue !== null) {
+                var index = indexOfValue(aValue);
+                if (index !== -1) {
+                    var item = itemAt(index);
+                    item.innerText = aLabel;
+                }
+            }
+        }
+
+        Object.defineProperty(this, 'updateLabel', {
+            get: function () {
+                return updateLabel;
+            }
+        });
+
+        function valueAt(index) {
             var item = itemAt(index);
             return item ? item['js-value'] : null;
         }
@@ -197,7 +221,7 @@ define([
             }
         });
 
-        function labelAt(index){
+        function labelAt(index) {
             var item = itemAt(index);
             return item ? item.innerText : null;
         }
@@ -221,9 +245,11 @@ define([
         });
 
         function clear() {
-            for (var i = box.options.length; i >= 0; i--) {
-                removeItem(i);
+            while (box.firstElementChild) {
+                box.removeChild(box.firstElementChild);
             }
+            invalidateValuesIndicies();
+            box.appendChild(nullItem);
         }
 
         Object.defineProperty(this, 'clear', {
@@ -242,11 +268,14 @@ define([
                 var wasUnselected = box.selectedIndex === -1;
                 if (index === box.options.length) {
                     box.appendChild(item);
+                    if (valuesIndicies)
+                        valuesIndicies.set(aValue, index);
                 } else {
                     box.insertBefore(itemAt(index), item);
+                    invalidateValuesIndicies();
                 }
                 if (wasUnselected) {
-                    box.seelectedIndex = -1;
+                    box.selectedIndex = -1;
                 }
             }
         }
@@ -255,18 +284,15 @@ define([
                 var item = box.options[index];
                 if (item !== nullItem) {
                     box.removeChild(item);
+                    invalidateValuesIndicies();
                     return item;
                 }
             }
         }
 
         function indexOfValue(aValue) {
-            for (var i = 0; i < box.options.length; i++) {
-                if (valueAt(i) === aValue) {
-                    return i;
-                }
-            }
-            return -1;
+            validateValuesIndicies();
+            return valuesIndicies.get(aValue);
         }
 
         Object.defineProperty(this, 'indexOfValue', {

@@ -1,6 +1,4 @@
-define([
-], function (
-        ) {
+define(function () {
     var addListenerName = "-platypus-listener-add-func";
     var removeListenerName = "-platypus-listener-remove-func";
 
@@ -104,7 +102,8 @@ define([
                         aEntry();
                     });
                     listenPath();
-                    aPropListener(evt);
+                    var pathDatum = getPathData(aTarget, aPath);
+                    aPropListener({source: aTarget, propertyName: aPath, oldValue: pathDatum, newValue: pathDatum});
                 };
                 var cookie = subscribe(data, listener, propName);
                 if (cookie) {
@@ -212,5 +211,15 @@ define([
             }
         });
     }
+    Object.defineProperty(Bound, 'observeElements', {
+        get: function(){
+            return observeElements;
+        }
+    });
+    Object.defineProperty(Bound, 'listen', {
+        get: function(){
+            return listen;
+        }
+    });
     return Bound;
 });

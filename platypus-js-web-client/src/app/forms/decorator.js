@@ -1,4 +1,4 @@
-define(['../../ui'], function (Ui) {
+define(['../ui'], function (Ui) {
     function Decorator() {
         var self = this;
 
@@ -16,7 +16,7 @@ define(['../../ui'], function (Ui) {
 
         var btnSelect = document.createElement('div');
         btnSelect.className = 'p-decoration p-select';
-        Ui.on(btnClear, 'click', function (evt) {
+        Ui.on(btnSelect, 'click', function (evt) {
             evt.stopPropagation();
             onSelect.call(self, self);
         });
@@ -26,8 +26,10 @@ define(['../../ui'], function (Ui) {
             self.element.classList.remove("p-decorator-nullable-selectable");
             self.element.classList.remove("p-decorator-nullable");
             self.element.classList.remove("p-decorator-selectable");
-            self.element.removeChild(btnClear);
-            self.element.removeChild(btnSelect);
+            if (btnClear.parentNode === self.element)
+                self.element.removeChild(btnClear);
+            if (btnSelect.parentNode === self.element)
+                self.element.removeChild(btnSelect);
             if (nullable && onSelect) {
                 self.element.classList.add("p-decorator-nullable-selectable");
                 self.element.appendChild(btnClear);
@@ -40,6 +42,7 @@ define(['../../ui'], function (Ui) {
                 self.element.appendChild(btnSelect);
             }
         }
+        redecorate();
 
         Object.defineProperty(this, 'nullable', {
             get: function () {

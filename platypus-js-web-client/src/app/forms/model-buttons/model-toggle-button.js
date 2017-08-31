@@ -5,11 +5,11 @@ define([
         extend,
         ToggleButton,
         Bound) {
-    function ModelCheckBox(text, icon, selected, iconTextGap, onActionPerformed) {
+    function ModelToggleButton(text, icon, selected, iconTextGap, onActionPerformed) {
         if (arguments.length < 4)
             iconTextGap = 4;
         if (arguments.length < 3)
-            selected = false;
+            selected = null;
         if (arguments.length < 2)
             icon = null;
         if (arguments.length < 1)
@@ -18,6 +18,6 @@ define([
         ToggleButton.call(this, text, icon, selected, iconTextGap, onActionPerformed);
         Bound.call(this);
     }
-    extend(ModelCheckBox, ToggleButton);
-    return ModelCheckBox;
+    extend(ModelToggleButton, ToggleButton);
+    return ModelToggleButton;
 });

@@ -1,6 +1,6 @@
 define(function () {
     var global = window;
-    
+
     if (!global.platypusjs) {
         var config = {};
         (function () {
@@ -60,7 +60,7 @@ define(function () {
             return null;
         }
     }
-    
+
     // TODO: Check if changes are made to this function both in amd.js and here
     function lookupCallerApplicationJsFile(aException) {
         var calledFromFile = null;
@@ -158,7 +158,10 @@ define(function () {
         var hostContextNormalizer = document.createElement('div');
         hostContextNormalizer.innerHTML = "<a href=\"" + hostContextPrefix + "\">o</a>";
         var mormalizedHostContextPrefix = decodeURI(hostContextNormalizer.firstChild.href);
-        return mormalizedAbsoluteModuleUrl.substring(mormalizedHostContextPrefix.length);
+        var mormalizedRelativeModuleUrl = mormalizedAbsoluteModuleUrl.substring(mormalizedHostContextPrefix.length);
+        if (mormalizedRelativeModuleUrl === '')
+            throw "Module reference '" + aRelative + "' couldn't be resolved, starting from '" + aStartPoint + "'";
+        return mormalizedRelativeModuleUrl;
     }
 
     function resourceUri(aResourceName) {

@@ -1,6 +1,6 @@
 (function () {
     var global = window;
-    
+
     var INJECTED_SCRIPT_CLASS_NAME = "platypus-injected-script";
     var MODULES_INDEX = "modules-index"; // Map module name -> script file with this module
     var TYPE_JAVASCRIPT = "text/javascript";
@@ -287,8 +287,8 @@
     function pendOnScript(aScriptName, onSuccess, onFailure) {
         var pendingOnScript = pendingsOnScript.get(aScriptName);
         if (!pendingOnScript) {
-            pendingOnScript = [];
-            pendingsOnScript.set(aScriptName, pendingOnScript);
+        pendingOnScript = [];
+                pendingsOnScript.set(aScriptName, pendingOnScript);
         }
         pendingOnScript.push({onSuccess, onFailure});
     }
@@ -603,7 +603,10 @@
         var hostContextNormalizer = document.createElement('div');
         hostContextNormalizer.innerHTML = "<a href=\"" + hostContextPrefix + "\">o</a>";
         var mormalizedHostContextPrefix = decodeURI(hostContextNormalizer.firstChild.href);
-        return mormalizedAbsoluteModuleUrl.substring(mormalizedHostContextPrefix.length);
+        var mormalizedRelativeModuleUrl = mormalizedAbsoluteModuleUrl.substring(mormalizedHostContextPrefix.length);
+        if (mormalizedRelativeModuleUrl === '')
+            throw "Module reference '" + aRelative + "' couldn't be resolved, starting from '"+aStartPoint+"'";
+        return mormalizedRelativeModuleUrl;
     }
 
     // TODO: Check if changes are made to this function both in resource.js and here
