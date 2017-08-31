@@ -19,12 +19,12 @@ define([
         if (arguments.length < 1)
             orientation = Ui.Orientation.HORIZONTAL;
 
-        self.element.classList.add('p-box-horizontal');
-        self.element.classList.add('p-horizontal-scroll-filler');
+        this.element.classList.add('p-box-horizontal');
+        this.element.classList.add('p-horizontal-scroll-filler');
         this.element.id = 'p-' + Id.generate();
 
         var gapsStyle = document.createElement('style');
-        self.element.appendChild(gapsStyle);
+        this.element.appendChild(gapsStyle);
         
         function formatChildren() {
             if (orientation === Ui.Orientation.HORIZONTAL) {
