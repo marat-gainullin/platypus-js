@@ -51,7 +51,7 @@ define([
         applyText();
         applyPosition();
 
-        var clickReg = Ui.on(box, 'click', function (evt) {
+        var clickReg = Ui.on(box, Ui.Events.CLICK, function (evt) {
             self.fireActionPerformed();
         });
                 

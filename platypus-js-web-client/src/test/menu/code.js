@@ -2,8 +2,8 @@
 /* global NaN */
 
 describe('Menu Api', function () {
-    
-    function expectMenuItem(w, Ui) {
+
+    function expectHorizontalTextPosition(w, Ui) {
         var h = [Ui.HorizontalPosition.LEFT, Ui.HorizontalPosition.CENTER, Ui.HorizontalPosition.RIGHT];
         h.forEach(function (hi) {
             w.horizontalTextPosition = hi;
@@ -11,6 +11,42 @@ describe('Menu Api', function () {
         });
     }
 
+    function expectMenuItemStructure(MenuItem, Ui, Font, Color, Cursor, done) {
+        var image = document.createElement('image');
+        var menuItem1 = new MenuItem('txt', image, function () {});
+        expect(menuItem1.text).toEqual('txt');
+        expect(menuItem1.icon).toBe(image);
+        expect(menuItem1.onActionPerformed).toBeTruthy();
+        expectHorizontalTextPosition(menuItem1, Ui);
+        expectWidget(menuItem1, Font, Color, Cursor);
+
+        var menuItem2 = new MenuItem('txt', image);
+        expect(menuItem2.text).toEqual('txt');
+        expect(menuItem2.icon).toBe(image);
+        expect(menuItem2.onActionPerformed).toBeFalsy();
+        expectHorizontalTextPosition(menuItem2, Ui);
+
+        var menuItem3 = new MenuItem('txt');
+        expect(menuItem3.text).toEqual('txt');
+        expect(menuItem3.icon).toBeNull();
+        expect(menuItem3.onActionPerformed).toBeFalsy();
+        expectHorizontalTextPosition(menuItem3, Ui);
+
+        var menuItem4 = new MenuItem();
+        expect(menuItem4.text).toEqual('');
+        expect(menuItem4.icon).toBeNull();
+        expect(menuItem4.onActionPerformed).toBeFalsy();
+        expectHorizontalTextPosition(menuItem4, Ui);
+
+        menuItem4.text = 'Sample label';
+        expect(menuItem4.iconTextGap).toEqual(4);
+        Ui.Icon.load('assets/binary-content.png', function (loaded) {
+            menuItem4.icon = loaded;
+            done();
+        }, function (e) {
+            done.fail(e);
+        });
+    }
     it('MenuItem.Structure', function (done) {
         require([
             'common-utils/font',
@@ -23,96 +59,213 @@ describe('Menu Api', function () {
                 Cursor,
                 Ui,
                 MenuItem) {
-            var label1 = new MenuItem('txt', null, 45);
-            expectMenuItem(label1, Ui);
-            expect(label1.text).toEqual('txt');
-            expect(label1.icon).toBeNull();
-            expect(label1.iconTextGap).toEqual(45);
-            var label2 = new MenuItem('txt', null);
-            expectMenuItem(label2, Ui);
-            expect(label2.text).toEqual('txt');
-            expect(label2.icon).toBeNull();
-            expect(label2.iconTextGap).toEqual(4);
-            var label3 = new MenuItem('txt');
-            expectMenuItem(label3, Ui);
-            expect(label3.text).toEqual('txt');
-            expect(label3.icon).toBeNull();
-            expect(label3.iconTextGap).toEqual(4);
-            var label4 = new MenuItem();
-            expectMenuItem(label4, Ui);
-            expectWidget(label4, Font, Color, Cursor);
-            label4.text = 'Sample label';
-            expect(label4.iconTextGap).toEqual(4);
+            expectMenuItemStructure(MenuItem, Ui, Font, Color, Cursor, done);
+        });
+    });
+    it('MenuItem.Markup', function (done) {
+        require([
+            'ui',
+            'forms/menu/menu-item'], function (
+                Ui,
+                MenuItem) {
+            var menuItem = new MenuItem();
+            document.body.appendChild(menuItem.element);
+            menuItem.text = 'Sample menu item';
+            expect(menuItem.iconTextGap).toEqual(4);
             Ui.Icon.load('assets/binary-content.png', function (loaded) {
-                label4.icon = loaded;
+                menuItem.icon = loaded;
+                // defaults
+                // right text
+                expect(menuItem.horizontalTextPosition).toEqual(Ui.HorizontalPosition.RIGHT);
+                (function () {
+                    var image = menuItem.element.firstElementChild;
+                    var paragraph = menuItem.element.lastElementChild;
+                    expect(image.offsetLeft).toEqual(0);
+                    expect(paragraph.offsetLeft).toEqual(16 + 4);
+                }());
+                // left text
+                menuItem.horizontalTextPosition = Ui.HorizontalPosition.LEFT;
+                (function () {
+                    var image = menuItem.element.lastElementChild;
+                    var paragraph = menuItem.element.firstElementChild;
+                    expect(paragraph.offsetLeft).toEqual(0);
+                    expect(image.offsetLeft).toEqual(paragraph.offsetWidth + 4);
+                }());
+                document.body.removeChild(menuItem.element);
                 done();
             }, function (e) {
                 done.fail(e);
             });
         });
     });
-    it('Label.Markup', function (done) {
+    function expectBooleanMenuItemStructure(MenuItem, Ui, Font, Color, Cursor, done) {
+        var menuItem1 = new MenuItem('txt', true, function () {});
+        expect(menuItem1.text).toEqual('txt');
+        expect(menuItem1.selected).toBe(true);
+        expect(menuItem1.onActionPerformed).toBeTruthy();
+        expectHorizontalTextPosition(menuItem1, Ui);
+        expectWidget(menuItem1, Font, Color, Cursor);
+
+        var menuItem2 = new MenuItem('txt', true);
+        expect(menuItem2.text).toEqual('txt');
+        expect(menuItem2.selected).toBe(true);
+        expect(menuItem2.onActionPerformed).toBeFalsy();
+        expectHorizontalTextPosition(menuItem2, Ui);
+
+        var menuItem3 = new MenuItem('txt');
+        expect(menuItem3.text).toEqual('txt');
+        expect(menuItem3.selected).toBe(false);
+        expect(menuItem3.onActionPerformed).toBeFalsy();
+        expectHorizontalTextPosition(menuItem3, Ui);
+
+        var menuItem4 = new MenuItem();
+        expect(menuItem4.text).toEqual('');
+        expect(menuItem4.selected).toBe(false);
+        expect(menuItem4.onActionPerformed).toBeFalsy();
+        expectHorizontalTextPosition(menuItem4, Ui);
+
+        done();
+    }
+    function expectBooleanMenuItemMarkup(MenuItem, Invoke, Logger, done) {
+        var menuItem = new MenuItem();
+        document.body.appendChild(menuItem.element);
+        menuItem.text = 'Are you beatyful?';
+
+        menuItem.onActionPerformed = function (evt) {
+            Logger.info("Action performed on '" + evt.source.constructor.name + "'");
+        };
+        menuItem.onValueChange = function (evt) {
+            Logger.info("Value changed on '" + evt.source.constructor.name + "' oldValue: " + evt.oldValue + '; newValue: ' + evt.newValue);
+        };
+
+        spyOn(menuItem, 'onValueChange');
+
+        expect(menuItem.value).toBe(false);
+        expect(menuItem.selected).toBe(false);
+        menuItem.selected = true;
+        expect(menuItem.selected).toBe(true);
+        expect(menuItem.value).toBe(true);
+        menuItem.value = false;
+        expect(menuItem.value).toBe(false);
+        expect(menuItem.selected).toBe(false);
+        menuItem.selected = true;
+        expect(menuItem.selected).toBe(true);
+        expect(menuItem.value).toBe(true);
+        menuItem.value = null;
+        expect(menuItem.value).toBeNull();
+        expect(menuItem.selected).toBeNull();
+        Invoke.later(function () {
+            expect(menuItem.onValueChange.calls.count()).toEqual(4);
+            document.body.removeChild(menuItem.element);
+            done();
+        });
+    }
+    it('CheckMenuItem.Structure', function (done) {
         require([
             'ui',
-            'forms/label'], function (
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
+            'forms/menu/check-menu-item'
+        ], function (
                 Ui,
-                Label) {
-            var label = new Label();
-            document.body.appendChild(label.element);
-            label.text = 'Sample label';
-            expect(label.iconTextGap).toEqual(4);
-            Ui.Icon.load('assets/binary-content.png', function (loaded) {
-                label.icon = loaded;
-                // defaults
-                // right text
-                expect(label.horizontalTextPosition).toEqual(Ui.HorizontalPosition.RIGHT);
-                expect(label.verticalTextPosition).toEqual(Ui.VerticalPosition.CENTER);
-                (function () {
-                    var image = label.element.firstElementChild;
-                    var paragraph = label.element.lastElementChild;
-                    expect(image.offsetLeft).toEqual(0);
-                    expect(paragraph.offsetLeft).toEqual(16 + 4);
-                }());
-                // top and bottom
-                label.verticalTextPosition = Ui.VerticalPosition.BOTTOM;
-                label.verticalTextPosition = Ui.VerticalPosition.TOP;
-                // left text
-                label.horizontalTextPosition = Ui.HorizontalPosition.LEFT;
-                (function () {
-                    var image = label.element.lastElementChild;
-                    var paragraph = label.element.firstElementChild;
-                    expect(paragraph.offsetLeft).toEqual(0);
-                    expect(image.offsetLeft).toEqual(paragraph.offsetWidth + 4);
-                }());
-                // top and bottom
-                label.verticalTextPosition = Ui.VerticalPosition.BOTTOM;
-                label.verticalTextPosition = Ui.VerticalPosition.TOP;
+                Font,
+                Color,
+                Cursor,
+                CheckMenuItem) {
+            expectBooleanMenuItemStructure(CheckMenuItem, Ui, Font, Color, Cursor, done);
+            done();
+        });
+    });
+    it('CheckMenuItem.Markup', function (done) {
+        require([
+            'invoke',
+            'logger',
+            'forms/menu/check-menu-item'
+        ], function (
+                Invoke,
+                Logger,
+                CheckMenuItem) {
+            expectBooleanMenuItemMarkup(CheckMenuItem, Invoke, Logger, done);
+        });
+    });
+    it('RadioMenuItem.Structure', function (done) {
+        require([
+            'ui',
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
+            'forms/menu/radio-menu-item'
+        ], function (
+                Ui,
+                Font,
+                Color,
+                Cursor,
+                RadioMenuItem) {
+            expectBooleanMenuItemStructure(RadioMenuItem, Ui, Font, Color, Cursor, done);
+            done();
+        });
+    });
+    it('RadioMenuItem.Markup', function (done) {
+        require([
+            'invoke',
+            'logger',
+            'forms/menu/radio-menu-item'
+        ], function (
+                Invoke,
+                Logger,
+                RadioMenuItem) {
+            expectBooleanMenuItemMarkup(RadioMenuItem, Invoke, Logger, done);
+        });
+    });
+    fit('MenuBar.Markup', function (done) {
+        require([
+            'forms/containers/button-group',
+            'forms/menu/menu-item',
+            'forms/menu/check-menu-item',
+            'forms/menu/radio-menu-item',
+            'forms/menu/menu-separator',
+            'forms/menu/menu',
+            'forms/menu/menu-bar'
+        ], function (
+                ButtonGroup,
+                MenuItem,
+                CheckMenuItem,
+                RadioMenuItem,
+                MenuSeparator,
+                Menu,
+                MenuBar) {
+            var menuBar = new MenuBar();
+            document.body.appendChild(menuBar.element);
+            
+            var fileItem = new MenuItem('File');
+            fileItem.subMenu = new Menu();
+            fileItem.subMenu.add(new MenuItem('Save'));
+            fileItem.subMenu.add(new MenuItem('Save As'));
+            fileItem.subMenu.add(new MenuItem('Exit'));
+            menuBar.add(fileItem);
 
-                // center text
-                label.horizontalTextPosition = Ui.HorizontalPosition.CENTER;
+            var settingsItem = new MenuItem('Settings');
+            settingsItem.subMenu = new Menu();
+            settingsItem.subMenu.add(new MenuItem('Main'));
+            var hardwareItem = new MenuItem('Hardware');
+            settingsItem.subMenu.add(hardwareItem);
+            hardwareItem.subMenu = new Menu();
+            hardwareItem.subMenu.add(new CheckMenuItem('Motorola'));
+            hardwareItem.subMenu.add(new RadioMenuItem('LG'));
+            hardwareItem.subMenu.add(new RadioMenuItem('Huawei'));
+            var buttonGroup = new ButtonGroup();
+            for (var m = 0; m < hardwareItem.subMenu.count; m++) {
+                var item = hardwareItem.subMenu.child(m);
+                item.buttonGroup = buttonGroup;
+            }
+            settingsItem.subMenu.add(new MenuItem('Misc'));
+            settingsItem.subMenu.add(new MenuSeparator('Misc'));
+            settingsItem.subMenu.add(new MenuItem('Other'));
+            menuBar.add(settingsItem);
 
-                // top and bottom
-                label.verticalTextPosition = Ui.VerticalPosition.BOTTOM;
-                (function () {
-                    var image = label.element.firstElementChild;
-                    var paragraph = label.element.lastElementChild;
-                    expect(image.offsetTop).toEqual(0);
-                    expect(paragraph.offsetTop).toEqual(16 + 4);
-                }());
-                label.verticalTextPosition = Ui.VerticalPosition.TOP;
-                (function () {
-                    var image = label.element.lastElementChild;
-                    var paragraph = label.element.firstElementChild;
-                    expect(image.offsetTop).toBeGreaterThan(paragraph.offsetTop);
-                }());
-                // center center
-                label.verticalTextPosition = Ui.VerticalPosition.CENTER;
-
-                document.body.removeChild(label.element);
-                done();
-            }, function (e) {
-                done.fail(e);
-            });
+            // document.body.removeChild(menuBar.element);
+            done();
         });
     });
 });

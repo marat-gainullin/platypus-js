@@ -1,11 +1,11 @@
 define([
     '../../extend',
-    './boolean-menu-element'], function (
+    './boolean-menu-item'], function (
         extend,
         BooleanMenuItem) {
     function RadioMenuItem(text, selected, onActionPerformed) {
         if (arguments.length < 2)
-            selected = null;
+            selected = false;
         if (arguments.length < 1)
             text = '';
         var radio = document.createElement('input');

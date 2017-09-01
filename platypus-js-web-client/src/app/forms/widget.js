@@ -338,7 +338,11 @@ define([
                         menuTriggerReg = Ui.on(box, Ui.Events.CONTEXTMENU, function (event) {
                             event.preventDefault();
                             event.stopPropagation();
-                            menu.show(Ui.absoluteLeft(shell), Ui.absoluteTop(shell), shell.offsetWidth, shell.offsetHeight);
+                            if (menu.showAt) {
+                                Ui.startMenuSession(self);
+                                // TODO: Review event's coordinates here
+                                menu.showAt(event.x, event.y);
+                            }
                         });
                     }
                 }

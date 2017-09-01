@@ -35,7 +35,7 @@ define([
             }
         });
 
-        var changeReg = Ui.on(box, 'change', function (evt) {
+        var changeReg = Ui.on(box, Ui.Events.CHANGE, function (evt) {
             self.fireActionPerformed();
             box.checkValidity();
             if(self.error)
@@ -44,7 +44,7 @@ define([
                 self.textChanged();
         });
 
-        var changeReg = Ui.on(box, 'input', function (evt) {
+        var changeReg = Ui.on(box, Ui.Events.INPUT, function (evt) {
             self.error = null;
         });
 

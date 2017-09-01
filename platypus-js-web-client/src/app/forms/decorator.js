@@ -9,14 +9,14 @@ define(['../ui'], function (Ui) {
 
         var btnClear = document.createElement('div');
         btnClear.className = 'p-decoration p-clear';
-        Ui.on(btnClear, 'click', function (evt) {
+        Ui.on(btnClear, Ui.Events.CLICK, function (evt) {
             evt.stopPropagation();
             self.value = null;
         });
 
         var btnSelect = document.createElement('div');
         btnSelect.className = 'p-decoration p-select';
-        Ui.on(btnSelect, 'click', function (evt) {
+        Ui.on(btnSelect, Ui.Events.CLICK, function (evt) {
             evt.stopPropagation();
             onSelect.call(self, self);
         });

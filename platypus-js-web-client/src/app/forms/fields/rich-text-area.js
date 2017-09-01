@@ -69,7 +69,7 @@ define([
             });
         }
 
-        Ui.on(content, 'blur', function (e) {
+        Ui.on(content, Ui.Events.BLUR, function (e) {
             if (wasValue !== self.value) {
                 self.fireActionPerformed();
                 self.fireValueChanged(wasValue);
@@ -77,28 +77,28 @@ define([
         });
 
         var btnBold = document.createElement('button');
-        on(btnBold, 'click', function () {
+        on(btnBold, Ui.Events.CLICK, function () {
             document.execCommand('bold', null, null);
         });
         btnBold.className = 'p-rich-text-tool p-rich-text-bold';
         btnBold.title = i18n['rich.text.bold'];
         tools.appendChild(btnBold);
         var btnItalic = document.createElement('button');
-        on(btnItalic, 'click', function () {
+        on(btnItalic, Ui.Events.CLICK, function () {
             document.execCommand('italic', null, null);
         });
         btnItalic.className = 'p-rich-text-tool p-rich-text-italic';
         btnItalic.title = i18n['rich.text.italic'];
         tools.appendChild(btnItalic);
         var btnUnderline = document.createElement('button');
-        on(btnUnderline, 'click', function () {
+        on(btnUnderline, Ui.Events.CLICK, function () {
             document.execCommand('underline', null, null);
         });
         btnUnderline.className = 'p-rich-text-tool p-rich-text-underline';
         btnUnderline.title = i18n['rich.text.underline'];
         tools.appendChild(btnItalic);
         var btnStrikeThrough = document.createElement('button');
-        on(btnStrikeThrough, 'click', function () {
+        on(btnStrikeThrough, Ui.Events.CLICK, function () {
             document.execCommand('strikeThrough', null, null);
         });
         btnStrikeThrough.className = 'p-rich-text-tool p-rich-text-strike-through';
@@ -106,14 +106,14 @@ define([
         tools.appendChild(btnStrikeThrough);
 
         var btnSub = document.createElement('button');
-        on(btnSub, 'click', function () {
+        on(btnSub, Ui.Events.CLICK, function () {
             document.execCommand('subscript', null, null);
         });
         btnSub.className = 'p-rich-text-tool p-rich-text-subscript';
         btnSub.title = i18n['rich.text.subscript'];
         tools.appendChild(btnSub);
         var btnSup = document.createElement('button');
-        on(btnSup, 'click', function () {
+        on(btnSup, Ui.Events.CLICK, function () {
             document.execCommand('superscript', null, null);
         });
         btnSup.className = 'p-rich-text-tool p-rich-text-superscript';
@@ -121,28 +121,28 @@ define([
         tools.appendChild(btnSup);
 
         var tglAlignLeft = document.createElement('button');
-        on(tglAlignLeft, 'click', function () {
+        on(tglAlignLeft, Ui.Events.CLICK, function () {
             document.execCommand('justifyLeft', null, null);
         });
         tglAlignLeft.className = 'p-rich-text-tool p-rich-text-align-left';
         tglAlignLeft.title = i18n['rich.text.align.left'];
         tools.appendChild(tglAlignLeft);
         var tglAlignCenter = document.createElement('button');
-        on(tglAlignCenter, 'click', function () {
+        on(tglAlignCenter, Ui.Events.CLICK, function () {
             document.execCommand('justifyCenter', null, null);
         });
         tglAlignCenter.className = 'p-rich-text-tool p-rich-text-align-center';
         tglAlignCenter.title = i18n['rich.text.align.center'];
         tools.appendChild(tglAlignCenter);
         var tglAlignRight = document.createElement('button');
-        on(tglAlignRight, 'click', function () {
+        on(tglAlignRight, Ui.Events.CLICK, function () {
             document.execCommand('justifyRight', null, null);
         });
         tglAlignRight.className = 'p-rich-text-tool p-rich-text-align-right';
         tglAlignRight.title = i18n['rich.text.align.right'];
         tools.appendChild(tglAlignRight);
         var tglAlignFull = document.createElement('button');
-        on(tglAlignFull, 'click', function () {
+        on(tglAlignFull, Ui.Events.CLICK, function () {
             document.execCommand('justifyFull', null, null);
         });
         tglAlignFull.className = 'p-rich-text-tool p-rich-text-align-full';
@@ -150,21 +150,21 @@ define([
         tools.appendChild(tglAlignFull);
 
         var btnCut = document.createElement('button');
-        on(btnCut, 'click', function () {
+        on(btnCut, Ui.Events.CLICK, function () {
             document.execCommand('cut', null, null);
         });
         btnCut.className = 'p-rich-text-tool p-rich-text-cut';
         btnCut.title = i18n['rich.text.cut'];
         tools.appendChild(btnCut);
         var btnCopy = document.createElement('button');
-        on(btnCopy, 'click', function () {
+        on(btnCopy, Ui.Events.CLICK, function () {
             document.execCommand('copy', null, null);
         });
         btnCopy.className = 'p-rich-text-tool p-rich-text-copy';
         btnCopy.title = i18n['rich.text.copy'];
         tools.appendChild(btnCopy);
         var btnPaste = document.createElement('button');
-        on(btnPaste, 'click', function () {
+        on(btnPaste, Ui.Events.CLICK, function () {
             document.execCommand('paste', null, null);
         });
         btnPaste.className = 'p-rich-text-tool p-rich-text-paste';
@@ -172,14 +172,14 @@ define([
         tools.appendChild(btnPaste);
 
         var btnUndo = document.createElement('button');
-        on(btnUndo, 'click', function () {
+        on(btnUndo, Ui.Events.CLICK, function () {
             document.execCommand('undo', null, null);
         });
         btnUndo.className = 'p-rich-text-tool p-rich-text-undo';
         btnUndo.title = i18n['rich.text.undo'];
         tools.appendChild(btnUndo);
         var btnRedo = document.createElement('button');
-        on(btnRedo, 'click', function () {
+        on(btnRedo, Ui.Events.CLICK, function () {
             document.execCommand('redo', null, null);
         });
         btnRedo.className = 'p-rich-text-tool p-rich-text-redo';
@@ -187,14 +187,14 @@ define([
         tools.appendChild(btnRedo);
 
         var btnIdentRight = document.createElement('button');
-        on(btnIdentRight, 'click', function () {
+        on(btnIdentRight, Ui.Events.CLICK, function () {
             document.execCommand('indent', null, null);
         });
         btnIdentRight.className = 'p-rich-text-tool p-rich-text-indent-right';
         btnIdentRight.title = i18n['rich.text.indent.right'];
         tools.appendChild(btnIdentRight);
         var btnIdentLeft = document.createElement('button');
-        on(btnIdentLeft, 'click', function () {
+        on(btnIdentLeft, Ui.Events.CLICK, function () {
             document.execCommand('outdent', null, null);
         });
         btnIdentLeft.className = 'p-rich-text-tool p-rich-text-indent-left';
@@ -202,7 +202,7 @@ define([
         tools.appendChild(btnIdentLeft);
 
         var btnHorizontalRule = document.createElement('button');
-        on(btnHorizontalRule, 'click', function () {
+        on(btnHorizontalRule, Ui.Events.CLICK, function () {
             document.execCommand('insertHorizontalRule', null, null);
         });
         btnHorizontalRule.className = 'p-rich-text-tool p-rich-text-horizontal-rule';
@@ -210,14 +210,14 @@ define([
         tools.appendChild(btnHorizontalRule);
 
         var btnOrderedList = document.createElement('button');
-        on(btnOrderedList, 'click', function () {
+        on(btnOrderedList, Ui.Events.CLICK, function () {
             document.execCommand('insertOrderedList', null, null);
         });
         btnOrderedList.className = 'p-rich-text-tool p-rich-text-ordered-list';
         btnOrderedList.title = i18n['rich.text.ordered.list'];
         tools.appendChild(btnOrderedList);
         var btnUnorderedList = document.createElement('button');
-        on(btnUnorderedList, 'click', function () {
+        on(btnUnorderedList, Ui.Events.CLICK, function () {
             document.execCommand('insertUnorderedList', null, null);
         });
         btnUnorderedList.className = 'p-rich-text-tool p-rich-text-unordered-list';
@@ -225,7 +225,7 @@ define([
         tools.appendChild(btnUnorderedList);
 
         var btnImage = document.createElement('button');
-        Ui.on(btnImage, 'click', function () {
+        Ui.on(btnImage, Ui.Events.CLICK, function () {
             var url = prompt(i18n['rich.text.insert.image.prompt'], "http://");
             if (url) {
                 document.execCommand('insertImage', null, url);
@@ -237,7 +237,7 @@ define([
         btnImage.title = i18n['rich.text.insert.image'];
         tools.appendChild(btnImage);
         var btnUploadImage = document.createElement('button');
-        Ui.on(btnUploadImage, 'click', function () {
+        Ui.on(btnUploadImage, Ui.Events.CLICK, function () {
             Ui.selectFile(function (selectedFile) {
                 upload(selectedFile, function (uploaded) {
                     document.execCommand('insertImage', null, uploaded[0]);
@@ -251,7 +251,7 @@ define([
         tools.appendChild(btnUploadImage);
 
         var btnCreateLink = document.createElement('button');
-        Ui.on(btnCreateLink, 'click', function () {
+        Ui.on(btnCreateLink, Ui.Events.CLICK, function () {
             var url = prompt(i18n['rich.text.create.link.prompt'], "http://");
             if (url) {
                 document.execCommand('createLink', null, url);
@@ -263,7 +263,7 @@ define([
         btnCreateLink.title = i18n['rich.text.create.link'];
         tools.appendChild(btnCreateLink);
         var btnRemoveLink = document.createElement('button');
-        on(btnRemoveLink, 'click', function () {
+        on(btnRemoveLink, Ui.Events.CLICK, function () {
             document.execCommand('unlink', null, null);
         });
         btnRemoveLink.className = 'p-rich-text-tool p-rich-text-remove-link';
@@ -271,7 +271,7 @@ define([
         tools.appendChild(btnRemoveLink);
 
         var btnClearFormat = document.createElement('button');
-        on(btnClearFormat, 'click', function () {
+        on(btnClearFormat, Ui.Events.CLICK, function () {
             document.execCommand('removeFormat', null, null);
         });
         btnClearFormat.className = 'p-rich-text-tool p-rich-text-clear-format';
@@ -279,7 +279,7 @@ define([
         tools.appendChild(btnClearFormat);
 
         var btnBackground = document.createElement('button');
-        Ui.on(btnBackground, 'click', function () {
+        Ui.on(btnBackground, Ui.Events.CLICK, function () {
             Ui.selectColor(function (selectedColor) {
                 document.execCommand('backColor', null, selectedColor);
                 self.fireActionPerformed();
@@ -290,7 +290,7 @@ define([
         btnBackground.title = i18n['rich.text.background'];
         tools.appendChild(btnBackground);
         var btnForeground = document.createElement('button');
-        Ui.on(btnForeground, 'click', function () {
+        Ui.on(btnForeground, Ui.Events.CLICK, function () {
             Ui.selectColor(function (selectedColor) {
                 document.execCommand('foreColor', null, selectedColor);
                 self.fireActionPerformed();
@@ -302,7 +302,7 @@ define([
         tools.appendChild(btnForeground);
 
         var fontNames = document.createElement('select');
-        on(fontNames, 'change', function () {
+        on(fontNames, Ui.Events.CHANGE, function () {
             document.execCommand('fontName', null, fontNames.options[fontNames.selectedIndex].value);
         });
         fontNames.className = 'p-rich-text-tool p-rich-text-font-name';
@@ -323,7 +323,7 @@ define([
         fontNames.selectedIndex = 0;
 
         var fontSizes = document.createElement('select');
-        on(fontSizes, 'change', function () {
+        on(fontSizes, Ui.Events.CHANGE, function () {
             document.execCommand('fontSize', null, fontSizes.options[fontSizes.selectedIndex].value);
         });
         fontSizes.className = 'p-rich-text-tool p-rich-text-font-size';

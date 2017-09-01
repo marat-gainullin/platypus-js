@@ -15,15 +15,14 @@ define([
         MenuElement.call(this);
         var self = this;
 
-        this.onActionPerformed = onActionPerformed;
-
         var actionHandlers = 0;
         var clickReg = null;
         var superAddActionHandler = this.addActionHandler;
         function addActionHandler(handler) {
             if (actionHandlers === 0) {
-                clickReg = Ui.on(this.element, 'click', function () {
+                clickReg = Ui.on(this.element, Ui.Events.CLICK, function () {
                     self.fireActionPerformed();
+                    Ui.closeMenuSession();
                 });
             }
             actionHandlers++;
@@ -48,6 +47,8 @@ define([
             }
         });
 
+        this.onActionPerformed = onActionPerformed;
+        
         var horizontalTextPosition = Ui.HorizontalPosition.RIGHT;
 
         var paragraph = document.createElement('p');
@@ -118,6 +119,7 @@ define([
             },
             set: function (aValue) {
                 iconTextGap = aValue;
+                applyPosition();
             }
         });
         /**

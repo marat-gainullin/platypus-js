@@ -1,7 +1,7 @@
 define([
     '../extend',
     './widget',
-    './container-event',
+    './events/container-event',
     '../invoke',
     '../logger'], function (
         extend,

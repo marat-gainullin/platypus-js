@@ -15,14 +15,13 @@ define([
         ImageParagraph.call(this, document.createElement('button'), text, icon, iconTextGap);
         var self = this;
         this.opaque = true;
-        this.onActionPerformed = onActionPerformed;
 
         var actionHandlers = 0;
         var clickReg = null;
         var superAddActionHandler = this.addActionHandler;
         function addActionHandler(handler) {
             if (actionHandlers === 0) {
-                clickReg = Ui.on(this.element, 'click', function () {
+                clickReg = Ui.on(this.element, Ui.Events.CLICK, function () {
                     self.fireActionPerformed();
                 });
             }
@@ -47,6 +46,7 @@ define([
                 return addActionHandler;
             }
         });
+        this.onActionPerformed = onActionPerformed;
     }
     extend(Button, ImageParagraph);
     return Button;

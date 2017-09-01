@@ -2,14 +2,16 @@ define([
     '../../invoke',
     '../../ui',
     '../../extend',
-    './menu-element'], function (
+    './menu-element',
+    '../events/value-change-event'], function (
         Invoke,
         Ui,
         extend,
-        MenuElement) {
+        MenuElement,
+        ValueChangeEvent) {
     function BooleanMenuItem(radio, text, selected, onActionPerformed) {
         if (arguments.length < 3)
-            selected = null;
+            selected = false;
         if (arguments.length < 2)
             text = '';
         var iconTextGap = 4;
@@ -19,9 +21,10 @@ define([
 
         this.onActionPerformed = onActionPerformed;
 
-        var clickReg = Ui.on(this.element, 'click', function () {
-            self.selected = !self.selected;
+        var clickReg = Ui.on(this.element, Ui.Events.CLICK, function () {
             self.fireActionPerformed();
+            self.selected = !self.selected;
+            Ui.closeMenuSession();
         });
 
         var horizontalTextPosition = Ui.HorizontalPosition.RIGHT;

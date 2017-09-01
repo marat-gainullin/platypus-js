@@ -83,11 +83,11 @@ define([
         return top;
     }
 
-    function on(element, eventName, handler) {
-        element.addEventListener(eventName, handler, false);
+    function on(element, eventName, handler, capturePhase) {
+        element.addEventListener(eventName, handler, !!capturePhase);
         return {
             removeHandler: function () {
-                element.removeEventListener(eventName, handler, false);
+                element.removeEventListener(eventName, handler, !!capturePhase);
             }
         };
     }
@@ -101,10 +101,10 @@ define([
     function selectFile(onSelection, fileFilter) {
         var fileField = document.createElement('input');
         fileField.type = 'file';
-        if(fileFilter)
+        if (fileFilter)
             fileField.accept = fileFilter;
         on(fileField, 'change', function () {
-            if(fileField.files.length === 1)
+            if (fileField.files.length === 1)
                 onSelection(fileField.files[0]);
             else
                 onSelection(fileField.files);
@@ -352,5 +352,59 @@ define([
             return absoluteTop;
         }
     });
+
+    (function () {
+        var menuSession = null;
+        var mouseDownReg = null;
+        function startMenuSession(menu) {
+            function isOutsideOfAnyMenu(anElement) {
+                var currentElement = anElement;
+                while (currentElement !== null && currentElement.className.indexOf('p-menu') === -1 && currentElement !== document.body)
+                    currentElement = currentElement.parentElement;
+                return currentElement === document.body || currentElement === null;
+            }
+
+            if (menuSession !== menu) {
+                if (menuSession) {
+                    menuSession.close();
+                }
+                menuSession = menu;
+                mouseDownReg = on(document, Events.MOUSEDOWN, function (evt) {
+                    if (isOutsideOfAnyMenu(evt.target)) {
+                        evt.stopPropagation();
+                        closeMenuSession();
+                    }
+                }, true);
+            }
+        }
+
+        function closeMenuSession() {
+            if (menuSession) {
+                mouseDownReg.removeHandler();
+                menuSession.close();
+                menuSession = null;
+            }
+        }
+
+        function isMenuSession(){
+            return !!menuSession;
+        }
+
+        Object.defineProperty(module, 'startMenuSession', {
+            get: function () {
+                return startMenuSession;
+            }
+        });
+        Object.defineProperty(module, 'closeMenuSession', {
+            get: function () {
+                return closeMenuSession;
+            }
+        });
+        Object.defineProperty(module, 'isMenuSession', {
+            get: function () {
+                return isMenuSession;
+            }
+        });
+    }());
     return module;
 });

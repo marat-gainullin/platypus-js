@@ -1,6 +1,8 @@
 define([
+    '../../ui',
     '../../extend',
     '../widget'], function (
+        Ui,
         extend,
         Widget) {
     function MenuElement() {
@@ -22,6 +24,17 @@ define([
                     } else {
                         self.element.classList.remove('p-menu-item-submenu');
                     }
+                }
+            }
+        });
+        Ui.on(this.element, Ui.Events.MOUSEOVER, function (evt) {
+            if (Ui.isMenuSession()) {
+                self.parent.forEach(function (item) {
+                    if(item.subMenu)
+                        item.subMenu.close();
+                });
+                if (subMenu) {
+                    subMenu.showRelativeTo(self.element, self.parent.element.className.indexOf('menu-bar') === -1);
                 }
             }
         });
