@@ -339,9 +339,10 @@ define([
                             event.preventDefault();
                             event.stopPropagation();
                             if (menu.showAt) {
-                                Ui.startMenuSession(self);
-                                // TODO: Review event's coordinates here
-                                menu.showAt(event.x, event.y);
+                                Ui.startMenuSession(menu);
+                                var pageX = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                                var pageY = event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+                                menu.showAt(pageX, pageY);
                             }
                         });
                     }

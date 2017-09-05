@@ -26,3 +26,36 @@
     visibility: hidden;
     border: 1px solid lightgray;
 }
+
+.p-window-tl{
+    cursor: nw-resize;
+}
+.p-window-tr{
+    cursor: ne-resize;
+}
+.p-window-bl{
+    cursor: sw-resize;
+}
+.p-window-br{
+    cursor: se-resize;
+}
+
+.p-window-t{
+    cursor: n-resize;
+}
+.p-window-b{
+    cursor: s-resize;
+}
+.p-window-l{
+    cursor: w-resize;
+}
+.p-window-r{
+    cursor: e-resize;
+}
+.p-window-t,.p-window-b,.p-window-l,.p-window-r{
+    background-color: bisque;
+}
+.p-window-tl,.p-window-tr,.p-window-bl,.p-window-br{
+    background-color: blueviolet;
+}
+

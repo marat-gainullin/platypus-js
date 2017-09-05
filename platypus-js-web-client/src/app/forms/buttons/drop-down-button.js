@@ -20,15 +20,36 @@ define([
         this.element.appendChild(dropDown);
 
         var dropDownMenu;
+        var mouseDownReg;
+        var mouseClickReg;
         Object.defineProperty(this, "dropDownMenu", {
             get: function () {
                 return dropDownMenu;
             },
             set: function (aValue) {
-                dropDownMenu = aValue;
+                if (dropDownMenu !== aValue) {
+                    if (mouseDownReg) {
+                        mouseDownReg.removeHandler();
+                        mouseDownReg = null;
+                    }
+                    if (mouseClickReg) {
+                        mouseClickReg.removeHandler();
+                        mouseClickReg = null;
+                    }
+                    dropDownMenu = aValue;
+                    if (dropDownMenu) {
+                        mouseDownReg = Ui.on(dropDown, Ui.Events.MOUSEDOWN, function (evt) {
+                            evt.stopPropagation();
+                            Ui.startMenuSession(dropDownMenu);
+                            dropDownMenu.showRelativeTo(dropDown, false);
+                        }, false);
+                        mouseClickReg = Ui.on(dropDown, Ui.Events.CLICK, function (evt) {
+                            evt.stopPropagation();
+                        }, false);
+                    }
+                }
             }
         });
-        // TODO: Implement drop down menu showing
     }
     extend(DropDownButton, Button);
     return DropDownButton;

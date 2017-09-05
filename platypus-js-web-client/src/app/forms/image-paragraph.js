@@ -82,7 +82,7 @@ define([
         applyPosition();
         applyText();
 
-        Object.defineProperty(this, "icon", {
+        Object.defineProperty(this, 'icon', {
             get: function () {
                 return image;
             },

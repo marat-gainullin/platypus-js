@@ -29,13 +29,22 @@ define([
             return currentElement !== document.body && currentElement !== null ? currentElement['p-widget'] : null;
         }
 
-        Ui.on(this.element, Ui.Events.MOUSEDOWN, function (evt) {
-            var item = findWidgetByElement(evt.target);
+        function startItem(target){
+            var item = findWidgetByElement(target);
             if (item && item.subMenu) {
                 Ui.startMenuSession(self);
                 item.subMenu.showRelativeTo(item.element, false);
-            }
-        });
+            }            
+        }
+
+        Ui.on(this.element, Ui.Events.MOUSEDOWN, function (evt) {
+            evt.stopPropagation();
+            startItem(evt.target);
+        }, true);
+        Ui.on(this.element, Ui.Events.CLICK, function (evt) {
+            evt.stopPropagation();
+            startItem(evt.target);
+        }, true);
         function close() {
             if (self.element.parentElement) {
                 self.forEach(function (item) {

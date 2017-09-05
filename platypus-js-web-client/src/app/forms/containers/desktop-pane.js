@@ -3,16 +3,10 @@ define([
     '../anchors-pane'
 ], function (extend, AnchorsPane) {
 
-    var DEFAULT_WINDOWS_SPACING_X = 25;
-    var DEFAULT_WINDOWS_SPACING_Y = 20;
-
     function DesktopPane() {
         AnchorsPane.call(this);
 
         var self = this;
-
-        var consideredPosition = {x: DEFAULT_WINDOWS_SPACING_X, y: DEFAULT_WINDOWS_SPACING_Y};
-
 
         Object.defineProperty(this, 'forms', {
             get: function () {
@@ -78,9 +72,23 @@ define([
             }
         });
 
-        Object.defineProperty(this, 'consideredPosition', {
+        var platformLocationLeft = 0;
+        Object.defineProperty(this, 'platformLocationLeft', {
             get: function () {
-                return consideredPosition;
+                return platformLocationLeft;
+            },
+            set: function (aValue) {
+                platformLocationLeft = aValue;
+            }
+        });
+
+        var platformLocationTop = 0;
+        Object.defineProperty(this, 'platformLocationTop', {
+            get: function () {
+                return platformLocationTop;
+            },
+            set: function (aValue) {
+                platformLocationTop = aValue;
             }
         });
 
@@ -97,12 +105,11 @@ define([
 
         function check(w) {
             if (w.minimize && w.maximize && w.close && w.restore) {
-                refreshConsideredPosition();
                 var regs = [];
                 if (w.addActivateHandler) {
                     regs.push(w.addActivateHandler(function (anEvent) {
                         self.forEach(function (child) {
-                            if (child != anEvent.target && child.deactivate) {
+                            if (child !== anEvent.target && child.deactivate) {
                                 child.deactivate();
                             }
                         });
@@ -118,17 +125,6 @@ define([
                 }
             }
         }
-
-        function refreshConsideredPosition() {
-            if (consideredPosition.x > self.element.clientWidth / 2) {
-                consideredPosition = {x: 0, y: consideredPosition.y};// setX(0)
-            }
-            if (consideredPosition.y > self.element.clientHeight / 2) {
-                consideredPosition = {x: consideredPosition.x, y: 0};// setY(0)
-            }
-            consideredPosition = {x: consideredPosition.x + DEFAULT_WINDOWS_SPACING_X, y: consideredPosition.y + DEFAULT_WINDOWS_SPACING_Y};
-        }
-
     }
     extend(DesktopPane, AnchorsPane);
     return DesktopPane;

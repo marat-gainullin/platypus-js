@@ -45,7 +45,7 @@ define([
             }
         });
 
-        function showAt(top, left) {
+        function showAt(left, top) {
             if (self.element.parentElement)
                 throw 'Menu is already shown';
             this.element.classList.remove('p-menu-horizontal-rel');

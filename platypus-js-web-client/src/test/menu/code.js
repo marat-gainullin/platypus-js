@@ -218,7 +218,47 @@ describe('Menu Api', function () {
             expectBooleanMenuItemMarkup(RadioMenuItem, Invoke, Logger, done);
         });
     });
-    fit('MenuBar.Markup', function (done) {
+
+    function fillMenu(
+            RootMenu,
+            ButtonGroup,
+            MenuItem,
+            CheckMenuItem,
+            RadioMenuItem,
+            MenuSeparator,
+            Menu) {
+        var menu = new RootMenu();
+
+        var fileItem = new MenuItem('File');
+        fileItem.subMenu = new Menu();
+        fileItem.subMenu.add(new MenuItem('Save'));
+        fileItem.subMenu.add(new MenuItem('Save As'));
+        fileItem.subMenu.add(new MenuItem('Exit'));
+        menu.add(fileItem);
+
+        var settingsItem = new MenuItem('Settings');
+        settingsItem.subMenu = new Menu();
+        settingsItem.subMenu.add(new MenuItem('Main'));
+        var hardwareItem = new MenuItem('Hardware');
+        settingsItem.subMenu.add(hardwareItem);
+        hardwareItem.subMenu = new Menu();
+        hardwareItem.subMenu.add(new CheckMenuItem('Motorola'));
+        hardwareItem.subMenu.add(new RadioMenuItem('LG'));
+        hardwareItem.subMenu.add(new RadioMenuItem('Huawei'));
+        var buttonGroup = new ButtonGroup();
+        for (var m = 0; m < hardwareItem.subMenu.count; m++) {
+            var item = hardwareItem.subMenu.child(m);
+            item.buttonGroup = buttonGroup;
+            expect(item.buttonGroup).toBe(buttonGroup);
+        }
+        settingsItem.subMenu.add(new MenuItem('Misc'));
+        settingsItem.subMenu.add(new MenuSeparator('Misc'));
+        settingsItem.subMenu.add(new MenuItem('Other'));
+        menu.add(settingsItem);
+        return menu;
+    }
+
+    it('MenuBar.Markup', function (done) {
         require([
             'forms/containers/button-group',
             'forms/menu/menu-item',
@@ -235,36 +275,92 @@ describe('Menu Api', function () {
                 MenuSeparator,
                 Menu,
                 MenuBar) {
-            var menuBar = new MenuBar();
+            var menuBar = fillMenu(
+                    MenuBar,
+                    ButtonGroup,
+                    MenuItem,
+                    CheckMenuItem,
+                    RadioMenuItem,
+                    MenuSeparator,
+                    Menu);
             document.body.appendChild(menuBar.element);
+            document.body.removeChild(menuBar.element);
+            done();
+        });
+    });
+    it('PopupMenu.Markup', function (done) {
+        require([
+            'forms/buttons/button',
+            'forms/containers/button-group',
+            'forms/menu/menu-item',
+            'forms/menu/check-menu-item',
+            'forms/menu/radio-menu-item',
+            'forms/menu/menu-separator',
+            'forms/menu/menu',
+            'forms/menu/menu-bar'
+        ], function (
+                Button,
+                ButtonGroup,
+                MenuItem,
+                CheckMenuItem,
+                RadioMenuItem,
+                MenuSeparator,
+                Menu) {
+            var button = new Button('Right click me');
+            document.body.appendChild(button.element);
+
+            var menu = fillMenu(
+                    Menu,
+                    ButtonGroup,
+                    MenuItem,
+                    CheckMenuItem,
+                    RadioMenuItem,
+                    MenuSeparator,
+                    Menu);
+            button.componentPopupMenu = menu;
+            expect(button.componentPopupMenu).toBe(menu);
+            document.body.removeChild(button.element);
+            done();
+        });
+    });
+    it('DropDownMenu.Markup', function (done) {
+        require([
+            'logger',
+            'forms/buttons/drop-down-button',
+            'forms/containers/button-group',
+            'forms/menu/menu-item',
+            'forms/menu/check-menu-item',
+            'forms/menu/radio-menu-item',
+            'forms/menu/menu-separator',
+            'forms/menu/menu',
+            'forms/menu/menu-bar'
+        ], function (
+                Logger,
+                DropDownButton,
+                ButtonGroup,
+                MenuItem,
+                CheckMenuItem,
+                RadioMenuItem,
+                MenuSeparator,
+                Menu) {
+            var button = new DropDownButton('Click my chevron');
+            document.body.appendChild(button.element);
             
-            var fileItem = new MenuItem('File');
-            fileItem.subMenu = new Menu();
-            fileItem.subMenu.add(new MenuItem('Save'));
-            fileItem.subMenu.add(new MenuItem('Save As'));
-            fileItem.subMenu.add(new MenuItem('Exit'));
-            menuBar.add(fileItem);
+            button.onActionPerformed = function (evt) {
+                Logger.info("Action performed on '" + evt.source.constructor.name + "'");
+            };
 
-            var settingsItem = new MenuItem('Settings');
-            settingsItem.subMenu = new Menu();
-            settingsItem.subMenu.add(new MenuItem('Main'));
-            var hardwareItem = new MenuItem('Hardware');
-            settingsItem.subMenu.add(hardwareItem);
-            hardwareItem.subMenu = new Menu();
-            hardwareItem.subMenu.add(new CheckMenuItem('Motorola'));
-            hardwareItem.subMenu.add(new RadioMenuItem('LG'));
-            hardwareItem.subMenu.add(new RadioMenuItem('Huawei'));
-            var buttonGroup = new ButtonGroup();
-            for (var m = 0; m < hardwareItem.subMenu.count; m++) {
-                var item = hardwareItem.subMenu.child(m);
-                item.buttonGroup = buttonGroup;
-            }
-            settingsItem.subMenu.add(new MenuItem('Misc'));
-            settingsItem.subMenu.add(new MenuSeparator('Misc'));
-            settingsItem.subMenu.add(new MenuItem('Other'));
-            menuBar.add(settingsItem);
-
-            // document.body.removeChild(menuBar.element);
+            var menu = fillMenu(
+                    Menu,
+                    ButtonGroup,
+                    MenuItem,
+                    CheckMenuItem,
+                    RadioMenuItem,
+                    MenuSeparator,
+                    Menu);
+            button.dropDownMenu = menu;
+            expect(button.dropDownMenu).toBe(menu);
+            document.body.removeChild(button.element);
             done();
         });
     });
