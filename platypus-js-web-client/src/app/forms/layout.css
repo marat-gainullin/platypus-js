@@ -251,6 +251,11 @@
     position: absolute;
 }
 
+.p-window-shell{
+    display: inline-block;
+    position: absolute;
+}
+
 .p-window-shell > .p-widget,
 .p-window-shell > .p-window-caption
 {
@@ -259,6 +264,9 @@
 
 .p-window-caption{
     white-space: nowrap;
+    position: relative;
+    line-height: normal;
+    background-color: blueviolet;
 }
 
 .p-window-tools{
@@ -270,11 +278,22 @@
     height: 100%;
 }
 
+/*
+.p-window-tools::after{
+    content: ' ';
+    height: 100%;
+    visibility: hidden;
+    vertical-align: middle;
+    display: inline-block;
+}
+*/
+
 .p-window-close-tool,
 .p-window-minimize-tool,
 .p-window-maximize-tool,
 .p-window-restore-tool{
     display: inline-block;
+    vertical-align: middle;
 }
 
 .p-window-close-tool::after{content: 'x'}
@@ -284,11 +303,16 @@
 /* content layout duplication to avoid by content vs. by size layout conflict */
 .p-window-text::after{content: '[ ]'; visibility: hidden}
 .p-window-text{
-    text-overflow: ellipsis;
+    display: inline-block;
     vertical-align: middle;
+    text-overflow: ellipsis;
+    margin-top: 0px;
+    margin-bottom: 0px;
 }
 .p-window-image{
+    display: inline-block;
     vertical-align: middle;
+    margin-right: 5px;
 }
 
 .p-window-tl,
@@ -306,44 +330,54 @@
 .p-window-tr,
 .p-window-bl,
 .p-window-br{
-    width: 10px;
-    height: 10px;
+    width: 20px;
+    height: 20px;
 }
 
 .p-window-tl{
-    top: 0px;
-    left: 0px;
+    top: -5px;
+    left: -5px;
 }
 .p-window-tr{
-    top: 0px;
-    right: 0px;
+    top: -5px;
+    right: -5px;
 }
 .p-window-bl{
-    bottom: 0px;
-    left: 0px;
+    bottom: -5px;
+    left: -5px;
 }
 .p-window-br{
-    bottom: 0px;
-    right: 0px;
+    bottom: -5px;
+    right: -5px;
 }
 
 .p-window-t{
-    top: 0px;
+    top: -5px;
     width: 100%;
     height: 5px;
 }
 .p-window-b{
-    bottom: 0px;
+    bottom: -5px;
     width: 100%;
     height: 5px;
 }
 .p-window-l{
-    left: 0px;
+    left: -5px;
     height: 100%;
     width: 5px;
 }
 .p-window-r{
-    right: 0px;
+    right: -5px;
     height: 100%;
     width: 5px;
+}
+.p-window-modal-mask{
+    display: inline-block;
+    position: absolute;
+    box-sizing: border-box;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    background-color: lightgray;
 }

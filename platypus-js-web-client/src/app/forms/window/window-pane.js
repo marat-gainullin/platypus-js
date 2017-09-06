@@ -8,7 +8,7 @@ define([
         Invoke,
         Id,
         WindowEvent) {
-    
+
     var DEFAULT_WINDOWS_SPACING_X = 25;
     var DEFAULT_WINDOWS_SPACING_Y = 20;
 
@@ -21,85 +21,173 @@ define([
         return shownForms.get(aFormKey);
     }
 
-    function WindowPane() {
+    function WindowPane(aView, formKey) {
+        if (arguments.length < 2)
+            formKey = Id.generate();
+        var content;
+        if (arguments.length < 1) {
+            content = document.createElement('div');
+            content.className = 'p-widget';
+        } else {
+            content = aView.element;
+        }
         var self = this;
         var shell = document.createElement('div');
-        shell.calssName = 'p-window-shell';
+        shell['p-widget'] = this;
+        shell.className = 'p-window-shell';
         var caption = document.createElement('div');
-        caption.calssName = 'p-window-caption';
+        caption.className = 'p-window-caption';
+
+        function onDecoration(element, onMove) {
+            Ui.on(element, Ui.Events.MOUSEDOWN, function (downEvent) {
+                var snapshot = {
+                    downPageX: downEvent.clientX + document.body.scrollLeft + document.documentElement.scrollLeft,
+                    downPageY: downEvent.clientY + document.body.scrollTop + document.documentElement.scrollTop,
+                    startLeft: shell.offsetLeft,
+                    startTop: shell.offsetTop,
+                    startWidth: content.offsetWidth,
+                    startHeight: content.offsetHeight
+                };
+                var mouseMoveReg = Ui.on(document, Ui.Events.MOUSEMOVE, function (moveEvent) {
+                    onMove(snapshot, moveEvent);
+                }, true);
+                var mouseUpReg = Ui.on(document, Ui.Events.MOUSEUP, function () {
+                    mouseMoveReg.removeHandler();
+                    mouseUpReg.removeHandler();
+                }, true);
+            });
+        }
+        onDecoration(caption, function (snapshot, event) {
+            var movePageX = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+            var movePageY = event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+            var newLeft = snapshot.startLeft + movePageX - snapshot.downPageX;
+            var newTop = snapshot.startTop + movePageY - snapshot.downPageY;
+            shell.style.left = (newLeft >= 0 ? newLeft : 0) + 'px';
+            shell.style.top = (newTop >= 0 ? newTop : 0) + 'px';
+        });
+
         var image = null;
         var text = document.createElement('p');
-        text.calssName = 'p-window-text';
+        text.className = 'p-window-text';
         caption.appendChild(text);
-        Ui.on(caption, Ui.Events.DBLCLICK, function(){
-            if(maximized){
+        Ui.on(caption, Ui.Events.DBLCLICK, function () {
+            if (maximized) {
                 restore();
-            } else if(!minimized){
+            } else if (!minimized) {
                 maximize();
             }
         });
 
+        function moveLeft(snapshot, event) {
+            var movePageX = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+            var newLeft = snapshot.startLeft + movePageX - snapshot.downPageX;
+            newLeft = newLeft >= 0 ? newLeft : 0;
+            var newWidth = snapshot.startWidth - (newLeft - snapshot.startLeft);
+            newWidth = newWidth >= 0 ? newWidth : 0;
+            shell.style.left = newLeft + 'px';
+            content.style.width = newWidth + 'px';
+        }
+        function moveRight(snapshot, event) {
+            var movePageX = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+            var newWidth = snapshot.startWidth + movePageX - snapshot.downPageX;
+            newWidth = newWidth >= 0 ? newWidth : 0;
+            content.style.width = newWidth + 'px';
+        }
+        function moveTop(snapshot, event) {
+            var movePageY = event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+            var newTop = snapshot.startTop + movePageY - snapshot.downPageY;
+            newTop = newTop >= 0 ? newTop : 0;
+            var newHeight = snapshot.startHeight - (newTop - snapshot.startTop);
+            newHeight = newHeight >= 0 ? newHeight : 0;
+            shell.style.top = newTop + 'px';
+            content.style.height = newHeight + 'px';
+        }
+        function moveBottom(snapshot, event) {
+            var movePageY = event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+            var newHeight = snapshot.startHeight + movePageY - snapshot.downPageY;
+            newHeight = newHeight >= 0 ? newHeight : 0;
+            content.style.height = newHeight + 'px';
+        }
         var t = document.createElement('div');
         t.className = 'p-window-t';
+        onDecoration(t, moveTop);
         var l = document.createElement('div');
         l.className = 'p-window-l';
+        onDecoration(l, moveLeft);
         var b = document.createElement('div');
         b.className = 'p-window-b';
+        onDecoration(b, moveBottom);
         var r = document.createElement('div');
         r.className = 'p-window-r';
+        onDecoration(r, moveRight);
         var tl = document.createElement('div');
         tl.className = 'p-window-tl';
+        onDecoration(tl, function (snapshot, event) {
+            moveTop(snapshot, event);
+            moveLeft(snapshot, event);
+        });
         var tr = document.createElement('div');
+        onDecoration(tr, function (snapshot, event) {
+            moveTop(snapshot, event);
+            moveRight(snapshot, event);
+        });
         tr.className = 'p-window-tr';
         var bl = document.createElement('div');
         bl.className = 'p-window-bl';
+        onDecoration(bl, function (snapshot, event) {
+            moveBottom(snapshot, event);
+            moveLeft(snapshot, event);
+        });
         var br = document.createElement('div');
         br.className = 'p-window-br';
+        onDecoration(br, function (snapshot, event) {
+            moveBottom(snapshot, event);
+            moveRight(snapshot, event);
+        });
 
-        [t, l, r, b, tl, tr, bl, b, br].forEach(function (decor) {
-            shell.appendChild(decor);
+        [t, l, r, b, tl, tr, bl, br, caption, content].forEach(function (item) {
+            shell.appendChild(item);
         });
 
         var tools = document.createElement('div');
         tools.className = 'p-window-tools';
         var closeTool = document.createElement('div');
         closeTool.className = 'p-window-close-tool';
-        Ui.on(closeTool, Ui.Events.CLICK, function(){
+        Ui.on(closeTool, Ui.Events.CLICK, function () {
             close();
         });
         var minimizeTool = document.createElement('div');
         minimizeTool.className = 'p-window-minimize-tool';
-        Ui.on(minimizeTool, Ui.Events.CLICK, function(){
+        Ui.on(minimizeTool, Ui.Events.CLICK, function () {
             minimize();
         });
         var restoreTool = document.createElement('div');
         restoreTool.className = 'p-window-restore-tool';
-        Ui.on(restoreTool, Ui.Events.CLICK, function(){
+        Ui.on(restoreTool, Ui.Events.CLICK, function () {
             restore();
         });
         var maximizeTool = document.createElement('div');
         maximizeTool.className = 'p-window-maximize-tool';
-        Ui.on(maximizeTool, Ui.Events.CLICK, function(){
+        Ui.on(maximizeTool, Ui.Events.CLICK, function () {
             maximize();
         });
-
         caption.appendChild(tools);
         [minimizeTool, restoreTool, maximizeTool, closeTool].forEach(function (tool) {
             tools.appendChild(tool);
         });
 
-        var formKey = Id.generate();
         Object.defineProperty(this, 'formKey', {
             get: function () {
                 return formKey;
             },
             set: function (aValue) {
                 if (formKey !== aValue) {
+                    var formsMap = lookupFormsMap();
                     if (shell.parentElement)
-                        shownForms.delete(formKey);
+                        formsMap.delete(formKey);
                     formKey = aValue;
                     if (shell.parentElement)
-                        shownForms.set(formKey, self);
+                        formsMap.set(formKey, self);
                     fireShownChange();
                 }
             }
@@ -128,7 +216,7 @@ define([
                     }
                     image = aValue;
                     if (image) {
-                        caption.insertBefore(text);
+                        caption.insertBefore(image, text);
                         image.classList.add('p-window-image');
                     }
                 }
@@ -161,6 +249,7 @@ define([
             restoreTool.style.display = minimized || maximized ? '' : 'none';
             closeTool.style.display = closable ? '' : 'none';
         }
+        updateToolsVisibility();
 
         Object.defineProperty(this, "resizable", {
             get: function () {
@@ -279,20 +368,21 @@ define([
             }
         });
 
+        var autoClose = false;
         function isOutsideOfWindow(anElement) {
             var currentElement = anElement;
             while (currentElement !== null && currentElement !== shell && currentElement !== document.body)
                 currentElement = currentElement.parentElement;
             return currentElement === document.body || currentElement === null;
         }
-        var autoHideMouseDownReg = null;
-        function applyAutoHide() {
-            if (autoHideMouseDownReg) {
-                autoHideMouseDownReg.removeHandler();
-                autoHideMouseDownReg = null;
+        var autoCloseMouseDownReg = null;
+        function applyAutoClose() {
+            if (autoCloseMouseDownReg) {
+                autoCloseMouseDownReg.removeHandler();
+                autoCloseMouseDownReg = null;
             }
             if (autoClose && shell.parentElement) {
-                autoHideMouseDownReg = Ui.on(document, Ui.Events.MOUSEDOWN, function (evt) {
+                autoCloseMouseDownReg = Ui.on(document, Ui.Events.MOUSEDOWN, function (evt) {
                     if (isOutsideOfWindow(evt.target)) {
                         evt.stopPropagation();
                         close();
@@ -305,10 +395,10 @@ define([
             get: function () {
                 return autoClose;
             },
-            set function(aValue) {
+            set: function (aValue) {
                 if (autoClose !== aValue) {
                     autoClose = !!aValue;
-                    applyAutoHide();
+                    applyAutoClose();
                 }
             }
         });
@@ -330,7 +420,8 @@ define([
         });
 
         function fireWindowOpened() {
-            shownForms.set(formKey, self);
+            var formsMap = lookupFormsMap();
+            formsMap.set(formKey, self);
             var event = new WindowEvent(self);
             windowOpenedHandlers.forEach(function (h) {
                 Invoke.later(function () {
@@ -338,7 +429,7 @@ define([
                 });
             });
             fireShownChange();
-            applyAutoHide();
+            applyAutoClose();
         }
 
         var onWindowOpened = null;
@@ -379,10 +470,14 @@ define([
             var canClose = true;
             var event = new WindowEvent(self);
             windowClosingHandlers.forEach(function (h) {
-                if (!h(event)) {
+                if (h(event) === false) {
                     canClose = false;
                 }
             });
+            if (canClose) {
+                var formsMap = lookupFormsMap();
+                formsMap.delete(formKey);
+            }
             return canClose;
         }
 
@@ -421,7 +516,6 @@ define([
         });
 
         function fireWindowClosed(selectedItem) {
-            shownForms.delete(formKey);
             var event = new WindowEvent(self);
             windowClosedHandlers.forEach(function (h) {
                 Invoke.later(function () {
@@ -429,9 +523,9 @@ define([
                 });
             });
             fireShownChange();
-            if (autoHideMouseDownReg) {
-                autoHideMouseDownReg.removeHandler();
-                autoHideMouseDownReg = null;
+            if (autoCloseMouseDownReg) {
+                autoCloseMouseDownReg.removeHandler();
+                autoCloseMouseDownReg = null;
             }
             if (onItemSelected) {
                 var _onItemSelected = onItemSelected;
@@ -627,7 +721,7 @@ define([
                 }
                 onWindowActivated = aValue;
                 if (onWindowActivated) {
-                    windowActivatedReg = addWindowHandler(onWindowActivated);
+                    windowActivatedReg = addWindowActivatedHandler(onWindowActivated);
                 }
             }
         });
@@ -675,17 +769,27 @@ define([
             }
         });
 
+        function lookupFormsMap() {
+            return shell.parentElement.className.indexOf('p-widget') !== -1 &&
+                    shell.parentElement.className.indexOf('p-container') !== -1 ?
+                    shell.parentElement['p-widget'].shownForms :
+                    shownForms;
+        }
+
         function activate() {
-            if (shell.className.indexOf('p-window-active') === -1) {
-                Array.from(shownForms.values)
-                        .filter(function (aWindow) {
-                            return aWindow !== self;
-                        })
-                        .forEach(function (aWindow) {
-                            aWindow.deactivate();
-                        });
-                shell.classList.add('p-window-active');
-                fireWindowActivated();
+            if (shell.parentElement) {
+                var formsMap = lookupFormsMap();
+                if (shell.className.indexOf('p-window-active') === -1) {
+                    Array.from(formsMap.values())
+                            .filter(function (aWindow) {
+                                return aWindow !== self;
+                            })
+                            .forEach(function (aWindow) {
+                                aWindow.deactivate();
+                            });
+                    shell.classList.add('p-window-active');
+                    fireWindowActivated();
+                }
             }
         }
         Object.defineProperty(this, "activate", {
@@ -815,8 +919,11 @@ define([
 
         function minimize() {
             if (!minimized) {
+                if (maximized)
+                    restore();
                 sizePositionSnapshot = {left: self.left, top: self.top, width: self.width, height: self.height, maximized: maximized};
                 minimized = true;
+                content.style.height = '0px';
                 fireWindowMinimized();
                 updateToolsVisibility();
             }
@@ -828,11 +935,21 @@ define([
         });
 
         function maximize() {
-            if (!maximized && !minimized) {
-                sizePositionSnapshot = {left: self.left, top: self.top, width: self.width, height: self.height, maximized: maximized};
-                maximized = true;
-                fireWindowMaximized();
-                updateToolsVisibility();
+            if (shell.parentElement) {
+                if (!maximized && !minimized) {
+                    sizePositionSnapshot = {left: self.left, top: self.top, width: self.width, height: self.height, maximized: maximized};
+                    maximized = true;
+                    self.left = self.top = 0;
+                    if (shell.parentElement === document.body) {
+                        self.width = window.innerWidth;
+                        self.height = window.innerHeight;
+                    } else {
+                        self.width = shell.parentElement.clientWidth;
+                        self.height = shell.parentElement.clientHeight;
+                    }
+                    fireWindowMaximized();
+                    updateToolsVisibility();
+                }
             }
         }
         Object.defineProperty(this, "maximize", {

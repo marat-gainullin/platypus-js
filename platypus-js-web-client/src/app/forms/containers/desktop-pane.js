@@ -1,6 +1,6 @@
 define([
     '../../extend',
-    '../anchors-pane'
+    './anchors-pane'
 ], function (extend, AnchorsPane) {
 
     function DesktopPane() {
@@ -8,20 +8,26 @@ define([
 
         var self = this;
 
+        function lookupForms(){
+            var res = [];
+            var child = self.element.firstElementChild;
+            while(child){
+                if(child.className.indexOf('p-window-shell') !== -1){
+                    res.push(child['p-widget']);
+                }
+                child = child.nextElementSibling;
+            }
+            return res;
+        }
+
         Object.defineProperty(this, 'forms', {
             get: function () {
-                var managed = [];
-                self.forEach(function (w) {
-                    if (w.minimize && w.maximize && w.close && w.restore) {
-                        managed.push(w);
-                    }
-                });
-                return managed;
+                return lookupForms();
             }
         });
 
         function minimizeAll() {
-            self.forEach(function (w) {
+            lookupForms().forEach(function (w) {
                 if (w.minimize) {
                     w.minimize();
                 }
@@ -34,7 +40,7 @@ define([
         });
 
         function maximizeAll() {
-            self.forEach(function (w) {
+            lookupForms().forEach(function (w) {
                 if (w.maximize) {
                     w.maximize();
                 }
@@ -47,7 +53,7 @@ define([
         });
 
         function restoreAll() {
-            self.forEach(function (w) {
+            lookupForms().forEach(function (w) {
                 if (w.restore) {
                     w.restore();
                 }
@@ -60,7 +66,7 @@ define([
         });
 
         function closeAll() {
-            self.forEach(function (w) {
+            lookupForms().forEach(function (w) {
                 if (w.close) {
                     w.close();
                 }
@@ -72,7 +78,7 @@ define([
             }
         });
 
-        var platformLocationLeft = 0;
+        var platformLocationLeft = 10;
         Object.defineProperty(this, 'platformLocationLeft', {
             get: function () {
                 return platformLocationLeft;
@@ -82,7 +88,7 @@ define([
             }
         });
 
-        var platformLocationTop = 0;
+        var platformLocationTop = 10;
         Object.defineProperty(this, 'platformLocationTop', {
             get: function () {
                 return platformLocationTop;
@@ -92,39 +98,29 @@ define([
             }
         });
 
-        var superAdd = this.add;
-        function add(w, beforeIndex) {
-            superAdd(w, beforeIndex);
-            check(w);
+        var shownForms = new Map();
+        function getShownForms() {
+            return Array.from(shownForms.values());
         }
-        Object.defineProperty(this, 'add', {
+        function getShownForm(aFormKey) {
+            return shownForms.get(aFormKey);
+        }
+        Object.defineProperty(this, 'shownForms', {
             get: function () {
-                return add;
+                return shownForms;
+            }
+        });
+        Object.defineProperty(this, 'shown', {
+            get: function () {
+                return getShownForms;
             }
         });
 
-        function check(w) {
-            if (w.minimize && w.maximize && w.close && w.restore) {
-                var regs = [];
-                if (w.addActivateHandler) {
-                    regs.push(w.addActivateHandler(function (anEvent) {
-                        self.forEach(function (child) {
-                            if (child !== anEvent.target && child.deactivate) {
-                                child.deactivate();
-                            }
-                        });
-                    }));
-                }
-                if (w.addClosedHandler) {
-                    regs.push(w.addClosedHandler(function (event) {
-                        self.remove(event.target);
-                        regs.forEach(function (reg) {
-                            reg.removeHandler();
-                        });
-                    }));
-                }
+        Object.defineProperty(this, 'getShownForm', {
+            get: function () {
+                return getShownForm;
             }
-        }
+        });
     }
     extend(DesktopPane, AnchorsPane);
     return DesktopPane;
