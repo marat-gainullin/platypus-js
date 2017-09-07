@@ -90,7 +90,7 @@ define([
         Ui.on(this.element, Ui.Events.MOUSEOVER, function () {
             checkChevrons();
         });
-        Ui.on(rightChevron, Ui.Events.SCROLL, function (event) {
+        Ui.on(this.element, Ui.Events.SCROLL, function (event) {
             checkChevrons();
         });
 

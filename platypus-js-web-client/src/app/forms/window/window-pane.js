@@ -38,8 +38,9 @@ define([
         var caption = document.createElement('div');
         caption.className = 'p-window-caption';
 
-        function onDecoration(element, onMove) {
+        function decorationOnMove(element, onMove) {
             Ui.on(element, Ui.Events.MOUSEDOWN, function (downEvent) {
+                downEvent.stopPropagation();
                 var snapshot = {
                     downPageX: downEvent.clientX + document.body.scrollLeft + document.documentElement.scrollLeft,
                     downPageY: downEvent.clientY + document.body.scrollTop + document.documentElement.scrollTop,
@@ -49,15 +50,17 @@ define([
                     startHeight: content.offsetHeight
                 };
                 var mouseMoveReg = Ui.on(document, Ui.Events.MOUSEMOVE, function (moveEvent) {
+                    moveEvent.stopPropagation();
                     onMove(snapshot, moveEvent);
                 }, true);
-                var mouseUpReg = Ui.on(document, Ui.Events.MOUSEUP, function () {
+                var mouseUpReg = Ui.on(document, Ui.Events.MOUSEUP, function (upEvent) {
+                    upEvent.stopPropagation();
                     mouseMoveReg.removeHandler();
                     mouseUpReg.removeHandler();
                 }, true);
             });
         }
-        onDecoration(caption, function (snapshot, event) {
+        decorationOnMove(caption, function (snapshot, event) {
             var movePageX = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
             var movePageY = event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
             var newLeft = snapshot.startLeft + movePageX - snapshot.downPageX;
@@ -110,37 +113,37 @@ define([
         }
         var t = document.createElement('div');
         t.className = 'p-window-t';
-        onDecoration(t, moveTop);
+        decorationOnMove(t, moveTop);
         var l = document.createElement('div');
         l.className = 'p-window-l';
-        onDecoration(l, moveLeft);
+        decorationOnMove(l, moveLeft);
         var b = document.createElement('div');
         b.className = 'p-window-b';
-        onDecoration(b, moveBottom);
+        decorationOnMove(b, moveBottom);
         var r = document.createElement('div');
         r.className = 'p-window-r';
-        onDecoration(r, moveRight);
+        decorationOnMove(r, moveRight);
         var tl = document.createElement('div');
         tl.className = 'p-window-tl';
-        onDecoration(tl, function (snapshot, event) {
+        decorationOnMove(tl, function (snapshot, event) {
             moveTop(snapshot, event);
             moveLeft(snapshot, event);
         });
         var tr = document.createElement('div');
-        onDecoration(tr, function (snapshot, event) {
+        decorationOnMove(tr, function (snapshot, event) {
             moveTop(snapshot, event);
             moveRight(snapshot, event);
         });
         tr.className = 'p-window-tr';
         var bl = document.createElement('div');
         bl.className = 'p-window-bl';
-        onDecoration(bl, function (snapshot, event) {
+        decorationOnMove(bl, function (snapshot, event) {
             moveBottom(snapshot, event);
             moveLeft(snapshot, event);
         });
         var br = document.createElement('div');
         br.className = 'p-window-br';
-        onDecoration(br, function (snapshot, event) {
+        decorationOnMove(br, function (snapshot, event) {
             moveBottom(snapshot, event);
             moveRight(snapshot, event);
         });
@@ -222,7 +225,7 @@ define([
                 }
             }
         });
-        Object.defineProperty(this, "title", {
+        Object.defineProperty(this, 'title', {
             get: function () {
                 return text.innerText;
             },
@@ -251,7 +254,7 @@ define([
         }
         updateToolsVisibility();
 
-        Object.defineProperty(this, "resizable", {
+        Object.defineProperty(this, 'resizable', {
             get: function () {
                 return resizable;
             },
@@ -260,7 +263,7 @@ define([
                 updateToolsVisibility();
             }
         });
-        Object.defineProperty(this, "minimizable", {
+        Object.defineProperty(this, 'minimizable', {
             get: function () {
                 return minimizable;
             },
@@ -269,7 +272,7 @@ define([
                 updateToolsVisibility();
             }
         });
-        Object.defineProperty(this, "maximizable", {
+        Object.defineProperty(this, 'maximizable', {
             get: function () {
                 return maximizable;
             },
@@ -278,7 +281,7 @@ define([
                 updateToolsVisibility();
             }
         });
-        Object.defineProperty(this, "closable", {
+        Object.defineProperty(this, 'closable', {
             get: function () {
                 return closable;
             },
@@ -287,39 +290,38 @@ define([
                 updateToolsVisibility();
             }
         });
-        Object.defineProperty(this, "minimized", {
+        Object.defineProperty(this, 'minimized', {
             get: function () {
                 return minimized;
             }
         });
-        Object.defineProperty(this, "maximized", {
+        Object.defineProperty(this, 'maximized', {
             get: function () {
                 return maximized;
             }
         });
-        Object.defineProperty(this, "undecorated", {
+        Object.defineProperty(this, 'undecorated', {
             get: function () {
                 return undecorated;
             },
             set: function (aValue) {
                 undecorated = !!aValue;
-                [caption, t, l, r, b, tl, tr, bl, b, br].forEach(function (decor) {
+                [caption, t, l, r, b, tl, tr, bl, br].forEach(function (decor) {
                     decor.style.display = undecorated ? 'none' : '';
                 });
             }
         });
-        Object.defineProperty(this, "opacity", {
+        Object.defineProperty(this, 'opacity', {
             get: function () {
                 return opacity;
             },
             set: function (aValue) {
                 if (opacity !== aValue) {
-                    opacity = (aValue * 1);
-                    shell.style.opacity = opacity;
+                    shell.style.opacity = isNaN(aValue) ? '' : aValue;
                 }
             }
         });
-        Object.defineProperty(this, "alwaysOnTop", {
+        Object.defineProperty(this, 'alwaysOnTop', {
             get: function () {
                 return alwaysOnTop;
             },
@@ -327,7 +329,7 @@ define([
                 alwaysOnTop = !!aValue;
             }
         });
-        Object.defineProperty(this, "locationByPlatform", {
+        Object.defineProperty(this, 'locationByPlatform', {
             get: function () {
                 return locationByPlatform;
             },
@@ -335,7 +337,7 @@ define([
                 locationByPlatform = !!aValue;
             }
         });
-        Object.defineProperty(this, "left", {
+        Object.defineProperty(this, 'left', {
             get: function () {
                 return shell.offsetLeft;
             },
@@ -343,7 +345,7 @@ define([
                 shell.style.left = (aValue * 1) + 'px';
             }
         });
-        Object.defineProperty(this, "top", {
+        Object.defineProperty(this, 'top', {
             get: function () {
                 return shell.offsetTop;
             },
@@ -351,7 +353,7 @@ define([
                 shell.style.top = (aValue * 1) + 'px';
             }
         });
-        Object.defineProperty(this, "width", {
+        Object.defineProperty(this, 'width', {
             get: function () {
                 return shell.offsetWidth;
             },
@@ -359,7 +361,7 @@ define([
                 content.style.width = (aValue * 1 - (shell.offsetWidth - content.offsetWidth)) + 'px';
             }
         });
-        Object.defineProperty(this, "height", {
+        Object.defineProperty(this, 'height', {
             get: function () {
                 return shell.offsetHeight;
             },
@@ -391,7 +393,7 @@ define([
             }
         }
 
-        Object.defineProperty(this, "autoClose", {
+        Object.defineProperty(this, 'autoClose', {
             get: function () {
                 return autoClose;
             },
@@ -434,7 +436,7 @@ define([
 
         var onWindowOpened = null;
         var windowOpenedReg = null;
-        Object.defineProperty(this, "onWindowOpened", {
+        Object.defineProperty(this, 'onWindowOpened', {
             get: function () {
                 return onWindowOpened;
             },
@@ -483,7 +485,7 @@ define([
 
         var onWindowClosing = null;
         var windowClosingReg = null;
-        Object.defineProperty(this, "onWindowClosing", {
+        Object.defineProperty(this, 'onWindowClosing', {
             get: function () {
                 return onWindowClosing;
             },
@@ -538,7 +540,7 @@ define([
 
         var onWindowClosed = null;
         var windowClosedReg = null;
-        Object.defineProperty(this, "onWindowClosed", {
+        Object.defineProperty(this, 'onWindowClosed', {
             get: function () {
                 return onWindowClosed;
             },
@@ -581,7 +583,7 @@ define([
 
         var onWindowMinimized = null;
         var windowMinimizedReg = null;
-        Object.defineProperty(this, "onWindowMinimized", {
+        Object.defineProperty(this, 'onWindowMinimized', {
             get: function () {
                 return onWindowMinimized;
             },
@@ -624,7 +626,7 @@ define([
 
         var onWindowRestored = null;
         var windowRestoredReg = null;
-        Object.defineProperty(this, "onWindowRestored", {
+        Object.defineProperty(this, 'onWindowRestored', {
             get: function () {
                 return onWindowRestored;
             },
@@ -667,7 +669,7 @@ define([
 
         var onWindowMaximized = null;
         var windowMaximizedReg = null;
-        Object.defineProperty(this, "onWindowMaximized", {
+        Object.defineProperty(this, 'onWindowMaximized', {
             get: function () {
                 return onWindowMaximized;
             },
@@ -710,7 +712,7 @@ define([
 
         var onWindowActivated = null;
         var windowActivatedReg = null;
-        Object.defineProperty(this, "onWindowActivated", {
+        Object.defineProperty(this, 'onWindowActivated', {
             get: function () {
                 return onWindowActivated;
             },
@@ -753,7 +755,7 @@ define([
 
         var onWindowDeactivated = null;
         var windowDeactivatedReg = null;
-        Object.defineProperty(this, "onWindowDeactivated", {
+        Object.defineProperty(this, 'onWindowDeactivated', {
             get: function () {
                 return onWindowDeactivated;
             },
@@ -792,7 +794,7 @@ define([
                 }
             }
         }
-        Object.defineProperty(this, "activate", {
+        Object.defineProperty(this, 'activate', {
             get: function () {
                 return activate;
             }
@@ -804,7 +806,7 @@ define([
                 fireWindowDeactivated();
             }
         }
-        Object.defineProperty(this, "deactivate", {
+        Object.defineProperty(this, 'deactivate', {
             get: function () {
                 return deactivate;
             }
@@ -838,7 +840,7 @@ define([
                 activate();
             }
         }
-        Object.defineProperty(this, "show", {
+        Object.defineProperty(this, 'show', {
             get: function () {
                 return show;
             }
@@ -854,7 +856,7 @@ define([
                 show();
             }
         }
-        Object.defineProperty(this, "showModal", {
+        Object.defineProperty(this, 'showModal', {
             get: function () {
                 return showModal;
             }
@@ -888,7 +890,7 @@ define([
                 activate();
             }
         }
-        Object.defineProperty(this, "showInternalFrame", {
+        Object.defineProperty(this, 'showInternalFrame', {
             get: function () {
                 return showInternalFrame;
             }
@@ -909,7 +911,7 @@ define([
                 }
             }
         }
-        Object.defineProperty(this, "close", {
+        Object.defineProperty(this, 'close', {
             get: function () {
                 return close;
             }
@@ -928,7 +930,7 @@ define([
                 updateToolsVisibility();
             }
         }
-        Object.defineProperty(this, "minimize", {
+        Object.defineProperty(this, 'minimize', {
             get: function () {
                 return minimize;
             }
@@ -952,7 +954,7 @@ define([
                 }
             }
         }
-        Object.defineProperty(this, "maximize", {
+        Object.defineProperty(this, 'maximize', {
             get: function () {
                 return maximize;
             }
@@ -970,7 +972,7 @@ define([
                 updateToolsVisibility();
             }
         }
-        Object.defineProperty(this, "restore", {
+        Object.defineProperty(this, 'restore', {
             get: function () {
                 return restore;
             }
@@ -984,7 +986,7 @@ define([
                 activate();
             }
         }
-        Object.defineProperty(this, "toFront", {
+        Object.defineProperty(this, 'toFront', {
             get: function () {
                 return toFront;
             }
@@ -1030,7 +1032,7 @@ define([
 
     var onShownChange = null;
     var shownChangeReg = null;
-    Object.defineProperty(this, "onChange", {
+    Object.defineProperty(this, 'onChange', {
         get: function () {
             return onShownChange;
         },

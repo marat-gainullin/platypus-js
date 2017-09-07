@@ -1770,18 +1770,18 @@ describe('Containers Api', function () {
             var topChild = new Borders();
             topChild.height = 50;
             topChild.background = Color.black;
-            
+
             var leftChild = new Borders();
             leftChild.width = 50;
             leftChild.background = Color.black;
-            
+
             var centerChild = new Borders();
             centerChild.background = Color.black;
-            
+
             var rightChild = new Borders();
             //rightChild.width = 50; moved to third argument 'add' call
             rightChild.background = Color.black;
-            
+
             var bottomChild = new Borders();
             bottomChild.height = 50;
             bottomChild.background = Color.black;
@@ -1792,41 +1792,41 @@ describe('Containers Api', function () {
             //borders.rightComponent = rightChild;
             borders.add(rightChild, Ui.HorizontalPosition.RIGHT, 50);
             borders.bottomComponent = bottomChild;
-            
-            Invoke.later(function(){
+
+            Invoke.later(function () {
                 // top
                 expect(topChild.width).toEqual(400);
                 topChild.width += 10;
-                expect(topChild.width).toEqual(400);                
+                expect(topChild.width).toEqual(400);
                 expect(topChild.height).toEqual(50);
                 topChild.height += 10;
-                expect(topChild.height).toEqual(60);                
+                expect(topChild.height).toEqual(60);
                 expect(topChild.left).toEqual(0);
                 topChild.left += 10;
-                expect(topChild.left).toEqual(0);                
+                expect(topChild.left).toEqual(0);
                 expect(topChild.top).toEqual(0);
                 topChild.top += 10;
                 expect(topChild.top).toEqual(0);
                 // bottom
                 expect(bottomChild.width).toEqual(400);
                 bottomChild.width += 10;
-                expect(bottomChild.width).toEqual(400);                
+                expect(bottomChild.width).toEqual(400);
                 expect(bottomChild.height).toEqual(50);
                 bottomChild.height += 10;
-                expect(bottomChild.height).toEqual(60);                
+                expect(bottomChild.height).toEqual(60);
                 expect(bottomChild.left).toEqual(0);
                 bottomChild.left += 10;
-                expect(bottomChild.left).toEqual(0);                
+                expect(bottomChild.left).toEqual(0);
                 expect(bottomChild.top).toEqual(340);
                 bottomChild.top += 10;
                 expect(bottomChild.top).toEqual(340);
                 // left
                 expect(leftChild.width).toEqual(50);
                 leftChild.width += 10;
-                expect(leftChild.width).toEqual(60);                
+                expect(leftChild.width).toEqual(60);
                 expect(leftChild.height).toEqual(280);
                 leftChild.height += 10;
-                expect(leftChild.height).toEqual(280);                
+                expect(leftChild.height).toEqual(280);
                 expect(leftChild.left).toEqual(0);
                 leftChild.left += 10;
                 expect(leftChild.left).toEqual(0);
@@ -1836,20 +1836,20 @@ describe('Containers Api', function () {
                 // right
                 expect(rightChild.width).toEqual(50);
                 rightChild.width += 10;
-                expect(rightChild.width).toEqual(60);                
+                expect(rightChild.width).toEqual(60);
                 expect(rightChild.height).toEqual(280);
                 rightChild.height += 10;
-                expect(rightChild.height).toEqual(280);                
+                expect(rightChild.height).toEqual(280);
                 expect(rightChild.left).toEqual(340);
                 rightChild.left += 10;
-                expect(rightChild.left).toEqual(340);                
+                expect(rightChild.left).toEqual(340);
                 expect(rightChild.top).toEqual(60);
                 rightChild.top += 10;
                 expect(rightChild.top).toEqual(60);
                 // center
                 expect(centerChild.width).toEqual(280);
                 centerChild.width += 10;
-                expect(centerChild.width).toEqual(280);                
+                expect(centerChild.width).toEqual(280);
                 expect(centerChild.height).toEqual(280);
                 centerChild.height += 10;
                 expect(centerChild.height).toEqual(280);
@@ -1859,10 +1859,10 @@ describe('Containers Api', function () {
                 expect(centerChild.top).toEqual(60);
                 centerChild.top += 10;
                 expect(centerChild.top).toEqual(60);
-                
+
                 document.body.removeChild(borders.element);
                 done();
-            });            
+            });
 
         });
     });
@@ -1883,18 +1883,18 @@ describe('Containers Api', function () {
             var topChild = new Borders();
             topChild.height = 50;
             topChild.background = Color.black;
-            
+
             var leftChild = new Borders();
             leftChild.width = 50;
             leftChild.background = Color.black;
-            
+
             var centerChild = new Borders();
             centerChild.background = Color.black;
-            
+
             var rightChild = new Borders();
             rightChild.width = 50;
             rightChild.background = Color.black;
-            
+
             var bottomChild = new Borders();
             bottomChild.height = 50;
             bottomChild.background = Color.black;
@@ -1904,11 +1904,11 @@ describe('Containers Api', function () {
             borders.centerComponent = centerChild;
             borders.rightComponent = rightChild;
             borders.bottomComponent = bottomChild;
-            
+
             expect(borders.vgap).toEqual(0);
             borders.vgap = 10;
-            
-            Invoke.later(function(){
+
+            Invoke.later(function () {
                 // top
                 expect(topChild.width).toEqual(400);
                 expect(topChild.height).toEqual(50);
@@ -1921,11 +1921,11 @@ describe('Containers Api', function () {
                 expect(bottomChild.top).toEqual(350);
                 // left
                 expect(leftChild.width).toEqual(50);
-                expect(leftChild.height).toEqual(280);                
+                expect(leftChild.height).toEqual(280);
                 expect(leftChild.left).toEqual(0);
                 expect(leftChild.top).toEqual(60);
                 // right
-                expect(rightChild.width).toEqual(50);                
+                expect(rightChild.width).toEqual(50);
                 expect(rightChild.height).toEqual(280);
                 expect(rightChild.left).toEqual(350);
                 expect(rightChild.top).toEqual(60);
@@ -1934,26 +1934,99 @@ describe('Containers Api', function () {
                 expect(centerChild.height).toEqual(280);
                 expect(centerChild.left).toEqual(60);
                 expect(centerChild.top).toEqual(60);
-                
+
                 document.body.removeChild(borders.element);
                 done();
-            });            
+            });
 
         });
     });
-    
-    it('TabedPane.Structure', function(done){
-        pending('Label widget');
-        done();
+
+    it('TabedPane.Structure', function (done) {
+        require([
+            'common-utils/font',
+            'common-utils/color',
+            'common-utils/cursor',
+            'ui',
+            'forms/containers/tabbed-pane'
+        ], function (
+                Font,
+                Color,
+                Cursor,
+                Ui,
+                TabbedPane
+                ) {
+            var tabs = new TabbedPane();
+            expectContainer(tabs, Font, Color, Cursor);
+            var tab0 = new TabbedPane();
+            var tab1 = new TabbedPane();
+            var tab2 = new TabbedPane();
+            Ui.Icon.load('assets/binary-content.png', function (loaded) {
+                tabs.add(tab0, 'tab1', loaded, 'tooltip1');
+                tabs.add(tab1, 'tab2', loaded, 'tooltip2');
+                tabs.add(tab2, 'tab3', loaded, 'tooltip3');
+                expect(tabs.count).toEqual(3);
+                expect(tabs.child(0)).toEqual(tab0);
+                expect(tabs.child(1)).toEqual(tab1);
+                expect(tabs.child(2)).toEqual(tab2);
+                expect(tabs.indexOf(tab0)).toEqual(0);
+                expect(tabs.indexOf(tab1)).toEqual(1);
+                expect(tabs.indexOf(tab2)).toEqual(2);
+                expect(tabs.children()).toEqual([tab0, tab1, tab2]);
+                tabs.remove(tab1);
+                expect(tabs.indexOf(tab0)).toEqual(0);
+                expect(tabs.indexOf(tab2)).toEqual(1);
+                expect(tabs.children()).toEqual([tab0, tab2]);
+                expect(tabs.indexOf(tab0)).toEqual(0);
+                expect(tabs.indexOf(tab1)).toEqual(-1);
+                expect(tabs.indexOf(tab2)).toEqual(1);
+                tabs.clear();
+                expect(tabs.count).toEqual(0);
+                expect(tabs.indexOf(tab0)).toEqual(-1);
+                expect(tabs.indexOf(tab1)).toEqual(-1);
+                expect(tabs.indexOf(tab2)).toEqual(-1);
+                expect(tabs.children()).toEqual([]);
+                done();
+            });
+        });
     });
-    it('DesktopPane.Structure', function(done){
-        pending('Windows');
-        done();
+    fit('TabedPane.Markup', function (done) {
+        require([
+            'ui',
+            'logger',
+            'forms/containers/flow-pane',
+            'forms/containers/tabbed-pane'
+        ], function (
+                Ui,
+                Logger,
+                FlowPane,
+                TabbedPane
+                ) {
+            var tabs = new TabbedPane();
+            tabs.onItemSelected = function (evt) {
+                Logger.info('Item selected on: ' + evt.source.constructor.name);
+            };
+            document.body.appendChild(tabs.element);
+            var tab0 = new FlowPane();
+            tab0.background = '#bcbcfc';
+            tab0.width = 250;
+            tab0.height = 200;
+            var tab1 = new FlowPane();
+            tab1.background = '#fcacac';
+            tab1.width = 200;
+            tab1.height = 250;
+            var tab2 = new FlowPane();
+            tabs.add(tab0, 'tab0', null, 'tooltip0');
+            tabs.add(tab2, 'tab2', null, 'tooltip2');
+            Ui.Icon.load('assets/binary-content.png', function (loaded) {
+                tabs.add(tab1, 'tab1', loaded, 'tooltip1', 1);
+                expect(tabs.children()).toEqual([tab0, tab1, tab2]);                
+                document.body.removeChild(tabs.element);
+                done();
+            });
+        });
     });
     // TODO: Add tests against scrolls and nested boxes
     // TODO: Add tests against scroll and text boxes
-    // TODO: Add tests against tabs 'onItemSelected' event
-    // TODO: Add tests against cards 'onItemSelected' event
-    
 });
 

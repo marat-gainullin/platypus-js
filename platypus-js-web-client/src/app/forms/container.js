@@ -9,8 +9,12 @@ define([
         ContainerEvent,
         Invoke,
         Logger) {
-    function Container() {
-        Widget.call(this);
+    function Container(shell, content) {
+        if (!shell)
+            shell = document.createElement('div');
+        if (!content)
+            content = shell;
+        Widget.call(this, shell);
         var self = this;
 
         var children = [];
@@ -36,7 +40,7 @@ define([
                 return child;
             }
         });
-        function _children(){
+        function _children() {
             Logger.warning("'children()' function is obsolete. Use 'count', 'child' and 'forEach' please");
             return children.slice(0, children.length);
         }
@@ -68,17 +72,17 @@ define([
         });
 
         function add(w, beforeIndex) {
-            if(w.parent === self)
+            if (w.parent === self)
                 throw 'A widget is already child of this container';
             w.parent = self;
             if (isNaN(beforeIndex)) {
-                self.element.appendChild(w.element);
+                content.appendChild(w.element);
                 children.push(w);
             } else {
                 if (beforeIndex < children.length) {
-                    self.element.insertBefore(w.element, children[beforeIndex].element);
+                    content.insertBefore(w.element, children[beforeIndex].element);
                 } else {
-                    self.element.appendChild(w.element);
+                    content.appendChild(w.element);
                 }
                 children.splice(beforeIndex, 0, w);
             }
@@ -101,7 +105,7 @@ define([
             if (idx >= 0 && idx < children.length) {
                 var removed = children.splice(idx, 1)[0];
                 removed.parent = null;
-                removed.element.parentNode.removeChild(removed.element);
+                removed.element.parentElement.removeChild(removed.element);
                 fireRemoved(w);
                 return removed;
             } else {
@@ -119,7 +123,7 @@ define([
         function clear() {
             children.forEach(function (child) {
                 child.parent = null;
-                child.element.parentNode.removeChild(child.element);
+                child.element.parentElement.removeChild(child.element);
                 fireRemoved(child);
             });
             children.splice(0, children.length);

@@ -9,11 +9,15 @@ define([
         Invoke,
         Container,
         SelectionEvent) {
-    function Cards(hgap, vgap) {
-        Container.call(this);
+    function Cards(hgap, vgap, shell, content) {
+        if (!shell)
+            shell = document.createElement('div');
+        if (!content)
+            content = shell;
+        Container.call(this, shell, content);
 
         var self = this;
-        
+
         if (arguments.length < 2) {
             vgap = 0;
         }
@@ -22,13 +26,10 @@ define([
             hgap = 0;
         }
 
-        this.element.style.overflow = 'hidden';
-        this.element.style.position = 'relative';
-        
         this.element.classList.add('p-cards');
-        
+
         this.element.id = 'p-' + Id.generate();
-        
+
         var style = document.createElement('style');
         self.element.appendChild(style);
         function formatChildren() {
@@ -37,10 +38,10 @@ define([
                     '}';
         }
         formatChildren();
-        
+
         var cards = new Map();
 
-        var visibleWidget;
+        var selectedComponent;
 
         Object.defineProperty(this, 'hgap', {
             get: function () {
@@ -89,7 +90,7 @@ define([
                     throw 'A widget is already added to this container';
                 var card;
                 var index;
-                if (arguments.length < 2) {
+                if (arguments.length < 2 || indexOrCard === undefined) {
                     card = 'card-' + Id.generate();
                     index = self.count;
                 } else {
@@ -107,8 +108,8 @@ define([
                 }
                 superAdd(w, index);
                 cards.set(card, w);
-                w['-platypus-ui-card'] = card;
-                if (!visibleWidget) {
+                w['p-card'] = card;
+                if (!selectedComponent) {
                     showWidget(w);
                 }
                 return {
@@ -118,75 +119,78 @@ define([
             }
         }
         Object.defineProperty(this, 'add', {
+            configurable: true,
             get: function () {
                 return add;
             }
         });
 
-        var superClear = this.clear;
-        function clear() {
-            visibleWidget = null;
-            cards.clear();
-            self.forEach(function(w){
-                w.element.classList.remove('card-shown');
-                w.element.classList.remove('card-hidden');
-            });
-            superClear();
-        }
-        Object.defineProperty(this, 'clear', {
-            get: function () {
-                return clear;
-            }
-        });
-
         var superRemove = this.remove;
         function remove(widgetOrIndexOrCard) {
-            if(typeof widgetOrIndexOrCard === 'string')
+            if (typeof widgetOrIndexOrCard === 'string')
                 widgetOrIndexOrCard = cards.get(widgetOrIndexOrCard);
             var removed = superRemove(widgetOrIndexOrCard);
             if (removed) {
                 removeCard(removed);
-                if (visibleWidget === removed) {
-                    visibleWidget = self.count === 0 ? null : superChild(0);
+                if (selectedComponent === removed) {
+                    if (self.count === 0) {
+                        selectedComponent = null;
+                    } else {
+                        showWidget(superChild(0));
+                    }
                 }
             }
             return removed;
         }
         Object.defineProperty(this, 'remove', {
+            configurable: true,
             get: function () {
                 return remove;
             }
         });
 
+        var superClear = this.clear;
+        function clear() {
+            selectedComponent = null;
+            cards.clear();
+            self.forEach(function (w) {
+                w.element.classList.remove('p-card-shown');
+            });
+            superClear();
+        }
+        Object.defineProperty(this, 'clear', {
+            configurable: true,
+            get: function () {
+                return clear;
+            }
+        });
+
         function removeCard(w) {
-            w.element.classList.remove('card-shown');
-            w.element.classList.remove('card-hidden');
-            if (w && w['-platypus-ui-card']) {
-                cards.delete(w['-platypus-ui-card']);
-                delete w['-platypus-ui-card'];
+            w.element.classList.remove('p-card-shown');
+            if (w && w['p-card']) {
+                cards.delete(w['p-card']);
+                delete w['p-card'];
             }
         }
 
         function showWidget(toBeShown) {
-            var oldWidget = visibleWidget;
-            visibleWidget = toBeShown;
+            var oldWidget = selectedComponent;
+            selectedComponent = toBeShown;
 
-            if (visibleWidget !== oldWidget) {
-                visibleWidget.element.classList.add('card-shown');
-                visibleWidget.element.classList.remove('card-hidden');
+            if (selectedComponent !== oldWidget) {
+                selectedComponent.element.classList.add('p-card-shown');
 
                 if (oldWidget) {
-                    oldWidget.element.classList.add('card-hidden');
-                    oldWidget.element.classList.remove('card-shown');
+                    oldWidget.element.classList.remove('p-card-shown');
                 }
-                fireSelected(visibleWidget);
+                fireSelected(selectedComponent);
             }
         }
 
         function fireSelected(aItem) {
             var event = new SelectionEvent(self, aItem);
             selectionHandlers.forEach(function (h) {
-                Invoke.later(function(){
+                Invoke.later(function () {
                     h(event);
                 });
             });
@@ -207,9 +211,17 @@ define([
             }
         });
 
-        Object.defineProperty(this, 'visibleWidget', {
+        Object.defineProperty(this, 'selectedComponent', {
             get: function () {
-                return visibleWidget;
+                return selectedComponent;
+            }
+        });
+        Object.defineProperty(this, 'selectedIndex', {
+            get: function () {
+                if (selectedComponent)
+                    return self.indexOf(selectedComponent);
+                else
+                    return -1;
             }
         });
 

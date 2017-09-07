@@ -1,39 +1,93 @@
 define([
+    '../../invoke',
+    '../../ui',
     '../../extend',
-    '../border-pane',
-    '../tool-bar',
-    '../card-pane'], function (
+    './card-pane'], function (
+        Invoke,
+        Ui,
         extend,
-        BorderPane,
-        Toolbar,
-        Cards) {
+        CardPane) {
+
+    var SCROLL_PORTION = 20;
+    var AUTO_SCROLL_DELAY = 300;
+
     function TabbedPane() {
-        BorderPane.call(this);
+        var shell = document.createElement('div');
+        shell.className = 'p-tabs';
+        var content = document.createElement('div');
+        content.className = 'p-tabs-content';
+        CardPane.call(this, 0, 0, shell, content);
 
         var self = this;
 
-        var tabs = new Toolbar();
-        var content = new Cards(0, 0);
+        var captionsShell = document.createElement('div');
+        captionsShell.className = 'p-tabs-captions-shell';
+        var captions = document.createElement('div');
+        captions.className = 'p-tabs-captions';
         var tabsOf = new Map();
-        var onItemSelected;
 
-        this.topComponent = tabs;
-        this.centerComponent = content;
+        captionsShell.appendChild(captions);
+        shell.appendChild(captionsShell);
+        shell.appendChild(content);
 
-        function addCaptionFor(w, title, image, toolTip, beforeIndex) {
-            if (!title) {
-                title = w.name ? w.name : "Unnamed - " + tabs.getCount();
+        function showCaption(toShow) {
+            var caption = captions.firstElementChild;
+            while (caption) {
+                if (caption === toShow) {
+                    caption.classList.add('p-tab-caption-selected');
+                } else {
+                    caption.classList.remove('p-tab-caption-selected');
+                }
+                caption = caption.nextElementSibling;
             }
-            var label = new TabCaption(title, image, toolTip);
-            tabs.add(label, beforeIndex);
-            tabsOf.put(w, label);
+        }
+
+        function addCaption(w, title, image, toolTip, beforeIndex) {
+            if (!title) {
+                title = w.name ? w.name : "Unnamed - " + captions.childElementCount;
+            }
+            var caption = document.createElement('div');
+            caption.className = 'p-tab-caption';
+            Ui.on(caption, Ui.Events.CLICK, function (event) {
+                event.stopPropagation();
+                self.show(w);
+            });
+            var labelText = document.createElement('div');
+            labelText.className = 'p-tab-caption-text';
+            labelText.innerText = title;
+            var closeTool = document.createElement('div');
+            closeTool.className = 'p-tab-caption-close-tool';
+            Ui.on(closeTool, Ui.Events.CLICK, function (event) {
+                event.stopPropagation();
+                self.remove(w);
+            });
+            if (toolTip)
+                caption.title = toolTip;
+            if (image) {
+                image.classList.add('p-tab-caption-image');
+                caption.appendChild(image);
+            }
+            caption.appendChild(labelText);
+            caption.appendChild(closeTool);
+
+            if (isNaN(beforeIndex)) {
+                captions.appendChild(caption);
+            } else {
+                if (beforeIndex < captions.childElementCount) {
+                    captions.insertBefore(caption, captions.children[beforeIndex]);
+                } else {
+                    captions.appendChild(caption);
+                }
+            }
+            tabsOf.set(w, caption);
         }
 
         // TODO: Add <html> prefix in tab title feature 
-        function add(w, title, image, tooltip) {
-            content.add(w);
-            w.parent = self;
-            addCaptionFor(w, arguments.length < 2 ? null : title, arguments.length < 3 ? null : image, arguments.length < 4 ? '' : tooltip, tabs.count);
+        var superAdd = this.add;
+        function add(w, title, image, tooltip, beforeIndex) {
+            superAdd(w, beforeIndex);
+            addCaption(w, arguments.length < 2 ? null : title, arguments.length < 3 ? null : image, arguments.length < 4 ? '' : tooltip, beforeIndex);
+            checkChevrons();
         }
         Object.defineProperty(this, 'add', {
             get: function () {
@@ -41,10 +95,14 @@ define([
             }
         });
 
+        var superRemove = this.remove;
         function remove(widgetOrIndex) {
-            var removed = content.remove(widgetOrIndex);
-            if (removed)
-                tabs.remove(tabsOf.get(removed));
+            var removed = superRemove(widgetOrIndex);
+            if (removed) {
+                captions.removeChild(tabsOf.get(removed));
+                tabsOf.delete(removed);
+            }
+            checkChevrons();
             return removed;
         }
         Object.defineProperty(this, 'remove', {
@@ -52,82 +110,121 @@ define([
                 return remove;
             }
         });
-
-        function addAddHandler(handler) {
-            return content.addAddHandler(function (anEvent) {
-                anEvent.source = self;
-                handler(anEvent);
-            });
+        var superClear = this.clear;
+        function clear() {
+            superClear();
+            while (captions.firstElementChild)
+                captions.removeChild(captions.firstElementChild);
+            tabsOf.clear();
+            checkChevrons();
         }
-        Object.defineProperty(this, 'addAddHandler', {
+        Object.defineProperty(this, 'clear', {
             get: function () {
-                return addAddHandler;
+                return clear;
             }
         });
 
-        function addRemoveHandler(handler) {
-            return content.addRemoveHandler(function (anEvent) {
-                anEvent.source = self;
-                handler(anEvent);
-            });
-        }
-        Object.defineProperty(this, 'addRemoveHandler', {
-            get: function () {
-                return addRemoveHandler;
-            }
+        this.addSelectionHandler(function (evt) {
+            showCaption(tabsOf.get(evt.item));
         });
 
-        function addSelectionHandler(handler) {
-            return content.addSelectionHandler(function (event) {
-                event.source = self;
-                handler(event);
-            });
-        }
-        Object.defineProperty(this, 'addSelectionHandler', {
-            get: function () {
-                return addSelectionHandler;
-            }
-        });
+        var leftChevron = document.createElement('div');
+        leftChevron.classList.add('p-tabs-chevron');
+        leftChevron.classList.add('p-tabs-chevron-left');
+        var rightChevron = document.createElement('div');
+        rightChevron.classList.add('p-tabs-chevron');
+        rightChevron.classList.add('p-tabs-chevron-right');
 
-        Object.defineProperty(this, 'selectedComponent', {
-            get: function () {
-                return content.visibleWidget;
-            }
-        });
-
-        Object.defineProperty(this, 'selectedIndex', {
-            get: function () {
-                if (content.visibleWidget)
-                    return content.indexOf(content.visibleWidget);
-                else
-                    return -1;
-            }
-        });
-
-        var selectedReg;
-        Object.defineProperty(this, 'onItemSelected', {
-            get: function () {
-                return onItemSelected;
-            },
-            set: function (aValue) {
-                if (onItemSelected !== aValue) {
-                    if (selectedReg) {
-                        selectedReg.removeHandler();
-                        selectedReg = null;
+        function checkChevrons() {
+            if (self.count > 0) {
+                var lastCaption = captions.lastElementChild;
+                if (captions.scrollLeft > 0) {
+                    //if (parseFloat(leftChevron.style.left) !== captions.scrollLeft)
+                    //    leftChevron.style.left = captions.scrollLeft + 'px';
+                    if (!leftChevron.parentElement) {
+                        //leftChevron.style.marginLeft = '0px';
+                        captionsShell.appendChild(leftChevron);
                     }
-                    onItemSelected = aValue;
-                    if (onItemSelected) {
-                        selectedReg = addSelectionHandler(function (event) {
-                            if (onItemSelected) {
-                                onItemSelected(event);
-                            }
-                        });
+                } else {
+                    scheduledLeft = null;
+                    if (leftChevron.parentElement) {
+                        leftChevron.parentElement.removeChild(leftChevron);
                     }
                 }
-
+                if (lastCaption.offsetLeft + lastCaption.offsetWidth - captions.scrollLeft > captions.offsetWidth) {
+                    //if (parseFloat(rightChevron.style.right) !== -captions.scrollLeft)
+                    //    rightChevron.style.right = -captions.scrollLeft + 'px';
+                    if (!rightChevron.parentElement) {
+                        captionsShell.appendChild(rightChevron);
+                    }
+                } else {
+                    scheduledRight = null;
+                    if (rightChevron.parentElement) {
+                        rightChevron.parentElement.removeChild(rightChevron);
+                    }
+                }
+            } else {
+                scheduledLeft = null;
+                scheduledRight = null;
+                if (leftChevron.parentElement)
+                    leftChevron.parentElement.removeChild(leftChevron);
+                if (rightChevron.parentElement)
+                    rightChevron.parentElement.removeChild(rightChevron);
             }
+        }
+
+        function moveRight() {
+            captions.scrollLeft -= SCROLL_PORTION;
+            checkChevrons();
+        }
+
+        function moveLeft() {
+            captions.scrollLeft += SCROLL_PORTION;
+            checkChevrons();
+        }
+
+        Ui.on(this.element, Ui.Events.MOUSEOVER, function (event) {
+            checkChevrons();
+        });
+        Ui.on(captionsShell, Ui.Events.SCROLL, function (event) {
+            checkChevrons();
+        });
+
+        var scheduledLeft = null;
+        Ui.on(leftChevron, Ui.Events.MOUSEDOWN, function (event) {
+            function schedule() {
+                Invoke.delayed(AUTO_SCROLL_DELAY, function () {
+                    if (scheduledLeft === schedule) {
+                        schedule();
+                        moveRight();
+                    }
+                });
+            }
+            scheduledLeft = schedule;
+            schedule();
+        });
+        Ui.on(leftChevron, Ui.Events.MOUSEUP, function (event) {
+            scheduledLeft = null;
+            moveRight();
+        });
+        var scheduledRight = null;
+        Ui.on(rightChevron, Ui.Events.MOUSEDOWN, function (event) {
+            function schedule() {
+                Invoke.delayed(AUTO_SCROLL_DELAY, function () {
+                    if (scheduledRight === schedule) {
+                        schedule();
+                        moveLeft();
+                    }
+                });
+            }
+            scheduledRight = schedule;
+            schedule();
+        });
+        Ui.on(rightChevron, Ui.Events.MOUSEUP, function (event) {
+            scheduledRight = null;
+            moveLeft();
         });
     }
-    extend(TabbedPane, BorderPane);
+    extend(TabbedPane, CardPane);
     return TabbedPane;
 });
