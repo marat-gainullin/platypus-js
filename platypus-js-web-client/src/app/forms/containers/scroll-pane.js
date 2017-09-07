@@ -1,19 +1,11 @@
 define([
     '../../ui',
     '../../extend',
-    '../container',
-    // TODO: Remove has-scroll, horizontal-scroll-filler and vertical-scroll-filler forever.
-    // maybe replace with css classes, or by using marker properties
-    '../has-scroll',
-    '../horizontal-scroll-filler',
-    '../vertical-scroll-filler'
+    '../container'
     ], function (
         Ui,
         extend,
-        Container,
-        HasScroll,
-        HorizontalScrollFiller,
-        VerticalScrollFiller
+        Container
         ) {
 
     function Scroll(view) {
@@ -22,6 +14,8 @@ define([
         var self = this;
 
         this.element.classList.add('p-scroll');
+        this.element.classList.add('p-vertical-scroll-filler');
+        this.element.classList.add('p-horizontal-scroll-filler');
         /**
          * Used to set the horizontal scroll bar policy so that horizontal
          * scrollbars are displayed only when needed.
@@ -62,13 +56,11 @@ define([
         });
 
         function isHorizontalScrollFiller(w) {
-            return w instanceof HorizontalScrollFiller
-                    || w.element.className.indexOf('p-horizontal-scroll-filler') > -1;
+            return w.element.className.indexOf('p-horizontal-scroll-filler') > -1;
         }
 
         function isVerticalScrollFiller(w) {
-            return w instanceof VerticalScrollFiller
-                    || w.element.className.indexOf('p-vertical-scroll-filler') > -1;
+            return w.element.className.indexOf('p-vertical-scroll-filler') > -1;
         }
 
         function ajustWidth(w, aValue) {
@@ -115,7 +107,7 @@ define([
             } else if (horizontalScrollBarPolicy === SCROLLBAR_NEVER) {
                 value = 'hidden';
             }
-            if (view instanceof HasScroll) {
+            if (view.element.className.indexOf('p-scroll') !== -1) {
                 value = 'hidden';
             }
             self.element.style.overflowX = value;
@@ -128,7 +120,7 @@ define([
             } else if (verticalScrollBarPolicy === SCROLLBAR_NEVER) {
                 value = 'hidden';
             }
-            if (view instanceof HasScroll) {
+            if (view.element.className.indexOf('p-scroll') !== -1) {
                 value = 'hidden';
             }
             self.element.style.overflowY = value;

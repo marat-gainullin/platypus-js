@@ -20,7 +20,7 @@ define([
             orientation = Ui.Orientation.HORIZONTAL;
 
         this.element.classList.add('p-box-horizontal');
-        this.element.classList.add('p-horizontal-scroll-filler');
+        this.element.classList.add('p-vertical-scroll-filler');
         this.element.id = 'p-' + Id.generate();
 
         var gapsStyle = document.createElement('style');
@@ -29,9 +29,9 @@ define([
         function formatChildren() {
             if (orientation === Ui.Orientation.HORIZONTAL) {
                 self.element.classList.remove('p-box-vertical');
-                self.element.classList.remove('p-vertical-scroll-filler');
+                self.element.classList.remove('p-horizontal-scroll-filler');
                 self.element.classList.add('p-box-horizontal');
-                self.element.classList.add('p-horizontal-scroll-filler');
+                self.element.classList.add('p-vertical-scroll-filler');
                 gapsStyle.innerHTML =
                         'div#' + self.element.id + ' > .p-widget {' +
                         'height: 100%;' +
@@ -41,10 +41,10 @@ define([
                         'margin-left: ' + hgap + 'px;' +
                         '}';
             } else {
-                self.element.classList.add('p-box-vertical');
-                self.element.classList.add('p-vertical-scroll-filler');
                 self.element.classList.remove('p-box-horizontal');
-                self.element.classList.remove('p-horizontal-scroll-filler');
+                self.element.classList.remove('p-vertical-scroll-filler');
+                self.element.classList.add('p-box-vertical');
+                self.element.classList.add('p-horizontal-scroll-filler');
                 gapsStyle.innerHTML =
                         'div#' + self.element.id + ' > .p-widget {' +
                         'display: block;' +

@@ -139,10 +139,7 @@ define([
             if (self.count > 0) {
                 var lastCaption = captions.lastElementChild;
                 if (captions.scrollLeft > 0) {
-                    //if (parseFloat(leftChevron.style.left) !== captions.scrollLeft)
-                    //    leftChevron.style.left = captions.scrollLeft + 'px';
                     if (!leftChevron.parentElement) {
-                        //leftChevron.style.marginLeft = '0px';
                         captionsShell.appendChild(leftChevron);
                     }
                 } else {
@@ -152,8 +149,6 @@ define([
                     }
                 }
                 if (lastCaption.offsetLeft + lastCaption.offsetWidth - captions.scrollLeft > captions.offsetWidth) {
-                    //if (parseFloat(rightChevron.style.right) !== -captions.scrollLeft)
-                    //    rightChevron.style.right = -captions.scrollLeft + 'px';
                     if (!rightChevron.parentElement) {
                         captionsShell.appendChild(rightChevron);
                     }

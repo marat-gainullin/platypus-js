@@ -17,6 +17,9 @@ define([
             shell = box;
 
         box.classList.add('p-rich-text-area');
+        shell.classList.add('p-scroll');
+        shell.classList.add('p-vertical-scroll-filler');
+        shell.classList.add('p-horizontal-scroll-filler');
         
         Widget.call(this, box, shell);
         var self = this;

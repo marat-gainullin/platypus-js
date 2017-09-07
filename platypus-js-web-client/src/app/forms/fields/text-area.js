@@ -10,6 +10,9 @@ define([
         
         TextField.call(this, '', box, shell);
         var self = this;
+        shell.classList.add('p-scroll');
+        shell.classList.add('p-vertical-scroll-filler');
+        shell.classList.add('p-horizontal-scroll-filler');
     }
     extend(TextArea, TextField);
     return TextArea;

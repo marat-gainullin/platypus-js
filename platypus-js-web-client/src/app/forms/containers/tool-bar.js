@@ -46,7 +46,6 @@ define([
                     if (parseFloat(leftChevron.style.left) !== self.element.scrollLeft)
                         leftChevron.style.left = self.element.scrollLeft + 'px';
                     if (!leftChevron.parentElement) {
-                        leftChevron.style.marginLeft = '0px';
                         self.element.appendChild(leftChevron);
                     }
                 } else {

@@ -102,11 +102,11 @@
     overflow-y: auto;
 }
 
-.p-scroll > .p-box-horizontal {
+.p-scroll > .p-vertical-scroll-filler {
     height: 100%
 }
 
-.p-scroll > .p-box-vertical {
+.p-scroll > .p-horizontal-scroll-filler {
     width: 100%
 }
 

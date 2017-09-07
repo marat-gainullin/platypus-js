@@ -27,8 +27,6 @@ define([
         shell['p-widget'] = this;
         shell.classList.add('p-widget');
 
-        // TODO: Ensure all widgets have a class 'border-sized' or something as 'widget' with border sizing setted up.
-
         var parent;
         var visibleDisplay = 'inline-block';
         var menu;
@@ -230,19 +228,13 @@ define([
                 }
             }
         });
-        // TODO: Check 'left', 'top', 'width', 'height' properties and
-        // 'getLeft', 'getTop', 'ajustWidth' and 'ajustHeight' methods against all containers.
         Object.defineProperty(this, "left", {
             get: function () {
-                if (parent && parent.getLeft) {
-                    return parent.getLeft(self);
+                if (isAttached()) {
+                    return shell.offsetLeft;
                 } else {
-                    if (isAttached()) {
-                        return shell.offsetLeft;
-                    } else {
-                        var parsed = parseFloat(shell.style.left);
-                        return isNaN(parsed) ? 0 : parsed;
-                    }
+                    var parsed = parseFloat(shell.style.left);
+                    return isNaN(parsed) ? 0 : parsed;
                 }
             },
             set: function (aValue) {
@@ -258,15 +250,11 @@ define([
         });
         Object.defineProperty(this, "top", {
             get: function () {
-                if (parent && parent.getTop) {
-                    return parent.getTop(self);
+                if (isAttached()) {
+                    return shell.offsetTop;
                 } else {
-                    if (isAttached()) {
-                        return shell.offsetTop;
-                    } else {
-                        var parsed = parseFloat(shell.style.top);
-                        return isNaN(parsed) ? 0 : parsed;
-                    }
+                    var parsed = parseFloat(shell.style.top);
+                    return isNaN(parsed) ? 0 : parsed;
                 }
             },
             set: function (aValue) {

@@ -1990,7 +1990,7 @@ describe('Containers Api', function () {
             });
         });
     });
-    fit('TabedPane.Markup', function (done) {
+    it('TabedPane.Markup', function (done) {
         require([
             'ui',
             'logger',
@@ -2020,13 +2020,130 @@ describe('Containers Api', function () {
             tabs.add(tab2, 'tab2', null, 'tooltip2');
             Ui.Icon.load('assets/binary-content.png', function (loaded) {
                 tabs.add(tab1, 'tab1', loaded, 'tooltip1', 1);
-                expect(tabs.children()).toEqual([tab0, tab1, tab2]);                
+                expect(tabs.children()).toEqual([tab0, tab1, tab2]);
                 document.body.removeChild(tabs.element);
                 done();
             });
         });
     });
-    // TODO: Add tests against scrolls and nested boxes
-    // TODO: Add tests against scroll and text boxes
+    it('TextArea.ScrollPane.Markup', function (done) {
+        require([
+            'invoke',
+            'forms/containers/scroll-pane',
+            'forms/fields/text-area'
+        ], function (
+                Invoke,
+                ScrollPane,
+                TextArea
+                ) {
+            var textArea = new TextArea();
+            var scroll = new ScrollPane(textArea);
+            var scroll1 = new ScrollPane(scroll);
+            document.body.appendChild(scroll1.element);
+            textArea.text =
+                    'Sample text for text area, ' +
+                    'Sample text for text area, ' +
+                    'Sample text for text area, ' +
+                    'Sample text for text area';
+            Invoke.later(function () {
+                expect(textArea.element.offsetWidth).toEqual(scroll.element.offsetWidth);
+                expect(textArea.element.offsetHeight).toEqual(scroll.element.offsetHeight);
+                expect(scroll1.element.offsetWidth).toEqual(scroll.element.offsetWidth);
+                expect(scroll1.element.offsetHeight).toEqual(scroll.element.offsetHeight);
+                var oldWidth = scroll.width;
+                scroll.width -= 10;
+                textArea.width -= 10;
+                expect(scroll.width).toEqual(oldWidth);
+                expect(textArea.width).toEqual(oldWidth);
+                document.body.removeChild(scroll1.element);
+                done();
+            });
+        });
+    });
+    it('RichTextArea.ScrollPane.Markup', function (done) {
+        require([
+            'invoke',
+            'forms/containers/scroll-pane',
+            'forms/fields/rich-text-area'
+        ], function (
+                Invoke,
+                ScrollPane,
+                RichTextArea
+                ) {
+            var textArea = new RichTextArea();
+            var scroll = new ScrollPane(textArea);
+            var scroll1 = new ScrollPane(scroll);
+            document.body.appendChild(scroll1.element);
+            textArea.text =
+                    'Sample text for text area, ' +
+                    'Sample text for text area, ' +
+                    'Sample text for text area, ' +
+                    'Sample text for text area';
+            Invoke.later(function () {
+                expect(textArea.element.offsetWidth).toEqual(scroll.element.offsetWidth);
+                expect(textArea.element.offsetHeight).toEqual(scroll.element.offsetHeight);
+                expect(scroll1.element.offsetWidth).toEqual(scroll.element.offsetWidth);
+                expect(scroll1.element.offsetHeight).toEqual(scroll.element.offsetHeight);
+                var oldWidth = scroll.width;
+                scroll.width -= 10;
+                textArea.width -= 10;
+                expect(scroll.width).toEqual(oldWidth);
+                expect(textArea.width).toEqual(oldWidth);
+                document.body.removeChild(scroll1.element);
+                done();
+            });
+        });
+    });
+    it('Box.Horizontal.ScrollPane.Markup', function (done) {
+        require([
+            'invoke',
+            'forms/containers/scroll-pane',
+            'forms/containers/box-pane'
+        ], function (
+                Invoke,
+                ScrollPane,
+                BoxPane
+                ) {
+            var box = new BoxPane();
+            var scroll = new ScrollPane(box);
+            scroll.width = scroll.height = 400;
+            document.body.appendChild(scroll.element);
+            Invoke.later(function () {
+                expect(box.element.offsetHeight).toEqual(scroll.element.offsetHeight);
+                var oldHeight = box.height;
+                box.height -= 10;
+                expect(box.height).toEqual(oldHeight);
+                document.body.removeChild(scroll.element);
+                done();
+            });
+        });
+    });
+    it('Box.Vertical.ScrollPane.Markup', function (done) {
+        require([
+            'ui',
+            'invoke',
+            'forms/containers/scroll-pane',
+            'forms/containers/box-pane'
+        ], function (
+                Ui,
+                Invoke,
+                ScrollPane,
+                BoxPane
+                ) {
+            var box = new BoxPane();
+            box.orientation = Ui.Orientation.VERTICAL;
+            var scroll = new ScrollPane(box);
+            scroll.width = scroll.height = 400;
+            document.body.appendChild(scroll.element);
+            Invoke.later(function () {
+                expect(box.element.offsetWidth).toEqual(scroll.element.offsetWidth);
+                var oldWidth = box.width;
+                box.width -= 10;
+                expect(box.width).toEqual(oldWidth);
+                document.body.removeChild(scroll.element);
+                done();
+            });
+        });
+    });
 });
 
