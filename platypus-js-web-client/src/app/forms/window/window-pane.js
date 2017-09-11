@@ -529,11 +529,11 @@ define([
                 autoCloseMouseDownReg.removeHandler();
                 autoCloseMouseDownReg = null;
             }
-            if (onItemSelected) {
-                var _onItemSelected = onItemSelected;
-                onItemSelected = null;
+            if (onSelect) {
+                var _onSelect = onSelect;
+                onSelect = null;
                 Invoke.later(function () {
-                    _onItemSelected(selectedItem);
+                    _onSelect(selectedItem);
                 });
             }
         }
@@ -848,10 +848,10 @@ define([
 
         var modelMask = document.createElement('div');
         modelMask.className = 'p-window-modal-mask';
-        var onItemSelected = null;
-        function showModal(aOnItemSelected) {
+        var onSelect = null;
+        function showModal(aOnSelect) {
             if (!shell.parentElement) {
-                onItemSelected = aOnItemSelected;
+                onSelect = aOnSelect;
                 document.body.appendChild(modelMask);
                 show();
             }

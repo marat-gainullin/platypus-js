@@ -129,7 +129,6 @@ define(function () {
         };
     }
 
-
     function Bound() {
         var self = this;
         
@@ -219,6 +218,21 @@ define(function () {
     Object.defineProperty(Bound, 'listen', {
         get: function(){
             return listen;
+        }
+    });
+    Object.defineProperty(Bound, 'getPathData', {
+        get: function(){
+            return getPathData;
+        }
+    });
+    Object.defineProperty(Bound, 'setPathData', {
+        get: function(){
+            return setPathData;
+        }
+    });
+    Object.defineProperty(Bound, 'observePath', {
+        get: function(){
+            return observePath;
         }
     });
     return Bound;

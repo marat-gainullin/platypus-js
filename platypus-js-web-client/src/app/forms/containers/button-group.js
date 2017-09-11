@@ -14,7 +14,7 @@ define([
 
         var selectionHandlers = new Set();
 
-        function addSelectionHandler(handler) {
+        function addSelectHandler(handler) {
             selectionHandlers.add(handler);
             return {
                 removeHandler: function () {
@@ -32,30 +32,29 @@ define([
             });
         }
 
-        Object.defineProperty(this, 'addSelectionHandler', {
+        Object.defineProperty(this, 'addSelectHandler', {
             get: function () {
-                return addSelectionHandler;
+                return addSelectHandler;
             }
         });
 
-        var onItemSelected;
-
-        var selectedReg;
-        Object.defineProperty(this, 'onItemSelected', {
+        var onSelect;
+        var selectReg;
+        Object.defineProperty(this, 'onSelect', {
             get: function () {
-                return onItemSelected;
+                return onSelect;
             },
             set: function (aValue) {
-                if (onItemSelected !== aValue) {
-                    if (selectedReg) {
-                        selectedReg.removeHandler();
-                        selectedReg = null;
+                if (onSelect !== aValue) {
+                    if (selectReg) {
+                        selectReg.removeHandler();
+                        selectReg = null;
                     }
-                    onItemSelected = aValue;
-                    if (onItemSelected) {
-                        selectedReg = addSelectionHandler(function (event) {
-                            if (onItemSelected) {
-                                onItemSelected(event);
+                    onSelect = aValue;
+                    if (onSelect) {
+                        selectReg = addSelectHandler(function (event) {
+                            if (onSelect) {
+                                onSelect(event);
                             }
                         });
                     }

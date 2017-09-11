@@ -137,7 +137,6 @@ define([
         });
 
         var addHandlers = new Set();
-
         function addAddHandler(handler) {
             addHandlers.add(handler);
             return {
@@ -163,8 +162,31 @@ define([
             });
         }
 
-        var removeHandlers = new Set();
+        var onAdd;
+        var addReg;
+        Object.defineProperty(this, 'onAdd', {
+            get: function () {
+                return onAdd;
+            },
+            set: function (aValue) {
+                if (onAdd !== aValue) {
+                    if (addReg) {
+                        addReg.removeHandler();
+                        addReg = null;
+                    }
+                    onAdd = aValue;
+                    if (onAdd) {
+                        addReg = addAddHandler(function (event) {
+                            if (onAdd) {
+                                onAdd(event);
+                            }
+                        });
+                    }
+                }
+            }
+        });
 
+        var removeHandlers = new Set();
         function addRemoveHandler(handler) {
             removeHandlers.add(handler);
             return {
@@ -190,47 +212,23 @@ define([
             });
         }
 
-        var onComponentAdded;
-        var componentAddedReg;
-        Object.defineProperty(this, 'onComponentAdded', {
+        var onRemove;
+        var removeReg;
+        Object.defineProperty(this, 'onRemove', {
             get: function () {
-                return onComponentAdded;
+                return onRemove;
             },
             set: function (aValue) {
-                if (onComponentAdded !== aValue) {
-                    if (componentAddedReg) {
-                        componentAddedReg.removeHandler();
-                        componentAddedReg = null;
+                if (onRemove !== aValue) {
+                    if (removeReg) {
+                        removeReg.removeHandler();
+                        removeReg = null;
                     }
-                    onComponentAdded = aValue;
-                    if (onComponentAdded) {
-                        componentAddedReg = addAddHandler(function (event) {
-                            if (onComponentAdded) {
-                                onComponentAdded(event);
-                            }
-                        });
-                    }
-                }
-            }
-        });
-
-        var onComponentRemoved;
-        var componentRemovedReg;
-        Object.defineProperty(this, 'onComponentRemoved', {
-            get: function () {
-                return onComponentRemoved;
-            },
-            set: function (aValue) {
-                if (onComponentRemoved !== aValue) {
-                    if (componentRemovedReg) {
-                        componentRemovedReg.removeHandler();
-                        componentRemovedReg = null;
-                    }
-                    onComponentRemoved = aValue;
-                    if (onComponentRemoved) {
-                        componentRemovedReg = addRemoveHandler(function (event) {
-                            if (onComponentRemoved) {
-                                onComponentRemoved(event);
+                    onRemove = aValue;
+                    if (onRemove) {
+                        removeReg = addRemoveHandler(function (event) {
+                            if (onRemove) {
+                                onRemove(event);
                             }
                         });
                     }

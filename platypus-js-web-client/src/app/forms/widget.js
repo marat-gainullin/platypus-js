@@ -961,23 +961,23 @@ define([
                 }
             }
         });
-        var onItemSelected;
-        var selectedItemReg;
-        Object.defineProperty(this, 'onItemSelected', {
+        var onSelect;
+        var selectReg;
+        Object.defineProperty(this, 'onSelect', {
             get: function () {
-                return onItemSelected;
+                return onSelect;
             },
             set: function (aValue) {
-                if (onItemSelected !== aValue) {
-                    if (selectedItemReg) {
-                        selectedItemReg.removeHandler();
-                        selectedItemReg = null;
+                if (onSelect !== aValue) {
+                    if (selectReg) {
+                        selectReg.removeHandler();
+                        selectReg = null;
                     }
-                    onItemSelected = aValue;
-                    if (onItemSelected && self.addSelectionHandler) {
-                        selectedItemReg = self.addSelectionHandler(function (event) {
-                            if (onItemSelected) {
-                                onItemSelected(event);
+                    onSelect = aValue;
+                    if (onSelect && self.addSelectHandler) {
+                        selectReg = self.addSelectHandler(function (event) {
+                            if (onSelect) {
+                                onSelect(event);
                             }
                         });
                     }

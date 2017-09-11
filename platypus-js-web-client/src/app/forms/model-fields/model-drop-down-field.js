@@ -14,24 +14,13 @@ define([
         Decorator.call(this);
 
         var self = this;
-        var list = true;
-
-        Object.defineProperty(this, 'list', {
-            get: function () {
-                return list;
-            },
-            set: function (aValue) {
-                if (list !== aValue) {
-                    list = aValue;
-                }
-            }
-        });
 
         var lengthReg = null;
         var elementsReg = null;
-        var displayList = null;
+        var values = null;
         var displayField = null;
-        function rebindList() {
+        
+        function unbindValues(){
             if (lengthReg) {
                 lengthReg.unlisten();
                 lengthReg = null;
@@ -41,34 +30,38 @@ define([
                 elementsReg = null;
             }
             self.clear();
-            bindList();
-            if (displayList) {
-                lengthReg = Bound.listen(displayList, function (evt) {
-                    if (evt.propertyName === 'length')
-                        rebindList();
+        }
+        
+        function bindValues() {
+            if (values) {
+                values.forEach(function (item) {
+                    self.addValue(displayField ? item[displayField] : item /* assume plain values */, item);
                 });
-                elementsReg = Bound.observeElements(displayList, function (evt) {
+                lengthReg = Bound.listen(values, function (evt) {
+                    if (evt.propertyName === 'length')
+                        rebindValues();
+                });
+                elementsReg = Bound.observeElements(values, function (evt) {
                     if (evt.propertyName === displayField)
                         self.updateLabel(evt.source, evt.newValue);
                 });
             }
         }
-        function bindList() {
-            if (displayList && displayField) {
-                displayList.forEach(function (item) {
-                    self.addValue(item[displayField], item);
-                });
-            }
-        }
 
-        Object.defineProperty(this, 'displayList', {
+        function rebindValues() {
+            unbindValues();
+            bindValues();
+        }
+        
+        Object.defineProperty(this, 'values', {
             get: function () {
-                return displayList;
+                return values;
             },
             set: function (aValue) {
-                if (displayList !== aValue) {
-                    displayList = aValue;
-                    rebindList();
+                if (values !== aValue) {
+                    unbindValues();
+                    values = aValue;
+                    bindValues();
                 }
             }
         });
@@ -81,7 +74,7 @@ define([
             set: function (aValue) {
                 if (displayField !== aValue) {
                     displayField = aValue;
-                    rebindList();
+                    rebindValues();
                 }
             }
         });
