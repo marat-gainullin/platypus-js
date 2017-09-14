@@ -12,19 +12,26 @@ define([
 
     var JS_ROW_NAME = "js-row";
 
-    function Section(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName) {
-
+    function Section(grid, dynamicCellsClassName,
+            dynamicRowsClassName,
+            dynamicHeaderCellsClassName,
+            dynamicHeaderRowsClassName,
+            dynamicOddRowsClassName,
+            dynamicEvenRowsClassName) {
         var self = this;
 
         var table = document.createElement('table');
+        table.className = 'p-grid-section';
         var colgroup = document.createElement('colgroup');
+        var rowsHeight = 30;
         var headerNodes = [];
+        var headerMaxDepth = 0;
         var keyboardSelectedElement = null;
         var draggableRows = false;
         var keyboardSelectedRow = -1;
         var keyboardSelectedColumn = -1;
         var rowsPerPage = 30; // Only for PageDown or PageUp keys handling
-        var data = null; // Already sorted
+        var data = []; // Already sorted
         /**
          * Already sorted data array indices;
          */
@@ -32,16 +39,16 @@ define([
         var endRow = 0; // Exclusive
         var columns = [];
 
-        var thead = document.createElement('thead');
-        table.appendChild(thead);
-        thead.appendChild(colgroup);
-        var tbody = document.createElement('tbody');
-        table.appendChild(tbody);
-        var tfoot = document.createElement('tfoot');
-        table.appendChild(tfoot);
+        var thead;
+        recreateHead();
+        var tbody;
+        recreateBody();
+        var tfoot;
+        recreateFoot();
+        var bodyFiller = document.createElement('div');
+        bodyFiller.className = 'p-grid-body-filler';
 
-        table.style.borderCollapse = 'collapse';
-        Ui.on(table, Ui.Eents.KEYDOWN, function (event) {
+        Ui.on(table, Ui.Events.KEYDOWN, function (event) {
             var oldRow = self.keyboardSelectedRow;
             var oldColumn = self.keyboardSelectedColumn;
             var keyCode = event.keyCode;
@@ -60,6 +67,27 @@ define([
         Object.defineProperty(this, 'element', {
             get: function () {
                 return table;
+            }
+        });
+        Object.defineProperty(this, 'data', {
+            get: function () {
+                return data;
+            },
+            set: function (aValue) {
+                if (data !== aValue) {
+                    data = aValue;
+                }
+            }
+        });
+        Object.defineProperty(this, 'rowsHeight', {
+            get: function () {
+                return rowsHeight;
+            },
+            set: function (aValue) {
+                if (rowsHeight !== aValue) {
+                    rowsHeight = aValue;
+                    redrawBody();
+                }
             }
         });
         Object.defineProperty(this, 'draggableRows', {
@@ -93,31 +121,51 @@ define([
             }
         });
 
-        function addColumn(index, aColumn, needRedraw) {
+        function insertColumn(index, aColumn, needRedraw) {
             if (arguments.length < 3)
-                needRedraw = false;
+                needRedraw = true;
             if (index >= 0 && index <= columns.length) { // It is all about insertBefore
                 if (index < columns.length) { // It is all about insertBefore
                     columns.splice(index, 0, aColumn);
                     var col = colgroup.getChild(index);
-                    colgroup.insertBefore(aColumn.element, col);
+                    colgroup.insertBefore(aColumn.addCol(), col);
                 } else {
                     columns.push(aColumn);
-                    colgroup.appendChild(aColumn.element);
+                    colgroup.appendChild(aColumn.addCol());
                 }
+                table.parentElement.parentElement.appendChild(aColumn.columnRule);
                 if (needRedraw) {
                     redraw();
                 }
             }
         }
+        Object.defineProperty(this, 'insertColumn', {
+            get: function () {
+                return insertColumn;
+            }
+        });
+        function addColumn(aColumn, needRedraw) {
+            if (arguments.length < 2)
+                needRedraw = true;
+            insertColumn(columns.length, aColumn, needRedraw);
+        }
+        Object.defineProperty(this, 'addColumn', {
+            get: function () {
+                return addColumn;
+            }
+        });
 
         function removeColumn(index, needRedraw) {
             if (arguments.length < 2)
-                needRedraw = false;
+                needRedraw = true;
             if (index >= 0 && index < columns.length) {
                 var removed = columns.splice(index, 1)[0];
-                removed.element.parentElement.removeChild(removed.element);
-                removed.columnRule.parentElement.remove(removed.columnRule);
+                removed.elements.forEach(function (col) {
+                    col.parentElement.removeChild(col);
+                });
+                removed.elements.splice(0, removed.elements.length);
+                if (removed.columnRule.parentElement)
+                    removed.columnRule.parentElement.removeChild(removed.columnRule);
                 if (needRedraw) {
                     redraw();
                 }
@@ -126,6 +174,11 @@ define([
                 return null;
             }
         }
+        Object.defineProperty(this, 'removeColumn', {
+            get: function () {
+                return removeColumn;
+            }
+        });
 
         Object.defineProperty(this, 'columnsCount', {
             get: function () {
@@ -136,6 +189,11 @@ define([
         function getColumn(index) {
             return index >= 0 && index < columns.length ? columns[index] : null;
         }
+        Object.defineProperty(this, 'getColumn', {
+            get: function () {
+                return getColumn;
+            }
+        });
 
         function getColumnIndex(column) {
             return columns.indexOf(column);
@@ -158,6 +216,11 @@ define([
             }
             return null;
         }
+        Object.defineProperty(this, 'getViewCell', {
+            get: function () {
+                return getViewCell;
+            }
+        });
 
         function focusCell(aRow, aCol) {
             var cell = getViewCell(aRow, aCol);
@@ -167,6 +230,11 @@ define([
                 cell.focus();
             }
         }
+        Object.defineProperty(this, 'focusCell', {
+            get: function () {
+                return focusCell;
+            }
+        });
 
         Object.defineProperty(this, 'keyboardSelectedElement', {
             get: function () {
@@ -179,13 +247,78 @@ define([
             redrawBody();
             redrawFooters();
         }
+        Object.defineProperty(this, 'redraw', {
+            get: function () {
+                return redraw;
+            }
+        });
+
+        function recreateHead() {
+            if (thead && thead.parentElement)
+                table.removeChild(thead);
+            if (colgroup && colgroup.parentElement)
+                table.removeChild(colgroup);
+            thead = document.createElement('thead');
+            table.insertBefore(thead, tbody);
+            table.insertBefore(colgroup, thead);
+        }
+
+        function redrawHeaders() {
+            recreateHead();
+            drawHeaders();
+        }
+        Object.defineProperty(this, 'redrawHeaders', {
+            get: function () {
+                return redrawHeaders;
+            }
+        });
+
+        function drawHeaders() {
+            if (columns.length > 0) {
+                var r = 0;
+                var nextLayer = headerNodes;
+                while (nextLayer.length > 0) {
+                    nextLayer = drawHeaderRow(nextLayer);
+                    r++;
+                }
+                while (r < headerMaxDepth) {
+                    drawHeaderRow([]);
+                    r++;
+                }
+            }
+        }
+
+        function drawHeaderRow(layer) {
+            var children = [];
+            var tr = document.createElement('tr');
+            tr.className = 'p-grid-header-row ' + dynamicHeaderRowsClassName;
+            layer.forEach(function (node) {
+                tr.appendChild(node.view.element);
+                node.view.element.className = 'p-grid-header-cell ' + dynamicHeaderCellsClassName; // reassign classes
+                node.view.element.classList.add(node.column.styleName);
+                Array.prototype.push.apply(children, node.children);
+            });
+            thead.appendChild(tr);
+            return children;
+        }
+
+        function recreateBody() {
+            if (tbody && tbody.parentElement)
+                table.removeChild(tbody);
+            tbody = document.createElement('tbody');
+            table.insertBefore(tbody, tfoot);
+        }
 
         function redrawBody() {
-            tbody.parentElement.removeChild(tbody);
-            tbody = document.createElement('tbody');
-            table.appendChild(tbody);
+            recreateBody();
             drawBody();
         }
+
+        Object.defineProperty(this, 'redrawBody', {
+            get: function () {
+                return redrawBody;
+            }
+        });
 
         function drawBody() {
             if (columns.length > 0) {
@@ -194,43 +327,63 @@ define([
         }
 
         function drawBodyPortion(start, end) {
-            for (var i = start; i < end; i++) {
-                var dataRow = data[i];
-                var viewRow = document.createElement('tr');
-                if ((i + 1) % 2 === 0) {
-                    viewRow.classList.add(dynamicEvenRowsClassName);
-                } else {
-                    viewRow.classList.add(dynamicOddRowsClassName);
-                }
-                viewRow.classList.add("selected-row");
-                viewRow[JS_ROW_NAME] = dataRow;
-                if (i < startRow) {
-                    // insertFirst ...
-                    if (tbody.firstElementChild)
-                        tbody.insertBefore(viewRow, tbody.firstElementChild);
-                    else
+            if (end - start > 0) {
+                if (!bodyFiller.parentElement)
+                    table.parentElement.appendChild(bodyFiller);
+                for (var i = start; i < end; i++) {
+                    var dataRow = data[i];
+                    var viewRow = document.createElement('tr');
+                    viewRow.className = 'p-grid-row ' + dynamicRowsClassName;
+                    if ((i + 1) % 2 === 0) {
+                        viewRow.classList.add(dynamicEvenRowsClassName);
+                    } else {
+                        viewRow.classList.add(dynamicOddRowsClassName);
+                    }
+                    if (grid.isSelected(dataRow))
+                        viewRow.classList.add('p-grid-selected-row');
+                    viewRow[JS_ROW_NAME] = dataRow;
+                    if (i < startRow) {
+                        // insertFirst ...
+                        if (tbody.firstElementChild)
+                            tbody.insertBefore(viewRow, tbody.firstElementChild);
+                        else
+                            tbody.appendChild(viewRow);
+                        // ... insertFirst
+                    } else {
                         tbody.appendChild(viewRow);
-                    // ... insertFirst
-                } else {
-                    tbody.appendChild(viewRow);
+                    }
+                    for (var c = 0; c < columns.length; c++) {
+                        var column = columns[c];
+                        var viewCell = document.createElement('td');
+                        // TODO: Check alignment of the cell
+                        // TODO: Check image decoration of the cell and decoration styles
+                        viewCell.className = 'p-grid-cell ' + dynamicCellsClassName;
+                        viewRow.appendChild(viewCell);
+                        column.render(i, dataRow, viewCell);
+                    }
                 }
-                for (var c = 0; c < columns.length; c++) {
-                    var column = columns[c];
-                    var viewCell = document.createElement('td');
-                    // TODO: Check alignment of the cell
-                    // TODO: Check image decoration of the cell and decoration styles
-                    viewCell.classList.add(dynamicCellClassName);
-                    viewRow.appendChild(viewCell);
-                    column.render(i, dataRow, viewCell);
-                }
+                var rowSpace = endRow - startRow;
+                var renderedRowPortion = end - start;
+                var fillerHeight = rowsHeight * (data ? rowSpace - renderedRowPortion : 0);
+                bodyFiller.style.height = fillerHeight + 'px';
+                bodyFiller.style.display = fillerHeight === 0 ? 'none' : '';
             }
         }
 
-        function setRange(aStartRow, aEndRow) {
-            startRow = aStartRow;
-            endRow = aEndRow;
-            redrawBody();
+        function setRange(start, end, needRedraw) {
+            if (arguments.length < 3)
+                needRedraw = true;
+            startRow = start;
+            endRow = end;
+            if (needRedraw) {
+                redrawBody();
+            }
         }
+        Object.defineProperty(this, 'setRange', {
+            get: function () {
+                return setRange;
+            }
+        });
 
         function shiftRange(aStartRow, aEndRow) {
             if (aStartRow >= endRow || aEndRow < startRow) {
@@ -254,40 +407,28 @@ define([
                 endRow = aEndRow;
             }
         }
-
-        function redrawHeaders() {
-            table.removeChild(thead);
-            thead = document.createElement('thead');
-            table.appendChild(thead);
-            drawHeaders();
-        }
-
-        function drawHeaders() {
-            if (columns.length > 0) {
-                var nextLayer = headerNodes;
-                while (nextLayer.length > 0) {
-                    nextLayer = drawHeaderRow(nextLayer);
-                }
+        Object.defineProperty(this, 'shiftRange', {
+            get: function () {
+                return shiftRange;
             }
-        }
+        });
 
-        function drawHeaderRow(layer) {
-            var children = [];
-            var tr = document.createElement('tr');
-            layer.forEach(function (hn) {
-                tr.appendChild(hn.header.element);
-                Array.push.apply(children, hn.children);
-            });
-            thead.appendChild(tr);
-            return children;
+        function recreateFoot() {
+            if (tfoot && tfoot.parentElement)
+                table.removeChild(tfoot);
+            tfoot = document.createElement('tfoot');
+            table.appendChild(tfoot);
         }
 
         function redrawFooters() {
-            table.removeChild(tfoot);
-            tfoot = document.createTFootElement('tfoot');
-            table.appendChild(tfoot);
+            recreateFoot();
             drawFooters();
         }
+        Object.defineProperty(this, 'redrawFooters', {
+            get: function () {
+                return redrawFooters;
+            }
+        });
 
         function drawFooters() {
             if (columns.length > 0) {
@@ -321,32 +462,43 @@ define([
             }
         }
 
-        function setHeaderNodes(aHeader, needReadraw) {
+        function setHeaderNodes(aHeader, maxDepth, needRedraw) {
             if (arguments.length < 2)
-                needReadraw = false;
+                needRedraw = false;
             headerNodes = aHeader;
-            if (needReadraw) {
+            headerMaxDepth = maxDepth;
+            if (needRedraw) {
                 redrawHeaders();
             }
         }
-
-        function clearColumnsAndHeader() {
-            clearColumnsAndHeader(true);
-        }
+        Object.defineProperty(this, 'setHeaderNodes', {
+            get: function () {
+                return setHeaderNodes;
+            }
+        });
 
         function clearColumnsAndHeader(needRedraw) {
             if (arguments.length < 1)
-                needRedraw = false;
-            for (var i = columns.length - 1; i >= 0; i--) {
-                var removed = columns.splice(i, 1)[0];
-                removed.element.parentElement.removeChild(removed.element);
-                removed.columnRule.parentElement.removeChild(removed.columnRule);
-            }
+                needRedraw = true;
+            columns.forEach(function (removed) {
+                removed.elements.forEach(function (col) {
+                    col.parentElement.removeChild(col);
+                });
+                removed.elements.splice(0, removed.elements.length);
+                if (removed.columnRule.parentElement)
+                    removed.columnRule.parentElement.removeChild(removed.columnRule);
+            });
+            columns = [];
             headerNodes = [];
             if (needRedraw) {
                 redraw();
             }
         }
+        Object.defineProperty(this, 'clearColumnsAndHeader', {
+            get: function () {
+                return clearColumnsAndHeader;
+            }
+        });
     }
     return Section;
 });

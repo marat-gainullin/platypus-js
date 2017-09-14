@@ -1,4 +1,4 @@
-deinfe([
+define([
     '../../../extend',
     '../column'
 ], function(

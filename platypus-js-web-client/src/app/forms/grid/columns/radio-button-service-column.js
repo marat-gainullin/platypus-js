@@ -1,12 +1,15 @@
-deinfe([
+define([
+    '../../../id',
     '../../../extend',
     '../column'
 ], function(
+        Id,
         extend,
         Column){
     function RadioServiceColumn(){
         Column.call(this);
         var self = this;
+        var radioGroup = 'p-grid-group-' + Id.generate();
    
         this.width = 22;
         

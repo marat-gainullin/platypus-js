@@ -1,20 +1,20 @@
 define([
     '../column',
-    './node-view',
+    '../header/node-view',
     '../../fields/text-field'
 ], function (
         Column,
-        HeaderView,
+        NodeView,
         TextField
         ) {
-    function HeaderNode(column, header) {
+    function ColumnNode(column, nodeView) {
         var self = this;
         var name = null;
         if (!column) {
             column = new Column();
         }
-        if (!header) {
-            header = new HeaderView("", this);
+        if (!nodeView) {
+            nodeView = new NodeView("", this);
         }
         var parent = null;
         var children = [];
@@ -24,17 +24,25 @@ define([
 
         column.editor = new TextField();
 
-        function lightCopy() {
-            var copied = new HeaderNode();
+        function copy() {
+            var copied = new ColumnNode();
+            // Only one column is possible for one header node.
+            // Multiple header nodes are possible for the same column.
+            // It is ok, because of public API.
             copied.column = column;
-            copied.header = header;
+            // For one header node, single or multiple header cells may be created, while header split.
+            // So, we have to replicate header cell and copied.header = header assignment is not applicable.
+            // Othewise, spans will be reassigned by header nodes unpredictibly.
+            copied.view.text = nodeView.text;
+            copied.leavesCount = leavesCount;
+            copied.depthRemainder = depthRemainder;
             return copied;
         }
 
-        Object.defineProperty(this, 'lightCopy', {
+        Object.defineProperty(this, 'copy', {
             configurable: true,
             get: function () {
-                return lightCopy;
+                return copy;
             }
         });
         Object.defineProperty(this, 'column', {
@@ -62,13 +70,9 @@ define([
             }
         });
 
-        Object.defineProperty(this, 'header', {
-            configurable: true,
+        Object.defineProperty(this, 'view', {
             get: function () {
-                return header;
-            },
-            set: function (aValue) {
-                header = aValue;
+                return nodeView;
             }
         });
 
@@ -133,7 +137,11 @@ define([
             },
             set: function (aValue) {
                 depthRemainder = aValue;
-                header.element.rowspan = (aValue + 1) + "";
+                if (aValue > 0) {
+                    nodeView.element.setAttribute('rowspan', (aValue + 1) + '');
+                } else {
+                    nodeView.element.removeAttribute('rowspan');
+                }
             }
         });
 
@@ -143,7 +151,11 @@ define([
             },
             set: function (aValue) {
                 leavesCount = aValue;
-                header.element.colspan = aValue + "";
+                if (aValue > 1) {
+                    nodeView.element.setAttribute('colspan', aValue + '');
+                } else {
+                    nodeView.element.removeAttribute('colspan');
+                }
             }
         });
 
@@ -164,28 +176,28 @@ define([
 
         Object.defineProperty(this, 'background', {
             get: function () {
-                return header.background;
+                return nodeView.background;
             },
             set: function (aValue) {
-                header.background = aValue;
+                nodeView.background = aValue;
             }
         });
 
         Object.defineProperty(this, 'foreground', {
             get: function () {
-                return header.foreground;
+                return nodeView.foreground;
             },
             set: function (aValue) {
-                header.foreground = aValue;
+                nodeView.foreground = aValue;
             }
         });
 
         Object.defineProperty(this, 'font', {
             get: function () {
-                return header.font;
+                return nodeView.font;
             },
             set: function (aValue) {
-                header.font = aValue;
+                nodeView.font = aValue;
             }
         });
 
@@ -227,28 +239,28 @@ define([
 
         Object.defineProperty(this, 'title', {
             get: function () {
-                return header.title;
+                return nodeView.text;
             },
             set: function (aValue) {
-                header.title = aValue;
+                nodeView.text = aValue;
             }
         });
 
         Object.defineProperty(this, 'resizable', {
             get: function () {
-                return header.resizable;
+                return nodeView.resizable;
             },
             set: function (aValue) {
-                header.resizable = aValue;
+                nodeView.resizable = aValue;
             }
         });
 
         Object.defineProperty(this, 'moveable', {
             get: function () {
-                return header.moveable;
+                return nodeView.moveable;
             },
             set: function (aValue) {
-                header.moveable = aValue;
+                nodeView.moveable = aValue;
             }
         });
 
@@ -354,4 +366,5 @@ define([
             }
         });
     }
+    return ColumnNode;
 });

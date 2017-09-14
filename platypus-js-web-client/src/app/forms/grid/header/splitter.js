@@ -1,6 +1,5 @@
 define([], function () {
     function HeaderSplitter(minLeave, maxLeave) {
-        // processing
         var splittedLeaves = [];
         var leaveIndex = -1;
 
@@ -30,7 +29,7 @@ define([], function () {
             var res = false;
             for (var i = 0; i < toBeSplitted.length; i++) {
                 var n = toBeSplitted[i];
-                var nc = n.lightCopy();
+                var nc = n.copy();
                 if (n.children.length === 0) {
                     leaveIndex++;
                     if (leaveIndex >= minLeave && leaveIndex <= maxLeave) {
@@ -52,12 +51,27 @@ define([], function () {
             }
             return res;
         }
+        Object.defineProperty(this, 'process', {
+            get: function(){
+                return process;
+            }
+        });
     }
     var module = {};
+    
+    function injectHeaders(forest){
+        forest.forEach(function(node){
+            node.column.headers.push(node.header);
+            injectHeaders(node.children);
+        });
+    }
+    
     function split(toBeSplitted, aMinLeave, aMaxLeave) {
         var splitter = new HeaderSplitter(aMinLeave, aMaxLeave);
         splitter.process(toBeSplitted, null);
-        return splitter.toRoots();
+        var clonedPortion = splitter.toRoots();
+        injectHeaders(clonedPortion);
+        return clonedPortion;
     }
     Object.defineProperty(module, 'split', {
         get: function () {

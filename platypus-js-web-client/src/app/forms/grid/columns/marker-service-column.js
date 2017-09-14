@@ -1,4 +1,4 @@
-deinfe([
+define([
     '../../../extend',
     '../column'
 ], function (
@@ -12,13 +12,11 @@ deinfe([
 
         function render(viewIndex, dataRow, viewCell) {
             // TODO: Add data cursor and data changes driven data rendering
-            var rows = self.grid.discoverRows();
-            var currentRow = rows && rows[self.grid.cursorProperty] === dataRow;
-            if (currentRow) {
-                var content = document.createDivElement('div');
+            var content = document.createElement('div');
+            if (self.grid.cursorProperty && self.grid.rows && self.grid.rows[self.grid.cursorProperty] === dataRow) {
                 content.className = 'p-grid-marker-cell-cursor';
-                viewCell.appendChild(content);
             }
+            viewCell.appendChild(content);
             /*
              if (value.inserted)
              content.className = 'grid-marker-inserted';

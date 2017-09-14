@@ -46,20 +46,43 @@
 }
 
 .p-window-t {
-    cursor: n-resize;
+    cursor: ns-resize;
 }
 .p-window-b {
-    cursor: s-resize;
+    cursor: ns-resize;
 }
 .p-window-l {
-    cursor: w-resize;
+    cursor: ew-resize;
 }
 .p-window-r {
-    cursor: e-resize;
+    cursor: ew-resize;
 }
 .p-window-t,.p-window-b,.p-window-l,.p-window-r {
     /* background-color: bisque; */
 }
 .p-window-tl,.p-window-tr,.p-window-bl,.p-window-br {
     /* background-color: blueviolet; */
+}
+
+.p-grid-shell{
+}
+
+.p-grid-cell,
+.p-grid-header-cell {
+    border-style: solid;
+    border-width: 1px;
+    border-color: lightgray;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.p-grid-column-resizer {
+    display: inline-block;
+    position: absolute;
+    right: 0px;
+    width: 5px;
+    top: 0px;
+    height: 100%;
+    box-sizing: border-box;
+    cursor: ew-resize;
 }

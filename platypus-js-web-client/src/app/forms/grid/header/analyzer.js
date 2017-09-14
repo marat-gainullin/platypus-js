@@ -15,21 +15,40 @@ define([], function () {
                 }
             }
         }
-        Object.defineProperty(HeaderAnalyzer, 'maxDepth', {
+        Object.defineProperty(this, 'maxDepth', {
             get: function () {
                 return maxDepth;
             }
         });
+        Object.defineProperty(this, 'depth', {
+            get: function () {
+                return depth;
+            }
+        });
 
-        function mine(aForest, aDepth, aParent) {
+        function mineDepth(aForest, aDepth) {
             aDepth++;
+            for (var i = 0; i < aForest.length; i++) {
+                var n = aForest[i];
+                if (!n.leaf) {
+                    mineDepth(n.children, aDepth);
+                } else {
+                    n.depthRemainder = depth - aDepth;
+                }
+            }
+        }
+        Object.defineProperty(this, 'mineDepth', {
+            get: function () {
+                return mineDepth;
+            }
+        });
+        function mineLeaves(aForest, aParent) {
             var leavesCount = 0;
             for (var i = 0; i < aForest.length; i++) {
                 var n = aForest[i];
                 if (!n.leaf) {
-                    leavesCount += mine(n.children, aDepth, n);
+                    leavesCount += mineLeaves(n.children, n);
                 } else {
-                    n.depthRemainder = depth - aDepth;
                     leavesCount += 1;
                 }
             }
@@ -38,21 +57,32 @@ define([], function () {
             }
             return leavesCount;
         }
-        Object.defineProperty(HeaderAnalyzer, 'mine', {
+        Object.defineProperty(this, 'mineLeaves', {
             get: function () {
-                return mine;
+                return mineLeaves;
             }
         });
     }
 
-    function analyze(aForest) {
+    var module = {};
+    function analyzeDepth(aForest) {
         var analyzer = new HeaderAnalyzer();
         analyzer.maxDepth(aForest, 0);
-        analyzer.mine(aForest, 0, null);
+        analyzer.mineDepth(aForest, 0);
+        return analyzer.depth;
     }
-    Object.defineProperty(HeaderAnalyzer, 'analyze', {
+    Object.defineProperty(module, 'analyzeDepth', {
         get: function () {
-            return analyze;
+            return analyzeDepth;
+        }
+    });
+    function analyzeLeaves(aForest) {
+        var analyzer = new HeaderAnalyzer();
+        analyzer.mineLeaves(aForest, null);
+    }
+    Object.defineProperty(module, 'analyzeLeaves', {
+        get: function () {
+            return analyzeLeaves;
         }
     });
     function achieveLeaves(aRoots, aLeaves) {
@@ -64,21 +94,16 @@ define([], function () {
             }
         });
     }
-    Object.defineProperty(HeaderAnalyzer, 'achieveLeaves', {
-        get: function () {
-            return achieveLeaves;
-        }
-    });
 
     function toLeaves(aRoots) {
         var leaves = [];
         achieveLeaves(aRoots, leaves);
         return leaves;
     }
-    Object.defineProperty(HeaderAnalyzer, 'toLeaves', {
+    Object.defineProperty(module, 'toLeaves', {
         get: function () {
             return toLeaves;
         }
     });
-    return HeaderAnalyzer;
+    return module;
 });

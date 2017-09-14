@@ -8,30 +8,41 @@ define([
 
     var HEADER_VIEW = 'header-view';
 
-    function HeaderView(aTitle, aHeaderNode) {
-
+    function NodeView(aTitle, columnNode) {
         var self = this;
         var th = document.createElement('th');
+        var thResizer = document.createElement('div');
+        thResizer.className = 'p-grid-column-resizer';
         var background = null;
         var foreground = null;
         var font = null;
-        var headerNode = null;
         var moveable = true;
         var resizable = true;
+        th.draggable = true;
 
         th[HEADER_VIEW] = this;
         th.innerText = aTitle;
-        headerNode = aHeaderNode;
-        headerNode.header = this;
+        th.appendChild(thResizer);
         Ui.on(th, Ui.Events.DRAGSTART, function (event) {
             event.stopPropagation();
-            var col = new ColumnDrag(self, event.target);
-            if ((col.move && moveable) || (col.resize && resizable)) {
+            if (moveable) {
                 event.dataTransfer.effectAllowed = 'move';
-                ColumnDrag.instance = col;
-                event.dataTransfer.setData('Text', 'column-' + (ColumnDrag.instance.move ? 'moved' : 'resized'));
+                ColumnDrag.instance = new ColumnDrag(self, event.target, 'move');
+                event.dataTransfer.setData('Text', 'column-moved');
             } else {
                 event.dataTransfer.effectAllowed = 'none';
+                ColumnDrag.instance = null;
+            }
+        });
+        Ui.on(thResizer, Ui.Events.DRAGSTART, function (event) {
+            event.stopPropagation();
+            if (resizable) {
+                event.dataTransfer.effectAllowed = 'move';
+                ColumnDrag.instance = new ColumnDrag(self, event.target, 'resize');
+                event.dataTransfer.setData('Text', 'column-resized');
+            } else {
+                event.dataTransfer.effectAllowed = 'none';
+                ColumnDrag.instance = null;
             }
         });
 
@@ -47,6 +58,7 @@ define([
             },
             set: function (aValue) {
                 th.innerText = aValue;
+                th.appendChild(thResizer);
             }
         });
 
@@ -58,7 +70,7 @@ define([
 
         Object.defineProperty(this, 'headerNode', {
             get: function () {
-                return headerNode;
+                return columnNode;
             }
         });
 
@@ -94,7 +106,10 @@ define([
                 return resizable;
             },
             set: function (aValue) {
-                resizable = aValue;
+                if (resizable !== aValue) {
+                    resizable = aValue;
+                    th.draggable = moveable || resizable;
+                }
             }
         });
 
@@ -103,12 +118,15 @@ define([
                 return moveable;
             },
             set: function (aValue) {
-                moveable = aValue;
+                if (moveable !== aValue) {
+                    moveable = aValue;
+                    th.draggable = moveable || resizable;
+                }
             }
         });
 
         function getRightMostColumn() {
-            var node = headerNode;
+            var node = columnNode;
             while (!node.column && !node.children.length === 0) {
                 node = node.children[node.children.length - 1];
             }
@@ -154,9 +172,10 @@ define([
          }
          */
     }
-    Object.defineProperty(HeaderView, 'HEADER_VIEW', {
+    Object.defineProperty(NodeView, 'HEADER_VIEW', {
         get: function () {
             return HEADER_VIEW;
         }
     });
+    return NodeView;
 });

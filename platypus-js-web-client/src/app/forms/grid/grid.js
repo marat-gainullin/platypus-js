@@ -1,50 +1,50 @@
+/* global Infinity */
 define([
-    '../../extend',
     '../../id',
     '../../ui',
+    '../../extend',
     '../../invoke',
     '../../logger',
-    '../../bound',
     '../../common-utils/color',
-    '../key-codes',
+    '../bound',
     '../widget',
+    '../key-codes',
+    '../events/key-event',
     '../events/item-event',
     '../events/sort-event',
-    '../events/key-event',
-    '../events/focus-event',
     '../events/blur-event',
+    '../events/focus-event',
     './section',
     './columns/drag',
+    './header/analyzer',
+    './header/splitter',
+    './header/node-view',
     './columns/marker-service-column',
     './columns/check-box-service-column',
-    './columns/radio-button-service-column',
-    './header/node-view',
-    './header/analyzer',
-    './header/splitter'
+    './columns/radio-button-service-column'
 ], function (
-        extend,
         Id,
         Ui,
+        extend,
         Invoke,
         Logger,
-        Bound,
         Color,
-        KeyCodes,
+        Bound,
         Widget,
+        KeyCodes,
+        KeyEvent,
         ItemEvent,
         SortEvent,
-        KeyEvent,
-        FocusEvent,
         BlurEvent,
+        FocusEvent,
         Section,
         ColumnDrag,
+        HeaderAnalyzer,
+        HeaderSplitter,
+        NodeView,
         MarkerServiceColumn,
         CheckBoxServiceColumn,
-        RadioButtonServiceColumn,
-        MarkerServiceColumn,
-        HeaderView,
-        HeaderAnalyzer,
-        HeaderSplitter
+        RadioButtonServiceColumn
         ) {
 
 //public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObject>, HasSelectionLead, HasOnRender, HasBinding, 
@@ -57,45 +57,131 @@ define([
 
     function Grid() {
         var shell = document.createElement('div');
-        Widget.call(shell);
+        Widget.call(this, shell);
         var self = this;
 
         var cellsStyleElement = document.createElement('style');
         var rowsStyleElement = document.createElement('style');
+        var headerCellsStyleElement = document.createElement('style');
+        var headerRowsStyleElement = document.createElement('style');
+
         var oddRowsStyleElement = document.createElement('style');
         var evenRowsStyleElement = document.createElement('style');
-        var headerRowsStyleElement = document.createElement('style');
-        var dynamicCellClassName = 'p-grid-cell-' + Id.generate();
+
+        var dynamicCellsClassName = 'p-grid-cell-' + Id.generate();
+        var dynamicRowsClassName = 'p-grid-row-' + Id.generate();
+        var dynamicHeaderCellsClassName = 'p-grid-header-cell-' + Id.generate();
+        var dynamicHeaderRowsClassName = 'p-grid-header-row-' + Id.generate();
+
         var dynamicOddRowsClassName = 'p-grid-odd-row-' + Id.generate();
         var dynamicEvenRowsClassName = 'p-grid-even-row-' + Id.generate();
-        var dynamicHeaderRowClassName = 'p-grid-heder-row-' + Id.generate();
-        var headerLeftContainer = document.createElement('div');
-        var headerLeft = new Section(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
-        var headerRightContainer = document.createElement('div');
-        var headerRight = new Section(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
-        var frozenLeftContainer = document.createElement('div');
-        var frozenLeft = new Section(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
-        var frozenRightContainer = document.createElement('div');
-        var frozenRight = new Section(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
-        var scrollableLeftContainer = document.createElement('div');
-        var scrollableLeft = new Section(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
-        var scrollableRightContainer = document.createElement('div');
-        var scrollableRight = new Section(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
-        var footerLeftContainer = document.createElement('div');
-        var footerLeft = new Section(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
-        var footerRightContainer = document.createElement('div');
-        var footerRight = new Section(dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName, dynamicHeaderRowClassName);
+
+        var headerContainer = document.createElement('div');
+        var headerContainerLeft = document.createElement('div');
+        var headerContainerRight = document.createElement('div');
+
+        var headerLeft = new Section(self, dynamicCellsClassName, dynamicRowsClassName, dynamicHeaderCellsClassName, dynamicHeaderRowsClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName);
+        Object.defineProperty(this, 'headerLeft', {
+            get: function () {
+                return headerLeft;
+            }
+        });
+        headerContainerLeft.appendChild(headerLeft.element);
+        var headerRight = new Section(self, dynamicCellsClassName, dynamicRowsClassName, dynamicHeaderCellsClassName, dynamicHeaderRowsClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName);
+        Object.defineProperty(this, 'headerRight', {
+            get: function () {
+                return headerRight;
+            }
+        });
+        headerContainerRight.appendChild(headerRight.element);
+
+        headerContainer.appendChild(headerContainerLeft);
+        headerContainer.appendChild(headerContainerRight);
+
+        var frozenContainer = document.createElement('div');
+        var frozenContainerLeft = document.createElement('div');
+        var frozenContainerRight = document.createElement('div');
+
+        var frozenLeft = new Section(self, dynamicCellsClassName, dynamicRowsClassName, dynamicHeaderCellsClassName, dynamicHeaderRowsClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName);
+        Object.defineProperty(this, 'frozenLeft', {
+            get: function () {
+                return frozenLeft;
+            }
+        });
+        frozenContainerLeft.appendChild(frozenLeft.element);
+        var frozenRight = new Section(self, dynamicCellsClassName, dynamicRowsClassName, dynamicHeaderCellsClassName, dynamicHeaderRowsClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName);
+        Object.defineProperty(this, 'frozenRight', {
+            get: function () {
+                return frozenRight;
+            }
+        });
+        frozenContainerRight.appendChild(frozenRight.element);
+        frozenContainer.appendChild(frozenContainerLeft);
+        frozenContainer.appendChild(frozenContainerRight);
+
+        var bodyContainer = document.createElement('div');
+        var bodyContainerLeft = document.createElement('div');
+        var bodyContainerRight = document.createElement('div');
+        var bodyLeft = new Section(self, dynamicCellsClassName, dynamicRowsClassName, dynamicHeaderCellsClassName, dynamicHeaderRowsClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName);
+        Object.defineProperty(this, 'bodyLeft', {
+            get: function () {
+                return bodyLeft;
+            }
+        });
+        bodyContainerLeft.appendChild(bodyLeft.element);
+        var bodyRight = new Section(self, dynamicCellsClassName, dynamicRowsClassName, dynamicHeaderCellsClassName, dynamicHeaderRowsClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName);
+        Object.defineProperty(this, 'bodyRight', {
+            get: function () {
+                return bodyRight;
+            }
+        });
+        bodyContainerRight.appendChild(bodyRight.element);
+        bodyContainer.appendChild(bodyContainerLeft);
+        bodyContainer.appendChild(bodyContainerRight);
+        Ui.on(bodyContainerRight, 'scroll', function (evt) {
+            bodyLeft.element.style.marginTop = -bodyContainerRight.scrollTop + 'px';
+            [
+                headerRight,
+                frozenRight,
+                footerRight
+            ].forEach(function (section) {
+                section.element.style.marginLeft = -bodyContainerRight.scrollLeft + 'px';
+            });
+        });
+
+        var footerContainer = document.createElement('div');
+        var footerContainerLeft = document.createElement('div');
+        var footerContainerRight = document.createElement('div');
+        var footerLeft = new Section(self, dynamicCellsClassName, dynamicRowsClassName, dynamicHeaderCellsClassName, dynamicHeaderRowsClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName);
+        Object.defineProperty(this, 'footerLeft', {
+            get: function () {
+                return footerLeft;
+            }
+        });
+        footerContainerLeft.appendChild(footerLeft.element);
+        var footerRight = new Section(self, dynamicCellsClassName, dynamicRowsClassName, dynamicHeaderCellsClassName, dynamicHeaderRowsClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName);
+        Object.defineProperty(this, 'footerRight', {
+            get: function () {
+                return footerRight;
+            }
+        });
+        footerContainerRight.appendChild(footerRight.element);
+        footerContainer.appendChild(footerContainerLeft);
+        footerContainer.appendChild(footerContainerRight);
+        footerContainer.style.display = 'none';
+
         var ghostLine = document.createElement('div');
         var ghostColumn = null;
         var targetDraggedColumn = null;
 
-        var header = [];
-        Object.defineProperty(this, 'columnNodes', {
+        var columnNodes = [];
+
+        var columnsFacade = [];
+        Object.defineProperty(this, 'columns', {
             get: function () {
-                return header.slice(0, header.length);
+                return columnsFacade;
             }
         });
-
         //
         var columnsChevron = document.createElement('div');
         //
@@ -105,7 +191,8 @@ define([
         var showVerticalLines = true;
         var showOddRowsInOtherColor = true;
         var gridColor = null;
-        var oddRowsColor = new Color(241, 241, 241, 255);
+        var oddRowsColor = null;
+        var evenRowsColor = new Color(241, 241, 241, 255);
 
         var selectedRows = new Set();
         var selectionLead = null;
@@ -121,7 +208,7 @@ define([
         var childrenField = null;
         //
         var data = null; // bounded data. this is not rows source. rows source is data['field' property path]
-        var sortedRows = null; // rows in view. subject of sorting. subject of collapse / expand in tree.
+        var sortedRows = []; // rows in view. subject of sorting. subject of collapse / expand in tree.
         var expandedRows = new Set();
         var field = null;
         var boundToData = null;
@@ -139,30 +226,37 @@ define([
 
         shell.className = 'p-widget p-grid-shell';
 
-        headerLeftContainer.className = 'p-grid-section-header-left';
-        headerRightContainer.className = 'p-grid-section-header-right';
-        frozenLeftContainer.className = 'p-grid-section-frozen-left';
-        frozenRightContainer.className = 'p-grid-section-frozen-right';
-        scrollableLeftContainer.className = 'p-grid-section-body-left';
-        scrollableRightContainer.className = 'p-grid-section-body-right';
-        footerLeftContainer.className = 'p-grid-section-footer-left';
-        footerRightContainer.className = 'p-grid-section-footer-right';
+        headerContainer.className = 'p-grid-section-header';
+        headerContainerLeft.className = 'p-grid-section-header-left';
+        headerContainerRight.className = 'p-grid-section-header-right';
+        frozenContainer.className = 'p-grid-section-frozen';
+        frozenContainerLeft.className = 'p-grid-section-frozen-left';
+        frozenContainerRight.className = 'p-grid-section-frozen-right';
+        bodyContainer.className = 'p-grid-section-body';
+        bodyContainerLeft.className = 'p-grid-section-body-left';
+        bodyContainerRight.className = 'p-grid-section-body-right';
+        footerContainer.className = 'p-grid-section-footer';
+        footerContainerLeft.className = 'p-grid-section-footer-left';
+        footerContainerRight.className = 'p-grid-section-footer-right';
+
         columnsChevron.className = 'p-grid-columns-chevron';
+
         shell.appendChild(cellsStyleElement);
         shell.appendChild(rowsStyleElement);
+        shell.appendChild(headerCellsStyleElement);
+        shell.appendChild(headerRowsStyleElement);
+
         shell.appendChild(oddRowsStyleElement);
         shell.appendChild(evenRowsStyleElement);
-        shell.appendChild(headerLeftContainer);
-        shell.appendChild(headerRightContainer);
-        shell.appendChild(frozenLeftContainer);
-        shell.appendChild(frozenRightContainer);
-        shell.appendChild(scrollableLeftContainer);
-        shell.appendChild(scrollableRightContainer);
-        shell.appendChild(footerLeftContainer);
-        shell.appendChild(footerRightContainer);
+
+        shell.appendChild(headerContainer);
+        shell.appendChild(frozenContainer);
+        shell.appendChild(bodyContainer);
+        shell.appendChild(footerContainer);
+
         shell.appendChild(columnsChevron);
 
-        Ui.on(scrollableRightContainer, Ui.Events.SCROLL, function (evt) {
+        Ui.on(bodyContainer, Ui.Events.SCROLL, function (evt) {
             // TODO: Add ajacent sections movement logic
         });
 
@@ -325,7 +419,7 @@ define([
 
         (function () {
             function fillColumns(aTarget, aSection) {
-                for (var i = 0; i < aSection.columnCount; i++) {
+                for (var i = 0; i < aSection.columnsCount; i++) {
                     var column = aSection.getColumn(i);
                     var miCheck = new MenuItemCheckBox(column.visible, column.header.text, true);
                     miCheck.addValueChangeHandler(function (event) {
@@ -342,11 +436,13 @@ define([
             });
         }());
 
-        gridColor = new Color(211, 211, 211, 255);
+        regenerateDynamicHeaderCellsStyles();
         regenerateDynamicHeaderRowsStyles();
-        regenerateDynamicRowsStyles();
-        regenerateDynamicOddRowsStyles();
         regenerateDynamicCellsStyles();
+        regenerateDynamicRowsStyles();
+
+        regenerateDynamicOddRowsStyles();
+        regenerateDynamicEvenRowsStyles();
 
         Ui.on(shell, Ui.Events.KEYUP, function (event) {
             var rows = discoverRows();
@@ -447,29 +543,65 @@ define([
         function isSelected(item) {
             return selectedRows.has(item);
         }
+        Object.defineProperty(this, 'isSelected', {
+            get: function () {
+                return isSelected;
+            }
+        });
 
         function select(item) {
             selectedRows.add(item);
             selectionLead = item;
             var rows = discoverRows();
-            rows[cursorProperty] = selectionLead;
+            if (cursorProperty)
+                rows[cursorProperty] = selectionLead;
             fireSelected(item);
         }
+        Object.defineProperty(this, 'select', {
+            get: function () {
+                return select;
+            }
+        });
+
+        function selectAll() {
+            var rows = discoverRows();
+            selectedRows = new Set(rows);
+            selectionLead = rows.length > 0 ? rows[0] : null;
+            if (cursorProperty)
+                rows[cursorProperty] = selectionLead;
+            fireSelected(selectionLead);
+        }
+        Object.defineProperty(this, 'selectAll', {
+            get: function () {
+                return selectAll;
+            }
+        });
 
         function unselect(item) {
             if (selectionLead === item) {
                 selectionLead = null;
             }
+            fireSelected(null);
             return selectedRows.delete(item);
         }
+        Object.defineProperty(this, 'unselect', {
+            get: function () {
+                return unselect;
+            }
+        });
 
-        function clearSelection() {
+        function unselectAll() {
             selectedRows.clear();
             if (selectedRows.has(selectionLead)) {
                 selectionLead = null;
             }
             fireSelected(null);
         }
+        Object.defineProperty(this, 'unselectAll', {
+            get: function () {
+                return unselectAll;
+            }
+        });
 
         function findTargetDraggedColumn(aEventTarget) {
             var targetSection = null;
@@ -492,16 +624,16 @@ define([
                             targetSection = headerLeft;
                         } else if (currentTarget === frozenLeft.element) {
                             targetSection = frozenLeft;
-                        } else if (currentTarget === scrollableLeft.element) {
-                            targetSection = scrollableLeft;
+                        } else if (currentTarget === bodyLeft.element) {
+                            targetSection = bodyLeft;
                         } else if (currentTarget === footerLeft.element) {
                             targetSection = footerLeft;
                         } else if (currentTarget === headerRight.element) {
                             targetSection = headerRight;
                         } else if (currentTarget === frozenRight.element) {
                             targetSection = frozenRight;
-                        } else if (currentTarget === scrollableRight.element) {
-                            targetSection = scrollableRight;
+                        } else if (currentTarget === bodyRight.element) {
+                            targetSection = bodyRight;
                         } else if (currentTarget === footerRight.element) {
                             targetSection = footerRight;
                         }
@@ -509,9 +641,9 @@ define([
                     currentTarget = currentTarget.parentElement;
                 }
                 if (targetSection && targetCell) {
-                    var header = targetCell[HeaderView.HEADER_VIEW];
-                    if (header) {
-                        return new ColumnDrag(header, targetCell);
+                    var view = targetCell[NodeView.HEADER_VIEW];
+                    if (view) {
+                        return new ColumnDrag(view, targetCell);
                     } else {
                         return null;
                     }
@@ -549,7 +681,7 @@ define([
 
         Object.defineProperty(this, 'dynamicCellClassName', {
             get: function () {
-                return dynamicCellClassName;
+                return dynamicCellsClassName;
             }
         });
 
@@ -579,22 +711,13 @@ define([
 
         function regenerateDynamicCellsStyles() {
             cellsStyleElement.innerHTML =
-                    '.' + dynamicCellClassName + '{' +
-                    'border-left-width: ' + (showHorizontalLines ? 1 : 0) + 'px;' +
-                    'border-right-width: ' + (showVerticalLines ? 1 : 0) + 'px;' +
-                    'border-color: ' + (gridColor ? gridColor.toStyled() : 'auto') + ';' +
+                    '.' + dynamicCellsClassName + '{' +
+                    (showHorizontalLines ? '' : 'border-top-style: none;') +
+                    (showHorizontalLines ? '' : 'border-bottom-style: none;') +
+                    (showVerticalLines ? '' : 'border-left-style: none;') +
+                    (showVerticalLines ? '' : 'border-right-style: none;') +
+                    (gridColor ? 'border-color: ' + gridColor.toStyled() + ';' : '') +
                     '}';
-        }
-
-        function regenerateDynamicOddRowsStyles() {
-            if (showOddRowsInOtherColor && oddRowsColor) {
-                oddRowsStyleElement.innerHTML =
-                        '.' + dynamicOddRowsClassName + '{' +
-                        'background-color: ' + oddRowsColor.toStyled() +
-                        '}';
-            } else {
-                oddRowsStyleElement.innerHTML = '';
-            }
         }
 
         Object.defineProperty(this, 'gridColor', {
@@ -608,6 +731,18 @@ define([
                 }
             }
         });
+
+        function regenerateDynamicOddRowsStyles() {
+            if (showOddRowsInOtherColor && oddRowsColor) {
+                oddRowsStyleElement.innerHTML =
+                        '.' + dynamicOddRowsClassName + '{' +
+                        (oddRowsColor ? 'background-color: ' + oddRowsColor.toStyled() + ';' : '') +
+                        '}';
+            } else {
+                oddRowsStyleElement.innerHTML = '';
+            }
+        }
+
         Object.defineProperty(this, 'oddRowsColor', {
             get: function () {
                 return oddRowsColor;
@@ -619,6 +754,35 @@ define([
                 }
             }
         });
+        function regenerateDynamicEvenRowsStyles() {
+            if (showOddRowsInOtherColor && evenRowsColor) {
+                evenRowsStyleElement.innerHTML =
+                        '.' + dynamicEvenRowsClassName + '{' +
+                        (evenRowsColor ? 'background-color: ' + evenRowsColor.toStyled() + ';' : '') +
+                        '}';
+            } else {
+                evenRowsStyleElement.innerHTML = '';
+            }
+        }
+
+        Object.defineProperty(this, 'evenRowsColor', {
+            get: function () {
+                return evenRowsColor;
+            },
+            set: function (aValue) {
+                if (evenRowsColor !== aValue) {
+                    evenRowsColor = aValue;
+                    regenerateDynamicEvenRowsStyles();
+                }
+            }
+        });
+
+        function regenerateDynamicRowsStyles() {
+            rowsStyleElement.innerHTML =
+                    '.' + dynamicRowsClassName + '{' +
+                    ' height: ' + rowsHeight + 'px;' +
+                    '}';
+        }
 
         Object.defineProperty(this, 'rowsHeight', {
             get: function () {
@@ -628,13 +792,21 @@ define([
                 if (rowsHeight !== aValue && aValue >= 10) {
                     rowsHeight = aValue;
                     regenerateDynamicRowsStyles();
+                    bodyLeft.rowsHeight = rowsHeight;
+                    bodyRight.rowsHeight = rowsHeight;
                 }
             }
         });
 
-        function regenerateDynamicRowsStyles() {
-            rowsStyleElement.innerHTML =
-                    '.' + dynamicCellClassName + '{' +
+        function regenerateDynamicHeaderCellsStyles() {
+            headerCellsStyleElement.innerHTML =
+                    '.' + dynamicHeaderCellsClassName + '{' +
+                    '}';
+        }
+
+        function regenerateDynamicHeaderRowsStyles() {
+            headerCellsStyleElement.innerHTML =
+                    '.' + dynamicHeaderRowsClassName + '{' +
                     ' height: ' + headerRowsHeight + 'px;' +
                     '}';
         }
@@ -651,13 +823,6 @@ define([
             }
         });
 
-        function regenerateDynamicHeaderRowsStyles() {
-            headerRowsStyleElement.innerHTML =
-                    '.' + dynamicCellClassName + '{' +
-                    ' height: ' + rowsHeight + 'px;' +
-                    '}';
-        }
-
         Object.defineProperty(this, 'headerVisible', {
             get: function () {
                 return 'none' !== headerLeft.element.style.display
@@ -665,13 +830,9 @@ define([
             },
             set: function (aValue) {
                 if (aValue) {
-                    columnsChevron.style.display = '';
-                    headerLeftContainer.style.display = '';
-                    headerRightContainer.style.display = '';
+                    headerContainer.style.display = '';
                 } else {
-                    columnsChevron.style.display = 'none';
-                    headerLeftContainer.style.display = 'none';
-                    headerRightContainer.style.display = 'none';
+                    headerContainer.style.display = 'none';
                 }
             }
         });
@@ -681,7 +842,7 @@ define([
                 return frozenColumns;
             },
             set: function (aValue) {
-                if (aValue >= 0 && frozenColumns !== aValue) {
+                if (aValue >= 0 && aValue <= getColumnsCount() && frozenColumns !== aValue) {
                     frozenColumns = aValue;
                     applyColumnsNodes();
                 }
@@ -708,6 +869,7 @@ define([
                 if (showOddRowsInOtherColor !== aValue) {
                     showOddRowsInOtherColor = aValue;
                     regenerateDynamicOddRowsStyles();
+                    regenerateDynamicEvenRowsStyles();
                 }
             }
         });
@@ -719,7 +881,7 @@ define([
             set: function (aValue) {
                 if (draggableRows !== aValue) {
                     draggableRows = aValue;
-                    [frozenLeft, frozenRight, scrollableLeft, scrollableRight].forEach(function (section) {
+                    [frozenLeft, frozenRight, bodyLeft, bodyRight].forEach(function (section) {
                         section.draggableRows = aValue;
                     });
                 }
@@ -753,6 +915,11 @@ define([
             }
         });
 
+        Object.defineProperty(this, 'rows', {
+            get: function () {
+                return sortedRows;
+            }
+        });
         Object.defineProperty(this, 'cursorProperty', {
             get: function () {
                 return cursorProperty;
@@ -799,15 +966,15 @@ define([
             function redrawServiceColumns() {
                 if (serviceColumnsRedrawQueued === redrawServiceColumns) {
                     serviceColumnsRedrawQueued = null;
-                    for (var i = 0; i < getColumnCount(); i++) {
+                    for (var i = 0; i < getColumnsCount(); i++) {
                         var col = getColumn(i);
                         if (col instanceof MarkerServiceColumn) {
                             if (i < frozenColumns) {
                                 frozenLeft.redrawColumn(i);
-                                scrollableLeft.redrawColumn(i);
+                                bodyLeft.redrawColumn(i);
                             } else {
                                 frozenRight.redrawColumn(i - frozenColumns);
-                                scrollableRight.redrawColumn(i - frozenColumns);
+                                bodyRight.redrawColumn(i - frozenColumns);
                             }
                         }
                     }
@@ -846,8 +1013,8 @@ define([
                     var children = getChildrenOf(anElement);
                     if (children && children.length > 0) {
                         expandedRows.add(anElement);
-                        regenerateSortedRows(false);
-                        sortSortedRows(true);
+                        applyRows(false);
+                        setupRanges(true);
                         fireExpanded(anElement);
                     }
                 }
@@ -864,8 +1031,8 @@ define([
             if (isTreeConfigured()) {
                 if (expandedRows.has(anElement)) {
                     expandedRows.delete(anElement);
-                    regenerateSortedRows(false);
-                    sortSortedRows(true);
+                    applyRows(false);
+                    setupRanges(true);
                     fireCollapsed(anElement);
                 }
             }
@@ -932,7 +1099,7 @@ define([
          * Builds path to specified element if the element belongs to the model.
          *
          * @param anElement Element to build path to.
-         * @return List<JavaScriptObject> of elements comprising the path, excluding
+         * @return Array of elements comprising the path, excluding
          * root null. So for the roots of the forest path will be a list with one
          * element.
          */
@@ -945,17 +1112,21 @@ define([
                 added.add(currentParent);
                 while (currentParent) {
                     currentParent = getParentOf(currentParent);
-                    if (added.has(currentParent)) {
-                        break;
-                    }
-                    if (currentParent) {
-                        path.add(0, currentParent);
+                    if (currentParent && !added.has(currentParent)) {
+                        path.unshift(currentParent);
                         added.add(currentParent);
+                    } else {
+                        break;
                     }
                 }
             }
             return path;
         }
+        Object.defineProperty(this, 'buildPathTo', {
+            get: function () {
+                return buildPathTo;
+            }
+        });
 
         function makeVisible(anElement, aNeedToSelect) {
             // TODO: refactor indexof to something else
@@ -974,25 +1145,25 @@ define([
                         }
                     }
                 } else {
-                    var leftCell = scrollableLeft.getViewCell(index, 0);
+                    var leftCell = bodyLeft.getViewCell(index, 0);
                     if (leftCell) {
                         leftCell.scrollIntoView();
                     } else {
-                        var rightCell = scrollableRight.getViewCell(index, 0);
+                        var rightCell = bodyRight.getViewCell(index, 0);
                         if (rightCell) {
                             rightCell.scrollIntoView();
                         }
                     }
                 }
                 if (aNeedToSelect) {
-                    clearSelection();
+                    unselectAll();
                     select(anElement);
                     if (index >= 0 && index < frozenRows) {
                         frozenLeft.keyboardSelectedRow = index;
                         frozenRight.keyboardSelectedRow = index;
                     } else {
-                        scrollableLeft.keyboardSelectedRow = index - frozenRows;
-                        scrollableRight.keyboardSelectedRow = index - frozenRows;
+                        bodyLeft.keyboardSelectedRow = index - frozenRows;
+                        bodyRight.keyboardSelectedRow = index - frozenRows;
                     }
                 }
                 return true;
@@ -1013,13 +1184,17 @@ define([
         }
 
         function bind() {
-            if (data && field) {
-                boundToData = Bound.observePath(data, field, function (anEvent) {
-                    rebind();
-                    redraw();
-                });
+            if (data) {
+                if (field) {
+                    boundToData = Bound.observePath(data, field, function (anEvent) {
+                        rebind();
+                        redraw();
+                    });
+                }
                 bindElements();
                 bindCursor();
+                applyRows(false);
+                setupRanges(true);
             }
         }
 
@@ -1051,14 +1226,18 @@ define([
             }
             unbindElements();
             unbindCursor();
+            applyRows(false);
+            setupRanges(true);
         }
 
         function bindCursor() {
             if (data) {
                 var rows = discoverRows();
-                boundToCursor = Bound.observePath(rows, cursorProperty, function (anEvent) {
-                    enqueueServiceColumnsRedraw();
-                });
+                if (cursorProperty) {
+                    boundToCursor = Bound.observePath(rows, cursorProperty, function (anEvent) {
+                        enqueueServiceColumnsRedraw();
+                    });
+                }
             }
         }
 
@@ -1106,8 +1285,7 @@ define([
                     var isTree = isTreeConfigured();
                     if (wasTree !== isTree) {
                         expandedRows.clear();
-                        regenerateSortedRows(false);
-                        sortSortedRows(true);
+                        applyRows(true);
                     }
                 }
             }
@@ -1124,8 +1302,7 @@ define([
                     var isTree = isTreeConfigured();
                     if (wasTree !== isTree) {
                         expandedRows.clear();
-                        regenerateSortedRows(false);
-                        sortSortedRows(true);
+                        applyRows(true);
                     }
                 }
             }
@@ -1135,21 +1312,45 @@ define([
             return parentField && childrenField;
         }
 
-        function setupRanges() {
-            frozenLeft.setRange(0, frozenRows);
-            frozenRight.setRange(0, frozenRows);
-            var rows = discoverRows();
-            scrollableLeft.setRange(frozenRows, rows.length);
-            scrollableRight.setRange(frozenRows, rows.length);
+        function setupRanges(needRedraw) {
+            if (arguments.length < 1)
+                needRedraw = true;
+            frozenContainer.style.display = frozenRows > 0 ? '' : 'none';
+            frozenLeft.setRange(0, frozenRows, needRedraw);
+            frozenRight.setRange(0, frozenRows, needRedraw);
+
+            bodyContainer.style.display = sortedRows.length - frozenRows > 0 ? '' : 'none';
+            bodyLeft.setRange(frozenRows, sortedRows.length, needRedraw);
+            bodyRight.setRange(frozenRows, sortedRows.length, needRedraw);
         }
 
-        var treeIndicatorColumn;
+        function updateRightSectionsWidth() {
+            var rightColumnsWidth = 0;
+            for (var c = 0; c < headerRight.columnsCount; c++) {
+                var column = headerRight.getColumn(c);
+                rightColumnsWidth += column.width;
+            }
+            [
+                headerRight,
+                frozenRight,
+                bodyRight,
+                footerRight
+            ].forEach(function (section) {
+                section.element.style.width = rightColumnsWidth + 'px';
+            });
+        }
+        Object.defineProperty(this, 'updateRightSectionsWidth', {
+            get: function(){
+                return updateRightSectionsWidth;
+            }
+        });
 
+        var treeIndicatorColumn;
         function checkTreeIndicatorColumn() {
             if (isTreeConfigured()) {
                 if (!treeIndicatorColumn) {
                     var treeIndicatorIndex = 0;
-                    while (treeIndicatorIndex < getColumnCount()) {
+                    while (treeIndicatorIndex < getColumnsCount()) {
                         var indicatorColumn = getColumn(treeIndicatorIndex);
                         if (indicatorColumn instanceof MarkerServiceColumn || indicatorColumn instanceof RadioButtonServiceColumn
                                 || indicatorColumn instanceof CheckBoxServiceColumn) {
@@ -1168,49 +1369,95 @@ define([
         function clearColumnsNodes(needRedraw) {
             if (arguments.length < 1)
                 needRedraw = true;
-            for (var i = getColumnCount() - 1; i >= 0; i--) {
+            columnsFacade = [];
+            for (var i = getColumnsCount() - 1; i >= 0; i--) {
                 var toDel = getColumn(i);
-                var mCol = toDel;
-                if (mCol === treeIndicatorColumn) {
+                var column = toDel;
+                if (column === treeIndicatorColumn) {
                     treeIndicatorColumn = null;
                 }
-                mCol.setGrid(null);
+                column.grid = null;
+                column.headers.splice(0, column.headers.length);
             }
             headerLeft.clearColumnsAndHeader(needRedraw);
             headerRight.clearColumnsAndHeader(needRedraw);
+            frozenLeft.clearColumnsAndHeader(needRedraw);
+            frozenRight.clearColumnsAndHeader(needRedraw);
+            bodyLeft.clearColumnsAndHeader(needRedraw);
+            bodyRight.clearColumnsAndHeader(needRedraw);
+            footerLeft.clearColumnsAndHeader(needRedraw);
+            footerRight.clearColumnsAndHeader(needRedraw);
         }
+        Object.defineProperty(this, 'clearColumnsNodes', {
+            get: function () {
+                return clearColumnsNodes;
+            }
+        });
+
 
         function applyColumnsNodes() {
             clearColumnsNodes(false);
-            var leaves = HeaderAnalyzer.toLeaves(header);
-            leaves.forEach(function (leaf) { // linear list of columner header nodes
+
+            var maxDepth = HeaderAnalyzer.analyzeDepth(columnNodes);
+            leftHeader = HeaderSplitter.split(columnNodes, 0, frozenColumns - 1);
+            HeaderAnalyzer.analyzeLeaves(leftHeader);
+            headerLeft.setHeaderNodes(leftHeader, maxDepth, false);
+            var rightHeader = HeaderSplitter.split(columnNodes, frozenColumns, Infinity);
+            HeaderAnalyzer.analyzeLeaves(rightHeader);
+            headerRight.setHeaderNodes(rightHeader, maxDepth, false);
+
+            var leftLeaves = HeaderAnalyzer.toLeaves(leftHeader);
+            var rightLeaves = HeaderAnalyzer.toLeaves(rightHeader);
+            leftLeaves.forEach(function (leaf) { // linear list of columner header nodes
                 addColumnToSections(leaf.column);
             });
+            rightLeaves.forEach(function (leaf) { // linear list of columner header nodes
+                addColumnToSections(leaf.column);
+            });
+            [
+                headerContainerLeft,
+                frozenContainerLeft,
+                bodyContainerLeft,
+                footerContainerLeft
+            ].forEach(function (section) {
+                section.style.display = frozenColumns > 0 ? '' : 'none';
+            });
+            updateRightSectionsWidth();
             checkTreeIndicatorColumn();
-            headerLeft.setHeaderNodes(HeaderSplitter.split(header, 0, frozenColumns - 1), false);
-            headerRight.setHeaderNodes(HeaderSplitter.split(header, frozenColumns, getColumnCount()), false);
             redraw();
         }
 
-
         Object.defineProperty(this, 'header', {
             get: function () {
-                return header;
+                return columnNodes;
             },
             set: function (aHeader) {
-                if (header !== aHeader) {
-                    header = aHeader;
+                if (columnNodes !== aHeader) {
+                    columnNodes = aHeader;
                     applyColumnsNodes();
                 }
             }
         });
 
         function removeColumnNode(aNode) {
-            var nodeIndex = header.indexOf(aNode);
+            var nodeIndex = columnNodes.indexOf(aNode);
             if (nodeIndex !== -1) {
-                header.splice(nodeIndex, 1);
-                aNode.column.grid = null;
-                if (treeIndicatorColumn === aNode.column) {
+                removeColumnNodeAt(nodeIndex);
+            } else {
+                return false;
+            }
+        }
+        Object.defineProperty(this, 'removeColumnNode', {
+            get: function () {
+                return removeColumnNode;
+            }
+        });
+
+        function removeColumnNodeAt(nodeIndex) {
+            if (nodeIndex >= 0 && nodeIndex < columnNodes.length) {
+                var node = columnNodes[nodeIndex];
+                columnNodes.splice(nodeIndex, 1);
+                if (treeIndicatorColumn === node.column) {
                     treeIndicatorColumn = null;
                 }
                 applyColumnsNodes();
@@ -1219,16 +1466,14 @@ define([
                 return false;
             }
         }
-
-        Object.defineProperty(this, 'removeColumnNode', {
+        Object.defineProperty(this, 'removeColumnNodeAt', {
             get: function () {
                 return removeColumnNode;
             }
         });
 
         function addColumnNode(aNode) {
-            header.push(aNode);
-            aNode.column.grid = self;
+            columnNodes.push(aNode);
             applyColumnsNodes();
         }
 
@@ -1239,8 +1484,7 @@ define([
         });
 
         function insertColumnNode(aIndex, aNode) {
-            header.splice(aIndex, 0, aNode);
-            aNode.column.grid = self;
+            columnNodes.splice(aIndex, 0, aNode);
             applyColumnsNodes();
         }
 
@@ -1250,9 +1494,27 @@ define([
             }
         });
 
+        Object.defineProperty(this, 'columnNodesCount', {
+            get: function () {
+                return columnNodes.length;
+            }
+        });
+
+        function getColumnNode(nodeIndex) {
+            if (nodeIndex >= 0 && nodeIndex < columnNodes.length) {
+                return columnNodes[nodeIndex];
+            }
+        }
+
+        Object.defineProperty(this, 'getColumnNode', {
+            get: function () {
+                return getColumnNode;
+            }
+        });
+
         function moveColumnNode(aSubject, aInsertBefore) {
             if (aSubject && aInsertBefore && aSubject.parent === aInsertBefore.parent) {
-                var neighbours = aSubject.parent ? aSubject.parent.children : header;
+                var neighbours = aSubject.parent ? aSubject.parent.children : columnNodes;
                 var neighbourIndex = neighbours.indexOf(aSubject);
                 neighbours.splice(neighbourIndex, 1);
                 var insertAt = neighbours.indexOf(aInsertBefore);
@@ -1261,37 +1523,44 @@ define([
             }
         }
 
-        function addColumnToSections(aColumn) {
-            if (headerLeft.columnCount < frozenColumns) {
-                headerLeft.addColumn(aColumn, false);
-                frozenLeft.addColumn(aColumn, false);
-                scrollableLeft.addColumn(aColumn, false);
-                footerLeft.addColumn(aColumn, false);
+        function addColumnToSections(column) {
+            column.grid = self;
+            columnsFacade.push(column);
+            if (headerLeft.columnsCount < frozenColumns) {
+                headerLeft.addColumn(column, false);
+                frozenLeft.addColumn(column, false);
+                bodyLeft.addColumn(column, false);
+                footerLeft.addColumn(column, false);
             } else {
-                headerRight.addColumn(aColumn, false);
-                frozenRight.addColumn(aColumn, false);
-                scrollableRight.addColumn(aColumn, false);
-                footerRight.addColumn(aColumn, false);
+                headerRight.addColumn(column, false);
+                frozenRight.addColumn(column, false);
+                bodyRight.addColumn(column, false);
+                footerRight.addColumn(column, false);
             }
         }
 
         function redrawRow(index) {
             frozenLeft.redrawRow(index);
             frozenRight.redrawRow(index);
-            scrollableLeft.redrawRow(index);
-            scrollableRight.redrawRow(index);
+            bodyLeft.redrawRow(index);
+            bodyRight.redrawRow(index);
         }
+        Object.defineProperty(this, 'redrawRow', {
+            get: function () {
+                return redrawRow;
+            }
+        });
 
         function redraw() {
+            headerLeft.redraw();
             headerRight.redraw();
             frozenLeft.redraw();
             frozenRight.redraw();
-            scrollableLeft.redraw();
-            scrollableRight.redraw();
+            bodyLeft.redraw();
+            bodyRight.redraw();
             footerLeft.redraw();
             footerRight.redraw();
         }
-
         Object.defineProperty(this, 'redraw', {
             get: function () {
                 return redraw;
@@ -1302,27 +1571,47 @@ define([
             headerLeft.redrawHeaders();
             headerRight.redrawHeaders();
         }
+        Object.defineProperty(this, 'redrawHeaders', {
+            get: function () {
+                return redrawHeaders;
+            }
+        });
 
         function redrawFooters() {
             footerLeft.redrawFooters();
             footerRight.redrawFooters();
         }
+        Object.defineProperty(this, 'redrawFooters', {
+            get: function () {
+                return redrawFooters;
+            }
+        });
 
-        function getColumnCount() {
-            return (headerLeft ? headerLeft.columnCount : 0)
-                    + (headerRight ? headerRight.columnCount : 0);
+        function getColumnsCount() {
+            return (headerLeft ? headerLeft.columnsCount : 0)
+                    + (headerRight ? headerRight.columnsCount : 0);
         }
+        Object.defineProperty(this, 'getColumnsCount', {
+            get: function () {
+                return getColumnsCount;
+            }
+        });
 
         function getColumn(aIndex) {
-            if (aIndex >= 0 && aIndex < getColumnCount()) {
-                return aIndex >= 0 && aIndex < headerLeft.columnCount ? headerLeft.getColumn(aIndex)
-                        : headerRight.getColumn(aIndex - headerLeft.columnCount);
+            if (aIndex >= 0 && aIndex < getColumnsCount()) {
+                return aIndex >= 0 && aIndex < headerLeft.columnsCount ? headerLeft.getColumn(aIndex)
+                        : headerRight.getColumn(aIndex - headerLeft.columnsCount);
             } else {
                 return null;
             }
         }
+        Object.defineProperty(this, 'getColumn', {
+            get: function () {
+                return getColumn;
+            }
+        });
 
-        function getViewCell(aRow, aCol) {
+        function getCell(aRow, aCol) {
             var targetSection;
             if (aRow < frozenRows) {
                 if (aCol < frozenColumns) {
@@ -1332,15 +1621,20 @@ define([
                 }
             } else {
                 if (aCol < frozenColumns) {
-                    targetSection = scrollableLeft;
+                    targetSection = bodyLeft;
                 } else {
-                    targetSection = scrollableRight;
+                    targetSection = bodyRight;
                 }
             }
             return targetSection.getViewCell(aRow, aCol);
         }
+        Object.defineProperty(this, 'getCell', {
+            get: function () {
+                return getCell;
+            }
+        });
 
-        function focusViewCell(aRow, aCol) {
+        function focusCell(aRow, aCol) {
             var targetSection;
             if (aRow < frozenRows) {
                 if (aCol < frozenColumns) {
@@ -1350,22 +1644,29 @@ define([
                 }
             } else {
                 if (aCol < frozenColumns) {
-                    targetSection = scrollableLeft;
+                    targetSection = bodyLeft;
                 } else {
-                    targetSection = scrollableRight;
+                    targetSection = bodyRight;
                 }
             }
             targetSection.focusCell(aRow, aCol);
         }
+        Object.defineProperty(this, 'focusCell', {
+            get: function () {
+                return focusCell;
+            }
+        });
 
         function sort() {
-            regenerateSortedRows(false);
-            sortSortedRows(true);
+            applyRows(true);
         }
+        Object.defineProperty(this, 'sort', {
+            get: function () {
+                return sort;
+            }
+        });
 
-        function regenerateSortedRows(needRedraw) {
-            if (arguments.length < 1)
-                needRedraw = true;
+        function regenerateFront() {
             var rows = discoverRows();
             if (isTreeConfigured()) {
                 sortedRows = [];
@@ -1385,15 +1686,12 @@ define([
             } else {
                 sortedRows = rows.slice(0, rows.length);
             }
-            if (needRedraw) {
-                redraw();
-                fireRowsSort();
-            }
         }
 
-        function sortSortedRows(needRedraw) {
+        function applyRows(needRedraw) {
             if (arguments.length < 1)
                 needRedraw = true;
+            regenerateFront();
             var sortedColumns = 0;
             for (var c = 0; c < getColumnsCount(); c++) {
                 var column = getColumn(c);
@@ -1433,20 +1731,27 @@ define([
                     return res;
                 });
             }
+            [
+                frozenLeft, frozenRight,
+                bodyLeft, bodyRight
+            ].forEach(function (section) {
+                section.data = sortedRows;
+            });
+
+            fireRowsSort();
             if (needRedraw) {
                 redraw();
-                fireRowsSort();
             }
         }
 
         function unsort(needRedraw) {
             if (arguments.length < 1)
                 needRedraw = true;
-            for (var i = 0; i < getColumnCount(); i++) {
+            for (var i = 0; i < getColumnsCount(); i++) {
                 var column = getColumn(i);
                 column.unsort(false);
             }
-            regenerateSortedRows(needRedraw);
+            regenerateFront(needRedraw);
         }
 
         Object.defineProperty(this, 'unsort', {
@@ -1458,9 +1763,9 @@ define([
         var tabIndex = 0;
 
         function calcFocusedElement() {
-            var focusedEelement = scrollableRight.getKeyboardSelectedElement();
+            var focusedEelement = bodyRight.getKeyboardSelectedElement();
             if (!focusedEelement) {
-                focusedEelement = scrollableLeft.getKeyboardSelectedElement();
+                focusedEelement = bodyLeft.getKeyboardSelectedElement();
             }
             if (!focusedEelement) {
                 focusedEelement = frozenLeft.getKeyboardSelectedElement();
@@ -1495,7 +1800,7 @@ define([
                 focusedElement.blur();
             }
         }
-        
+
         var expandListeners = new Set();
         function addExpandHandler(h) {
             expandListeners.add(h);
@@ -1514,8 +1819,8 @@ define([
         function fireExpanded(anElement) {
             fireRowsSort();
             var event = new ItemEvent(self, anElement);
-            expandListeners.forEach(function(h){
-                Invoke.later(function(){
+            expandListeners.forEach(function (h) {
+                Invoke.later(function () {
                     h(event);
                 });
             });
@@ -1563,8 +1868,8 @@ define([
         function fireCollapsed(anElement) {
             fireRowsSort();
             var event = new ItemEvent(self, anElement);
-            collapseHandlers.forEach(function(h){
-                Invoke.later(function(){
+            collapseHandlers.forEach(function (h) {
+                Invoke.later(function () {
                     h(event);
                 });
             });
@@ -1593,7 +1898,7 @@ define([
                 }
             }
         });
-        
+
         var sortHandlers = new Set();
         function addSortHandler(handler) {
             sortHandlers.add(handler);
@@ -1604,7 +1909,7 @@ define([
             };
         }
         Object.defineProperty(this, 'addSortHandler', {
-            get: function(){
+            get: function () {
                 return addSortHandler;
             }
         });
@@ -1615,6 +1920,12 @@ define([
                 Invoke.later(function () {
                     h(event);
                 });
+            });
+            [
+                frozenLeft, frozenRight,
+                bodyLeft, bodyRight
+            ].forEach(function (section) {
+                section.data = sortedRows;
             });
         }
 
@@ -1641,7 +1952,7 @@ define([
                 }
             }
         });
-        
+
         var selectionHandlers = new Set();
         function addSelectionHandler(handler) {
             selectionHandlers.add(handler);
@@ -1652,7 +1963,7 @@ define([
             };
         }
         Object.defineProperty(this, 'addSelectionHandler', {
-            get: function(){
+            get: function () {
                 return addSelectionHandler;
             }
         });
@@ -1676,7 +1987,7 @@ define([
             };
         }
         Object.defineProperty(this, 'addFocusHandler', {
-            get: function(){
+            get: function () {
                 return addFocusHandler;
             }
         });
@@ -1700,7 +2011,7 @@ define([
             };
         }
         Object.defineProperty(this, 'addBlurHandler', {
-            get: function(){
+            get: function () {
                 return addBlurHandler;
             }
         });
@@ -1724,7 +2035,7 @@ define([
             };
         }
         Object.defineProperty(this, 'addKeyUpHandler', {
-            get: function(){
+            get: function () {
                 return addKeyUpHandler;
             }
         });
@@ -1748,7 +2059,7 @@ define([
             };
         }
         Object.defineProperty(this, 'addKeyDownHandler', {
-            get: function(){
+            get: function () {
                 return addKeyDownHandler;
             }
         });
@@ -1772,7 +2083,7 @@ define([
             };
         }
         Object.defineProperty(this, 'addKeyPressHandler', {
-            get: function(){
+            get: function () {
                 return addKeyPressHandler;
             }
         });

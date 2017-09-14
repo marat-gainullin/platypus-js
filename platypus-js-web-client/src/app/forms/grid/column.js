@@ -1,10 +1,9 @@
 /* global Infinity */
-
 define([
     '../../id',
     '../../ui',
     '../../logger',
-    '../../bound'
+    '../bound'
 ], function (
         Id,
         Ui,
@@ -14,9 +13,9 @@ define([
 // TODO: Check tree expandable cell decorations like left paddnig according to deepness and plus / minus icon and open / closed folder icons
     function Column() {
         var self = this;
-        var col = document.createElement('col');
-        var radioGroup = "group-" + Id.generate();
+        var cols = []; // dom 'col' elements for header,frozen,body and footer sections of the grid
         var columnRule = document.createElement('style');
+        var columnStyleName = 'p-grid-column-' + Id.generate();
         var field = null;
         var sortField = null;
         var editor = null;
@@ -34,23 +33,63 @@ define([
         var sortable = false;
         var indent = 24;
         var comparator; // PathComparator
-        var header; // HeaderView
+        var headers = []; // multiple instances of NodeView
         var onRender;
         var onSelect;
         var grid;
 
-        Object.defineProperty(this, 'element', {
+        function regenerateColStyle() {
+            columnRule.innerHTML = '.' + columnStyleName + '{' +
+                    (visible ? '' : 'display: none;') +
+                    (width == null || width == Infinity ? '' : 'width: ' + width + 'px;') +
+                    (minWidth == null || minWidth == Infinity ? '' : 'min-width: ' + minWidth + 'px;') +
+                    (maxWidth == null || maxWidth == Infinity ? '' : 'max-width: ' + maxWidth + 'px;') +
+                    '}';
+        }
+        regenerateColStyle();
+
+        Object.defineProperty(this, 'styleName', {
             get: function () {
-                return col;
+                return columnStyleName;
             }
         });
 
+        function addCol() {
+            var col = document.createElement('col');
+            cols.push(col);
+            col.className = columnStyleName;
+            return col;
+        }
+
+        Object.defineProperty(this, 'addCol', {
+            get: function () {
+                return addCol;
+            }
+        });
+        /**
+         * Multiple 'col' elements for the single column, because of grid sections.
+         */
+        Object.defineProperty(this, 'elements', {
+            get: function () {
+                return cols;
+            }
+        });
+
+        /**
+         * Multiple 'headers' for the single column, because of splitted column nodes.
+         */
+        Object.defineProperty(this, 'headers', {
+            get: function () {
+                return headers;
+            }
+        });
+        /**
+         * Typically, we need only leaf column's header.
+         * Leaf nodes' columns can have only single header, by nature.
+         */
         Object.defineProperty(this, 'header', {
             get: function () {
-                return header;
-            },
-            set: function (aValue) {
-                header = aValue;
+                return headers.length === 1 ? headers[0] : null;
             }
         });
         Object.defineProperty(this, 'grid', {
@@ -123,6 +162,21 @@ define([
             }
         });
 
+        Object.defineProperty(this, 'width', {
+            get: function () {
+                return width;
+            },
+            set: function (aValue) {
+                if (width !== aValue) {
+                    width = aValue;
+                    regenerateColStyle();
+                    if (grid) {
+                        grid.updateRightSectionsWidth();
+                    }
+                }
+            }
+        });
+
         Object.defineProperty(this, 'minWidth', {
             configurable: true,
             get: function () {
@@ -131,6 +185,7 @@ define([
             set: function (aValue) {
                 if (minWidth !== aValue) {
                     minWidth = aValue;
+                    regenerateColStyle();
                 }
             }
         });
@@ -143,6 +198,7 @@ define([
             set: function (aValue) {
                 if (maxWidth !== aValue) {
                     maxWidth = aValue;
+                    regenerateColStyle();
                 }
             }
         });
@@ -175,7 +231,8 @@ define([
 
         function render(viewIndex, dataRow, viewCell) {
             var path = grid.buildPathTo(dataRow);
-            var padding = indent * path.length;
+            var padding = indent * (path.length - 1);
+            viewCell.style.paddingLeft = padding  > 0 ? padding + 'px' : '';
             var value = getValue(dataRow);
             var text;
             if (!value) {
@@ -184,6 +241,7 @@ define([
                 text = value + '';
                 if (editor) {
                     editor.value = value;
+                    /*
                     if (editor instanceof BooleanDecoratorField || editor instanceof CheckBox) {
                         var checkbox = document.createElement('input');
                         checkbox.type = 'checkbox';
@@ -213,25 +271,15 @@ define([
                         text = editor.text;
                         viewCell.innerText = text;
                     }
+                    */
+                    text = editor.text;
+                    viewCell.innerText = text;
                 }
             }
-            if (onRender || grid.onRender) { // User's rendering for all values, including null
-                try {
-                    // TODO: Check if abstract 'cell' object is needed at all  
-                    var cellToRender = WidgetsUtils.calcGridPublishedCell(self, onRender ? onRender : grid.onRender, dataRow, field, text, viewCell, viewIndex, null);
-                    if (cellToRender) {
-                        if (!cellToRender.displayCallback) {
-                            cellToRender.displayCallback = function () {
-                                cellToRender.styleToElement(viewCell);
-                                viewCell.innerText = cellToRender.display;
-                            };
-                        }
-                        cellToRender.styleToElement(viewCell);
-                        viewCell.innerText = cellToRender.display;
-                    }
-                } catch (ex) {
-                    Logger.severe(ex);
-                }
+            // User's rendering for all values, including null
+            if (onRender || grid.onRender) {
+                var handler = onRender ? onRender : grid.onRender;
+                handler.call(self, dataRow, viewCell, viewIndex, text);
             }
         }
 
@@ -248,21 +296,8 @@ define([
             set: function (aValue) {
                 if (visible !== aValue) {
                     visible = aValue;
-                    if (visible) {
-                        columnRule.innerHTML = '';
-                    } else {
-                        columnRule.innerHTML = 'display: none';
-                    }
+                    regenerateColStyle();
                 }
-            }
-        });
-
-        Object.defineProperty(this, 'width', {
-            get: function () {
-                return width;
-            },
-            set: function (aValue) {
-                width = aValue;
             }
         });
 
