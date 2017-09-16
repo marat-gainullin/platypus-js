@@ -171,7 +171,7 @@ define([
                     width = aValue;
                     regenerateColStyle();
                     if (grid) {
-                        grid.updateRightSectionsWidth();
+                        grid.updateSectionsWidth();
                     }
                 }
             }

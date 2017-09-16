@@ -14,7 +14,7 @@ define([
             column = new Column();
         }
         if (!nodeView) {
-            nodeView = new NodeView("", this);
+            nodeView = new NodeView('', this);
         }
         var parent = null;
         var children = [];

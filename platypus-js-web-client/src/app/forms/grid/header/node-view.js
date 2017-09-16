@@ -1,6 +1,6 @@
 define([
     '../../../ui',
-    '../columns/drag'
+    '../columns/column-drag'
 ], function (
         Ui,
         ColumnDrag
@@ -8,43 +8,162 @@ define([
 
     var HEADER_VIEW = 'header-view';
 
-    function NodeView(aTitle, columnNode) {
+    function NodeView(text, columnNode) {
         var self = this;
         var th = document.createElement('th');
         var thResizer = document.createElement('div');
         thResizer.className = 'p-grid-column-resizer';
+        var thMover = document.createElement('div');
+        thMover.className = 'p-grid-column-mover';
+        var thTitle = document.createElement('div');
+        thTitle.className = 'p-grid-column-title';
         var background = null;
         var foreground = null;
         var font = null;
         var moveable = true;
         var resizable = true;
-        th.draggable = true;
+        thMover.draggable = moveable;
 
         th[HEADER_VIEW] = this;
-        th.innerText = aTitle;
+        thTitle.innerText = text;
+        th.appendChild(thTitle);
         th.appendChild(thResizer);
-        Ui.on(th, Ui.Events.DRAGSTART, function (event) {
-            event.stopPropagation();
-            if (moveable) {
-                event.dataTransfer.effectAllowed = 'move';
-                ColumnDrag.instance = new ColumnDrag(self, event.target, 'move');
-                event.dataTransfer.setData('Text', 'column-moved');
+        th.appendChild(thMover);
+        var moveHintLeft = document.createElement('div');
+        moveHintLeft.className = 'p-grid-column-move-hint-left';
+        var moveHintRight = document.createElement('div');
+        moveHintRight.className = 'p-grid-column-move-hint-right';
+
+        (function () {
+            var mouseDownAtX = null;
+            var mouseDownWidth = null;
+            var onMouseUp = null;
+            var onMouseMove = null;
+            var columnToResize = null;
+            Ui.on(thResizer, Ui.Events.MOUSEDOWN, function (event) {
+                if (resizable && event.button === 0) {
+                    ColumnDrag.instance = {
+                        resize: true
+                    };
+                    columnToResize = findRightMostLeafColumn();
+                    event.stopPropagation();
+                    mouseDownAtX = 'pageX' in event ? event.pageX : event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                    mouseDownWidth = columnNode.width;
+                    if (!onMouseUp) {
+                        onMouseUp = Ui.on(document, Ui.Events.MOUSEUP, function (event) {
+                            event.stopPropagation();
+                            ColumnDrag.instance = null;
+                            columnToResize = null;
+                            if (onMouseUp) {
+                                onMouseUp.removeHandler();
+                                onMouseUp = null;
+                            }
+                            if (onMouseMove) {
+                                onMouseMove.removeHandler();
+                                onMouseMove = null;
+                            }
+                        });
+                    }
+                    if (!onMouseMove) {
+                        onMouseMove = Ui.on(document, Ui.Events.MOUSEMOVE, function (event) {
+                            event.stopPropagation();
+                            var newPageX = 'pageX' in event ? event.pageX : event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                            var dx = newPageX - mouseDownAtX;
+                            var newWidth = mouseDownWidth + dx;
+                            if (columnToResize.minWidth <= newWidth && newWidth <= columnToResize.maxWidth) {
+                                columnToResize.width = newWidth;
+                            }
+                        });
+                    }
+                }
+            });
+        }());
+
+        Ui.on(thMover, Ui.Events.DRAGSTART, function (event) {
+            if (ColumnDrag.instance && ColumnDrag.instance.resize) {
+                event.stopPropagation();
+                event.preventDefault();
             } else {
-                event.dataTransfer.effectAllowed = 'none';
-                ColumnDrag.instance = null;
+                ColumnDrag.instance = {
+                    move: true,
+                    column: columnNode.column,
+                    columnParent: columnNode.parent
+                };
+                event.dataTransfer.effectAllowed = 'move';
+                event.dataTransfer.setData('text/plain', 'p-grid-column-move');
+                var onDragEnd = Ui.on(thMover, Ui.Events.DRAGEND, function (event) {
+                    onDragEnd.removeHandler();
+                    onDragEnd = null;
+                    if (ColumnDrag.instance &&
+                            ColumnDrag.instance.move) {
+                        if (ColumnDrag.instance.clear) {
+                            ColumnDrag.instance.clear();
+                            ColumnDrag.instance.clear = null;
+                        }
+                        ColumnDrag.instance = null;
+                    }
+                });
             }
         });
-        Ui.on(thResizer, Ui.Events.DRAGSTART, function (event) {
-            event.stopPropagation();
-            if (resizable) {
-                event.dataTransfer.effectAllowed = 'move';
-                ColumnDrag.instance = new ColumnDrag(self, event.target, 'resize');
-                event.dataTransfer.setData('Text', 'column-resized');
+
+        function onDragOver(event) {
+            if (ColumnDrag.instance &&
+                    ColumnDrag.instance.move &&
+                    ColumnDrag.instance.column !== columnNode.column &&
+                    ColumnDrag.instance.columnParent === columnNode.parent) {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = 'move';
             } else {
-                event.dataTransfer.effectAllowed = 'none';
-                ColumnDrag.instance = null;
+                event.dataTransfer.dropEffect = 'none';
             }
-        });
+        }
+        Ui.on(th, Ui.Events.DRAGOVER, onDragOver);
+        function inThRect(event) {
+            var rect = th.getBoundingClientRect();
+            return event.clientX >= rect.left &&
+                    event.clientY >= rect.top &&
+                    event.clientX < rect.right &&
+                    event.clientY < rect.bottom;
+        }
+        function onDragEnter(event) {
+            if (inThRect(event) && ColumnDrag.instance &&
+                    ColumnDrag.instance.move &&
+                    ColumnDrag.instance.column !== columnNode.column &&
+                    ColumnDrag.instance.columnParent === columnNode.parent) {
+                ColumnDrag.instance.enteredTh = th;
+                event.dataTransfer.dropEffect = 'move';
+                if (ColumnDrag.instance.clear) {
+                    ColumnDrag.instance.clear();
+                    ColumnDrag.instance.clear = null;
+                }
+                if (!moveHintLeft.parentElement) {
+                    th.appendChild(moveHintLeft);
+                    th.appendChild(moveHintRight);
+                    th.classList.add('p-grid-column-move-target');
+                    ColumnDrag.instance.clear = function () {
+                        if (moveHintLeft.parentElement) {
+                            th.classList.remove('p-grid-column-move-target');
+                            th.removeChild(moveHintLeft);
+                            th.removeChild(moveHintRight);
+                        }
+                    };
+                }
+            } else {
+                event.dataTransfer.dropEffect = 'none';
+            }
+        }
+        Ui.on(th, Ui.Events.DRAGENTER, onDragEnter);
+        function onDragLeave(event) {
+            if (!inThRect(event) && ColumnDrag.instance &&
+                    ColumnDrag.instance.move &&
+                    ColumnDrag.instance.enteredTh === th) {
+                if (ColumnDrag.instance.clear) {
+                    ColumnDrag.instance.clear();
+                    ColumnDrag.instance.clear = null;
+                }
+            }
+        }
+        Ui.on(th, Ui.Events.DRAGLEAVE, onDragLeave);
 
         Object.defineProperty(this, 'element', {
             get: function () {
@@ -57,18 +176,17 @@ define([
                 return th.innerText;
             },
             set: function (aValue) {
-                th.innerText = aValue;
-                th.appendChild(thResizer);
+                thTitle.innerText = aValue;
             }
         });
 
         Object.defineProperty(this, 'column', {
             get: function () {
-                return getRightMostColumn();
+                return findRightMostLeafColumn();
             }
         });
 
-        Object.defineProperty(this, 'headerNode', {
+        Object.defineProperty(this, 'columnNode', {
             get: function () {
                 return columnNode;
             }
@@ -108,7 +226,13 @@ define([
             set: function (aValue) {
                 if (resizable !== aValue) {
                     resizable = aValue;
-                    th.draggable = moveable || resizable;
+                    if (resizable) {
+                        thResizer.style.display = '';
+                        thMover.classList.remove('p-grid-column-mover-alone');
+                    } else {
+                        thResizer.style.display = 'none';
+                        thMover.classList.add('p-grid-column-mover-alone');
+                    }
                 }
             }
         });
@@ -120,57 +244,18 @@ define([
             set: function (aValue) {
                 if (moveable !== aValue) {
                     moveable = aValue;
-                    th.draggable = moveable || resizable;
+                    thMover.draggable = moveable;
                 }
             }
         });
 
-        function getRightMostColumn() {
+        function findRightMostLeafColumn() {
             var node = columnNode;
-            while (!node.column && !node.children.length === 0) {
+            while (!node.leaf) {
                 node = node.children[node.children.length - 1];
             }
             return node.column;
         }
-
-        /*
-         public interface GridResources extends ClientBundle {
-         
-         static final GridResources instance = GWT.create(GridResources.class);
-         
-         public GridStyles header();
-         
-         }
-         
-         public interface GridStyles extends CssResource {
-         
-         public String gridHeaderMover();
-         
-         public String gridHeaderResizer();
-         
-         }
-         
-         public static GridStyles headerStyles = GridResources.instance.header();
-         
-         private static class HeaderCell extends AbstractCell<String> {
-         
-         public HeaderCell() {
-         super(BrowserEvents.DRAGSTART);
-         }
-         
-         @Override
-         public void render(Context context, String value, SafeHtmlBuilder sb) {
-         headerStyles.ensureInjected();// ondragenter=\"event.preventDefault();\"
-         // ondragover=\"event.preventDefault();\"
-         // ondrop=\"event.preventDefault();\"
-         sb.append(SafeHtmlUtils.fromTrustedString("<div class=\"grid-column-header-content\"; style=\"position:relative;\">"))
-         .append(value.startsWith("<html>") ? SafeHtmlUtils.fromTrustedString(value.substring(6)) : SafeHtmlUtils.fromString(value)).append(SafeHtmlUtils.fromTrustedString("</div>"))
-         .append(SafeHtmlUtils.fromTrustedString("<span draggable=\"true\" class=\"" + headerStyles.gridHeaderMover() + " grid-header-mover\"></span>"))
-         .append(SafeHtmlUtils.fromTrustedString("<span draggable=\"true\" class=\"" + headerStyles.gridHeaderResizer() + " grid-header-resizer\"></span>"));
-         }
-         
-         }
-         */
     }
     Object.defineProperty(NodeView, 'HEADER_VIEW', {
         get: function () {

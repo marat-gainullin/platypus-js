@@ -333,6 +333,7 @@ define([
                 for (var i = start; i < end; i++) {
                     var dataRow = data[i];
                     var viewRow = document.createElement('tr');
+                    viewRow.draggable = draggableRows;
                     viewRow.className = 'p-grid-row ' + dynamicRowsClassName;
                     if ((i + 1) % 2 === 0) {
                         viewRow.classList.add(dynamicEvenRowsClassName);

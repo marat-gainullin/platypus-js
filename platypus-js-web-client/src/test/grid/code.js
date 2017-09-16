@@ -38,7 +38,7 @@ describe('Grid Api', function () {
             instance.addColumnNode(name);
             instance.addColumnNode(birth);
             instance.addColumnNode(payed);
-            expect(instance.headerRight.columnsCount).toEqual(instance.getColumnsCount());
+            expect(instance.headerRight.columnsCount).toEqual(instance.columnsCount);
             expect(instance.headerLeft.columnsCount).toEqual(0);
             expect(instance.headerRight.columnsCount).toEqual(6);
             expectColumns(instance);
@@ -114,7 +114,7 @@ describe('Grid Api', function () {
                 payed1
             ];
 
-            expect(instance.headerRight.columnsCount).toEqual(instance.getColumnsCount());
+            expect(instance.headerRight.columnsCount).toEqual(instance.columnsCount);
             expect(instance.headerLeft.columnsCount).toEqual(0);
             expect(instance.headerRight.columnsCount).toEqual(6);
             instance.frozenColumns = 1;
@@ -184,7 +184,7 @@ describe('Grid Api', function () {
             instance.addColumnNode(service);
             instance.addColumnNode(semantic);
 
-            expect(instance.headerRight.columnsCount).toEqual(instance.getColumnsCount());
+            expect(instance.headerRight.columnsCount).toEqual(instance.columnsCount);
             expect(instance.headerLeft.columnsCount).toEqual(0);
             expect(instance.headerRight.columnsCount).toEqual(6);
             instance.frozenColumns = 1;
@@ -251,7 +251,7 @@ describe('Grid Api', function () {
 
             instance.addColumnNode(semantic);
 
-            expect(instance.headerRight.columnsCount).toEqual(instance.getColumnsCount());
+            expect(instance.headerRight.columnsCount).toEqual(instance.columnsCount);
             expect(instance.headerLeft.columnsCount).toEqual(0);
             expect(instance.headerRight.columnsCount).toEqual(6);
             instance.frozenColumns = 1;

@@ -328,8 +328,8 @@ define([
                             event.stopPropagation();
                             if (menu.showAt) {
                                 Ui.startMenuSession(menu);
-                                var pageX = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-                                var pageY = event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+                                var pageX = 'pageX' in event ? event.pageX : event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                                var pageY = 'pageY' in event ? event.pageY : event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
                                 menu.showAt(pageX, pageY);
                             }
                         });

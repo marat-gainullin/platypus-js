@@ -67,8 +67,7 @@
 .p-grid-shell{
 }
 
-.p-grid-cell,
-.p-grid-header-cell {
+.p-grid-cell {
     border-style: solid;
     border-width: 1px;
     border-color: lightgray;
@@ -76,13 +75,40 @@
     overflow: hidden;
 }
 
+.p-grid-header-cell {
+    border-style: solid;
+    border-width: 1px;
+    border-color: lightgray;
+}
+
 .p-grid-column-resizer {
+    cursor: ew-resize;
+}
+
+.p-grid-column-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.p-grid-column-move-hint-left,
+.p-grid-column-move-hint-right {
     display: inline-block;
     position: absolute;
-    right: 0px;
-    width: 5px;
+    box-sizing: border-box;
+    background-color: crimson;
     top: 0px;
     height: 100%;
-    box-sizing: border-box;
-    cursor: ew-resize;
+    width: 2px;
+}
+
+.p-grid-column-move-hint-left {
+    left: 0px;
+}
+
+.p-grid-column-move-hint-right{
+    right: 0px;
+}
+
+.p-grid-column-move-target {
+    background: bisque;
 }

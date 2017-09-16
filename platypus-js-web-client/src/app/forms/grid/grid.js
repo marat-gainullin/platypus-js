@@ -15,7 +15,7 @@ define([
     '../events/blur-event',
     '../events/focus-event',
     './section',
-    './columns/drag',
+    './columns/column-drag',
     './header/analyzer',
     './header/splitter',
     './header/node-view',
@@ -170,8 +170,7 @@ define([
         footerContainer.appendChild(footerContainerRight);
         footerContainer.style.display = 'none';
 
-        var ghostLine = document.createElement('div');
-        var ghostColumn = null;
+        var columnMoveDecoration = null;
         var targetDraggedColumn = null;
 
         var columnNodes = [];
@@ -256,182 +255,40 @@ define([
 
         shell.appendChild(columnsChevron);
 
-        Ui.on(bodyContainer, Ui.Events.SCROLL, function (evt) {
-            // TODO: Add ajacent sections movement logic
-        });
-
-        /*
-         @Override
-         public void onScroll(ScrollEvent event) {
-         int aimLeft = scrollableRightContainer.element.getScrollLeft();
-         if (isHeaderVisible()) {
-         headerRightContainer.element.setScrollLeft(aimLeft);
-         int factLeftDelta0 = aimLeft - headerRightContainer.element.getScrollLeft();
-         if (factLeftDelta0 > 0) {
-         headerRightContainer.element.style.right =factLeftDelta0+ 'px');
-         } else {
-         headerRightContainer.element.style.clearRight();
-         }
-         }
-         if (frozenColumns > 0 || frozenRows > 0) {
-         int aimTop = scrollableRightContainer.element.getScrollTop();
-         
-         scrollableLeftContainer.element.setScrollTop(aimTop);
-         int factTopDelta = aimTop - scrollableLeftContainer.element.getScrollTop();
-         if (factTopDelta > 0) {
-         scrollableLeftContainer.element.style.bottom =factTopDelta+ 'px');
-         } else {
-         scrollableLeftContainer.element.style.bottom =0+ 'px');
-         //scrollableLeftContainer.element.style.clearBottom();
-         }
-         frozenRightContainer.element.setScrollLeft(aimLeft);
-         int factLeftDelta1 = aimLeft - frozenRightContainer.element.getScrollLeft();
-         if (factLeftDelta1 > 0) {
-         frozenRightContainer.element.style.right =factLeftDelta1+ 'px');
-         } else {
-         frozenRightContainer.element.style.clearRight();
-         }
-         footerRightContainer.element
-         .setScrollLeft(scrollableRightContainer.element.getScrollLeft());
-         int factLeftDelta2 = aimLeft - footerRightContainer.element.getScrollLeft();
-         if (factLeftDelta2 > 0) {
-         footerRightContainer.element.style.right =factLeftDelta2+ 'px');
-         } else {
-         footerRightContainer.element.style.clearRight();
-         }
-         }
-         }
-         });
-         */
-        ghostLine.classList.add(RULER_STYLE);
-        ghostLine.style.position = 'absolute';
-        ghostLine.style.top = 0 + 'px';
-        ghostColumn = document.createElement('div');
-        ghostColumn.classList.add(COLUMN_PHANTOM_STYLE);
-        ghostColumn.style.position = 'absolute';
-        ghostColumn.style.top = 0 + 'px';
+        columnMoveDecoration = document.createElement('div');
+        columnMoveDecoration.classList.add(COLUMN_PHANTOM_STYLE);
+        columnMoveDecoration.style.position = 'absolute';
+        columnMoveDecoration.style.top = 0 + 'px';
 
         Ui.on(shell, Ui.Events.DRAGSTART, function (event) {
             if (draggableRows) {
                 var targetElement = event.target;
-                if ("tr".equalsIgnoreCase(targetElement.tagName)) {
+                if ('tr' === targetElement.tagName.toLowerCase()) {
                     event.stopPropagation();
                     var dragged = targetElement[Section.JS_ROW_NAME];
                     var rows = discoverRows();
                     var dataIndex = rows.indexOf(dragged);
-                    event.dataTransfer.setData('text/modelgrid-row',
-                            '{"gridName":"' + name + '", "dataIndex": ' + dataIndex + '}');
+                    event.dataTransfer.setData('text/p-grid-row',
+                            '{"p-grid-name":"' + name + '", "data-row-index": ' + dataIndex + '}');
                 }
             }
         });
-        Ui.on(shell, Ui.Events.DRAGENTER, function (event) {
-            if (ColumnDrag.instance && ColumnDrag.instance.move) {
-                event.preventDefault();
-                event.stopPropagation();
-                var target = findTargetDraggedColumn(event.target);
-                if (target) {
-                    showColumnMoveDecorations(target);
-                    event.dataTransfer.dropEffect = 'move';
-                } else {
-                    event.dataTransfer.dropEffect = 'none';
-                }
-            }
-        });
-        Ui.on(shell, Ui.Events.DRAG, function (event) {
-            if (ColumnDrag.instance && ColumnDrag.instance.resize) {
-                event.stopPropagation();
-            }
-        });
-        Ui.on(shell, Ui.Events.DRAGOVER, function (event) {
-            if (ColumnDrag.instance) {
-                event.preventDefault();
-                event.stopPropagation();
-                if (ColumnDrag.instance.move) {
-                    var target = findTargetDraggedColumn(event.target);
-                    if (target) {
-                        event.dataTransfer.dropEffect = 'move';
-                    } else {
-                        hideColumnDecorations();
-                        event.dataTransfer.dropEffect = 'none';
-                    }
-                } else {
-                    var hostElement = self.shell;
-                    var clientX = event.clientX;
-                    var hostAbsX = Ui.absoluteLeft(hostElement);
-                    var hostScrollX = hostElement.scrollLeft;
-                    // TODO: Align with widget.js's docu,emt scroll left calc
-                    var docScrollX = document.scrollLeft;
-                    var relativeX = clientX - hostAbsX + hostScrollX + docScrollX;
-                    ghostLine.style.left = relativeX + 'px';
-                    ghostLine.style.height = hostElement.clientHeight + 'px';
-                    if (ghostLine.parentElement !== hostElement) {
-                        hostElement.appendChild(ghostLine);
-                    }
-                }
-            }
-        });
-        Ui.on(shell, Ui.Events.DRAGLEAVE, function (event) {
-            if (ColumnDrag.instance) {
-                event.stopPropagation();
-                if (ColumnDrag.instance.move) {
-                    if (event.target === self.shell) {
-                        hideColumnDecorations();
-                    }
-                }
-            }
-        });
-        Ui.on(shell, Ui.Events.DRAGEND, function (event) {
-            if (ColumnDrag.instance) {
-                event.stopPropagation();
-                hideColumnDecorations();
-                ColumnDrag.instance = null;
-            }
-        });
-        Ui.on(shell, Ui.Events.DROP, function (event) {
-            var source = ColumnDrag.instance;
-            var target = targetDraggedColumn;
-            hideColumnDecorations();
-            ColumnDrag.instance = null;
-            if (source) {
-                event.preventDefault();
-                event.stopPropagation();
-                if (source.move) {
-                    // target table may be any section in our grid
-                    if (target) {
-                        var sourceHeader = source.header;
-                        var targetHeader = target.header;
-                        moveColumnNode(sourceHeader.headerNode, targetHeader.headerNode);
-                    }
-                } else {
-                    var header = source.header;
-                    if (header.resizable) {
-                        var newWidth = Math.max(
-                                event.clientX - Ui.absoluteLeft(source.decorationElement),
-                                MINIMUM_COLUMN_WIDTH);
-                        if (newWidth >= header.column.minWidth && newWidth <= header.column.maxWidth) {
-                            header.column.width = newWidth;
-                        }
-                    }
-                }
-            }
-        });
-
 
         (function () {
-            function fillColumns(aTarget, aSection) {
-                for (var i = 0; i < aSection.columnsCount; i++) {
-                    var column = aSection.getColumn(i);
+            function fillColumns(section, target) {
+                for (var i = 0; i < section.columnsCount; i++) {
+                    var column = section.getColumn(i);
                     var miCheck = new MenuItemCheckBox(column.visible, column.header.text, true);
                     miCheck.addValueChangeHandler(function (event) {
                         column.visible = !!event.newValue;
                     });
-                    aTarget.add(miCheck);
+                    target.add(miCheck);
                 }
             }
             Ui.on(columnsChevron, Ui.Events.CLICK, function (event) {
                 var columnsMenu = new Menu();
-                fillColumns(columnsMenu, headerLeft);
-                fillColumns(columnsMenu, headerRight);
+                fillColumns(headerLeft, columnsMenu);
+                fillColumns(headerRight, columnsMenu);
                 columnsMenu.showRelativeTo(columnsChevron);
             });
         }());
@@ -652,9 +509,9 @@ define([
             }
         }
 
-        function hideColumnDecorations() {
-            ghostLine.parentElement.removeChild(ghostLine);
-            ghostColumn.parentElement.removeChild(ghostColumn);
+        function hideColumnMoveDecorations() {
+            if (columnMoveDecoration.parentElement)
+                columnMoveDecoration.parentElement.removeChild(columnMoveDecoration);
             targetDraggedColumn = null;
         }
 
@@ -664,18 +521,12 @@ define([
             var thtdElement = target.decorationElement;
             var thLeft = Ui.absoluteLeft(thtdElement);
             thLeft = thLeft - Ui.absoluteLeft(shell) + hostElement.scrollLeft;
-            ghostLine.style.left = thLeft + 'px';
-            ghostLine.style.height = hostElement.clientHeight + 'px';
-            ghostColumn.style.left = thLeft + 'px';
-            ghostColumn.style.width = thtdElement.offsetWidth + 'px';
-            ghostColumn.style.height = hostElement.clientHeight + 'px';
-            if (ghostLine.parentElement !== hostElement) {
-                ghostLine.parentElement.removeChild(ghostLine);
-                hostElement.appendChild(ghostLine);
-            }
-            if (ghostColumn.parentElement !== hostElement) {
-                ghostColumn.parentElement.removeChild(ghostColumn);
-                hostElement.appendChild(ghostColumn);
+            columnMoveDecoration.style.left = thLeft + 'px';
+            columnMoveDecoration.style.width = thtdElement.offsetWidth + 'px';
+            columnMoveDecoration.style.height = hostElement.clientHeight + 'px';
+            if (columnMoveDecoration.parentElement !== hostElement) {
+                columnMoveDecoration.parentElement.removeChild(columnMoveDecoration);
+                hostElement.appendChild(columnMoveDecoration);
             }
         }
 
@@ -1324,7 +1175,20 @@ define([
             bodyRight.setRange(frozenRows, sortedRows.length, needRedraw);
         }
 
-        function updateRightSectionsWidth() {
+        function updateSectionsWidth() {
+            var leftColumnsWidth = 0;
+            for (var c = 0; c < headerLeft.columnsCount; c++) {
+                var column = headerLeft.getColumn(c);
+                leftColumnsWidth += column.width;
+            }
+            [
+                headerLeft,
+                frozenLeft,
+                bodyLeft,
+                footerLeft
+            ].forEach(function (section) {
+                section.element.style.width = leftColumnsWidth + 'px';
+            });
             var rightColumnsWidth = 0;
             for (var c = 0; c < headerRight.columnsCount; c++) {
                 var column = headerRight.getColumn(c);
@@ -1339,9 +1203,9 @@ define([
                 section.element.style.width = rightColumnsWidth + 'px';
             });
         }
-        Object.defineProperty(this, 'updateRightSectionsWidth', {
-            get: function(){
-                return updateRightSectionsWidth;
+        Object.defineProperty(this, 'updateSectionsWidth', {
+            get: function () {
+                return updateSectionsWidth;
             }
         });
 
@@ -1422,7 +1286,7 @@ define([
             ].forEach(function (section) {
                 section.style.display = frozenColumns > 0 ? '' : 'none';
             });
-            updateRightSectionsWidth();
+            updateSectionsWidth();
             checkTreeIndicatorColumn();
             redraw();
         }
@@ -1591,9 +1455,9 @@ define([
             return (headerLeft ? headerLeft.columnsCount : 0)
                     + (headerRight ? headerRight.columnsCount : 0);
         }
-        Object.defineProperty(this, 'getColumnsCount', {
+        Object.defineProperty(this, 'columnsCount', {
             get: function () {
-                return getColumnsCount;
+                return getColumnsCount();
             }
         });
 
