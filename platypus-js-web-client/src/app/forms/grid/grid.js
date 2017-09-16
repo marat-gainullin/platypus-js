@@ -170,9 +170,6 @@ define([
         footerContainer.appendChild(footerContainerRight);
         footerContainer.style.display = 'none';
 
-        var columnMoveDecoration = null;
-        var targetDraggedColumn = null;
-
         var columnNodes = [];
 
         var columnsFacade = [];
@@ -254,11 +251,6 @@ define([
         shell.appendChild(footerContainer);
 
         shell.appendChild(columnsChevron);
-
-        columnMoveDecoration = document.createElement('div');
-        columnMoveDecoration.classList.add(COLUMN_PHANTOM_STYLE);
-        columnMoveDecoration.style.position = 'absolute';
-        columnMoveDecoration.style.top = 0 + 'px';
 
         Ui.on(shell, Ui.Events.DRAGSTART, function (event) {
             if (draggableRows) {
@@ -459,76 +451,6 @@ define([
                 return unselectAll;
             }
         });
-
-        function findTargetDraggedColumn(aEventTarget) {
-            var targetSection = null;
-            var targetCell = null;
-            var currentTarget = aEventTarget;
-            if (COLUMN_PHANTOM_STYLE.equals(currentTarget.className)
-                    || RULER_STYLE.equals(currentTarget.className)) {
-                return targetDraggedColumn;
-            } else {
-                while ((!targetCell || !targetSection) && currentTarget
-                        && currentTarget !== self.shell) {
-                    if (!targetCell) {
-                        if ("td" === currentTarget.tagName.toLowerCase()
-                                || "th" === currentTarget.tagName.toLowerCase()) {
-                            targetCell = currentTarget;
-                        }
-                    }
-                    if (!targetSection) {
-                        if (currentTarget === headerLeft.element) {
-                            targetSection = headerLeft;
-                        } else if (currentTarget === frozenLeft.element) {
-                            targetSection = frozenLeft;
-                        } else if (currentTarget === bodyLeft.element) {
-                            targetSection = bodyLeft;
-                        } else if (currentTarget === footerLeft.element) {
-                            targetSection = footerLeft;
-                        } else if (currentTarget === headerRight.element) {
-                            targetSection = headerRight;
-                        } else if (currentTarget === frozenRight.element) {
-                            targetSection = frozenRight;
-                        } else if (currentTarget === bodyRight.element) {
-                            targetSection = bodyRight;
-                        } else if (currentTarget === footerRight.element) {
-                            targetSection = footerRight;
-                        }
-                    }
-                    currentTarget = currentTarget.parentElement;
-                }
-                if (targetSection && targetCell) {
-                    var view = targetCell[NodeView.HEADER_VIEW];
-                    if (view) {
-                        return new ColumnDrag(view, targetCell);
-                    } else {
-                        return null;
-                    }
-                }
-                return null;
-            }
-        }
-
-        function hideColumnMoveDecorations() {
-            if (columnMoveDecoration.parentElement)
-                columnMoveDecoration.parentElement.removeChild(columnMoveDecoration);
-            targetDraggedColumn = null;
-        }
-
-        function showColumnMoveDecorations(target) {
-            targetDraggedColumn = target;
-            var hostElement = shell;
-            var thtdElement = target.decorationElement;
-            var thLeft = Ui.absoluteLeft(thtdElement);
-            thLeft = thLeft - Ui.absoluteLeft(shell) + hostElement.scrollLeft;
-            columnMoveDecoration.style.left = thLeft + 'px';
-            columnMoveDecoration.style.width = thtdElement.offsetWidth + 'px';
-            columnMoveDecoration.style.height = hostElement.clientHeight + 'px';
-            if (columnMoveDecoration.parentElement !== hostElement) {
-                columnMoveDecoration.parentElement.removeChild(columnMoveDecoration);
-                hostElement.appendChild(columnMoveDecoration);
-            }
-        }
 
         Object.defineProperty(this, 'dynamicCellClassName', {
             get: function () {
