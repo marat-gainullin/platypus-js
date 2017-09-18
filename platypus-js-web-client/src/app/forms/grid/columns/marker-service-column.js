@@ -4,8 +4,8 @@ define([
 ], function (
         extend,
         Column) {
-    function MarkerServiceColumn() {
-        Column.call(this);
+    function MarkerServiceColumn(node) {
+        Column.call(this, node);
         var self = this;
 
         this.width = 22;

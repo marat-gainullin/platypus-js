@@ -42,14 +42,16 @@ define([], function () {
                 return mineDepth;
             }
         });
-        function mineLeaves(aForest, aParent) {
+        function mineLeaves(aLevel, aParent) {
             var leavesCount = 0;
-            for (var i = 0; i < aForest.length; i++) {
-                var n = aForest[i];
-                if (!n.leaf) {
-                    leavesCount += mineLeaves(n.children, n);
-                } else {
-                    leavesCount += 1;
+            for (var i = 0; i < aLevel.length; i++) {
+                var n = aLevel[i];
+                if (n.visible) {
+                    if (!n.leaf) {
+                        leavesCount += mineLeaves(n.children, n);
+                    } else {
+                        leavesCount += 1;
+                    }
                 }
             }
             if (aParent) {

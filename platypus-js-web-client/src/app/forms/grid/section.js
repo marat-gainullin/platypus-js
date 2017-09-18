@@ -333,7 +333,9 @@ define([
                 for (var i = start; i < end; i++) {
                     var dataRow = data[i];
                     var viewRow = document.createElement('tr');
-                    viewRow.draggable = draggableRows;
+                    if (draggableRows) {
+                        viewRow.draggable = draggableRows;
+                    }
                     viewRow.className = 'p-grid-row ' + dynamicRowsClassName;
                     if ((i + 1) % 2 === 0) {
                         viewRow.classList.add(dynamicEvenRowsClassName);
@@ -358,7 +360,7 @@ define([
                         var viewCell = document.createElement('td');
                         // TODO: Check alignment of the cell
                         // TODO: Check image decoration of the cell and decoration styles
-                        viewCell.className = 'p-grid-cell ' + dynamicCellsClassName;
+                        viewCell.className = 'p-grid-cell ' + dynamicCellsClassName + ' ' + column.styleName;
                         viewRow.appendChild(viewCell);
                         column.render(i, dataRow, viewCell);
                     }
@@ -443,18 +445,20 @@ define([
                 for (var c = 0; c < columns.length; c++) {
                     var column = columns[c];
                     var viewCell = viewRow.cells[c];
+                    viewCell.className = 'p-grid-cell ' + dynamicCellsClassName + ' ' + column.styleName;
                     column.render(index, dataRow, viewCell);
                 }
             } // if the row is not rendered then we have nothing to do
         }
 
-        function redrawColumn(aIndex) {
-            if (aIndex >= 0 && aIndex < columns.length) {
-                var column = columns[aIndex];
+        function redrawColumn(index) {
+            if (index >= 0 && index < columns.length) {
+                var column = columns[index];
                 for (var i = startRow; i < endRow; i++) {
                     var dataRow = data[i];
                     var viewRow = tbody.rows[i - startRow];
-                    var viewCell = viewRow.cells[aIndex];
+                    var viewCell = viewRow.cells[index];
+                    viewCell.className = 'p-grid-cell ' + dynamicCellsClassName + ' ' + column.styleName;
                     while (viewCell.firstElementChild) {
                         viewCell.removeChild(viewCell.firstElementChild);
                     }

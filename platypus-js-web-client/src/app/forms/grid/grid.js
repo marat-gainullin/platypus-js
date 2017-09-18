@@ -14,6 +14,8 @@ define([
     '../events/sort-event',
     '../events/blur-event',
     '../events/focus-event',
+    '../menu/menu',
+    '../menu/check-box-menu-item',
     './section',
     './columns/column-drag',
     './header/analyzer',
@@ -37,6 +39,8 @@ define([
         SortEvent,
         BlurEvent,
         FocusEvent,
+        Menu,
+        CheckBoxMenuItem,
         Section,
         ColumnDrag,
         HeaderAnalyzer,
@@ -95,8 +99,11 @@ define([
         });
         headerContainerRight.appendChild(headerRight.element);
 
+        var columnsChevron = document.createElement('div');
+
         headerContainer.appendChild(headerContainerLeft);
         headerContainer.appendChild(headerContainerRight);
+        headerContainer.appendChild(columnsChevron);
 
         var frozenContainer = document.createElement('div');
         var frozenContainerLeft = document.createElement('div');
@@ -178,9 +185,6 @@ define([
                 return columnsFacade;
             }
         });
-        //
-        var columnsChevron = document.createElement('div');
-        //
         var headerRowsHeight = 30;
         var rowsHeight = 30;
         var showHorizontalLines = true;
@@ -250,8 +254,6 @@ define([
         shell.appendChild(bodyContainer);
         shell.appendChild(footerContainer);
 
-        shell.appendChild(columnsChevron);
-
         Ui.on(shell, Ui.Events.DRAGSTART, function (event) {
             if (draggableRows) {
                 var targetElement = event.target;
@@ -266,22 +268,31 @@ define([
             }
         });
 
+        var columnsMenu = null;
         (function () {
-            function fillColumns(section, target) {
+            function fillColumnsMenu(section, target) {
                 for (var i = 0; i < section.columnsCount; i++) {
-                    var column = section.getColumn(i);
-                    var miCheck = new MenuItemCheckBox(column.visible, column.header.text, true);
-                    miCheck.addValueChangeHandler(function (event) {
-                        column.visible = !!event.newValue;
-                    });
-                    target.add(miCheck);
+                    (function () {
+                        var column = section.getColumn(i);
+                        var miCheck = new CheckBoxMenuItem(column.header.text, column.visible);
+                        miCheck.addValueChangeHandler(function (event) {
+                            column.visible = !!event.newValue;
+                        });
+                        target.add(miCheck);
+                    }());
                 }
             }
             Ui.on(columnsChevron, Ui.Events.CLICK, function (event) {
-                var columnsMenu = new Menu();
-                fillColumns(headerLeft, columnsMenu);
-                fillColumns(headerRight, columnsMenu);
-                columnsMenu.showRelativeTo(columnsChevron);
+                if (columnsMenu) {
+                    columnsMenu.close();
+                    columnsMenu = null;
+                } else {
+                    columnsMenu = new Menu();
+                    fillColumnsMenu(headerLeft, columnsMenu);
+                    fillColumnsMenu(headerRight, columnsMenu);
+                    Ui.startMenuSession(columnsMenu);
+                    columnsMenu.showRelativeTo(columnsChevron);
+                }
             });
         }());
 
@@ -1100,8 +1111,10 @@ define([
         function updateSectionsWidth() {
             var leftColumnsWidth = 0;
             for (var c = 0; c < headerLeft.columnsCount; c++) {
-                var column = headerLeft.getColumn(c);
-                leftColumnsWidth += column.width;
+                var lcolumn = headerLeft.getColumn(c);
+                if (lcolumn.visible) {
+                    leftColumnsWidth += lcolumn.width;
+                }
             }
             [
                 headerLeft,
@@ -1113,8 +1126,10 @@ define([
             });
             var rightColumnsWidth = 0;
             for (var c = 0; c < headerRight.columnsCount; c++) {
-                var column = headerRight.getColumn(c);
-                rightColumnsWidth += column.width;
+                var rcolumn = headerRight.getColumn(c);
+                if (rcolumn.visible) {
+                    rightColumnsWidth += rcolumn.width;
+                }
             }
             [
                 headerRight,
@@ -1155,6 +1170,14 @@ define([
         function clearColumnsNodes(needRedraw) {
             if (arguments.length < 1)
                 needRedraw = true;
+            function clearHeaders(forest) {
+                forest.forEach(function (node) {
+                    node.column.grid = null;
+                    node.column.headers.splice(0, node.column.headers.length);
+                    clearHeaders(node.children);
+                });
+            }
+            clearHeaders(columnNodes);
             columnsFacade = [];
             for (var i = getColumnsCount() - 1; i >= 0; i--) {
                 var toDel = getColumn(i);
@@ -1162,7 +1185,6 @@ define([
                 if (column === treeIndicatorColumn) {
                     treeIndicatorColumn = null;
                 }
-                column.grid = null;
                 column.headers.splice(0, column.headers.length);
             }
             headerLeft.clearColumnsAndHeader(needRedraw);
@@ -1180,15 +1202,24 @@ define([
             }
         });
 
-
         function applyColumnsNodes() {
             clearColumnsNodes(false);
 
+            function injectHeaders(forest) {
+                forest.forEach(function (node) {
+                    node.column.grid = self;
+                    node.column.headers.push(node.view);
+                    injectHeaders(node.children);
+                });
+            }
+
             var maxDepth = HeaderAnalyzer.analyzeDepth(columnNodes);
             leftHeader = HeaderSplitter.split(columnNodes, 0, frozenColumns - 1);
+            injectHeaders(leftHeader);
             HeaderAnalyzer.analyzeLeaves(leftHeader);
             headerLeft.setHeaderNodes(leftHeader, maxDepth, false);
             var rightHeader = HeaderSplitter.split(columnNodes, frozenColumns, Infinity);
+            injectHeaders(rightHeader);
             HeaderAnalyzer.analyzeLeaves(rightHeader);
             headerRight.setHeaderNodes(rightHeader, maxDepth, false);
 
@@ -1225,7 +1256,21 @@ define([
             }
         });
 
+        Object.defineProperty(this, 'applyColumnsNodes', {
+            get: function () {
+                return applyColumnsNodes;
+            }
+        });
+
+        function closeColumnMenu() {
+            if (columnsMenu) {
+                columnsMenu.close();
+                columnsMenu = null;
+            }
+        }
+        
         function removeColumnNode(aNode) {
+            closeColumnMenu();
             var nodeIndex = columnNodes.indexOf(aNode);
             if (nodeIndex !== -1) {
                 removeColumnNodeAt(nodeIndex);
@@ -1240,6 +1285,7 @@ define([
         });
 
         function removeColumnNodeAt(nodeIndex) {
+            closeColumnMenu();
             if (nodeIndex >= 0 && nodeIndex < columnNodes.length) {
                 var node = columnNodes[nodeIndex];
                 columnNodes.splice(nodeIndex, 1);
@@ -1258,7 +1304,9 @@ define([
             }
         });
 
+
         function addColumnNode(aNode) {
+            closeColumnMenu();
             columnNodes.push(aNode);
             applyColumnsNodes();
         }
@@ -1270,6 +1318,7 @@ define([
         });
 
         function insertColumnNode(aIndex, aNode) {
+            closeColumnMenu();
             columnNodes.splice(aIndex, 0, aNode);
             applyColumnsNodes();
         }
@@ -1298,19 +1347,41 @@ define([
             }
         });
 
-        function moveColumnNode(aSubject, aInsertBefore) {
-            if (aSubject && aInsertBefore && aSubject.parent === aInsertBefore.parent) {
-                var neighbours = aSubject.parent ? aSubject.parent.children : columnNodes;
-                var neighbourIndex = neighbours.indexOf(aSubject);
+        function insertBeforeColumnNode(subject, insertBefore) {
+            closeColumnMenu();
+            if (subject && insertBefore && subject.parent === insertBefore.parent) {
+                var neighbours = subject.parent ? subject.parent.children : columnNodes;
+                var neighbourIndex = neighbours.indexOf(subject);
                 neighbours.splice(neighbourIndex, 1);
-                var insertAt = neighbours.indexOf(aInsertBefore);
-                neighbours.splice(insertAt, 0, aSubject);
+                var insertAt = neighbours.indexOf(insertBefore);
+                neighbours.splice(insertAt, 0, subject);
                 applyColumnsNodes();
             }
         }
+        Object.defineProperty(this, 'insertBeforeColumnNode', {
+            get: function () {
+                return insertBeforeColumnNode;
+            }
+        });
+
+        function insertAfterColumnNode(subject, insertAfter) {
+            closeColumnMenu();
+            if (subject && insertAfter && subject.parent === insertAfter.parent) {
+                var neighbours = subject.parent ? subject.parent.children : columnNodes;
+                var neighbourIndex = neighbours.indexOf(subject);
+                neighbours.splice(neighbourIndex, 1);
+                var insertAt = neighbours.indexOf(insertAfter);
+                neighbours.splice(insertAt + 1, 0, subject);
+                applyColumnsNodes();
+            }
+        }
+        Object.defineProperty(this, 'insertAfterColumnNode', {
+            get: function () {
+                return insertAfterColumnNode;
+            }
+        });
 
         function addColumnToSections(column) {
-            column.grid = self;
             columnsFacade.push(column);
             if (headerLeft.columnsCount < frozenColumns) {
                 headerLeft.addColumn(column, false);

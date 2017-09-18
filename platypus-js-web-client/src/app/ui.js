@@ -92,11 +92,11 @@ define([
         };
     }
 
-    var Orientation = {HORIZONTAL: 0, VERTICAL: 1};
-    var VerticalPosition = {CENTER: 0, TOP: 1, BOTTOM: 3};
-    var HorizontalPosition = {CENTER: 0, LEFT: 2, RIGHT: 4};
+    var Orientation = {HORIZONTAL: 'horizontal', VERTICAL: 'vertical'};
+    var VerticalPosition = {CENTER: 'center', TOP: 'top', BOTTOM: 'bottom'};
+    var HorizontalPosition = {CENTER: 'center', LEFT: 'left', RIGHT: 'right'};
     var FontStyle = Font.Style;
-    var ScrollBarPolicy = {ALLWAYS: 32, NEVER: 31, AUTO: 30};
+    var ScrollBarPolicy = {ALLWAYS: 'allways', NEVER: 'never', AUTO: 'auto'};
 
     function selectFile(onSelection, fileFilter) {
         var fileField = document.createElement('input');

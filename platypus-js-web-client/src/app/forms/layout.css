@@ -405,11 +405,13 @@
     height: 100%;
     width: 5px;
 }
+
 .p-window-r{
     right: -5px;
     height: 100%;
     width: 5px;
 }
+
 .p-window-modal-mask{
     display: inline-block;
     position: absolute;
@@ -497,6 +499,7 @@
     table-layout: fixed;
 }
 
+.p-grid-row,
 .p-grid-header-row{
     line-height: normal;
 }
@@ -546,4 +549,15 @@
     box-sizing: border-box;
     width: 2px;/* 0px; */
     background: lightgray;
+}
+
+.p-grid-columns-chevron{
+    display: inline-block;
+    position: absolute;
+    box-sizing: border-box;
+    right: 0px;
+    top: 0px;
+    width: 10px;
+    bottom: 0px;
+    background-color: blueviolet;
 }

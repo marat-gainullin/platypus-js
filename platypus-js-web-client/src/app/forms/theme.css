@@ -98,15 +98,15 @@
     background-color: crimson;
     top: 0px;
     height: 100%;
-    width: 2px;
+    width: 3px;
 }
 
 .p-grid-column-move-hint-left {
-    left: 0px;
+    left: -2px;
 }
 
 .p-grid-column-move-hint-right{
-    right: 0px;
+    right: -2px;
 }
 
 .p-grid-column-move-target {

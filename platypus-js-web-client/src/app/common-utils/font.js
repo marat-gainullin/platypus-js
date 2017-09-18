@@ -1,9 +1,9 @@
 define(function () {
     var Style = {
-        NORMAL: 0,
-        BOLD: 1,
-        ITALIC: 2,
-        BOLD_ITALIC: 3
+        NORMAL: 'normal',
+        BOLD: 'bold',
+        ITALIC: 'italic',
+        BOLD_ITALIC: 'bold-italic'
     };
 
     function Font(aFamily, aStyle, aSize) {

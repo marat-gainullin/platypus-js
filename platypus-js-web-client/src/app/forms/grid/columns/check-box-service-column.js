@@ -4,8 +4,8 @@ define([
 ], function(
         extend,
         Column){
-    function CheckBoxServiceColumn(){
-        Column.call(this);
+    function CheckBoxServiceColumn(node){
+        Column.call(this, node);
         var self = this;
    
         this.width = 22;

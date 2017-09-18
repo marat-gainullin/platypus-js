@@ -29,7 +29,7 @@ define([
 
         var parent;
         var visibleDisplay = 'inline-block';
-        var menu;
+        var contextMenu;
         var enabled = true;
         var name;
         var background;
@@ -311,26 +311,26 @@ define([
             }
         });
         var menuTriggerReg = null;
-        Object.defineProperty(this, 'componentPopupMenu', {
+        Object.defineProperty(this, 'contextMenu', {
             get: function () {
-                return menu;
+                return contextMenu;
             },
             set: function (aValue) {
-                if (menu !== aValue) {
+                if (contextMenu !== aValue) {
                     if (menuTriggerReg) {
                         menuTriggerReg.removeHandler();
                         menuTriggerReg = null;
                     }
-                    menu = aValue;
-                    if (menu) {
+                    contextMenu = aValue;
+                    if (contextMenu) {
                         menuTriggerReg = Ui.on(box, Ui.Events.CONTEXTMENU, function (event) {
                             event.preventDefault();
                             event.stopPropagation();
-                            if (menu.showAt) {
-                                Ui.startMenuSession(menu);
+                            if (contextMenu.showAt) {
+                                Ui.startMenuSession(contextMenu);
                                 var pageX = 'pageX' in event ? event.pageX : event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
                                 var pageY = 'pageY' in event ? event.pageY : event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-                                menu.showAt(pageX, pageY);
+                                contextMenu.showAt(pageX, pageY);
                             }
                         });
                     }

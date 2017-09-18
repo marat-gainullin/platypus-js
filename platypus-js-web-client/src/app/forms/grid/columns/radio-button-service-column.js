@@ -6,8 +6,8 @@ define([
         Id,
         extend,
         Column){
-    function RadioServiceColumn(){
-        Column.call(this);
+    function RadioButtonServiceColumn(node){
+        Column.call(this, node);
         var self = this;
         var radioGroup = 'p-grid-group-' + Id.generate();
    
@@ -42,6 +42,6 @@ define([
         });
 
     }
-    extend(RadioServiceColumn, Column);
-    return RadioServiceColumn;
+    extend(RadioButtonServiceColumn, Column);
+    return RadioButtonServiceColumn;
 });

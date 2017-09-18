@@ -166,14 +166,14 @@ describe('Menu Api', function () {
             'common-utils/font',
             'common-utils/color',
             'common-utils/cursor',
-            'forms/menu/check-menu-item'
+            'forms/menu/check-box-menu-item'
         ], function (
                 Ui,
                 Font,
                 Color,
                 Cursor,
-                CheckMenuItem) {
-            expectBooleanMenuItemStructure(CheckMenuItem, Ui, Font, Color, Cursor, done);
+                CheckBoxMenuItem) {
+            expectBooleanMenuItemStructure(CheckBoxMenuItem, Ui, Font, Color, Cursor, done);
             done();
         });
     });
@@ -181,12 +181,12 @@ describe('Menu Api', function () {
         require([
             'invoke',
             'logger',
-            'forms/menu/check-menu-item'
+            'forms/menu/check-box-menu-item'
         ], function (
                 Invoke,
                 Logger,
-                CheckMenuItem) {
-            expectBooleanMenuItemMarkup(CheckMenuItem, Invoke, Logger, done);
+                CheckBoxMenuItem) {
+            expectBooleanMenuItemMarkup(CheckBoxMenuItem, Invoke, Logger, done);
         });
     });
     it('RadioMenuItem.Structure', function (done) {
@@ -195,14 +195,14 @@ describe('Menu Api', function () {
             'common-utils/font',
             'common-utils/color',
             'common-utils/cursor',
-            'forms/menu/radio-menu-item'
+            'forms/menu/radio-button-menu-item'
         ], function (
                 Ui,
                 Font,
                 Color,
                 Cursor,
-                RadioMenuItem) {
-            expectBooleanMenuItemStructure(RadioMenuItem, Ui, Font, Color, Cursor, done);
+                RadioButtonMenuItem) {
+            expectBooleanMenuItemStructure(RadioButtonMenuItem, Ui, Font, Color, Cursor, done);
             done();
         });
     });
@@ -210,12 +210,12 @@ describe('Menu Api', function () {
         require([
             'invoke',
             'logger',
-            'forms/menu/radio-menu-item'
+            'forms/menu/radio-button-menu-item'
         ], function (
                 Invoke,
                 Logger,
-                RadioMenuItem) {
-            expectBooleanMenuItemMarkup(RadioMenuItem, Invoke, Logger, done);
+                RadioButtonMenuItem) {
+            expectBooleanMenuItemMarkup(RadioButtonMenuItem, Invoke, Logger, done);
         });
     });
 
@@ -262,16 +262,16 @@ describe('Menu Api', function () {
         require([
             'forms/containers/button-group',
             'forms/menu/menu-item',
-            'forms/menu/check-menu-item',
-            'forms/menu/radio-menu-item',
+            'forms/menu/check-box-menu-item',
+            'forms/menu/radio-button-menu-item',
             'forms/menu/menu-separator',
             'forms/menu/menu',
             'forms/menu/menu-bar'
         ], function (
                 ButtonGroup,
                 MenuItem,
-                CheckMenuItem,
-                RadioMenuItem,
+                CheckBoxMenuItem,
+                RadioButtonMenuItem,
                 MenuSeparator,
                 Menu,
                 MenuBar) {
@@ -279,8 +279,8 @@ describe('Menu Api', function () {
                     MenuBar,
                     ButtonGroup,
                     MenuItem,
-                    CheckMenuItem,
-                    RadioMenuItem,
+                    CheckBoxMenuItem,
+                    RadioButtonMenuItem,
                     MenuSeparator,
                     Menu);
             document.body.appendChild(menuBar.element);
@@ -293,8 +293,8 @@ describe('Menu Api', function () {
             'forms/buttons/button',
             'forms/containers/button-group',
             'forms/menu/menu-item',
-            'forms/menu/check-menu-item',
-            'forms/menu/radio-menu-item',
+            'forms/menu/check-box-menu-item',
+            'forms/menu/radio-button-menu-item',
             'forms/menu/menu-separator',
             'forms/menu/menu',
             'forms/menu/menu-bar'
@@ -302,8 +302,8 @@ describe('Menu Api', function () {
                 Button,
                 ButtonGroup,
                 MenuItem,
-                CheckMenuItem,
-                RadioMenuItem,
+                CheckBoxMenuItem,
+                RadioButtonMenuItem,
                 MenuSeparator,
                 Menu) {
             var button = new Button('Right click me');
@@ -313,12 +313,12 @@ describe('Menu Api', function () {
                     Menu,
                     ButtonGroup,
                     MenuItem,
-                    CheckMenuItem,
-                    RadioMenuItem,
+                    CheckBoxMenuItem,
+                    RadioButtonMenuItem,
                     MenuSeparator,
                     Menu);
-            button.componentPopupMenu = menu;
-            expect(button.componentPopupMenu).toBe(menu);
+            button.contextMenu = menu;
+            expect(button.contextMenu).toBe(menu);
             document.body.removeChild(button.element);
             done();
         });
@@ -329,8 +329,8 @@ describe('Menu Api', function () {
             'forms/buttons/drop-down-button',
             'forms/containers/button-group',
             'forms/menu/menu-item',
-            'forms/menu/check-menu-item',
-            'forms/menu/radio-menu-item',
+            'forms/menu/check-box-menu-item',
+            'forms/menu/radio-button-menu-item',
             'forms/menu/menu-separator',
             'forms/menu/menu',
             'forms/menu/menu-bar'
@@ -339,8 +339,8 @@ describe('Menu Api', function () {
                 DropDownButton,
                 ButtonGroup,
                 MenuItem,
-                CheckMenuItem,
-                RadioMenuItem,
+                CheckBoxMenuItem,
+                RadioButtonMenuItem,
                 MenuSeparator,
                 Menu) {
             var button = new DropDownButton('Click my chevron');
@@ -354,8 +354,8 @@ describe('Menu Api', function () {
                     Menu,
                     ButtonGroup,
                     MenuItem,
-                    CheckMenuItem,
-                    RadioMenuItem,
+                    CheckBoxMenuItem,
+                    RadioButtonMenuItem,
                     MenuSeparator,
                     Menu);
             button.dropDownMenu = menu;

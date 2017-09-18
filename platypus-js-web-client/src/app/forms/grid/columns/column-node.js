@@ -11,7 +11,7 @@ define([
         var self = this;
         var name = null;
         if (!column) {
-            column = new Column();
+            column = new Column(this);
         }
         if (!nodeView) {
             nodeView = new NodeView('', this);

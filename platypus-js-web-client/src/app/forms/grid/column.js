@@ -1,17 +1,13 @@
 /* global Infinity */
 define([
     '../../id',
-    '../../ui',
-    '../../logger',
     '../bound'
 ], function (
         Id,
-        Ui,
-        Logger,
         Bound
         ) {
 // TODO: Check tree expandable cell decorations like left paddnig according to deepness and plus / minus icon and open / closed folder icons
-    function Column() {
+    function Column(node) {
         var self = this;
         var cols = []; // dom 'col' elements for header,frozen,body and footer sections of the grid
         var columnRule = document.createElement('style');
@@ -98,6 +94,12 @@ define([
             },
             set: function (aValue) {
                 grid = aValue;
+            }
+        });
+
+        Object.defineProperty(this, 'node', {
+            get: function () {
+                return node;
             }
         });
 
@@ -232,54 +234,31 @@ define([
         function render(viewIndex, dataRow, viewCell) {
             var path = grid.buildPathTo(dataRow);
             var padding = indent * (path.length - 1);
-            viewCell.style.paddingLeft = padding  > 0 ? padding + 'px' : '';
+            viewCell.style.paddingLeft = padding > 0 ? padding + 'px' : '';
             var value = getValue(dataRow);
-            var text;
-            if (!value) {
-                text = null; // No native rendering for null values
+            if (value == null) { // null == undefined, null !== undefined
+                viewCell.innerTHML = ''; // No native rendering for null values
+            } else if (typeof (value) === 'boolean') {
+                var checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = !!value;
+                viewCell.appendChild(checkbox);
             } else {
-                text = value + '';
+                var html;
                 if (editor) {
                     editor.value = value;
-                    /*
-                    if (editor instanceof BooleanDecoratorField || editor instanceof CheckBox) {
-                        var checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox';
-                        checkbox.checked = !!value;
-                        if (!checkbox.checked) {
-                            text = "";
-                        }
-                        viewCell.appendChild(checkbox);
-                        Ui.on(checkbox, Ui.Events.CHANGE, function (evt) {
-                            setValue(dataRow, !!!value);
-                        });
-                    } else if (editor instanceof RadioButton) {
-                        var radiobutton = document.createElement('input');
-                        radiobutton.type = 'radio';
-                        radiobutton.group = radioGroup;
-                        checkbox.checked = !!value;
-                        if (!checkbox.checked) {
-                            text = "";
-                        }
-                        viewCell.appendChild(radiobutton);
-                        Ui.on(radiobutton, Ui.Events.CHANGE, function (evt) {
-                            if (!value) {
-                                setValue(dataRow, true);
-                            }
-                        });
-                    } else {
-                        text = editor.text;
-                        viewCell.innerText = text;
-                    }
-                    */
-                    text = editor.text;
-                    viewCell.innerText = text;
+                    html = editor.text;
+                } else if (value instanceof Date) {
+                    html = value.toJSON();
+                } else {
+                    html = value + '';
                 }
+                viewCell.innerHTML = html;
             }
             // User's rendering for all values, including null
             if (onRender || grid.onRender) {
                 var handler = onRender ? onRender : grid.onRender;
-                handler.call(self, dataRow, viewCell, viewIndex, text);
+                handler.call(self, dataRow, viewCell, viewIndex, html);
             }
         }
 
@@ -297,6 +276,9 @@ define([
                 if (visible !== aValue) {
                     visible = aValue;
                     regenerateColStyle();
+                    if (grid) {
+                        grid.applyColumnsNodes();
+                    }
                 }
             }
         });

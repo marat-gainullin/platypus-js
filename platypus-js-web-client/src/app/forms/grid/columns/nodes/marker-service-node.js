@@ -9,7 +9,7 @@ define([
         NodeView){
     function MarkerServiceColumnNode(){
         var self = this;
-        var column = new MarkerServiceColumn();
+        var column = new MarkerServiceColumn(this);
         var header = new NodeView('\\', this);
         HeaderNode.call(this, column, header);
         

@@ -8,7 +8,7 @@ define([
 
     var HEADER_VIEW = 'header-view';
 
-    function NodeView(text, columnNode) {
+    function NodeView(text, viewColumnNode) {
         var self = this;
         var th = document.createElement('th');
         var thResizer = document.createElement('div');
@@ -42,13 +42,14 @@ define([
             var columnToResize = null;
             Ui.on(thResizer, Ui.Events.MOUSEDOWN, function (event) {
                 if (resizable && event.button === 0) {
+                    event.preventDefault();
+                    event.stopPropagation();
                     ColumnDrag.instance = {
                         resize: true
                     };
                     columnToResize = findRightMostLeafColumn();
-                    event.stopPropagation();
                     mouseDownAtX = 'pageX' in event ? event.pageX : event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-                    mouseDownWidth = columnNode.width;
+                    mouseDownWidth = viewColumnNode.width;
                     if (!onMouseUp) {
                         onMouseUp = Ui.on(document, Ui.Events.MOUSEUP, function (event) {
                             event.stopPropagation();
@@ -66,6 +67,7 @@ define([
                     }
                     if (!onMouseMove) {
                         onMouseMove = Ui.on(document, Ui.Events.MOUSEMOVE, function (event) {
+                            event.preventDefault();
                             event.stopPropagation();
                             var newPageX = 'pageX' in event ? event.pageX : event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
                             var dx = newPageX - mouseDownAtX;
@@ -86,8 +88,7 @@ define([
             } else {
                 ColumnDrag.instance = {
                     move: true,
-                    column: columnNode.column,
-                    columnParent: columnNode.parent
+                    column: viewColumnNode.column
                 };
                 event.dataTransfer.effectAllowed = 'move';
                 event.dataTransfer.setData('text/plain', 'p-grid-column-move');
@@ -109,10 +110,28 @@ define([
         function onDragOver(event) {
             if (ColumnDrag.instance &&
                     ColumnDrag.instance.move &&
-                    ColumnDrag.instance.column !== columnNode.column &&
-                    ColumnDrag.instance.columnParent === columnNode.parent) {
+                    ColumnDrag.instance.column !== viewColumnNode.column &&
+                    ColumnDrag.instance.column.node.parent === viewColumnNode.column.node.parent) {
                 event.preventDefault();
                 event.dataTransfer.dropEffect = 'move';
+                if (inThRect(event) && ColumnDrag.instance.enteredTh === th) {
+                    var rect = th.getBoundingClientRect();
+                    if (event.clientX < rect.left + rect.width / 2) {
+                        if (!moveHintLeft.parentElement) {
+                            th.appendChild(moveHintLeft);
+                        }
+                        if (moveHintRight.parentElement) {
+                            th.removeChild(moveHintRight);
+                        }
+                    } else {
+                        if (!moveHintRight.parentElement) {
+                            th.appendChild(moveHintRight);
+                        }
+                        if (moveHintLeft.parentElement) {
+                            th.removeChild(moveHintLeft);
+                        }
+                    }
+                }
             } else {
                 event.dataTransfer.dropEffect = 'none';
             }
@@ -128,22 +147,29 @@ define([
         function onDragEnter(event) {
             if (inThRect(event) && ColumnDrag.instance &&
                     ColumnDrag.instance.move &&
-                    ColumnDrag.instance.column !== columnNode.column &&
-                    ColumnDrag.instance.columnParent === columnNode.parent) {
+                    ColumnDrag.instance.column !== viewColumnNode.column &&
+                    ColumnDrag.instance.column.node.parent === viewColumnNode.column.node.parent) {
                 ColumnDrag.instance.enteredTh = th;
                 event.dataTransfer.dropEffect = 'move';
                 if (ColumnDrag.instance.clear) {
                     ColumnDrag.instance.clear();
                     ColumnDrag.instance.clear = null;
                 }
-                if (!moveHintLeft.parentElement) {
-                    th.appendChild(moveHintLeft);
-                    th.appendChild(moveHintRight);
+                if (th.className.indexOf('p-grid-column-move-target') === -1) {
                     th.classList.add('p-grid-column-move-target');
+
+                    var rect = th.getBoundingClientRect();
+                    if (event.clientX < rect.left + rect.width / 2) {
+                        th.appendChild(moveHintLeft);
+                    } else {
+                        th.appendChild(moveHintRight);
+                    }
                     ColumnDrag.instance.clear = function () {
+                        th.classList.remove('p-grid-column-move-target');
                         if (moveHintLeft.parentElement) {
-                            th.classList.remove('p-grid-column-move-target');
                             th.removeChild(moveHintLeft);
+                        }
+                        if (moveHintRight.parentElement) {
                             th.removeChild(moveHintRight);
                         }
                     };
@@ -164,6 +190,27 @@ define([
             }
         }
         Ui.on(th, Ui.Events.DRAGLEAVE, onDragLeave);
+        function onDrop(event) {
+            if (inThRect(event) && ColumnDrag.instance &&
+                    ColumnDrag.instance.move &&
+                    ColumnDrag.instance.enteredTh === th) {
+                var droppedNode = ColumnDrag.instance.column.node;
+                var targetNode = viewColumnNode.column.node;
+                var grid = viewColumnNode.column.grid;
+                if (ColumnDrag.instance.clear) {
+                    ColumnDrag.instance.clear();
+                    ColumnDrag.instance.clear = null;
+                }
+                ColumnDrag.instance = null;
+                var rect = th.getBoundingClientRect();
+                if (event.clientX < rect.left + rect.width / 2) {
+                    grid.insertBeforeColumnNode(droppedNode, targetNode);
+                } else {
+                    grid.insertAfterColumnNode(droppedNode, targetNode);
+                }
+            }
+        }
+        Ui.on(th, Ui.Events.DROP, onDrop);
 
         Object.defineProperty(this, 'element', {
             get: function () {
@@ -188,7 +235,7 @@ define([
 
         Object.defineProperty(this, 'columnNode', {
             get: function () {
-                return columnNode;
+                return viewColumnNode;
             }
         });
 
@@ -250,7 +297,7 @@ define([
         });
 
         function findRightMostLeafColumn() {
-            var node = columnNode;
+            var node = viewColumnNode;
             while (!node.leaf) {
                 node = node.children[node.children.length - 1];
             }

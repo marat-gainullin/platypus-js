@@ -59,19 +59,10 @@ define([], function () {
     }
     var module = {};
     
-    function injectHeaders(forest){
-        forest.forEach(function(node){
-            node.column.headers.push(node.header);
-            injectHeaders(node.children);
-        });
-    }
-    
     function split(toBeSplitted, aMinLeave, aMaxLeave) {
         var splitter = new HeaderSplitter(aMinLeave, aMaxLeave);
         splitter.process(toBeSplitted, null);
-        var clonedPortion = splitter.toRoots();
-        injectHeaders(clonedPortion);
-        return clonedPortion;
+        return splitter.toRoots();
     }
     Object.defineProperty(module, 'split', {
         get: function () {

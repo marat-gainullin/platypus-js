@@ -9,9 +9,10 @@ define([
         NodeView){
     function CheckServiceColumnNode(){
         var self = this;
-        var column = new CheckServiceColumn();
+        var column = new CheckServiceColumn(this);
         var header = new NodeView('\\', this);
         HeaderNode.call(this, column, header);
+        column.editor = null;
         
         function copy() {
             var copied = new CheckServiceColumnNode();

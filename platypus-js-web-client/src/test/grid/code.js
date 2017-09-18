@@ -311,7 +311,7 @@ describe('Grid Api', function () {
                 CheckBoxColumnNode,
                 RadioButtonColumnNode) {
             var instance = new Grid();
-            instance.width = instance.height = 250;
+            instance.width = instance.height = 400;
             instance.frozenRows = 2;
             document.body.appendChild(instance.element);
 
@@ -330,7 +330,10 @@ describe('Grid Api', function () {
             
             semantic.addColumnNode(name);
             var birth = new ColumnNode();
+            birth.editor = null;
             birth.field = birth.title = 'birth';
+            birth.width = 170;
+            birth.visible = false;
             semantic.addColumnNode(birth);
             var payed = new ColumnNode();
             payed.field = payed.title = 'payed';

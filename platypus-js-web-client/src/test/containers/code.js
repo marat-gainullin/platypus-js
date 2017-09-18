@@ -40,8 +40,8 @@ describe('Containers Api', function () {
         expectValue(widget, 'foreground', new Color(12, 45, 78, 35));
         expect('error' in widget).toBeTruthy();
         expectValue(widget, 'error', 'sample validation message');
-        expect('componentPopupMenu' in widget).toBeTruthy();
-        expectValue(widget, 'componentPopupMenu', new widget.constructor());
+        expect('contextMenu' in widget).toBeTruthy();
+        expectValue(widget, 'contextMenu', new widget.constructor());
         expect('toolTipText' in widget).toBeTruthy();
         expectValue(widget, 'toolTipText', ' sample tooltip');
         expect('nextFocusableComponent' in widget).toBeTruthy();

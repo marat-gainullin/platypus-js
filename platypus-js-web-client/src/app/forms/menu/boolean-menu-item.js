@@ -24,7 +24,7 @@ define([
         var clickReg = Ui.on(this.element, Ui.Events.CLICK, function () {
             self.fireActionPerformed();
             self.selected = !self.selected;
-            Ui.closeMenuSession();
+            // Ui.closeMenuSession();
         });
 
         var horizontalTextPosition = Ui.HorizontalPosition.RIGHT;

@@ -9,9 +9,10 @@ define([
         NodeView){
     function RadioServiceColumnNode(){
         var self = this;
-        var column = new RadioServiceColumn();
+        var column = new RadioServiceColumn(this);
         var header = new NodeView('\\', this);
         HeaderNode.call(this, column, header);
+        column.editor = null; // TODO: Add radio button default editor
         
         function copy() {
             var copied = new RadioServiceColumnNode();
