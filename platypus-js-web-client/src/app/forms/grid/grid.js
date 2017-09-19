@@ -81,8 +81,8 @@ define([
         var dynamicEvenRowsClassName = 'p-grid-even-row-' + Id.generate();
 
         var headerContainer = document.createElement('div');
-        var headerContainerLeft = document.createElement('div');
-        var headerContainerRight = document.createElement('div');
+        var headerLeftContainer = document.createElement('div');
+        var headerRightContainer = document.createElement('div');
 
         var headerLeft = new Section(self, dynamicCellsClassName, dynamicRowsClassName, dynamicHeaderCellsClassName, dynamicHeaderRowsClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName);
         Object.defineProperty(this, 'headerLeft', {
@@ -90,24 +90,24 @@ define([
                 return headerLeft;
             }
         });
-        headerContainerLeft.appendChild(headerLeft.element);
+        headerLeftContainer.appendChild(headerLeft.element);
         var headerRight = new Section(self, dynamicCellsClassName, dynamicRowsClassName, dynamicHeaderCellsClassName, dynamicHeaderRowsClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName);
         Object.defineProperty(this, 'headerRight', {
             get: function () {
                 return headerRight;
             }
         });
-        headerContainerRight.appendChild(headerRight.element);
+        headerRightContainer.appendChild(headerRight.element);
 
         var columnsChevron = document.createElement('div');
 
-        headerContainer.appendChild(headerContainerLeft);
-        headerContainer.appendChild(headerContainerRight);
+        headerContainer.appendChild(headerLeftContainer);
+        headerContainer.appendChild(headerRightContainer);
         headerContainer.appendChild(columnsChevron);
 
         var frozenContainer = document.createElement('div');
-        var frozenContainerLeft = document.createElement('div');
-        var frozenContainerRight = document.createElement('div');
+        var frozenLeftContainer = document.createElement('div');
+        var frozenRightContainer = document.createElement('div');
 
         var frozenLeft = new Section(self, dynamicCellsClassName, dynamicRowsClassName, dynamicHeaderCellsClassName, dynamicHeaderRowsClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName);
         Object.defineProperty(this, 'frozenLeft', {
@@ -115,66 +115,65 @@ define([
                 return frozenLeft;
             }
         });
-        frozenContainerLeft.appendChild(frozenLeft.element);
+        frozenLeftContainer.appendChild(frozenLeft.element);
         var frozenRight = new Section(self, dynamicCellsClassName, dynamicRowsClassName, dynamicHeaderCellsClassName, dynamicHeaderRowsClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName);
         Object.defineProperty(this, 'frozenRight', {
             get: function () {
                 return frozenRight;
             }
         });
-        frozenContainerRight.appendChild(frozenRight.element);
-        frozenContainer.appendChild(frozenContainerLeft);
-        frozenContainer.appendChild(frozenContainerRight);
+        frozenRightContainer.appendChild(frozenRight.element);
+        frozenContainer.appendChild(frozenLeftContainer);
+        frozenContainer.appendChild(frozenRightContainer);
 
         var bodyContainer = document.createElement('div');
-        var bodyContainerLeft = document.createElement('div');
-        var bodyContainerRight = document.createElement('div');
+        var bodyLeftContainer = document.createElement('div');
+        var bodyRightContainer = document.createElement('div');
         var bodyLeft = new Section(self, dynamicCellsClassName, dynamicRowsClassName, dynamicHeaderCellsClassName, dynamicHeaderRowsClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName);
         Object.defineProperty(this, 'bodyLeft', {
             get: function () {
                 return bodyLeft;
             }
         });
-        bodyContainerLeft.appendChild(bodyLeft.element);
+        bodyLeftContainer.appendChild(bodyLeft.element);
         var bodyRight = new Section(self, dynamicCellsClassName, dynamicRowsClassName, dynamicHeaderCellsClassName, dynamicHeaderRowsClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName);
         Object.defineProperty(this, 'bodyRight', {
             get: function () {
                 return bodyRight;
             }
         });
-        bodyContainerRight.appendChild(bodyRight.element);
-        bodyContainer.appendChild(bodyContainerLeft);
-        bodyContainer.appendChild(bodyContainerRight);
-        Ui.on(bodyContainerRight, 'scroll', function (evt) {
-            bodyLeft.element.style.marginTop = -bodyContainerRight.scrollTop + 'px';
+        bodyRightContainer.appendChild(bodyRight.element);
+        bodyContainer.appendChild(bodyLeftContainer);
+        bodyContainer.appendChild(bodyRightContainer);
+        Ui.on(bodyRightContainer, Ui.Events.SCROLL, function (evt) {
             [
                 headerRight,
                 frozenRight,
                 footerRight
             ].forEach(function (section) {
-                section.element.style.marginLeft = -bodyContainerRight.scrollLeft + 'px';
+                section.element.style.marginLeft = -bodyRightContainer.scrollLeft + 'px';
             });
         });
 
         var footerContainer = document.createElement('div');
-        var footerContainerLeft = document.createElement('div');
-        var footerContainerRight = document.createElement('div');
+        var footerLeftContainer = document.createElement('div');
+        var footerRightContainer = document.createElement('div');
         var footerLeft = new Section(self, dynamicCellsClassName, dynamicRowsClassName, dynamicHeaderCellsClassName, dynamicHeaderRowsClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName);
         Object.defineProperty(this, 'footerLeft', {
             get: function () {
                 return footerLeft;
             }
         });
-        footerContainerLeft.appendChild(footerLeft.element);
+        footerLeftContainer.appendChild(footerLeft.element);
         var footerRight = new Section(self, dynamicCellsClassName, dynamicRowsClassName, dynamicHeaderCellsClassName, dynamicHeaderRowsClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName);
         Object.defineProperty(this, 'footerRight', {
             get: function () {
                 return footerRight;
             }
         });
-        footerContainerRight.appendChild(footerRight.element);
-        footerContainer.appendChild(footerContainerLeft);
-        footerContainer.appendChild(footerContainerRight);
+        footerRightContainer.appendChild(footerRight.element);
+        footerContainer.appendChild(footerLeftContainer);
+        footerContainer.appendChild(footerRightContainer);
         footerContainer.style.display = 'none';
 
         var columnNodes = [];
@@ -185,8 +184,11 @@ define([
                 return columnsFacade;
             }
         });
+        var sortedColumns = [];
         var headerRowsHeight = 30;
         var rowsHeight = 30;
+        var renderingThrottle = 0; // No throttling
+        var renderingPadding = 0; // No padding
         var showHorizontalLines = true;
         var showVerticalLines = true;
         var showOddRowsInOtherColor = true;
@@ -227,17 +229,17 @@ define([
         shell.className = 'p-widget p-grid-shell';
 
         headerContainer.className = 'p-grid-section-header';
-        headerContainerLeft.className = 'p-grid-section-header-left';
-        headerContainerRight.className = 'p-grid-section-header-right';
+        headerLeftContainer.className = 'p-grid-section-header-left';
+        headerRightContainer.className = 'p-grid-section-header-right';
         frozenContainer.className = 'p-grid-section-frozen';
-        frozenContainerLeft.className = 'p-grid-section-frozen-left';
-        frozenContainerRight.className = 'p-grid-section-frozen-right';
+        frozenLeftContainer.className = 'p-grid-section-frozen-left';
+        frozenRightContainer.className = 'p-grid-section-frozen-right';
         bodyContainer.className = 'p-grid-section-body';
-        bodyContainerLeft.className = 'p-grid-section-body-left';
-        bodyContainerRight.className = 'p-grid-section-body-right';
+        bodyLeftContainer.className = 'p-grid-section-body-left';
+        bodyRightContainer.className = 'p-grid-section-body-right';
         footerContainer.className = 'p-grid-section-footer';
-        footerContainerLeft.className = 'p-grid-section-footer-left';
-        footerContainerRight.className = 'p-grid-section-footer-right';
+        footerLeftContainer.className = 'p-grid-section-footer-left';
+        footerRightContainer.className = 'p-grid-section-footer-right';
 
         columnsChevron.className = 'p-grid-columns-chevron';
 
@@ -579,6 +581,24 @@ define([
                     bodyLeft.rowsHeight = rowsHeight;
                     bodyRight.rowsHeight = rowsHeight;
                 }
+            }
+        });
+        Object.defineProperty(this, 'renderingThrottle', {
+            get: function () {
+                return renderingThrottle;
+            },
+            set: function (aValue) {
+                renderingThrottle = aValue;
+                bodyRight.renderingThrottle = renderingThrottle;
+            }
+        });
+        Object.defineProperty(this, 'renderingPadding', {
+            get: function () {
+                return renderingPadding;
+            },
+            set: function (aValue) {
+                renderingPadding = aValue;
+                bodyRight.renderingPadding = renderingPadding;
             }
         });
 
@@ -1100,12 +1120,16 @@ define([
             if (arguments.length < 1)
                 needRedraw = true;
             frozenContainer.style.display = frozenRows > 0 ? '' : 'none';
-            frozenLeft.setRange(0, frozenRows, needRedraw);
-            frozenRight.setRange(0, frozenRows, needRedraw);
+            frozenLeft.setDataRange(0, frozenRows, needRedraw);
+            frozenRight.setDataRange(0, frozenRows, needRedraw);
 
             bodyContainer.style.display = sortedRows.length - frozenRows > 0 ? '' : 'none';
-            bodyLeft.setRange(frozenRows, sortedRows.length, needRedraw);
-            bodyRight.setRange(frozenRows, sortedRows.length, needRedraw);
+            bodyLeft.setDataRange(frozenRows, sortedRows.length, needRedraw);
+            bodyRight.setDataRange(frozenRows, sortedRows.length, needRedraw);
+            bodyRight.onDrawBody = function (rendering) {
+                bodyLeft.setDataRange(rendering.dataStart, rendering.dataEnd);
+                bodyLeft.element.style.marginTop = -rendering.scrolled + 'px';
+            };
         }
 
         function updateSectionsWidth() {
@@ -1179,6 +1203,7 @@ define([
             }
             clearHeaders(columnNodes);
             columnsFacade = [];
+            sortedColumns = [];
             for (var i = getColumnsCount() - 1; i >= 0; i--) {
                 var toDel = getColumn(i);
                 var column = toDel;
@@ -1232,10 +1257,10 @@ define([
                 addColumnToSections(leaf.column);
             });
             [
-                headerContainerLeft,
-                frozenContainerLeft,
-                bodyContainerLeft,
-                footerContainerLeft
+                headerLeftContainer,
+                frozenLeftContainer,
+                bodyLeftContainer,
+                footerLeftContainer
             ].forEach(function (section) {
                 section.style.display = frozenColumns > 0 ? '' : 'none';
             });
@@ -1268,7 +1293,7 @@ define([
                 columnsMenu = null;
             }
         }
-        
+
         function removeColumnNode(aNode) {
             closeColumnMenu();
             var nodeIndex = columnNodes.indexOf(aNode);
@@ -1523,6 +1548,49 @@ define([
             }
         });
 
+        function addSortedColumn(column) {
+            var idx = sortedColumns.indexOf(column);
+            if (idx === -1) {
+                sortedColumns.push(column);
+            }
+            sort();
+        }
+        Object.defineProperty(this, 'addSortedColumn', {
+            get: function () {
+                return addSortedColumn;
+            }
+        });
+
+        function removeSortedColumn(column) {
+            var idx = sortedColumns.indexOf(column);
+            if (idx !== -1) {
+                sortedColumns.splice(idx, 1);
+            }
+            sort();
+        }
+        Object.defineProperty(this, 'removeSortedColumn', {
+            get: function () {
+                return removeSortedColumn;
+            }
+        });
+
+        function unsort(apply) {
+            if (arguments.length < 1)
+                apply = true;
+            sortedColumns = [];
+            columnsFacade.forEach(function (column) {
+                column.unsort(false);
+            });
+            if (apply) {
+                applyRows(true);
+            }
+        }
+        Object.defineProperty(this, 'unsort', {
+            get: function () {
+                return unsort;
+            }
+        });
+
         function regenerateFront() {
             var rows = discoverRows();
             if (isTreeConfigured()) {
@@ -1549,14 +1617,7 @@ define([
             if (arguments.length < 1)
                 needRedraw = true;
             regenerateFront();
-            var sortedColumns = 0;
-            for (var c = 0; c < getColumnsCount(); c++) {
-                var column = getColumn(c);
-                if (column.comparator) {
-                    sortedColumns++;
-                }
-            }
-            if (sortedColumns > 0) {
+            if (sortedColumns.length > 0) {
                 sortedRows.sort(function (o1, o2) {
                     if (isTreeConfigured() && getParentOf(o1) !== getParentOf(o2)) {
                         var path1 = buildPathTo(o1);
@@ -1579,10 +1640,10 @@ define([
                     }
                     var res = 0;
                     var index = 0;
-                    while (res === 0 && index < getColumnsCount()) {
-                        var column = getColumn(index++);
+                    while (res === 0 && index < sortedColumns.length) {
+                        var column = sortedColumns[index++];
                         if (column.comparator) {
-                            res = column.comparator(o1, o2);
+                            res = column.comparator.compare(o1, o2);
                         }
                     }
                     return res;
@@ -1600,22 +1661,6 @@ define([
                 redraw();
             }
         }
-
-        function unsort(needRedraw) {
-            if (arguments.length < 1)
-                needRedraw = true;
-            for (var i = 0; i < getColumnsCount(); i++) {
-                var column = getColumn(i);
-                column.unsort(false);
-            }
-            regenerateFront(needRedraw);
-        }
-
-        Object.defineProperty(this, 'unsort', {
-            get: function () {
-                return unsort;
-            }
-        });
 
         var tabIndex = 0;
 

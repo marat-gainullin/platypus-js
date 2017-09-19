@@ -89,18 +89,21 @@
     }
 
     function severe(message) {
-        if (console)
-            console.log('SEVERE ' + message);
+        if (console){
+            console.error('SEVERE ' + message);
+        }
     }
 
     function info(message) {
-        if (console)
-            console.log('INFO ' + message);
+        if (console){
+            console.info('INFO ' + message);
+        }
     }
 
     function warning(message) {
-        if (console)
-            console.log('WARNING ' + message);
+        if (console){
+            console.warn('WARNING ' + message);
+        }
     }
 
     function fireStarted(anItemName) {

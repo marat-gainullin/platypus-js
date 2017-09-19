@@ -1,10 +1,12 @@
 /* global Infinity */
 define([
     '../../id',
-    '../bound'
+    '../bound',
+    '../path-comparator'
 ], function (
         Id,
-        Bound
+        Bound,
+        PathComparator
         ) {
 // TODO: Check tree expandable cell decorations like left paddnig according to deepness and plus / minus icon and open / closed folder icons
     function Column(node) {
@@ -112,6 +114,9 @@ define([
         Object.defineProperty(this, 'comparator', {
             get: function () {
                 return comparator;
+            },
+            set: function(aValue){
+                comparator = aValue;
             }
         });
 
@@ -120,27 +125,42 @@ define([
                 fireEvent = true;
             comparator = new PathComparator(sortField ? sortField : field, true);
             if (fireEvent) {
-                grid.sort();
+                grid.addSortedColumn(self);
             }
         }
+        Object.defineProperty(this, 'sort', {
+            get: function () {
+                return sort;
+            }
+        });
 
         function sortDesc(fireEvent) {
             if (arguments.length < 1)
                 fireEvent = true;
             comparator = new PathComparator(sortField ? sortField : field, false);
             if (fireEvent) {
-                grid.sort();
+                grid.addSortedColumn(self);
             }
         }
+        Object.defineProperty(this, 'sortDesc', {
+            get: function () {
+                return sortDesc;
+            }
+        });
 
         function unsort(fireEvent) {
             if (arguments.length < 1)
                 fireEvent = true;
             comparator = null;
             if (fireEvent) {
-                grid.sort();
+                grid.removeSortedColumn(self);
             }
         }
+        Object.defineProperty(this, 'unsort', {
+            get: function () {
+                return unsort;
+            }
+        });
 
         Object.defineProperty(this, 'field', {
             get: function () {

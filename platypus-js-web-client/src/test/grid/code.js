@@ -284,6 +284,7 @@ describe('Grid Api', function () {
 
     var samples = [];
     (function () {
+        var moment = new Date();
         var dataSize = 10;
         while (samples.length < dataSize) {
             samples.push({
@@ -291,7 +292,7 @@ describe('Grid Api', function () {
                 check: samples.length % 2 === 0,
                 radio: false,
                 name: 'title' + samples.length,
-                birth: new Date(),
+                birth: new Date(moment.valueOf() + samples.length * 10),
                 payed: true
             });
         }
@@ -311,7 +312,7 @@ describe('Grid Api', function () {
                 CheckBoxColumnNode,
                 RadioButtonColumnNode) {
             var instance = new Grid();
-            instance.width = instance.height = 400;
+            instance.width = instance.height = 250;
             instance.frozenRows = 2;
             document.body.appendChild(instance.element);
 

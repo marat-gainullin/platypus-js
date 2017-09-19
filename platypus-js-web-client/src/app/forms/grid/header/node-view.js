@@ -34,6 +34,29 @@ define([
         var moveHintRight = document.createElement('div');
         moveHintRight.className = 'p-grid-column-move-hint-right';
 
+        Ui.on(th, Ui.Events.CLICK, function (event) {
+            function checkOthers(){
+                if (!event.ctrlKey) {
+                    column.grid.unsort(false);
+                }                
+            }
+            if (event.button === 0) {
+                var column = viewColumnNode.column;
+                if (viewColumnNode.leaf) {
+                    if (!column.comparator) {
+                        checkOthers();
+                        column.sort();
+                    } else if (column.comparator.ascending) {
+                        checkOthers();
+                        column.sortDesc();
+                    } else {
+                        checkOthers();
+                        column.unsort();
+                    }
+                }
+            }
+        });
+
         (function () {
             var mouseDownAtX = null;
             var mouseDownWidth = null;

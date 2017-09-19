@@ -37,7 +37,6 @@ define([
                 return self.width;
             }
         });
-
     }
     extend(CheckBoxServiceColumn, Column);
     return CheckBoxServiceColumn;

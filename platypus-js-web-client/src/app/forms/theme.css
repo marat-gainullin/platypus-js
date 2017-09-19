@@ -21,7 +21,7 @@
     top: 0px;
     margin-top: -6px;
     margin-left: -5px;
-    border: 1px solid lightgrey;
+    border: 1px solid lightgray;
     background: white;
     transform: rotate(45deg);
     clip-path: polygon(0 0, 0 100%, 100% 0);
@@ -111,4 +111,26 @@
 
 .p-grid-column-move-target {
     background: bisque;
+}
+
+.p-grid-header-sorted-asc::after,
+.p-grid-header-sorted-desc::after {
+    position: absolute;
+    top: 2px;
+    right: 5px;
+    
+    content: ' ';
+    width: 0px;
+    height: 0px; 
+    
+    border-left: 3px solid transparent;
+    border-right: 3px solid transparent;
+}
+
+.p-grid-header-sorted-asc::after{    
+    border-bottom: 5px solid gray;
+}
+
+.p-grid-header-sorted-desc::after {
+    border-top: 5px solid gray;
 }

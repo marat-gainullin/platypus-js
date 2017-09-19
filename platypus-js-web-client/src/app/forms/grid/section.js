@@ -1,16 +1,14 @@
 define([
     '../../ui',
     '../../invoke',
-    '../../logger',
     '../key-codes'
 ], function (
         Ui,
         Invoke,
-        Logger,
         KeyCodes
         ) {
 
-    var JS_ROW_NAME = "js-row";
+    var JS_ROW_NAME = 'js-row';
 
     function Section(grid, dynamicCellsClassName,
             dynamicRowsClassName,
@@ -30,14 +28,15 @@ define([
         var draggableRows = false;
         var keyboardSelectedRow = -1;
         var keyboardSelectedColumn = -1;
-        var rowsPerPage = 30; // Only for PageDown or PageUp keys handling
-        var data = []; // Already sorted
-        /**
-         * Already sorted data array indices;
-         */
-        var startRow = 0; // Inclusive
-        var endRow = 0; // Exclusive
         var columns = [];
+        var data = []; // Already sorted data
+        var dataRangeStart = 0; // Inclusive
+        var dataRangeEnd = 0; // Exclusive
+        var renderedRangeStart = 0; // Inclusive
+        var renderedRangeEnd = 0; // Exclusive
+        var renderingThrottle = 0; // No throttling
+        var renderingPadding = 0; // No padding
+        var onDrawBody = null;
 
         var thead;
         recreateHead();
@@ -63,7 +62,6 @@ define([
             }
         });
 
-
         Object.defineProperty(this, 'element', {
             get: function () {
                 return table;
@@ -88,6 +86,30 @@ define([
                     rowsHeight = aValue;
                     redrawBody();
                 }
+            }
+        });
+        Object.defineProperty(this, 'renderingThrottle', {
+            get: function () {
+                return renderingThrottle;
+            },
+            set: function (aValue) {
+                renderingThrottle = aValue;
+            }
+        });
+        Object.defineProperty(this, 'renderingPadding', {
+            get: function () {
+                return renderingPadding;
+            },
+            set: function (aValue) {
+                renderingPadding = aValue;
+            }
+        });
+        Object.defineProperty(this, 'onDrawBody', {
+            get: function () {
+                return onDrawBody;
+            },
+            set: function (aValue) {
+                onDrawBody = aValue;
             }
         });
         Object.defineProperty(this, 'draggableRows', {
@@ -207,7 +229,7 @@ define([
 
         function getViewCell(aRow, aCol) {
             var viewRows = tbody.rows;
-            if (aRow - startRow >= 0 && aRow - startRow < viewRows.length) {
+            if (aRow - renderedRangeStart >= 0 && aRow - renderedRangeStart < viewRows.length) {
                 var viewRow = viewRows[aRow];
                 var cells = viewRow.cells;
                 if (aCol >= 0 && aCol < cells.length) {
@@ -242,6 +264,43 @@ define([
             }
         });
 
+        function setHeaderNodes(aHeader, maxDepth, needRedraw) {
+            if (arguments.length < 2)
+                needRedraw = false;
+            headerNodes = aHeader;
+            headerMaxDepth = maxDepth;
+            if (needRedraw) {
+                redrawHeaders();
+            }
+        }
+        Object.defineProperty(this, 'setHeaderNodes', {
+            get: function () {
+                return setHeaderNodes;
+            }
+        });
+
+        function clearColumnsAndHeader(needRedraw) {
+            if (arguments.length < 1)
+                needRedraw = true;
+            columns.forEach(function (removed) {
+                removed.elements.forEach(function (col) {
+                    col.parentElement.removeChild(col);
+                });
+                removed.elements.splice(0, removed.elements.length);
+                if (removed.columnRule.parentElement)
+                    removed.columnRule.parentElement.removeChild(removed.columnRule);
+            });
+            columns = [];
+            headerNodes = [];
+            if (needRedraw) {
+                redraw();
+            }
+        }
+        Object.defineProperty(this, 'clearColumnsAndHeader', {
+            get: function () {
+                return clearColumnsAndHeader;
+            }
+        });
         function redraw() {
             redrawHeaders();
             redrawBody();
@@ -294,7 +353,12 @@ define([
             tr.className = 'p-grid-header-row ' + dynamicHeaderRowsClassName;
             layer.forEach(function (node) {
                 tr.appendChild(node.view.element);
-                node.view.element.className = 'p-grid-header-cell ' + dynamicHeaderCellsClassName; // reassign classes
+                if (node.column.comparator) {
+                    node.view.element.className = node.column.comparator.ascending ? 'p-grid-header-sorted-asc ' : 'p-grid-header-sorted-desc ';
+                } else {
+                    node.view.element.className = '';
+                }
+                node.view.element.className += 'p-grid-header-cell ' + dynamicHeaderCellsClassName; // reassign classes
                 node.view.element.classList.add(node.column.styleName);
                 Array.prototype.push.apply(children, node.children);
             });
@@ -309,27 +373,54 @@ define([
             table.insertBefore(tbody, tfoot);
         }
 
-        function redrawBody() {
-            recreateBody();
-            drawBody();
+        function drawBody() {
+            var rowsCount = dataRangeEnd - dataRangeStart;
+
+            var viewportHeight = table.parentElement.clientHeight;
+            var contentHeight = rowsCount * rowsHeight;
+            var topPadding = Math.floor(viewportHeight * renderingPadding);
+            topPadding = Math.max(topPadding, 0);
+            var bottomPadding = Math.floor(viewportHeight * renderingPadding);
+            bottomPadding = Math.max(bottomPadding, 0);
+
+            var startY = table.parentElement.scrollTop - topPadding;
+            startY = Math.max(startY, 0);
+            var startRenderedRow = Math.floor(startY / rowsHeight);
+
+            var endY = table.parentElement.scrollTop + viewportHeight + bottomPadding;
+            endY = Math.min(endY, contentHeight - 1);
+            var endRenderedRow = Math.floor(endY / rowsHeight) + 1; // Range is right exclusive 
+            endRenderedRow = Math.min(endRenderedRow, rowsCount);
+
+            var renderedRowsCount = endRenderedRow - startRenderedRow;
+            var fillerHeight = rowsHeight * (rowsCount - renderedRowsCount);
+            bodyFiller.style.height = fillerHeight + 'px';
+            bodyFiller.style.display = fillerHeight === 0 ? 'none' : '';
+
+            renderRange(startRenderedRow + dataRangeStart, endRenderedRow + dataRangeStart);
+
+            table.style.top = (startRenderedRow * rowsHeight) + 'px';
+            if (onDrawBody)
+                onDrawBody({
+                    dataStart: startRenderedRow + dataRangeStart,
+                    dataEnd: endRenderedRow + dataRangeStart,
+                    scrolled: table.parentElement.scrollTop - startRenderedRow * rowsHeight
+                });
         }
 
+        function redrawBody() {
+            renderedRangeStart = renderedRangeEnd = 0;
+            drawBody();
+        }
         Object.defineProperty(this, 'redrawBody', {
             get: function () {
                 return redrawBody;
             }
         });
 
-        function drawBody() {
-            if (columns.length > 0) {
-                drawBodyPortion(startRow, endRow);
-            }
-        }
 
         function drawBodyPortion(start, end) {
-            if (end - start > 0) {
-                if (!bodyFiller.parentElement)
-                    table.parentElement.appendChild(bodyFiller);
+            if (end - start > 0 && columns.length > 0) {
                 for (var i = start; i < end; i++) {
                     var dataRow = data[i];
                     var viewRow = document.createElement('tr');
@@ -345,7 +436,7 @@ define([
                     if (grid.isSelected(dataRow))
                         viewRow.classList.add('p-grid-selected-row');
                     viewRow[JS_ROW_NAME] = dataRow;
-                    if (i < startRow) {
+                    if (i < renderedRangeStart) {
                         // insertFirst ...
                         if (tbody.firstElementChild)
                             tbody.insertBefore(viewRow, tbody.firstElementChild);
@@ -365,56 +456,76 @@ define([
                         column.render(i, dataRow, viewCell);
                     }
                 }
-                var rowSpace = endRow - startRow;
-                var renderedRowPortion = end - start;
-                var fillerHeight = rowsHeight * (data ? rowSpace - renderedRowPortion : 0);
-                bodyFiller.style.height = fillerHeight + 'px';
-                bodyFiller.style.display = fillerHeight === 0 ? 'none' : '';
             }
         }
 
-        function setRange(start, end, needRedraw) {
+        var throttle = (function () {
+            var watchdog = null;
+            function throttle(action, timeout) {
+                if (timeout < 1) // ms
+                    action();
+                else {
+                    function invoked() {
+                        watchdog = null;
+                        action();
+                    }
+                    if (!watchdog) {
+                        Invoke.delayed(timeout, invoked);
+                        watchdog = invoked;
+                    }
+                }
+            }
+            return throttle;
+        }());
+
+        function setDataRange(start, end, needRedraw) {
             if (arguments.length < 3)
                 needRedraw = true;
-            startRow = start;
-            endRow = end;
+            if (!bodyFiller.parentElement) {
+                table.parentElement.appendChild(bodyFiller);
+                Ui.on(table.parentElement, Ui.Events.SCROLL, function (event) {
+                    throttle(drawBody, renderingThrottle);
+                });
+            }
+            dataRangeStart = start;
+            dataRangeEnd = end;
             if (needRedraw) {
                 redrawBody();
             }
         }
-        Object.defineProperty(this, 'setRange', {
+        Object.defineProperty(this, 'setDataRange', {
             get: function () {
-                return setRange;
+                return setDataRange;
             }
         });
 
-        function shiftRange(aStartRow, aEndRow) {
-            if (aStartRow >= endRow || aEndRow < startRow) {
-                setRange(aStartRow, aEndRow);
-            } else {
-                if (aStartRow < startRow) {
-                    drawBodyPortion(aStartRow, startRow);
-                } else if (aStartRow > startRow) {
-                    for (var i1 = startRow; i1 < aStartRow; i1++) {
-                        tbody.removeChild(tbody.rows[0]);
+        function renderRange(start, end) {
+            if (start !== renderedRangeStart || end !== renderedRangeEnd) {
+                if (start >= renderedRangeEnd || end < renderedRangeStart) {
+                    recreateBody();
+                    renderedRangeStart = start;
+                    renderedRangeEnd = end;
+                    drawBodyPortion(renderedRangeStart, renderedRangeEnd);
+                } else {
+                    if (start < renderedRangeStart) {
+                        drawBodyPortion(start, renderedRangeStart);
+                    } else if (start > renderedRangeStart) {
+                        for (var i1 = renderedRangeStart; i1 < start; i1++) {
+                            tbody.removeChild(tbody.rows[0]);
+                        }
                     }
-                }
-                startRow = aStartRow;
-                if (aEndRow < endRow) {
-                    for (var i2 = endRow - 1; i2 >= aEndRow; i2--) {
-                        tbody.removeChild(tbody.rows[tbody.rows.length - 1]);
+                    renderedRangeStart = start;
+                    if (end < renderedRangeEnd) {
+                        for (var i2 = renderedRangeEnd - 1; i2 >= end; i2--) {
+                            tbody.removeChild(tbody.rows[tbody.rows.length - 1]);
+                        }
+                    } else if (end > renderedRangeEnd) {
+                        drawBodyPortion(renderedRangeEnd, end);
                     }
-                } else if (aEndRow > endRow) {
-                    drawBodyPortion(endRow, aEndRow);
+                    renderedRangeEnd = end;
                 }
-                endRow = aEndRow;
             }
         }
-        Object.defineProperty(this, 'shiftRange', {
-            get: function () {
-                return shiftRange;
-            }
-        });
 
         function recreateFoot() {
             if (tfoot && tfoot.parentElement)
@@ -438,72 +549,36 @@ define([
             }
         }
 
-        function redrawRow(index) {
-            if (index - startRow >= 0 && index - startRow < tbody.rows.length) {
-                var viewRow = tbody.rows[index - startRow];
-                var dataRow = data[index];
-                for (var c = 0; c < columns.length; c++) {
-                    var column = columns[c];
-                    var viewCell = viewRow.cells[c];
-                    viewCell.className = 'p-grid-cell ' + dynamicCellsClassName + ' ' + column.styleName;
-                    column.render(index, dataRow, viewCell);
-                }
-            } // if the row is not rendered then we have nothing to do
-        }
-
-        function redrawColumn(index) {
-            if (index >= 0 && index < columns.length) {
-                var column = columns[index];
-                for (var i = startRow; i < endRow; i++) {
-                    var dataRow = data[i];
-                    var viewRow = tbody.rows[i - startRow];
-                    var viewCell = viewRow.cells[index];
-                    viewCell.className = 'p-grid-cell ' + dynamicCellsClassName + ' ' + column.styleName;
-                    while (viewCell.firstElementChild) {
-                        viewCell.removeChild(viewCell.firstElementChild);
-                    }
-                    column.render(i, dataRow, viewCell);
-                }
-            }
-        }
-
-        function setHeaderNodes(aHeader, maxDepth, needRedraw) {
-            if (arguments.length < 2)
-                needRedraw = false;
-            headerNodes = aHeader;
-            headerMaxDepth = maxDepth;
-            if (needRedraw) {
-                redrawHeaders();
-            }
-        }
-        Object.defineProperty(this, 'setHeaderNodes', {
-            get: function () {
-                return setHeaderNodes;
-            }
-        });
-
-        function clearColumnsAndHeader(needRedraw) {
-            if (arguments.length < 1)
-                needRedraw = true;
-            columns.forEach(function (removed) {
-                removed.elements.forEach(function (col) {
-                    col.parentElement.removeChild(col);
-                });
-                removed.elements.splice(0, removed.elements.length);
-                if (removed.columnRule.parentElement)
-                    removed.columnRule.parentElement.removeChild(removed.columnRule);
-            });
-            columns = [];
-            headerNodes = [];
-            if (needRedraw) {
-                redraw();
-            }
-        }
-        Object.defineProperty(this, 'clearColumnsAndHeader', {
-            get: function () {
-                return clearColumnsAndHeader;
-            }
-        });
+        /*
+         function redrawRow(index) {
+         if (index - startRow >= 0 && index - startRow < tbody.rows.length) {
+         var viewRow = tbody.rows[index - startRow];
+         var dataRow = data[index];
+         for (var c = 0; c < columns.length; c++) {
+         var column = columns[c];
+         var viewCell = viewRow.cells[c];
+         viewCell.className = 'p-grid-cell ' + dynamicCellsClassName + ' ' + column.styleName;
+         column.render(index, dataRow, viewCell);
+         }
+         } // if the row is not rendered then we have nothing to do
+         }
+         
+         function redrawColumn(index) {
+         if (index >= 0 && index < columns.length) {
+         var column = columns[index];
+         for (var i = startRow; i < endRow; i++) {
+         var dataRow = data[i];
+         var viewRow = tbody.rows[i - startRow];
+         var viewCell = viewRow.cells[index];
+         viewCell.className = 'p-grid-cell ' + dynamicCellsClassName + ' ' + column.styleName;
+         while (viewCell.firstElementChild) {
+         viewCell.removeChild(viewCell.firstElementChild);
+         }
+         column.render(i, dataRow, viewCell);
+         }
+         }
+         }
+         */
     }
     return Section;
 });

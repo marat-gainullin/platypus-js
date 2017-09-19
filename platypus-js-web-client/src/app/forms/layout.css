@@ -497,6 +497,7 @@
 .p-grid-section{
     border-collapse: collapse;
     table-layout: fixed;
+    position: relative;
 }
 
 .p-grid-row,

@@ -13,58 +13,58 @@ define(function () {
     }
 
     var module = {};
-    Object.defineProperty(module, "config", {
+    Object.defineProperty(module, 'config', {
         value: function (aMessage) {
             if (console) {
-                console.log(date() + " CONFIG " + aMessage);
+                console.log(date() + ' CONFIG ' + aMessage);
                 messagePrinted(aMessage);
             }
         }
     });
-    Object.defineProperty(module, "severe", {
+    Object.defineProperty(module, 'severe', {
         value: function (aMessage) {
             if (console) {
-                console.log(date() + " SEVERE " + aMessage);
+                console.error(date() + ' SEVERE ' + aMessage);
                 messagePrinted(aMessage);
             }
         }
     });
-    Object.defineProperty(module, "warning", {
+    Object.defineProperty(module, 'warning', {
         value: function (aMessage) {
             if (console) {
-                console.log(date() + " WARNING " + aMessage);
+                console.warn(date() + ' WARNING ' + aMessage);
                 messagePrinted(aMessage);
             }
         }
     });
-    Object.defineProperty(module, "info", {
+    Object.defineProperty(module, 'info', {
         value: function (aMessage) {
             if (console) {
-                console.log(date() + " INFO " + aMessage);
+                console.info(date() + ' INFO ' + aMessage);
                 messagePrinted(aMessage);
             }
         }
     });
-    Object.defineProperty(module, "fine", {
+    Object.defineProperty(module, 'fine', {
         value: function (aMessage) {
             if (console) {
-                console.log(date() + " FINE " + aMessage);
+                console.log(date() + ' FINE ' + aMessage);
                 messagePrinted(aMessage);
             }
         }
     });
-    Object.defineProperty(module, "finer", {
+    Object.defineProperty(module, 'finer', {
         value: function (aMessage) {
             if (console) {
-                console.log(date() + " FINER " + aMessage);
+                console.log(date() + ' FINER ' + aMessage);
                 messagePrinted(aMessage);
             }
         }
     });
-    Object.defineProperty(module, "finest", {
+    Object.defineProperty(module, 'finest', {
         value: function (aMessage) {
             if (console) {
-                console.log(date() + " FINEST " + aMessage);
+                console.log(date() + ' FINEST ' + aMessage);
                 messagePrinted(aMessage);
             }
         }
