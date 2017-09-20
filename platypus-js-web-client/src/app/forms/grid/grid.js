@@ -17,10 +17,8 @@ define([
     '../menu/menu',
     '../menu/check-box-menu-item',
     './section',
-    './columns/column-drag',
     './header/analyzer',
     './header/splitter',
-    './header/node-view',
     './columns/marker-service-column',
     './columns/check-box-service-column',
     './columns/radio-button-service-column'
@@ -42,10 +40,8 @@ define([
         Menu,
         CheckBoxMenuItem,
         Section,
-        ColumnDrag,
         HeaderAnalyzer,
         HeaderSplitter,
-        NodeView,
         MarkerServiceColumn,
         CheckBoxServiceColumn,
         RadioButtonServiceColumn
@@ -54,10 +50,6 @@ define([
 //public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObject>, HasSelectionLead, HasOnRender, HasBinding, 
 //        Focusable, HasFocusHandlers, HasBlurHandlers,
 //        HasKeyDownHandlers, HasKeyPressHandlers, HasKeyUpHandlers {
-
-    var RULER_STYLE = "p-grid-ruler";
-    var COLUMN_PHANTOM_STYLE = "p-grid-column-phantom";
-    var MINIMUM_COLUMN_WIDTH = 15;
 
     function Grid() {
         var shell = document.createElement('div');
@@ -208,10 +200,12 @@ define([
         var frozenRows = 0;
         var parentField = null;
         var childrenField = null;
+        var indent = 20;
         //
         var data = null; // bounded data. this is not rows source. rows source is data['field' property path]
         var sortedRows = []; // rows in view. subject of sorting. subject of collapse / expand in tree.
         var expandedRows = new Set();
+        var depths = new Map();
         var field = null;
         var boundToData = null;
         var boundToElements = null;
@@ -226,7 +220,7 @@ define([
         var insertable = true;
         var draggableRows = false;
 
-        shell.className = 'p-widget p-grid-shell';
+        shell.className = 'p-widget p-grid-shell p-scroll p-vertical-scroll-filler p-horizontal-scroll-filler';
 
         headerContainer.className = 'p-grid-section-header';
         headerLeftContainer.className = 'p-grid-section-header-left';
@@ -284,17 +278,27 @@ define([
                     }());
                 }
             }
+            function showColumnsMenu(event) {
+                columnsMenu = new Menu();
+                fillColumnsMenu(headerLeft, columnsMenu);
+                fillColumnsMenu(headerRight, columnsMenu);
+                Ui.startMenuSession(columnsMenu);
+                var pageX = 'pageX' in event ? event.pageX : event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                var pageY = 'pageY' in event ? event.pageY : event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+                columnsMenu.showAt(pageX, pageY);
+            }
             Ui.on(columnsChevron, Ui.Events.CLICK, function (event) {
                 if (columnsMenu) {
                     columnsMenu.close();
                     columnsMenu = null;
                 } else {
-                    columnsMenu = new Menu();
-                    fillColumnsMenu(headerLeft, columnsMenu);
-                    fillColumnsMenu(headerRight, columnsMenu);
-                    Ui.startMenuSession(columnsMenu);
-                    columnsMenu.showRelativeTo(columnsChevron);
+                    showColumnsMenu(event);
                 }
+            });
+            Ui.on(columnsChevron, Ui.Events.CONTEXTMENU, function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                showColumnsMenu(event);
             });
         }());
 
@@ -721,6 +725,11 @@ define([
 
         Object.defineProperty(this, 'rows', {
             get: function () {
+                return discoverRows();
+            }
+        });
+        Object.defineProperty(this, 'viewRows', {
+            get: function () {
                 return sortedRows;
             }
         });
@@ -801,6 +810,15 @@ define([
             redrawQueued = callredraw;
         }
 
+        function depthOf(item) {
+            return isTreeConfigured() ? depths.get(item) : 0;
+        }
+        Object.defineProperty(this, 'depthOf', {
+            get: function () {
+                return depthOf;
+            }
+        });
+
         function isExpanded(anElement) {
             return isTreeConfigured() && expandedRows.has(anElement);
         }
@@ -868,6 +886,11 @@ define([
         function isLeaf(anElement) {
             return !hasRowChildren(anElement);
         }
+        Object.defineProperty(this, 'isLeaf', {
+            get: function () {
+                return isLeaf;
+            }
+        });
 
         function hasRowChildren(parent) {
             var children = findChildren(parent);
@@ -891,7 +914,8 @@ define([
         }
 
         function getParentOf(anElement) {
-            return anElement[parentField];
+            var parent = anElement[parentField];
+            return parent == null ? null : parent; // undefined -> null
         }
 
         function getChildrenOf(anElement) {
@@ -1089,8 +1113,21 @@ define([
                     var isTree = isTreeConfigured();
                     if (wasTree !== isTree) {
                         expandedRows.clear();
-                        applyRows(true);
+                        applyRows(false);
+                        setupRanges(true);
                     }
+                }
+            }
+        });
+
+        Object.defineProperty(this, 'indent', {
+            get: function () {
+                return indent;
+            },
+            set: function (aValue) {
+                if (indent !== aValue) {
+                    indent = aValue;
+                    applyRows(true);
                 }
             }
         });
@@ -1106,22 +1143,23 @@ define([
                     var isTree = isTreeConfigured();
                     if (wasTree !== isTree) {
                         expandedRows.clear();
-                        applyRows(true);
+                        applyRows(false);
+                        setupRanges(true);
                     }
                 }
             }
         });
 
         function isTreeConfigured() {
-            return parentField && childrenField;
+            return !!parentField && !!childrenField;
         }
 
         function setupRanges(needRedraw) {
             if (arguments.length < 1)
                 needRedraw = true;
             frozenContainer.style.display = frozenRows > 0 ? '' : 'none';
-            frozenLeft.setDataRange(0, frozenRows, needRedraw);
-            frozenRight.setDataRange(0, frozenRows, needRedraw);
+            frozenLeft.setDataRange(0, sortedRows.length >= frozenRows ? frozenRows : sortedRows.length, needRedraw);
+            frozenRight.setDataRange(0, sortedRows.length >= frozenRows ? frozenRows : sortedRows.length, needRedraw);
 
             bodyContainer.style.display = sortedRows.length - frozenRows > 0 ? '' : 'none';
             bodyLeft.setDataRange(frozenRows, sortedRows.length, needRedraw);
@@ -1137,7 +1175,7 @@ define([
             for (var c = 0; c < headerLeft.columnsCount; c++) {
                 var lcolumn = headerLeft.getColumn(c);
                 if (lcolumn.visible) {
-                    leftColumnsWidth += lcolumn.width;
+                    leftColumnsWidth += lcolumn.width + lcolumn.padding;
                 }
             }
             [
@@ -1152,7 +1190,7 @@ define([
             for (var c = 0; c < headerRight.columnsCount; c++) {
                 var rcolumn = headerRight.getColumn(c);
                 if (rcolumn.visible) {
-                    rightColumnsWidth += rcolumn.width;
+                    rightColumnsWidth += rcolumn.width + rcolumn.padding;
                 }
             }
             [
@@ -1171,25 +1209,35 @@ define([
         });
 
         var treeIndicatorColumn;
-        function checkTreeIndicatorColumn() {
+        function lookupTreeColumn() {
+            var found = null;
             if (isTreeConfigured()) {
-                if (!treeIndicatorColumn) {
-                    var treeIndicatorIndex = 0;
-                    while (treeIndicatorIndex < getColumnsCount()) {
-                        var indicatorColumn = getColumn(treeIndicatorIndex);
-                        if (indicatorColumn instanceof MarkerServiceColumn || indicatorColumn instanceof RadioButtonServiceColumn
-                                || indicatorColumn instanceof CheckBoxServiceColumn) {
-                            treeIndicatorIndex++;
-                        } else {
-                            treeIndicatorColumn = indicatorColumn;
-                            break;
-                        }
+                var c = 0;
+                while (c < getColumnsCount()) {
+                    var column = getColumn(c);
+                    if (column instanceof MarkerServiceColumn || column instanceof RadioButtonServiceColumn
+                            || column instanceof CheckBoxServiceColumn) {
+                        c++;
+                    } else {
+                        found = column;
+                        break;
                     }
                 }
-            } else {
-                treeIndicatorColumn = null;
+            }
+
+            if (treeIndicatorColumn !== found) {
+                if (treeIndicatorColumn) {
+                    treeIndicatorColumn.padding = 0;
+                }
+                treeIndicatorColumn = found;
             }
         }
+        Object.defineProperty(this, 'treeIndicatorColumn', {
+            get: function () {
+                return treeIndicatorColumn;
+            }
+        });
+
 
         function clearColumnsNodes(needRedraw) {
             if (arguments.length < 1)
@@ -1208,6 +1256,7 @@ define([
                 var toDel = getColumn(i);
                 var column = toDel;
                 if (column === treeIndicatorColumn) {
+                    treeIndicatorColumn.padding = 0;
                     treeIndicatorColumn = null;
                 }
                 column.headers.splice(0, column.headers.length);
@@ -1250,10 +1299,10 @@ define([
 
             var leftLeaves = HeaderAnalyzer.toLeaves(leftHeader);
             var rightLeaves = HeaderAnalyzer.toLeaves(rightHeader);
-            leftLeaves.forEach(function (leaf) { // linear list of columner header nodes
+            leftLeaves.forEach(function (leaf) { // linear list of column header nodes
                 addColumnToSections(leaf.column);
             });
-            rightLeaves.forEach(function (leaf) { // linear list of columner header nodes
+            rightLeaves.forEach(function (leaf) { // linear list of column header nodes
                 addColumnToSections(leaf.column);
             });
             [
@@ -1264,8 +1313,8 @@ define([
             ].forEach(function (section) {
                 section.style.display = frozenColumns > 0 ? '' : 'none';
             });
+            lookupTreeColumn();
             updateSectionsWidth();
-            checkTreeIndicatorColumn();
             redraw();
         }
 
@@ -1315,6 +1364,7 @@ define([
                 var node = columnNodes[nodeIndex];
                 columnNodes.splice(nodeIndex, 1);
                 if (treeIndicatorColumn === node.column) {
+                    treeIndicatorColumn.padding = 0;
                     treeIndicatorColumn = null;
                 }
                 applyColumnsNodes();
@@ -1592,41 +1642,50 @@ define([
         });
 
         function regenerateFront() {
+            depths.clear();
             var rows = discoverRows();
             if (isTreeConfigured()) {
                 sortedRows = [];
-                var children = getChildrenOf(null);
-                Array.prototype.push.apply(sortedRows, children);
-                var i = 0;
-                while (i < sortedRows.length) {
-                    if (expandedRows.has(sortedRows[i])) {
-                        var children1 = getChildrenOf(sortedRows[i]);
-                        var spliceArgs = children1;
-                        spliceArgs.unshift(0);
-                        spliceArgs.unshift(i + 1);
-                        Array.prototype.splice.apply(sortedRows, spliceArgs); // splice(i + 1, 0, flattern -> children1);
+                var roots = getChildrenOf(null);
+                var stack = [];
+                var parents = [null];
+                var maxPathLength = 1;
+                Array.prototype.unshift.apply(stack, roots);
+                while (stack.length > 0) {
+                    var item = stack.shift();
+                    if (parents[parents.length - 1] !== getParentOf(item)) {
+                        parents.pop();
                     }
-                    ++i;
+                    depths.set(item, parents.length);
+                    sortedRows.push(item);
+                    if (expandedRows.has(item)) {
+                        var children = getChildrenOf(item);
+                        if (children.length > 0) {
+                            parents.push(item);
+                            if (maxPathLength < parents.length) {
+                                maxPathLength = parents.length;
+                            }
+                            Array.prototype.unshift.apply(stack, children);
+                        }
+                    }
                 }
+                treeIndicatorColumn.padding = maxPathLength * indent;
             } else {
                 sortedRows = rows.slice(0, rows.length);
             }
         }
 
-        function applyRows(needRedraw) {
-            if (arguments.length < 1)
-                needRedraw = true;
-            regenerateFront();
+        function sortFront() {
             if (sortedColumns.length > 0) {
                 sortedRows.sort(function (o1, o2) {
                     if (isTreeConfigured() && getParentOf(o1) !== getParentOf(o2)) {
                         var path1 = buildPathTo(o1);
                         var path2 = buildPathTo(o2);
-                        if (path2.contains(o1)) {
+                        if (path2.indexOf(o1) !== -1) {
                             // o1 is parent of o2
                             return -1;
                         }
-                        if (path1.contains(o2)) {
+                        if (path1.indexOf(o2) !== -1) {
                             // o2 is parent of o1
                             return 1;
                         }
@@ -1657,6 +1716,14 @@ define([
             });
 
             fireRowsSort();
+        }
+
+        function applyRows(needRedraw) {
+            if (arguments.length < 1)
+                needRedraw = true;
+            lookupTreeColumn();
+            regenerateFront();
+            sortFront();
             if (needRedraw) {
                 redraw();
             }

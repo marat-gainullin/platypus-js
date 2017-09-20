@@ -35,14 +35,14 @@ define([
         moveHintRight.className = 'p-grid-column-move-hint-right';
 
         Ui.on(th, Ui.Events.CLICK, function (event) {
-            function checkOthers(){
+            function checkOthers() {
                 if (!event.ctrlKey) {
                     column.grid.unsort(false);
-                }                
+                }
             }
             if (event.button === 0) {
                 var column = viewColumnNode.column;
-                if (viewColumnNode.leaf) {
+                if (viewColumnNode.leaf && column.sortable) {
                     if (!column.comparator) {
                         checkOthers();
                         column.sort();
@@ -58,6 +58,11 @@ define([
         });
 
         (function () {
+            Ui.on(thResizer, Ui.Events.CLICK, function (event) {
+                if (resizable && event.button === 0) {
+                    event.stopPropagation();
+                }
+            });
             var mouseDownAtX = null;
             var mouseDownWidth = null;
             var onMouseUp = null;

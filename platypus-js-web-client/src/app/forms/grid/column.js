@@ -1,10 +1,12 @@
 /* global Infinity */
 define([
     '../../id',
+    '../../ui',
     '../bound',
     '../path-comparator'
 ], function (
         Id,
+        Ui,
         Bound,
         PathComparator
         ) {
@@ -26,10 +28,10 @@ define([
          */
         var maxWidth = Infinity;
         var width = 75;
+        var padding = 0;
         var readonly = false;
         var visible = true;
-        var sortable = false;
-        var indent = 24;
+        var sortable = true;
         var comparator; // PathComparator
         var headers = []; // multiple instances of NodeView
         var onRender;
@@ -39,7 +41,7 @@ define([
         function regenerateColStyle() {
             columnRule.innerHTML = '.' + columnStyleName + '{' +
                     (visible ? '' : 'display: none;') +
-                    (width == null || width == Infinity ? '' : 'width: ' + width + 'px;') +
+                    (width == null || width == Infinity ? '' : 'width: ' + (width + padding) + 'px;') +
                     (minWidth == null || minWidth == Infinity ? '' : 'min-width: ' + minWidth + 'px;') +
                     (maxWidth == null || maxWidth == Infinity ? '' : 'max-width: ' + maxWidth + 'px;') +
                     '}';
@@ -115,7 +117,7 @@ define([
             get: function () {
                 return comparator;
             },
-            set: function(aValue){
+            set: function (aValue) {
                 comparator = aValue;
             }
         });
@@ -199,6 +201,21 @@ define([
             }
         });
 
+        Object.defineProperty(this, 'padding', {
+            get: function () {
+                return padding;
+            },
+            set: function (aValue) {
+                if (aValue != null && padding !== aValue) {
+                    padding = aValue;
+                    regenerateColStyle();
+                    if (grid) {
+                        grid.updateSectionsWidth();
+                    }
+                }
+            }
+        });
+
         Object.defineProperty(this, 'minWidth', {
             configurable: true,
             get: function () {
@@ -252,9 +269,23 @@ define([
         });
 
         function render(viewIndex, dataRow, viewCell) {
-            var path = grid.buildPathTo(dataRow);
-            var padding = indent * (path.length - 1);
-            viewCell.style.paddingLeft = padding > 0 ? padding + 'px' : '';
+            if (grid.treeIndicatorColumn === self) {
+                var padding = grid.indent * grid.depthOf(dataRow);
+                viewCell.style.paddingLeft = padding > 0 ? padding + 'px' : '';
+                if (!grid.isLeaf(dataRow)) {
+                    viewCell.classList.add(grid.expanded(dataRow) ? 'p-grid-cell-expanded' : 'p-grid-cell-collapsed');
+                }
+                Ui.on(viewCell, Ui.Events.MOUSEDOWN, function (event) {
+                    if (event.button === 0) {
+                        var rect = viewCell.getBoundingClientRect();
+                        if (event.clientX > rect.left + padding - grid.indent &&
+                                event.clientX <= rect.left + padding) {
+                            event.stopPropagation();
+                            grid.toggle(dataRow);
+                        }
+                    }
+                });
+            }
             var value = getValue(dataRow);
             if (value == null) { // null == undefined, null !== undefined
                 viewCell.innerTHML = ''; // No native rendering for null values

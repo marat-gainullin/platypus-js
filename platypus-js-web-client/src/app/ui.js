@@ -352,6 +352,14 @@ define([
             return absoluteTop;
         }
     });
+    function isMobile(){
+        return 'orientation' in window;
+    }
+    Object.defineProperty(module, 'isMobile', {
+        get: function () {
+            return isMobile;
+        }
+    });
 
     (function () {
         var menuSession = null;

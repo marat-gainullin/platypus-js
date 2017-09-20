@@ -12,11 +12,9 @@ define([
 
         function render(viewIndex, dataRow, viewCell) {
             // TODO: Add data cursor and data changes driven data rendering
-            var content = document.createElement('div');
             if (self.grid.cursorProperty && self.grid.rows && self.grid.rows[self.grid.cursorProperty] === dataRow) {
-                content.className = 'p-grid-marker-cell-cursor';
+                viewCell.classList.add('p-grid-cell-cursor');
             }
-            viewCell.appendChild(content);
             /*
              if (value.inserted)
              content.className = 'grid-marker-inserted';

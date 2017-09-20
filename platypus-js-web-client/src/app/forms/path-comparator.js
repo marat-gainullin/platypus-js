@@ -5,16 +5,13 @@ define([
         Bound
         ) {
     function PathComparator(field, ascending) {
-
         if(arguments.length < 2)
             ascending = true;
-
         Object.defineProperty(this, 'ascending', {
             get: function(){
                 return ascending;
             }
         });
-        
         function oCompare(od1, od2){
             if(od1 == null && od2 == null)
                 return 0;
@@ -45,7 +42,6 @@ define([
                 return compare;
             }
         });
-
     }
     return PathComparator;
 });
