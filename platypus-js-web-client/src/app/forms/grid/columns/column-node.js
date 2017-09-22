@@ -22,6 +22,7 @@ define([
         var leavesCount = 0;
         var depthRemainder = 0;
 
+        column.view = new TextField();
         column.editor = new TextField();
 
         function copy() {

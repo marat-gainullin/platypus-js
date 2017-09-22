@@ -322,42 +322,52 @@ define([
         }
 
         function drawBody() {
-            var rowsCount = dataRangeEnd - dataRangeStart;
+            var startRenderedRow;
+            var endRenderedRow;
+            var viewportHeight;
+            function calc() {
+                var rowsCount = dataRangeEnd - dataRangeStart;
 
-            var viewportHeight = table.parentElement.offsetHeight;
-            var contentHeight = rowsCount * rowsHeight;
-            var topPadding = Math.floor(viewportHeight * renderingPadding);
-            topPadding = Math.max(topPadding, 0);
-            var bottomPadding = Math.floor(viewportHeight * renderingPadding);
-            bottomPadding = Math.max(bottomPadding, 0);
+                viewportHeight = table.parentElement.offsetHeight;
+                var contentHeight = rowsCount * rowsHeight;
+                var topPadding = Math.floor(viewportHeight * renderingPadding);
+                topPadding = Math.max(topPadding, 0);
+                var bottomPadding = Math.floor(viewportHeight * renderingPadding);
+                bottomPadding = Math.max(bottomPadding, 0);
 
-            var startY = table.parentElement.scrollTop - topPadding;
-            startY = Math.max(startY, 0);
-            var startRenderedRow = Math.floor(startY / rowsHeight);
+                var startY = table.parentElement.scrollTop - topPadding;
+                startY = Math.max(startY, 0);
+                startRenderedRow = Math.floor(startY / rowsHeight);
 
-            var endY = table.parentElement.scrollTop + viewportHeight + bottomPadding;
-            endY = Math.min(endY, contentHeight - 1);
-            var endRenderedRow = Math.floor(endY / rowsHeight) + 1; // Range is right exclusive 
-            endRenderedRow = Math.min(endRenderedRow, rowsCount);
+                var endY = table.parentElement.scrollTop + viewportHeight + bottomPadding;
+                endY = Math.min(endY, contentHeight - 1);
+                endRenderedRow = Math.ceil(endY / rowsHeight);
+                endRenderedRow = Math.min(endRenderedRow, rowsCount);
 
-            var renderedRowsCount = endRenderedRow - startRenderedRow;
-            var fillerHeight = rowsHeight * (rowsCount - renderedRowsCount);
-            bodyFiller.style.height = fillerHeight + 'px';
-            bodyFiller.style.display = fillerHeight === 0 ? 'none' : '';
+                var renderedRowsCount = endRenderedRow - startRenderedRow;
+                var fillerHeight = rowsHeight * (rowsCount - renderedRowsCount);
+                bodyFiller.style.height = fillerHeight + 'px';
+                bodyFiller.style.display = fillerHeight === 0 ? 'none' : '';
 
-            renderRange(startRenderedRow + dataRangeStart, endRenderedRow + dataRangeStart);
+                renderRange(startRenderedRow + dataRangeStart, endRenderedRow + dataRangeStart);
 
-            table.style.top = (startRenderedRow * rowsHeight) + 'px';
-            if (onDrawBody)
+                table.style.top = (startRenderedRow * rowsHeight) + 'px';
+            }
+            calc();
+            if (viewportHeight !== table.parentElement.offsetHeight) {
+                calc();
+            }
+            if (onDrawBody) {
                 onDrawBody({
                     dataStart: startRenderedRow + dataRangeStart,
                     dataEnd: endRenderedRow + dataRangeStart,
                     scrolled: table.parentElement.scrollTop - startRenderedRow * rowsHeight
                 });
+            }
         }
 
         function redrawBody() {
-            renderedRangeStart = renderedRangeEnd = 0;
+            renderedRangeStart = renderedRangeEnd = -1;
             drawBody();
         }
         Object.defineProperty(this, 'redrawBody', {
@@ -407,6 +417,12 @@ define([
                         }
                         viewRow.appendChild(viewCell);
                         column.render(i, columnsBias + c, dataRow, viewCell);
+                        if (grid.activeEditor && i === grid.focusedRow && grid.activeEditor === column.editor) {
+                            viewCell.appendChild(grid.activeEditor.element);
+                            if (grid.activeEditor.focus) {
+                                grid.activeEditor.focus();
+                            }
+                        }
                     }
                 }
             }

@@ -11,6 +11,7 @@ define([
         var self = this;
 
         this.width = 22;
+        this.readonly = true;
 
         function getValue(dataRow) {
             return dataRow;
@@ -22,6 +23,7 @@ define([
                 self.grid.select(dataRow, true);
                 self.grid.focusCell(viewRowIndex, viewColumnIndex);
             });
+            viewCell.classList.add('p-grid-cell-service');
         }
         Object.defineProperty(this, 'render', {
             get: function () {

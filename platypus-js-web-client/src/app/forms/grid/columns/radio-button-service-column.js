@@ -14,6 +14,7 @@ define([
         var radioGroup = 'p-grid-group-' + Id.generate();
 
         this.width = 22;
+        this.readonly = true;
 
         function getValue(dataRow) {
             return self.grid.isSelected(dataRow);
@@ -31,6 +32,7 @@ define([
                 self.grid.focus();
             };
             viewCell.appendChild(radio);
+            viewCell.classList.add('p-grid-cell-check-box');
         }
         Object.defineProperty(this, 'render', {
             get: function () {

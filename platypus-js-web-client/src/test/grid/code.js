@@ -489,7 +489,7 @@ describe('Grid Api', function () {
             r++;
         }
     }());
-    fit('Rows.Tree', function (done) {
+    it('Rows.Tree', function (done) {
         require([
             'forms/grid/grid',
             'forms/grid/columns/column-node',
@@ -560,7 +560,7 @@ describe('Grid Api', function () {
             expect(instance.frozenRight.columnsCount).toEqual(3);
             expect(instance.bodyRight.columnsCount).toEqual(3);
 
-            //document.body.removeChild(instance.element);
+            document.body.removeChild(instance.element);
             done();
         });
     });
@@ -579,14 +579,78 @@ describe('Grid Api', function () {
             done();
         });
     });
-    it('Editing.Inline', function (done) {
+    fit('Editing.Inline', function (done) {
         require([
-            'logger',
-            'forms/grid/grid'
+            'forms/grid/grid',
+            'forms/grid/columns/column-node',
+            'forms/grid/columns/nodes/order-num-service-node',
+            'forms/grid/columns/nodes/marker-service-node',
+            'forms/grid/columns/nodes/check-box-service-node',
+            'forms/grid/columns/nodes/radio-button-service-node'
         ], function (
-                Logger,
-                Grid) {
+                Grid,
+                ColumnNode,
+                OrderNumServiceColumnNode,
+                MarkerColumnNode,
+                CheckBoxColumnNode,
+                RadioButtonColumnNode) {
             var instance = new Grid();
+            instance.width = instance.height = 300;
+            instance.frozenRows = 2;
+            document.body.appendChild(instance.element);
+
+            var nmb = new OrderNumServiceColumnNode();
+            instance.addColumnNode(nmb);
+            var marker = new MarkerColumnNode();
+            instance.addColumnNode(marker);
+            var check = new CheckBoxColumnNode();
+            instance.addColumnNode(check);
+            var radio = new RadioButtonColumnNode();
+            instance.addColumnNode(radio);
+
+            var semantic = new ColumnNode();
+            semantic.title = 'semantic';
+
+            var name = new ColumnNode();
+            name.field = name.title = 'name';
+
+            semantic.addColumnNode(name);
+            var birth = new ColumnNode();
+            birth.editor = null;
+            birth.field = birth.title = 'birth';
+            birth.width = 170;
+            birth.visible = false;
+            semantic.addColumnNode(birth);
+            var payed = new ColumnNode();
+            payed.field = payed.title = 'payed';
+            semantic.addColumnNode(payed);
+
+            instance.addColumnNode(semantic);
+
+            instance.frozenColumns = 4;
+
+            instance.data = treeSamples;
+            instance.parentField = 'parent';
+            instance.childrenField = 'children';
+
+            birth.sort();
+            birth.sortDesc();
+            birth.unsort();
+            birth.sort();
+            birth.sortDesc();
+            instance.unsort();
+
+            expect(instance.frozenLeft.rowsCount).toEqual(2);
+            expect(instance.frozenRight.rowsCount).toEqual(2);
+            expect(instance.bodyLeft.rowsCount).toEqual(5);// 5 instead of 8 because of virtual nature of grid
+            expect(instance.bodyRight.rowsCount).toEqual(5);
+
+            expect(instance.frozenLeft.columnsCount).toEqual(4);
+            expect(instance.bodyLeft.columnsCount).toEqual(4);
+            expect(instance.frozenRight.columnsCount).toEqual(3);
+            expect(instance.bodyRight.columnsCount).toEqual(3);
+
+            //document.body.removeChild(instance.element);
             done();
         });
     });

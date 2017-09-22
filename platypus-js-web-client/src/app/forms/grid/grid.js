@@ -208,7 +208,6 @@ define([
         var boundToCursor = null;
         var cursorProperty = 'cursor';
         var onRender = null;
-        var activeEditor = null;
         var editable = true;
         var deletable = true;
         var insertable = true;
@@ -426,14 +425,30 @@ define([
                     self.focusedRow = viewRows.length - 1;
                 }
             } else if (event.keyCode === KeyCodes.KEY_F2) {
-                editCell(self.focusedRow, self.focusedColumn);
-            }
-        });
-
-        Ui.on(shell, Ui.Events.KEYUP, function (event) {
-            var rows = discoverRows();
-            if (!activeEditor) {
-                if (event.keyCode === KeyCodes.KEY_DELETE && deletable) {
+                if (self.focusedColumn >= 0 && self.focusedColumn < columnsFacade.length &&
+                        editable && !columnsFacade[self.focusedColumn].readonly) {
+                    if (focusedCell.editor) {
+                        abortEditing();
+                    } else {
+                        editCell(self.focusedRow, self.focusedColumn);
+                    }
+                }
+            } else if (event.keyCode === KeyCodes.KEY_ESCAPE) {
+                abortEditing();
+            } else if (event.keyCode === KeyCodes.KEY_F2 ||
+                    event.keyCode >= KeyCodes.KEY_A && event.keyCode <= KeyCodes.KEY_Z ||
+                    event.keyCode >= KeyCodes.KEY_ZERO && event.keyCode <= KeyCodes.KEY_NINE ||
+                    event.keyCode >= KeyCodes.KEY_NUM_ZERO && event.keyCode <= KeyCodes.KEY_NUM_DIVISION && event.keyCode !== 108
+                    ) {
+                if (self.focusedColumn >= 0 && self.focusedColumn < columnsFacade.length &&
+                        editable && !columnsFacade[self.focusedColumn].readonly) {
+                    if (!focusedCell.editor) {
+                        editCell(self.focusedRow, self.focusedColumn);
+                    }
+                }
+            } else if (event.keyCode === KeyCodes.KEY_DELETE && deletable) {
+                if (!focusedCell.editor) {
+                    var rows = discoverRows();
                     if (viewRows.length > 0) {
                         // calculate some view sugar
                         var lastSelectedViewIndex = -1;
@@ -446,16 +461,18 @@ define([
                         }
                         // actually delete selected elements
                         var deletedAt = -1;
+                        var deleted = [];
                         for (var i = rows.length - 1; i >= 0; i--) {
-                            var row = rows[i];
-                            if (isSelected(row)) {
+                            var item = rows[i];
+                            if (isSelected(item)) {
+                                deleted.push(item);
                                 rows.splice(i, 1);
                                 deletedAt = i;
                             }
                         }
+                        removedItems(deleted);
                         var viewIndexToSelect = lastSelectedViewIndex;
                         if (deletedAt > -1) {
-                            // TODO: Check if Invoke.Later is an option
                             var vIndex = viewIndexToSelect;
                             if (vIndex >= 0 && viewRows.length > 0) {
                                 if (vIndex >= viewRows.length) {
@@ -468,16 +485,18 @@ define([
                             }
                         }
                     }
-                } else if (event.keyCode === KeyCodes.KEY_INSERT && insertable) {
+                }
+            } else if (event.keyCode === KeyCodes.KEY_INSERT && insertable) {
+                if (!focusedCell.editor) {
+                    var rows = discoverRows();
                     var insertAt = -1;
                     var lead = selectionLead;
                     insertAt = rows.indexOf(lead);
                     insertAt++;
                     var elementClass = rows['elementClass'];
-                    var inserted = elementClass ? new elementClass()
-                            : {};
+                    var inserted = elementClass ? new elementClass() : {};
                     rows.splice(insertAt, 0, inserted);
-                    // TODO: Check if Invoke.Later is an option
+                    addedItems([inserted]);
                     goTo(inserted, true);
                 }
             }
@@ -488,11 +507,12 @@ define([
             return rows ? rows : [];
         }
 
-        function removedItems(anArray) {
-            if (!Array.isArray(anArray))
-                anArray = [anArray];
+        function removedItems(items) {
+            if (!Array.isArray(items))
+                items = [items];
             rebindElements();
-            redraw();
+            applyRows(false);
+            setupRanges(true);
         }
 
         Object.defineProperty(this, 'removed', {
@@ -501,11 +521,12 @@ define([
             }
         });
 
-        function addedItems(anArray) {
-            if (!Array.isArray(anArray))
-                anArray = [anArray];
+        function addedItems(items) {
+            if (!Array.isArray(items))
+                items = [items];
             rebindElements();
-            redraw();
+            applyRows(false);
+            setupRanges(true);
         }
 
         Object.defineProperty(this, 'added', {
@@ -514,10 +535,11 @@ define([
             }
         });
 
-        function changedItems(anArray) {
-            if (!Array.isArray(anArray))
-                anArray = [anArray];
-            redraw();
+        function changedItems(items) {
+            if (!Array.isArray(items))
+                items = [items];
+            redrawFrozen();
+            redrawBody();
         }
 
         Object.defineProperty(this, 'changed', {
@@ -553,15 +575,19 @@ define([
             }
         });
 
-        function select(item, needRedraw) {
+        function select(items, needRedraw) {
+            if (!Array.isArray(items))
+                items = [items];
             if (arguments.length < 2)
                 needRedraw = true;
-            selectedRows.add(item);
-            selectionLead = item;
+            items.forEach(function (item) {
+                selectedRows.add(item);
+                selectionLead = item;
+                fireSelected(item);
+            });
             var rows = discoverRows();
             if (cursorProperty)
                 rows[cursorProperty] = selectionLead;
-            fireSelected(item);
             if (needRedraw) {
                 redrawFrozen();
                 redrawBody();
@@ -593,13 +619,18 @@ define([
             }
         });
 
-        function unselect(item, needRedraw) {
+        function unselect(items, needRedraw) {
+            if (!Array.isArray(items))
+                items = [items];
             if (arguments.length < 2)
                 needRedraw = true;
-            if (selectionLead === item) {
-                selectionLead = null;
-            }
-            var res = selectedRows.delete(item);
+            var res = false;
+            items.forEach(function (item) {
+                if (selectionLead === item) {
+                    selectionLead = null;
+                }
+                res = selectedRows.delete(item);
+            });
             fireSelected(null);
             if (needRedraw) {
                 redrawFrozen();
@@ -855,16 +886,15 @@ define([
                     [frozenLeft, frozenRight, bodyLeft, bodyRight].forEach(function (section) {
                         section.draggableRows = aValue;
                     });
+                    redrawFrozen();
+                    redrawBody();
                 }
             }
         });
 
         Object.defineProperty(this, 'activeEditor', {
             get: function () {
-                return activeEditor;
-            },
-            set: function (aWidget) {
-                activeEditor = aWidget;
+                return focusedCell.editor;
             }
         });
 
@@ -1121,26 +1151,28 @@ define([
                 if (field) {
                     boundToData = Bound.observePath(data, field, function (anEvent) {
                         rebind();
-                        redraw();
+                        redrawFrozen();
+                        redrawBody();
                     });
                 }
                 bindElements();
                 bindCursor();
-                applyRows(false);
-                setupRanges(true);
             }
+            applyRows(false);
+            setupRanges(true);
         }
 
         function bindElements() {
             var rows = discoverRows();
             boundToElements = Bound.observeElements(rows, function (anEvent) {
-                redraw();
+                redrawFrozen();
+                redrawBody();
             });
         }
 
         function unbindElements() {
             if (boundToElements) {
-                boundToElements.removeHandler();
+                boundToElements.unlisten();
                 boundToElements = null;
             }
         }
@@ -1154,7 +1186,7 @@ define([
             selectedRows.clear();
             expandedRows.clear();
             if (boundToData) {
-                boundToData.removeHandler();
+                boundToData.unlisten();
                 boundToData = null;
             }
             unbindElements();
@@ -1177,7 +1209,7 @@ define([
 
         function unbindCursor() {
             if (boundToCursor) {
-                boundToCursor.removeHandler();
+                boundToCursor.unlisten();
                 boundToCursor = null;
             }
         }
@@ -1264,8 +1296,9 @@ define([
             if (arguments.length < 1)
                 needRedraw = true;
             frozenContainer.style.display = frozenRows > 0 ? '' : 'none';
-            frozenLeft.setDataRange(0, viewRows.length >= frozenRows ? frozenRows : viewRows.length, needRedraw);
-            frozenRight.setDataRange(0, viewRows.length >= frozenRows ? frozenRows : viewRows.length, needRedraw);
+            var frozenRangeEnd = viewRows.length >= frozenRows ? frozenRows : viewRows.length;
+            frozenLeft.setDataRange(0, frozenRangeEnd, needRedraw);
+            frozenRight.setDataRange(0, frozenRangeEnd, needRedraw);
 
             bodyContainer.style.display = viewRows.length - frozenRows > 0 ? '' : 'none';
             bodyLeft.setDataRange(frozenRows, viewRows.length, needRedraw);
@@ -1579,18 +1612,6 @@ define([
             }
         }
 
-        function redrawRow(index) {
-            frozenLeft.redrawRow(index);
-            frozenRight.redrawRow(index);
-            bodyLeft.redrawRow(index);
-            bodyRight.redrawRow(index);
-        }
-        Object.defineProperty(this, 'redrawRow', {
-            get: function () {
-                return redrawRow;
-            }
-        });
-
         function redraw() {
             headerLeft.redraw();
             headerRight.redraw();
@@ -1699,6 +1720,8 @@ define([
             column: 0
         };
         function focusCell(row, column, needRedraw) {
+            if (arguments.length < 3)
+                needRedraw = true;
             if (row >= 0 && row < viewRows.length ||
                     column >= 0 && column < columnsFacade.length) {
                 if (row >= 0 && row < viewRows.length) {
@@ -1709,12 +1732,6 @@ define([
                 }
                 if (focusedCell.row >= 0 && focusedCell.row < viewRows.length &&
                         focusedCell.column >= 0 && focusedCell.column < columnsFacade.length) {
-                    if (arguments.length < 3)
-                        needRedraw = true;
-                    if (needRedraw) {
-                        redrawFrozen();
-                        redrawBody();
-                    }
                     var cell = frozenLeft.getViewCell(row, column);
                     if (cell) {
                         cell.scrollIntoView();
@@ -1735,8 +1752,18 @@ define([
                             }
                         }
                     }
+                    if (focusedCell.row >= 0 && focusedCell.row < viewRows.length) {
+                        selectionLead = viewRows[focusedCell.row];
+                        setCursorOn(selectionLead, false);
+                    }
+                    if (needRedraw) {
+                        redrawFrozen();
+                        redrawBody();
+                    }
+                    return true;
                 }
             }
+            return false;
         }
         Object.defineProperty(this, 'focusCell', {
             get: function () {
@@ -1763,14 +1790,90 @@ define([
                 }
             }
         });
+        function startEditing() {
+            if (!focusedCell.editor && focusedCell.row >= 0 && focusedCell.row < viewRows.length ||
+                    focusedCell.column >= 0 && focusedCell.column < columnsFacade.length) {
+                var edited = viewRows[focusedCell.row];
+                var column = columnsFacade[focusedCell.column];
+                if (column.editor) {
+                    var editor = column.editor;
+                    editor.value = column.getValue(edited);
+                    focusedCell.editor = editor;
+                    focusedCell.commit = function () {
+                        column.setValue(edited, editor.value);
+                    };
+                    var valueChangeReg = editor.addValueChangeHandler ?
+                            editor.addValueChangeHandler(function (event) {
+                                column.setValue(edited, event.newValue);
+                            })
+                            : null;
+                    var blurReg = editor.addBlurHandler ?
+                            editor.addBlurHandler(function (event) {
+                                completeEditing();
+                            })
+                            : null;
+                    focusedCell.clean = function () {
+                        if (blurReg) {
+                            blurReg.removeHandler();
+                            blurReg = null;
+                        }
+                        if (valueChangeReg) {
+                            valueChangeReg.removeHandler();
+                            valueChangeReg = null;
+                        }
+                        focusedCell.clean = null;
+                    };
+
+                    if (focusedCell.row < frozenRows) {
+                        redrawFrozen();
+                    } else {
+                        redrawBody();
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+        Object.defineProperty(this, 'startEditing', {
+            get: function () {
+                return startEditing;
+            }
+        });
         function editCell(row, column) {
-            if (row >= 0 && row < viewRows.length ||
-                    column >= 0 && column < columnsFacade.length) {
+            if (focusCell(row, column)) {
+                startEditing();
             }
         }
-        Object.defineProperty(this, 'editCell', {
+        function abortEditing() {
+            if (focusedCell.clean) {
+                focusedCell.clean();
+                focusedCell.clean = null;
+            }
+            if (focusedCell.editor) {
+                if (focusedCell.editor.element.parentElement)
+                    focusedCell.editor.element.parentElement.removeChild(focusedCell.editor.element);
+                focusedCell.editor = null;
+                focusedCell.commit = null;
+                redrawFrozen();
+                redrawBody();
+                self.focus();
+            }
+        }
+        Object.defineProperty(this, 'abortEditing', {
             get: function () {
-                return editCell;
+                return abortEditing;
+            }
+        });
+        function completeEditing() {
+            if (focusedCell.commit) {
+                focusedCell.commit();
+                focusedCell.commit = null;
+            }
+            abortEditing();
+        }
+        Object.defineProperty(this, 'completeEditing', {
+            get: function () {
+                return completeEditing;
             }
         });
         function sort() {
@@ -1915,7 +2018,8 @@ define([
             regenerateFront();
             sortFront();
             if (needRedraw) {
-                redraw();
+                redrawFrozen();
+                redrawBody();
             }
         }
 

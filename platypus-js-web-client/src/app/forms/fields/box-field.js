@@ -3,12 +3,16 @@ define([
     '../../invoke',
     '../../extend',
     '../widget',
-    '../events/value-change-event'], function (
+    '../events/value-change-event',
+    '../events/focus-event',
+    '../events/blur-event'], function (
         Ui,
         Invoke,
         extend,
         Widget,
-        ValueChangeEvent) {
+        ValueChangeEvent,
+        FocusEvent,
+        BlurEvent) {
     var ERROR_BUBBLE_OFFSET_PART = 0.2;
     function BoxField(box, shell) {
         if (!box) {
@@ -101,6 +105,55 @@ define([
                 return fireValueChanged;
             }
         });
+        var focusHandlers = new Set();
+        function addFocusHandler(handler) {
+            focusHandlers.add(handler);
+            return {
+                removeHandler: function () {
+                    focusHandlers.delete(handler);
+                }
+            };
+        }
+        Object.defineProperty(this, 'addFocusHandler', {
+            get: function () {
+                return addFocusHandler;
+            }
+        });
+
+        Ui.on(box, Ui.Events.FOCUS, fireFocus);
+        function fireFocus() {
+            var event = new FocusEvent(self);
+            focusHandlers.forEach(function (h) {
+                Invoke.later(function () {
+                    h(event);
+                });
+            });
+        }
+
+        var blurHandlers = new Set();
+        function addBlurHandler(handler) {
+            blurHandlers.add(handler);
+            return {
+                removeHandler: function () {
+                    blurHandlers.delete(handler);
+                }
+            };
+        }
+        Object.defineProperty(this, 'addBlurHandler', {
+            get: function () {
+                return addBlurHandler;
+            }
+        });
+
+        Ui.on(box, Ui.Events.BLUR, fireBlur);
+        function fireBlur() {
+            var event = new BlurEvent(self);
+            blurHandlers.forEach(function (h) {
+                Invoke.later(function () {
+                    h(event);
+                });
+            });
+        }
     }
     extend(BoxField, Widget);
     return BoxField;

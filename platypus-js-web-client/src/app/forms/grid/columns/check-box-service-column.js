@@ -11,6 +11,7 @@ define([
         var self = this;
 
         this.width = 22;
+        this.readonly = true;
 
         function getValue(dataRow) {
             return self.grid.isSelected(dataRow);
@@ -19,7 +20,7 @@ define([
             var checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.checked = self.grid.isSelected(dataRow);
-            Ui.on(checkbox, Ui.Events.CHANGE, function (event){
+            Ui.on(checkbox, Ui.Events.CHANGE, function (event) {
                 if (checkbox.checked) {
                     self.grid.select(dataRow);
                 } else {
@@ -28,6 +29,7 @@ define([
                 self.grid.focus();
             });
             viewCell.appendChild(checkbox);
+            viewCell.classList.add('p-grid-cell-check-box');
         }
         Object.defineProperty(this, 'render', {
             get: function () {

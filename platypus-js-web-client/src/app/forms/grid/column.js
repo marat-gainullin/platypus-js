@@ -10,7 +10,6 @@ define([
         Bound,
         PathComparator
         ) {
-// TODO: Check tree expandable cell decorations like left paddnig according to deepness and plus / minus icon and open / closed folder icons
     function Column(node) {
         var self = this;
         var cols = []; // dom 'col' elements for header,frozen,body and footer sections of the grid
@@ -18,6 +17,7 @@ define([
         var columnStyleName = 'p-grid-column-' + Id.generate();
         var field = null;
         var sortField = null;
+        var view = null;
         var editor = null;
         /**
          * Minimum column width while resizing by a user.
@@ -269,7 +269,11 @@ define([
         });
 
         function render(viewRowIndex, viewColumnIndex, dataRow, viewCell) {
+            var checkbox = null;
             function handleSelection(event) {
+                if (checkbox && !readonly) {
+                    setValue(dataRow, !getValue(dataRow));
+                }
                 if (!event.ctrlKey && !event.metaKey) {
                     self.grid.unselectAll(false);
                 }
@@ -282,35 +286,52 @@ define([
                 if (!grid.isLeaf(dataRow)) {
                     viewCell.classList.add(grid.expanded(dataRow) ? 'p-grid-cell-expanded' : 'p-grid-cell-collapsed');
                 }
-                Ui.on(viewCell, Ui.Events.CLICK, function (event) {
+                function onClick(event) {
                     if (event.button === 0) {
                         var rect = viewCell.getBoundingClientRect();
                         if (event.clientX > rect.left + padding - grid.indent &&
                                 event.clientX <= rect.left + padding) {
                             event.stopPropagation();
+                            if (checkbox && !readonly) {
+                                setValue(dataRow, !getValue(dataRow));
+                            }
                             grid.focusCell(viewRowIndex, viewColumnIndex);
                             grid.toggle(dataRow);
                         } else {
                             handleSelection(event);
                         }
                     }
+                }
+                Ui.on(viewCell, Ui.Events.CLICK, onClick);
+                if(checkbox){
+                    Ui.on(checkbox, Ui.Events.CLICK, onClick);
+                }
+                Ui.on(viewCell, Ui.Events.DBLCLICK, function (event) {
+                    if (event.button === 0) {
+                        handleSelection(event);
+                        self.grid.startEditing();
+                    }
                 });
             } else {
                 Ui.on(viewCell, Ui.Events.CLICK, handleSelection);
+                if(checkbox){
+                    Ui.on(checkbox, Ui.Events.CLICK, handleSelection);
+                }
             }
             var value = getValue(dataRow);
             if (value == null) { // null == undefined, null !== undefined
                 viewCell.innerTHML = ''; // No native rendering for null values
             } else if (typeof (value) === 'boolean') {
-                var checkbox = document.createElement('input');
+                checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.checked = !!value;
                 viewCell.appendChild(checkbox);
+                viewCell.classList.add('p-grid-cell-check-box');
             } else {
                 var html;
-                if (editor) {
-                    editor.value = value;
-                    html = editor.text;
+                if (view) {
+                    view.value = value;
+                    html = view.text;
                 } else if (value instanceof Date) {
                     html = value.toJSON();
                 } else {
@@ -386,13 +407,29 @@ define([
             }
         });
 
+        Object.defineProperty(this, 'view', {
+            get: function () {
+                return view;
+            },
+            set: function (aValue) {
+                if (view !== aValue) {
+                    view = aValue;
+                }
+            }
+        });
         Object.defineProperty(this, 'editor', {
             get: function () {
                 return editor;
             },
             set: function (aValue) {
                 if (editor !== aValue) {
+                    if (editor && editor.element) {
+                        editor.element.classList.remove('p-grid-cell-editor');
+                    }
                     editor = aValue;
+                    if (editor && editor.element) {
+                        editor.element.classList.add('p-grid-cell-editor');
+                    }
                 }
             }
         });

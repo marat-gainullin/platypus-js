@@ -81,6 +81,17 @@
     border-color: lightgray;
 }
 
+.p-grid-columns-chevron {
+    display: inline-block;
+    position: absolute;
+    box-sizing: border-box;
+    right: 0px;
+    top: 0px;
+    width: 10px;
+    bottom: 0px;
+    background-color: lightgray;
+}
+
 .p-grid-column-resizer {
     cursor: ew-resize;
 }
@@ -150,6 +161,7 @@
     border-right: 5px solid transparent;
     border-top: 5px solid gray;
     right: 7px;
+    bottom: 3px;
     margin-left: -5px;
 }
 
@@ -158,6 +170,7 @@
     border-bottom: 5px solid transparent;
     border-left: 5px solid gray;
     right: 10px;
+    bottom: 0px;
 }
 
 .p-grid-cell-cursor::before {
@@ -173,4 +186,9 @@
 
 .p-grid-cell-focused {
     background: #5acaef;
+}
+
+.p-grid-cell-check-box,
+.p-grid-cell-service {
+    text-align: center;
 }

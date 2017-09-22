@@ -11,6 +11,7 @@ define([
         var self = this;
 
         this.width = 22;
+        this.readonly = true;
 
         function render(viewRowIndex, viewColumnIndex, dataRow, viewCell) {
             Ui.on(viewCell, Ui.Events.CLICK, function (event) {
@@ -20,6 +21,7 @@ define([
             if (self.grid.cursorProperty && self.grid.rows && self.grid.rows[self.grid.cursorProperty] === dataRow) {
                 viewCell.classList.add('p-grid-cell-cursor');
             }
+            viewCell.classList.add('p-grid-cell-service');
             /*
              if (value.inserted)
              content.className = 'grid-marker-inserted';
