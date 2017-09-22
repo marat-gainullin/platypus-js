@@ -105,7 +105,7 @@ define([
             },
             set: function (aValue) {
                 if (value !== aValue) {
-                    if (aValue !== null) {
+                    if (aValue != null) {
                         var index = indexOfValue(aValue);
                         if (index !== -1) {
                             box.selectedIndex = index;

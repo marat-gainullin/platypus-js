@@ -29,6 +29,7 @@ define([
         var renderedRangeEnd = 0; // Exclusive
         var renderingThrottle = 0; // No throttling
         var renderingPadding = 0; // No padding
+        var viewportBias = 0;
         var onDrawBody = null;
 
         var thead;
@@ -72,6 +73,14 @@ define([
             },
             set: function (aValue) {
                 renderingThrottle = aValue;
+            }
+        });
+        Object.defineProperty(this, 'viewportBias', {
+            get: function () {
+                return viewportBias;
+            },
+            set: function (aValue) {
+                viewportBias = aValue;
             }
         });
         Object.defineProperty(this, 'renderingPadding', {
@@ -328,7 +337,7 @@ define([
             function calc() {
                 var rowsCount = dataRangeEnd - dataRangeStart;
 
-                viewportHeight = table.parentElement.offsetHeight;
+                viewportHeight = table.parentElement.clientHeight - viewportBias;
                 var contentHeight = rowsCount * rowsHeight;
                 var topPadding = Math.floor(viewportHeight * renderingPadding);
                 topPadding = Math.max(topPadding, 0);
@@ -345,7 +354,7 @@ define([
                 endRenderedRow = Math.min(endRenderedRow, rowsCount);
 
                 var renderedRowsCount = endRenderedRow - startRenderedRow;
-                var fillerHeight = rowsHeight * (rowsCount - renderedRowsCount);
+                var fillerHeight = rowsHeight * (rowsCount - renderedRowsCount) + viewportBias;
                 bodyFiller.style.height = fillerHeight + 'px';
                 bodyFiller.style.display = fillerHeight === 0 ? 'none' : '';
 
@@ -358,17 +367,17 @@ define([
                 calc();
             }
             if (onDrawBody) {
-                onDrawBody({
+                onDrawBody(/*{
                     dataStart: startRenderedRow + dataRangeStart,
                     dataEnd: endRenderedRow + dataRangeStart,
                     scrolled: table.parentElement.scrollTop - startRenderedRow * rowsHeight
-                });
+                }*/);
             }
         }
 
-        function redrawBody() {
+        function redrawBody(viewportBias) {
             renderedRangeStart = renderedRangeEnd = -1;
-            drawBody();
+            drawBody(viewportBias);
         }
         Object.defineProperty(this, 'redrawBody', {
             get: function () {
@@ -460,13 +469,13 @@ define([
                     if (start < renderedRangeStart) {
                         drawBodyPortion(start, renderedRangeStart);
                     } else if (start > renderedRangeStart) {
-                        for (var i1 = renderedRangeStart; i1 < start; i1++) {
+                        for (var i1 = renderedRangeStart; i1 < start && tbody.rows.length > 0; i1++) {
                             tbody.removeChild(tbody.rows[0]);
                         }
                     }
                     renderedRangeStart = start;
                     if (end < renderedRangeEnd) {
-                        for (var i2 = renderedRangeEnd - 1; i2 >= end; i2--) {
+                        for (var i2 = renderedRangeEnd - 1; i2 >= end && tbody.rows.length > 0; i2--) {
                             tbody.removeChild(tbody.rows[tbody.rows.length - 1]);
                         }
                     } else if (end > renderedRangeEnd) {

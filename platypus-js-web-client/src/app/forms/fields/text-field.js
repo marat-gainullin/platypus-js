@@ -50,8 +50,8 @@ define([
             },
             set: function (aValue) {
                 var oldValue = value;
-                value = aValue;
-                box.value = aValue;
+                value = aValue !== undefined ? aValue : null;
+                box.value = value;
                 self.fireValueChanged(oldValue);
             }
         });

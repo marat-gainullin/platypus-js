@@ -308,7 +308,7 @@ define([
                 event.preventDefault();
                 if (self.focusedRow > 0) {
                     var wasFocused = self.focusedRow;
-                    self.focusedRow--;
+                    focusCell(focusedCell.row - 1, focusedCell.column, false);
                     if (self.focusedRow >= 0 && self.focusedRow < viewRows.length) {
                         if (event.shiftKey) {
                             if (isSelected(viewRows[self.focusedRow])) {
@@ -324,18 +324,20 @@ define([
                 }
             } else if (event.keyCode === KeyCodes.KEY_DOWN) {
                 event.preventDefault();
-                var wasFocused = self.focusedRow;
-                self.focusedRow++;
-                if (self.focusedRow >= 0 && self.focusedRow < viewRows.length) {
-                    if (event.shiftKey) {
-                        if (isSelected(viewRows[self.focusedRow])) {
-                            unselect(viewRows[wasFocused]);
+                if (self.focusedRow < viewRows.length - 1) {
+                    var wasFocused = self.focusedRow;
+                    focusCell(focusedCell.row + 1, focusedCell.column, false);
+                    if (self.focusedRow >= 0 && self.focusedRow < viewRows.length) {
+                        if (event.shiftKey) {
+                            if (isSelected(viewRows[self.focusedRow])) {
+                                unselect(viewRows[wasFocused]);
+                            } else {
+                                select(viewRows[self.focusedRow]);
+                            }
                         } else {
+                            unselectAll(false);
                             select(viewRows[self.focusedRow]);
                         }
-                    } else {
-                        unselectAll(false);
-                        select(viewRows[self.focusedRow]);
                     }
                 }
             } else if (event.keyCode === KeyCodes.KEY_LEFT) {
@@ -446,8 +448,20 @@ define([
                         editCell(self.focusedRow, self.focusedColumn);
                     }
                 }
-            } else if (event.keyCode === KeyCodes.KEY_DELETE && deletable) {
-                if (!focusedCell.editor) {
+            } else if (event.keyCode === KeyCodes.KEY_SPACE) {
+                if (self.focusedColumn >= 0 && self.focusedColumn < columnsFacade.length &&
+                        self.focusedRow >= 0 && self.focusedRow < viewRows.length) {
+                    var dataRow = viewRows[self.focusedRow];
+                    var column = columnsFacade[self.focusedColumn];
+                    var value = column.getValue(dataRow);
+                    if (typeof (value) === 'boolean') {
+                        column.setValue(dataRow, !value);
+                        redrawFrozen();
+                        redrawBody();
+                    }
+                }
+            } else if (event.keyCode === KeyCodes.KEY_DELETE) {
+                if (deletable && !focusedCell.editor) {
                     var rows = discoverRows();
                     if (viewRows.length > 0) {
                         // calculate some view sugar
@@ -486,8 +500,8 @@ define([
                         }
                     }
                 }
-            } else if (event.keyCode === KeyCodes.KEY_INSERT && insertable) {
-                if (!focusedCell.editor) {
+            } else if (event.keyCode === KeyCodes.KEY_INSERT) {
+                if (insertable && !focusedCell.editor) {
                     var rows = discoverRows();
                     var insertAt = -1;
                     var lead = selectionLead;
@@ -510,6 +524,9 @@ define([
         function removedItems(items) {
             if (!Array.isArray(items))
                 items = [items];
+            items.forEach(function (item) {
+                expandedRows.delete(item);
+            });
             rebindElements();
             applyRows(false);
             setupRanges(true);
@@ -1303,9 +1320,11 @@ define([
             bodyContainer.style.display = viewRows.length - frozenRows > 0 ? '' : 'none';
             bodyLeft.setDataRange(frozenRows, viewRows.length, needRedraw);
             bodyRight.setDataRange(frozenRows, viewRows.length, needRedraw);
-            bodyRight.onDrawBody = function (rendering) {
-                bodyLeft.setDataRange(rendering.dataStart, rendering.dataEnd);
-                bodyLeft.element.style.marginTop = -rendering.scrolled + 'px';
+
+            bodyRight.onDrawBody = function () {
+                bodyLeft.viewportBias = bodyRightContainer.offsetHeight - bodyRightContainer.clientHeight;
+                bodyLeftContainer.scrollTop = bodyRightContainer.scrollTop;
+                // bodyLeft.redrawBody();
             };
         }
 
@@ -1797,7 +1816,8 @@ define([
                 var column = columnsFacade[focusedCell.column];
                 if (column.editor) {
                     var editor = column.editor;
-                    editor.value = column.getValue(edited);
+                    var value = column.getValue(edited);
+                    editor.value = value === undefined ? null : value;
                     focusedCell.editor = editor;
                     focusedCell.commit = function () {
                         column.setValue(edited, editor.value);

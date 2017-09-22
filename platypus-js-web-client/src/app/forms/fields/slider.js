@@ -82,7 +82,7 @@ define([
                     if (value !== aValue) {
                         var oldValue = value;
                         value = aValue;
-                        text = value !== null ? value + '' : '';
+                        text = value != null ? value + '' : '';
                         box.value = text;
                         checkNullClasses();
                         self.fireValueChanged(oldValue);

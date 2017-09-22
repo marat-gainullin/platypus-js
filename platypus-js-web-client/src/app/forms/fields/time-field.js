@@ -73,7 +73,7 @@ define([
                 if (value !== aValue) {
                     var oldValue = value;
                     value = aValue;
-                    box.value = value !== null ? format(value) : '';
+                    box.value = value != null ? format(value) : '';
                     self.fireValueChanged(oldValue);
                 }
             }

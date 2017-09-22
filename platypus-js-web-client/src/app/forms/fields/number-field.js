@@ -64,7 +64,7 @@ define([
                     if (value !== aValue) {
                         var oldValue = value;
                         value = aValue;
-                        box.value = value !== null ? value + '' : '';
+                        box.value = value != null ? value + '' : '';
                         self.fireValueChanged(oldValue);
                     }
                 }

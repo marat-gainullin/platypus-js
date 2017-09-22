@@ -53,7 +53,7 @@ define(function () {
         }
     }
 
-    function observeElements(aTarget, aPropListener) {
+    function observeElements(target, propListener) {
         function subscribe(aData, aListener) {
             var nHandler = listen(aData, aListener);
             if (nHandler) {
@@ -62,12 +62,12 @@ define(function () {
             return null;
         }
         var subscribed = [];
-        for (var i = 0; i < aTarget.length; i++) {
-            var remover = subscribe(aTarget[i], aPropListener);
+        target.forEach(function (item) {
+            var remover = subscribe(item, propListener);
             if (remover) {
                 subscribed.push(remover);
             }
-        }
+        });
         return {
             unlisten: function () {
                 subscribed.forEach(function (aEntry) {
@@ -131,7 +131,7 @@ define(function () {
 
     function Bound() {
         var self = this;
-        
+
         var data = null;
         var path = null;
 
@@ -211,27 +211,27 @@ define(function () {
         });
     }
     Object.defineProperty(Bound, 'observeElements', {
-        get: function(){
+        get: function () {
             return observeElements;
         }
     });
     Object.defineProperty(Bound, 'listen', {
-        get: function(){
+        get: function () {
             return listen;
         }
     });
     Object.defineProperty(Bound, 'getPathData', {
-        get: function(){
+        get: function () {
             return getPathData;
         }
     });
     Object.defineProperty(Bound, 'setPathData', {
-        get: function(){
+        get: function () {
             return setPathData;
         }
     });
     Object.defineProperty(Bound, 'observePath', {
-        get: function(){
+        get: function () {
             return observePath;
         }
     });
