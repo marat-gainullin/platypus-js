@@ -36,7 +36,7 @@ define([
 
         Ui.on(th, Ui.Events.CLICK, function (event) {
             function checkOthers() {
-                if (!event.ctrlKey) {
+                if (!event.ctrlKey && !event.metaKey) {
                     column.grid.unsort(false);
                 }
             }

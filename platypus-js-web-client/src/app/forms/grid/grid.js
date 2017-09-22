@@ -4,7 +4,6 @@ define([
     '../../ui',
     '../../extend',
     '../../invoke',
-    '../../logger',
     '../../common-utils/color',
     '../bound',
     '../widget',
@@ -19,6 +18,7 @@ define([
     './section',
     './header/analyzer',
     './header/splitter',
+    './columns/order-num-service-column',
     './columns/marker-service-column',
     './columns/check-box-service-column',
     './columns/radio-button-service-column'
@@ -27,7 +27,6 @@ define([
         Ui,
         extend,
         Invoke,
-        Logger,
         Color,
         Bound,
         Widget,
@@ -42,18 +41,15 @@ define([
         Section,
         HeaderAnalyzer,
         HeaderSplitter,
+        OrderNumServiceColumn,
         MarkerServiceColumn,
         CheckBoxServiceColumn,
         RadioButtonServiceColumn
         ) {
-
-//public class Grid extends Widget implements HasSelectionHandlers<JavaScriptObject>, HasSelectionLead, HasOnRender, HasBinding, 
-//        Focusable, HasFocusHandlers, HasBlurHandlers,
-//        HasKeyDownHandlers, HasKeyPressHandlers, HasKeyUpHandlers {
-
     function Grid() {
         var shell = document.createElement('div');
         Widget.call(this, shell);
+        this.focusable = true;
         var self = this;
 
         var cellsStyleElement = document.createElement('style');
@@ -203,7 +199,7 @@ define([
         var indent = 20;
         //
         var data = null; // bounded data. this is not rows source. rows source is data['field' property path]
-        var sortedRows = []; // rows in view. subject of sorting. subject of collapse / expand in tree.
+        var viewRows = []; // rows in view. subject of sorting. subject of collapse / expand in tree.
         var expandedRows = new Set();
         var depths = new Map();
         var field = null;
@@ -212,8 +208,6 @@ define([
         var boundToCursor = null;
         var cursorProperty = 'cursor';
         var onRender = null;
-        var onAfterRender = null;
-        // runtime
         var activeEditor = null;
         var editable = true;
         var deletable = true;
@@ -310,15 +304,141 @@ define([
         regenerateDynamicOddRowsStyles();
         regenerateDynamicEvenRowsStyles();
 
+        Ui.on(shell, Ui.Events.KEYDOWN, function (event) {
+            if (event.keyCode === KeyCodes.KEY_UP) {
+                event.preventDefault();
+                if (self.focusedRow > 0) {
+                    var wasFocused = self.focusedRow;
+                    self.focusedRow--;
+                    if (self.focusedRow >= 0 && self.focusedRow < viewRows.length) {
+                        if (event.shiftKey) {
+                            if (isSelected(viewRows[self.focusedRow])) {
+                                unselect(viewRows[wasFocused]);
+                            } else {
+                                select(viewRows[self.focusedRow]);
+                            }
+                        } else {
+                            unselectAll(false);
+                            select(viewRows[self.focusedRow]);
+                        }
+                    }
+                }
+            } else if (event.keyCode === KeyCodes.KEY_DOWN) {
+                event.preventDefault();
+                var wasFocused = self.focusedRow;
+                self.focusedRow++;
+                if (self.focusedRow >= 0 && self.focusedRow < viewRows.length) {
+                    if (event.shiftKey) {
+                        if (isSelected(viewRows[self.focusedRow])) {
+                            unselect(viewRows[wasFocused]);
+                        } else {
+                            select(viewRows[self.focusedRow]);
+                        }
+                    } else {
+                        unselectAll(false);
+                        select(viewRows[self.focusedRow]);
+                    }
+                }
+            } else if (event.keyCode === KeyCodes.KEY_LEFT) {
+                event.preventDefault();
+                function goLeftCell() {
+                    if (self.focusedColumn > 0 || self.focusedRow > 0) {
+                        do {
+                            if (self.focusedColumn === 0) {
+                                focusCell(self.focusedRow - 1, columnsFacade.length - 1);
+                            } else {
+                                self.focusedColumn--;
+                            }
+                        } while ((self.focusedColumn > 0 || self.focusedRow > 0) &&
+                                !columnsFacade[self.focusedColumn].visible);
+                    }
+                }
+                if (isTreeConfigured() &&
+                        self.focusedColumn >= 0 && self.focusedColumn < columnsFacade.length &&
+                        columnsFacade[self.focusedColumn] === treeIndicatorColumn &&
+                        self.focusedRow >= 0 && self.focusedRow < viewRows.length) {
+                    if (hasRowChildren(viewRows[self.focusedRow]) && isExpanded(viewRows[self.focusedRow])) {
+                        collapse(viewRows[self.focusedRow]);
+                    } else {
+                        var parent = getParentOf(viewRows[self.focusedRow]);
+                        if (parent) {
+                            goTo(parent);
+                        } else {
+                            goLeftCell();
+                        }
+                    }
+                } else {
+                    goLeftCell();
+                }
+            } else if (event.keyCode === KeyCodes.KEY_RIGHT) {
+                event.preventDefault();
+                if (isTreeConfigured() &&
+                        self.focusedColumn >= 0 && self.focusedColumn < columnsFacade.length &&
+                        columnsFacade[self.focusedColumn] === treeIndicatorColumn &&
+                        self.focusedRow >= 0 && self.focusedRow < viewRows.length &&
+                        hasRowChildren(viewRows[self.focusedRow]) &&
+                        !isExpanded(viewRows[self.focusedRow])) {
+                    expand(viewRows[self.focusedRow]);
+                } else {
+                    if (self.focusedColumn < columnsFacade.length - 1 || self.focusedRow < viewRows.length - 1) {
+                        do {
+                            if (self.focusedColumn === columnsFacade.length - 1) {
+                                focusCell(self.focusedRow + 1, 0);
+                            } else {
+                                self.focusedColumn++;
+                            }
+                        } while ((self.focusedColumn < columnsFacade.length - 1 || self.focusedRow < viewRows.length - 1) &&
+                                !columnsFacade[self.focusedColumn].visible);
+                    }
+                }
+            } else if (event.keyCode === KeyCodes.KEY_HOME) {
+                event.preventDefault();
+                if (event.ctrlKey || event.metaKey) {
+                    if (self.focusedRow > 0 || self.focusedColumn > 0) {
+                        focusCell(0, 0);
+                    }
+                } else {
+                    self.focusedColumn = 0;
+                }
+            } else if (event.keyCode === KeyCodes.KEY_END) {
+                event.preventDefault();
+                if (event.ctrlKey || event.metaKey) {
+                    if (self.focusedRow < viewRows.length - 1 || self.focusedColumn < columnsFacade.length - 1) {
+                        focusCell(viewRows.length - 1, columnsFacade.length - 1);
+                    }
+                } else {
+                    self.focusedColumn = columnsFacade.length - 1;
+                }
+            } else if (event.keyCode === KeyCodes.KEY_PAGEUP) {
+                event.preventDefault();
+                var page = frozenRows + Math.floor(bodyRightContainer.offsetHeight / rowsHeight);
+                if (self.focusedRow - page >= 0) {
+                    self.focusedRow -= page;
+                } else {
+                    self.focusedRow = 0;
+                }
+            } else if (event.keyCode === KeyCodes.KEY_PAGEDOWN) {
+                event.preventDefault();
+                var page = frozenRows + Math.floor(bodyRightContainer.offsetHeight / rowsHeight);
+                if (self.focusedRow + page < viewRows.length) {
+                    self.focusedRow += page;
+                } else {
+                    self.focusedRow = viewRows.length - 1;
+                }
+            } else if (event.keyCode === KeyCodes.KEY_F2) {
+                editCell(self.focusedRow, self.focusedColumn);
+            }
+        });
+
         Ui.on(shell, Ui.Events.KEYUP, function (event) {
             var rows = discoverRows();
             if (!activeEditor) {
                 if (event.keyCode === KeyCodes.KEY_DELETE && deletable) {
-                    if (sortedRows.length > 0) {
+                    if (viewRows.length > 0) {
                         // calculate some view sugar
                         var lastSelectedViewIndex = -1;
-                        for (var i = sortedRows.length - 1; i >= 0; i--) {
-                            var element = sortedRows[i];
+                        for (var i = viewRows.length - 1; i >= 0; i--) {
+                            var element = viewRows[i];
                             if (isSelected(element)) {
                                 lastSelectedViewIndex = i;
                                 break;
@@ -337,14 +457,14 @@ define([
                         if (deletedAt > -1) {
                             // TODO: Check if Invoke.Later is an option
                             var vIndex = viewIndexToSelect;
-                            if (vIndex >= 0 && sortedRows.length > 0) {
-                                if (vIndex >= sortedRows.length) {
-                                    vIndex = sortedRows.length - 1;
+                            if (vIndex >= 0 && viewRows.length > 0) {
+                                if (vIndex >= viewRows.length) {
+                                    vIndex = viewRows.length - 1;
                                 }
-                                var toSelect = sortedRows[vIndex];
-                                makeVisible(toSelect, true);
+                                var toSelect = viewRows[vIndex];
+                                goTo(toSelect, true);
                             } else {
-                                self.setFocus(true);
+                                self.focus();
                             }
                         }
                     }
@@ -358,7 +478,7 @@ define([
                             : {};
                     rows.splice(insertAt, 0, inserted);
                     // TODO: Check if Invoke.Later is an option
-                    makeVisible(inserted, true);
+                    goTo(inserted, true);
                 }
             }
         });
@@ -415,13 +535,37 @@ define([
             }
         });
 
-        function select(item) {
+        function setCursorOn(item, needRedraw) {
+            if (cursorProperty) {
+                if (arguments.length < 2)
+                    needRedraw = true;
+                var rows = discoverRows();
+                rows[cursorProperty] = item;
+                if (needRedraw) {
+                    redrawFrozen();
+                    redrawBody();
+                }
+            }
+        }
+        Object.defineProperty(this, 'setCursorOn', {
+            get: function () {
+                return setCursorOn;
+            }
+        });
+
+        function select(item, needRedraw) {
+            if (arguments.length < 2)
+                needRedraw = true;
             selectedRows.add(item);
             selectionLead = item;
             var rows = discoverRows();
             if (cursorProperty)
                 rows[cursorProperty] = selectionLead;
             fireSelected(item);
+            if (needRedraw) {
+                redrawFrozen();
+                redrawBody();
+            }
         }
         Object.defineProperty(this, 'select', {
             get: function () {
@@ -429,13 +573,19 @@ define([
             }
         });
 
-        function selectAll() {
+        function selectAll(needRedraw) {
+            if (arguments.length < 1)
+                needRedraw = true;
             var rows = discoverRows();
             selectedRows = new Set(rows);
             selectionLead = rows.length > 0 ? rows[0] : null;
             if (cursorProperty)
                 rows[cursorProperty] = selectionLead;
             fireSelected(selectionLead);
+            if (needRedraw) {
+                redrawFrozen();
+                redrawBody();
+            }
         }
         Object.defineProperty(this, 'selectAll', {
             get: function () {
@@ -443,12 +593,19 @@ define([
             }
         });
 
-        function unselect(item) {
+        function unselect(item, needRedraw) {
+            if (arguments.length < 2)
+                needRedraw = true;
             if (selectionLead === item) {
                 selectionLead = null;
             }
+            var res = selectedRows.delete(item);
             fireSelected(null);
-            return selectedRows.delete(item);
+            if (needRedraw) {
+                redrawFrozen();
+                redrawBody();
+            }
+            return res;
         }
         Object.defineProperty(this, 'unselect', {
             get: function () {
@@ -456,12 +613,18 @@ define([
             }
         });
 
-        function unselectAll() {
+        function unselectAll(needRedraw) {
+            if (arguments.length < 1)
+                needRedraw = true;
             selectedRows.clear();
             if (selectedRows.has(selectionLead)) {
                 selectionLead = null;
             }
             fireSelected(null);
+            if (needRedraw) {
+                redrawFrozen();
+                redrawBody();
+            }
         }
         Object.defineProperty(this, 'unselectAll', {
             get: function () {
@@ -714,15 +877,6 @@ define([
             }
         });
 
-        Object.defineProperty(this, 'onAfterRender', {
-            get: function () {
-                return onAfterRender;
-            },
-            set: function (aValue) {
-                onAfterRender = aValue;
-            }
-        });
-
         Object.defineProperty(this, 'rows', {
             get: function () {
                 return discoverRows();
@@ -730,7 +884,7 @@ define([
         });
         Object.defineProperty(this, 'viewRows', {
             get: function () {
-                return sortedRows;
+                return viewRows;
             }
         });
         Object.defineProperty(this, 'cursorProperty', {
@@ -772,43 +926,6 @@ define([
                 insertable = aValue;
             }
         });
-
-        var serviceColumnsRedrawQueued = null;
-
-        function enqueueServiceColumnsRedraw() {
-            function redrawServiceColumns() {
-                if (serviceColumnsRedrawQueued === redrawServiceColumns) {
-                    serviceColumnsRedrawQueued = null;
-                    for (var i = 0; i < getColumnsCount(); i++) {
-                        var col = getColumn(i);
-                        if (col instanceof MarkerServiceColumn) {
-                            if (i < frozenColumns) {
-                                frozenLeft.redrawColumn(i);
-                                bodyLeft.redrawColumn(i);
-                            } else {
-                                frozenRight.redrawColumn(i - frozenColumns);
-                                bodyRight.redrawColumn(i - frozenColumns);
-                            }
-                        }
-                    }
-                }
-            }
-            Invoke.later(redrawServiceColumns);
-            serviceColumnsRedrawQueued = redrawServiceColumns;
-        }
-
-        var redrawQueued = null;
-
-        function enqueueRedraw() {
-            function callredraw() {
-                if (redrawQueued === callredraw) {
-                    redrawQueued = null;
-                    redraw();
-                }
-            }
-            Invoke.later(callredraw);
-            redrawQueued = callredraw;
-        }
 
         function depthOf(item) {
             return isTreeConfigured() ? depths.get(item) : 0;
@@ -882,7 +999,6 @@ define([
             }
         });
 
-        // Tree structure
         function isLeaf(anElement) {
             return !hasRowChildren(anElement);
         }
@@ -926,15 +1042,15 @@ define([
         /**
          * Builds path to specified element if the element belongs to the model.
          *
-         * @param anElement Element to build path to.
+         * @param anItem Element to build path to.
          * @return Array of elements comprising the path, excluding
-         * root null. So for the roots of the forest path will be a list with one
+         * root null. So, for the roots of the forest path will be a list with one
          * element.
          */
-        function buildPathTo(anElement) {
+        function pathTo(anItem) {
             var path = [];
-            if (anElement) {
-                var currentParent = anElement;
+            if (anItem) {
+                var currentParent = anItem;
                 var added = new Set();
                 path.push(currentParent);
                 added.add(currentParent);
@@ -950,59 +1066,48 @@ define([
             }
             return path;
         }
-        Object.defineProperty(this, 'buildPathTo', {
+        Object.defineProperty(this, 'pathTo', {
             get: function () {
-                return buildPathTo;
+                return pathTo;
             }
         });
 
-        function makeVisible(anElement, aNeedToSelect) {
-            // TODO: refactor indexof to something else
-            // TODO: think about tree data model and path to item expanding
-            //IndexOfProvider<JavaScriptObject> indexOfProvider = (IndexOfProvider<JavaScriptObject>) dataProvider;
-            var index = -1;//indexOfProvider.indexOf(anElement);
-            if (index > -1) {
-                if (index >= 0 && index < frozenRows) {
-                    var leftCell = frozenLeft.getViewCell(index, 0);
-                    if (leftCell) {
-                        leftCell.scrollIntoView();
-                    } else {
-                        var rightCell = frozenRight.getViewCell(index, 0);
-                        if (rightCell) {
-                            rightCell.scrollIntoView();
-                        }
-                    }
-                } else {
-                    var leftCell = bodyLeft.getViewCell(index, 0);
-                    if (leftCell) {
-                        leftCell.scrollIntoView();
-                    } else {
-                        var rightCell = bodyRight.getViewCell(index, 0);
-                        if (rightCell) {
-                            rightCell.scrollIntoView();
-                        }
+        function goTo(anItem, aNeedToSelect) {
+            var expanded = false;
+            if (isTreeConfigured()) {
+                var path = pathTo(anItem);
+                for (var p = 0; p < path.length - 1/* exclude last element*/; p++) {
+                    if (!expandedRows.has(path[p])) {
+                        expandedRows.add(path[p]);
+                        fireExpanded(path[p]);
+                        expanded = true;
                     }
                 }
+            }
+            var index;
+            if (expanded) {
+                lookupTreeColumn();
+                index = regenerateFront(anItem);
+                sortFront();
+                setupRanges(false);
+            } else {
+                index = viewRows.indexOf(anItem);
+            }
+            if (index !== -1) {
                 if (aNeedToSelect) {
-                    unselectAll();
-                    select(anElement);
-                    if (index >= 0 && index < frozenRows) {
-                        frozenLeft.keyboardSelectedRow = index;
-                        frozenRight.keyboardSelectedRow = index;
-                    } else {
-                        bodyLeft.keyboardSelectedRow = index - frozenRows;
-                        bodyRight.keyboardSelectedRow = index - frozenRows;
-                    }
+                    unselectAll(false);
+                    select(anItem, false);
                 }
+                focusCell(index, focusedCell.column !== -1 ? focusedCell.column : 0);
                 return true;
             } else {
-                return false;
+                return  false;
             }
         }
 
-        Object.defineProperty(this, 'makeVisible', {
+        Object.defineProperty(this, 'goTo', {
             get: function () {
-                return makeVisible;
+                return goTo;
             }
         });
 
@@ -1063,7 +1168,8 @@ define([
                 var rows = discoverRows();
                 if (cursorProperty) {
                     boundToCursor = Bound.observePath(rows, cursorProperty, function (anEvent) {
-                        enqueueServiceColumnsRedraw();
+                        redrawFrozen();
+                        redrawBody();
                     });
                 }
             }
@@ -1158,12 +1264,12 @@ define([
             if (arguments.length < 1)
                 needRedraw = true;
             frozenContainer.style.display = frozenRows > 0 ? '' : 'none';
-            frozenLeft.setDataRange(0, sortedRows.length >= frozenRows ? frozenRows : sortedRows.length, needRedraw);
-            frozenRight.setDataRange(0, sortedRows.length >= frozenRows ? frozenRows : sortedRows.length, needRedraw);
+            frozenLeft.setDataRange(0, viewRows.length >= frozenRows ? frozenRows : viewRows.length, needRedraw);
+            frozenRight.setDataRange(0, viewRows.length >= frozenRows ? frozenRows : viewRows.length, needRedraw);
 
-            bodyContainer.style.display = sortedRows.length - frozenRows > 0 ? '' : 'none';
-            bodyLeft.setDataRange(frozenRows, sortedRows.length, needRedraw);
-            bodyRight.setDataRange(frozenRows, sortedRows.length, needRedraw);
+            bodyContainer.style.display = viewRows.length - frozenRows > 0 ? '' : 'none';
+            bodyLeft.setDataRange(frozenRows, viewRows.length, needRedraw);
+            bodyRight.setDataRange(frozenRows, viewRows.length, needRedraw);
             bodyRight.onDrawBody = function (rendering) {
                 bodyLeft.setDataRange(rendering.dataStart, rendering.dataEnd);
                 bodyLeft.element.style.marginTop = -rendering.scrolled + 'px';
@@ -1215,8 +1321,10 @@ define([
                 var c = 0;
                 while (c < getColumnsCount()) {
                     var column = getColumn(c);
-                    if (column instanceof MarkerServiceColumn || column instanceof RadioButtonServiceColumn
-                            || column instanceof CheckBoxServiceColumn) {
+                    if (column instanceof MarkerServiceColumn ||
+                            column instanceof RadioButtonServiceColumn ||
+                            column instanceof CheckBoxServiceColumn ||
+                            column instanceof OrderNumServiceColumn) {
                         c++;
                     } else {
                         found = column;
@@ -1499,6 +1607,26 @@ define([
             }
         });
 
+        function redrawFrozen() {
+            frozenLeft.redraw();
+            frozenRight.redraw();
+        }
+        Object.defineProperty(this, 'redrawFrozen', {
+            get: function () {
+                return redrawFrozen;
+            }
+        });
+
+        function redrawBody() {
+            bodyLeft.redraw();
+            bodyRight.redraw();
+        }
+        Object.defineProperty(this, 'redrawBody', {
+            get: function () {
+                return redrawBody;
+            }
+        });
+
         function redrawHeaders() {
             headerLeft.redrawHeaders();
             headerRight.redrawHeaders();
@@ -1566,29 +1694,85 @@ define([
             }
         });
 
-        function focusCell(aRow, aCol) {
-            var targetSection;
-            if (aRow < frozenRows) {
-                if (aCol < frozenColumns) {
-                    targetSection = frozenLeft;
-                } else {
-                    targetSection = frozenRight;
+        var focusedCell = {
+            row: 0,
+            column: 0
+        };
+        function focusCell(row, column, needRedraw) {
+            if (row >= 0 && row < viewRows.length ||
+                    column >= 0 && column < columnsFacade.length) {
+                if (row >= 0 && row < viewRows.length) {
+                    focusedCell.row = row;
                 }
-            } else {
-                if (aCol < frozenColumns) {
-                    targetSection = bodyLeft;
-                } else {
-                    targetSection = bodyRight;
+                if (column >= 0 && column < columnsFacade.length) {
+                    focusedCell.column = column;
+                }
+                if (focusedCell.row >= 0 && focusedCell.row < viewRows.length &&
+                        focusedCell.column >= 0 && focusedCell.column < columnsFacade.length) {
+                    if (arguments.length < 3)
+                        needRedraw = true;
+                    if (needRedraw) {
+                        redrawFrozen();
+                        redrawBody();
+                    }
+                    var cell = frozenLeft.getViewCell(row, column);
+                    if (cell) {
+                        cell.scrollIntoView();
+                    } else {
+                        cell = frozenRight.getViewCell(row, column);
+                        if (cell) {
+                            var bodyCell = bodyRight.getViewCell(frozenRows, column);
+                            if (bodyCell)
+                                bodyCell.scrollIntoView();
+                            else
+                                cell.scrollIntoView();
+                        } else {
+                            if (row >= frozenRows) {
+                                var rowCenter = (row - frozenRows) * rowsHeight + rowsHeight / 2;
+                                if (bodyRightContainer.scrollTop > rowCenter || rowCenter > bodyRightContainer.scrollTop + bodyRightContainer.clientHeight) {
+                                    bodyRightContainer.scrollTop = (row - frozenRows) * rowsHeight - bodyRightContainer.clientHeight / 2 + rowsHeight / 2;
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            targetSection.focusCell(aRow, aCol);
         }
         Object.defineProperty(this, 'focusCell', {
             get: function () {
                 return focusCell;
             }
         });
-
+        Object.defineProperty(this, 'focusedRow', {
+            get: function () {
+                return focusedCell.row;
+            },
+            set: function (aValue) {
+                if (aValue >= 0 && aValue < viewRows.length && aValue !== focusedCell.row) {
+                    focusCell(aValue, focusedCell.column);
+                }
+            }
+        });
+        Object.defineProperty(this, 'focusedColumn', {
+            get: function () {
+                return focusedCell.column;
+            },
+            set: function (aValue) {
+                if (aValue >= 0 && aValue < columnsFacade.length && aValue !== focusedCell.column) {
+                    focusCell(focusedCell.row, aValue);
+                }
+            }
+        });
+        function editCell(row, column) {
+            if (row >= 0 && row < viewRows.length ||
+                    column >= 0 && column < columnsFacade.length) {
+            }
+        }
+        Object.defineProperty(this, 'editCell', {
+            get: function () {
+                return editCell;
+            }
+        });
         function sort() {
             applyRows(true);
         }
@@ -1641,11 +1825,12 @@ define([
             }
         });
 
-        function regenerateFront() {
+        function regenerateFront(anItemToLookup) {
+            var itemToLookupIndex = -1;
             depths.clear();
             var rows = discoverRows();
             if (isTreeConfigured()) {
-                sortedRows = [];
+                viewRows = [];
                 var roots = getChildrenOf(null);
                 var stack = [];
                 var parents = [null];
@@ -1657,7 +1842,10 @@ define([
                         parents.pop();
                     }
                     depths.set(item, parents.length);
-                    sortedRows.push(item);
+                    if (item === anItemToLookup) {
+                        itemToLookupIndex = viewRows.length;
+                    }
+                    viewRows.push(item);
                     if (expandedRows.has(item)) {
                         var children = getChildrenOf(item);
                         if (children.length > 0) {
@@ -1671,16 +1859,18 @@ define([
                 }
                 treeIndicatorColumn.padding = maxPathLength * indent;
             } else {
-                sortedRows = rows.slice(0, rows.length);
+                viewRows = rows.slice(0, rows.length);
+                itemToLookupIndex = viewRows.indexOf(anItemToLookup);
             }
+            return itemToLookupIndex;
         }
 
         function sortFront() {
             if (sortedColumns.length > 0) {
-                sortedRows.sort(function (o1, o2) {
+                viewRows.sort(function (o1, o2) {
                     if (isTreeConfigured() && getParentOf(o1) !== getParentOf(o2)) {
-                        var path1 = buildPathTo(o1);
-                        var path2 = buildPathTo(o2);
+                        var path1 = pathTo(o1);
+                        var path2 = pathTo(o2);
                         if (path2.indexOf(o1) !== -1) {
                             // o1 is parent of o2
                             return -1;
@@ -1712,7 +1902,7 @@ define([
                 frozenLeft, frozenRight,
                 bodyLeft, bodyRight
             ].forEach(function (section) {
-                section.data = sortedRows;
+                section.data = viewRows;
             });
 
             fireRowsSort();
@@ -1726,47 +1916,6 @@ define([
             sortFront();
             if (needRedraw) {
                 redraw();
-            }
-        }
-
-        var tabIndex = 0;
-
-        function calcFocusedElement() {
-            var focusedEelement = bodyRight.getKeyboardSelectedElement();
-            if (!focusedEelement) {
-                focusedEelement = bodyLeft.getKeyboardSelectedElement();
-            }
-            if (!focusedEelement) {
-                focusedEelement = frozenLeft.getKeyboardSelectedElement();
-            }
-            if (!focusedEelement) {
-                focusedEelement = frozenRight.getKeyboardSelectedElement();
-            }
-            if (!focusedEelement) {
-                focusedEelement = getElement();
-            }
-            return focusedEelement;
-        }
-
-        Object.defineProperty(this, 'tabIndex', {
-            get: function () {
-                return tabIndex;
-            },
-            set: function (index) {
-                tabIndex = index;
-                focusedElement = calcFocusedElement();
-                if (focusedElement)
-                    focusedElement.tabIndex = tabIndex;
-            }
-        });
-
-        function setFocus(focused) {
-            var focusedElement = calcFocusedElement();
-            focusedElement.tabIndex = tabIndex;
-            if (focused) {
-                focusedElement.focus();
-            } else {
-                focusedElement.blur();
             }
         }
 
@@ -1894,7 +2043,7 @@ define([
                 frozenLeft, frozenRight,
                 bodyLeft, bodyRight
             ].forEach(function (section) {
-                section.data = sortedRows;
+                section.data = viewRows;
             });
         }
 
@@ -1961,6 +2110,7 @@ define([
             }
         });
 
+        Ui.on(shell, Ui.Events.FOCUS, fireFocus);
         function fireFocus() {
             var event = new FocusEvent(self);
             focusHandlers.forEach(function (h) {
@@ -1985,6 +2135,7 @@ define([
             }
         });
 
+        Ui.on(shell, Ui.Events.BLUR, fireBlur);
         function fireBlur() {
             var event = new BlurEvent(self);
             blurHandlers.forEach(function (h) {
@@ -2009,6 +2160,7 @@ define([
             }
         });
 
+        Ui.on(shell, Ui.Events.KEYUP, fireKeyUp);
         function fireKeyUp(nevent) {
             var event = new KeyEvent(self, nevent);
             keyUpHandlers.forEach(function (h) {
@@ -2033,6 +2185,7 @@ define([
             }
         });
 
+        Ui.on(shell, Ui.Events.KEYDOWN, fireKeyDown);
         function fireKeyDown(nevent) {
             var event = new KeyEvent(self, nevent);
             keyDownHandlers.forEach(function (h) {
@@ -2057,6 +2210,7 @@ define([
             }
         });
 
+        Ui.on(shell, Ui.Events.KEYPRESS, fireKeyPress);
         function fireKeyPress(nevent) {
             var event = new KeyEvent(this, nevent);
             keyPressHandlers.forEach(function (h) {

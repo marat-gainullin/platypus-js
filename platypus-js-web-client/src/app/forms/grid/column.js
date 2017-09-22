@@ -268,23 +268,35 @@ define([
             }
         });
 
-        function render(viewIndex, dataRow, viewCell) {
+        function render(viewRowIndex, viewColumnIndex, dataRow, viewCell) {
+            function handleSelection(event) {
+                if (!event.ctrlKey && !event.metaKey) {
+                    self.grid.unselectAll(false);
+                }
+                self.grid.select(dataRow, false);
+                self.grid.focusCell(viewRowIndex, viewColumnIndex, true);
+            }
             if (grid.treeIndicatorColumn === self) {
                 var padding = grid.indent * grid.depthOf(dataRow);
                 viewCell.style.paddingLeft = padding > 0 ? padding + 'px' : '';
                 if (!grid.isLeaf(dataRow)) {
                     viewCell.classList.add(grid.expanded(dataRow) ? 'p-grid-cell-expanded' : 'p-grid-cell-collapsed');
                 }
-                Ui.on(viewCell, Ui.Events.MOUSEDOWN, function (event) {
+                Ui.on(viewCell, Ui.Events.CLICK, function (event) {
                     if (event.button === 0) {
                         var rect = viewCell.getBoundingClientRect();
                         if (event.clientX > rect.left + padding - grid.indent &&
                                 event.clientX <= rect.left + padding) {
                             event.stopPropagation();
+                            grid.focusCell(viewRowIndex, viewColumnIndex);
                             grid.toggle(dataRow);
+                        } else {
+                            handleSelection(event);
                         }
                     }
                 });
+            } else {
+                Ui.on(viewCell, Ui.Events.CLICK, handleSelection);
             }
             var value = getValue(dataRow);
             if (value == null) { // null == undefined, null !== undefined
@@ -309,7 +321,7 @@ define([
             // User's rendering for all values, including null
             if (onRender || grid.onRender) {
                 var handler = onRender ? onRender : grid.onRender;
-                handler.call(self, dataRow, viewCell, viewIndex, html);
+                handler.call(self, dataRow, viewCell, viewRowIndex, html);
             }
         }
 

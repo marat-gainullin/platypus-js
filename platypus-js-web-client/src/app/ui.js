@@ -3,11 +3,13 @@ define([
     './common-utils/cursor',
     './common-utils/font',
     './forms/key-codes',
+    './invoke',
     './internals'], function (
         Color,
         Cursor,
         Font,
         KeyCodes,
+        Invoke,
         Utils) {
     var global = window;
     var Events = {
@@ -52,6 +54,25 @@ define([
         TOUCHMOVE: 'touchmove',
         TOUCHSTART: 'touchstart'
     };
+
+    var throttle = (function () {
+        var watchdog = null;
+        function throttle(action, timeout) {
+            if (timeout < 1) // ms
+                action();
+            else {
+                function invoked() {
+                    watchdog = null;
+                    action();
+                }
+                if (!watchdog) {
+                    Invoke.delayed(timeout, invoked);
+                    watchdog = invoked;
+                }
+            }
+        }
+        return throttle;
+    }());
 
     function absoluteLeft(elem) {
         var left = 0;
@@ -342,6 +363,11 @@ define([
             return Events;
         }
     });
+    Object.defineProperty(module, 'throttle', {
+        get: function () {
+            return throttle;
+        }
+    });
     Object.defineProperty(module, 'absoluteLeft', {
         get: function () {
             return absoluteLeft;
@@ -352,7 +378,7 @@ define([
             return absoluteTop;
         }
     });
-    function isMobile(){
+    function isMobile() {
         return 'orientation' in window;
     }
     Object.defineProperty(module, 'isMobile', {
@@ -367,7 +393,7 @@ define([
         function startMenuSession(menu) {
             function isOutsideOfAnyMenu(anElement) {
                 var currentElement = anElement;
-                while (currentElement !== null && currentElement.className.indexOf('p-menu') === -1 && currentElement !== document.body)
+                while (currentElement !== null && currentElement.className.indexOf('p-menu') === - 1 && currentElement !== document.body)
                     currentElement = currentElement.parentElement;
                 return currentElement === document.body || currentElement === null;
             }
@@ -394,7 +420,7 @@ define([
             }
         }
 
-        function isMenuSession(){
+        function isMenuSession() {
             return !!menuSession;
         }
 

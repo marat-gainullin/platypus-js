@@ -1,11 +1,7 @@
 define([
-    '../../ui',
-    '../../invoke',
-    '../key-codes'
+    '../../ui'
 ], function (
-        Ui,
-        Invoke,
-        KeyCodes
+        Ui
         ) {
 
     var JS_ROW_NAME = 'js-row';
@@ -24,10 +20,7 @@ define([
         var rowsHeight = 30;
         var headerNodes = [];
         var headerMaxDepth = 0;
-        var keyboardSelectedElement = null;
         var draggableRows = false;
-        var keyboardSelectedRow = -1;
-        var keyboardSelectedColumn = -1;
         var columns = [];
         var data = []; // Already sorted data
         var dataRangeStart = 0; // Inclusive
@@ -46,21 +39,6 @@ define([
         recreateFoot();
         var bodyFiller = document.createElement('div');
         bodyFiller.className = 'p-grid-body-filler';
-
-        Ui.on(table, Ui.Events.KEYDOWN, function (event) {
-            var oldRow = self.keyboardSelectedRow;
-            var oldColumn = self.keyboardSelectedColumn;
-            var keyCode = event.keyCode;
-            if (keyCode === KeyCodes.KEY_LEFT) {
-            } else if (keyCode === KeyCodes.KEY_RIGHT) {
-            } else if (keyCode === KeyCodes.KEY_UP) {
-            } else if (keyCode === KeyCodes.KEY_DOWN) {
-            } else if (keyCode === KeyCodes.KEY_PAGEUP) {
-            } else if (keyCode === KeyCodes.KEY_PAGEDOWN) {
-            } else if (keyCode === KeyCodes.KEY_HOME) {
-            } else if (keyCode === KeyCodes.KEY_END) {
-            }
-        });
 
         Object.defineProperty(this, 'element', {
             get: function () {
@@ -119,26 +97,6 @@ define([
             set: function (aValue) {
                 if (draggableRows !== aValue) {
                     draggableRows = aValue;
-                }
-            }
-        });
-        Object.defineProperty(this, 'keyboardSelectedColumn', {
-            get: function () {
-                return keyboardSelectedColumn;
-            },
-            set: function (aValue) {
-                if (keyboardSelectedColumn !== aValue) {
-                    keyboardSelectedColumn = aValue;
-                }
-            }
-        });
-        Object.defineProperty(this, 'keyboardSelectedRow', {
-            get: function () {
-                return keyboardSelectedRow;
-            },
-            set: function (aValue) {
-                if (keyboardSelectedRow !== aValue) {
-                    keyboardSelectedRow = aValue;
                 }
             }
         });
@@ -221,19 +179,29 @@ define([
             return columns.indexOf(column);
         }
 
+        Object.defineProperty(this, 'getColumnIndex', {
+            get: function () {
+                return getColumnIndex;
+            }
+        });
+
         Object.defineProperty(this, 'rowsCount', {
             get: function () {
                 return tbody.rows.length;
             }
         });
 
-        function getViewCell(aRow, aCol) {
-            var viewRows = tbody.rows;
-            if (aRow - renderedRangeStart >= 0 && aRow - renderedRangeStart < viewRows.length) {
-                var viewRow = viewRows[aRow];
-                var cells = viewRow.cells;
-                if (aCol >= 0 && aCol < cells.length) {
-                    return cells[aCol];
+        function getViewCell(row, col) {
+            if (columns.length > 0) {
+                var grid = columns[0].grid;
+                var viewRows = tbody.rows;
+                var columnsBias = self === grid.frozenRight || self === grid.bodyRight ? grid.frozenColumns : 0;
+                if (row - renderedRangeStart >= 0 && row - renderedRangeStart < viewRows.length) {
+                    var viewRow = viewRows[row - renderedRangeStart];
+                    var cells = viewRow.cells;
+                    if (col - columnsBias >= 0 && col - columnsBias < cells.length) {
+                        return cells[col - columnsBias];
+                    }
                 }
             }
             return null;
@@ -241,26 +209,6 @@ define([
         Object.defineProperty(this, 'getViewCell', {
             get: function () {
                 return getViewCell;
-            }
-        });
-
-        function focusCell(aRow, aCol) {
-            var cell = getViewCell(aRow, aCol);
-            if (cell) {
-                keyboardSelectedColumn = aCol;
-                keyboardSelectedRow = aRow;
-                cell.focus();
-            }
-        }
-        Object.defineProperty(this, 'focusCell', {
-            get: function () {
-                return focusCell;
-            }
-        });
-
-        Object.defineProperty(this, 'keyboardSelectedElement', {
-            get: function () {
-                return keyboardSelectedElement;
             }
         });
 
@@ -376,7 +324,7 @@ define([
         function drawBody() {
             var rowsCount = dataRangeEnd - dataRangeStart;
 
-            var viewportHeight = table.parentElement.clientHeight;
+            var viewportHeight = table.parentElement.offsetHeight;
             var contentHeight = rowsCount * rowsHeight;
             var topPadding = Math.floor(viewportHeight * renderingPadding);
             topPadding = Math.max(topPadding, 0);
@@ -421,6 +369,7 @@ define([
 
         function drawBodyPortion(start, end) {
             if (end - start > 0 && columns.length > 0) {
+                var grid = columns[0].grid;
                 for (var i = start; i < end; i++) {
                     var dataRow = data[i];
                     var viewRow = document.createElement('tr');
@@ -446,37 +395,22 @@ define([
                     } else {
                         tbody.appendChild(viewRow);
                     }
+                    var columnsBias = self === grid.frozenRight || self === grid.bodyRight ? grid.frozenColumns : 0;
                     for (var c = 0; c < columns.length; c++) {
                         var column = columns[c];
                         var viewCell = document.createElement('td');
                         // TODO: Check alignment of the cell
                         // TODO: Check image decoration of the cell and decoration styles
                         viewCell.className = 'p-grid-cell ' + dynamicCellsClassName + ' ' + column.styleName;
+                        if (i === grid.focusedRow && columnsBias + c === grid.focusedColumn) {
+                            viewCell.classList.add('p-grid-cell-focused');
+                        }
                         viewRow.appendChild(viewCell);
-                        column.render(i, dataRow, viewCell);
+                        column.render(i, columnsBias + c, dataRow, viewCell);
                     }
                 }
             }
         }
-
-        var throttle = (function () {
-            var watchdog = null;
-            function throttle(action, timeout) {
-                if (timeout < 1) // ms
-                    action();
-                else {
-                    function invoked() {
-                        watchdog = null;
-                        action();
-                    }
-                    if (!watchdog) {
-                        Invoke.delayed(timeout, invoked);
-                        watchdog = invoked;
-                    }
-                }
-            }
-            return throttle;
-        }());
 
         function setDataRange(start, end, needRedraw) {
             if (arguments.length < 3)
@@ -484,7 +418,7 @@ define([
             if (!bodyFiller.parentElement) {
                 table.parentElement.appendChild(bodyFiller);
                 Ui.on(table.parentElement, Ui.Events.SCROLL, function (event) {
-                    throttle(drawBody, renderingThrottle);
+                    Ui.throttle(drawBody, renderingThrottle);
                 });
             }
             dataRangeStart = start;

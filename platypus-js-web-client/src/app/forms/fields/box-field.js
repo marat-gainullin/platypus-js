@@ -20,6 +20,7 @@ define([
         }
 
         Widget.call(this, box, shell);
+        this.focusable = true;
         var self = this;
 
         /**
@@ -100,15 +101,6 @@ define([
                 return fireValueChanged;
             }
         });
-        Object.defineProperty(this, 'tabIndex', {
-            get: function () {
-                return box.tabIndex;
-            },
-            set: function(aValue){
-                box.tabIndex = aValue;
-            }
-        });
-
     }
     extend(BoxField, Widget);
     return BoxField;

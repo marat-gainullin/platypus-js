@@ -1,20 +1,33 @@
 define([
     '../../../extend',
+    '../../../ui',
     '../column'
-], function(
+], function (
         extend,
-        Column){
-    function CheckBoxServiceColumn(node){
+        Ui,
+        Column) {
+    function CheckBoxServiceColumn(node) {
         Column.call(this, node);
         var self = this;
-   
+
         this.width = 22;
-        
-        function getValue(dataRow){
+
+        function getValue(dataRow) {
             return self.grid.isSelected(dataRow);
         }
-        function render(viewIndex, dataRow, viewCell) {
-            // TODO: Add grid.isSelected() driven rendering
+        function render(viewRowIndex, viewColumnIndex, dataRow, viewCell) {
+            var checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = self.grid.isSelected(dataRow);
+            Ui.on(checkbox, Ui.Events.CHANGE, function (event){
+                if (checkbox.checked) {
+                    self.grid.select(dataRow);
+                } else {
+                    self.grid.unselect(dataRow);
+                }
+                self.grid.focus();
+            });
+            viewCell.appendChild(checkbox);
         }
         Object.defineProperty(this, 'render', {
             get: function () {

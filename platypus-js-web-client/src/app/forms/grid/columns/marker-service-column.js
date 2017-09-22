@@ -1,8 +1,10 @@
 define([
     '../../../extend',
+    '../../../ui',
     '../column'
 ], function (
         extend,
+        Ui,
         Column) {
     function MarkerServiceColumn(node) {
         Column.call(this, node);
@@ -10,8 +12,11 @@ define([
 
         this.width = 22;
 
-        function render(viewIndex, dataRow, viewCell) {
-            // TODO: Add data cursor and data changes driven data rendering
+        function render(viewRowIndex, viewColumnIndex, dataRow, viewCell) {
+            Ui.on(viewCell, Ui.Events.CLICK, function (event) {
+                self.grid.setCursorOn(dataRow);
+                self.grid.focusCell(viewRowIndex, viewColumnIndex);
+            });
             if (self.grid.cursorProperty && self.grid.rows && self.grid.rows[self.grid.cursorProperty] === dataRow) {
                 viewCell.classList.add('p-grid-cell-cursor');
             }

@@ -493,12 +493,14 @@ describe('Grid Api', function () {
         require([
             'forms/grid/grid',
             'forms/grid/columns/column-node',
+            'forms/grid/columns/nodes/order-num-service-node',
             'forms/grid/columns/nodes/marker-service-node',
             'forms/grid/columns/nodes/check-box-service-node',
             'forms/grid/columns/nodes/radio-button-service-node'
         ], function (
                 Grid,
                 ColumnNode,
+                OrderNumServiceColumnNode,
                 MarkerColumnNode,
                 CheckBoxColumnNode,
                 RadioButtonColumnNode) {
@@ -507,6 +509,8 @@ describe('Grid Api', function () {
             instance.frozenRows = 2;
             document.body.appendChild(instance.element);
 
+            var nmb = new OrderNumServiceColumnNode();
+            instance.addColumnNode(nmb);
             var marker = new MarkerColumnNode();
             instance.addColumnNode(marker);
             var check = new CheckBoxColumnNode();
@@ -553,8 +557,8 @@ describe('Grid Api', function () {
 
             expect(instance.frozenLeft.columnsCount).toEqual(4);
             expect(instance.bodyLeft.columnsCount).toEqual(4);
-            expect(instance.frozenRight.columnsCount).toEqual(2);
-            expect(instance.bodyRight.columnsCount).toEqual(2);
+            expect(instance.frozenRight.columnsCount).toEqual(3);
+            expect(instance.bodyRight.columnsCount).toEqual(3);
 
             //document.body.removeChild(instance.element);
             done();

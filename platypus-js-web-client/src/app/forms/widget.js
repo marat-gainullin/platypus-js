@@ -37,7 +37,6 @@ define([
         var opaque = true;
         var cursor;
         var toolTipText;
-        var nextFocusableComponent;
         var focusable = false;
         var font = null;
 
@@ -208,13 +207,22 @@ define([
                 }
             }
         });
-        Object.defineProperty(this, 'nextFocusableComponent', {
+        var tabIndex = 1;
+        function applyTabIndex() {
+            if (focusable) {
+                box.setAttribute('tabindex', tabIndex + '');
+            } else {
+                box.removeAttribute('tabindex');
+            }
+        }
+        Object.defineProperty(this, 'tabIndex', {
             get: function () {
-                return nextFocusableComponent;
+                return tabIndex;
             },
             set: function (aValue) {
-                if (nextFocusableComponent !== aValue) {
-                    nextFocusableComponent = aValue;
+                if (!isNaN(aValue) && tabIndex !== aValue) {
+                    tabIndex = aValue;
+                    applyTabIndex();
                 }
             }
         });
@@ -225,6 +233,7 @@ define([
             set: function (aValue) {
                 if (focusable !== aValue) {
                     focusable = aValue;
+                    applyTabIndex();
                 }
             }
         });
@@ -529,6 +538,14 @@ define([
         Object.defineProperty(this, 'focus', {
             get: function () {
                 return focus;
+            }
+        });
+        function blur() {
+            box.blur();
+        }
+        Object.defineProperty(this, 'blur', {
+            get: function () {
+                return blur;
             }
         });
         Object.defineProperty(this, 'component', {

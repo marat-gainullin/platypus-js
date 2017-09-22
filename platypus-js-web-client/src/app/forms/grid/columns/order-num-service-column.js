@@ -1,36 +1,27 @@
 define([
-    '../../../id',
     '../../../extend',
     '../../../ui',
     '../column'
 ], function (
-        Id,
         extend,
         Ui,
         Column) {
-    function RadioButtonServiceColumn(node) {
+    function OrderNumServiceColumn(node) {
         Column.call(this, node);
         var self = this;
-        var radioGroup = 'p-grid-group-' + Id.generate();
 
         this.width = 22;
 
         function getValue(dataRow) {
-            return self.grid.isSelected(dataRow);
+            return dataRow;
         }
         function render(viewRowIndex, viewColumnIndex, dataRow, viewCell) {
-            var radio = document.createElement('input');
-            radio.type = 'radio';
-            radio.name = radioGroup;
-            radio.checked = self.grid.isSelected(dataRow);
-            radio.onchange = function (event) {
-                if (radio.checked) {
-                    self.grid.unselectAll();
-                    self.grid.select(dataRow);
-                }
-                self.grid.focus();
-            };
-            viewCell.appendChild(radio);
+            viewCell.innerText = (viewRowIndex + 1) + '';
+            Ui.on(viewCell, Ui.Events.CLICK, function(event){
+                self.grid.unselectAll(false);
+                self.grid.select(dataRow, true);
+                self.grid.focusCell(viewRowIndex, viewColumnIndex);
+            });
         }
         Object.defineProperty(this, 'render', {
             get: function () {
@@ -53,8 +44,7 @@ define([
                 return self.width;
             }
         });
-
     }
-    extend(RadioButtonServiceColumn, Column);
-    return RadioButtonServiceColumn;
+    extend(OrderNumServiceColumn, Column);
+    return OrderNumServiceColumn;
 });
