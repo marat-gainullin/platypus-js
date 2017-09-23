@@ -22,7 +22,7 @@ define([
         var leavesCount = 0;
         var depthRemainder = 0;
 
-        column.view = new TextField();
+        column.renderer = new TextField();
         column.editor = new TextField();
 
         function copy() {
@@ -352,6 +352,18 @@ define([
         Object.defineProperty(this, 'unsort', {
             get: function () {
                 return unsort;
+            }
+        });
+
+        Object.defineProperty(this, 'renderer', {
+            configurable: true,
+            get: function () {
+                return column ? column.renderer : null;
+            },
+            set: function (aWidget) {
+                if (column) {
+                    column.renderer = aWidget;
+                }
             }
         });
 

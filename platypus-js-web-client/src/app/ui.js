@@ -58,6 +58,10 @@ define([
     var throttle = (function () {
         var watchdog = null;
         function throttle(action, timeout) {
+            if (arguments.length < 1)
+                throw "Missing throttle 'action' argument";
+            if (arguments.length < 2)
+                throw "Missing throttle 'timeout' argument";
             if (timeout < 1) // ms
                 action();
             else {

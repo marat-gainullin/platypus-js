@@ -363,21 +363,17 @@ define([
                 table.style.top = (startRenderedRow * rowsHeight) + 'px';
             }
             calc();
-            if (viewportHeight !== table.parentElement.offsetHeight) {
+            if (viewportHeight !== table.parentElement.clientHeight) {
                 calc();
             }
             if (onDrawBody) {
-                onDrawBody(/*{
-                    dataStart: startRenderedRow + dataRangeStart,
-                    dataEnd: endRenderedRow + dataRangeStart,
-                    scrolled: table.parentElement.scrollTop - startRenderedRow * rowsHeight
-                }*/);
+                onDrawBody();
             }
         }
 
-        function redrawBody(viewportBias) {
+        function redrawBody() {
             renderedRangeStart = renderedRangeEnd = -1;
-            drawBody(viewportBias);
+            Ui.throttle(drawBody, renderingThrottle);
         }
         Object.defineProperty(this, 'redrawBody', {
             get: function () {

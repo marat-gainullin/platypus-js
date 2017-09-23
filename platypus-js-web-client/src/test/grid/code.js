@@ -579,7 +579,7 @@ describe('Grid Api', function () {
             done();
         });
     });
-    it('Editing.Inline', function (done) {
+    fit('Editing.Inline', function (done) {
         require([
             'forms/grid/grid',
             'forms/grid/columns/column-node',
@@ -616,7 +616,7 @@ describe('Grid Api', function () {
 
             semantic.addColumnNode(name);
             var birth = new ColumnNode();
-            birth.editor = birth.view = null;
+            birth.editor = birth.renderer = null;
             birth.field = birth.title = 'birth';
             birth.width = 170;
             birth.visible = false;
@@ -642,7 +642,7 @@ describe('Grid Api', function () {
 
             expect(instance.frozenLeft.rowsCount).toEqual(2);
             expect(instance.frozenRight.rowsCount).toEqual(2);
-            expect(instance.bodyLeft.rowsCount).toEqual(6);// 6 instead of 8 because of virtual nature of grid
+            expect(instance.bodyLeft.rowsCount).toEqual(6);// 6 instead of 8 because of grid virtualization
             expect(instance.bodyRight.rowsCount).toEqual(6);
 
             expect(instance.frozenLeft.columnsCount).toEqual(4);

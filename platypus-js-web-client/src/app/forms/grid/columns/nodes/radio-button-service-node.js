@@ -28,6 +28,11 @@ define([
                 return copy;
             }
         });
+        Object.defineProperty(this, 'renderer', {
+            get: function () {
+                return null;
+            }
+        });
         Object.defineProperty(this, 'editor', {
             get: function () {
                 return null;

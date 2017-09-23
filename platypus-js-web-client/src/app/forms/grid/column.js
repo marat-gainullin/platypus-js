@@ -17,7 +17,7 @@ define([
         var columnStyleName = 'p-grid-column-' + Id.generate();
         var field = null;
         var sortField = null;
-        var view = null;
+        var renderer = null;
         var editor = null;
         /**
          * Minimum column width while resizing by a user.
@@ -329,9 +329,9 @@ define([
                 viewCell.classList.add('p-grid-cell-check-box');
             } else {
                 var html;
-                if (view) {
-                    view.value = value;
-                    html = view.text;
+                if (renderer) {
+                    renderer.value = value;
+                    html = renderer.text;
                 } else if (value instanceof Date) {
                     html = value.toJSON();
                 } else {
@@ -407,13 +407,13 @@ define([
             }
         });
 
-        Object.defineProperty(this, 'view', {
+        Object.defineProperty(this, 'renderer', {
             get: function () {
-                return view;
+                return renderer;
             },
             set: function (aValue) {
-                if (view !== aValue) {
-                    view = aValue;
+                if (renderer !== aValue) {
+                    renderer = aValue;
                 }
             }
         });

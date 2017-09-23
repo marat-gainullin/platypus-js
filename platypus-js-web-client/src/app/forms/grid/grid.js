@@ -602,9 +602,7 @@ define([
                 selectionLead = item;
                 fireSelected(item);
             });
-            var rows = discoverRows();
-            if (cursorProperty)
-                rows[cursorProperty] = selectionLead;
+            setCursorOn(selectionLead, false);
             if (needRedraw) {
                 redrawFrozen();
                 redrawBody();
@@ -622,8 +620,7 @@ define([
             var rows = discoverRows();
             selectedRows = new Set(rows);
             selectionLead = rows.length > 0 ? rows[0] : null;
-            if (cursorProperty)
-                rows[cursorProperty] = selectionLead;
+            setCursorOn(selectionLead, false);
             fireSelected(selectionLead);
             if (needRedraw) {
                 redrawFrozen();
@@ -804,7 +801,12 @@ define([
             },
             set: function (aValue) {
                 renderingThrottle = aValue;
-                bodyRight.renderingThrottle = renderingThrottle;
+                [
+                    frozenLeft, frozenRight,
+                    bodyLeft, bodyRight
+                ].forEach(function (section) {
+                    section.renderingThrottle = renderingThrottle;
+                });
             }
         });
         Object.defineProperty(this, 'renderingPadding', {
@@ -813,7 +815,12 @@ define([
             },
             set: function (aValue) {
                 renderingPadding = aValue;
-                bodyRight.renderingPadding = renderingPadding;
+                [
+                    frozenLeft, frozenRight,
+                    bodyLeft, bodyRight
+                ].forEach(function (section) {
+                    section.renderingPadding = renderingPadding;
+                });
             }
         });
 
@@ -1535,7 +1542,7 @@ define([
         }
         Object.defineProperty(this, 'removeColumnNodeAt', {
             get: function () {
-                return removeColumnNode;
+                return removeColumnNodeAt;
             }
         });
 
@@ -1772,8 +1779,7 @@ define([
                         }
                     }
                     if (focusedCell.row >= 0 && focusedCell.row < viewRows.length) {
-                        selectionLead = viewRows[focusedCell.row];
-                        setCursorOn(selectionLead, false);
+                        setCursorOn(viewRows[focusedCell.row], false);
                     }
                     if (needRedraw) {
                         redrawFrozen();
@@ -1898,6 +1904,7 @@ define([
         });
         function sort() {
             applyRows(true);
+            redrawHeaders();
         }
         Object.defineProperty(this, 'sort', {
             get: function () {
@@ -1940,6 +1947,7 @@ define([
             });
             if (apply) {
                 applyRows(true);
+                redrawHeaders();
             }
         }
         Object.defineProperty(this, 'unsort', {
