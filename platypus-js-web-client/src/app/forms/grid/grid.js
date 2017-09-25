@@ -484,7 +484,7 @@ define([
                                 deletedAt = i;
                             }
                         }
-                        removedItems(deleted);
+                        itemsRemoved(deleted);
                         var viewIndexToSelect = lastSelectedViewIndex;
                         if (deletedAt > -1) {
                             var vIndex = viewIndexToSelect;
@@ -510,7 +510,7 @@ define([
                     var elementClass = rows['elementClass'];
                     var inserted = elementClass ? new elementClass() : {};
                     rows.splice(insertAt, 0, inserted);
-                    addedItems([inserted]);
+                    itemsAdded([inserted]);
                     goTo(inserted, true);
                 }
             }
@@ -521,38 +521,38 @@ define([
             return rows ? rows : [];
         }
 
-        function removedItems(items) {
+        function itemsRemoved(items) {
             if (!Array.isArray(items))
                 items = [items];
             items.forEach(function (item) {
                 expandedRows.delete(item);
             });
             rebindElements();
-            applyRows(false);
+            rowsToViewRows(false);
             setupRanges(true);
         }
 
         Object.defineProperty(this, 'removed', {
             get: function () {
-                return removedItems;
+                return itemsRemoved;
             }
         });
 
-        function addedItems(items) {
+        function itemsAdded(items) {
             if (!Array.isArray(items))
                 items = [items];
             rebindElements();
-            applyRows(false);
+            rowsToViewRows(false);
             setupRanges(true);
         }
 
         Object.defineProperty(this, 'added', {
             get: function () {
-                return addedItems;
+                return itemsAdded;
             }
         });
 
-        function changedItems(items) {
+        function itemsChanged(items) {
             if (!Array.isArray(items))
                 items = [items];
             redrawFrozen();
@@ -561,7 +561,7 @@ define([
 
         Object.defineProperty(this, 'changed', {
             get: function () {
-                return changedItems;
+                return itemsChanged;
             }
         });
 
@@ -1006,7 +1006,7 @@ define([
                     var children = getChildrenOf(anElement);
                     if (children && children.length > 0) {
                         expandedRows.add(anElement);
-                        applyRows(false);
+                        rowsToViewRows(false);
                         setupRanges(true);
                         fireExpanded(anElement);
                     }
@@ -1024,7 +1024,7 @@ define([
             if (isTreeConfigured()) {
                 if (expandedRows.has(anElement)) {
                     expandedRows.delete(anElement);
-                    applyRows(false);
+                    rowsToViewRows(false);
                     setupRanges(true);
                     fireCollapsed(anElement);
                 }
@@ -1133,6 +1133,7 @@ define([
                 for (var p = 0; p < path.length - 1/* exclude last element*/; p++) {
                     if (!expandedRows.has(path[p])) {
                         expandedRows.add(path[p]);
+                        fireRowsSort();
                         fireExpanded(path[p]);
                         expanded = true;
                     }
@@ -1141,8 +1142,8 @@ define([
             var index;
             if (expanded) {
                 lookupTreeColumn();
-                index = regenerateFront(anItem);
-                sortFront();
+                index = generateViewRows(anItem);
+                sortViewRows();
                 setupRanges(false);
             } else {
                 index = viewRows.indexOf(anItem);
@@ -1182,7 +1183,7 @@ define([
                 bindElements();
                 bindCursor();
             }
-            applyRows(false);
+            rowsToViewRows(false);
             setupRanges(true);
         }
 
@@ -1215,7 +1216,7 @@ define([
             }
             unbindElements();
             unbindCursor();
-            applyRows(false);
+            rowsToViewRows(false);
             setupRanges(true);
         }
 
@@ -1275,7 +1276,7 @@ define([
                     var isTree = isTreeConfigured();
                     if (wasTree !== isTree) {
                         expandedRows.clear();
-                        applyRows(false);
+                        rowsToViewRows(false);
                         setupRanges(true);
                     }
                 }
@@ -1289,7 +1290,7 @@ define([
             set: function (aValue) {
                 if (indent !== aValue) {
                     indent = aValue;
-                    applyRows(true);
+                    rowsToViewRows(true);
                 }
             }
         });
@@ -1305,7 +1306,7 @@ define([
                     var isTree = isTreeConfigured();
                     if (wasTree !== isTree) {
                         expandedRows.clear();
-                        applyRows(false);
+                        rowsToViewRows(false);
                         setupRanges(true);
                     }
                 }
@@ -1374,7 +1375,7 @@ define([
         });
 
         var treeIndicatorColumn;
-        function lookupTreeColumn() {
+        function lookupTreeColumn(treeWidthPadding) {
             var found = null;
             if (isTreeConfigured()) {
                 var c = 0;
@@ -1397,6 +1398,9 @@ define([
                     treeIndicatorColumn.padding = 0;
                 }
                 treeIndicatorColumn = found;
+                if (treeIndicatorColumn) {
+                    treeIndicatorColumn.padding = treeWidthPadding;
+                }
             }
         }
         Object.defineProperty(this, 'treeIndicatorColumn', {
@@ -1444,6 +1448,7 @@ define([
         });
 
         function applyColumnsNodes() {
+            var treeWidthPadding = treeIndicatorColumn ? treeIndicatorColumn.padding : 0;
             clearColumnsNodes(false);
 
             function injectHeaders(forest) {
@@ -1480,7 +1485,7 @@ define([
             ].forEach(function (section) {
                 section.style.display = frozenColumns > 0 ? '' : 'none';
             });
-            lookupTreeColumn();
+            lookupTreeColumn(treeWidthPadding);
             updateSectionsWidth();
             redraw();
         }
@@ -1903,7 +1908,7 @@ define([
             }
         });
         function sort() {
-            applyRows(true);
+            rowsToViewRows(true);
             redrawHeaders();
         }
         Object.defineProperty(this, 'sort', {
@@ -1946,7 +1951,7 @@ define([
                 column.unsort(false);
             });
             if (apply) {
-                applyRows(true);
+                rowsToViewRows(true);
                 redrawHeaders();
             }
         }
@@ -1956,7 +1961,7 @@ define([
             }
         });
 
-        function regenerateFront(anItemToLookup) {
+        function generateViewRows(anItemToLookup) {
             var itemToLookupIndex = -1;
             depths.clear();
             var rows = discoverRows();
@@ -1996,7 +2001,7 @@ define([
             return itemToLookupIndex;
         }
 
-        function sortFront() {
+        function sortViewRows() {
             if (sortedColumns.length > 0) {
                 viewRows.sort(function (o1, o2) {
                     if (isTreeConfigured() && getParentOf(o1) !== getParentOf(o2)) {
@@ -2029,22 +2034,16 @@ define([
                     return res;
                 });
             }
-            [
-                frozenLeft, frozenRight,
-                bodyLeft, bodyRight
-            ].forEach(function (section) {
-                section.data = viewRows;
-            });
-
+            viewRowsToSections();
             fireRowsSort();
         }
 
-        function applyRows(needRedraw) {
+        function rowsToViewRows(needRedraw) {
             if (arguments.length < 1)
                 needRedraw = true;
             lookupTreeColumn();
-            regenerateFront();
-            sortFront();
+            generateViewRows();
+            sortViewRows();
             if (needRedraw) {
                 redrawFrozen();
                 redrawBody();
@@ -2067,7 +2066,6 @@ define([
         });
 
         function fireExpanded(anElement) {
-            fireRowsSort();
             var event = new ItemEvent(self, anElement);
             expandListeners.forEach(function (h) {
                 Invoke.later(function () {
@@ -2116,7 +2114,6 @@ define([
         });
 
         function fireCollapsed(anElement) {
-            fireRowsSort();
             var event = new ItemEvent(self, anElement);
             collapseHandlers.forEach(function (h) {
                 Invoke.later(function () {
@@ -2164,18 +2161,21 @@ define([
             }
         });
 
+        function viewRowsToSections() {
+            [
+                frozenLeft, frozenRight,
+                bodyLeft, bodyRight
+            ].forEach(function (section) {
+                section.data = viewRows;
+            });
+        }
+
         function fireRowsSort() {
             var event = new SortEvent(this);
             sortHandlers.forEach(function (h) {
                 Invoke.later(function () {
                     h(event);
                 });
-            });
-            [
-                frozenLeft, frozenRight,
-                bodyLeft, bodyRight
-            ].forEach(function (section) {
-                section.data = viewRows;
             });
         }
 

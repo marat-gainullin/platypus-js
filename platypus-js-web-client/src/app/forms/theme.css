@@ -129,11 +129,11 @@
     position: absolute;
     top: 2px;
     right: 5px;
-    
+
     content: ' ';
     width: 0px;
     height: 0px; 
-    
+
     border-left: 3px solid transparent;
     border-right: 3px solid transparent;
 }
@@ -191,4 +191,16 @@
 .p-grid-cell-check-box,
 .p-grid-cell-service {
     text-align: center;
+}
+
+.p-grid-row-drop-before {
+    background-image: linear-gradient(to top, white 80%, gray);
+}
+
+.p-grid-row-drop-into {
+    background-color: gray !important;
+}
+
+.p-grid-row-drop-after {
+    background-image: linear-gradient(to bottom, white 80%, gray);
 }

@@ -444,6 +444,96 @@ describe('Grid Api', function () {
             done();
         });
     });
+    fit('Rows.Dragging', function (done) {
+        require([
+            'logger',
+            'forms/grid/grid',
+            'forms/grid/columns/column-node',
+            'forms/grid/columns/nodes/order-num-service-node',
+            'forms/grid/columns/nodes/marker-service-node',
+            'forms/grid/columns/nodes/check-box-service-node',
+            'forms/grid/columns/nodes/radio-button-service-node'
+        ], function (
+                Logger,
+                Grid,
+                ColumnNode,
+                OrderNumServiceColumnNode,
+                MarkerColumnNode,
+                CheckBoxColumnNode,
+                RadioButtonColumnNode) {
+            var instance = new Grid();
+            instance.width = instance.height = 300;
+            instance.frozenRows = 2;
+            document.body.appendChild(instance.element);
+
+            var nmb = new OrderNumServiceColumnNode();
+            instance.addColumnNode(nmb);
+            var marker = new MarkerColumnNode();
+            instance.addColumnNode(marker);
+            var check = new CheckBoxColumnNode();
+            instance.addColumnNode(check);
+            var radio = new RadioButtonColumnNode();
+            instance.addColumnNode(radio);
+
+            var semantic = new ColumnNode();
+            semantic.title = 'semantic';
+
+            var name = new ColumnNode();
+            name.field = name.title = 'name';
+
+            semantic.addColumnNode(name);
+            var birth = new ColumnNode();
+            birth.editor = birth.renderer = null;
+            birth.field = birth.title = 'birth';
+            birth.width = 170;
+            birth.visible = false;
+            semantic.addColumnNode(birth);
+            var payed = new ColumnNode();
+            payed.field = payed.title = 'payed';
+            semantic.addColumnNode(payed);
+
+            instance.addColumnNode(semantic);
+
+            instance.frozenColumns = 4;
+
+            instance.data = treeSamples;
+            instance.parentField = 'parent';
+            instance.childrenField = 'children';
+
+            instance.draggableRows = true;
+            instance.onDragBefore = function (row, before) {
+                Logger.info('Drag of row: ' + row + '; before: ' + before);
+            };
+            instance.onDragInto = function (row, into) {
+                Logger.info('Drag of row: ' + row + '; into: ' + into);
+            };
+            instance.onDragAfter = function (row, after) {
+                Logger.info('Drag of row: ' + row + '; after: ' + after);
+            };
+            instance.onDropBefore = function (row, before) {
+                Logger.info('Drop of row: ' + row + '; before: ' + before);
+            };
+            instance.onDropInto = function (row, into) {
+                Logger.info('Drop of row: ' + row + '; into: ' + into);
+            };
+            instance.onDropAfter = function (row, after) {
+                Logger.info('Drop of row: ' + row + '; after: ' + after);
+            };
+
+            expect(instance.frozenLeft.rowsCount).toEqual(2);
+            expect(instance.frozenRight.rowsCount).toEqual(2);
+            expect(instance.bodyLeft.rowsCount).toEqual(6);// 6 instead of 8 because of grid virtualization
+            expect(instance.bodyRight.rowsCount).toEqual(6);
+
+            expect(instance.frozenLeft.columnsCount).toEqual(4);
+            expect(instance.bodyLeft.columnsCount).toEqual(4);
+            expect(instance.frozenRight.columnsCount).toEqual(3);
+            expect(instance.bodyRight.columnsCount).toEqual(3);
+
+            document.body.removeChild(instance.element);
+            done();
+        });
+    });
     var treeSamples = [];
     (function () {
         var maxDepth = 2;
@@ -579,7 +669,7 @@ describe('Grid Api', function () {
             done();
         });
     });
-    fit('Editing.Inline', function (done) {
+    it('Editing.Inline', function (done) {
         require([
             'forms/grid/grid',
             'forms/grid/columns/column-node',

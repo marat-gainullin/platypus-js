@@ -1,12 +1,11 @@
 define([
-    '../../../ui',
-    '../columns/column-drag'
+    '../../../ui'
 ], function (
-        Ui,
-        ColumnDrag
+        Ui
         ) {
 
     var HEADER_VIEW = 'header-view';
+    var columnDrag = null;
 
     function NodeView(text, viewColumnNode) {
         var self = this;
@@ -72,7 +71,7 @@ define([
                 if (resizable && event.button === 0) {
                     event.preventDefault();
                     event.stopPropagation();
-                    ColumnDrag.instance = {
+                    columnDrag = {
                         resize: true
                     };
                     columnToResize = findRightMostLeafColumn();
@@ -81,7 +80,7 @@ define([
                     if (!onMouseUp) {
                         onMouseUp = Ui.on(document, Ui.Events.MOUSEUP, function (event) {
                             event.stopPropagation();
-                            ColumnDrag.instance = null;
+                            columnDrag = null;
                             columnToResize = null;
                             if (onMouseUp) {
                                 onMouseUp.removeHandler();
@@ -110,11 +109,11 @@ define([
         }());
 
         Ui.on(thMover, Ui.Events.DRAGSTART, function (event) {
-            if (ColumnDrag.instance && ColumnDrag.instance.resize) {
+            if (columnDrag && columnDrag.resize) {
                 event.stopPropagation();
                 event.preventDefault();
             } else {
-                ColumnDrag.instance = {
+                columnDrag = {
                     move: true,
                     column: viewColumnNode.column
                 };
@@ -123,26 +122,26 @@ define([
                 var onDragEnd = Ui.on(thMover, Ui.Events.DRAGEND, function (event) {
                     onDragEnd.removeHandler();
                     onDragEnd = null;
-                    if (ColumnDrag.instance &&
-                            ColumnDrag.instance.move) {
-                        if (ColumnDrag.instance.clear) {
-                            ColumnDrag.instance.clear();
-                            ColumnDrag.instance.clear = null;
+                    if (columnDrag &&
+                            columnDrag.move) {
+                        if (columnDrag.clear) {
+                            columnDrag.clear();
+                            columnDrag.clear = null;
                         }
-                        ColumnDrag.instance = null;
+                        columnDrag = null;
                     }
                 });
             }
         });
 
         function onDragOver(event) {
-            if (ColumnDrag.instance &&
-                    ColumnDrag.instance.move &&
-                    ColumnDrag.instance.column !== viewColumnNode.column &&
-                    ColumnDrag.instance.column.node.parent === viewColumnNode.column.node.parent) {
+            if (columnDrag &&
+                    columnDrag.move &&
+                    columnDrag.column !== viewColumnNode.column &&
+                    columnDrag.column.node.parent === viewColumnNode.column.node.parent) {
                 event.preventDefault();
                 event.dataTransfer.dropEffect = 'move';
-                if (inThRect(event) && ColumnDrag.instance.enteredTh === th) {
+                if (inThRect(event) && columnDrag.enteredTh === th) {
                     var rect = th.getBoundingClientRect();
                     if (event.clientX < rect.left + rect.width / 2) {
                         if (!moveHintLeft.parentElement) {
@@ -173,15 +172,15 @@ define([
                     event.clientY < rect.bottom;
         }
         function onDragEnter(event) {
-            if (inThRect(event) && ColumnDrag.instance &&
-                    ColumnDrag.instance.move &&
-                    ColumnDrag.instance.column !== viewColumnNode.column &&
-                    ColumnDrag.instance.column.node.parent === viewColumnNode.column.node.parent) {
-                ColumnDrag.instance.enteredTh = th;
+            if (inThRect(event) && columnDrag &&
+                    columnDrag.move &&
+                    columnDrag.column !== viewColumnNode.column &&
+                    columnDrag.column.node.parent === viewColumnNode.column.node.parent) {
+                columnDrag.enteredTh = th;
                 event.dataTransfer.dropEffect = 'move';
-                if (ColumnDrag.instance.clear) {
-                    ColumnDrag.instance.clear();
-                    ColumnDrag.instance.clear = null;
+                if (columnDrag.clear) {
+                    columnDrag.clear();
+                    columnDrag.clear = null;
                 }
                 if (th.className.indexOf('p-grid-column-move-target') === -1) {
                     th.classList.add('p-grid-column-move-target');
@@ -192,7 +191,7 @@ define([
                     } else {
                         th.appendChild(moveHintRight);
                     }
-                    ColumnDrag.instance.clear = function () {
+                    columnDrag.clear = function () {
                         th.classList.remove('p-grid-column-move-target');
                         if (moveHintLeft.parentElement) {
                             th.removeChild(moveHintLeft);
@@ -208,28 +207,28 @@ define([
         }
         Ui.on(th, Ui.Events.DRAGENTER, onDragEnter);
         function onDragLeave(event) {
-            if (!inThRect(event) && ColumnDrag.instance &&
-                    ColumnDrag.instance.move &&
-                    ColumnDrag.instance.enteredTh === th) {
-                if (ColumnDrag.instance.clear) {
-                    ColumnDrag.instance.clear();
-                    ColumnDrag.instance.clear = null;
+            if (!inThRect(event) && columnDrag &&
+                    columnDrag.move &&
+                    columnDrag.enteredTh === th) {
+                if (columnDrag.clear) {
+                    columnDrag.clear();
+                    columnDrag.clear = null;
                 }
             }
         }
         Ui.on(th, Ui.Events.DRAGLEAVE, onDragLeave);
         function onDrop(event) {
-            if (inThRect(event) && ColumnDrag.instance &&
-                    ColumnDrag.instance.move &&
-                    ColumnDrag.instance.enteredTh === th) {
-                var droppedNode = ColumnDrag.instance.column.node;
+            if (inThRect(event) && columnDrag &&
+                    columnDrag.move &&
+                    columnDrag.enteredTh === th) {
+                var droppedNode = columnDrag.column.node;
                 var targetNode = viewColumnNode.column.node;
                 var grid = viewColumnNode.column.grid;
-                if (ColumnDrag.instance.clear) {
-                    ColumnDrag.instance.clear();
-                    ColumnDrag.instance.clear = null;
+                if (columnDrag.clear) {
+                    columnDrag.clear();
+                    columnDrag.clear = null;
                 }
-                ColumnDrag.instance = null;
+                columnDrag = null;
                 var rect = th.getBoundingClientRect();
                 if (event.clientX < rect.left + rect.width / 2) {
                     grid.insertBeforeColumnNode(droppedNode, targetNode);

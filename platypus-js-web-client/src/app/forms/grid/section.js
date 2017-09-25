@@ -381,54 +381,177 @@ define([
             }
         });
 
+        function inTrRect(viewRow, event) {
+            var rect = viewRow.getBoundingClientRect();
+            return event.clientX >= rect.left &&
+                    event.clientY >= rect.top &&
+                    event.clientX < rect.right &&
+                    event.clientY < rect.bottom;
+        }
+
+        function checkRegion(viewRow, event) {
+            function clear() {
+                if (rowDrag.clear) {
+                    rowDrag.clear();
+                    rowDrag.clear = null;
+                }
+                rowDrag.clear = function () {
+                    viewRow.classList.remove('p-grid-row-drop-before');
+                    viewRow.classList.remove('p-grid-row-drop-into');
+                    viewRow.classList.remove('p-grid-row-drop-after');
+                };
+            }
+            function check(className) {
+                if (viewRow.className.indexOf(className) === -1) {
+                    clear();
+                    viewRow.classList.add(className);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            var rect = viewRow.getBoundingClientRect();
+            var heightPortion = (event.clientY - rect.top) / rect.height;
+            if (heightPortion <= 0.2) {
+                var modified = check('p-grid-row-drop-before');
+                return {
+                    onDrag: grid.onDragBefore,
+                    onDrop: grid.onDropBefore,
+                    modified: modified
+                };
+            } else if (heightPortion > 0.2 && heightPortion <= 0.8) {
+                var modified = check('p-grid-row-drop-into');
+                return {
+                    onDrag: grid.onDragInto,
+                    onDrop: grid.onDropInto,
+                    modified: modified
+                };
+            } else {
+                var modified = check('p-grid-row-drop-after');
+                return {
+                    onDrag: grid.onDragAfter,
+                    onDrop: grid.onDropAfter,
+                    modified: modified
+                };
+            }
+        }
 
         function drawBodyPortion(start, end) {
             if (end - start > 0 && columns.length > 0) {
                 var grid = columns[0].grid;
                 for (var i = start; i < end; i++) {
-                    var dataRow = data[i];
-                    var viewRow = document.createElement('tr');
-                    if (draggableRows) {
-                        viewRow.draggable = draggableRows;
-                    }
-                    viewRow.className = 'p-grid-row ' + dynamicRowsClassName;
-                    if ((i + 1) % 2 === 0) {
-                        viewRow.classList.add(dynamicEvenRowsClassName);
-                    } else {
-                        viewRow.classList.add(dynamicOddRowsClassName);
-                    }
-                    if (grid.isSelected(dataRow))
-                        viewRow.classList.add('p-grid-selected-row');
-                    viewRow[JS_ROW_NAME] = dataRow;
-                    if (i < renderedRangeStart) {
-                        // insertFirst ...
-                        if (tbody.firstElementChild)
-                            tbody.insertBefore(viewRow, tbody.firstElementChild);
-                        else
-                            tbody.appendChild(viewRow);
-                        // ... insertFirst
-                    } else {
-                        tbody.appendChild(viewRow);
-                    }
-                    var columnsBias = self === grid.frozenRight || self === grid.bodyRight ? grid.frozenColumns : 0;
-                    for (var c = 0; c < columns.length; c++) {
-                        var column = columns[c];
-                        var viewCell = document.createElement('td');
-                        // TODO: Check alignment of the cell
-                        // TODO: Check image decoration of the cell and decoration styles
-                        viewCell.className = 'p-grid-cell ' + dynamicCellsClassName + ' ' + column.styleName;
-                        if (i === grid.focusedRow && columnsBias + c === grid.focusedColumn) {
-                            viewCell.classList.add('p-grid-cell-focused');
+                    (function () {
+                        var dataRow = data[i];
+                        var viewRow = document.createElement('tr');
+                        if (draggableRows) {
+                            viewRow.draggable = draggableRows;
                         }
-                        viewRow.appendChild(viewCell);
-                        column.render(i, columnsBias + c, dataRow, viewCell);
-                        if (grid.activeEditor && i === grid.focusedRow && grid.activeEditor === column.editor) {
-                            viewCell.appendChild(grid.activeEditor.element);
-                            if (grid.activeEditor.focus) {
-                                grid.activeEditor.focus();
+                        viewRow.className = 'p-grid-row ' + dynamicRowsClassName;
+                        if ((i + 1) % 2 === 0) {
+                            viewRow.classList.add(dynamicEvenRowsClassName);
+                        } else {
+                            viewRow.classList.add(dynamicOddRowsClassName);
+                        }
+                        if (grid.isSelected(dataRow))
+                            viewRow.classList.add('p-grid-selected-row');
+                        viewRow[JS_ROW_NAME] = dataRow;
+                        if (i < renderedRangeStart) {
+                            // insertFirst ...
+                            if (tbody.firstElementChild)
+                                tbody.insertBefore(viewRow, tbody.firstElementChild);
+                            else
+                                tbody.appendChild(viewRow);
+                            // ... insertFirst
+                        } else {
+                            tbody.appendChild(viewRow);
+                        }
+                        var columnsBias = self === grid.frozenRight || self === grid.bodyRight ? grid.frozenColumns : 0;
+                        for (var c = 0; c < columns.length; c++) {
+                            var column = columns[c];
+                            var viewCell = document.createElement('td');
+                            // TODO: Check alignment of the cell
+                            // TODO: Check image decoration of the cell and decoration styles
+                            viewCell.className = 'p-grid-cell ' + dynamicCellsClassName + ' ' + column.styleName;
+                            if (i === grid.focusedRow && columnsBias + c === grid.focusedColumn) {
+                                viewCell.classList.add('p-grid-cell-focused');
+                            }
+                            viewRow.appendChild(viewCell);
+                            column.render(i, columnsBias + c, dataRow, viewCell);
+                            if (grid.activeEditor && i === grid.focusedRow && grid.activeEditor === column.editor) {
+                                viewCell.appendChild(grid.activeEditor.element);
+                                if (grid.activeEditor.focus) {
+                                    grid.activeEditor.focus();
+                                }
                             }
                         }
-                    }
+                        if (draggableRows) {
+                            Ui.on(viewRow, Ui.Events.DRAGSTART, function (event) {
+                                event.stopPropagation();
+                                rowDrag = {
+                                    row: dataRow
+                                };
+                                event.dataTransfer.effectAllowed = 'move';
+                                event.dataTransfer.setData('text/plain', 'p-grid-row-move');
+                                var onDragEnd = Ui.on(viewRow, Ui.Events.DRAGEND, function (event) {
+                                    event.stopPropagation();
+                                    if (onDragEnd) {
+                                        onDragEnd.removeHandler();
+                                        onDragEnd = null;
+                                    }
+                                    if (rowDrag) {
+                                        if (rowDrag.clear) {
+                                            rowDrag.clear();
+                                        }
+                                        rowDrag = null;
+                                    }
+                                });
+                            });
+                            function onDragEnterOver(event) {
+                                if (rowDrag && rowDrag.row !== dataRow && inTrRect(viewRow, event)) {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    var region = checkRegion(viewRow, event);
+                                    if (region.onDrag) {
+                                        event.dropEffect = 'move';
+                                        if (region.modified) {
+                                            region.onDrag(rowDrag.row, dataRow, event);
+                                        }
+                                    } else {
+                                        event.dropEffect = 'none';
+                                    }
+                                }
+                            }
+                            Ui.on(viewRow, Ui.Events.DRAGENTER, onDragEnterOver);
+                            Ui.on(viewRow, Ui.Events.DRAGOVER, onDragEnterOver);
+                            Ui.on(viewRow, Ui.Events.DROP, function (event) {
+                                if (rowDrag && rowDrag.row !== dataRow) {
+                                    if (rowDrag.clear) {
+                                        rowDrag.clear();
+                                        rowDrag.clear = null;
+                                    }
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    var region = checkRegion(viewRow, event);
+                                    if (region.onDrop) {
+                                        event.dropEffect = 'move';
+                                        region.onDrop(rowDrag.row, dataRow, event);
+                                    } else {
+                                        event.dropEffect = 'none';
+                                    }
+                                }
+                            });
+                            Ui.on(viewRow, Ui.Events.DRAGLEAVE, function (event) {
+                                if (rowDrag && !inTrRect(viewRow, event)) {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    if (rowDrag && rowDrag.clear) {
+                                        rowDrag.clear();
+                                        rowDrag.clear = null;
+                                    }
+                                }
+                            });
+                        }
+                    }());
                 }
             }
         }
@@ -503,37 +626,6 @@ define([
             if (columns.length > 0) {
             }
         }
-
-        /*
-         function redrawRow(index) {
-         if (index - startRow >= 0 && index - startRow < tbody.rows.length) {
-         var viewRow = tbody.rows[index - startRow];
-         var dataRow = data[index];
-         for (var c = 0; c < columns.length; c++) {
-         var column = columns[c];
-         var viewCell = viewRow.cells[c];
-         viewCell.className = 'p-grid-cell ' + dynamicCellsClassName + ' ' + column.styleName;
-         column.render(index, dataRow, viewCell);
-         }
-         } // if the row is not rendered then we have nothing to do
-         }
-         
-         function redrawColumn(index) {
-         if (index >= 0 && index < columns.length) {
-         var column = columns[index];
-         for (var i = startRow; i < endRow; i++) {
-         var dataRow = data[i];
-         var viewRow = tbody.rows[i - startRow];
-         var viewCell = viewRow.cells[index];
-         viewCell.className = 'p-grid-cell ' + dynamicCellsClassName + ' ' + column.styleName;
-         while (viewCell.firstElementChild) {
-         viewCell.removeChild(viewCell.firstElementChild);
-         }
-         column.render(i, dataRow, viewCell);
-         }
-         }
-         }
-         */
     }
     return Section;
 });
