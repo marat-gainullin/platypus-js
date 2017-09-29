@@ -1,0 +1,31 @@
+.p-window-tl {
+    cursor: nw-resize;
+}
+.p-window-tr {
+    cursor: ne-resize;
+}
+.p-window-bl {
+    cursor: sw-resize;
+}
+.p-window-br {
+    cursor: se-resize;
+}
+
+.p-window-t {
+    cursor: ns-resize;
+}
+.p-window-b {
+    cursor: ns-resize;
+}
+.p-window-l {
+    cursor: ew-resize;
+}
+.p-window-r {
+    cursor: ew-resize;
+}
+.p-window-t,.p-window-b,.p-window-l,.p-window-r {
+    /* background-color: bisque; */
+}
+.p-window-tl,.p-window-tr,.p-window-bl,.p-window-br {
+    /* background-color: blueviolet; */
+}

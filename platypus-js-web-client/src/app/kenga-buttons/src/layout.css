@@ -1,0 +1,9 @@
+.p-dropdown-chevron {
+    position: absolute;
+    display: inline-block;
+    box-sizing: border-box;
+    width: 20px;
+    top: 0px;
+    right: 0px;
+    height: 100%;
+}

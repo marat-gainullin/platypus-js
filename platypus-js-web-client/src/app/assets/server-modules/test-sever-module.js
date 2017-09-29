@@ -1,7 +1,7 @@
 /**
  * @public 
  */
-define(['invoke'], function (Invoke) {
+define(['core/invoke'], function (Invoke) {
     function EchoServerModule() {
         this.echo = function (a, b, c, d, onSuccess, onFailure) {
             var result = a + ' - ' + b + ' - ' + c + ' - ' + d;

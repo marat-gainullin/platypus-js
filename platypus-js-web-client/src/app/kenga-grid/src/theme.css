@@ -1,0 +1,140 @@
+.p-grid-shell{
+}
+
+.p-grid-cell {
+    border-style: solid;
+    border-width: 1px;
+    border-color: lightgray;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.p-grid-header-cell {
+    border-style: solid;
+    border-width: 1px;
+    border-color: lightgray;
+}
+
+.p-grid-columns-chevron {
+    display: inline-block;
+    position: absolute;
+    box-sizing: border-box;
+    right: 0px;
+    top: 0px;
+    width: 10px;
+    bottom: 0px;
+    background-color: lightgray;
+}
+
+.p-grid-column-resizer {
+    cursor: ew-resize;
+}
+
+.p-grid-column-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.p-grid-column-move-hint-left,
+.p-grid-column-move-hint-right {
+    display: inline-block;
+    position: absolute;
+    box-sizing: border-box;
+    background-color: crimson;
+    top: 0px;
+    height: 100%;
+    width: 3px;
+}
+
+.p-grid-column-move-hint-left {
+    left: -2px;
+}
+
+.p-grid-column-move-hint-right{
+    right: -2px;
+}
+
+.p-grid-column-move-target {
+    background: bisque;
+}
+
+.p-grid-header-sorted-asc::after,
+.p-grid-header-sorted-desc::after {
+    position: absolute;
+    top: 2px;
+    right: 5px;
+
+    content: ' ';
+    width: 0px;
+    height: 0px; 
+
+    border-left: 3px solid transparent;
+    border-right: 3px solid transparent;
+}
+
+.p-grid-header-sorted-asc::after {
+    border-bottom: 5px solid gray;
+}
+
+.p-grid-header-sorted-desc::after {
+    border-top: 5px solid gray;
+}
+
+.p-grid-cell-cursor::before,
+.p-grid-cell-expanded::before,
+.p-grid-cell-collapsed::before {
+    content: ' ';
+    display: inline-block;
+    width: 0px;
+    height: 0px;
+    position: relative;
+}
+
+.p-grid-cell-expanded::before {
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid gray;
+    right: 7px;
+    bottom: 3px;
+    margin-left: -5px;
+}
+
+.p-grid-cell-collapsed::before {
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid gray;
+    right: 10px;
+    bottom: 0px;
+}
+
+.p-grid-cell-cursor::before {
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 8px solid gray;
+    margin-left: 5px;
+}
+
+.p-grid-selected-row {
+    background: lightblue !important;
+}
+
+.p-grid-cell-focused {
+    background: #5acaef;
+}
+
+.p-grid-cell-check-box,
+.p-grid-cell-service {
+    text-align: center;
+}
+
+.p-grid-row-drop-before {
+    background-image: linear-gradient(to top, white 80%, gray);
+}
+
+.p-grid-row-drop-into {
+    background-color: gray !important;
+}
+
+.p-grid-row-drop-after {
+    background-image: linear-gradient(to bottom, white 80%, gray);
+}

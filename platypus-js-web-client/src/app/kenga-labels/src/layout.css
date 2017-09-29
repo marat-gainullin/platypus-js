@@ -1,0 +1,30 @@
+.p-image-paragraph-layers > .p-image,
+.p-image-paragraph-layers > .p-paragraph {
+    margin: auto;
+}
+
+.p-image-paragraph-layers > .p-image {
+    display: block;
+}
+
+.p-image-paragraph-column > .p-image,
+.p-image-paragraph-column > .p-paragraph {
+    margin: auto;
+    display: block;
+}
+
+.p-image-paragraph-row > .p-image,
+.p-image-paragraph-row > .p-paragraph {
+    display: inline;
+    vertical-align: middle;
+}
+
+.p-image-paragraph-row-top > .p-image,
+.p-image-paragraph-row-top > .p-paragraph {
+    vertical-align: top;
+}
+
+.p-image-paragraph-row-bottom > .p-image,
+.p-image-paragraph-row-bottom > .p-paragraph {
+    vertical-align: bottom;
+}

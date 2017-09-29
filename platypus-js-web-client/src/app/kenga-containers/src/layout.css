@@ -1,0 +1,161 @@
+.p-flow {
+    white-space: normal;
+    line-height: 0px;
+    overflow: auto;
+}
+
+.p-flow > .p-widget {
+    vertical-align: bottom;
+}
+
+.p-cards > .p-widget,
+.p-tabs-content > .p-widget {
+    width: 100%;
+    height: 100%;
+}
+
+.p-cards,
+.p-tabs-content {
+    overflow: hidden;
+    position: relative;
+}
+
+.p-cards > .p-widget,
+.p-tabs-content > .p-widget {
+    display: none;
+}
+
+.p-cards > .p-card-shown,
+.p-tabs-content > .p-card-shown {
+    display: inline-block;
+}
+
+.p-tabs {
+}
+
+.p-tabs-content {
+}
+
+.p-tabs-captions,
+.p-tabs-captions-shell {
+    position: relative;
+}
+
+.p-tab-caption {
+    display: inline-block;
+    line-height: normal;
+}
+
+.p-tab-caption > .p-tab-caption-image {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.p-tab-caption-text {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.p-tab-caption-close-tool {
+    display: inline-block;
+    vertical-align: middle;
+    padding-left: 10px;
+}
+
+.p-tab-caption-close-tool::after {
+    content: 'x';
+}
+
+.p-tab-caption-selected {
+}
+
+.p-cells > .p-widget {
+    background-clip: content-box;
+}
+
+.p-anchors > .p-widget {
+    position: absolute;
+}
+
+.p-anchors {
+}
+
+.p-box-horizontal {
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+.p-box-vertical {
+    overflow-y: auto;
+}
+
+.p-scroll > .p-vertical-scroll-filler {
+    height: 100%
+}
+
+.p-scroll > .p-horizontal-scroll-filler {
+    width: 100%
+}
+
+.p-toolbar,
+.p-tabs-captions {
+    overflow-x: hidden;
+    white-space: nowrap;
+}
+
+.p-toolbar-chevron,
+.p-tabs-chevron {
+    position: absolute;
+    display: inline-block;
+    top: 0px;
+    height: 100%;
+    width: 20px;
+}
+
+.p-toolbar-chevron-left,
+.p-tabs-chevron-left {
+    left: 0px;
+}
+
+.p-toolbar-chevron-right,
+.p-tabs-chevron-right {
+    right: 0px;
+}
+
+.p-borders-column {
+    display: inline-flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+.p-borders-row {
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.p-borders-column > .p-borders-top,
+.p-borders-column > .p-borders-row,
+.p-borders-column > .p-borders-bottom,
+.p-borders-row > .p-borders-left,
+.p-borders-row > .p-borders-center,
+.p-borders-row > .p-borders-right {
+    display: inline-flex;
+}
+
+.p-borders-column > .p-borders-top,
+.p-borders-row > .p-borders-left {
+    order: 1;
+}
+
+.p-borders-column > .p-borders-row,
+.p-borders-row > .p-borders-center {
+    order: 2;
+    flex: 1 1;
+}
+
+.p-borders-column > .p-borders-bottom,
+.p-borders-row > .p-borders-right {
+    order: 3;
+}
+

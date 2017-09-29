@@ -1,0 +1,25 @@
+.p-error-popup {
+    border: 1px solid lightgrey;
+    border-radius: 10px;
+    padding: 10px;
+    margin-top: 5px;
+    max-width: 150px;
+    background: white;
+}
+
+.p-error-popup::after {
+    width: 10px;
+    height: 10px;
+    top: 0px;
+    margin-top: -6px;
+    margin-left: -5px;
+    border: 1px solid lightgray;
+    background: white;
+    transform: rotate(45deg);
+    clip-path: polygon(0 0, 0 100%, 100% 0);
+}
+
+.p-indeterminate::-webkit-slider-thumb {
+    visibility: hidden;
+    border: 1px solid lightgray;
+}

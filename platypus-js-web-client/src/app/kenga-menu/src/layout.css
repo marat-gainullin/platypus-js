@@ -1,0 +1,17 @@
+.p-menu-item > .p-paragraph,
+.p-menu-item > .p-image,
+.p-menu-item > input[type=check],
+.p-menu-item > input[type=radio] {
+    display: inline;
+    vertical-align: middle;
+}
+
+.p-menu, .p-menu-bar {
+    line-height: normal;
+    border: 1px solid lightgray;
+    cursor: pointer;
+}
+
+.p-menu {
+    position: absolute;
+}

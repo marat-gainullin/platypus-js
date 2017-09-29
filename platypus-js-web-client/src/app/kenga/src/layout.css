@@ -1,0 +1,71 @@
+/**
+ * Platypus UI layout rules
+ */
+.p-widget {
+    position: relative;
+    box-sizing: border-box;
+    display: inline-block;
+}
+
+.p-container {
+    overflow: hidden;
+    line-height: 0px;
+}
+
+.p-decorator > input,
+.p-decorator > select,
+.p-decorator > progress,
+.p-decorator > meter {
+    box-sizing: border-box;
+    display: inline;
+    width: 100%;
+    height: 100%;
+}
+
+.p-decorator-nullable-selectable > input,
+.p-decorator-nullable-selectable > select,
+.p-decorator-nullable-selectable > progress,
+.p-decorator-nullable-selectable > meter {
+    padding-right: 50px;
+}
+
+.p-decorator-nullable > input,
+.p-decorator-nullable > select,
+.p-decorator-nullable > progress,
+.p-decorator-nullable > meter {
+    padding-right: 20px;
+}
+
+.p-decorator-selectable > input,
+.p-decorator-selectable > select,
+.p-decorator-selectable > progress,
+.p-decorator-selectable > meter {
+    padding-right: 30px;
+}
+
+.p-decoration {
+    box-sizing: border-box;
+    display: inline-block;
+    position: absolute;
+    top: 0px;
+    height: 100%;
+}
+
+.p-clear {
+    width: 20px;
+    background-color: yellowgreen;
+}
+
+.p-decorator-nullable-selectable > .p-clear {
+    right: 30px;
+}
+.p-decorator-nullable > .p-clear {
+    right: 0px;
+}
+
+.p-select {
+    width: 30px;
+    right: 0px;
+    background-color: aquamarine;
+}
+
