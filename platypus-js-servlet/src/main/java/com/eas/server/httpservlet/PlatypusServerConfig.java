@@ -16,6 +16,7 @@ public class PlatypusServerConfig {
 
     // configuration parameters
     public static final String APPELEMENT_CONF_PARAM = "appelement";
+    public static final String RUN_ON_STARTUP_MODULE_PARAM = "run-on-startup-module";
     public static final String DEF_DATASOURCE_CONF_PARAM = "default-datasource";
     public static final String GLOBAL_API_CONF_PARAM = "global-api";
     public static final String SOURCE_PATH_CONF_PARAM = "source-path";
@@ -27,6 +28,7 @@ public class PlatypusServerConfig {
     public static final String WATCH_CONF_PARAM = "watch";
     //
     protected String appElementName;
+    protected String runOnStartupModule;
     protected String defaultDatasourceName;
     protected String sourcePath;
     protected boolean globalAPI;
@@ -69,6 +71,11 @@ public class PlatypusServerConfig {
                     if (appElementName.toLowerCase().endsWith(".js")) {
                         appElementName = appElementName.substring(0, appElementName.length() - 3);
                     }
+                    } else if (RUN_ON_STARTUP_MODULE_PARAM.equalsIgnoreCase(paramName)) {
+                        runOnStartupModule = paramValue;
+                    if (runOnStartupModule.toLowerCase().endsWith(".js")) {
+                        runOnStartupModule = runOnStartupModule.substring(0, runOnStartupModule.length() - 3);
+                    }
                     } else if (WATCH_CONF_PARAM.equalsIgnoreCase(paramName)) {
                         watch = Boolean.valueOf(paramValue);
                     }
@@ -81,6 +88,10 @@ public class PlatypusServerConfig {
         return appElementName;
     }
 
+    public String getRunOnStartupModuleName() {
+        return runOnStartupModule;
+    }
+    
     public String getDefaultDatasourceName() {
         return defaultDatasourceName;
     }

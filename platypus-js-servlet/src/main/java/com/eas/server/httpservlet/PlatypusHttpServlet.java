@@ -76,6 +76,8 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String TEXT_CONTENT_TYPE = "text/plain";
     public static final String PLATYPUS_SESSION_ID_ATTR_NAME = "platypus-session-id";
     public static final String PLATYPUS_USER_CONTEXT_ATTR_NAME = "platypus-user-context";
+    public static final String PLATYPUS_SERVER_CORE_ATTR_NAME = "platypus-server-core";
+    public static final String PLATYPUS_STARTUP_MODULE_ATTR_NAME = "platypus-startup-module";
 
     private static volatile PlatypusServerCore platypusCore;
     private String realRootPathName;
@@ -124,6 +126,8 @@ public class PlatypusHttpServlet extends HttpServlet {
                         return Application.Type.SERVLET;
                     }
                 };
+                config.getServletContext().setAttribute(PLATYPUS_SERVER_CORE_ATTR_NAME, platypusCore);
+                config.getServletContext().setAttribute(PLATYPUS_STARTUP_MODULE_ATTR_NAME, platypusConfig.getRunOnStartupModuleName());
                 basesProxy.setContextHost(platypusCore);
                 Scripts.initBIO(platypusConfig.getMaximumBIOTreads());
                 ScriptedResource.init(platypusCore, apiFolder, platypusConfig.isGlobalAPI());
