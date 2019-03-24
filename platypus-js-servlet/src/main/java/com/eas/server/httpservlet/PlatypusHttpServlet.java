@@ -470,7 +470,6 @@ public class PlatypusHttpServlet extends HttpServlet {
 
     private void runCodeOnStartUp(String moduleName) {
         if (moduleName != null && !moduleName.isEmpty()) {
-
             Session session = platypusCore.getSessionManager().getSystemSession();
             Scripts.LocalContext context = new Scripts.LocalContext(session.getPrincipal(), session);
             session.getSpace().process(context, () -> {
