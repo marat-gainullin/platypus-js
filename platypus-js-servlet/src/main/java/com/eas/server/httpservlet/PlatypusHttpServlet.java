@@ -76,8 +76,6 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String TEXT_CONTENT_TYPE = "text/plain";
     public static final String PLATYPUS_SESSION_ID_ATTR_NAME = "platypus-session-id";
     public static final String PLATYPUS_USER_CONTEXT_ATTR_NAME = "platypus-user-context";
-    public static final String PLATYPUS_SERVER_CORE_ATTR_NAME = "platypus-server-core";
-    public static final String PLATYPUS_STARTUP_MODULE_ATTR_NAME = "platypus-startup-module";
     public static final String RUN_ON_STARTUP_METHOD_NAME = "execute";
 
     private static volatile PlatypusServerCore platypusCore;
