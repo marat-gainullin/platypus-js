@@ -78,6 +78,7 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String PLATYPUS_USER_CONTEXT_ATTR_NAME = "platypus-user-context";
     public static final String PLATYPUS_SERVER_CORE_ATTR_NAME = "platypus-server-core";
     public static final String PLATYPUS_STARTUP_MODULE_ATTR_NAME = "platypus-startup-module";
+    public static final String RUN_ON_STARTUP_METHOD_NAME = "execute";
 
     private static volatile PlatypusServerCore platypusCore;
     private String realRootPathName;
@@ -126,8 +127,6 @@ public class PlatypusHttpServlet extends HttpServlet {
                         return Application.Type.SERVLET;
                     }
                 };
-                config.getServletContext().setAttribute(PLATYPUS_SERVER_CORE_ATTR_NAME, platypusCore);
-                config.getServletContext().setAttribute(PLATYPUS_STARTUP_MODULE_ATTR_NAME, platypusConfig.getRunOnStartupModuleName());
                 basesProxy.setContextHost(platypusCore);
                 Scripts.initBIO(platypusConfig.getMaximumBIOTreads());
                 ScriptedResource.init(platypusCore, apiFolder, platypusConfig.isGlobalAPI());
@@ -136,6 +135,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                     // TODO: Uncomment after watcher refactoring
                     //indexer.watch();
                 }
+                runCodeOnStartUp(platypusConfig.getRunOnStartupModuleName());
             } else {
                 throw new IllegalArgumentException("Application path: " + realRootPathName + " doesn't point to existent directory.");
             }
@@ -469,6 +469,25 @@ public class PlatypusHttpServlet extends HttpServlet {
     public String getServletInfo() {
         return "Platypus servlet provides platypus server functionality within a J2EE/Servlet container";
     }// </editor-fold>
+
+    private void runCodeOnStartUp(String moduleName) {
+        if (moduleName != null && !moduleName.isEmpty()) {
+
+            Session session = platypusCore.getSessionManager().getSystemSession();
+            Scripts.LocalContext context = new Scripts.LocalContext(session.getPrincipal(), session);
+            session.getSpace().process(context, () -> {
+                platypusCore.executeMethod(moduleName, RUN_ON_STARTUP_METHOD_NAME, new Object[]{}, false, (Object result) -> {
+                    Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.INFO,
+                            "StartUp method " + RUN_ON_STARTUP_METHOD_NAME + " in module {0} called successfully.",
+                            moduleName);
+                }, (Exception ex) -> {
+                    Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.WARNING, null, ex);
+                });
+            });
+        } else {
+            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.INFO, "No module to run on startup.");
+        }
+    }
 
     protected Request readPlatypusRequest(HttpServletRequest aHttpRequest, HttpServletResponse aResponse) throws Exception {
         String sType = aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE);
