@@ -784,6 +784,9 @@ public class Utils {
 			StackTraceElement[] stackFrames = ex.getStackTrace();
 			String firstFileName = extractFileName(stackFrames[0]);
 			if (firstFileName != null) {
+                            if (stackFrames.length < 2) {
+                                calledFromFile = firstFileName;
+                            } else {
 				for (int frameIdx = 1; frameIdx < stackFrames.length; frameIdx++) {
 					String fileName = extractFileName(stackFrames[frameIdx]);
 					if (fileName != null && !fileName.equals(firstFileName)) {
@@ -792,6 +795,7 @@ public class Utils {
 						return lastQuestionIndex != -1 ? calledFromFile.substring(0, lastQuestionIndex) : calledFromFile;
 					}
 				}
+                            }
 			}
 		}
 		return calledFromFile;
