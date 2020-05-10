@@ -21,7 +21,9 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -631,21 +633,16 @@ public class Scripts {
 
         public void schedule(JSObject aJsTask, long aTimeout) {
             Scripts.LocalContext context = Scripts.getContext();
-            bio.submit(() -> {
+            scheduler.schedule(() -> {
+                Scripts.setContext(context);
                 try {
-                    Thread.sleep(aTimeout);
-                    Scripts.setContext(context);
-                    try {
-                        process(() -> {
-                            aJsTask.call(null, new Object[]{});
-                        });
-                    } finally {
-                        Scripts.setContext(null);
-                    }
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
+                    process(() -> {
+                        aJsTask.call(null, new Object[]{});
+                    });
+                } finally {
+                    Scripts.setContext(null);
                 }
-            });
+            }, aTimeout, TimeUnit.MILLISECONDS);
         }
 
         public void enqueue(JSObject aJsTask) {
@@ -755,6 +752,7 @@ public class Scripts {
     protected static Consumer<Runnable> tasks;
     // bio thread pool
     protected static ThreadPoolExecutor bio;
+    protected static ScheduledExecutorService scheduler;
 
     public static void init(Path aAbsoluteApiPath, boolean aGlobalAPI) throws MalformedURLException {
         globalAPI = aGlobalAPI;
@@ -810,11 +808,16 @@ public class Scripts {
                 new LinkedBlockingQueue<>(),
                 new PlatypusThreadFactory("platypus-abio-", false));
         bio.allowCoreThreadTimeOut(true);
+        scheduler = Executors.newSingleThreadScheduledExecutor(
+                new PlatypusThreadFactory("platypus-scheduler-", false));
     }
 
     public static void shutdown() {
         if (bio != null) {
             bio.shutdownNow();
+        }
+        if (scheduler != null) {
+            scheduler.shutdownNow();
         }
     }
 
